@@ -1203,7 +1203,8 @@ class LeadController extends FController
                 if ($allowRbac) {
                     $user = Auth::user();
                     $leadAbacDto = new LeadAbacDto($lead, $user->getId());
-                    if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS)) {
+                    /** @abac $leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD_FROM_CHAT, LeadAbacObject::ACTION_ACCESS, Access to take lead from chat */
+                    if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD_FROM_CHAT, LeadAbacObject::ACTION_ACCESS)) {
                         $lead->processing($user->getId(), Yii::$app->user->getId(), 'Take');
 
                         $this->transaction->wrap(function () use ($lead) {

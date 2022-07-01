@@ -4,6 +4,7 @@
 
     let btn;
     let btnHtml;
+    let $collapsedResourcesInput = $('#collapsedResources');
 
     function TimelineFormFilter(formElementId) {
         this.formElementId = formElementId;
@@ -16,6 +17,15 @@
     };
 
     TimelineFormFilter.prototype.getQueryString = function () {
+        if (this.timeline) {
+            let collapsed = [];
+            this.timeline.timeline.props.resources.forEach(function (i, e) {
+                if (!i.collapsed) {
+                    collapsed.push(i.mainId || null);
+                }
+            });
+            $collapsedResourcesInput.val(collapsed.join(','));
+        }
         let form = document.getElementById(this.formElementId);
         let formData = new FormData(form);
         formData.delete('_csrf-frontend');

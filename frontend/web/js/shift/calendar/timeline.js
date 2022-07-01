@@ -263,21 +263,25 @@
             <div mbsc-calendar-next class="md-work-week-next"></div>`.trim();
     }
 
+    function getValidUtcDate(year, month, day, format = 'YYYY-MM-DD') {
+        return moment.utc([year, month]).add(day, 'days').format(format);
+    }
+
     function onPageLoading(event) {
         if (this.multipleManageModule.isEnabled()) {
             this.multipleManageModule.resetSelectedEvents();
         }
 
         let year = event.firstDay.getUTCFullYear(),
-            month = event.firstDay.getUTCMonth() + 1,
-            day = event.firstDay.getUTCDate() + 1;
+            month = event.firstDay.getUTCMonth(),
+            day = event.firstDay.getUTCDate();
 
         let endYear = event.lastDay.getUTCFullYear(),
-            endMonth = event.lastDay.getUTCMonth() + 1,
-            endDay = event.lastDay.getUTCDate();
+            endMonth = event.lastDay.getUTCMonth(),
+            endDay = event.lastDay.getUTCDate() - 1;
 
-        let startDate = year + '-' + month + '-' + day;
-        let endDate = endYear + '-' + endMonth + '-' + endDay;
+        let startDate = getValidUtcDate(year, month, day);
+        let endDate = getValidUtcDate(endYear, endMonth, endDay);
 
         $('#startDate').val(startDate);
         $('#endDate').val(endDate);

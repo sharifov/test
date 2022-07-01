@@ -3,7 +3,10 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": "-- Grafana --",
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
@@ -23,13 +26,16 @@
   "fiscalYearStartMonth": 0,
   "gnetId": 763,
   "graphTooltip": 0,
-  "id": 10,
-  "iteration": 1651679874342,
+  "id": 12,
+  "iteration": 1655374508843,
   "links": [],
   "liveNow": false,
   "panels": [
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -88,11 +94,15 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.2.3",
+      "pluginVersion": "8.5.0",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "exemplar": true,
-          "expr": "redis_up{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"redis_crm\"} ",
+          "expr": "redis_up{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"} ",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -102,8 +112,10 @@
       "type": "stat"
     },
     {
-      "cacheTimeout": null,
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -146,7 +158,6 @@
         "y": 0
       },
       "id": 9,
-      "interval": null,
       "links": [],
       "maxDataPoints": 100,
       "options": {
@@ -164,11 +175,15 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.2.3",
+      "pluginVersion": "8.5.0",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "exemplar": true,
-          "expr": "max(max_over_time(redis_uptime_in_seconds{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"redis_crm\"}[$__interval]))",
+          "expr": "max(max_over_time(redis_uptime_in_seconds{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}[$__interval]))",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -181,8 +196,10 @@
       "type": "stat"
     },
     {
-      "cacheTimeout": null,
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -226,7 +243,6 @@
       },
       "hideTimeOverride": true,
       "id": 12,
-      "interval": null,
       "links": [],
       "maxDataPoints": 100,
       "options": {
@@ -244,11 +260,15 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.2.3",
+      "pluginVersion": "8.5.0",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "exemplar": true,
-          "expr": "redis_connected_clients{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"redis_crm\"}",
+          "expr": "redis_connected_clients{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -258,13 +278,14 @@
         }
       ],
       "timeFrom": "1m",
-      "timeShift": null,
       "title": "Clients",
       "type": "stat"
     },
     {
-      "cacheTimeout": null,
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -308,7 +329,6 @@
       },
       "hideTimeOverride": true,
       "id": 18,
-      "interval": null,
       "links": [],
       "maxDataPoints": 100,
       "options": {
@@ -326,11 +346,15 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.2.3",
+      "pluginVersion": "8.5.0",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "exemplar": true,
-          "expr": "redis_memory_used_bytes{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"redis_crm\"}",
+          "expr": "redis_memory_used_bytes{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -340,12 +364,14 @@
         }
       ],
       "timeFrom": "1m",
-      "timeShift": null,
       "title": "Memory Usage",
       "type": "stat"
     },
     {
-      "datasource": null,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -390,11 +416,15 @@
         "text": {},
         "textMode": "name"
       },
-      "pluginVersion": "8.2.3",
+      "pluginVersion": "8.5.0",
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "exemplar": true,
-          "expr": "redis_up{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"redis_crm\"} ",
+          "expr": "redis_up{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"} ",
           "interval": "",
           "legendFormat": "{{name}}",
           "refId": "A"
@@ -408,7 +438,10 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "editable": true,
       "error": false,
       "fieldConfig": {
@@ -445,7 +478,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.2.3",
+      "pluginVersion": "8.5.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -455,8 +488,12 @@
       "steppedLine": false,
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "exemplar": true,
-          "expr": "rate(redis_commands_processed_total{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"redis_crm\"}[5m])",
+          "expr": "rate(redis_commands_processed_total{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}[5m])",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -467,9 +504,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Commands Executed / sec",
       "tooltip": {
         "msResolution": false,
@@ -479,33 +514,24 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         },
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -513,7 +539,10 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "decimals": 2,
       "editable": true,
       "error": false,
@@ -551,7 +580,7 @@
         "alertThreshold": true
       },
       "percentage": true,
-      "pluginVersion": "8.2.3",
+      "pluginVersion": "8.5.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -561,8 +590,12 @@
       "steppedLine": false,
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "exemplar": true,
-          "expr": "irate(redis_keyspace_hits_total{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"redis_crm\"}[5m])",
+          "expr": "irate(redis_keyspace_hits_total{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}[5m])",
           "hide": false,
           "interval": "",
           "intervalFactor": 2,
@@ -573,8 +606,12 @@
           "target": ""
         },
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "exemplar": true,
-          "expr": "irate(redis_keyspace_misses_total{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"redis_crm\"}[5m])",
+          "expr": "irate(redis_keyspace_misses_total{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}[5m])",
           "hide": false,
           "interval": "",
           "intervalFactor": 2,
@@ -586,9 +623,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Hits / Misses per Sec",
       "tooltip": {
         "msResolution": false,
@@ -598,9 +633,7 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
@@ -609,22 +642,17 @@
           "format": "short",
           "label": "",
           "logBase": 1,
-          "max": null,
           "min": 0,
           "show": true
         },
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -634,7 +662,10 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "editable": true,
       "error": false,
       "fieldConfig": {
@@ -673,7 +704,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.2.3",
+      "pluginVersion": "8.5.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -683,8 +714,12 @@
       "steppedLine": false,
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "exemplar": true,
-          "expr": "redis_memory_used_bytes{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"redis_crm\"} ",
+          "expr": "redis_memory_used_bytes{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"} ",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "used",
@@ -694,8 +729,12 @@
           "target": ""
         },
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "exemplar": true,
-          "expr": "redis_memory_max_bytes{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"redis_crm\"} ",
+          "expr": "redis_memory_max_bytes{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"} ",
           "hide": false,
           "interval": "",
           "intervalFactor": 2,
@@ -705,9 +744,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Total Memory Usage",
       "tooltip": {
         "msResolution": false,
@@ -717,33 +754,25 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "bytes",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": 0,
           "show": true
         },
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -751,7 +780,10 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "editable": true,
       "error": false,
       "fieldConfig": {
@@ -788,7 +820,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.2.3",
+      "pluginVersion": "8.5.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -798,8 +830,12 @@
       "steppedLine": false,
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "exemplar": true,
-          "expr": "rate(redis_net_input_bytes_total{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"redis_crm\"}[5m])",
+          "expr": "rate(redis_net_input_bytes_total{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}[5m])",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "input ",
@@ -807,8 +843,12 @@
           "step": 2
         },
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "exemplar": true,
-          "expr": "rate(redis_net_output_bytes_total{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"redis_crm\"}[5m])",
+          "expr": "rate(redis_net_output_bytes_total{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}[5m])",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "output",
@@ -817,9 +857,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Network I/O",
       "tooltip": {
         "msResolution": true,
@@ -829,33 +867,24 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "bytes",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         },
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -863,7 +892,10 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "editable": true,
       "error": false,
       "fieldConfig": {
@@ -904,7 +936,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.2.3",
+      "pluginVersion": "8.5.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -914,8 +946,12 @@
       "steppedLine": false,
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "exemplar": true,
-          "expr": "sum (redis_db_keys{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"redis_crm\"}) by (db)",
+          "expr": "sum (redis_db_keys{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}) by (db)",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "{{ db }} ",
@@ -925,9 +961,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Total Items per DB",
       "tooltip": {
         "msResolution": false,
@@ -937,33 +971,24 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "none",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         },
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -971,7 +996,10 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "editable": true,
       "error": false,
       "fieldConfig": {
@@ -1008,7 +1036,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.2.3",
+      "pluginVersion": "8.5.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1018,8 +1046,12 @@
       "steppedLine": false,
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "exemplar": true,
-          "expr": "sum (redis_db_keys{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"redis_crm\"}) - sum (redis_db_keys_expiring{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"redis_crm\"}) ",
+          "expr": "sum (redis_db_keys{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"redis_crm\"}) - sum (redis_db_keys_expiring{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}) ",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "not expiring",
@@ -1028,8 +1060,12 @@
           "target": ""
         },
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "exemplar": true,
-          "expr": "sum (redis_db_keys_expiring{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"redis_crm\"}) ",
+          "expr": "sum (redis_db_keys_expiring{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}) ",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "expiring",
@@ -1039,9 +1075,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Expiring vs Not-Expiring Keys",
       "tooltip": {
         "msResolution": false,
@@ -1051,33 +1085,24 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         },
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -1087,7 +1112,10 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "editable": true,
       "error": false,
       "fieldConfig": {
@@ -1124,7 +1152,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.2.3",
+      "pluginVersion": "8.5.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1139,8 +1167,12 @@
       "steppedLine": false,
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "exemplar": true,
-          "expr": "sum(rate(redis_expired_keys_total{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"redis_crm\"}[5m])) by (addr)",
+          "expr": "sum(rate(redis_expired_keys_total{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}[5m])) by (addr)",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "expired",
@@ -1150,8 +1182,12 @@
           "target": ""
         },
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "exemplar": true,
-          "expr": "sum(rate(redis_evicted_keys_total{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"redis_crm\"}[5m])) by (addr)",
+          "expr": "sum(rate(redis_evicted_keys_total{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}[5m])) by (addr)",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "evicted",
@@ -1160,9 +1196,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Expired / Evicted",
       "tooltip": {
         "msResolution": false,
@@ -1172,33 +1206,24 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         },
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -1206,7 +1231,10 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Prometheus",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "editable": true,
       "error": false,
       "fieldConfig": {
@@ -1243,7 +1271,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.2.3",
+      "pluginVersion": "8.5.0",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1253,8 +1281,12 @@
       "steppedLine": false,
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
           "exemplar": true,
-          "expr": "topk(5, irate(redis_commands_total{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"redis_crm\"} [1m]))",
+          "expr": "topk(5, irate(redis_commands_total{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"} [1m]))",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "{{ cmd }}",
@@ -1264,9 +1296,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "Command Calls / sec",
       "tooltip": {
         "msResolution": true,
@@ -1276,56 +1306,46 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         },
         {
           "format": "short",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     }
   ],
   "refresh": "",
-  "schemaVersion": 31,
+  "schemaVersion": 36,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": [
       {
-        "allValue": null,
         "current": {
           "selected": false,
           "text": "shared-crm-dev",
           "value": "shared-crm-dev"
         },
-        "datasource": "Prometheus",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PBFA97CFB590B2093"
+        },
         "definition": "label_values(redis_connected_clients, name)",
-        "description": null,
-        "error": null,
         "hide": 2,
         "includeAll": false,
-        "label": null,
         "multi": false,
         "name": "host",
         "options": [],
@@ -1343,16 +1363,16 @@
         "useTags": false
       },
       {
-        "allValue": null,
         "current": {
-          "selected": false,
-          "text": "dev",
-          "value": "dev"
+          "selected": true,
+          "text": "prod",
+          "value": "prod"
         },
-        "datasource": "Prometheus",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PBFA97CFB590B2093"
+        },
         "definition": "label_values(node_exporter_build_info,env)",
-        "description": null,
-        "error": null,
         "hide": 0,
         "includeAll": false,
         "label": "env",
@@ -1373,16 +1393,16 @@
         "useTags": false
       },
       {
-        "allValue": null,
         "current": {
           "selected": false,
-          "text": "i-09ee387c650467d50",
-          "value": "i-09ee387c650467d50"
+          "text": "i-074f036ce85a34bc6",
+          "value": "i-074f036ce85a34bc6"
         },
-        "datasource": null,
-        "definition": "label_values(redis_up{ project=\"crm\", env=~\"$env\", job=\"redis_crm\"} ,instance)",
-        "description": null,
-        "error": null,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PBFA97CFB590B2093"
+        },
+        "definition": "label_values(redis_up{ project=\"crm\", env=~\"$env\", job=\"$job\"} ,instance)",
         "hide": 0,
         "includeAll": false,
         "label": "instance",
@@ -1390,7 +1410,34 @@
         "name": "instance",
         "options": [],
         "query": {
-          "query": "label_values(redis_up{ project=\"crm\", env=~\"$env\", job=\"redis_crm\"} ,instance)",
+          "query": "label_values(redis_up{ project=\"crm\", env=~\"$env\", job=\"$job\"} ,instance)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "redis_crm_prod",
+          "value": "redis_crm_prod"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "PBFA97CFB590B2093"
+        },
+        "definition": "label_values(redis_up{env=\"$env\",project=\"crm\"}, job)",
+        "hide": 2,
+        "includeAll": false,
+        "label": "job",
+        "multi": false,
+        "name": "job",
+        "options": [],
+        "query": {
+          "query": "label_values(redis_up{env=\"$env\",project=\"crm\"}, job)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -1430,7 +1477,8 @@
     ]
   },
   "timezone": "browser",
-  "title": "Redis CRM",
+  "title": "Redis",
   "uid": "v9flQoink",
-  "version": 1
+  "version": 3,
+  "weekStart": ""
 }

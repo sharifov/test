@@ -27,7 +27,7 @@ class TwoFactorAuthHelper
      */
     public static function setAuthAttempts($value): void
     {
-        Yii::$app->session->get(self::AUTH_ATTEMPTS_KEY, $value);
+        Yii::$app->session->set(self::AUTH_ATTEMPTS_KEY, $value);
     }
 
     /**
@@ -43,6 +43,6 @@ class TwoFactorAuthHelper
      */
     public static function showWarningAttemptsRemain(): bool
     {
-        return (SettingHelper::getTwoFactorAuthWarningAttemptsRemain() - self::getAuthAttempts()) > 0;
+        return (SettingHelper::getTwoFactorAuthWarningAttemptsRemain() - self::getAuthAttempts()) >= 0;
     }
 }

@@ -40,6 +40,7 @@ use yii\widgets\ActiveForm;
                   <?= $form->field($timelineCalendarFilter, 'userId')->hiddenInput()->label(false) ?>
                   <?= $form->field($timelineCalendarFilter, 'startDate')->hiddenInput(['id' => 'startDate'])->label(false) ?>
                   <?= $form->field($timelineCalendarFilter, 'endDate')->hiddenInput(['id' => 'endDate'])->label(false) ?>
+                  <?= $form->field($timelineCalendarFilter, 'collapsedResources')->hiddenInput(['id' => 'collapsedResources'])->label(false) ?>
                   <div class="row">
                       <div class="col-md-3">
                           <div class="row">
@@ -135,6 +136,7 @@ use yii\widgets\ActiveForm;
                               'size' => Select2::SMALL,
                           ]) ?>
                       </div>
+                      <input type="hidden" id="shift_calendar_tab_state" name="tab_state" value="">
                   </div>
                   <hr>
                   <div class="row">

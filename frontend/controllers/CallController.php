@@ -38,6 +38,8 @@ use src\model\call\services\reserve\CallReserver;
 use src\model\call\services\reserve\Key;
 use src\model\call\useCase\assignUsers\UsersForm;
 use src\model\call\useCase\createCall\redialCall\CreateRedialCall;
+use src\model\callLog\abac\CallLogAbacObject;
+use src\model\callLog\abac\dto\CallLogRecordListenAbacDto;
 use src\model\callLog\entity\callLog\CallLog;
 use src\model\callLog\entity\callLog\CallLogQuery;
 use src\model\callLog\entity\callLogRecord\CallLogRecord;
@@ -1230,7 +1232,7 @@ class CallController extends FController
 
     /**
      * @param string $callSid
-     * @return void
+     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      */
     public function actionRecord(string $callSid): void
@@ -1238,7 +1240,8 @@ class CallController extends FController
         $cacheKey = 'call-recording-url-' . $callSid . '-user-' . Auth::id();
 
         try {
-            if (!$callRecordSid = Yii::$app->cacheFile->get($cacheKey)) {
+            $callRecordSid = Yii::$app->cacheFile->get($cacheKey);
+            if (!$callRecordSid) {
                 $callLogRecord = CallLogQuery::getCallLogRecordByCallSid($callSid);
 
                 if ($callLogRecord && !empty($callLogRecord['clr_record_sid'])) {
@@ -1260,9 +1263,19 @@ class CallController extends FController
                     }
                 }
             }
-            header('X-Accel-Redirect: ' . Yii::$app->communication->xAccelRedirectCommunicationUrl . $callRecordSid);
+
+            if ($callRecordSid) {
+                $dto = new CallLogRecordListenAbacDto(CallLog::findOne(['cl_call_sid' => $callSid]), Auth::user());
+                if (\Yii::$app->abac->can($dto, CallLogAbacObject::OBJECT_ACT_INDEX, CallLogAbacObject::ACTION_LISTEN, Auth::user())) {
+                    header('X-Accel-Redirect: ' . Yii::$app->communication->xAccelRedirectCommunicationUrl . $callRecordSid);
+                } else {
+                    throw new ForbiddenHttpException('You can not hear this record');
+                }
+            }
         } catch (NotFoundException $e) {
             throw new NotFoundHttpException($e->getMessage());
+        } catch (ForbiddenHttpException $e) {
+            throw new ForbiddenHttpException($e->getMessage());
         }
     }
 
