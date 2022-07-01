@@ -11,6 +11,7 @@ use yii\helpers\Html;
 use yii\widgets\Pjax;
 use yii\grid\ActionColumn;
 use yii\helpers\Url;
+use modules\objectSegment\src\contracts\ObjectSegmentListContract;
 
 /* @var $this yii\web\View */
 /* @var $searchModel \modules\objectSegment\src\entities\search\ObjectSegmentListSearch */
@@ -128,6 +129,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class'    => ActionColumn::class,
                 'template' => '{view} {update} {viewSegmentRules} {assign} {delete}',
                 'buttons'  => [
+                    'delete' => function ($action, $model, $key) {
+                        $url = Url::toRoute(['/object-segment/object-segment-list/?id=' . $model->osl_id]);
+                        if (!in_array($model->osl_key, ObjectSegmentListContract::KEYS_LIST)) {
+                            return Html::a('<i class="fa fa-trash"></i>', $url, ['title' => 'Delete', 'data-pjax' => 0, 'target' => '_blank']);
+                        }
+                    },
                     'viewSegmentRules' => function ($action, $model, $key) {
                         $url = Url::toRoute(['/object-segment/object-segment-rule/?ObjectSegmentRuleSearch[osr_osl_id]=' . $model->osl_id]);
                         return Html::a('<i class="fa fa-toggle-down"></i>', $url, ['title' => 'View Rules', 'data-pjax' => 0, 'target' => '_blank']);
