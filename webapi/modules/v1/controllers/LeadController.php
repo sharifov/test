@@ -556,9 +556,7 @@ class LeadController extends ApiBaseController
             $leadDataInserted = $leadDataService->getInserted();
         }
 
-        if (!empty($modelLead->experiments) && is_array($modelLead->experiments)) {
-            ExperimentTarget::saveExperimentObjects(Lead::class, $lead->id, $modelLead->experiments);
-        }
+        ExperimentTarget::saveExperimentObjects(ExperimentTarget::EXT_TYPE_LEAD, $lead->id, $modelLead->experiments);
 
         $clientDataInserted = [];
         if (!empty($modelLead->client_data) && ($clientId = $lead->client->id ?? null)) {
