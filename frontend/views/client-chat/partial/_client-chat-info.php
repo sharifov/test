@@ -408,9 +408,9 @@ $leads = $clientChat->leads;
                                             ]) ?>
                                       <?php endif; ?>
                                         <?php
-                                         /** @abac LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS, Access To Take Lead*/
+                                         /** @abac LeadAbacObject::ACT_TAKE_LEAD_FROM_CHAT, LeadAbacObject::ACTION_ACCESS, Access To Take Lead From Chat*/
                                         $leadAbacDto = new LeadAbacDto($lead, Auth::id());
-                                        if (Auth::can('leadSection', ['lead' => $lead]) && Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS)) :
+                                        if (Auth::can('leadSection', ['lead' => $lead]) && Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD_FROM_CHAT, LeadAbacObject::ACTION_ACCESS)) :
                                             echo Html::a('<i class="fa fa-download"></i> Take', null, [
                                                 'class' => 'dropdown-item',
                                                 'id' => 'take_button',
