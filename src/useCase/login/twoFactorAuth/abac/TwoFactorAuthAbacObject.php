@@ -22,12 +22,13 @@ class TwoFactorAuthAbacObject extends AbacBaseModel implements AbacInterface
     ];
 
     /** --------------- ACTIONS --------------------------- */
+    public const ACTION_ACCESS = 'access';
     public const ACTION_TOTP  = 'totpAuth';
     public const ACTION_OTP_EMAIL  = 'otpEmail';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
-        self::TWO_FACTOR_AUTH => [self::ACTION_TOTP, self::ACTION_OTP_EMAIL],
+        self::TWO_FACTOR_AUTH => [self::ACTION_ACCESS, self::ACTION_TOTP, self::ACTION_OTP_EMAIL],
     ];
 
     /** --------------- ATTRIBUTE LIST --------------------------- */

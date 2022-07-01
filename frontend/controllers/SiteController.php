@@ -24,6 +24,7 @@ use src\helpers\twoFactorAuth\TwoFactorAuthHelper;
 use src\model\userAuthClient\entity\UserAuthClientQuery;
 use src\model\userAuthClient\entity\UserAuthClientSources;
 use src\model\user\entity\monitor\UserMonitor;
+use src\useCase\login\twoFactorAuth\abac\TwoFactorAuthAbacObject;
 use src\useCase\login\twoFactorAuth\TwoFactorAuthFactory;
 use Yii;
 use yii\authclient\AuthAction;
@@ -157,7 +158,7 @@ class SiteController extends FController
         $model = new LoginForm();
 
         if ($model->load(Yii::$app->request->post()) && $user = $model->checkedUser()) {
-            if (SettingHelper::isTwoFactorAuthEnabled() && $user->userProfile /*&& $user->userProfile->is2faEnable()*/) {
+            if (SettingHelper::isTwoFactorAuthEnabled() && $this->get2FAAbacAccess($user) && $user->userProfile /*&& $user->userProfile->is2faEnable()*/) {
                 return $this->redirectToTwoFactorAuth($user, $model);
             }
 
@@ -424,7 +425,7 @@ class SiteController extends FController
                 $form->setUser($authClient->user);
                 $form->setUserChecked(true);
 
-                if (SettingHelper::isTwoFactorAuthEnabled() && $authClient->user->userProfile) {
+                if (SettingHelper::isTwoFactorAuthEnabled() && $authClient->user->userProfile && $this->get2FAAbacAccess($authClient->user)) {
                     return $this->redirectToTwoFactorAuth($authClient->user, $form);
                 }
 
@@ -493,5 +494,15 @@ class SiteController extends FController
 //        $session->set('two_factor_key', $twoFactorAuthSecretKey);
         $session->set('two_factor_remember_me', $model->rememberMe);
         return $this->redirect(['site/step-two']);
+    }
+
+    protected function get2FAAbacAccess(Employee $user): bool
+    {
+        return !$user->isSuperAdmin() && (bool)\Yii::$app->abac->can(
+            null,
+            TwoFactorAuthAbacObject::TWO_FACTOR_AUTH,
+            TwoFactorAuthAbacObject::ACTION_ACCESS,
+            $user
+        );
     }
 }
