@@ -31,6 +31,7 @@ use yii\helpers\ArrayHelper;
 use src\helpers\app\AppHelper;
 use Yii;
 use src\entities\email\helpers\EmailType;
+use src\entities\email\helpers\EmailContactType;
 
 /**
  *
@@ -61,223 +62,88 @@ class EmailsNormalizeService
         return new static();
     }
 
+    public function getDataArrayFromOld(EmailOld $emailOld)
+    {
+        $data = [
+            'userId'        =>  $emailOld->e_created_user_id,
+            'emailId'       =>  $emailOld->e_id,
+            'type'          =>  $emailOld->e_type_id,
+            'status'        =>  $emailOld->e_status_id,
+            'isDeleted'     =>  $emailOld->e_is_deleted,
+            'projectId'     =>  $emailOld->e_project_id,
+            'depId'         =>  null, //TODO: get from
+            'createdDt'     =>  $emailOld->e_created_dt,
+            'updatedDt'     =>  $emailOld->e_updated_dt,
+            'clientsIds'    =>  $emailOld->e_client_id ? [$emailOld->e_client_id] : null,
+            'casesIds'      =>  $emailOld->e_case_id ? [$emailOld->e_case_id] : null,
+            'leadsIds'      =>  $emailOld->e_lead_id ? [$emailOld->e_lead_id] : null,
+            'replyId'       =>  $emailOld->e_reply_id,
+        ];
+
+        $data['params'] = [
+            'templateType'  =>  $emailOld->e_template_type_id,
+            'language'      =>  $emailOld->e_language_id,
+            'priority'      =>  $emailOld->e_priority,
+        ];
+
+        $data['body'] = [
+            'subject'   =>  $emailOld->e_email_subject,
+            'text'      =>  $emailOld->e_email_body_text,
+            'bodyHtml'  =>  TextConvertingHelper::unCompress($emailOld->e_email_body_blob),
+            'data'      =>  $emailOld->e_email_data,
+        ];
+
+        $data['log'] = [
+            'communicationId'   =>  $emailOld->e_communication_id,
+            'messageId'         =>  $emailOld->e_message_id,
+            'errorMessage'      =>  $emailOld->e_error_message,
+            'statusDoneDt'      =>  $emailOld->e_status_done_dt,
+            'readDt'            =>  $emailOld->e_read_dt,
+            'refMessageId'      =>  $emailOld->e_ref_message_id,
+            'inboxCreatedDt'    =>  $emailOld->e_inbox_created_dt,
+            'inboxEmailId'      =>  $emailOld->e_inbox_email_id,
+            'isNew'             =>  $emailOld->e_is_new,
+        ];
+
+        $data['contacts'] = [
+            'from' => [
+                'email' => $emailOld->e_email_from,
+                'name'  =>  $emailOld->e_email_from_name,
+                'type' => EmailContactType::FROM,
+            ],
+            'to' => [
+                'email' => $emailOld->e_email_to,
+                'name'  =>  $emailOld->e_email_to_name,
+                'type' => EmailContactType::TO,
+            ],
+            'cc' => [
+                'email' => $emailOld->e_email_cc,
+                'type' => EmailContactType::CC,
+            ],
+            'bcc' => [
+                'email' => $emailOld->e_email_bc,
+                'type' => EmailContactType::BCC,
+            ],
+        ];
+
+        return $data;
+    }
+
     public function createEmailFromOld(EmailOld $emailOld)
     {
-        $this->email = Email::createFromEmailObject($emailOld);
-        $this->isNew = $this->email->isNewRecord;
-        $this->email->save();
+        $form = EmailCreateForm::fromArray($this->getDataArrayFromOld($emailOld));
 
-        if ($this->email) {
-            $this
-                ->fillEmailParams($emailOld->e_priority, $emailOld->e_template_type_id, $emailOld->e_language_id)
-                ->fillEmailBody($emailOld->e_email_subject, $emailOld->e_email_body_text, $emailOld->e_email_data)
-                ->fillEmailBlob($emailOld->e_email_body_blob, true)
-                ->fillEmailContacts(
-                    $emailOld->e_email_from,
-                    $emailOld->e_email_to,
-                    $emailOld->e_email_from_name,
-                    $emailOld->e_email_to_name,
-                    $emailOld->e_email_cc,
-                    $emailOld->e_email_bc
-                )
-                ->fillEmailLog(
-                    $emailOld->e_communication_id,
-                    $emailOld->e_message_id,
-                    $emailOld->e_error_message,
-                    $emailOld->e_status_done_dt,
-                    $emailOld->e_read_dt,
-                    $emailOld->e_ref_message_id,
-                    $emailOld->e_inbox_created_dt,
-                    $emailOld->e_inbox_email_id
-                )
-                ->linkClient($emailOld->e_client_id)
-                ->linkCase($emailOld->e_case_id)
-                ->linkLead($emailOld->e_lead_id)
-                ->linkReply($emailOld->e_reply_id)
-            ;
-        }
-
-        return $this;
+        return $this->create($form);
     }
 
-    public function fillEmailParams(int $priority, ?int $templateType, ?string $language)
-    {
-        $attributes = [
-            'ep_template_type_id' => $templateType,
-            'ep_language_id' => $language,
-            'ep_priority' => $priority,
-        ];
-
-        $this->emailParams = $this->email->params ?? new EmailParams();
-        $this->emailParams->attributes = $attributes;
-        $this->emailParams->save();
-
-        $this->emailParams->link('email', $this->email);
-
-        return $this;
-    }
-
-    public function fillEmailLog(
-        ?int $communicationId,
-        ?string $messageId,
-        ?string $errorMessage,
-        ?string $statusDoneDt,
-        ?string $readDt,
-        ?string $refMessageId,
-        ?string $inboxCreatedDt,
-        ?int $inboxEmailId
-    ) {
-        $attributes = [
-            'el_status_done_dt' => $statusDoneDt,
-            'el_read_dt' => $readDt,
-            'el_error_message' => $errorMessage,
-            'el_message_id' => $messageId,
-            'el_ref_message_id' => $refMessageId,
-            'el_inbox_created_dt' => $inboxCreatedDt,
-            'el_inbox_email_id' => $inboxEmailId,
-            'el_communication_id' => $communicationId,
-        ];
-
-        $this->emailLog = $this->email->emailLog ?? new EmailLog();
-        $this->emailLog->attributes = $attributes;
-        $this->emailLog->save();
-
-        $this->emailLog->link('email', $this->email);
-
-        return $this;
-    }
-
-    public function fillEmailBody(string $subject, string $body, $emailData)
-    {
-        $attributes = [
-            'embd_email_subject' => $subject,
-            'embd_email_body_text' => $body,
-            'embd_email_data' => $emailData,
-            'embd_hash' => hash('crc32b', join(' | ', [$subject, $body])),
-        ];
-
-        $this->emailBody = $this->email->emailBody ?? new EmailBody();
-        $this->emailBody->attributes = $attributes;
-        $this->emailBody->save();
-
-        $this->email->link('emailBody', $this->emailBody);
-
-        return $this;
-    }
-
-    public function fillEmailBlob(string $body, $compressed = false)
-    {
-        $this->emailBlob = new EmailBlob();
-        $this->emailBlob->attributes = ['embb_email_body_blob' => $compressed ? $body : TextConvertingHelper::compress($body)];
-        $this->emailBlob->save();
-
-        $this->emailBlob->link('emailBody', $this->emailBody);
-
-        return $this;
-    }
-
-    //call after fill Email
-    public function linkClient(?int $clientId)
-    {
-        if ($clientId !== null) {
-            $client = Client::findOne($clientId);
-            if ($client) {
-                $this->email->link('clients', $client);
-            }
-        }
-        return $this;
-    }
-
-    public function linkCase(?int $caseId)
-    {
-        if ($caseId !== null) {
-            $case = Cases::findOne($caseId);
-            if ($case) {
-                $this->email->link('cases', $case);
-            }
-        }
-        return $this;
-    }
-
-    public function linkLead(?int $leadId)
-    {
-        if ($leadId !== null) {
-            $lead = Lead::findOne($leadId);
-            if ($lead) {
-                $this->email->link('leads', $lead);
-            }
-        }
-        return $this;
-    }
-
-    public function linkReply(?int $replyId)
-    {
-        if ($replyId !== null) {
-            $reply = Email::findOne($replyId);
-            if ($reply) {
-                $this->email->link('reply', $reply);
-            }
-        }
-        return $this;
-    }
-
-    public function fillEmailContacts(string $emailFrom, string $emailTo, ?string $emailFromName, ?string $emailToName, ?string $emailCc, ?string $emailBcc)
-    {
-        $addressFrom = $this->getAddress($emailFrom, $emailFromName);
-        $contactFrom = new EmailContact();
-        $contactFrom->attributes = [
-            'ec_address_id' => $addressFrom->ea_id,
-            'ec_email_id' => $this->email->e_id,
-            'ec_type_id' => EmailContactType::FROM
-        ];
-        $contactFrom->save();
-        $this->emailContacts[] = $contactFrom;
-
-        $addressTo = $this->getAddress($emailTo, $emailToName);
-        $contactTo = new EmailContact();
-        $contactTo->attributes = [
-            'ec_address_id' => $addressTo->ea_id,
-            'ec_email_id' => $this->email->e_id,
-            'ec_type_id' => EmailContactType::TO
-        ];
-        $contactTo->save();
-        $this->emailContacts[] = $contactTo;
-
-        if (!empty($emailCc)) {
-            $addressCc = $this->getAddress($emailCc);
-            $contactCc = new EmailContact();
-            $contactCc->attributes = [
-                'ec_address_id' => $addressCc->ea_id,
-                'ec_email_id' => $this->email->e_id,
-                'ec_type_id' => EmailContactType::CC
-            ];
-            $contactCc->save();
-            $this->emailContacts[] = $contactCc;
-        }
-
-        if (!empty($emailBcc)) {
-            $addressBcc = $this->getAddress($emailBcc);
-            $contactBcc = new EmailContact();
-            $contactBcc->attributes = [
-                'ec_address_id' => $addressCc->ea_id,
-                'ec_email_id' => $this->email->e_id,
-                'ec_type_id' => EmailContactType::BCC
-            ];
-            $contactBcc->save();
-            $this->emailContacts[] = $contactBcc;
-        }
-
-        return $this;
-    }
-
-    public function getAddress(string $email, ?string $name): EmailAddress
+    public function getAddress(string $email, ?string $name, $update = false): EmailAddress
     {
         $attributes = [
             'ea_email' => $email,
             'ea_name' => preg_replace('~\"(.*)\"~iU', "$1", $name),
         ];
         $address = EmailAddress::findOneOrNew(['ea_email' => $email]);
-        if ($address->isNewRecord) {
+        if ($address->isNewRecord || $update) {
             $address->attributes = $attributes;
             $address->save();
         }
@@ -294,9 +160,9 @@ class EmailsNormalizeService
     {
         $connection = \Yii::$app->getDb();
         $command = $connection->createCommand(
-            "SELECT COUNT(*) as total
+            "SELECT COUNT(emo.e_id) as total
              FROM `".Email::tableName()."` emn
-            LEFT JOIN `".EmailOld::tableName()."` emo ON emo.e_id = emn.e_id"
+            INNER JOIN `".EmailOld::tableName()."` emo ON emo.e_id = emn.e_id"
             );
         $result = $command->queryAll();
 
@@ -326,13 +192,15 @@ class EmailsNormalizeService
 
             //=EmailParams
             if (!$form->params->isEmpty()) {
-                $paramsData = [
-                    'ep_template_type_id' => $form->params->templateType,
-                    'ep_language_id' => $form->params->language,
-                    'ep_priority' => $form->params->priority,
-                    'ep_email_id' => $email->e_id,
-                ];
+                $paramsData = array_merge($form->params->getAttributesForModel(), ['ep_email_id' => $email->e_id]);
                 EmailParams::create($paramsData);
+            }
+            //=!EmailParams
+
+            //=EmailLog
+            if (!$form->log->isEmpty()) {
+                $logData = array_merge($form->log->getAttributesForModel(), ['el_email_id' => $email->e_id]);
+                EmailLog::create($logData);
             }
             //=!EmailParams
 
@@ -358,7 +226,7 @@ class EmailsNormalizeService
             //=EmailContacts
             foreach ($form->contacts as $contactForm)
             {
-                $address = $this->getAddress($contactForm->email, $contactForm->name);
+                $address = $this->getAddress($contactForm->email, $contactForm->name, true);
                 EmailContact::create([
                     'ec_address_id' => $address->ea_id,
                     'ec_email_id' => $email->e_id,
@@ -367,15 +235,52 @@ class EmailsNormalizeService
             }
             //=!EmailContacts
 
-            //=link Client
             $email->refresh();
-            $clientId = (Yii::createObject(EmailService::class))->detectClientId($email->emailTo);
-            if ($client = Client::findOne($clientId)) {
-                $email->link('clients', $client);
-            }
-            //=!ink Client
 
-            $email->setMessageId();
+            //=link Clients
+            $clientsIds = $form->clients ?? [(Yii::createObject(EmailService::class))->detectClientId($email->emailTo)];
+            if (!empty($clientsIds)) {
+                foreach ($clientsIds as $id) {
+                    if ($client = Client::findOne($id)) {
+                        $email->link('clients', $client);
+                    }
+                }
+
+            }
+            //=!link Clients
+
+            //=link Cases
+            if (!empty($form->cases)) {
+                foreach ($form->cases as $id) {
+                    if ($case = Cases::findOne($id)) {
+                        $email->link('cases', $case);
+                    }
+                }
+            }
+            //=!link Cases
+
+            //=link Leads
+            if (!empty($form->leads)) {
+                foreach ($form->leads as $id) {
+                    if ($lead = Lead::findOne($id)) {
+                        $email->link('leads', $lead);
+                    }
+                }
+            }
+            //=!link Leads
+
+            //=link Reply
+            if ($form->replyId !== null) {
+                $reply = Email::findOne($replyId);
+                if ($reply) {
+                    $email->link('reply', $reply);
+                }
+            }
+            //=!link Reply
+
+            if ($email->getMessageId() === null) {
+                $email->setMessageId();
+            }
 
             $transaction->commit();
 
