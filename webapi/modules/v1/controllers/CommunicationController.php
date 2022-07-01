@@ -473,7 +473,7 @@ class CommunicationController extends ApiBaseController
                     $departmentPhone->dpp_phone_list_id
                 );
 
-                $departmentPhoneProjectParamsService->saveExperiments(ExperimentTarget::EXT_TYPE_CALL, $callModel->c_id);
+                $departmentPhoneProjectParamsService->processExperiments(ExperimentTarget::EXT_TYPE_CALL, $callModel->c_id);
 
                 if (!$isTrustStirCall && SettingHelper::isEnableCallLogFilterGuard()) {
                     try {
@@ -1433,7 +1433,6 @@ class CommunicationController extends ApiBaseController
 
             $call->c_recording_disabled = (bool)($calData['call_recording_disabled'] ?? false);
             $call->setDataPriority($priority);
-//            $call->saveExperiments();
             $call->setDataCreatedParams($calData);
             $call->setDataCreatorType((int)($calData['creator_type_id'] ?? null));
 

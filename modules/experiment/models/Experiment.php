@@ -82,7 +82,7 @@ class Experiment extends ActiveRecord
      * @param int $targetId
      * @return bool
      */
-    public function addTarget(string $targetTypeId, int $targetId): bool
+    public function processTarget(string $targetTypeId, int $targetId): bool
     {
         if (
             !$this->getExperimentTargets()->where([

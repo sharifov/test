@@ -146,7 +146,7 @@ class LeadCreateHandler
 
             $this->createFlightSegments($leadId, $form->flightsForm);
 
-            ExperimentTarget::saveExperimentObjects(ExperimentTarget::EXT_TYPE_LEAD, $leadId, $form->experiments);
+            ExperimentTarget::processExperimentObjects(ExperimentTarget::EXT_TYPE_LEAD, $leadId, $form->experiments);
 
             if (!empty($form->lead_data)) {
                 $leadDataService = new LeadDataCreateService();

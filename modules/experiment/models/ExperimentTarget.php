@@ -93,13 +93,15 @@ class ExperimentTarget extends ActiveRecord
     }
 
     /**
-     * @param string $target_type_id
+     * @param int $target_type_id
      * @param int $targetId
      * @return array
      */
-    public static function getExperimentIds(string $target_type_id, int $targetId): array
+    public static function getExperimentIds(int $target_type_id, int $targetId): array
     {
-        $targetExperiments = self::findAll(['ext_target_type_id' => $target_type_id, 'ext_target_id' => $targetId]);
+        $targetExperiments = self::find()
+                                 ->select('ex_id')
+                                 ->where(['ext_target_type_id' => $target_type_id, 'ext_target_id' => $targetId])->asArray()->all();
         $experiment_array  = [];
         foreach ($targetExperiments as $experiment) {
             $experiment_array[] = $experiment->ext_experiment_id;
@@ -108,11 +110,11 @@ class ExperimentTarget extends ActiveRecord
     }
 
     /**
-     * @param string $target_type_id
+     * @param int $target_type_id
      * @param int $targetId
      * @return array
      */
-    public static function getExperimentArray(string $target_type_id, int $targetId): array
+    public static function getExperimentObjects(int $target_type_id, int $targetId): array
     {
         $targetExperiments = self::find()
                              ->select('ex_code')
@@ -129,46 +131,46 @@ class ExperimentTarget extends ActiveRecord
     /**
      * @param int $target_type_id
      * @param int $targetId
-     * @param array $experimentCodesArray
+     * @param array $experimentObjects
      * @return void
      */
-    public static function saveExperimentCodesArray(int $target_type_id, int $targetId, array $experimentCodesArray): void
+    public static function processExperimentObjects(int $target_type_id, int $targetId, array $experimentObjects): void
     {
-        if (!empty($experimentCodesArray)) {
-            foreach ($experimentCodesArray as $ex_code) {
-                if ($ex_code != '') {
-                    self::saveExperiment($target_type_id, $targetId, $ex_code);
-                }
-            }
+        if (!empty($experimentObjects)) {
+            self::processExperimentsCodes($target_type_id, $targetId, array_unique(array_column($experimentObjects, 'ex_code')));
         }
     }
 
     /**
      * @param int $target_type_id
      * @param int $targetId
-     * @param array $experimentObjects
+     * @param array $experimentCodesArray
      * @return void
      */
-    public static function saveExperimentObjects(int $target_type_id, int $targetId, array $experimentObjects): void
+    public static function processExperimentsCodes(int $target_type_id, int $targetId, array $experimentsCodesArray): void
     {
-        if (!empty($experimentObjects)) {
-            self::saveExperimentCodesArray($target_type_id, $targetId, array_unique(array_column($experimentObjects, 'ex_code')));
+        if (!empty($experimentsCodesArray)) {
+            foreach ($experimentsCodesArray as $ex_code) {
+                if ($ex_code != '') {
+                    self::processExperimentTarget($target_type_id, $targetId, $ex_code);
+                }
+            }
         }
     }
 
     /**
      * @param string $target_type_id
      * @param int $targetId
-     * @param string $experimentCode
+     * @param string $experimentsCodes
      * @return void
      */
-    public static function saveExperiment(string $target_type_id, int $targetId, string $experimentCode): void
+    public static function processExperimentTarget(string $target_type_id, int $targetId, string $experimentsCodes): void
     {
-        $experimentRecord = Experiment::getExperimentByCode($experimentCode);
+        $experimentRecord = Experiment::getExperimentByCode($experimentsCodes);
         if (empty($experimentRecord)) {
-            $experimentRecord = new Experiment(['ex_code' => $experimentCode]);
+            $experimentRecord = new Experiment(['ex_code' => $experimentsCodes]);
             $experimentRecord->save();
         }
-        $experimentRecord->addTarget($target_type_id, $targetId);
+        $experimentRecord->processTarget($target_type_id, $targetId);
     }
 }

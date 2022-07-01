@@ -556,7 +556,7 @@ class LeadController extends ApiBaseController
             $leadDataInserted = $leadDataService->getInserted();
         }
 
-        ExperimentTarget::saveExperimentObjects(ExperimentTarget::EXT_TYPE_LEAD, $lead->id, $modelLead->experiments);
+        ExperimentTarget::processExperimentObjects(ExperimentTarget::EXT_TYPE_LEAD, $lead->id, $modelLead->experiments);
 
         $clientDataInserted = [];
         if (!empty($modelLead->client_data) && ($clientId = $lead->client->id ?? null)) {
@@ -1111,7 +1111,7 @@ class LeadController extends ApiBaseController
 
             if ($modelLead->experiments && is_array($modelLead->experiments)) {
                 ExperimentTarget::deleteAll(['ext_target_id' => $lead->id, 'ext_target_type_id' => ExperimentTarget::EXT_TYPE_LEAD]);
-                ExperimentTarget::saveExperimentObjects(ExperimentTarget::EXT_TYPE_LEAD, $lead->id, $modelLead->experiments);
+                ExperimentTarget::processExperimentObjects(ExperimentTarget::EXT_TYPE_LEAD, $lead->id, $modelLead->experiments);
             }
 
             if ($modelLead->flights) {
@@ -1487,7 +1487,7 @@ class LeadController extends ApiBaseController
 
         try {
             $response['lead'] = $lead;
-            $response['experiments'] = ExperimentTarget::getExperimentArray(ExperimentTarget::EXT_TYPE_LEAD, $modelLead->lead_id);
+            $response['experiments'] = ExperimentTarget::getExperimentObjects(ExperimentTarget::EXT_TYPE_LEAD, $modelLead->lead_id);
             $response['flights'] = $lead->leadFlightSegments;
             $response['emails'] = $lead->client->clientEmails;
             $response['phones'] = $lead->client->clientPhones;

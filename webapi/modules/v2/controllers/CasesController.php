@@ -238,7 +238,7 @@ class CasesController extends BaseController
             ->andWhere(['cs_category_id' => $caseCategory->cc_id, 'cs_order_uid' => $form->order_uid])
             ->withNotFinishStatus()->limit(1)->one()
         ) {
-            ExperimentTarget::saveExperimentObjects(ExperimentTarget::EXT_TYPE_CASE, $case->cs_id, $form->experiments);
+            ExperimentTarget::processExperimentObjects(ExperimentTarget::EXT_TYPE_CASE, $case->cs_id, $form->experiments);
 
             return new SuccessResponse(
                 new DataMessage(
@@ -259,7 +259,7 @@ class CasesController extends BaseController
             );
         }
 
-        ExperimentTarget::saveExperimentObjects(ExperimentTarget::EXT_TYPE_CASE, $result->csId, $form->experiments);
+        ExperimentTarget::processExperimentObjects(ExperimentTarget::EXT_TYPE_CASE, $result->csId, $form->experiments);
 
         if ($form->order_uid || $form->contact_email || $form->contact_phone) {
             try {

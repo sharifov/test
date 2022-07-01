@@ -32,9 +32,9 @@ class DepartmentPhoneProjectParamsService
         return array_unique(array_column(ArrayHelper::getValue(JsonHelper::decode($this->departmentPhoneProject->dpp_params), 'experiments', []), 'ex_code'));
     }
 
-    public function saveExperiments(int $targetTypeId, int $callId): void
+    public function processExperiments(int $targetTypeId, int $callId): void
     {
-        ExperimentTarget::saveExperimentCodesArray($targetTypeId, $callId, $this->getPhoneExperimentArray());
+        ExperimentTarget::processExperimentsCodes($targetTypeId, $callId, $this->getPhoneExperimentArray());
     }
 
     public function updateExperiments(int $oldTargetTypeId, int $newTargetTypeId, int $callId): void

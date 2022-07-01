@@ -151,7 +151,7 @@ class CallQueueJob extends BaseJob implements JobInterface
                                     $departmentPhone = DepartmentPhoneProject::find()->byPhone($call->c_to, false)->enabled()->limit(1)->one();
                                     if ($departmentPhone) {
                                         $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
-                                        $departmentPhoneProjectParamsService->saveExperiments(ExperimentTarget::EXT_TYPE_LEAD, $call->c_lead_id);
+                                        $departmentPhoneProjectParamsService->processExperiments(ExperimentTarget::EXT_TYPE_LEAD, $call->c_lead_id);
                                     }
                                 }
 
@@ -217,7 +217,7 @@ class CallQueueJob extends BaseJob implements JobInterface
                             $departmentPhone = DepartmentPhoneProject::find()->byPhone($call->c_to, false)->enabled()->limit(1)->one();
                             if ($departmentPhone) {
                                 $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
-                                $departmentPhoneProjectParamsService->saveExperiments(ExperimentTarget::EXT_TYPE_CASE, $call->c_case_id);
+                                $departmentPhoneProjectParamsService->processExperiments(ExperimentTarget::EXT_TYPE_CASE, $call->c_case_id);
 
 //                            \Yii::error($call); die;
 //                            \Yii::warning($call->c_case_id);
