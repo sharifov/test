@@ -36,12 +36,17 @@ $bundle = \frontend\assets\TimerAsset::register($this);
                     <?php
                     $js = <<<JS
   $('.enable-timer-lpp').each( function (i, e) {
-      let seconds = $(e).attr('data-seconds');
+      let seconds = $(e).attr('data-seconds'),
+          self = this;
       if (seconds < 0) {
           var params = {format: '%d %H:%M:%S', seconds: Math.abs(seconds)};
       } else {
           var params = {format: '%d %H:%M:%S', countdown: true, duration: seconds + 's', callback: function () {
               $(e).timer('remove').timer({format: '%d %H:%M:%S', seconds: 0}).timer('start');
+              
+              $(e).closest('span.label.label-warning')
+                  .removeClass('label-warning')
+                  .addClass('label-danger');
           }};
       }
       $(e).timer(params).timer('start');
