@@ -147,7 +147,6 @@ class LeadCreateHandler
             $this->createFlightSegments($leadId, $form->flightsForm);
 
             ExperimentTarget::saveExperimentObjects(ExperimentTarget::EXT_TYPE_LEAD, $leadId, $form->experiments);
-            $this->experiments = $form->experiments;
 
             if (!empty($form->lead_data)) {
                 $leadDataService = new LeadDataCreateService();
@@ -226,11 +225,6 @@ class LeadCreateHandler
     public function getLeadDataInserted(): array
     {
         return $this->leadDataInserted;
-    }
-
-    public function getExperiments(): array
-    {
-        return $this->experiments;
     }
 
     public function getWarnings(): array

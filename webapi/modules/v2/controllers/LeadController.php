@@ -391,7 +391,7 @@ class LeadController extends BaseController
                                 ]
                             ),
                         ],
-                        'experiments' => $this->leadCreateHandler->getExperiments(),
+                        'experiments' => $form->experiments,
                         'leadDataInserted' => $this->leadCreateHandler->getLeadDataInserted(),
                         'clientDataInserted' => $this->leadCreateHandler->getClientDataInserted(),
                         'warnings' => $this->leadCreateHandler->getWarnings(),

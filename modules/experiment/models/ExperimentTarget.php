@@ -127,12 +127,12 @@ class ExperimentTarget extends ActiveRecord
     }
 
     /**
-     * @param string $target_type_id
+     * @param int $target_type_id
      * @param int $targetId
      * @param array $experimentCodesArray
      * @return void
      */
-    public static function saveExperimentCodesArray(string $target_type_id, int $targetId, array $experimentCodesArray): void
+    public static function saveExperimentCodesArray(int $target_type_id, int $targetId, array $experimentCodesArray): void
     {
         if (!empty($experimentCodesArray)) {
             foreach ($experimentCodesArray as $ex_code) {
@@ -144,15 +144,15 @@ class ExperimentTarget extends ActiveRecord
     }
 
     /**
-     * @param string $target_type_id
+     * @param int $target_type_id
      * @param int $targetId
      * @param array $experimentObjects
      * @return void
      */
-    public static function saveExperimentObjects(string $target_type_id, int $targetId, array $experimentObjects): void
+    public static function saveExperimentObjects(int $target_type_id, int $targetId, array $experimentObjects): void
     {
         if (!empty($experimentObjects)) {
-            self::saveExperimentCodesArray(array_unique(array_column($experimentObjects, 'ex_code')));
+            self::saveExperimentCodesArray($target_type_id, $targetId, array_unique(array_column($experimentObjects, 'ex_code')));
         }
     }
 
