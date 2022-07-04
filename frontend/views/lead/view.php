@@ -29,6 +29,8 @@ use frontend\models\CommunicationForm;
 use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
+use frontend\widgets\sale\SaleWidget;
+use modules\featureFlag\FFlag;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\services\access\FileStorageAccessService;
 use modules\fileStorage\src\widgets\FileStorageListWidget;
@@ -37,6 +39,8 @@ use modules\lead\src\abac\communicationBlock\LeadCommunicationBlockAbacObject;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\communicationBlock\LeadCommunicationBlockAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
+use modules\lead\src\abac\sale\LeadSaleAbacDto;
+use modules\lead\src\abac\sale\LeadSaleAbacObject;
 use src\auth\Auth;
 use src\model\call\useCase\createCall\fromLead\AbacCallFromNumberList;
 use src\model\email\useCase\send\fromLead\AbacEmailList;
@@ -233,6 +237,18 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
                         <?php endif; ?>
                     <?php endif; ?>
                 <?php endif; ?>
+
+                <?php
+                /** @fflag FFlag::FF_KEY_SALE_VIEW_IN_LEAD_ENABLE, LeadSale view enable\disable */
+                if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SALE_VIEW_IN_LEAD_ENABLE)) : ?>
+                    <?php
+                    $leadSaleAbacDto = new LeadSaleAbacDto($lead, Auth::id());
+                    /** @abac new $leadSaleAbacDto, LeadSaleAbacObject::LOGIC_CLIENT_DATA, LeadSaleAbacObject::ACTION_VIEW, Access to view sale in lead view */
+                    if (!empty($lead->bo_flight_id) && Yii::$app->abac->can($leadSaleAbacDto, LeadSaleAbacObject::NS, LeadSaleAbacObject::ACTION_VIEW)) : ?>
+                        <?= SaleWidget::widget(['leadId' => $lead->id]) ?>
+                    <?php endif; ?>
+                <?php endif; ?>
+
 
             </div>
 
