@@ -229,8 +229,11 @@ class ProductQuoteController extends FController
                 if (!$originalQuote) {
                     throw new \RuntimeException('Original quote not found');
                 }
-
-                $emailData = $this->casesCommunicationService->getEmailData($case, Auth::user());
+                $locale = 'en-US';
+                if ($case->client && $case->client->cl_locale) {
+                    $locale = $case->client->cl_locale;
+                }
+                $emailData = $this->casesCommunicationService->getEmailData($case, Auth::user(), $locale);
                 $emailData['change_gid'] = $productQuoteChange->pqc_gid;
                 $emailData['original_quote'] = $originalQuote->serialize();
 
@@ -278,7 +281,7 @@ class ProductQuoteController extends FController
                 if (!$emailTemplateType) {
                     throw new \RuntimeException('Email template type is not set in project params');
                 }
-                $previewEmailResult = Yii::$app->communication->mailPreview($case->cs_project_id, $emailTemplateType, $emailFrom, $form->clientEmail, $emailData);
+                $previewEmailResult = Yii::$app->communication->mailPreview($case->cs_project_id, $emailTemplateType, $emailFrom, $form->clientEmail, $emailData, $locale);
                 if ($previewEmailResult['error']) {
                     $previewEmailResult['error'] = @Json::decode($previewEmailResult['error']);
                     $form->addError('general', 'Communication service error: ' . ($previewEmailResult['error']['name'] ?? '') . ' ( ' . ($previewEmailResult['error']['message']  ?? '') . ' )');
@@ -489,6 +492,11 @@ class ProductQuoteController extends FController
                     throw new \RuntimeException('Voluntary Refund - processing is not complete');
                 }
 
+                $locale = 'en-US';
+                if ($case->client && $case->client->cl_locale) {
+                    $locale = $case->client->cl_locale;
+                }
+
                 $relatedPrQtAbacDto = new RelatedProductQuoteAbacDto($quote);
                 $relatedPrQtAbacDto->mapOrderAttributes($order);
                 $relatedPrQtAbacDto->mapProductQuoteChangeAttributes($productQuoteChange);
@@ -499,7 +507,7 @@ class ProductQuoteController extends FController
                     throw new ForbiddenHttpException('You do not have access to perform this action', 403);
                 }
 
-                $emailData = $this->casesCommunicationService->getEmailData($case, Auth::user());
+                $emailData = $this->casesCommunicationService->getEmailData($case, Auth::user(), $locale);
                 $emailData['reprotection_quote'] = $quote->serialize();
                 $emailData['original_quote'] = $originalQuote->serialize();
                 $bookingId = ArrayHelper::getValue($emailData, 'original_quote.data.flights.0.fqf_booking_id', '') ?? '';
@@ -530,7 +538,7 @@ class ProductQuoteController extends FController
                 if (!$emailTemplateType) {
                     throw new \RuntimeException('Email template type is not set in project params');
                 }
-                $previewEmailResult = Yii::$app->communication->mailPreview($case->cs_project_id, $emailTemplateType, $emailFrom, $form->clientEmail, $emailData);
+                $previewEmailResult = Yii::$app->communication->mailPreview($case->cs_project_id, $emailTemplateType, $emailFrom, $form->clientEmail, $emailData, $locale);
                 if ($previewEmailResult['error']) {
                     $previewEmailResult['error'] = @Json::decode($previewEmailResult['error']);
                     $form->addError('general', 'Communication service error: ' . ($previewEmailResult['error']['name'] ?? '') . ' ( ' . ($previewEmailResult['error']['message']  ?? '') . ' )');
