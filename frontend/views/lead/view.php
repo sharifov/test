@@ -238,17 +238,6 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
                     <?php endif; ?>
                 <?php endif; ?>
 
-                <?php
-                /** @fflag FFlag::FF_KEY_SALE_VIEW_IN_LEAD_ENABLE, LeadSale view enable\disable */
-                if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SALE_VIEW_IN_LEAD_ENABLE)) : ?>
-                    <?php
-                    $leadSaleAbacDto = new LeadSaleAbacDto($lead, Auth::id());
-                    /** @abac new $leadSaleAbacDto, LeadSaleAbacObject::LOGIC_CLIENT_DATA, LeadSaleAbacObject::ACTION_VIEW, Access to view sale in lead view */
-                    if (!empty($lead->bo_flight_id) && Yii::$app->abac->can($leadSaleAbacDto, LeadSaleAbacObject::NS, LeadSaleAbacObject::ACTION_VIEW)) : ?>
-                        <?= SaleWidget::widget(['leadId' => $lead->id]) ?>
-                    <?php endif; ?>
-                <?php endif; ?>
-
 
             </div>
 

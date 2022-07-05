@@ -5,17 +5,14 @@ use yii\helpers\Url;
 
 ?>
 
-<div>
-    <?= Html::button('<i class="fa fa-eye"></i> Sale Detail', ['class' => 'btn btn-info', 'id' => 'sale-detail-view', 'data-url' => Url::to(['lead-sale/ajax-sale-detail', 'leadId' => $leadId])])?>
-</div>
-
+<?= Html::button('<i class="fa fa-info-circle"></i> Sale Details', ['class' => 'btn btn-info', 'id' => 'sale-detail-view', 'data-url' => Url::to(['lead-sale/ajax-sale-detail', 'leadId' => $leadId])])?>
 <?php
 $jsCode = <<<JS
  $(document).on('click', '#sale-detail-view', function(){
         let url = $(this).data('url');
         $('#preloader').removeClass('d-none');
         let modal = $('#modal-md');
-        
+        modal.find('.modal-title').html('Sale Details');
         $.ajax({
             type: 'get',
             url: url,
@@ -33,4 +30,3 @@ $jsCode = <<<JS
 JS;
 
 $this->registerJs($jsCode, \yii\web\View::POS_READY);
-?>

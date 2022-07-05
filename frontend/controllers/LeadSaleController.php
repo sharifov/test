@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use modules\featureFlag\FFlag;
 use modules\lead\src\abac\sale\LeadSaleAbacDto;
 use modules\lead\src\abac\sale\LeadSaleAbacObject;
 use src\auth\Auth;
@@ -10,6 +11,7 @@ use src\repositories\lead\LeadRepository;
 use src\services\cases\LeadSaleService;
 use Yii;
 use yii\helpers\ArrayHelper;
+use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 
 class LeadSaleController extends FController
@@ -49,6 +51,11 @@ class LeadSaleController extends FController
     {
         $viewData = [];
         try {
+            /** @fflag FFlag::FF_KEY_SALE_VIEW_IN_LEAD_ENABLE, LeadSale view enable\disable */
+            if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SALE_VIEW_IN_LEAD_ENABLE)) {
+                throw new BadRequestHttpException('Feature Flag ' . FFlag::FF_KEY_SALE_VIEW_IN_LEAD_ENABLE . ' disable');
+            }
+
             $lead = $this->leadRepository->findByIdAndNotEmptyBoFlightId($leadId);
 
             $leadSaleAbacDto = new LeadSaleAbacDto($lead, Auth::id());
