@@ -207,20 +207,13 @@ class CallQueueJob extends BaseJob implements JobInterface
                             $case = $this->casesCreateService->getOrCreateByCall(
                                 [new PhoneCreateForm(['phone' => $call->c_from])],
                                 $call->c_id,
+                                $call->c_to,
                                 $call->c_project_id,
                                 (int)$call->c_dep_id,
                                 $createCaseOnIncoming,
                                 $departmentParams->object->case->trashActiveDaysLimit
                             );
                             $call->c_case_id = $case->cs_id ?? null;
-
-                            if ($call->isGeneralLine()) {
-                                $departmentPhone = DepartmentPhoneProject::find()->byPhone($call->c_to, false)->enabled()->limit(1)->one();
-                                if ($departmentPhone) {
-                                    $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
-                                    $departmentPhoneProjectParamsService->processExperiments(ExperimentTarget::EXT_TYPE_CASE, $call->c_case_id);
-                                }
-                            }
 
                             if (!$departmentParams->object->case->createOnCall && !$allowAutoCreateByProject) {
                                 $clientForm = ClientCreateForm::createWidthDefaultName();

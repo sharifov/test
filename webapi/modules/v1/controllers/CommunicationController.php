@@ -29,7 +29,6 @@ use frontend\helpers\JsonHelper;
 use frontend\widgets\newWebPhone\call\socket\RemoveIncomingRequestMessage;
 use frontend\widgets\newWebPhone\sms\socket\Message;
 use frontend\widgets\notification\NotificationMessage;
-use modules\experiment\models\ExperimentTarget;
 use src\entities\cases\Cases;
 use src\forms\lead\PhoneCreateForm;
 use src\guards\call\CallRedialGuard;
