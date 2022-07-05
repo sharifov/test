@@ -3,23 +3,21 @@
 namespace src\listeners\lead;
 
 use common\models\Notifications;
-use src\events\lead\LeadExtraQueueEvent;
-use src\events\lead\LeadPoorProcessingEvent;
-use src\events\lead\LeadProcessingEvent;
+use src\events\lead\LeadableEventInterface;
 use Yii;
 
 class LeadInfoReloadListener
 {
-    public function handle(LeadProcessingEvent|LeadPoorProcessingEvent|LeadExtraQueueEvent $event): void
+    public function handle(LeadableEventInterface $event): void
     {
         try {
             Notifications::publish('updateLeadHeader', [
-                'user_id' => $event->lead->employee_id
+                'user_id' => $event->getLead()->employee_id
             ], [
                 'data' => [
                     'lead' => [
-                        'id' => $event->lead->id,
-                        'gid' => $event->lead->gid
+                        'id' => $event->getLead()->id,
+                        'gid' => $event->getLead()->gid
                     ],
                 ],
             ]);
