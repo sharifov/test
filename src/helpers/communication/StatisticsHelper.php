@@ -20,6 +20,8 @@ use yii\data\ActiveDataProvider;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
+use modules\featureFlag\FFlag;
+use src\entities\email\EmailRepository;
 
 /**
  * Class StatisticsHelper
@@ -62,11 +64,20 @@ class StatisticsHelper
      */
     public function setEmailCount(): StatisticsHelper
     {
-        $column = $this->type === self::TYPE_LEAD ? 'e_lead_id' : 'e_case_id';
-        $this->emailCount = (int) Email::find()
-            ->where([$column => $this->id])
-            ->cache($this->cacheDuration)
-            ->count();
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_EMAIL_NORMALIZED_FORM_ENABLE)) {
+            if ($this->type === self::TYPE_LEAD) {
+                $this->emailCount = EmailRepository::getEmailCountByLead($this->id);
+            } else {
+                $this->emailCount = EmailRepository::getEmailCountByCase($this->id);
+            }
+        } else {
+            $column = $this->type === self::TYPE_LEAD ? 'e_lead_id' : 'e_case_id';
+            $this->emailCount = (int) Email::find()
+                ->where([$column => $this->id])
+                ->cache($this->cacheDuration)
+                ->count();
+        }
+
         return $this;
     }
 
