@@ -1887,7 +1887,9 @@ input[disabled] + .radio-tab__text {
 .ll-trash {
   background-color: #8e99a5;
 }
-
+.ll-close {
+    background-color: #8e99a5;
+}
 .ll-booked {
   background-color: #0BB094;
 }
