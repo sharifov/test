@@ -42,6 +42,10 @@ $bundle = \frontend\assets\TimerAsset::register($this);
       } else {
           var params = {format: '%d %H:%M:%S', countdown: true, duration: seconds + 's', callback: function () {
               $(e).timer('remove').timer({format: '%d %H:%M:%S', seconds: 0}).timer('start');
+              
+              $(e).closest('span.label.label-warning')
+                  .removeClass('label-warning')
+                  .addClass('label-danger');
           }};
       }
       $(e).timer(params).timer('start');

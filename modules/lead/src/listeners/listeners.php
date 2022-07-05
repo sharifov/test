@@ -73,6 +73,7 @@ use src\listeners\lead\LeadSnoozeNotificationsListener;
 use src\listeners\lead\LeadSoldEventLogListener;
 use src\listeners\lead\LeadSoldNotificationsListener;
 use src\listeners\lead\LeadSoldSplitListener;
+use src\listeners\lead\LeadInfoReloadListener;
 use src\listeners\lead\LeadTaskEventListener;
 use src\listeners\lead\LeadTipsSplitListener;
 use src\listeners\lead\LeadTrashEventLogListener;
@@ -131,6 +132,7 @@ return [
     LeadPendingEvent::class => [LeadPendingEventLogListener::class],
     LeadProcessingEvent::class => [
         LeadProcessingEventLogListener::class,
+        LeadInfoReloadListener::class,
     ],
     LeadRejectEvent::class => [LeadRejectEventLogListener::class],
     LeadFollowUpEvent::class => [
@@ -167,9 +169,11 @@ return [
     LeadExtraQueueEvent::class => [
         LeadExtraQueueEventLogListener::class,
         LeadExtraQueueNotificationsListener::class,
+        LeadInfoReloadListener::class,
     ],
     LeadPoorProcessingEvent::class => [
         LeadPoorProcessingAdderListener::class,
+        LeadInfoReloadListener::class,
     ],
     LeadCloseEvent::class => [
         LeadCloseListener::class
