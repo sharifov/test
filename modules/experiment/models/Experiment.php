@@ -18,8 +18,6 @@ use yii\helpers\VarDumper;
  */
 class Experiment extends ActiveRecord
 {
-//    use FieldsTrait;
-
     /**
      * {@inheritdoc}
      */

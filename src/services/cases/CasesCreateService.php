@@ -146,12 +146,13 @@ class CasesCreateService
         array $clientPhones,
         int $callId,
         int $callTo,
+        int $callIsGeneralLine,
         int $projectId,
         int $depId,
         bool $createCaseOnIncoming,
         int $trashActiveDaysLimit
     ): ?Cases {
-        $case = $this->transaction->wrap(function () use ($clientPhones, $callId, $callTo, $projectId, $depId, $createCaseOnIncoming, $trashActiveDaysLimit) {
+        $case = $this->transaction->wrap(function () use ($clientPhones, $callId, $callTo, $callIsGeneralLine, $projectId, $depId, $createCaseOnIncoming, $trashActiveDaysLimit) {
             $clientForm = ClientCreateForm::createWidthDefaultName();
             $clientForm->projectId = $projectId;
             $clientForm->typeCreate = Client::TYPE_CREATE_CALL;
@@ -172,10 +173,12 @@ class CasesCreateService
                 );
                 $this->casesRepository->save($case);
 
-                $departmentPhone = DepartmentPhoneProject::find()->byPhone($callTo, false)->enabled()->limit(1)->one();
-                if ($departmentPhone) {
-                    $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
-                    $departmentPhoneProjectParamsService->processExperiments(ExperimentTarget::EXT_TYPE_CASE, $case->cs_id);
+                if ($callIsGeneralLine) {
+                    $departmentPhone = DepartmentPhoneProject::find()->byPhone($callTo, false)->enabled()->limit(1)->one();
+                    if ($departmentPhone) {
+                        $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
+                        $departmentPhoneProjectParamsService->processExperiments(ExperimentTarget::EXT_TYPE_CASE, $case->cs_id);
+                    }
                 }
             } else {
                 //\Yii::info('Find case: ' . $case->cs_id . ' - ' . VarDumper::dumpAsString(['ClientId' => $client->id, 'projectId' => $projectId, 'depId' => $depId]), 'info\getByClientProjectDepartment');

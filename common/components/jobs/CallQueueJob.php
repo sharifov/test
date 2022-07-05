@@ -208,6 +208,7 @@ class CallQueueJob extends BaseJob implements JobInterface
                                 [new PhoneCreateForm(['phone' => $call->c_from])],
                                 $call->c_id,
                                 $call->c_to,
+                                $call->isGeneralLine(),
                                 $call->c_project_id,
                                 (int)$call->c_dep_id,
                                 $createCaseOnIncoming,
