@@ -776,7 +776,7 @@ class CasesSaleService
                 $allCaseSalesProjectApi = [];
 
                 foreach ($allCaseSales as $caseSale) {
-                    $existSaleData = isset($caseSale->css_sale_data['projectApiKey']) ?? false;
+                    $existSaleData = isset($caseSale->css_sale_data['projectApiKey']);
                     if ($existSaleData && !in_array($caseSale->css_sale_data['projectApiKey'], $allCaseSalesProjectApi)) {
                         $allCaseSalesProjectApi[] = $caseSale->css_sale_data['projectApiKey'];
                     }
