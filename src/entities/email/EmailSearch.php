@@ -34,6 +34,8 @@ class EmailSearch extends Email
     public $email_from;
     public $email_to;
     public $language_id;
+    public $e_lead_id;
+    public $e_case_id;
 
     public function rules(): array
     {
@@ -41,7 +43,7 @@ class EmailSearch extends Email
             [['datetime_start', 'datetime_end', 'communication_id', 'email_from', 'email_to', 'language_id'], 'safe'],
             [['template_type_name'], 'string'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['e_id', 'e_project_id', 'e_type_id', 'e_is_deleted', 'e_status_id', 'e_created_user_id', 'supervision_id'], 'integer'],
+            [['e_id', 'e_project_id', 'e_type_id', 'e_is_deleted', 'e_status_id', 'e_created_user_id', 'supervision_id', 'e_lead_id', 'e_case_id'], 'integer'],
         ];
     }
 
@@ -135,6 +137,14 @@ class EmailSearch extends Email
             }]);
         }
 
+        if ($this->e_lead_id) {
+            $query->lead($this->e_lead_id);
+        }
+
+        if ($this->e_case_id) {
+            $query->lead($this->e_case_id);
+        }
+
         if ($this->template_type_name) {
             $templateIds = EmailTemplateType::find()->select(['DISTINCT(etp_id) as ep_template_type_id'])->where(['like', 'etp_name', $this->template_type_name])->asArray()->all();
             if ($templateIds) {
@@ -201,7 +211,7 @@ class EmailSearch extends Email
             ]);
         }
 
-        if (isset($params['EmailSearch']['email']) && $params['EmailSearch']['email']) {
+        if (isset($params['EmailSearch']['email']) && !empty($params['EmailSearch']['email'])) {
             $params['EmailSearch']['email'] = strtolower(trim($params['EmailSearch']['email']));
             $query->joinWith(['contacts' => function ($q) use ($params) {
                 $q->andFilterWhere(['like', 'ea_email', $params['EmailSearch']['email']]);
