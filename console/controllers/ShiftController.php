@@ -63,13 +63,13 @@ class ShiftController extends Controller
 
                 $decisionFormModel = new ScheduleDecisionForm();
                 $decisionFormModel->status = UserShiftSchedule::STATUS_CANCELED;
-                $decisionFormModel->description = 'Declined by system';
+                $decisionFormModel->description = ShiftScheduleRequest::DECLINE_BY_SYSTEM_DESCRIPTION;
 
                 $shift->uss_status_id = $decisionFormModel->status;
                 $shift->uss_description = $decisionFormModel->description;
 
                 if ($shift->save()) {
-                    ShiftScheduleRequestService::saveDecision($ssr, $decisionFormModel, $shift->user);
+                    ShiftScheduleRequestService::saveDecision($ssr, $decisionFormModel);
                 }
             } catch (DomainException $e) {
                 Yii::error(AppHelper::throwableLog($e), 'ShiftController:actionFindAndDeclineShiftsWithPendingStatusIfWtOrWtrExists:DomainException');
