@@ -313,15 +313,20 @@ class Lead extends ActiveRecord implements Objectable
     ];
 
     public const STATUS_CLASS_LIST = [
-        self::STATUS_PENDING        => 'll-pending',
-        self::STATUS_PROCESSING     => 'll-processing',
-        self::STATUS_FOLLOW_UP      => 'll-follow_up',
-        self::STATUS_ON_HOLD        => 'll-on_hold',
-        self::STATUS_SOLD           => 'll-sold',
-        self::STATUS_TRASH          => 'll-trash',
-        self::STATUS_BOOKED         => 'll-booked',
-        self::STATUS_SNOOZE         => 'll-snooze',
-        self::STATUS_CLOSED         => 'll-close',
+        self::STATUS_PENDING        => 'status-label bg-light-brown',
+        self::STATUS_PROCESSING     => 'status-label bg-turquoise',
+        self::STATUS_FOLLOW_UP      => 'status-label bg-blue',
+        self::STATUS_ON_HOLD        => 'status-label bg-blue',
+        self::STATUS_SOLD           => 'status-label bg-green',
+        self::STATUS_TRASH          => 'status-label bg-red',
+        self::STATUS_BOOKED         => 'status-label bg-green',
+        self::STATUS_SNOOZE         => 'status-label bg-turquoise',
+        self::STATUS_CLOSED         => 'status-label bg-red',
+        self::STATUS_REJECT         => 'status-label bg-red',
+        self::STATUS_NEW            => 'label-default',
+        self::STATUS_BOOK_FAILED    => 'label-default',
+        self::STATUS_ALTERNATIVE    => 'label-default',
+        self::STATUS_EXTRA_QUEUE    => 'label-default',
     ];
 
 
@@ -2737,7 +2742,7 @@ class Lead extends ActiveRecord implements Objectable
         $statusName = self::STATUS_LIST[$this->status] ?? '-';
 
         if ($label) {
-            $class = $this->getStatusLabelClass();
+            $class = self::getStatusLabelClass($this->status);
             $statusName = '<span class="label ' . $class . '" style="font-size: 13px">' . Html::encode($statusName) . '</span>';
         }
 
@@ -2745,11 +2750,12 @@ class Lead extends ActiveRecord implements Objectable
     }
 
     /**
+     * @param int|null $status
      * @return string
      */
-    public function getStatusLabelClass(): string
+    public static function getStatusLabelClass(?int $status): string
     {
-        return self::STATUS_CLASS_LIST[$this->status] ?? 'label-default';
+        return self::STATUS_CLASS_LIST[$status] ?? 'label-default';
     }
 
 
