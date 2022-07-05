@@ -1030,6 +1030,12 @@ class LeadController extends FController
             ],
         ]);
 
+        $isCreatedFlightRequest = false;
+
+        if ($lead->status === Lead::STATUS_PROCESSING && $lead->leadFlightSegmentsCount > 0 && $lead->quotesCount === 0) {
+            $isCreatedFlightRequest = true;
+        }
+
 //        $tmpl = $isQA ? 'view_qa' : 'view';
         $tmpl = 'view';
 
@@ -1054,6 +1060,8 @@ class LeadController extends FController
             'callFromNumberList' => $callFromNumberList,
             'smsFromNumberList' => $smsFromNumberList,
             'emailFromList' => $emailFromList,
+
+            'isCreatedFlightRequest' => $isCreatedFlightRequest,
         ]);
     }
 

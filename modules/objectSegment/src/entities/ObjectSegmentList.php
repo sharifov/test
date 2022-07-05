@@ -3,6 +3,7 @@
 namespace modules\objectSegment\src\entities;
 
 use common\models\Employee;
+use modules\objectSegment\src\contracts\ObjectSegmentListContract;
 use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -93,6 +94,14 @@ class ObjectSegmentList extends \yii\db\ActiveRecord
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+    public function beforeDelete()
+    {
+        if (in_array($this->osl_key, ObjectSegmentListContract::KEYS_LIST)) {
+            throw new \DomainException('This Object Segment List is restricted from delete model id' . $this->osl_id);
+        }
+        return parent::beforeDelete();
     }
 
     public function afterSave($insert, $changedAttributes)
