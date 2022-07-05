@@ -5,6 +5,7 @@ namespace src\services\cases;
 use common\components\BackOffice;
 use common\helpers\LogHelper;
 use common\models\CaseSale;
+use common\models\Project;
 use Exception;
 use frontend\helpers\JsonHelper;
 use frontend\models\form\CreditCardForm;
@@ -635,6 +636,8 @@ class CasesSaleService
                         ]));
                     }
 
+                    $this->updateCaseProjectBySale($case, $refreshSaleData);
+
                     if ($caseSale->css_cs_id && SettingHelper::isEnableOrderFromSale()) {
                         $transaction = new Transaction(['db' => Yii::$app->db]);
                         try {
@@ -757,5 +760,39 @@ class CasesSaleService
             throw new BoResponseException('Sale not found by Booking ID(' . $bookingId . ') from "cs/search"');
         }
         return $this->detailRequestToBackOffice($saleSearch['saleId'], 0, 120, 1);
+    }
+
+    /**
+     * @param Cases $case
+     * @param array $refreshSaleData
+     */
+    public function updateCaseProjectBySale(Cases $case, array $refreshSaleData)
+    {
+        try {
+            $saleProjectApiKey = $refreshSaleData['projectApiKey'] ?? null;
+
+            if (!empty($saleProjectApiKey)) {
+                $allCaseSales = $case->getCaseSale()->all();
+                $allCaseSalesProjectApi = [];
+
+                foreach ($allCaseSales as $caseSale) {
+                    $existSaleData = isset($caseSale->css_sale_data['projectApiKey']) ?? false;
+                    if ($existSaleData && !in_array($caseSale->css_sale_data['projectApiKey'], $allCaseSalesProjectApi)) {
+                        $allCaseSalesProjectApi[] = $caseSale->css_sale_data['projectApiKey'];
+                    }
+                }
+
+                if (count($allCaseSalesProjectApi) == 1 && isset($allCaseSalesProjectApi[0])) {
+                    if (trim($allCaseSalesProjectApi[0]) !== trim($saleProjectApiKey)) {
+                        $newProject = Project::findOne(['project_key' => $saleProjectApiKey]);
+                        if ($newProject) {
+                            $case->update(false, ['cs_project_id' => $newProject->id]);
+                        }
+                    }
+                }
+            }
+        } catch (\Throwable $throwable) {
+            AppHelper::throwableLogger($throwable, 'CasesSaleService:updateCaseProject:Throwable');
+        }
     }
 }
