@@ -363,6 +363,7 @@ class UserShiftScheduleQuery
         $curTime = date('Y-m-d H:i:s');
         $ussTableName = UserShiftSchedule::tableName();
         $ussStatusDone = UserShiftSchedule::STATUS_DONE;
+        $ussStatusApproved = UserShiftSchedule::STATUS_APPROVED;
 
         return UserShiftSchedule::find()
             ->alias('ussPending')
@@ -378,7 +379,7 @@ class UserShiftScheduleQuery
                 "ussPending.uss_user_id = ussDone.uss_user_id 
                 AND ussDone.uss_start_utc_dt <= '{$curTime}' 
                 AND ussDone.uss_end_utc_dt >= '{$curTime}' 
-                AND ussDone.uss_status_id = {$ussStatusDone}
+                AND ussDone.uss_status_id IN ({$ussStatusDone}, {$ussStatusApproved})
                 AND ussDone.uss_sst_id IN (1, 2)"
             )
             ->all();
