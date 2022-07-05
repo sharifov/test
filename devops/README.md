@@ -79,13 +79,13 @@ Logically you can split CRM architecture into the following layers
 
 `crm-api-php-fpm`: 9000
 
-`crm-ws`: 
+`crm-ws`: 80
 
 `crm-queue`:
 
 `crm-centrifugo-nginx`: 4433->443
 
-`crm-centrifugo`: 
+`crm-centrifugo`: 8000
 
 `crm-psql`: 5435->5432
 
