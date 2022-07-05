@@ -169,7 +169,7 @@ class EmailService
      */
     private function getCaseByLastEmail(string $emailFrom): ?Cases
     {
-        $clientEmail = ClientEmail::find()->where(['email' => $emailFrom])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+        $clientEmail = ClientEmail::find()->byEmail($emailFrom)->one();
         if (
             $clientEmail &&
             $clientEmail->client_id &&
@@ -243,7 +243,7 @@ class EmailService
      */
     private function getLeadByLastEmail(string $emailFrom): ?Lead
     {
-        $clientEmail = ClientEmail::find()->where(['email' => $emailFrom])->orderBy(['id' => SORT_DESC])->limit(1)->one();
+        $clientEmail = ClientEmail::find()->byEmail($emailFrom)->one();
         if (
             $clientEmail &&
             $clientEmail->client_id &&
@@ -257,7 +257,7 @@ class EmailService
 
     public function detectClientId(string $email)
     {
-        $clientEmail = ClientEmail::find()->where(['email' => $email])->one();
+        $clientEmail = ClientEmail::find()->byEmail($email)->one();
 
         return $clientEmail->client_id ?? null;
     }
