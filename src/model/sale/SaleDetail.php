@@ -2,6 +2,7 @@
 
 namespace src\model\sale;
 
+use common\components\validators\IsArrayValidator;
 use yii\base\Model;
 
 class SaleDetail extends Model
@@ -15,7 +16,7 @@ class SaleDetail extends Model
         return [
             [
                 ['processingTeamsStatus', 'notes', 'authList'],
-                'safe',
+                IsArrayValidator::class,
             ]
         ];
     }

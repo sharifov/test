@@ -1,5 +1,6 @@
 <?php
 
+use common\helpers\LogHelper;
 use yii\bootstrap4\Alert;
 use yii\helpers\Html;
 
@@ -59,6 +60,7 @@ if (isset($sale)) :?>
                 <th>CC Number</th>
             </tr>
             <?php foreach ($sale->authList as $list) : ?>
+                <?php LogHelper::hidePersonalData($list, ['ccNumber'], 1) ?>
                 <tr>
                     <td><?= Yii::$app->formatter->asDatetime(strtotime($list['created'])) ?></td>
                     <td><?= Html::encode($list['auth_system']) ?></td>
