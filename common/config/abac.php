@@ -41,6 +41,7 @@ return [
         'lead-expert-call' => \modules\lead\src\abac\LeadExpertCallObject::class,
         'task-list' => \modules\taskList\abac\TaskListAbacObject::class,
         'two-factor' => \src\useCase\login\twoFactorAuth\abac\TwoFactorAuthAbacObject::class,
+        'lead-sale' => modules\lead\src\abac\sale\LeadSaleAbacObject::class,
     ],
     'scanDirs' => [
         '/modules/',
