@@ -37,9 +37,9 @@ if (isset($sale)) :?>
                 <?php foreach ($sale->notes as $note) : ?>
                     <tr>
                         <td><?= Yii::$app->formatter->asDatetime(strtotime($note['created'])) ?></td>
-                        <td><?= Html::encode($note['message']) ?></td>
-                        <td><?= Html::encode($note['agent']) ?></td>
-                        <td><?= Html::encode($note['team']) ?></td>
+                        <td><?= Html::encode($note['message'] ?? '') ?></td>
+                        <td><?= Html::encode($note['agent'] ?? '') ?></td>
+                        <td><?= Html::encode($note['team'] ?? '') ?></td>
                     </tr>
                 <?php endforeach; ?>
             </table>
@@ -63,12 +63,12 @@ if (isset($sale)) :?>
                 <?php LogHelper::hidePersonalData($list, ['ccNumber'], 1) ?>
                 <tr>
                     <td><?= Yii::$app->formatter->asDatetime(strtotime($list['created'])) ?></td>
-                    <td><?= Html::encode($list['auth_system']) ?></td>
-                    <td><?= Html::encode($list['for_what']) ?></td>
-                    <td><?= number_format($list['amount'], 2) ?></td>
-                    <td><?= Html::encode($list['status']) ?></td>
-                    <td><?= Html::encode($list['message']) ?></td>
-                    <td><?= Html::encode($list['ccNumber']) ?></td>
+                    <td><?= Html::encode($list['auth_system'] ?? '') ?></td>
+                    <td><?= Html::encode($list['for_what'] ?? '') ?></td>
+                    <td><?= number_format($list['amount'] ?? 0, 2) ?></td>
+                    <td><?= Html::encode($list['status'] ?? '') ?></td>
+                    <td><?= Html::encode($list['message'] ?? '') ?></td>
+                    <td><?= Html::encode($list['ccNumber'] ?? '') ?></td>
                 </tr>
             <?php endforeach; ?>
         </table>
