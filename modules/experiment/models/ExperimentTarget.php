@@ -146,7 +146,7 @@ class ExperimentTarget extends ActiveRecord
      */
     public static function processExperimentsCodes(int $target_type_id, int $targetId, array $experimentsCodesArray): void
     {
-        if (!empty($experimentsCodesArray)) {
+        if (is_array($experimentsCodesArray)) {
             foreach ($experimentsCodesArray as $ex_code) {
                 if ($ex_code != '') {
                     self::processExperimentTarget($target_type_id, $targetId, $ex_code);
