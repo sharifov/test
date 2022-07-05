@@ -142,7 +142,7 @@ class EmailSearch extends Email
         }
 
         if ($this->e_case_id) {
-            $query->lead($this->e_case_id);
+            $query->case($this->e_case_id);
         }
 
         if ($this->template_type_name) {

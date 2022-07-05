@@ -68,6 +68,6 @@ class EmailQuery extends ActiveQuery
 
     public function case(int $caseId)
     {
-        return $this->leftJoin('email_case', 'ec_email_id = e_id')->andWhere(['ec_case_id' => $caseId]);
+        return $this->leftJoin('email_case', 'email_case.ec_email_id = e_id')->andWhere(['email_case.ec_case_id' => $caseId]);
     }
 }
