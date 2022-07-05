@@ -11,6 +11,7 @@ use yii\helpers\Html;
 use yii\widgets\Pjax;
 use yii\grid\ActionColumn;
 use yii\helpers\Url;
+use modules\objectSegment\src\contracts\ObjectSegmentListContract;
 
 /* @var $this yii\web\View */
 /* @var $searchModel \modules\objectSegment\src\entities\search\ObjectSegmentListSearch */

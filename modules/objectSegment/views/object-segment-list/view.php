@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
+use modules\objectSegment\src\contracts\ObjectSegmentListContract;
 
 /* @var $this yii\web\View */
 /* @var $model \modules\objectSegment\src\entities\ObjectSegmentList */
