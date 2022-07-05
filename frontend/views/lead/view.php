@@ -19,6 +19,7 @@
  * @var AbacCallFromNumberList $callFromNumberList
  * @var AbacSmsFromNumberList $smsFromNumberList
  * @var AbacEmailList $emailFromList
+ * @var $isCreatedFlightRequest bool
  */
 
 use common\models\Employee;
@@ -112,6 +113,7 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
                     'quotesProvider' => $quotesProvider,
                     'leadForm' => $leadForm,
                     'is_manager' => $is_manager,
+                    'isCreatedFlightRequest' => $isCreatedFlightRequest
                 ]) ?>
 
                 <?php if ($lead->products) : ?>
