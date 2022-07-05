@@ -52,4 +52,13 @@ class ClientEmailQuery extends ActiveQuery
 
         return $query->asArray()->all();
     }
+
+    /**
+     * @param string $email
+     * @return $this
+     */
+    public function byEmail(string $email): self
+    {
+        return $this->andWhere(['email' => $email])->orderBy(['id' => SORT_DESC])->limit(1);
+    }
 }
