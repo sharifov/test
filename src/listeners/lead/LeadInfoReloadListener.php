@@ -8,7 +8,7 @@ use src\events\lead\LeadPoorProcessingEvent;
 use src\events\lead\LeadProcessingEvent;
 use Yii;
 
-class LeadStatusChangedListener
+class LeadInfoReloadListener
 {
     public function handle(LeadProcessingEvent|LeadPoorProcessingEvent|LeadExtraQueueEvent $event): void
     {
