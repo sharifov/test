@@ -361,6 +361,10 @@ class UserShiftScheduleQuery
     public static function getPendingListWithIntersectionByWTAndWTR(): array
     {
         $curTime = date('Y-m-d H:i:s');
+        $shiftScheduleTypesAsString = implode(
+            ', ',
+            ShiftScheduleType::getIdListByKeys([ShiftScheduleType::TYPE_KEY_WT, ShiftScheduleType::TYPE_KEY_WTR])
+        );
         $ussTableName = UserShiftSchedule::tableName();
         $ussStatusDone = UserShiftSchedule::STATUS_DONE;
         $ussStatusApproved = UserShiftSchedule::STATUS_APPROVED;
@@ -380,7 +384,7 @@ class UserShiftScheduleQuery
                 AND ussDone.uss_start_utc_dt <= '{$curTime}' 
                 AND ussDone.uss_end_utc_dt >= '{$curTime}' 
                 AND ussDone.uss_status_id IN ({$ussStatusDone}, {$ussStatusApproved})
-                AND ussDone.uss_sst_id IN (1, 2)"
+                AND ussDone.uss_sst_id IN ({$shiftScheduleTypesAsString})"
             )
             ->all();
     }
