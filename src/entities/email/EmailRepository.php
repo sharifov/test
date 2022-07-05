@@ -104,4 +104,26 @@ class EmailRepository
     {
         return Email::find()->withContact($mailList)->deleted()->count();
     }
+
+    public static function getEmailCountByLead(int $leadId): int
+    {
+        $connection = \Yii::$app->getDb();
+        $command = $connection->createCommand(
+            "SELECT COUNT(*) as cnt
+             FROM email_lead
+             WHERE el_lead_id = $leadId"
+            );
+       return $command->queryScalar();
+    }
+
+    public static function getEmailCountByCase(int $caseId): int
+    {
+        $connection = \Yii::$app->getDb();
+        $command = $connection->createCommand(
+            "SELECT COUNT(*) as cnt
+            FROM email_case
+            WHERE ec_case_id = $caseId"
+            );
+        return $command->queryScalar();
+    }
 }
