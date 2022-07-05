@@ -75,6 +75,7 @@ use src\listeners\lead\LeadSoldNotificationsListener;
 use src\listeners\lead\LeadSoldSplitListener;
 use src\listeners\lead\LeadInfoReloadListener;
 use src\listeners\lead\LeadTaskEventListener;
+use src\listeners\lead\LeadTaskListListener;
 use src\listeners\lead\LeadTipsSplitListener;
 use src\listeners\lead\LeadTrashEventLogListener;
 use src\listeners\lead\leadWebEngage\LeadBookedWebEngageListener;
@@ -113,6 +114,7 @@ return [
 
     LeadDuplicateDetectedEvent::class => [LeadDuplicateDetectedEventListener::class],
     LeadOwnerChangedEvent::class => [
+        LeadTaskListListener::class,
         LeadOwnerChangedNotificationsListener::class,
         LeadPoorProcessingRemoverOwnerChangedListener::class,
     ],
