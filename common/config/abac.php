@@ -27,6 +27,7 @@ return [
         'related-product-quote' => \modules\product\src\abac\RelatedProductQuoteAbacObject::class,
         'notification' => \modules\notification\src\abac\NotificationAbacObject::class,
         'leadData' => \src\model\leadData\abac\LeadDataAbacObject::class,
+        'leadTaskList' => \modules\lead\src\abac\taskLIst\LeadTaskListAbacObject::class,
         'user' => \modules\user\src\abac\UserAbacObject::class,
         'lead-rating' => \src\model\leadUserRating\abac\LeadUserRatingAbacObject::class,
         'lead-poor-processing' => \src\model\leadPoorProcessingData\abac\LeadPoorProcessingAbacObject::class,
@@ -41,6 +42,7 @@ return [
         'lead-expert-call' => \modules\lead\src\abac\LeadExpertCallObject::class,
         'task-list' => \modules\taskList\abac\TaskListAbacObject::class,
         'two-factor' => \src\useCase\login\twoFactorAuth\abac\TwoFactorAuthAbacObject::class,
+        'lead-sale' => modules\lead\src\abac\sale\LeadSaleAbacObject::class,
     ],
     'scanDirs' => [
         '/modules/',

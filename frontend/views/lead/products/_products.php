@@ -7,6 +7,7 @@
  * @var $itineraryForm ItineraryEditForm
  * @var $is_manager bool
  * @var $quotesProvider \yii\data\ActiveDataProvider
+ * @var $isCreatedFlightRequest bool
  *
  */
 
@@ -59,7 +60,7 @@ JS;
             <?php \yii\widgets\Pjax::begin(['id' => 'pj-itinerary', 'enablePushState' => false, 'enableReplaceState' => false, 'timeout' => 5000])?>
             <?= $this->render('../partial/_flightDetails', [
                 'itineraryForm' => $itineraryForm,
-                'isCreatedFlightRequest' => false,
+                'isCreatedFlightRequest' => $isCreatedFlightRequest,
             ]) ?>
             <?php \yii\widgets\Pjax::end();?>
 

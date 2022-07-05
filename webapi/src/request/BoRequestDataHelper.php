@@ -6,6 +6,7 @@ use modules\flight\models\FlightQuoteTicket;
 use modules\flight\src\entities\flightQuoteTicketRefund\FlightQuoteTicketRefund;
 use modules\flight\src\useCases\api\voluntaryRefundConfirm\VoluntaryRefundConfirmForm;
 use modules\flight\src\useCases\api\voluntaryRefundCreate\VoluntaryRefundCreateForm;
+use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use src\services\CurrencyHelper;
 use webapi\src\forms\billing\BillingInfoForm;
@@ -63,6 +64,7 @@ class BoRequestDataHelper
         if ($form->paymentRequestForm) {
             $data['refund']['refundCost'] = $form->paymentRequestForm->amount;
         }
+        $data['additionalInfo'] = self::prepareAdditionalInfoToBoRequest($productQuoteRefund);
         return $data;
     }
 
@@ -138,5 +140,34 @@ class BoRequestDataHelper
         }
 
         return $data ?? null;
+    }
+
+    public static function prepareAdditionalInfoToBoRequest($quote): array
+    {
+        $createdBy = null;
+        $createdAt = null;
+        $expireAt = null;
+
+        if ($quote instanceof ProductQuote) {
+            $createdBy = $quote->getPqCreatedUser()->limit(1)->one();
+            $createdAt = $quote->pq_created_dt ?? null;
+            $expireAt = $quote->pq_expiration_dt ?? null;
+        }
+        if ($quote instanceof ProductQuoteRefund) {
+            $createdBy = $quote->getCreatedUser()->limit(1)->one();
+            $createdAt = $quote->pqr_created_dt ?? null;
+            $expireAt = $quote->pqr_expiration_dt ?? null;
+        }
+
+        return [
+            'user' => [
+                'name' => $createdBy->full_name ?? null,
+                'email' => $createdBy->email ?? null,
+            ],
+            'quote' => [
+                'created' => $createdAt,
+                'expire' => $expireAt,
+            ],
+        ];
     }
 }

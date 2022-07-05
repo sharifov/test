@@ -81,4 +81,13 @@ class ShiftScheduleEventTask extends \yii\db\ActiveRecord
     {
         return 'shift_schedule_event_task';
     }
+
+    public static function create(int $eventId, int $userTaskId): ShiftScheduleEventTask
+    {
+        $model = new self();
+        $model->sset_event_id = $eventId;
+        $model->sset_user_task_id = $userTaskId;
+
+        return $model;
+    }
 }
