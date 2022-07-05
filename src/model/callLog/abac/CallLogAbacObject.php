@@ -101,7 +101,8 @@ class CallLogAbacObject extends AbacBaseModel implements AbacInterface
                     'values' => self::getDepartmentList(),
                     'operators' =>  [self::OP_IN_ARRAY, self::OP_NOT_IN_ARRAY]
                 ]
-            ]);
+            ]
+        );
 
         return $attributes;
     }
@@ -111,7 +112,7 @@ class CallLogAbacObject extends AbacBaseModel implements AbacInterface
      * @param String $action
      * @return array
      */
-    protected static function getExistAttributeList(array $list, String $action): array
+    protected static function getExistAttributeList(array $list, string $action): array
     {
         return isset($list[$action]) ? $list[$action] : [];
     }
