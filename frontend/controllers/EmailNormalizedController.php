@@ -225,7 +225,7 @@ class EmailNormalizedController extends FController
         //search provider
         $params = Yii::$app->request->queryParams;
         $params['email_type_id'] = $getParams['email_type_id'] ?? EmailFilterType::ALL;
-        $params['EmailSearch']['e_project_id'] = empty($getParams['email_project_id']) ? null : $getParams['email_project_id'];
+        $params['EmailSearch']['e_project_id'] = empty($getParams['email_project_id']) ?? null;
         $params['EmailSearch']['user_id'] = $user->id;
         $params['EmailSearch']['email'] = empty($getParams['email_email']) ? null : $getParams['email_email'];
 

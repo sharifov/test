@@ -185,26 +185,28 @@ class ShiftScheduleRequestService
      * @param Employee $user
      * @return bool
      */
-    public static function saveDecision(ShiftScheduleRequest $requestModel, ScheduleDecisionForm $decisionForm, Employee $user): bool
+    public static function saveDecision(ShiftScheduleRequest $requestModel, ScheduleDecisionForm $decisionForm, ?Employee $user = null): bool
     {
         $oldStatus = $requestModel->ssr_status_id;
         $requestModel->ssr_status_id = $decisionForm->status;
         $requestModel->ssr_description = $decisionForm->description;
-        $requestModel->ssr_updated_user_id = $user->id;
+        $requestModel->ssr_updated_user_id = $user->id ?? null;
         if ($requestModel->save()) {
             if ($requestModel->isChangedStatus($oldStatus)) {
-                self::sendNotification(
-                    Employee::ROLE_AGENT,
-                    $requestModel,
-                    $user,
-                    self::NOTIFICATION_TYPE_CREATE
-                );
-                self::sendNotification(
-                    Employee::ROLE_SUPERVISION,
-                    $requestModel,
-                    $user,
-                    self::NOTIFICATION_TYPE_UPDATE
-                );
+                if ($user !== null) {
+                    self::sendNotification(
+                        Employee::ROLE_AGENT,
+                        $requestModel,
+                        $user,
+                        self::NOTIFICATION_TYPE_CREATE
+                    );
+                    self::sendNotification(
+                        Employee::ROLE_SUPERVISION,
+                        $requestModel,
+                        $user,
+                        self::NOTIFICATION_TYPE_UPDATE
+                    );
+                }
 
                 Notifications::pub(
                     ['user-' . $requestModel->ssr_created_user_id],

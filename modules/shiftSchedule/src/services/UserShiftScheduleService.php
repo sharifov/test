@@ -251,6 +251,12 @@ class UserShiftScheduleService
         $tl->uss_sst_id = $rule->ssr_sst_id;
         $tl->uss_type_id = UserShiftSchedule::TYPE_AUTO;
 
+        if ($rule->ssr_start_time_utc > $rule->ssr_start_time_loc) {
+            $newDate = new \DateTime($date);
+            $newDate->modify('-1 day');
+            $date = $newDate->format('Y-m-d');
+        }
+
         $timeStart = strtotime($date . ' ' . $rule->ssr_start_time_utc);
         $timeEnd = strtotime($date . ' ' . $rule->ssr_end_time_utc);
 

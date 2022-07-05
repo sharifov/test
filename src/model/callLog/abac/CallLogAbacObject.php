@@ -88,7 +88,7 @@ class CallLogAbacObject extends AbacBaseModel implements AbacInterface
                     'default_value' => true,
                     'vertical' => true,
                     'values' => ['true' => 'True', 'false' => 'False'],
-                    'operators' =>  [self::OP_EQUAL2]
+                    'operators' => [self::OP_EQUAL2]
                 ],
                 [
                     'optgroup' => 'Call',
@@ -99,11 +99,10 @@ class CallLogAbacObject extends AbacBaseModel implements AbacInterface
                     'input' => self::ATTR_INPUT_SELECT,
                     'multiple' => false,
                     'values' => self::getDepartmentList(),
-                    'operators' =>  [self::OP_IN_ARRAY, self::OP_NOT_IN_ARRAY]
+                    'operators' => [self::OP_IN_ARRAY, self::OP_NOT_IN_ARRAY]
                 ]
             ]
         );
-
         return $attributes;
     }
 
