@@ -96,6 +96,12 @@ class ApiLogSearch extends ApiLog
             return $dataProvider;
         }
 
+        if (!$this->createTimeRange) {
+            $this->createTimeStart = date('Y-m-d 00:00', strtotime('-7 days'));
+            $this->createTimeEnd = date('Y-m-d H:i');
+            $this->createTimeRange = $this->createTimeStart . ' - ' . $this->createTimeEnd;
+        }
+
         $query->andFilterWhere([
             'al_id' => $this->al_id,
             'al_response_dt' => $this->al_response_dt,

@@ -1,6 +1,9 @@
 <?php
 
+use modules\shiftSchedule\src\events\ShiftScheduleEventChangedEvent;
+use modules\shiftSchedule\src\listeners\ShiftScheduleEventChangedListener;
 use src\events\lead\LeadBookedEvent;
+use src\events\lead\LeadCallExpertChangedEvent;
 use src\events\lead\LeadCallExpertRequestEvent;
 use src\events\lead\LeadCloseEvent;
 use src\events\lead\LeadCountPassengersChangedEvent;
@@ -32,6 +35,7 @@ use src\events\lead\LeadTaskEvent;
 use src\events\lead\LeadTrashEvent;
 use src\listeners\lead\LeadBookedEventLogListener;
 use src\listeners\lead\LeadBookedNotificationsListener;
+use src\listeners\lead\LeadCallExpertChangedListener;
 use src\listeners\lead\LeadCallExpertRequestEventListener;
 use src\listeners\lead\LeadCloseListener;
 use src\listeners\lead\LeadCountPassengersChangedEventListener;
@@ -169,5 +173,11 @@ return [
     ],
     LeadCloseEvent::class => [
         LeadCloseListener::class
+    ],
+    LeadCallExpertChangedEvent::class => [
+        LeadCallExpertChangedListener::class
+    ],
+    ShiftScheduleEventChangedEvent::class => [
+        ShiftScheduleEventChangedListener::class
     ]
 ];

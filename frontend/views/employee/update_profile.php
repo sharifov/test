@@ -167,13 +167,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]) ?>
                 <div class="d-flex" style>
                     <?php foreach ($authChoice->getClients() as $client) : ?>
-                        <?= $authChoice->clientLink(
-                            $client,
-                            '<button type="button" class="login-with-btn login-with-' . $client->getName() . '-btn">Assign ' . $client->getTitle() . '</button>',
-                            [
-                                'style' => 'margin-left: 5px'
-                            ]
-                        ) ?>
+                        <?php
+                        $googleEnabled = SettingHelper::isEnabledGoogleAuthClient();
+                        $microsoftEnabled = SettingHelper::isEnabledMicrosoftAuthClient();
+                        if (($client->getName() == 'google' && $googleEnabled) || ($client->getName() == 'microsoft' && $microsoftEnabled)) : ?>
+                            <?= $authChoice->clientLink(
+                                $client,
+                                '<button type="button" class="login-with-btn login-with-' . $client->getName() . '-btn">Assign ' . $client->getTitle() . '</button>',
+                                [
+                                    'style' => 'margin-left: 5px'
+                                ]
+                            ) ?>
+                        <?php endif; ?>
                     <?php endforeach; ?>
                 </div>
                 <?php AuthChoice::end() ?>

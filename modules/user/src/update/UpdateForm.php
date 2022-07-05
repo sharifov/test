@@ -109,6 +109,8 @@ class UpdateForm extends Model
     public $up_show_in_contact_list;
     public $up_call_recording_disabled;
 
+    public bool $up_2fa_reset = false;
+
     public Employee $targetUser;
     public Employee $updaterUser;
     public FieldAccess $fieldAccess;
@@ -303,6 +305,7 @@ class UpdateForm extends Model
             'up_call_type_id',
             'up_2fa_secret',
             'up_2fa_enable',
+            'up_2fa_reset',
             'up_telegram',
             'up_telegram_enable',
             'up_auto_redial',
@@ -478,6 +481,10 @@ class UpdateForm extends Model
             ['up_call_recording_disabled', 'default', 'value' => false],
             ['up_call_recording_disabled', 'boolean'],
             ['up_call_recording_disabled', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
+
+            ['up_2fa_reset', 'default', 'value' => null],
+            ['up_2fa_reset', 'boolean'],
+            ['up_2fa_reset', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
         ];
     }
 

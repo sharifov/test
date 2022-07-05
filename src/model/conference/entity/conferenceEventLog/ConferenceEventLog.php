@@ -65,4 +65,29 @@ class ConferenceEventLog extends \yii\db\ActiveRecord
     {
         return '{{%conference_event_log}}';
     }
+
+    public static function getPrevModels($prevId, $limit, $filters = null): array
+    {
+        if (isset($filters)) {
+            $mainQuery = self::find()
+                ->where(['>', 'cel_id', $prevId])
+                ->andFilterWhere($filters)
+                ->orderBy(['cel_id' => SORT_ASC])
+                ->limit($limit + 1);
+            return self::find()
+                ->from(['C' => $mainQuery])
+                ->orderBy(['cel_id' => SORT_DESC])
+                ->all();
+        }
+
+        $mainQuery = self::find()
+            ->where(['>', 'cel_id', $prevId])
+            ->orderBy(['cel_id' => SORT_ASC])
+            ->limit($limit + 1);
+        return self::find()
+            ->from(['C' => $mainQuery])
+            ->orderBy(['cel_id' => SORT_DESC])
+            ->limit($limit + 1)
+            ->all();
+    }
 }

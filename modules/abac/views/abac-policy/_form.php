@@ -130,6 +130,7 @@ $operators = json_encode(\modules\abac\components\AbacBaseModel::getOperators())
                     <?php endif; ?>
 
                     <h2>Policy Rules</h2>
+                    <div id="rules-info-block"></div>
                     <?php echo Html::a('Show / hide Attribute List', null, ['class' => 'btn btn-sm btn-default', 'id' => 'btn-div-attr-list']) ?>
                     <div id="div-attr-list" style="display: none">
                         <pre><?php \yii\helpers\VarDumper::dump($filtersData, 10, true)?></pre>
@@ -156,7 +157,10 @@ $operators = json_encode(\modules\abac\components\AbacBaseModel::getOperators())
     var rulesData = $rulesDataStr;
     var filtersData = $filtersDataStr;
     var operators = $operators;
-    
+    if(rulesData !== null && !rulesData.valid) {
+        $('#rules-info-block').append('<div class="alert alert-warning" role="alert"><strong>Warning</strong>: Current Json Rules are invalid!</div>');
+        rulesData = JSON.parse('[]');
+    }
     $('#builder').queryBuilder({
         operators: operators,
         select_placeholder: '-- Select Attribute --',
@@ -172,7 +176,7 @@ $operators = json_encode(\modules\abac\components\AbacBaseModel::getOperators())
             //'bt-selectpicker',    
             'bt-checkbox',
             'invert',
-            //'not-group'
+            'not-group'
         ],
         filters: filtersData,
         rules: rulesData

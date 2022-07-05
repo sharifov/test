@@ -81,9 +81,6 @@ class AbacDocService
             $tokens = token_get_all($content);
             foreach ($tokens as $token) {
                 if (is_array($token)) {
-                    if ($token[0] !== 381) {
-                        continue;
-                    }
                     if (strpos($token[1], '@abac') !== false) {
                         $doc = str_replace(['/', '*', '@abac'], '', $token[1]);
                         $docExploded = explode(',', $doc);

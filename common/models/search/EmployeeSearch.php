@@ -3,6 +3,7 @@
 namespace common\models\search;
 
 use common\models\Call;
+use common\models\Email;
 use common\models\ProjectEmployeeAccess;
 use common\models\query\EmployeeQuery;
 use common\models\search\employee\SortParameters;
@@ -10,10 +11,15 @@ use common\models\UserConnection;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserOnline;
+use common\models\UserParams;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
+use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
+use src\helpers\DateHelper;
 use src\model\clientChat\entity\ClientChat;
 use src\model\clientChatUserAccess\entity\ClientChatUserAccess;
+use src\model\clientChatUserChannel\entity\ClientChatUserChannel;
+use src\model\emailList\entity\EmailList;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -31,12 +37,26 @@ use src\auth\Auth;
 class EmployeeSearch extends Employee
 {
     public $supervision_id;
+    public $userGroupIds = [];
     public $user_group_id;
     public $user_project_id;
     public $user_params_project_id;
+    public $userDepartmentIds = [];
+    public $assignedShifts = [];
+    public $userTimezones = [];
+    public $chatChannels = [];
+    public $skills = [];
+    public $useTelegram;
+    public $telegramEnabled;
     public $user_department_id;
     public $experienceMonth;
     public $joinDate;
+    public $callReady;
+    public $createdRangeTime;
+    public $updatedRangeTime;
+    public $lastLoginRangeTime;
+    public $phoneListId;
+    public $grav;
 
     public $user_call_type_id;
 
@@ -57,20 +77,32 @@ class EmployeeSearch extends Employee
     public $limit;
     public $exceptUserId;
 
+    public $show_fields = [];
+
     /**
      * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['id', 'status', 'acl_rules_activated', 'supervision_id', 'user_group_id', 'user_project_id', 'user_params_project_id', 'online', 'user_call_type_id', 'user_department_id', 'experienceMonth'], 'integer'],
-            [['username', 'nickname', 'full_name', 'auth_key', 'password_hash', 'password_reset_token', 'email', 'last_activity', 'pageSize'], 'safe'],
-            [['timeStart', 'timeEnd', 'roles', 'twoFaEnable', 'joinDate'], 'safe'],
+            [['id', 'status', 'acl_rules_activated', 'supervision_id', 'user_group_id', 'user_project_id', 'user_params_project_id', 'online', 'user_call_type_id', 'user_department_id',
+                'experienceMonth', 'e_created_user_id', 'e_updated_user_id', 'phoneListId'], 'integer'],
+            [['username', 'nickname', 'full_name', 'auth_key', 'password_hash', 'password_reset_token', 'email', 'last_activity', 'pageSize', 'chatChannels', 'phoneListId', 'show_fields'], 'safe'],
+            [['timeStart', 'timeEnd', 'roles', 'twoFaEnable', 'joinDate', 'userGroupIds', 'userDepartmentIds', 'assignedShifts', 'skills', 'useTelegram', 'userTimezones', 'telegramEnabled'], 'safe'],
             [['joinDate'], 'date', 'format' => 'php:Y-m-d', 'skipOnEmpty' => true],
             [['timeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['projectParamsIds', 'projectAccessIds'], 'each', 'rule' => ['integer']],
+            [['projectParamsIds', 'projectAccessIds', 'assignedShifts', 'userDepartmentIds', 'userGroupIds', 'skills', 'chatChannels'], 'each', 'rule' => ['integer']],
             [['created_at', 'updated_at'], 'date', 'format' => 'php:Y-m-d'],
-
+            ['acl_rules_activated', 'in', 'range' => [0, 1]],
+            ['useTelegram', 'in', 'range' => [0, 1]],
+            ['callReady', 'in', 'range' => [0, 1]],
+            ['telegramEnabled', 'in', 'range' => [0, 1]],
+            ['skills', 'each', 'rule' => ['in', 'range' => array_keys(UserProfile::SKILL_TYPE_LIST)]],
+            ['userTimezones', 'each', 'rule' => ['in', 'range' => UserParams::getActiveTimezones()]],
+            [['createdRangeTime', 'updatedRangeTime', 'lastLoginRangeTime'], 'convertDateTimeRange'],
+            ['show_fields', 'filter', 'filter' => static function ($value) {
+                return is_array($value) ? $value : [];
+            }, 'skipOnEmpty' => true],
         ];
     }
 
@@ -115,91 +147,6 @@ class EmployeeSearch extends Employee
             return $dataProvider;
         }
 
-//        // grid filtering conditions
-//        $query->andFilterWhere([
-//            'id' => $this->id,
-//            'status' => $this->status,
-//            'last_activity' => $this->last_activity,
-//            'acl_rules_activated' => $this->acl_rules_activated,
-//            'created_at' => $this->created_at,
-//            //'updated_at' => $this->updated_at,
-//        ]);
-//
-//        if ($this->updated_at){
-//            $query->andFilterWhere(['>=', 'updated_at', Employee::convertTimeFromUserDtToUTC(strtotime($this->updated_at))])
-//                ->andFilterWhere(['<=', 'updated_at', Employee::convertTimeFromUserDtToUTC(strtotime($this->updated_at) + 3600 * 24)]);
-//        }
-//
-//        if ($this->roles){
-//            $query->andWhere(['IN', 'employees.id', array_keys(Employee::getListByRole($this->roles))]);
-//        }
-//
-//        if ($this->user_group_id > 0) {
-//            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['=', 'ugs_group_id', $this->user_group_id]);
-//            $query->andWhere(['IN', 'employees.id', $subQuery]);
-//        }
-//
-//        if ($this->user_department_id > 0) {
-//            $subQuery = UserDepartment::find()->usersByDep($this->user_department_id);
-//            $query->andWhere(['IN', 'employees.id', $subQuery]);
-//        }
-//
-//        if ($this->user_params_project_id > 0) {
-//            $subQuery = UserProjectParams::find()->select(['DISTINCT(upp_user_id)'])->where(['=', 'upp_project_id', $this->user_params_project_id]);
-//            $query->andWhere(['IN', 'employees.id', $subQuery]);
-//        }
-//
-//        if ($this->user_call_type_id > 0 || $this->user_call_type_id === '0') {
-//            $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'up_call_type_id', $this->user_call_type_id]);
-//            $query->andWhere(['IN', 'employees.id', $subQuery]);
-//        }
-//
-//        if (strlen($this->twoFaEnable) > 0) {
-//            $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'up_2fa_enable', $this->twoFaEnable]);
-//            $query->andWhere(['IN', 'employees.id', $subQuery]);
-//        }
-//
-//
-//        if ($this->user_project_id > 0) {
-//            $subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['=', 'project_id', $this->user_project_id]);
-//            $query->andWhere(['IN', 'employees.id', $subQuery]);
-//        }
-//
-//        if ($this->supervision_id > 0) {
-//            $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
-//            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
-//            $query->andWhere(['IN', 'employees.id', $subQuery]);
-//        }
-//
-//        if ($this->online > 0) {
-//            if ($this->online == 1) {
-//                $subQuery = UserOnline::find()->select(['uo_user_id']);
-//                $query->andWhere(['IN', 'employees.id', $subQuery]);
-//            } elseif ($this->online == 2) {
-//                $subQuery = UserOnline::find()->select(['uo_user_id']);
-//                $query->andWhere(['NOT IN', 'employees.id', $subQuery]);
-//            }
-//        }
-//
-//        if ($this->experienceMonth > 0) {
-//          $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'ABS(TIMESTAMPDIFF(MONTH, curdate(), up_join_date))', $this->experienceMonth]);
-//          $query->andWhere(['IN', 'employees.id', $subQuery]);
-//      }
-//
-//        if (!empty($this->joinDate)) {
-//          $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'up_join_date', $this->joinDate]);
-//          $query->andWhere(['IN', 'employees.id', $subQuery]);
-//      }
-//
-//
-//        $query->andFilterWhere(['like', 'username', $this->username])
-//            ->andFilterWhere(['like', 'nickname', $this->nickname])
-//            ->andFilterWhere(['like', 'full_name', $this->full_name])
-//            ->andFilterWhere(['like', 'auth_key', $this->auth_key])
-//            ->andFilterWhere(['like', 'password_hash', $this->password_hash])
-//            ->andFilterWhere(['like', 'password_reset_token', $this->password_reset_token])
-//            ->andFilterWhere(['like', 'email', $this->email]);
-
         $this->filterQuery($query);
 
         return $dataProvider;
@@ -231,14 +178,17 @@ class EmployeeSearch extends Employee
      */
     private function filterQuery(EmployeeQuery $query)
     {
+        if (ArrayHelper::isIn($this->telegramEnabled, ['1', '0'], false) || ArrayHelper::isIn($this->useTelegram, ['1', '0'], false)) {
+            $query->leftJoin('user_profile', 'employees.id = user_profile.up_user_id');
+        }
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
             'status' => $this->status,
             'last_activity' => $this->last_activity,
             'acl_rules_activated' => $this->acl_rules_activated,
-            'created_at' => $this->created_at,
-            //'updated_at' => $this->updated_at,
+            'e_created_user_id' => $this->e_created_user_id,
+            'e_updated_user_id' => $this->e_updated_user_id,
         ]);
 
         if ($this->updated_at) {
@@ -250,13 +200,88 @@ class EmployeeSearch extends Employee
             $query->andWhere(['IN', 'employees.id', array_keys(Employee::getListByRole($this->roles))]);
         }
 
-        if ($this->user_group_id > 0) {
-            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['=', 'ugs_group_id', $this->user_group_id]);
+        if ($this->userGroupIds) {
+            $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['ugs_group_id' => $this->userGroupIds]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 
-        if ($this->user_department_id > 0) {
-            $subQuery = UserDepartment::find()->usersByDep($this->user_department_id);
+        if ($this->userDepartmentIds) {
+            $subQuery = UserDepartment::find()->usersByDep($this->userDepartmentIds);
+            $query->andWhere(['IN', 'employees.id', $subQuery]);
+        }
+
+        if ($this->assignedShifts) {
+            $subQuery = UserShiftAssign::find()->select(['DISTINCT(usa_user_id)'])->andWhere(['usa_sh_id' => $this->assignedShifts]);
+            $query->andWhere(['IN', 'employees.id', $subQuery]);
+        }
+
+        if ($this->skills) {
+            $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->andWhere(['up_skill' => $this->skills]);
+            $query->andWhere(['IN', 'employees.id', $subQuery]);
+        }
+
+        if (ArrayHelper::isIn($this->useTelegram, ['1', '0'], false)) {
+            if ($this->useTelegram == 0) {
+                $query->andWhere(['OR',
+                    ['user_profile.up_telegram' => ''],
+                    ['IS', 'user_profile.up_telegram', new \yii\db\Expression('null')]]);
+            } else {
+                $query->andWhere(['!=', 'user_profile.up_telegram', '']);
+            }
+        }
+
+        if (ArrayHelper::isIn($this->telegramEnabled, ['1', '0'], false)) {
+            if ($this->telegramEnabled == 0) {
+                $query->andWhere(['OR',
+                    ['user_profile.up_telegram_enable' => 0],
+                    ['IS', 'user_profile.up_telegram_enable', new \yii\db\Expression('null')]]);
+            } else {
+                $query->andWhere(['user_profile.up_telegram_enable' => 1]);
+            }
+        }
+
+        if ($this->userTimezones) {
+            $subQuery = UserParams::find()->select(['DISTINCT(up_user_id)'])->andWhere(['up_timezone' => $this->userTimezones]);
+            $query->andWhere(['IN', 'employees.id', $subQuery]);
+        }
+
+        if ($this->chatChannels) {
+            $subQuery = ClientChatUserChannel::find()->select(['DISTINCT(ccuc_user_id)'])->andWhere(['ccuc_channel_id' => $this->chatChannels]);
+            $query->andWhere(['IN', 'employees.id', $subQuery]);
+        }
+
+        if ($this->createdRangeTime) {
+            $createdRange = explode(" - ", $this->createdRangeTime);
+            if ($createdRange[0]) {
+                $query->andFilterWhere(['>=', 'employees.created_at', Employee::convertTimeFromUserDtToUTC(strtotime($createdRange[0]))]);
+            }
+            if ($createdRange[1]) {
+                $query->andFilterWhere(['<=', 'employees.created_at', Employee::convertTimeFromUserDtToUTC(strtotime($createdRange[1]) + 3600 * 24 - 1)]);
+            }
+        }
+
+        if ($this->updatedRangeTime) {
+            $updatedRange = explode(" - ", $this->updatedRangeTime);
+            if ($updatedRange[0]) {
+                $query->andFilterWhere(['>=', 'employees.updated_at', Employee::convertTimeFromUserDtToUTC(strtotime($updatedRange[0]))]);
+            }
+            if ($updatedRange[1]) {
+                $query->andFilterWhere(['<=', 'employees.updated_at', Employee::convertTimeFromUserDtToUTC(strtotime($updatedRange[1]) + 3600 * 24 - 1)]);
+            }
+        }
+
+        if ($this->lastLoginRangeTime) {
+            $lastLogin = explode(" - ", $this->lastLoginRangeTime);
+            if ($lastLogin[0]) {
+                $query->andFilterWhere(['>=', 'employees.last_login_dt', Employee::convertTimeFromUserDtToUTC(strtotime($lastLogin[0]))]);
+            }
+            if ($lastLogin[1]) {
+                $query->andFilterWhere(['<=', 'employees.last_login_dt', Employee::convertTimeFromUserDtToUTC(strtotime($lastLogin[1]) + 3600 * 24 - 1)]);
+            }
+        }
+
+        if ($this->phoneListId) {
+            $subQuery = UserProjectParams::find()->select(['DISTINCT(upp_user_id)'])->andWhere(['upp_phone_list_id' => $this->phoneListId]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 
@@ -275,11 +300,10 @@ class EmployeeSearch extends Employee
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 
-        if (strlen($this->twoFaEnable) > 0) {
+        if (intval($this->twoFaEnable) > 0) {
             $subQuery = UserProfile::find()->select(['DISTINCT(up_user_id)'])->where(['=', 'up_2fa_enable', $this->twoFaEnable]);
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
-
 
         if ($this->projectAccessIds) {
             $subQuery = ProjectEmployeeAccess::find()->select(['DISTINCT(employee_id)'])->where(['project_id' => $this->projectAccessIds]);
@@ -317,14 +341,35 @@ class EmployeeSearch extends Employee
             $query->andWhere(['IN', 'employees.id', $subQuery]);
         }
 
+        if (ArrayHelper::isIn($this->callReady, ['1', '0'], false)) {
+            $query->leftJoin('user_status', 'employees.id = user_status.us_user_id');
+            if ($this->callReady == 0) {
+                $query->andWhere(['OR', ['user_status.us_call_phone_status' => $this->callReady],
+                    ['IS', 'user_status.us_call_phone_status', new \yii\db\Expression('null')]]);
+            } else {
+                $query->andWhere(['user_status.us_call_phone_status' => $this->callReady]);
+            }
+        }
+
+        if ($this->email) {
+            $subQuery = UserProjectParams::find()->select(['DISTINCT(upp_user_id)'])
+                ->andWhere(['IN', 'upp_email_list_id', EmailList::find()->select('el_id')
+                    ->andWhere(['like', 'el_email', $this->email])
+                    ->orWhere(['like', 'el_title', $this->email])
+                ]);
+            $query->andWhere([
+                'OR',
+                ['like', 'email', $this->email],
+                ['IN', 'employees.id', $subQuery]
+            ]);
+        }
 
         $query->andFilterWhere(['like', 'username', $this->username])
             ->andFilterWhere(['like', 'nickname', $this->nickname])
             ->andFilterWhere(['like', 'full_name', $this->full_name])
             ->andFilterWhere(['like', 'auth_key', $this->auth_key])
             ->andFilterWhere(['like', 'password_hash', $this->password_hash])
-            ->andFilterWhere(['like', 'password_reset_token', $this->password_reset_token])
-            ->andFilterWhere(['like', 'email', $this->email]);
+            ->andFilterWhere(['like', 'password_reset_token', $this->password_reset_token]);
     }
 
 
@@ -387,8 +432,7 @@ class EmployeeSearch extends Employee
             ->andFilterWhere(['like', 'full_name', $this->full_name])
             ->andFilterWhere(['like', 'auth_key', $this->auth_key])
             ->andFilterWhere(['like', 'password_hash', $this->password_hash])
-            ->andFilterWhere(['like', 'password_reset_token', $this->password_reset_token])
-            ->andFilterWhere(['like', 'email', $this->email]);
+            ->andFilterWhere(['like', 'password_reset_token', $this->password_reset_token]);
 
 
         /*$query->andFilterWhere(['>=', 'createdAt', $this->timeStart])
@@ -472,7 +516,6 @@ class EmployeeSearch extends Employee
 
         //var_dump($query->createCommand()->getSql()); die();
         return $dataProvider = new ArrayDataProvider($paramsData);
-        ;
     }
 
     public function searchAgentLeads($params)
@@ -642,5 +685,58 @@ class EmployeeSearch extends Employee
         }
 
         return $users->all();
+    }
+
+    /**
+     * @return array
+     */
+    public function getPhoneListNumber(): array
+    {
+        return $this->phoneListId ? [
+            $this->phoneListId => \src\model\phoneList\entity\PhoneList::find()->select('pl_phone_number')->andWhere(['pl_id' => $this->phoneListId])->scalar()
+        ] : [];
+    }
+
+
+    /**
+     * @return string[]
+     */
+    public function getViewFields(): array
+    {
+        return [
+            'user_call_type_id' => 'Call type',
+            'callReady' => 'Call Ready',
+            'user_params_project_id' => 'Projects Params',
+            'acl_rules_activated' => 'IP filter',
+            'userTimezones' => 'Timezone',
+            'skills' => 'Skill',
+            'assignedShifts' => 'User Shifts',
+            'chatChannels' => 'Client Chat Channels',
+            'e_created_user_id' => 'Created User',
+            'e_updated_user_id' => 'Updated User',
+            'created_at' => 'Created DateTime',
+            'updated_at' => 'Updated DateTime',
+            'last_login_dt' => 'Last Login DateTime',
+            'useTelegram' => 'Use Telegram',
+            'telegramEnabled' => 'Telegram Enabled',
+            'grav' => 'Grav',
+        ];
+    }
+
+    public function convertDateTimeRange($attribute)
+    {
+        if ($this->{$attribute}) {
+            $date = explode(' - ', $this->{$attribute});
+            if (count($date) === 2) {
+                if (!DateHelper::checkDateTime($date[0], 'd-M-Y')) {
+                    $this->addError($attribute, 'Date time start incorrect format');
+                }
+                if (!DateHelper::checkDateTime($date[1], 'd-M-Y')) {
+                    $this->addError($attribute, 'Date time end incorrect format');
+                }
+            } else {
+                $this->addError($attribute, 'Range Time is not parsed correctly');
+            }
+        }
     }
 }

@@ -7,6 +7,7 @@ use common\models\ApiLog;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\LoginStepTwoForm;
+use common\models\query\EmployeeQuery;
 use common\models\search\EmployeeSearch;
 use common\models\search\LeadTaskSearch;
 use common\models\UserBonusRules;
@@ -19,9 +20,12 @@ use frontend\themes\gentelella_v2\widgets\SideBarMenu;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
+use src\helpers\twoFactorAuth\TwoFactorAuthHelper;
 use src\model\userAuthClient\entity\UserAuthClientQuery;
 use src\model\userAuthClient\entity\UserAuthClientSources;
 use src\model\user\entity\monitor\UserMonitor;
+use src\useCase\login\twoFactorAuth\abac\TwoFactorAuthAbacObject;
+use src\useCase\login\twoFactorAuth\TwoFactorAuthFactory;
 use Yii;
 use yii\authclient\AuthAction;
 use yii\authclient\ClientInterface;
@@ -30,6 +34,7 @@ use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use common\models\LoginForm;
+use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
@@ -87,7 +92,7 @@ class SiteController extends FController
                 'minLength' => 5,
                 'transparent' => true,
                 'offset' => 3,
-                'foreColor' => '596b7d',
+                'foreColor' => hexdec('596b7d'),
             ],
             'auth' => [
                 'class' => AuthAction::class,
@@ -153,7 +158,7 @@ class SiteController extends FController
         $model = new LoginForm();
 
         if ($model->load(Yii::$app->request->post()) && $user = $model->checkedUser()) {
-            if (SettingHelper::isTwoFactorAuthEnabled() && $user->userProfile && $user->userProfile->is2faEnable()) {
+            if (SettingHelper::isTwoFactorAuthEnabled() && $this->get2FAAbacAccess($user) && $user->userProfile /*&& $user->userProfile->is2faEnable()*/) {
                 return $this->redirectToTwoFactorAuth($user, $model);
             }
 
@@ -184,30 +189,73 @@ class SiteController extends FController
         $this->layout = '@frontend/themes/gentelella_v2/views/layouts/login';
         $session = Yii::$app->session;
 
-        if (!$session->has('two_factor_email') || !$session->has('two_factor_key')) {
+        if (!$session->has('two_factor_email')) {
+            return $this->redirect(['site/login']);
+        }
+        $userEmail = $session->get('two_factor_email');
+
+        $user = EmployeeQuery::findByEmail($userEmail);
+        if (!$user && !$user->userProfile) {
             return $this->redirect(['site/login']);
         }
 
-        $userEmail = $session->get('two_factor_email');
-        $userName = $session->get('two_factor_username');
-        $twoFactorAuthKey = $session->get('two_factor_key');
-
         $model = (new LoginStepTwoForm())
-            ->setUserEmail($userEmail)
-            ->setTwoFactorAuthKey($twoFactorAuthKey)
+            ->setUser($user)
             ->setRememberMe($session->get('two_factor_remember_me'));
 
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            $session->remove('auth_client_source');
-            $session->remove('auth_client_source_id');
-            return $this->goHome();
+        $attemptsRemain = TwoFactorAuthHelper::getAuthAttempts();
+        if ($model->load(Yii::$app->request->post()) && !Yii::$app->request->isPjax && $model->validate()) {
+            $twoFactorAuthForm = (TwoFactorAuthFactory::getForm($model->twoFactorMethod))->setUser($user);
+            $twoFactorAuthForm->load(Yii::$app->request->post());
+            if (($twoFactorAuthForm->validate() && $twoFactorAuthForm->login((bool)$model->rememberMe))) {
+                TwoFactorAuthHelper::removeAuthAttempts();
+                $session->remove('auth_client_source');
+                $session->remove('auth_client_source_id');
+                return $this->goHome();
+            } else {
+                if (--$attemptsRemain > 0) {
+                    Yii::warning(
+                        'Wrong step two code for user: ' . $user->id,
+                        'SiteController:actionStepTwo',
+                    );
+                    TwoFactorAuthHelper::setAuthAttempts($attemptsRemain);
+                } else {
+                    $user->setBlocked();
+                    if (!$user->save(false)) {
+                        \Yii::error(
+                            VarDumper::dumpAsString($user->getErrors(), 10),
+                            'SiteController:actionStepTwo'
+                        );
+                    } else {
+                        Yii::warning(
+                            'Step two attempts exceeded for user: ' . $user->id,
+                            'SiteController:actionStepTwo',
+                        );
+                    }
+                    TwoFactorAuthHelper::removeAuthAttempts();
+                    return $this->redirect(['site/login']);
+                }
+            }
+            $model->addError('general', $twoFactorAuthForm->getErrorSummary(true)[0]);
         }
-        $qrcodeSrc = (new TwoFactorService())->getBase64($twoFactorAuthKey, $userName);
 
+        if (empty($model->twoFactorMethod)) {
+            $model->twoFactorMethod = TwoFactorAuthFactory::getDefaultAuthMethod($user);
+            if (empty($model->twoFactorMethod)) {
+                Yii::$app->session->removeAll();
+                Yii::$app->session->setFlash('error', 'You do not have access to any two-factor authentication method.');
+                return $this->redirect(['/site/login']);
+            }
+        }
+        $helper = TwoFactorAuthFactory::getViewHelper($model->twoFactorMethod);
         return $this->render('step-two', [
-            'qrcodeSrc' => $qrcodeSrc,
             'model' => $model,
-            'twoFactorKeyExist' => $session->get('two_factor_key_exist'),
+            'viewHelper' => $helper,
+            'user' => $user,
+            'attemptsRemain' => [
+                'show' => TwoFactorAuthHelper::showWarningAttemptsRemain(),
+                'remain' => TwoFactorAuthHelper::getAuthAttempts(),
+            ],
         ]);
     }
 
@@ -377,7 +425,7 @@ class SiteController extends FController
                 $form->setUser($authClient->user);
                 $form->setUserChecked(true);
 
-                if (SettingHelper::isTwoFactorAuthEnabled() && $authClient->user->userProfile && $authClient->user->userProfile->is2faEnable()) {
+                if (SettingHelper::isTwoFactorAuthEnabled() && $authClient->user->userProfile && $this->get2FAAbacAccess($authClient->user)) {
                     return $this->redirectToTwoFactorAuth($authClient->user, $form);
                 }
 
@@ -421,6 +469,14 @@ class SiteController extends FController
             throw new ForbiddenHttpException('Access denied');
         }
 
+        if ($client->getName() == 'google' && !SettingHelper::isEnabledGoogleAuthClient()) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        if ($client->getName() == 'microsoft' && !SettingHelper::isEnabledMicrosoftAuthClient()) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
         $source = UserAuthClientSources::clientSourceFactory($client->getId());
         $source->handleAssign(Auth::id(), $this->action, $client);
         return $this->action->redirect($source->getRedirectUrl());
@@ -428,15 +484,25 @@ class SiteController extends FController
 
     protected function redirectToTwoFactorAuth(Employee $user, LoginForm $model): Response
     {
-        $twoFactorAuthSecretKey = empty($user->userProfile->up_2fa_secret) ?
-            (new TwoFactorService())->getSecret() : $user->userProfile->up_2fa_secret;
+//        $twoFactorAuthSecretKey = empty($user->userProfile->up_2fa_secret) ?
+//            (new TwoFactorService())->getSecret() : $user->userProfile->up_2fa_secret;
 
         $session = Yii::$app->session;
         $session->set('two_factor_email', $user->email);
-        $session->set('two_factor_username', $user->username);
-        $session->set('two_factor_key_exist', !empty($user->userProfile->up_2fa_secret));
-        $session->set('two_factor_key', $twoFactorAuthSecretKey);
+//        $session->set('two_factor_username', $user->username);
+//        $session->set('two_factor_key_exist', !empty($user->userProfile->up_2fa_secret));
+//        $session->set('two_factor_key', $twoFactorAuthSecretKey);
         $session->set('two_factor_remember_me', $model->rememberMe);
         return $this->redirect(['site/step-two']);
+    }
+
+    protected function get2FAAbacAccess(Employee $user): bool
+    {
+        return !$user->isSuperAdmin() && (bool)\Yii::$app->abac->can(
+            null,
+            TwoFactorAuthAbacObject::TWO_FACTOR_AUTH,
+            TwoFactorAuthAbacObject::ACTION_ACCESS,
+            $user
+        );
     }
 }

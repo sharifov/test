@@ -568,7 +568,7 @@ class FlightQuoteRefundController extends ApiBaseController
                         throw new \DomainException('Quote not available for refund due to exists active refund or change', VoluntaryRefundCodeException::PRODUCT_QUOTE_NOT_AVAILABLE);
                     }
                 } else {
-                    throw new \DomainException('Quote not available for refund due to status of product quote not in changeable list', VoluntaryRefundCodeException::PRODUCT_QUOTE_NOT_AVAILABLE_CHG_LIST);
+                    throw new \DomainException('Quote not available for refund due to status of product quote not in changeable list. BookingId [' . $voluntaryRefundCreateForm->bookingId . ']', VoluntaryRefundCodeException::PRODUCT_QUOTE_NOT_AVAILABLE_CHG_LIST);
                 }
                 $refundResult = $this->voluntaryRefundService
                     ->processProductQuote($productQuote)

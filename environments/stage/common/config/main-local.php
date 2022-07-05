@@ -96,6 +96,18 @@ return [
             'class' => 'yii\swiftmailer\Mailer',
             'viewPath' => '@common/mail',
             'useFileTransport' => false,
+            'transport' => [
+                'class' => 'Swift_SmtpTransport',
+                'host' => env('COMMON_CONFIG_MAIN_COMPONENTS_MAILER_HOST'),
+                'port' => env('COMMON_CONFIG_MAIN_COMPONENTS_MAILER_PORT'),
+                'username' => env('COMMON_CONFIG_MAIN_COMPONENTS_MAILER_USERNAME'),
+                'password' => env('COMMON_CONFIG_MAIN_COMPONENTS_MAILER_PASSWORD'),
+                'encryption' => env('COMMON_CONFIG_MAIN_COMPONENTS_MAILER_ENCRYPTION'),
+            ],
+        ],
+        'email' => [
+            'class' => 'common\components\email\EmailComponent',
+            'defaultFromEmail' => env('COMMON_CONFIG_MAIN_COMPONENTS_EMAIL_DEFAULTFROMEMAIL'),
         ],
         'communication' => [
             'class' => \common\components\CommunicationService::class,

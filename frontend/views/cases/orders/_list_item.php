@@ -187,7 +187,7 @@ $orderAbacDto = new OrderAbacDto($order);
         </ul>
         <div class="clearfix"></div>
     </div>
-    <div class="x_content" style="display: block">
+    <div class="x_content" style="display: block; overflow-x: auto;">
         <?php
             $ordTotalPrice = 0;
             $ordClientTotalPrice = 0;

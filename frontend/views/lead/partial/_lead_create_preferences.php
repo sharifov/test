@@ -28,7 +28,6 @@ use yii\widgets\ActiveForm;
     <div class="col-md-6">
         <?= $form->field($leadForm, 'depId', [
         ])->dropDownList(LeadHelper::getDepartments(Yii::$app->user), [
-            'prompt' => '-',
             'data' => [
                 'value' => null,
             ]

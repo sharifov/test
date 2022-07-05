@@ -602,7 +602,7 @@ class Quote extends \yii\db\ActiveRecord
         return $this->hasMany(QuoteTrip::class, ['qt_quote_id' => 'id']);
     }
 
-    public function getDataForProfit($quoteId)
+    public static function getDataForProfit($quoteId)
     {
         $query = new Query();
 
@@ -612,7 +612,7 @@ class Quote extends \yii\db\ActiveRecord
                 'fare_type' => 'q.fare_type',
                 'check_payment' => 'q.check_payment'
             ])
-            ->from(Quote::tableName() . ' q')
+            ->from(self::tableName() . ' q')
             ->leftJoin(QuotePrice::tableName() . ' qp', 'q.id = qp.quote_id')
             ->where(['q.id' => $quoteId]);
 
@@ -3020,5 +3020,32 @@ class Quote extends \yii\db\ActiveRecord
                 . $code . '.png';
         }
         return $airlineLogo;
+    }
+
+    public static function getPrevModels($prevId, $limit, $filters = null): array
+    {
+        if (isset($filters)) {
+            $mainQuery = self::find()
+                ->where(['>', 'id', $prevId])
+                ->andFilterWhere($filters)
+                ->with('employee', 'lead')
+                ->orderBy(['id' => SORT_ASC])
+                ->limit($limit + 1);
+            return self::find()
+                ->from(['C' => $mainQuery])
+                ->orderBy(['id' => SORT_DESC])
+                ->all();
+        }
+
+        $mainQuery = self::find()
+            ->where(['>', 'id', $prevId])
+            ->orderBy(['id' => SORT_ASC])
+            ->with('employee', 'lead')
+            ->limit($limit + 1);
+        return self::find()
+            ->from(['C' => $mainQuery])
+            ->orderBy(['id' => SORT_DESC])
+            ->limit($limit + 1)
+            ->all();
     }
 }

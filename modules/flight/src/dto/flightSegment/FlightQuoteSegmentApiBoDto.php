@@ -79,9 +79,14 @@ class FlightQuoteSegmentApiBoDto
         if (!$cabin) {
             return null;
         }
-        if (in_array($cabin, SearchService::CABIN_LIST, false)) {
-            return array_search($cabin, SearchService::CABIN_LIST, false);
+
+        $response = array_filter(SearchService::CABIN_LIST, function ($item) use ($cabin) {
+            return mb_strtolower($cabin) === mb_strtolower($item);
+        });
+        if (count($response)) {
+            return key($response);
         }
+
         if (array_key_exists($cabin, SearchService::CABIN_LIST)) {
             return $cabin;
         }

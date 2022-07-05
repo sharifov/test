@@ -8,6 +8,7 @@ use common\components\grid\quote\QuoteTypeColumn;
 use common\components\grid\UserColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 
@@ -67,13 +68,22 @@ $this->params['breadcrumbs'][] = $this->title;
         <?php ActiveForm::end(); ?>
     </div>
 
+    <?php  echo $this->render('_pagination', ['model' => $searchModel]);?>
+
+    <?= $searchModel->filterCount ? 'Find <b>' . $searchModel->filterCount . '</b> items' : null ?>
+
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'filterUrl' => Url::to(['quotes/index']),
+        'layout' => "{items}",
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
 
-            'id',
+            [
+                'attribute' => 'id',
+                'enableSorting' => false,
+            ],
             'uid',
             [
                 'class' => LeadColumn::class,
@@ -164,5 +174,8 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\ActionColumn', 'template' => '{view}'],
         ],
     ]); ?>
+
+    <?php  echo $this->render('_pagination', ['model' => $searchModel]);?>
+
     <?php Pjax::end(); ?>
 </div>

@@ -364,4 +364,13 @@ class AbacService
         return AbacPolicy::find()->where(['ap_hash_code' => $hashCode])
             ->orderBy(['ap_id' => SORT_DESC])->limit(1)->one();
     }
+
+    /**
+     * @param array $data
+     * @return false|string
+     */
+    public static function generateHashCode(array $data)
+    {
+        return substr(md5(implode('|', $data)), 0, 10);
+    }
 }

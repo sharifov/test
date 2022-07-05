@@ -1047,8 +1047,7 @@ class FlightQuoteHelper
             if ($tripType !== Flight::TRIP_TYPE_ONE_WAY) {
                 if ($key != 0) {
                     $lastSegment = $segments[$key - 1] ?? $segments[$key];
-                    $isMoreOneDay = self::isMoreOneDay($lastSegment['arrivalDateTime'], $segment['departureDateTime']);
-                    if ($isMoreOneDay) {
+                    if (self::isNextTrip($lastSegment, $segment)) {
                         ++$tripIndex;
                     }
                 }
@@ -1272,20 +1271,8 @@ class FlightQuoteHelper
         if ((!$departureDateTime = $curSegment['departureDateTime'] ?? null) || !($departureDateTime instanceof DateTime)) {
             throw new \RuntimeException('DepartureDateTime is corrupted');
         }
-        if (self::isMoreOneDay($prevArrivalDateTime, $departureDateTime)) {
-            return true;
-        }
 
-        if ((!$prevArrivalAirport = $prevSegment['arrivalAirport'] ?? null) || !is_string($prevArrivalAirport)) {
-            throw new \RuntimeException('ArrivalAirport is corrupted');
-        }
-        if ((!$departureAirport = $curSegment['departureAirport'] ?? null) || !is_string($departureAirport)) {
-            throw new \RuntimeException('DepartureAirport is corrupted');
-        }
-        if (!self::isEqualLocation($prevArrivalAirport, $departureAirport)) {
-            return true;
-        }
-        return false;
+        return $departureDateTime->diff($prevArrivalDateTime)->days >= FlightSettingHelper::getDaysDiffForNextTrip();
     }
 
     /**
@@ -1325,11 +1312,5 @@ class FlightQuoteHelper
     private static function isEqualLocation(string $prevArrivalAirport, string $departureAirport): bool
     {
         return $prevArrivalAirport === $departureAirport;
-    }
-
-    private static function isMoreOneDay(DateTime $departureDateTime, DateTime $arrivalDateTime): bool
-    {
-        $diff = $departureDateTime->diff($arrivalDateTime);
-        return (int) sprintf('%d%d%d', $diff->y, $diff->m, $diff->d) >= 1;
     }
 }

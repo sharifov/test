@@ -10,6 +10,8 @@ use yii\base\Model;
 
 class ShiftScheduleEditForm extends Model
 {
+    const SCENARIO_EDIT_DRAG_N_DROP = 'dragNDrop';
+
     public $eventId;
     public $scheduleType;
     public $description;
@@ -18,6 +20,8 @@ class ShiftScheduleEditForm extends Model
     public $dateTimeStart;
     public $dateTimeEnd;
     public $duration;
+    public $newUserId;
+    public $oldUserId;
 
     public function behaviors()
     {
@@ -36,13 +40,16 @@ class ShiftScheduleEditForm extends Model
     public function rules(): array
     {
         return [
-            [['eventId', 'scheduleType', 'status', 'dateTimeRange'], 'required'],
+            [['eventId'], 'required'],
+            [['scheduleType', 'status', 'dateTimeRange'], 'required', 'on' => self::SCENARIO_DEFAULT],
             ['scheduleType', 'in', 'range' => array_keys(UserShiftScheduleHelper::getAvailableScheduleTypeList())],
             ['status', 'in', 'range' => array_keys(UserShiftScheduleHelper::getAvailableStatusList())],
             [['description'], 'string', 'max' => 500],
             [['dateTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['dateTimeStart', 'dateTimeEnd', 'defaultDuration'], 'safe'],
+            [['dateTimeStart', 'dateTimeEnd'], 'required', 'on' => self::SCENARIO_EDIT_DRAG_N_DROP],
             [['dateTimeStart', 'dateTimeEnd'], 'datetime', 'format' => 'php:Y-m-d H:i'],
+            [['newUserId', 'oldUserId'], 'integer'],
         ];
     }
 
@@ -61,5 +68,20 @@ class ShiftScheduleEditForm extends Model
         $this->dateTimeEnd = $endDateTime;
         $this->dateTimeRange = $startDateTime->format('Y-m-d H:i') . ' - ' . $endDateTime->format('Y-m-d H:i');
         $this->duration = TimeConverterHelper::minutesToHours($event->uss_duration);
+    }
+
+    public function isChangedUser(): bool
+    {
+        return $this->oldUserId !== $this->newUserId;
+    }
+
+    public function isDragNDropScenario(): bool
+    {
+        return $this->scenario === self::SCENARIO_EDIT_DRAG_N_DROP;
+    }
+
+    public function formName(): string
+    {
+        return '';
     }
 }

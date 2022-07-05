@@ -2,15 +2,24 @@
 
 namespace modules\taskList\controllers;
 
+use common\components\bootstrap4\activeForm\ActiveForm;
 use frontend\controllers\FController;
+use modules\objectSegment\src\entities\ObjectSegmentTask;
+use modules\taskList\abac\TaskListAbacObject;
 use modules\taskList\src\entities\taskList\TaskList;
 use modules\taskList\src\entities\taskList\search\TaskListSearch;
+use modules\taskList\src\forms\TaskListAssignForm;
 use modules\taskList\src\services\TaskListService;
+use src\helpers\app\AppHelper;
+use src\helpers\ErrorsToStringHelper;
+use Yii;
 use yii\base\InvalidConfigException;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -50,6 +59,116 @@ class TaskListController extends FController
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
+    }
+
+    public function actionAssignForm(): Response
+    {
+        /** @abac TaskListAbacObject::UI_ASSIGN, TaskListAbacObject::ACTION_ACCESS, Access to action assign-form (TaskListController) */
+        if (Yii::$app->abac->can(null, TaskListAbacObject::UI_ASSIGN, TaskListAbacObject::ACTION_ACCESS) === false) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        $result = ['message' => '', 'status' => 0, 'data' => ''];
+        $modelForm = new TaskListAssignForm();
+
+        if ($modelForm->load(Yii::$app->request->post(), '')) {
+            $data = (array) Yii::$app->request->post();
+
+            try {
+                if (!$modelForm->validate()) {
+                    throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($modelForm));
+                }
+
+                $modelForm->objectSegmentIds = ObjectSegmentTask::getAssignedObjectSegmentIdsByTaskId($modelForm->taskListId);
+
+                $result['status'] = 1;
+                $result['data'] = $this->renderAjax('assign_form', [
+                    'model' => $modelForm,
+                    'taskList' => TaskList::findOne(['tl_id' => $modelForm->taskListId]),
+                ]);
+            } catch (\RuntimeException | \DomainException $throwable) {
+                $result['message'] = $throwable->getMessage();
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $data);
+                \Yii::warning($message, 'TaskListController:actionAssignForm:Exception');
+            } catch (\Throwable $throwable) {
+                $result['message'] = 'Internal Server Error';
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $data);
+                \Yii::error($message, 'TaskListController:actionAssignForm:Throwable');
+            }
+        }
+
+        return $this->asJson($result);
+    }
+
+    public function actionAssignValidation(): Response
+    {
+        /** @abac TaskListAbacObject::UI_ASSIGN, TaskListAbacObject::ACTION_ACCESS, Access to action assign-validation (TaskListController) */
+        if (Yii::$app->abac->can(null, TaskListAbacObject::UI_ASSIGN, TaskListAbacObject::ACTION_ACCESS) === false) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        try {
+            $objectSegmentListAssignForm = new TaskListAssignForm();
+
+            if ($objectSegmentListAssignForm->load(Yii::$app->request->post())) {
+                return $this->asJson(
+                    ActiveForm::validate($objectSegmentListAssignForm)
+                );
+            }
+        } catch (\Throwable $throwable) {
+            Yii::warning(AppHelper::throwableLog($throwable), 'TaskListController:actionAssignValidation');
+        }
+
+        throw new BadRequestHttpException();
+    }
+
+    public function actionAssign(): Response
+    {
+        /** @abac TaskListAbacObject::UI_ASSIGN, TaskListAbacObject::ACTION_ACCESS, Access to action assign (TaskListController) */
+        if (Yii::$app->abac->can(null, TaskListAbacObject::UI_ASSIGN, TaskListAbacObject::ACTION_ACCESS) === false) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        $result = ['message' => '', 'status' => 0];
+        $objectSegmentListAssignForm = new TaskListAssignForm();
+        $postData = (array) Yii::$app->request->post();
+
+        try {
+            if ($objectSegmentListAssignForm->load($postData)) {
+                if ($objectSegmentListAssignForm->validate() === false) {
+                    throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($objectSegmentListAssignForm));
+                }
+
+                $transaction = Yii::$app->db->beginTransaction();
+                try {
+                    ObjectSegmentTask::deleteOrAddObjectSegments(
+                        $objectSegmentListAssignForm->taskListId,
+                        $objectSegmentListAssignForm->objectSegmentIds
+                    );
+                    $transaction->commit();
+
+                    $result['status'] = 1;
+                    $result['message'] = 'Object Segments assigned';
+                } catch (\Throwable $e) {
+                    $transaction->rollBack();
+                    $result['message'] = $e->getMessage();
+                    $message = ArrayHelper::merge(AppHelper::throwableLog($e), $postData);
+                    Yii::warning($message, 'TaskListController:actionAssign:Exception');
+                }
+            } else {
+                throw new \RuntimeException('TaskListAssignForm not loaded');
+            }
+        } catch (\RuntimeException | \DomainException $throwable) {
+            $result['message'] = $throwable->getMessage();
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $postData);
+            Yii::warning($message, 'TaskListController:actionAssign:Exception');
+        } catch (\Throwable $throwable) {
+            $result['message'] = 'Internal Server Error';
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $postData);
+            Yii::error($message, 'TaskListController:actionAssign:Throwable');
+        }
+
+        return $this->asJson($result);
     }
 
     /**

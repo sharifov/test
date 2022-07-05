@@ -25,165 +25,11 @@ use yii\helpers\VarDumper;
 
 class UserShiftScheduleService
 {
-    private UserShiftScheduleRepository $repository;
+    private ShiftScheduleRequestService $requestService;
 
-    public function __construct(UserShiftScheduleRepository $repository)
+    public function __construct(ShiftScheduleRequestService $requestService)
     {
-        $this->repository = $repository;
-    }
-
-    /**
-     * @param int $userId
-     * @return int
-     */
-    public static function removeDataByUser(int $userId): int
-    {
-        return UserShiftSchedule::deleteAll(['uss_user_id' => $userId]);
-    }
-
-    /**
-     * @param int $userId
-     * @param string $startDt
-     * @param string $endDt
-     * @return array|UserShiftSchedule[]
-     */
-    public static function getTimelineListByUser(int $userId, string $startDt, string $endDt): array
-    {
-        return UserShiftSchedule::find()
-            ->where(['uss_user_id' => $userId])
-            ->andWhere(['AND',
-                ['>=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($startDt))],
-                ['<=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($endDt))]
-            ])
-            ->all();
-    }
-
-    /**
-     * @param int $userId
-     * @param string $minDate
-     * @param string $maxDate
-     * @param array $statusList
-     * @return array|UserShiftSchedule[]
-     */
-    public static function getUserShiftScheduleDataStats(
-        int $userId,
-        string $minDate,
-        string $maxDate,
-        array $statusList = []
-    ): array {
-        $query = UserShiftSchedule::find()
-            ->select(['uss_sst_id', 'uss_year' => 'YEAR(uss_start_utc_dt)',
-                'uss_month' => 'MONTH(uss_start_utc_dt)',
-                'uss_cnt' => 'COUNT(*)',
-                'uss_duration' => 'SUM(uss_duration)',
-            ])
-            ->where(['uss_user_id' => $userId])
-            ->andWhere(['AND',
-                ['>=', 'uss_start_utc_dt', $minDate],
-                ['<=', 'uss_start_utc_dt', $maxDate]
-            ])
-
-            ->groupBy(['uss_sst_id', 'uss_year', 'uss_month'])
-            ->asArray();
-
-        if ($statusList) {
-            $query->andWhere(['uss_status_id' => $statusList]);
-        }
-
-        return $query->all();
-    }
-
-    /**
-     * @param int $userId
-     * @param string $minDate
-     * @param string $maxDate
-     * @param array $statusList
-     * @return array|UserShiftSchedule[]
-     */
-    public static function getUserShiftScheduleLabelDataStats(
-        int $userId,
-        string $minDate,
-        string $maxDate,
-        array $statusList = []
-    ): array {
-        $query = UserShiftSchedule::find()
-            ->select(['stl_key' => 'tla_stl_key', 'uss_year' => 'YEAR(uss_start_utc_dt)',
-                'uss_month' => 'MONTH(uss_start_utc_dt)',
-                'uss_cnt' => 'COUNT(*)',
-                'uss_duration' => 'SUM(uss_duration)',
-            ])
-            ->alias('uss')
-            //->with(['shiftScheduleType'])
-            //->innerJoin(ShiftScheduleType::tableName(), 'sst_id=uss.uss_sst_id')
-            ->innerJoin(ShiftScheduleTypeLabelAssign::tableName(), 'uss.uss_sst_id = tla_sst_id')
-            // ['tla_stl_key', 'tla_sst_id']
-            ->where(['uss_user_id' => $userId])
-            ->andWhere(['AND',
-                ['>=', 'uss_start_utc_dt', $minDate],
-                ['<=', 'uss_start_utc_dt', $maxDate]
-            ])
-
-            ->groupBy(['tla_stl_key', 'uss_year', 'uss_month'])
-            ->asArray();
-
-        if ($statusList) {
-            $query->andWhere(['uss_status_id' => $statusList]);
-        }
-
-        return $query->all();
-    }
-
-    /**
-     * @param UserShiftSchedule[] $timelineList
-     * @param string $userTimeZone
-     * @return array
-     */
-    public static function getCalendarTimelineJsonData(array $timelineList, string $userTimeZone): array
-    {
-        $data = [];
-        if ($timelineList) {
-            foreach ($timelineList as $item) {
-                $dataItem = [
-                    'id' => $item->uss_id,
-                    //groupId: '999',
-                    'title' => $item->getScheduleTypeKey(), // . '-' . $item->uss_id,
-                        //. ' - ' . date('d H:i', strtotime($item->uss_start_utc_dt)),
-                    'description' => $item->getScheduleTypeTitle() . "\r\n" . '(' . $item->uss_id . ')' . ', duration: ' .
-                        Yii::$app->formatter->asDuration($item->uss_duration * 60),
-                    //. "\r\n" . $item->uss_description,
-                    'start' => Yii::$app->formatter->asDateTimeByUserTimezone(
-                        strtotime($item->uss_start_utc_dt ?? ''),
-                        $userTimeZone,
-                        'php: c'
-                    ),
-                    'end' => Yii::$app->formatter->asDateTimeByUserTimezone(
-                        strtotime($item->uss_end_utc_dt ?? ''),
-                        $userTimeZone,
-                        'php: c'
-                    ),
-                    'color' => $item->shiftScheduleType ? $item->shiftScheduleType->sst_color : 'gray',
-
-                    'display' => 'block', // 'list-item' , 'background'
-                    //'textColor' => 'black' // an option!
-                    'extendedProps' => [
-                        'icon' => $item->shiftScheduleType->sst_icon_class ?? '',
-                    ]
-                ];
-
-                if (
-                    !in_array($item->uss_status_id, [UserShiftSchedule::STATUS_DONE,
-                    UserShiftSchedule::STATUS_APPROVED])
-                ) {
-                    $dataItem['borderColor'] = '#000000';
-                    $dataItem['title'] .= ' (' . $item->getStatusName() . ')';
-                    $dataItem['description'] .= ' (' . $item->getStatusName() . ')';
-                    //$data[$item->uss_id]['extendedProps']['icon'] = 'rgb(255,0,0)';
-                }
-
-                $data[] = $dataItem;
-            }
-        }
-        return $data;
+        $this->requestService = $requestService;
     }
 
     /**
@@ -354,7 +200,7 @@ class UserShiftScheduleService
                                         continue;
                                     }
 
-                                    $existEvenList = UserShiftScheduleService::getUserEventIdList(
+                                    $existEvenList = UserShiftScheduleQuery::getUserEventIdList(
                                         $user->usa_user_id,
                                         $timeStart,
                                         $timeEnd,
@@ -431,8 +277,6 @@ class UserShiftScheduleService
         return true;
     }
 
-
-
     /**
      * @param mixed|null $expression
      * @param string $currentTime
@@ -443,8 +287,7 @@ class UserShiftScheduleService
         if ($expression === null) {
             return false;
         }
-        $cron = CronExpression::factory($expression);
-        return $cron->isDue($currentTime);
+        return CronExpression::factory($expression)->isDue($currentTime);
     }
 
     public function createManual(ShiftScheduleCreateForm $form, ?string $userTimeZone): array
@@ -463,7 +306,7 @@ class UserShiftScheduleService
                 UserShiftSchedule::TYPE_MANUAL,
                 $form->scheduleType
             );
-            $this->repository->save($userShiftSchedule);
+            (new UserShiftScheduleRepository($userShiftSchedule))->save(true);
             $userShiftScheduleCreatedList[] = $userShiftSchedule;
 
             Notifications::createAndPublish(
@@ -475,84 +318,6 @@ class UserShiftScheduleService
             );
         }
         return $userShiftScheduleCreatedList;
-    }
-
-    /**
-     * @param int $userId
-     * @param string $startDateTime
-     * @param string $endDateTime
-     * @param array|null $statusListId
-     * @param array|null $subTypeListId
-     * @return array
-     */
-    public static function getExistEventIdList(
-        int $userId,
-        string $startDateTime,
-        string $endDateTime,
-        ?array $statusListId = [],
-        ?array $subTypeListId = []
-    ): array {
-
-        $query = UserShiftSchedule::find();
-        $query->alias('uss');
-        $query->select(['uss.uss_id']);
-        $query->where(['uss.uss_user_id' => $userId]);
-
-        if (!empty($statusListId)) {
-            $query->andWhere(['uss.uss_status_id' => $statusListId]);
-        }
-
-        if (!empty($subTypeListId)) {
-            $query->innerJoin(ShiftScheduleType::tableName() . ' AS sst', 'sst.sst_id = uss.uss_sst_id');
-            $query->andWhere(['sst.sst_subtype_id' => $subTypeListId]);
-        }
-
-        if (!empty($startDateTime) && !empty($endDateTime)) {
-            $query->andWhere([
-                'OR',
-                ['between', 'uss.uss_start_utc_dt', $startDateTime, $endDateTime],
-                ['between', 'uss.uss_end_utc_dt', $startDateTime, $endDateTime],
-                [
-                    'AND',
-                    ['>=', 'uss.uss_start_utc_dt', $startDateTime],
-                    ['<=', 'uss.uss_end_utc_dt', $endDateTime]
-                ],
-                [
-                    'AND',
-                    ['<=', 'uss.uss_start_utc_dt', $startDateTime],
-                    ['>=', 'uss.uss_end_utc_dt', $endDateTime]
-                ]
-            ]);
-        }
-
-        return $query->column();
-    }
-
-    /**
-     * @param int $userId
-     * @param string $startDt
-     * @param string $endDt
-     * @param array|null $statusListId
-     * @param array|null $subTypeListId
-     * @return array
-     */
-    public static function getUserEventIdList(
-        int $userId,
-        string $startDt,
-        string $endDt,
-        ?array $statusListId = [],
-        ?array $subTypeListId = []
-    ): array {
-
-        if ($statusListId === null) {
-            $statusListId = [UserShiftSchedule::STATUS_APPROVED, UserShiftSchedule::STATUS_DONE];
-        }
-
-        if ($subTypeListId === null) {
-            $subTypeListId = [ShiftScheduleType::SUBTYPE_WORK_TIME, ShiftScheduleType::SUBTYPE_HOLIDAY];
-        }
-
-        return self::getExistEventIdList($userId, $startDt, $endDt, $statusListId, $subTypeListId);
     }
 
     public function createSingleManual(SingleEventCreateForm $form, ?string $userTimeZone): UserShiftSchedule
@@ -569,7 +334,7 @@ class UserShiftScheduleService
             UserShiftSchedule::TYPE_MANUAL,
             $form->scheduleType
         );
-        $this->repository->save($userShiftSchedule);
+        (new UserShiftScheduleRepository($userShiftSchedule))->save(true);
         Notifications::createAndPublish(
             $userShiftSchedule->uss_user_id,
             'Shift event was created',
@@ -593,11 +358,14 @@ class UserShiftScheduleService
             $diffMinutes,
             $form->description
         );
+        if ($form->isDragNDropScenario() && $form->isChangedUser()) {
+            $event->setNewOwner($form->newUserId);
+        }
 
         try {
             $changedAttributes = $event->getDirtyAttributes();
-            $this->repository->save($event);
-            ShiftScheduleRequestService::createDueToEventChange($event, $oldEvent, $changedAttributes, Auth::user());
+            $event->recordChangeEvent($oldEvent, $changedAttributes, Auth::id());
+            (new UserShiftScheduleRepository($event))->save(true);
 
             Notifications::createAndPublish(
                 $event->uss_user_id,
@@ -636,8 +404,8 @@ class UserShiftScheduleService
             $event->uss_description = $form->description;
         }
         $changedAttributes = $event->getDirtyAttributes();
-        $this->repository->save($event);
-        ShiftScheduleRequestService::createDueToEventChange($event, $oldEvent, $changedAttributes, Auth::user());
+        $event->recordChangeEvent($oldEvent, $changedAttributes, Auth::id());
+        (new UserShiftScheduleRepository($event))->save(true);
 
         Notifications::createAndPublish(
             $oldEvent->uss_user_id,

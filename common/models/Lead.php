@@ -9,6 +9,7 @@ use common\models\local\LeadAdditionalInformation;
 use common\models\query\LeadQuery;
 use common\models\query\SourcesQuery;
 use DateTime;
+use frontend\helpers\RedisHelper;
 use frontend\helpers\JsonHelper;
 use frontend\widgets\notification\NotificationMessage;
 use kivork\search\core\urlsig\UrlSignature;
@@ -21,6 +22,7 @@ use src\auth\Auth;
 use src\behaviors\metric\MetricLeadCounterBehavior;
 use src\entities\EventTrait;
 use src\events\lead\LeadBookedEvent;
+use src\events\lead\LeadCallExpertChangedEvent;
 use src\events\lead\LeadCallExpertRequestEvent;
 use src\events\lead\LeadCallStatusChangeEvent;
 use src\events\lead\LeadCloseEvent;
@@ -1133,6 +1135,10 @@ class Lead extends ActiveRecord implements Objectable
 
         $this->status = $status;
         $this->l_status_dt = date('Y-m-d H:i:s');
+
+        if (LeadHelper::checkCallExpertNeededChange($this)) {
+            $this->recordEvent(new LeadCallExpertChangedEvent($this->id));
+        }
     }
 
     /**
@@ -2254,6 +2260,19 @@ class Lead extends ActiveRecord implements Objectable
 
     public function updateLastAction(?string $description = null): int
     {
+        $idKey = 'update_last_action_' . $this->id;
+
+        if (RedisHelper::checkDuplicate($idKey, 5)) {
+            \Yii::info(
+                [
+                    'message' => 'Checked Duplicate Update Last Action in Lead',
+                    'leadId' => $this->id
+                ],
+                'Lead:updateLastAction:checkDuplicate'
+            );
+            return 0;
+        }
+
         $result = self::updateAll(['l_last_action_dt' => date('Y-m-d H:i:s')], ['id' => $this->id]);
 
         if ($this->isProcessing()) {
@@ -5212,6 +5231,12 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
                     $flexParams['departureFlexd'] = LeadUrlHelper::formatFlexOptions($entry['flexibility'], $entry['flexibility_type']);
                 }
                 if ($key == 1) {
+                    if (
+                        $flightSegments[0]['origin'] !== $flightSegments[1]['destination'] ||
+                        ($flightSegments[0]['origin'] == $flightSegments[1]['destination'] && $flightSegments[0]['destination'] !== $flightSegments[1]['origin'])
+                    ) {
+                        $trip = $entry['origin'] . '-' . $entry['destination'] . '/';
+                    }
                     $flexParams['returnFlexd'] = LeadUrlHelper::formatFlexOptions($entry['flexibility'], $entry['flexibility_type']);
                 }
                 $segmentsStr[] = $trip . date('Y-m-d', strtotime($entry['departure']));

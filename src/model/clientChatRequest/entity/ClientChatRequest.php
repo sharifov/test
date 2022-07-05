@@ -399,4 +399,29 @@ class ClientChatRequest extends \yii\db\ActiveRecord
         }
         return null;
     }
+
+    public static function getPrevModels($prevId, $limit, $filters = null): array
+    {
+        if (isset($filters)) {
+            $mainQuery = static::find()
+                ->where(['>', 'ccr_id', $prevId])
+                ->andFilterWhere($filters)
+                ->orderBy(['ccr_id' => SORT_ASC])
+                ->limit($limit + 1);
+            return static::find()
+                ->from(['C' => $mainQuery])
+                ->orderBy(['ccr_id' => SORT_DESC])
+                ->all();
+        }
+
+        $mainQuery = static::find()
+            ->where(['>', 'ccr_id', $prevId])
+            ->orderBy(['ccr_id' => SORT_ASC])
+            ->limit($limit + 1);
+        return static::find()
+            ->from(['C' => $mainQuery])
+            ->orderBy(['ccr_id' => SORT_DESC])
+            ->limit($limit + 1)
+            ->all();
+    }
 }

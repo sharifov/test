@@ -544,7 +544,7 @@ class Formatter extends \yii\i18n\Formatter
                 $format = FormatConverter::convertDateIcuToPhp($format, "datetime", $this->locale);
             }
             try {
-                $dateTime = (new \DateTimeImmutable(date('Y-m-d H:i:s', $dateTime), new \DateTimeZone('UTC')))
+                $dateTime = (new \DateTimeImmutable(date('Y-m-d H:i:s', intval($dateTime)), new \DateTimeZone('UTC')))
                 ->setTimezone(new \DateTimeZone($timezone))
                 ->format($format);
             } catch (\Throwable $throwable) {
@@ -571,6 +571,22 @@ class Formatter extends \yii\i18n\Formatter
             return $this->nullDisplay;
         }
         return Html::tag('i', '', ['class' => 'fa fa-calendar']) . ' ' . $this->asDatetime(strtotime($dateTime), $format);
+    }
+
+    /**
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function asByUserDateTimeAndUTC($dateTime, $format = 'php:d-M-Y [H:i]', string $timeZone = 'UTC'): string
+    {
+        if (!$dateTime) {
+            return $this->nullDisplay;
+        }
+
+        return Html::tag(
+            'span',
+            $this->asByUserDateTime($dateTime, $format),
+            ['title' => $this->asDateTimeByUserTimezone($dateTime, $timeZone, $format) . ' ' . Html::encode($timeZone)]
+        );
     }
 
     public function asByUserDate($dateTime, $format = 'php:d-M-Y'): string
@@ -632,7 +648,11 @@ class Formatter extends \yii\i18n\Formatter
         }
 
         if (is_string($value)) {
-            $name = $value;
+            if ($entity = Employee::find()->select(['username', 'id'])->where(['username' => $value])->cache(3600)->one()) {
+                $name = $entity->username . ' (' . $entity->id . ')';
+            } else {
+                $name = $value;
+            }
         } elseif ($value instanceof Employee) {
             $name = $value->username . ' (' . $value->id . ')';
         } elseif (is_int($value)) {

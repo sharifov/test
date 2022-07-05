@@ -213,4 +213,13 @@ class LeadHelper
 
         return (bool) ($lead->minLpp->lpp_expiration_dt ?? null);
     }
+
+    /**
+     * @param Lead $lead
+     * @return bool
+     */
+    public static function checkCallExpertNeededChange(Lead $lead): bool
+    {
+        return $lead->status !== Lead::STATUS_PROCESSING && $lead->isCalledExpert();
+    }
 }

@@ -6,6 +6,7 @@ use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use common\models\Lead;
 use frontend\helpers\JsonHelper;
+use http\Exception\InvalidArgumentException;
 use modules\shiftSchedule\src\services\ShiftScheduleDictionary;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -798,14 +799,29 @@ class SettingHelper
         return (bool) (Yii::$app->params['settings']['two_factor_authentication_enable'] ?? false);
     }
 
-    public static function getTwoFactorAuthCounter(): int
+    public static function getTwoFactorAuthMaxAttempts(): int
     {
-        return (int) (Yii::$app->params['settings']['two_factor_counter'] ?? 60);
+        return (int) (Yii::$app->params['settings']['two_factor_attempts_settings']['max_attempts'] ?? 60);
+    }
+
+    public static function getTwoFactorAuthWarningAttemptsRemain(): int
+    {
+        return (int) (Yii::$app->params['settings']['two_factor_attempts_settings']['show_warning_attempts_remain'] ?? 3);
     }
 
     public static function isEnabledAuthClients(): bool
     {
-        return (bool) (Yii::$app->params['settings']['enable_auth_clients'] ?? false);
+        return (self::isEnabledGoogleAuthClient() || self::isEnabledMicrosoftAuthClient());
+    }
+
+    public static function isEnabledGoogleAuthClient(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['enable_auth_clients']['auth_google'] ?? false);
+    }
+
+    public static function isEnabledMicrosoftAuthClient(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['enable_auth_clients']['auth_microsoft'] ?? false);
     }
 
     public static function getCleanLeadPoorProcessingLogAfterDays(): int
@@ -1013,8 +1029,45 @@ class SettingHelper
         return (bool) (Yii::$app->params['settings']['enable_agent_call_queue_job_after_change_call_status_ready'] ?? true);
     }
 
+    public static function isSyncOverridePhoneToEnable(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['call_sync_override_phone_to_enable'] ?? false);
+    }
+
     public static function isOverridePhoneToForwarderFrom(): bool
     {
         return (bool) (Yii::$app->params['settings']['call_is_override_phone_to_forwarded_from'] ?? false);
+    }
+
+    /**
+     * @return string
+     */
+    public static function getEmailFrom(): string
+    {
+        $email = \Yii::$app->params['settings']['email_component']['email_from'] ?? '';
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return $email;
+        }
+        throw new InvalidArgumentException('Invalid email_from address');
+    }
+
+    public static function getOtpEmailCodeLifeTime(): int
+    {
+        return (int)(Yii::$app->params['settings']['otp_email_settings']['code_life_time'] ?? 120);
+    }
+
+    public static function getOtpEmailProjectId(): int
+    {
+        return (int)(Yii::$app->params['settings']['otp_email_settings']['project_id'] ?? 2);
+    }
+
+    public static function getOtpEmailTemplateType(): string
+    {
+        return Yii::$app->params['settings']['otp_email_settings']['template_type'] ?? 'two_factor_auth';
+    }
+
+    public static function getOtpEmailTemplateSubject(): string
+    {
+        return Yii::$app->params['settings']['otp_email_settings']['template_subject'] ?? 'Your Two-Factor verification code!';
     }
 }

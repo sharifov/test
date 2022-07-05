@@ -675,7 +675,7 @@ class LeadController extends FController
             }
         }
 
-        $comForm = new CommunicationForm($lead->l_client_lang, $smsFromNumberList, $emailFromList);
+        $comForm = new CommunicationForm($smsFromNumberList, $emailFromList, $lead->l_client_lang);
         $comForm->c_preview_email = 0;
         $comForm->c_preview_sms = 0;
         $comForm->c_voice_status = 0;
@@ -735,7 +735,7 @@ class LeadController extends FController
                         $templateType = $tpl ? $tpl->etp_key : '';
                         if ($tpl) {
                             if (isset($tpl->etp_params_json['quotes']['originalRequired']) && $tpl->etp_params_json['quotes']['originalRequired'] === true) {
-                                return array_merge($lead->quotes, function ($acc, $quote) {
+                                return array_reduce($lead->quotes, function ($acc, $quote) {
                                     return $quote->type_id === Quote::TYPE_ORIGINAL ? true : $acc;
                                 }, false);
                             }
@@ -1203,7 +1203,8 @@ class LeadController extends FController
                 if ($allowRbac) {
                     $user = Auth::user();
                     $leadAbacDto = new LeadAbacDto($lead, $user->getId());
-                    if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS)) {
+                    /** @abac $leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD_FROM_CHAT, LeadAbacObject::ACTION_ACCESS, Access to take lead from chat */
+                    if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD_FROM_CHAT, LeadAbacObject::ACTION_ACCESS)) {
                         $lead->processing($user->getId(), Yii::$app->user->getId(), 'Take');
 
                         $this->transaction->wrap(function () use ($lead) {

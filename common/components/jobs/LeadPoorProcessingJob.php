@@ -2,6 +2,7 @@
 
 namespace common\components\jobs;
 
+use frontend\helpers\RedisHelper;
 use modules\featureFlag\FFlag;
 use src\helpers\app\AppHelper;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
@@ -40,7 +41,7 @@ class LeadPoorProcessingJob extends BaseJob implements JobInterface
         $this->waitingTimeRegister();
 
         $idKey = 'job_' . $this->leadId . '_' . implode('_', $this->ruleKeys);
-        if (!LeadPoorProcessingService::checkDuplicate($idKey)) {
+        if (RedisHelper::checkDuplicate($idKey)) {
             \Yii::info(
                 [
                     'message' => 'Checked Duplicate Job',
@@ -54,7 +55,7 @@ class LeadPoorProcessingJob extends BaseJob implements JobInterface
 
         foreach ($this->ruleKeys as $key) {
             $idRuleKey = 'job_rule_key_' . $this->leadId . '_' . $key;
-            if (!LeadPoorProcessingService::checkDuplicate($idRuleKey, 20)) {
+            if (RedisHelper::checkDuplicate($idRuleKey, 20)) {
                 \Yii::info(
                     [
                         'message' => 'Checked Duplicate RuleKey',
