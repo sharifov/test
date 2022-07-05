@@ -6,15 +6,14 @@ use common\models\Call;
 use common\models\Client;
 use common\models\Employee;
 use common\models\PhoneBlacklist;
+use common\models\UserDepartment;
 use common\models\UserGroupAssign;
-use kartik\daterange\DateRangeBehavior;
 use src\auth\Auth;
 use src\model\callLog\entity\callLog\CallLogCategory;
 use src\model\callLog\entity\callLog\CallLogStatus;
 use src\model\callLog\entity\callLog\CallLogType;
 use src\model\callLog\entity\callLogCase\CallLogCase;
 use src\model\callLog\entity\callLogLead\CallLogLead;
-use src\model\callLog\entity\callLogQueue\CallLogQueue;
 use src\model\callLog\entity\callLogRecord\CallLogRecord;
 use src\model\callNote\entity\CallNote;
 use src\model\voip\phoneDevice\device\VoipDevice;
@@ -23,7 +22,6 @@ use src\model\callLog\entity\callLog\CallLog;
 use yii\data\ArrayDataProvider;
 use yii\db\Expression;
 use yii\db\Query;
-use yii\helpers\VarDumper;
 use src\helpers\query\QueryHelper;
 
 /**
@@ -268,6 +266,17 @@ class CallLogSearch extends CallLog
         $query->andFilterWhere(['like', 'cl_call_sid', $this->cl_call_sid])
             ->andFilterWhere(['like', 'cl_phone_from', $this->cl_phone_from])
             ->andFilterWhere(['like', 'cl_phone_to', $this->cl_phone_to]);
+
+        /*
+         * Filtering call logs by department id of current user
+         */
+        /** @var Query $filterByDepartmentSubQuery */
+        $filterByDepartmentSubQuery = new Query();
+        $filterByDepartmentSubQuery
+            ->select('ud_dep_id')
+            ->from(UserDepartment::tableName())
+            ->where(['ud_user_id' => $user->getPrimaryKey()]);
+        $query->where(['IN', 'cl_department_id', $filterByDepartmentSubQuery]);
 
         return $dataProvider;
     }

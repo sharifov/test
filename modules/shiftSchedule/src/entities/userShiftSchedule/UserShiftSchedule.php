@@ -370,12 +370,12 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
     /**
      * @return void
      */
-    public function setStatusDelete()
+    public function setStatusDelete(int $userId)
     {
         $oldEvent = clone $this;
         $this->uss_status_id = UserShiftSchedule::STATUS_DELETED;
         $changedAttributes = $this->getDirtyAttributes();
-        $this->recordChangeEvent($oldEvent, $changedAttributes, Auth::user());
+        $this->recordChangeEvent($oldEvent, $changedAttributes, $userId);
     }
 
     /**
@@ -384,8 +384,8 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
      * @param Employee $user
      * @return void
      */
-    public function recordChangeEvent(UserShiftSchedule $oldEvent, array $changedAttributes, Employee $user)
+    public function recordChangeEvent(UserShiftSchedule $oldEvent, array $changedAttributes, int $userId)
     {
-        $this->recordEvent(new ShiftScheduleEventChangedEvent($this, $oldEvent, $changedAttributes, $user));
+        $this->recordEvent(new ShiftScheduleEventChangedEvent($this, $oldEvent, $changedAttributes, $userId));
     }
 }

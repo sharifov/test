@@ -58,7 +58,7 @@ if [ "$whatDo" == "init-env" ]; then
 elif [ ! -e "$dockerFolder/.env" ]; then
   printf "Not found .docker/.env Please run init-env command\n"
   exit;
-elif [ ! -e ".env" ]; then
+elif [ ! -e "$currentDir/.env" ]; then
   printf "Not found .env Please run init-env command\n"
   exit;
 fi
@@ -93,6 +93,11 @@ POSTGRES_USER=$(getEnvVar "POSTGRES_USER")
 POSTGRES_PASSWORD=$(getEnvVar "POSTGRES_PASSWORD")
 POSTGRES_DB=$(getEnvVar "POSTGRES_DB")
 
+PHP_XDEBUG_ENABLED=$(getEnvVar "PHP_XDEBUG_ENABLED")
+XDEBUG_CLIENT_HOST=$(getEnvVar "XDEBUG_CLIENT_HOST")
+XDEBUG_CLIENT_PORT=$(getEnvVar "XDEBUG_CLIENT_PORT")
+XDEBUG_IDE_KEY=$(getEnvVar "XDEBUG_IDE_KEY")
+
 tmpDirs=(
   "$dockerFolder/api-nginx/logs"
   "$dockerFolder/centrifugo/logs"
@@ -107,6 +112,7 @@ tmpDirs=(
 )
 
 createTemporallyDirectories () {
+  logoutRoot
   printf "\nCreate temporally directories"
   for str in ${tmpDirs[@]}; do
     if [ ! -e $str ]; then

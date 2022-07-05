@@ -2,6 +2,7 @@
 
 namespace modules\shiftSchedule\src\listeners;
 
+use common\models\Employee;
 use modules\shiftSchedule\src\events\ShiftScheduleEventChangedEvent;
 use modules\shiftSchedule\src\services\ShiftScheduleRequestService;
 use src\helpers\app\AppHelper;
@@ -18,7 +19,11 @@ class ShiftScheduleEventChangedListener
     {
         try {
             $requestService = \Yii::createObject(ShiftScheduleRequestService::class);
-            $requestService->changeDueToEventChange($event->event, $event->oldEvent, $event->changedAttributes, $event->user);
+            $user = Employee::findOne($event->userId);
+            if (!$user) {
+                throw new \DomainException('Employee not found by ID:' . $event->userId);
+            }
+            $requestService->changeDueToEventChange($event->event, $event->oldEvent, $event->changedAttributes, $user);
         } catch (\Throwable $throwable) {
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), ['UserShiftScheduleID' => $event->event->uss_id]);
             Yii::warning($message, 'ShiftScheduleEventChangedListener::handle::Throwable');

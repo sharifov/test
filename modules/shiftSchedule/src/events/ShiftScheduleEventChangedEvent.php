@@ -9,7 +9,7 @@ class ShiftScheduleEventChangedEvent
 {
     public UserShiftSchedule $event;
     public UserShiftSchedule $oldEvent;
-    public Employee $user;
+    public int $userId;
     public array $changedAttributes = [];
 
     /**
@@ -17,11 +17,11 @@ class ShiftScheduleEventChangedEvent
      * @param UserShiftSchedule $oldEvent
      * @param array $changedAttributes
      */
-    public function __construct(UserShiftSchedule $event, UserShiftSchedule $oldEvent, array $changedAttributes, Employee $user)
+    public function __construct(UserShiftSchedule $event, UserShiftSchedule $oldEvent, array $changedAttributes, int $userId)
     {
         $this->event = $event;
         $this->oldEvent = $oldEvent;
         $this->changedAttributes = $changedAttributes;
-        $this->user = $user;
+        $this->userId = $userId;
     }
 }

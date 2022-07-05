@@ -9,6 +9,10 @@ use common\models\Employee;
 use common\models\User;
 use frontend\models\LeadForm;
 use frontend\themes\gentelella_v2\assets\groups\GentelellaAsset;
+use frontend\widgets\sale\SaleWidget;
+use modules\featureFlag\FFlag;
+use modules\lead\src\abac\sale\LeadSaleAbacDto;
+use modules\lead\src\abac\sale\LeadSaleAbacObject;
 use src\access\EmployeeProductAccess;
 use src\access\ListsAccess;
 use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
@@ -196,6 +200,15 @@ $leadAbacDto = new LeadAbacDto($leadModel, $userId);
 
     if (Auth::can('/leads/view', ['lead' => $leadModel])) {
         $buttonsSubAction[] = $buttonDetailInfo;
+    }
+
+    /** @fflag FFlag::FF_KEY_SALE_VIEW_IN_LEAD_ENABLE, LeadSale view enable\disable */
+    if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SALE_VIEW_IN_LEAD_ENABLE)) {
+        $leadSaleAbacDto = new LeadSaleAbacDto($leadModel, Auth::id());
+        /** @abac new $leadSaleAbacDto, LeadSaleAbacObject::LOGIC_CLIENT_DATA, LeadSaleAbacObject::ACTION_VIEW, Access to view sale in lead view */
+        if (!empty($leadModel->bo_flight_id) && Yii::$app->abac->can($leadSaleAbacDto, LeadSaleAbacObject::NS, LeadSaleAbacObject::ACTION_VIEW)) {
+            $buttonsSubAction[] = SaleWidget::widget(['leadId' => $leadModel->id]);
+        }
     }
 
     $project = $leadModel->project;
