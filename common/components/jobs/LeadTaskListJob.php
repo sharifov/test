@@ -3,6 +3,7 @@
 namespace common\components\jobs;
 
 use common\models\Lead;
+use common\models\query\LeadQuery;
 use modules\lead\src\services\LeadTaskListService;
 use src\helpers\app\AppHelper;
 use yii\queue\JobInterface;
@@ -31,7 +32,7 @@ class LeadTaskListJob extends BaseJob implements JobInterface
         $this->waitingTimeRegister();
 
         try {
-            if (!$lead = Lead::find()->where(['id' => $this->leadId])->limit(1)->one()) {
+            if (!$lead = LeadQuery::getLeadById($this->leadId)) {
                 throw new \RuntimeException('Lead not found');
             }
 

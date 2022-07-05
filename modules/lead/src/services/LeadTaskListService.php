@@ -15,6 +15,7 @@ use modules\taskList\src\entities\shiftScheduleEventTask\repository\ShiftSchedul
 use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTask;
 use modules\taskList\src\entities\TargetObject;
 use modules\taskList\src\entities\taskList\TaskList;
+use modules\taskList\src\entities\taskList\TaskListQuery;
 use modules\taskList\src\entities\userTask\repository\UserTaskRepository;
 use modules\taskList\src\entities\userTask\UserTask;
 use src\helpers\app\AppHelper;
@@ -44,7 +45,7 @@ class LeadTaskListService
     {
         $dtNow = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')));
 
-        if ($taskLists = $this->getTaskList()) {
+        if ($taskLists = TaskListQuery::getTaskListByLeadId($this->lead->id)) {
             if (!$userShiftSchedule = UserShiftScheduleQuery::getNextTimeLineByUser($this->lead->employee_id, $dtNow)) {
                 throw new \RuntimeException('UserShiftSchedule not found by EmployeeId (' . $this->lead->employee_id . ')');
             }
@@ -87,41 +88,6 @@ class LeadTaskListService
                 }
             }
         }
-    }
-
-    /**
-     * @return TaskList[]
-     */
-    public function getTaskList(): array
-    {
-        return TaskList::find()
-            ->alias('task_list')
-            ->select('task_list.*')
-            ->innerJoin([
-                'object_segment_task_query' => ObjectSegmentTask::find()
-                    ->select(['ostl_tl_id'])
-                    ->innerJoin([
-                        'object_segment_list_query' => ObjectSegmentList::find()
-                            ->select(['osl_id'])
-                            ->innerJoin(
-                                ObjectSegmentType::tableName(),
-                                'osl_ost_id = ost_id AND ost_key = :keyLead',
-                                ['keyLead' => ObjectSegmentKeyContract::TYPE_KEY_LEAD]
-                            )
-                            ->innerJoin([
-                                'lead_data_query' => LeadData::find()
-                                    ->select(['ld_field_value'])
-                                    ->andWhere(['ld_lead_id' => $this->lead->id])
-                                    ->groupBy(['ld_field_value'])
-                            ], 'lead_data_query.ld_field_value = object_segment_list.osl_key')
-                            ->andWhere(['osl_enabled' => true])
-                            ->distinct()
-                    ], 'osl_id = ostl_osl_id')
-                    ->groupBy(['ostl_tl_id'])
-            ], 'object_segment_task_query.ostl_tl_id = task_list.tl_id')
-            ->where(['tl_enable_type' => 1])
-            ->distinct()
-            ->all();
     }
 
     public function hasActiveLeadObjectSegment(): bool
