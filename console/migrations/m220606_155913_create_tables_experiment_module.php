@@ -25,7 +25,8 @@ class m220606_155913_create_tables_experiment_module extends Migration
                 'ext_id' => $this->bigPrimaryKey(),
                 'ext_target_id' => $this->bigInteger()->notNull(),
                 'ext_target_type_id' => $this->tinyInteger()->notNull(),
-                'ext_experiment_id' => $this->bigInteger()->notNull()
+                'ext_experiment_id' => $this->bigInteger()->notNull(),
+                'ext_created_dt' => $this->dateTime()
             ]);
             $this->addForeignKey(
                 'fk-experiment_target-experiment_id',

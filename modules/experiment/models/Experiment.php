@@ -85,7 +85,8 @@ class Experiment extends ActiveRecord
         $experimentTarget = new ExperimentTarget([
                                                      'ext_target_type_id' => $targetTypeId,
                                                      'ext_target_id'      => $targetId,
-                                                     'ext_experiment_id'  => $this->ex_id
+                                                     'ext_experiment_id'  => $this->ex_id,
+                                                     'ext_created_dt'     => date('Y-m-d H:i:s')
                                                  ]);
         return $experimentTarget->save();
     }
