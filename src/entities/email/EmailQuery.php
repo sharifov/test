@@ -60,4 +60,14 @@ class EmailQuery extends ActiveQuery
             ->join('LEFT JOIN', ['ec' => EmailContact::tableName()], 'ec.ec_email_id = e_id')
             ->andWhere(['ec.ec_address_id' => $address_ids]);
     }
+
+    public function lead(int $leadId)
+    {
+        return $this->leftJoin('email_lead', 'email_lead.el_email_id = e_id')->andWhere(['el_lead_id' => $leadId]);
+    }
+
+    public function case(int $caseId)
+    {
+        return $this->leftJoin('email_case', 'ec_email_id = e_id')->andWhere(['ec_case_id' => $caseId]);
+    }
 }
