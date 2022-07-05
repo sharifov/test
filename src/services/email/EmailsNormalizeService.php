@@ -160,13 +160,11 @@ class EmailsNormalizeService
     {
         $connection = \Yii::$app->getDb();
         $command = $connection->createCommand(
-            "SELECT COUNT(emo.e_id) as total
+            "SELECT COUNT(emo.e_id)
              FROM `".Email::tableName()."` emn
             INNER JOIN `".EmailOld::tableName()."` emo ON emo.e_id = emn.e_id"
             );
-        $result = $command->queryAll();
-
-        return  $result[0]['total'];
+        return $command->queryScalar();
     }
 
     public function getErrors()
