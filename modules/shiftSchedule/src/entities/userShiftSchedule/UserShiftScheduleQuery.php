@@ -354,4 +354,33 @@ class UserShiftScheduleQuery
                 ['<=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($endDt))]
             ]);
     }
+
+    /**
+     * @return UserShiftSchedule[]
+     */
+    public static function getPendingListWithIntersectionByWTAndWTR(): array
+    {
+        $curTime = date('Y-m-d H:i:s');
+        $ussTableName = UserShiftSchedule::tableName();
+        $ussStatusDone = UserShiftSchedule::STATUS_DONE;
+
+        return UserShiftSchedule::find()
+            ->alias('ussPending')
+            ->where(['ussPending.uss_status_id' => UserShiftSchedule::STATUS_PENDING])
+            ->andWhere(['AND',
+                ['<=', 'ussPending.uss_start_utc_dt', $curTime],
+            ])
+            ->andWhere(['AND',
+                ['>=', 'ussPending.uss_end_utc_dt', $curTime],
+            ])
+            ->rightJoin(
+                "{$ussTableName} AS ussDone",
+                "ussPending.uss_user_id = ussDone.uss_user_id 
+                AND ussDone.uss_start_utc_dt <= '{$curTime}' 
+                AND ussDone.uss_end_utc_dt >= '{$curTime}' 
+                AND ussDone.uss_status_id = {$ussStatusDone}
+                AND ussDone.uss_sst_id IN (1, 2)"
+            )
+            ->all();
+    }
 }
