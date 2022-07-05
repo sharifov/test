@@ -35,7 +35,7 @@ class OtpEmailViewHelper extends View implements TwoFactorViewHelperInterface
             $userProfile->updateOtpData($this->service->hashKey((string)$code), $curDateTime->add($dateInterval));
             $userProfile->save();
 
-            $emailTemplate = $this->renderAjax('/site/2fa/email_template', [
+            $emailTemplate = $this->render('/site/2fa/email_template', [
                 'code' => $code,
                 'secondsRemain' => $userProfile->getOtpSecondsLeft(),
                 'emailSubject' => SettingHelper::getOtpEmailTemplateType()
