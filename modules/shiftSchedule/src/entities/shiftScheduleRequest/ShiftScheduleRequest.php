@@ -72,6 +72,8 @@ class ShiftScheduleRequest extends ActiveRecord
         self::STATUS_REMOVED => 'removed',
     ];
 
+    public const DECLINE_BY_SYSTEM_DESCRIPTION = 'Declined by system';
+
     /**
      * {@inheritdoc}
      */
