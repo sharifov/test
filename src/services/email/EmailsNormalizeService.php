@@ -2,60 +2,43 @@
 
 namespace src\services\email;
 
-use src\entities\email\EmailAddress;
-use src\entities\email\EmailBody;
-use src\entities\email\EmailBlob;
-use src\helpers\email\TextConvertingHelper;
-use src\entities\email\EmailParams;
-use src\entities\email\EmailContact;
-use src\entities\email\Email;
+use common\components\CommunicationService;
 use common\models\Client;
 use common\models\Email as EmailOld;
-use src\entities\cases\Cases;
 use common\models\Lead;
+use modules\featureFlag\FFlag;
+use src\auth\Auth;
+use src\entities\cases\Cases;
+use src\entities\email\Email;
+use src\entities\email\EmailAddress;
+use src\entities\email\EmailBlob;
+use src\entities\email\EmailBody;
+use src\entities\email\EmailContact;
 use src\entities\email\EmailLog;
 use src\entities\email\form\EmailCreateForm;
-use src\auth\Auth;
-use common\components\CommunicationService;
-use yii\helpers\VarDumper;
+use src\entities\email\helpers\EmailContactType;
 use src\entities\email\helpers\EmailStatus;
-use modules\featureFlag\FFlag;
-use src\services\abtesting\email\EmailTemplateOfferABTestingService;
+use src\entities\email\helpers\EmailType;
+use src\helpers\app\AppHelper;
+use src\helpers\email\TextConvertingHelper;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\leadUserData\entity\LeadUserData;
 use src\model\leadUserData\entity\LeadUserDataDictionary;
 use src\model\leadUserData\repository\LeadUserDataRepository;
-use yii\helpers\ArrayHelper;
-use src\helpers\app\AppHelper;
+use src\services\abtesting\email\EmailTemplateOfferABTestingService;
 use Yii;
-use src\entities\email\helpers\EmailType;
-use src\entities\email\helpers\EmailContactType;
+use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  *
  * Class EmailsNormalizeService
  *
- * @property Email $email
- * @property EmailLog $emailLog
- * @property EmailParams $emailParams
- * @property EmailBody $emailBody
- * @property EmailBlob $emailBlob
- * @property EmailContact[] $emailContacts
- * @property bool $isNew
- *
  */
 class EmailsNormalizeService
 {
-    public $isNew;
-    public $emailBody;
-    public $emailBlob;
-    public $emailContacts;
-    public $email;
-    public $emailLog;
-    public $emailParams;
-    public $errors = [];
 
     public static function newInstance()
     {
