@@ -31,13 +31,15 @@ use src\services\abtesting\email\EmailTemplateOfferABTestingService;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
+use frontend\models\LeadPreviewEmailForm;
+use src\exception\EmailNotSentException;
 
 /**
  *
  * Class EmailsNormalizeService
  *
  */
-class EmailsNormalizeService
+class EmailsNormalizeService implements EmailServiceInterface
 {
 
     public static function newInstance()
@@ -148,11 +150,6 @@ class EmailsNormalizeService
             INNER JOIN `".EmailOld::tableName()."` emo ON emo.e_id = emn.e_id"
             );
         return $command->queryScalar();
-    }
-
-    public function getErrors()
-    {
-        return $this->errors;
     }
 
     public function create(EmailCreateForm $form)
@@ -275,9 +272,9 @@ class EmailsNormalizeService
      *
      * @param Email $email
      * @param array $data
-     * @throws \RuntimeException
+     * @throws \RuntimeException|EmailNotSentException
      */
-    public function sendMail(Email $email, array $data = [])
+    public function sendMail($email, array $data = [])
     {
         /** @var CommunicationService $communication */
         $communication = Yii::$app->communication;
@@ -319,7 +316,7 @@ class EmailsNormalizeService
             if ($request && isset($request['error']) && $request['error']) {
                 $errorData = @json_decode($request['error'], true);
                 $errorMessage = $errorData['message'] ?: $request['error'];
-                throw new \Exception($errorMessage);
+                throw new EmailNotSentException($email->emailTo, $errorMessage);
             }
             /** @fflag FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES, A/B testing for email offer templates enable/disable */
             if (EmailStatus::notError($email->e_status_id) && Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES)) {
@@ -366,5 +363,10 @@ class EmailsNormalizeService
             $email->statusToError('Communication error: ' . $error);
             throw new \RuntimeException($error);
         }
+    }
+
+    public function createFromLead(LeadPreviewEmailForm $previewEmailForm, Lead $lead, array $attachments = []): Email
+    {
+
     }
 }
