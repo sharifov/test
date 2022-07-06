@@ -1240,8 +1240,7 @@ class CallController extends FController
         $cacheKey = 'call-recording-url-' . $callSid . '-user-' . Auth::id();
 
         try {
-            $callRecordSid = Yii::$app->cacheFile->get($cacheKey);
-            if (!$callRecordSid) {
+            if (!$callRecordSid = Yii::$app->cacheFile->get($cacheKey)) {
                 $callLogRecord = CallLogQuery::getCallLogRecordByCallSid($callSid);
 
                 if ($callLogRecord && !empty($callLogRecord['clr_record_sid'])) {
@@ -1263,19 +1262,9 @@ class CallController extends FController
                     }
                 }
             }
-
-            if ($callRecordSid) {
-                $dto = new CallLogRecordListenAbacDto(CallLog::findOne(['cl_call_sid' => $callSid]), Auth::user());
-                if (\Yii::$app->abac->can($dto, CallLogAbacObject::OBJECT_ACT_INDEX, CallLogAbacObject::ACTION_LISTEN, Auth::user())) {
-                    header('X-Accel-Redirect: ' . Yii::$app->communication->xAccelRedirectCommunicationUrl . $callRecordSid);
-                } else {
-                    throw new ForbiddenHttpException('You can not hear this record');
-                }
-            }
+            header('X-Accel-Redirect: ' . Yii::$app->communication->xAccelRedirectCommunicationUrl . $callRecordSid);
         } catch (NotFoundException $e) {
             throw new NotFoundHttpException($e->getMessage());
-        } catch (ForbiddenHttpException $e) {
-            throw new ForbiddenHttpException($e->getMessage());
         }
     }
 

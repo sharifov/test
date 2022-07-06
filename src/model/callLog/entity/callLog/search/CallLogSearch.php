@@ -6,7 +6,6 @@ use common\models\Call;
 use common\models\Client;
 use common\models\Employee;
 use common\models\PhoneBlacklist;
-use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use src\auth\Auth;
 use src\model\callLog\entity\callLog\CallLogCategory;
@@ -266,17 +265,6 @@ class CallLogSearch extends CallLog
         $query->andFilterWhere(['like', 'cl_call_sid', $this->cl_call_sid])
             ->andFilterWhere(['like', 'cl_phone_from', $this->cl_phone_from])
             ->andFilterWhere(['like', 'cl_phone_to', $this->cl_phone_to]);
-
-        /*
-         * Filtering call logs by department id of current user
-         */
-        /** @var Query $filterByDepartmentSubQuery */
-        $filterByDepartmentSubQuery = new Query();
-        $filterByDepartmentSubQuery
-            ->select('ud_dep_id')
-            ->from(UserDepartment::tableName())
-            ->where(['ud_user_id' => $user->getPrimaryKey()]);
-        $query->where(['IN', 'cl_department_id', $filterByDepartmentSubQuery]);
 
         return $dataProvider;
     }
