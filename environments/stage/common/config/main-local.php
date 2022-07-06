@@ -111,12 +111,12 @@ return [
         ],
         'communication' => [
             'class' => \common\components\CommunicationService::class,
-            'host' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMUNICATION_HOST'),
-            'url' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMUNICATION_URL'),
-            'username' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMUNICATION_USERNAME'),
-            'password' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMUNICATION_PASSWORD'),
-            'voipApiUsername' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMUNICATION_VOIPAPIUSERNAME'),
-            'xAccelRedirectCommunicationUrl' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMUNICATION_XACCELREDIRECTCOMMUNICATIONURL'),
+            'host' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMS_HOST'),
+            'url' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMS_URL'),
+            'username' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMS_USERNAME'),
+            'password' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMS_PASSWORD'),
+            'voipApiUsername' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMS_VOIPAPIUSERNAME'),
+            'xAccelRedirectCommunicationUrl' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMS_XACCELREDIRECTCOMMSURL'),
         ],
         'hybrid' => [
             'class' => \common\components\HybridService::class,
