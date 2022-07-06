@@ -33,7 +33,6 @@ use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
-use yii\web\BadRequestHttpException;
 
 /**
  * This is the model class for table "quotes".
