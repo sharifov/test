@@ -1,6 +1,6 @@
 <?php
 
-namespace src\exceptions;
+namespace src\exception;
 
 class CreateModelException extends \RuntimeException
 {
