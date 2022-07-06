@@ -9,6 +9,7 @@ use common\models\query\QuoteQuery;
 use frontend\helpers\JsonHelper;
 use frontend\helpers\QuoteHelper;
 use modules\featureFlag\FFlag;
+use modules\lead\src\services\LeadFlightRequestService;
 use src\behaviors\metric\MetricQuoteCounterBehavior;
 use src\behaviors\quote\ClientCurrencyBehavior;
 use src\entities\EventTrait;
@@ -1720,7 +1721,7 @@ class Quote extends \yii\db\ActiveRecord
     public function getQuoteTripsData()
     {
         $trips = [];
-        $leadFlightSegments = $this->lead->getFlightSegments();
+        $leadFlightSegments = (new LeadFlightRequestService($this->lead))->getFlightSegments();
 
         if (!$this->quoteTrips) {
             return $this->getTripsFromDumpLikeSearch();
@@ -1789,9 +1790,9 @@ class Quote extends \yii\db\ActiveRecord
                     $segmentData = array_merge(
                         $segmentData,
                         [
-                            'isChangedOrigin' => QuoteHelper::isChangedAttribute('origin', $segment->qs_departure_airport_code, $keySegm, $leadFlightSegments),
-                            'isChangedDestination' => QuoteHelper::isChangedAttribute('destination', $segment->qs_arrival_airport_code, $keySegm, $leadFlightSegments),
-                            'isChangedDeparture' => QuoteHelper::isChangedAttribute('departure', $departureDateTime->format('Y-m-d'), $keySegm, $leadFlightSegments)
+                            'isChangedOrigin' => QuoteHelper::isChangedAttribute(LeadFlightRequestService::ATTRIBUTE_ORIGIN, $segment->qs_departure_airport_code, $keySegm, $leadFlightSegments),
+                            'isChangedDestination' => QuoteHelper::isChangedAttribute(LeadFlightRequestService::ATTRIBUTE_DESTINATION, $segment->qs_arrival_airport_code, $keySegm, $leadFlightSegments),
+                            'isChangedDeparture' => QuoteHelper::isChangedAttribute(LeadFlightRequestService::ATTRIBUTE_DEPARTURE, $departureDateTime->format('Y-m-d'), $keySegm, $leadFlightSegments)
                         ]
                     );
                 }
@@ -1930,7 +1931,7 @@ class Quote extends \yii\db\ActiveRecord
         $quoteCabinClasses = [];
         $quoteMarketingAirlines = [];
         $quoteOperatingAirlines = [];
-        $leadFlightSegments = $this->lead->getFlightSegments();
+        $leadFlightSegments = (new LeadFlightRequestService($this->lead))->getFlightSegments();
 
         $maxStopsQuantity = 0;
 
@@ -2020,9 +2021,9 @@ class Quote extends \yii\db\ActiveRecord
                     $tripData = array_merge(
                         $tripData,
                         [
-                            'isChangedOrigin' => QuoteHelper::isChangedAttribute('origin', $firstSegment->qs_departure_airport_code, $keyTrip, $leadFlightSegments),
-                            'isChangedDestination' => QuoteHelper::isChangedAttribute('destination', $lastSegment->qs_arrival_airport_code, $keyTrip, $leadFlightSegments),
-                            'isChangedDeparture' => QuoteHelper::isChangedAttribute('departure', date('Y-m-d', strtotime($firstSegment->qs_departure_time)), $keyTrip, $leadFlightSegments)
+                            'isChangedOrigin' => QuoteHelper::isChangedAttribute(LeadFlightRequestService::ATTRIBUTE_ORIGIN, $firstSegment->qs_departure_airport_code, $keyTrip, $leadFlightSegments),
+                            'isChangedDestination' => QuoteHelper::isChangedAttribute(LeadFlightRequestService::ATTRIBUTE_DESTINATION, $lastSegment->qs_arrival_airport_code, $keyTrip, $leadFlightSegments),
+                            'isChangedDeparture' => QuoteHelper::isChangedAttribute(LeadFlightRequestService::ATTRIBUTE_DEPARTURE, date('Y-m-d', strtotime($firstSegment->qs_departure_time)), $keyTrip, $leadFlightSegments)
                         ]
                     );
                 }
@@ -2072,7 +2073,7 @@ class Quote extends \yii\db\ActiveRecord
         $trips = [];
         $tripIndex = 0;
         $segments = self::parseDump($this->reservation_dump, false);
-        $leadFlightSegments = $this->lead->getFlightSegments();
+        $leadFlightSegments = (new LeadFlightRequestService($this->lead))->getFlightSegments();
 
         foreach ($segments as $key => $segment) {
             if (!isset($segment['cabin']) || empty($segment['cabin'])) {
@@ -2109,9 +2110,9 @@ class Quote extends \yii\db\ActiveRecord
                 $segmentData = array_merge(
                     $segmentData,
                     [
-                        'isChangedOrigin' => QuoteHelper::isChangedAttribute('origin', $segment['departureAirport'], $key, $leadFlightSegments),
-                        'isChangedDestination' => QuoteHelper::isChangedAttribute('destination', $segment['arrivalAirport'], $key, $leadFlightSegments),
-                        'isChangedDeparture' => QuoteHelper::isChangedAttribute('departure', $segment['departureDateTime']->format('Y-m-d'), $key, $leadFlightSegments)
+                        'isChangedOrigin' => QuoteHelper::isChangedAttribute(LeadFlightRequestService::ATTRIBUTE_ORIGIN, $segment['departureAirport'], $key, $leadFlightSegments),
+                        'isChangedDestination' => QuoteHelper::isChangedAttribute(LeadFlightRequestService::ATTRIBUTE_DESTINATION, $segment['arrivalAirport'], $key, $leadFlightSegments),
+                        'isChangedDeparture' => QuoteHelper::isChangedAttribute(LeadFlightRequestService::ATTRIBUTE_DEPARTURE, $segment['departureDateTime']->format('Y-m-d'), $key, $leadFlightSegments)
                     ]
                 );
             }

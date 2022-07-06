@@ -365,9 +365,4 @@ class LeadFlightSegment extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Lead::class, ['id' => 'lead_id']);
     }
-
-    public static function getAttributesForCheckChanged(): array
-    {
-        return ['origin', 'destination', 'departure'];
-    }
 }
