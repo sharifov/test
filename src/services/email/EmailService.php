@@ -13,6 +13,18 @@ use src\repositories\cases\CasesRepository;
 use src\repositories\lead\LeadRepository;
 use src\repositories\NotFoundException;
 use Yii;
+use frontend\models\LeadPreviewEmailForm;
+use yii\helpers\VarDumper;
+use src\exceptions\CreateModelException;
+use src\entities\email\helpers\EmailStatus;
+use src\services\abtesting\email\EmailTemplateOfferABTestingService;
+use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
+use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
+use src\model\leadUserData\entity\LeadUserData;
+use src\model\leadUserData\repository\LeadUserDataRepository;
+use src\helpers\app\AppHelper;
+use src\exception\EmailNotSentException;
 
 /**
  * Class EmailService
@@ -20,7 +32,7 @@ use Yii;
  * @property LeadRepository $leadRepository
  * @property CasesRepository $casesRepository
  */
-class EmailService
+class EmailService implements EmailServiceInterface
 {
     /**
      * @var LeadRepository
@@ -269,5 +281,101 @@ class EmailService
     public static function prepareEmailBody(string $body): string
     {
         return str_replace('class="editable"', 'class="editable" contenteditable="true" ', $body);
+    }
+
+    /**
+     *
+     * @param Email $email
+     * @param array $data
+     * @throws \RuntimeException|EmailNotSentException
+     */
+    public function sendMail($email, array $data = [])
+    {
+        /** @var CommunicationService $communication */
+        $communication = Yii::$app->communication;
+        $data['project_id'] = $email->e_project_id;
+
+        $content_data['email_body_html'] = $email->getEmailBodyHtml();
+        $content_data['email_body_text'] = $email->e_email_body_text;
+        $content_data['email_subject'] = $email->e_email_subject;
+        $content_data['email_reply_to'] = $email->e_email_from;
+        $content_data['email_cc'] = $email->e_email_cc;
+        $content_data['email_bcc'] = $email->e_email_bc;
+
+        if ($email->e_email_from_name) {
+            $content_data['email_from_name'] = $email->e_email_from_name;
+        }
+
+        if ($email->e_email_to_name) {
+            $content_data['email_to_name'] = $email->e_email_to_name;
+        }
+
+        if ($email->e_message_id) {
+            $content_data['email_message_id'] = $this->e_message_id;
+        }
+
+        $tplType = $email->eTemplateType ? $email->eTemplateType->etp_key : null;
+        $language = $email->e_language_id ?? 'en-US';
+
+        try {
+
+            $request = $communication->mailSend($email->e_project_id, $tplType, $email->e_email_from, $email->e_email_to, $content_data, $data, $language, 0);
+
+            if ($request && isset($request['data']['eq_status_id'])) {
+                $email->e_status_id = $request['data']['eq_status_id'];
+                $email->e_communication_id = $request['data']['eq_id'];
+                $email->save();
+            }
+
+            if ($request && isset($request['error']) && $request['error']) {
+                $errorData = @json_decode($request['error'], true);
+                $errorMessage = $errorData['message'] ?: $request['error'];
+                throw new EmailNotSentException($email->e_email_to, $errorMessage);
+            }
+            /** @fflag FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES, A/B testing for email offer templates enable/disable */
+            if (EmailStatus::notError($email->e_status_id) && \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES)) {
+                if ($email->e_template_type_id && $email->e_project_id && isset($email->eLead)) {
+                    EmailTemplateOfferABTestingService::incrementCounterByTemplateAndProjectIds(
+                        $email->e_template_type_id,
+                        $email->e_project_id,
+                        $email->eLead->l_dep_id
+                        );
+                }
+            }
+            if ($email->e_id && $email->e_lead_id && LeadPoorProcessingService::checkEmailTemplate($tplType)) {
+                LeadPoorProcessingService::addLeadPoorProcessingRemoverJob(
+                    $email->e_lead_id,
+                    [
+                        LeadPoorProcessingDataDictionary::KEY_NO_ACTION,
+                        LeadPoorProcessingDataDictionary::KEY_EXPERT_IDLE,
+                        LeadPoorProcessingDataDictionary::KEY_SEND_SMS_OFFER,
+                    ],
+                    LeadPoorProcessingLogStatus::REASON_EMAIL
+                    );
+
+                if (($lead = $email->eLead) && $lead->employee_id && $lead->isProcessing()) {
+                    try {
+                        $leadUserData = LeadUserData::create(
+                            LeadUserDataDictionary::TYPE_EMAIL_OFFER,
+                            $lead->id,
+                            $lead->employee_id,
+                            (new \DateTimeImmutable())
+                            );
+                        (new LeadUserDataRepository($leadUserData))->save(true);
+                    } catch (\RuntimeException | \DomainException $throwable) {
+                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['emailId' => $email->e_id]);
+                        \Yii::warning($message, 'EmailService:LeadUserData:Exception');
+                    } catch (\Throwable $throwable) {
+                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['emailId' => $email->e_id]);
+                        \Yii::error($message, 'EmailService:LeadUserData:Throwable');
+                    }
+                }
+            }
+        } catch (\Throwable $exception) {
+            $error = VarDumper::dumpAsString($exception->getMessage());
+            \Yii::error($error, 'EmailService:sendMail:mailSend:exception');
+            $email->statusToError('Communication error: ' . $error);
+            throw new \RuntimeException($error);
+        }
     }
 }
