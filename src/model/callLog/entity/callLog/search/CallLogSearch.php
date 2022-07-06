@@ -6,6 +6,7 @@ use common\models\Call;
 use common\models\Client;
 use common\models\Employee;
 use common\models\PhoneBlacklist;
+use common\models\ProjectEmployeeAccess;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use src\auth\Auth;
@@ -269,6 +270,14 @@ class CallLogSearch extends CallLog
 
         /*
          * Filtering call logs by department id of current user
+         *
+         * Adds new selection conditions into the `$query`:
+         * > `... AND (('cl_department_id' IN $DEPARTMENT_LIST$) OR ('cl_project_id' IN $PROJECT_LIST$))`
+         *
+         * When:
+         * - $DEPARTMENT_LIST$ is a subquery getting user department
+         * - $PROJECT_LIST$ is a subquery getting user projects
+         *
          */
         /** @var Query $filterByDepartmentSubQuery */
         $filterByDepartmentSubQuery = new Query();
@@ -276,7 +285,13 @@ class CallLogSearch extends CallLog
             ->select('ud_dep_id')
             ->from(UserDepartment::tableName())
             ->where(['ud_user_id' => $user->getPrimaryKey()]);
-        $query->where(['IN', 'cl_department_id', $filterByDepartmentSubQuery]);
+        /** @var Query $filterByProjectSubQuery */
+        $filterByProjectSubQuery = new Query();
+        $filterByProjectSubQuery
+            ->select('project_id')
+            ->from(ProjectEmployeeAccess::tableName())
+            ->where(['employee_id' => $user->getPrimaryKey()]);
+        $query->andWhere(['OR', ['IN', 'cl_department_id', $filterByDepartmentSubQuery], ['IN', 'cl_project_id', $filterByProjectSubQuery]]);
 
         return $dataProvider;
     }
