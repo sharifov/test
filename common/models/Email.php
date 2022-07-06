@@ -27,6 +27,8 @@ use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use src\entities\email\Email as EmailNormalized;
+use src\entities\email\helpers\EmailType;
+use src\helpers\email\MaskEmailHelper;
 
 /**
  * This is the model class for table "email".
@@ -944,5 +946,30 @@ class Email extends \yii\db\ActiveRecord
     public function statusToCancel(): void
     {
         $this->e_status_id = self::STATUS_CANCEL;
+    }
+
+    /**
+     *
+     * @param unknown $errorMessage
+     * @return Email
+     */
+    public function statusToError($errorMessage)
+    {
+        $this->updateAttributes([
+            'e_error_message' => $errorMessage,
+            'e_status_id' => EmailStatus::ERROR,
+        ]);
+
+        return $this;
+    }
+
+    public function getEmailFrom(): string
+    {
+        return EmailType::isInbox($this->e_type_id) ?  MaskEmailHelper::masking($this->e_email_from): $this->e_email_from;
+    }
+
+    public function getEmailTo(): string
+    {
+        return EmailType::isOutbox($this->e_type_id) ?  MaskEmailHelper::masking($this->e_email_to): $this->e_email_to;
     }
 }
