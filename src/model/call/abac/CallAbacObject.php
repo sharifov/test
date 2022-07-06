@@ -78,6 +78,90 @@ class CallAbacObject extends AbacBaseModel implements AbacInterface
      */
     public static function getObjectAttributeList(): array
     {
-        return self::OBJECT_ATTRIBUTE_LIST;
+        $attributes = self::OBJECT_ATTRIBUTE_LIST;
+        $attributes[self::OBJ_CALL_LOG] = array_merge(
+            self::getExistAttributeList($attributes, self::OBJ_CALL_LOG),
+            [
+                [
+                    'optgroup' => 'Call Log',
+                    'id' => self::NS . 'is_call_owner',
+                    'field' => 'is_call_owner',
+                    'label' => 'Is Record Owner',
+                    'type' => self::ATTR_TYPE_BOOLEAN,
+                    'input' => self::ATTR_INPUT_RADIO,
+                    'multiple' => false,
+                    'default_value' => true,
+                    'vertical' => true,
+                    'values' => ['true' => 'True', 'false' => 'False'],
+                    'operators' =>  [self::OP_EQUAL2]
+                ],
+                [
+                    'optgroup' => 'Call Log',
+                    'id' => self::NS . 'record_department',
+                    'field' => 'record_department',
+                    'label' => 'Department',
+                    'type' => self::ATTR_TYPE_STRING,
+                    'input' => self::ATTR_INPUT_SELECT,
+                    'multiple' => false,
+                    'values' => self::getDepartmentList(),
+                    'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2]
+                ],
+                [
+                    'optgroup' => 'Call Log',
+                    'id' => self::NS . 'type_id',
+                    'field' => 'type_id',
+                    'label' => 'Type',
+                    'type' => self::ATTR_TYPE_INTEGER,
+                    'input' => self::ATTR_INPUT_SELECT,
+                    'multiple' => false,
+                    'values' => \src\model\callLog\entity\callLog\CallLogType::getList(),
+                    'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2]
+                ],
+                [
+                    'optgroup' => 'Call Log',
+                    'id' => self::NS . 'project_id',
+                    'field' => 'project_id',
+                    'label' => 'Project',
+                    'type' => self::ATTR_TYPE_INTEGER,
+                    'input' => self::ATTR_INPUT_SELECT,
+                    'multiple' => false,
+                    'values' => \common\models\Project::getList(),
+                    'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2]
+                ],
+                [
+                    'optgroup' => 'Call Log',
+                    'id' => self::NS . 'category_id',
+                    'field' => 'category_id',
+                    'label' => 'Category',
+                    'type' => self::ATTR_TYPE_INTEGER,
+                    'input' => self::ATTR_INPUT_SELECT,
+                    'multiple' => false,
+                    'values' => \common\models\Call::SOURCE_LIST,
+                    'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2]
+                ],
+                [
+                    'optgroup' => 'Call Log',
+                    'id' => self::NS . 'status_id',
+                    'field' => 'status_id',
+                    'label' => 'Status',
+                    'type' => self::ATTR_TYPE_INTEGER,
+                    'input' => self::ATTR_INPUT_SELECT,
+                    'multiple' => false,
+                    'values' => \common\models\Call::STATUS_LIST,
+                    'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2]
+                ]
+            ]);
+
+        return $attributes;
+    }
+
+    /**
+     * @param array $list
+     * @param String $action
+     * @return array
+     */
+    protected static function getExistAttributeList(array $list, String $action): array
+    {
+        return isset($list[$action]) ? $list[$action] : [];
     }
 }
