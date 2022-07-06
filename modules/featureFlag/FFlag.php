@@ -18,6 +18,7 @@ class FFlag
     public const FF_KEY_LEAD_TASK_ASSIGN = 'leadTaskAssign';
     public const FF_KEY_SALE_VIEW_IN_LEAD_ENABLE = 'saleViewInLeadEnable';
     public const FF_KEY_BEQ_ENABLE = 'beqEnable';
+    public const FF_KEY_COMPARE_QUOTE_AND_LEAD_FLIGHT_REQUEST = 'compareQuoteAndLeadFlightRequest';
 
     public const FF_KEY_LIST = [
         self::FF_KEY_LPP_ENABLE => self::FF_KEY_LPP_ENABLE,
@@ -31,6 +32,7 @@ class FFlag
         self::FF_KEY_PHONE_WIDGET_ACCEPTED_PANEL_ENABLED => self::FF_KEY_PHONE_WIDGET_ACCEPTED_PANEL_ENABLED,
         self::FF_KEY_LEAD_TASK_ASSIGN => self::FF_KEY_LEAD_TASK_ASSIGN,
         self::FF_KEY_SALE_VIEW_IN_LEAD_ENABLE => self::FF_KEY_SALE_VIEW_IN_LEAD_ENABLE,
+        self::FF_KEY_COMPARE_QUOTE_AND_LEAD_FLIGHT_REQUEST => self::FF_KEY_COMPARE_QUOTE_AND_LEAD_FLIGHT_REQUEST,
     ];
 
     public const FF_CATEGORY_LEAD = 'lead';

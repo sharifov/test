@@ -5298,4 +5298,17 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         $this->cabin = self::CABIN_ECONOMY;
     }
+
+    public function getFlightSegments(): array
+    {
+        $segments = [];
+        foreach ($this->leadFlightSegments as $key => $segment) {
+            foreach (LeadFlightSegment::getAttributesForCheckChanged() as $attribute) {
+                if (isset($segment->{$attribute})) {
+                    $segments[$key][$attribute] = $segment->{$attribute};
+                }
+            }
+        }
+        return $segments;
+    }
 }

@@ -536,4 +536,21 @@ class QuoteHelper
             Yii::$app->cacheFile->delete($keyCache);
         }
     }
+
+    public static function isChangedAttribute(string $attributeName, string $attributeValue, int $key, array $leadFlightSegments): bool
+    {
+        $isChanged = true;
+
+        if (!array_key_exists($key, $leadFlightSegments) && ($countLeadFlightSegments = count($leadFlightSegments)) > 0) {
+            $key = $countLeadFlightSegments - 1;
+        }
+
+        if (array_key_exists($key, $leadFlightSegments)) {
+            if (array_key_exists($attributeName, $leadFlightSegments[$key])) {
+                $isChanged = $attributeValue !== $leadFlightSegments[$key][$attributeName];
+            }
+        }
+
+        return $isChanged;
+    }
 }
