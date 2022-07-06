@@ -25,6 +25,7 @@ use modules\qaTask\QaTaskModule;
 use modules\requestControl\RequestControlModule;
 use common\components\i18n\Formatter;
 use modules\rentCar\RentCarModule;
+use modules\experiment\ExperimentModule;
 use yii\log\DbTarget;
 use yii\log\FileTarget;
 use yii\web\JqueryAsset;
@@ -444,6 +445,10 @@ return [
         ],
         'cruise' => [
             'class' => CruiseModule::class,
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
+        ],
+        'experiment' => [
+            'class' => ExperimentModule::class,
             'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
         ],
         'smart-search' => [

@@ -6,6 +6,8 @@ use common\models\Client;
 use common\models\Lead;
 use common\models\LeadFlightSegment;
 use common\models\LeadPreferences;
+use modules\experiment\models\Experiment;
+use modules\experiment\models\ExperimentTarget;
 use src\forms\lead\EmailCreateForm;
 use src\forms\lead\PhoneCreateForm;
 use src\model\clientData\service\ClientDataService;
@@ -19,6 +21,7 @@ use src\services\lead\calculator\LeadTripTypeCalculator;
 use src\services\lead\calculator\SegmentDTO;
 use src\services\lead\LeadHashGenerator;
 use src\services\TransactionManager;
+use yii\helpers\VarDumper;
 
 /**
  * Class Handler
@@ -31,12 +34,14 @@ use src\services\TransactionManager;
  * @property LeadPreferencesRepository $leadPreferencesRepository
  *
  * @property array $leadDataInserted
+ * @property array $experiments
  * @property array $clientDataInserted
  * @property array $warnings
  */
 class LeadCreateHandler
 {
     private array $leadDataInserted = [];
+    private array $experiments = [];
     private array $clientDataInserted = [];
     private array $warnings = [];
 
@@ -110,7 +115,6 @@ class LeadCreateHandler
             if ($visitorId = $form->clientForm->chat_visitor_id) {
                 $this->clientManageService->addVisitorId($client, $visitorId);
             }
-
             $lead = Lead::createByApiBO($form, $client);
 
             $hash = $this->hashGenerator->generate(
@@ -141,6 +145,8 @@ class LeadCreateHandler
             $leadId = $this->leadRepository->save($lead);
 
             $this->createFlightSegments($leadId, $form->flightsForm);
+
+            ExperimentTarget::processExperimentObjects(ExperimentTarget::EXT_TYPE_LEAD, $leadId, $form->experiments);
 
             if (!empty($form->lead_data)) {
                 $leadDataService = new LeadDataCreateService();

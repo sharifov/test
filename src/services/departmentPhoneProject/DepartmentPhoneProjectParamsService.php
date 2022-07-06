@@ -4,6 +4,7 @@ namespace src\services\departmentPhoneProject;
 
 use common\models\DepartmentPhoneProject;
 use frontend\helpers\JsonHelper;
+use modules\experiment\models\ExperimentTarget;
 use src\helpers\DateHelper;
 use yii\helpers\ArrayHelper;
 
@@ -21,6 +22,24 @@ class DepartmentPhoneProjectParamsService
     public function __construct(DepartmentPhoneProject $departmentPhoneProject)
     {
         $this->departmentPhoneProject = $departmentPhoneProject;
+    }
+
+    public function getPhoneExperiments(): array
+    {
+        if (empty($this->departmentPhoneProject->dpp_params)) {
+            return [];
+        }
+        return array_unique(array_column(ArrayHelper::getValue(JsonHelper::decode($this->departmentPhoneProject->dpp_params), 'experiments', []), 'ex_code'));
+    }
+
+    public function processExperiments(int $targetTypeId, int $phoneListId): void
+    {
+        ExperimentTarget::processExperimentsCodes($targetTypeId, $phoneListId, $this->getPhoneExperiments());
+    }
+
+    public function updateExperiments(int $oldTargetTypeId, int $newTargetTypeId, int $callId): void
+    {
+        ExperimentTarget::updateAll(['ext_target_type_id' => $newTargetTypeId], ['ext_target_type_id' => $oldTargetTypeId, 'ext_target_id' => $callId]);
     }
 
     public function getCallFilterGuard(): array

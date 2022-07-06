@@ -1027,6 +1027,16 @@ class SideBarMenu extends \yii\bootstrap\Widget
             ];
         }
 
+        if (class_exists('\modules\experiment\ExperimentModule')) {
+            $menuModuleItems[] = [
+                'label' => 'Experiments',
+                'url' => 'javascript:',
+                'icon' => 'flask',
+                'items' => \modules\experiment\ExperimentModule::getListMenu()
+            ];
+        }
+
+
         /** @fflag FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE, Object Segment module enable/disable */
         if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE)) {
             $menuModuleItems[] =  [
