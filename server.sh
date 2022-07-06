@@ -58,7 +58,7 @@ if [ "$whatDo" == "init-env" ]; then
 elif [ ! -e "$dockerFolder/.env" ]; then
   printf "Not found .docker/.env Please run init-env command\n"
   exit;
-elif [ ! -e ".env" ]; then
+elif [ ! -e "$currentDir/.env" ]; then
   printf "Not found .env Please run init-env command\n"
   exit;
 fi
@@ -93,6 +93,11 @@ POSTGRES_USER=$(getEnvVar "POSTGRES_USER")
 POSTGRES_PASSWORD=$(getEnvVar "POSTGRES_PASSWORD")
 POSTGRES_DB=$(getEnvVar "POSTGRES_DB")
 
+PHP_XDEBUG_ENABLED=$(getEnvVar "PHP_XDEBUG_ENABLED")
+XDEBUG_CLIENT_HOST=$(getEnvVar "XDEBUG_CLIENT_HOST")
+XDEBUG_CLIENT_PORT=$(getEnvVar "XDEBUG_CLIENT_PORT")
+XDEBUG_IDE_KEY=$(getEnvVar "XDEBUG_IDE_KEY")
+
 tmpDirs=(
   "$dockerFolder/api-nginx/logs"
   "$dockerFolder/centrifugo/logs"
@@ -103,9 +108,11 @@ tmpDirs=(
   "$dockerFolder/mysql/data"
   "$dockerFolder/psql/data"
   "$dockerFolder/ws-nginx/logs"
+  "$currentDir/var/fileStorage"
 )
 
 createTemporallyDirectories () {
+  logoutRoot
   printf "\nCreate temporally directories"
   for str in ${tmpDirs[@]}; do
     if [ ! -e $str ]; then
@@ -227,15 +234,8 @@ destroy () {
 
 applicationUninstall () {
   destroy
-
-#  if [ -e "$currentDir/.docker/mysql/data" ]; then
-#    sudo rm -r -d "$currentDir/.docker/mysql/data"
-#    logoutRoot
-#  fi
-
   removeTemporallyDirectories
   logoutRoot
-
   printf "Server is destroyed\n"
 }
 
@@ -246,6 +246,7 @@ initChown () {
     sudo chown -R "$CURRENT_USER":"$CURRENT_GROUP" "$currentDir/webapi/runtime/"
     sudo chown -R "$CURRENT_USER":"$CURRENT_GROUP" "$currentDir/yii"
     sudo chown -R "$CURRENT_USER":"$CURRENT_GROUP" "$currentDir/yii_test"
+    sudo chown -R "$CURRENT_USER":"$CURRENT_GROUP" "$currentDir/var/fileStorage"
 }
 
 composerInstall () {
@@ -491,6 +492,9 @@ elif [ "$whatDo" == "init-config" ]; then
 
 elif [ "$whatDo" == "migrate" ]; then
   runMigrate
+
+elif [ "$whatDo" == "create-temporally-directories" ]; then
+  createTemporallyDirectories
 
 elif [ "$whatDo" == "init-local-bo" ]; then
   useLocalBo=$(cat $dockerFolder/.env | grep 'USE_LOCAL_BO' | cut -d "=" -f 2)

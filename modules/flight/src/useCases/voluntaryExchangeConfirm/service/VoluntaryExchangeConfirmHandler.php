@@ -94,6 +94,7 @@ class VoluntaryExchangeConfirmHandler
         $request['billing'] = BoRequestDataHelper::fillBillingData($this->confirmForm->getBillingInfoForm());
         $request['payment'] = BoRequestDataHelper::fillPaymentData($this->confirmForm->getPaymentRequestForm());
         $request['exchange'] = $this->prepareExchange();
+        $request['additionalInfo'] = BoRequestDataHelper::prepareAdditionalInfoToBoRequest($this->confirmForm->changeQuote);
         return $request;
     }
 

@@ -8,22 +8,22 @@ use modules\abac\src\entities\AbacInterface;
 class LeadSearchAbacObject extends AbacBaseModel implements AbacInterface
 {
     /** NAMESPACE */
-    public const NS = 'lead/search/';
+    public const NS = 'lead/lead/';
 
     /** OBJECT PERMISSION */
-    public const SIMPLE_SEARCH = self::NS . 'simple_search';
+    public const ADVANCED_SEARCH = self::NS . 'obj/advanced_search';
 
     /** --------------- ACTIONS --------------------------- */
     public const ACTION_ACCESS = 'access';
 
     /** --------------- OBJECT LIST --------------------------- */
     public const OBJECT_LIST = [
-        self::SIMPLE_SEARCH => self::SIMPLE_SEARCH,
+        self::ADVANCED_SEARCH => self::ADVANCED_SEARCH,
     ];
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
-        self::SIMPLE_SEARCH => [self::ACTION_ACCESS],
+        self::ADVANCED_SEARCH => [self::ACTION_ACCESS],
     ];
 
     /** --------------- ATTRIBUTE LIST --------------------------- */

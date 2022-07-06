@@ -21,6 +21,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     /** ACTION PERMISSION */
     public const ACT_USER_CONVERSION  = self::NS . 'act/user-conversion';
     public const ACT_TAKE_LEAD = self::NS . 'act/take-lead';
+    public const ACT_TAKE_LEAD_FROM_CHAT = self::NS . 'act/take-lead-from-chat';
     public const ACT_CREATE_FROM_PHONE_WIDGET = self::NS . 'act/create-from-phone-widget';
     public const ACT_LINK_TO_CALL = self::NS . 'act/link-to-call';
     public const ACT_TAKE_LEAD_FROM_CALL = self::NS . 'act/take-from-call';
@@ -94,6 +95,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::UI_DISPLAY_MARKETING_SOURCE => self::UI_DISPLAY_MARKETING_SOURCE,
         self::CHANGE_SPLIT_TIPS  => self::CHANGE_SPLIT_TIPS,
         self::ACT_CHANGE_OWNER => self::ACT_CHANGE_OWNER,
+        self::ACT_TAKE_LEAD_FROM_CHAT => self::ACT_TAKE_LEAD_FROM_CHAT,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -193,6 +195,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::UI_DISPLAY_MARKETING_SOURCE => [self::ACTION_READ],
         self::CHANGE_SPLIT_TIPS => [self::ACTION_UPDATE],
         self::ACT_CHANGE_OWNER => [self::ACTION_UPDATE],
+        self::ACT_TAKE_LEAD_FROM_CHAT => [self::ACTION_ACCESS],
     ];
 
     public const ATTR_LEAD_IS_OWNER = [
@@ -499,6 +502,16 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_CAN_TAKE_BY_FREQUENCY_MINUTES,
         ],
 
+        self::ACT_TAKE_LEAD_FROM_CHAT    => [
+            self::ATTR_IS_EMPLOYEE_SHIFT_TIME,
+            self::ATTR_IS_IN_PROJECT,
+            self::ATTR_IS_IN_DEPARTMENT,
+            self::ATTR_HAS_APPLIED_QUOTE,
+            self::ATTR_WITHIN_PERSONAL_TAKE_LIMITS,
+            self::ATTR_LEAD_IS_OWNER,
+            self::ATTR_CAN_TAKE_BY_FREQUENCY_MINUTES,
+        ],
+
         self::OBJ_LEAD_PREFERENCES    => [
             self::ATTR_LEAD_IS_OWNER,
             self::ATTR_LEAD_HAS_OWNER,
@@ -620,6 +633,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::UI_BLOCK_CLIENT_INFO][] = $attrStatus;
         $attributeList[self::ACT_TAKE_LEAD][] = $attrStatus;
         $attributeList[self::ACT_TAKE_LEAD_FROM_CALL][] = $attrStatus;
+        $attributeList[self::ACT_TAKE_LEAD_FROM_CHAT][] = $attrStatus;
         $attributeList[self::ACT_PRICE_LINK_RESEARCH][] = $attrStatus;
         $attributeList[self::OBJ_LEAD_PREFERENCES][] = $attrStatus;
         $attributeList[self::OBJ_LEAD][] = $attrStatus;

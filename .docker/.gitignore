@@ -8,3 +8,7 @@
 /frontend-nginx/logs
 /ws-nginx/logs
 /console/.composer
+mysql/dump/*
+!mysql/dump/.gitkeep
+psql/dump/*
+!psql/dump/.gitkeep

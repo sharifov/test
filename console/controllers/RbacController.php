@@ -127,17 +127,33 @@ class RbacController extends Controller
     {
         $subDir = 'src';
         (new RbacMoveToSrc())->move(env('APP_PATH') . DIRECTORY_SEPARATOR . $subDir . DIRECTORY_SEPARATOR . 'rbac', $subDir);
-        if (Yii::$app->cache) {
-            Yii::$app->cache->flush();
-        }
+        Yii::$app->authManager->invalidateCache();
     }
 
     public function actionMoveRulesToSales()
     {
         $subDir = 'sales';
         (new RbacMoveToSrc())->move(env('APP_PATH') . DIRECTORY_SEPARATOR . $subDir . DIRECTORY_SEPARATOR . 'rbac', $subDir);
-        if (Yii::$app->cache) {
-            Yii::$app->cache->flush();
+        Yii::$app->authManager->invalidateCache();
+    }
+
+    public function actionCheckDifferentNamesAndClassNames()
+    {
+        $rules = (new Query())->select(['name', 'data'])->from('auth_rule')->all();
+        foreach ($rules as $rule) {
+            if (strpos($rule['data'], $rule['name']) === false) {
+                VarDumper::dump($rule);
+            }
+        }
+    }
+
+    public function actionCheckSalesNamespaceInRules()
+    {
+        $rules = (new Query())->select(['name', 'data'])->from('auth_rule')->all();
+        foreach ($rules as $rule) {
+            if (strpos($rule['data'], 'sales') !== false) {
+                VarDumper::dump($rule);
+            }
         }
     }
 }

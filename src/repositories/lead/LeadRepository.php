@@ -6,6 +6,7 @@ use common\models\Lead;
 use src\dispatchers\EventDispatcher;
 use src\model\lead\LeadCodeException;
 use src\repositories\NotFoundException;
+use yii\db\Expression;
 
 /**
  * Class LeadRepository
@@ -174,5 +175,17 @@ class LeadRepository
             throw new \RuntimeException('Removing error', LeadCodeException::LEAD_REMOVE);
         }
         $this->eventDispatcher->dispatchAll($lead->releaseEvents());
+    }
+
+    public function findByIdAndNotEmptyBoFlightId(int $id): Lead
+    {
+        if (
+            $lead = Lead::find()
+            ->andWhere(['id' => $id])
+            ->andWhere(new Expression("(bo_flight_id is not null and bo_flight_id <> 0)"))->one()
+        ) {
+            return $lead;
+        }
+        throw new NotFoundException('Lead with Sale is not found', LeadCodeException::LEAD_NOT_FOUND);
     }
 }
