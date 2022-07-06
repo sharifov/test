@@ -7,15 +7,15 @@ use modules\abac\src\entities\AbacPolicy;
 use yii\db\Migration;
 
 /**
- * Class m240622_113840_add_permission_lead_task_list
+ * Class m220607_071540_correction_permission_lead_task_list
  */
-class m240622_113840_add_permission_lead_task_list extends Migration
+class m220607_071540_correction_permission_lead_task_list extends Migration
 {
-    private const AP_SUBJECT = '(hasActiveLeadObjectSegment == true) && (has_owner == true) && (statusId in [1,2,16])';
+    private const AP_SUBJECT = '(r.sub.has_owner == true) && (r.sub.hasActiveLeadObjectSegment == true) && (r.sub.statusId in [1,2,16])';
     private const AP_OBJECT = 'lead/lead/task_list/assign_task';
     private const AP_ACTION = '(access)';
     private const AP_EFFECT = 1;
-    private const AP_SUBJECT_JSON = '{"condition":"AND","rules":[{"id":"lead/lead/task_list/hasActiveLeadObjectSegment","field":"hasActiveLeadObjectSegment","type":"boolean","input":"radio","operator":"==","value":true},{"id":"lead/lead/has_owner","field":"has_owner","type":"boolean","input":"radio","operator":"==","value":true},{"id":"lead/lead/task_list/statusId","field":"statusId","type":"integer","input":"select","operator":"in","value":[1,2,16]}],"not":false,"valid":true}';
+    private const AP_SUBJECT_JSON = '{"condition":"AND","rules":[{"id":"lead/lead/has_owner","field":"has_owner","type":"boolean","input":"radio","operator":"==","value":true},{"id":"lead/lead/task_list/hasActiveLeadObjectSegment","field":"hasActiveLeadObjectSegment","type":"boolean","input":"radio","operator":"==","value":true},{"id":"lead/lead/task_list/statusId","field":"statusId","type":"integer","input":"select","operator":"in","value":[1,2,16]}],"not":false,"valid":true}';
 
     private const GENERATE_HASH_DATA = [
         self::AP_OBJECT,
@@ -29,6 +29,12 @@ class m240622_113840_add_permission_lead_task_list extends Migration
      */
     public function safeUp()
     {
+        $this->update(
+            '{{%abac_policy}}',
+            ['ap_enabled' => 0, 'ap_title' => 'Disabled Rule. Access to assign task list to lead'],
+            ['AND', ['IN', 'ap_object', [self::AP_OBJECT]], ['IN', 'ap_action', [self::AP_ACTION]]]
+        );
+
         $this->insert('{{%abac_policy}}', [
             'ap_rule_type' => 'p',
             'ap_subject' => self::AP_SUBJECT,
@@ -52,8 +58,14 @@ class m240622_113840_add_permission_lead_task_list extends Migration
      */
     public function safeDown()
     {
-        if (AbacPolicy::deleteAll(['ap_object' => self::AP_OBJECT, 'ap_action' => self::AP_ACTION])) {
-            \Yii::$app->abac->invalidatePolicyCache();
-        }
+        AbacPolicy::deleteAll(['ap_object' => self::AP_OBJECT, 'ap_action' => self::AP_ACTION, 'ap_enabled' => 1]);
+
+        $this->update(
+            '{{%abac_policy}}',
+            ['ap_enabled' => 1],
+            ['AND', ['IN', 'ap_object', [self::AP_OBJECT]], ['IN', 'ap_action', [self::AP_ACTION]]]
+        );
+
+        \Yii::$app->abac->invalidatePolicyCache();
     }
 }
