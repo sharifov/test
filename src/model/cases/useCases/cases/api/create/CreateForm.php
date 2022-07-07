@@ -151,7 +151,6 @@ class CreateForm extends Model
             $this->category_id,
             $this->order_uid,
             $this->order_info,
-            $this->experiments,
             $this->project_id,
             $this->subject,
             $this->description,
