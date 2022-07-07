@@ -580,6 +580,9 @@ class LeadController extends FController
                     } catch (EmailNotSentException $e) {
                         Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>' . $e->getEmailTo() . '</strong>');
                         Yii::error('Error: Email Message has not been sent to ' . $e->getEmailTo(false) . "\r\n " . $e->getMessage(), 'LeadController:view:Email:sendMail');
+                    } catch (\Throwable $e) {
+                        Yii::$app->session->setFlash('send-error', $e->getMessage().'<br/>'.$e->getTraceAsString());
+                        Yii::error($e->getMessage(), 'LeadController:view:Email:save');
                     }
                 } else {
                     Yii::$app->session->setFlash('send-warning', 'Access denied: you dont have permission to send email');
