@@ -161,7 +161,10 @@ class QuoteController extends ApiBaseController
      *                                   "lastPiece": 1
      *                               }
      *                           }
-     *                       }
+     *                       },
+     *                      "isChangedOrigin": false,
+     *                      "isChangedDestination": false,
+     *                      "isChangedDeparture": false
      *                   },
      *                   {
      *                       "segmentId": 2,
@@ -194,7 +197,10 @@ class QuoteController extends ApiBaseController
      *                                   "lastPiece": 1
      *                               }
      *                           }
-     *                       }
+     *                       },
+     *                      "isChangedOrigin": false,
+     *                      "isChangedDestination": false,
+     *                      "isChangedDeparture": false
      *                   },
      *                   {
      *                       "segmentId": 3,
@@ -227,7 +233,10 @@ class QuoteController extends ApiBaseController
      *                                   "lastPiece": 1
      *                               }
      *                           }
-     *                       }
+     *                       },
+     *                      "isChangedOrigin": false,
+     *                      "isChangedDestination": false,
+     *                      "isChangedDeparture": false
      *                   }
      *               ],
      *               "duration": 1185
@@ -266,7 +275,10 @@ class QuoteController extends ApiBaseController
      *                                   "lastPiece": 1
      *                               }
      *                           }
-     *                       }
+     *                       },
+     *                      "isChangedOrigin": false,
+     *                      "isChangedDestination": false,
+     *                      "isChangedDeparture": false
      *                   },
      *                   {
      *                       "segmentId": 2,
@@ -299,7 +311,10 @@ class QuoteController extends ApiBaseController
      *                                   "lastPiece": 1
      *                               }
      *                           }
-     *                       }
+     *                       },
+     *                      "isChangedOrigin": false,
+     *                      "isChangedDestination": false,
+     *                      "isChangedDeparture": false
      *                   },
      *                   {
      *                       "segmentId": 3,
@@ -332,7 +347,10 @@ class QuoteController extends ApiBaseController
      *                                   "lastPiece": 1
      *                               }
      *                           }
-     *                       }
+     *                       },
+     *                      "isChangedOrigin": false,
+     *                      "isChangedDestination": false,
+     *                      "isChangedDeparture": false
      *                   }
      *               ],
      *               "duration": 1222
