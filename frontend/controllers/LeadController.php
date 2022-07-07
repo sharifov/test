@@ -135,6 +135,9 @@ use frontend\models\ProfitSplitForm;
 use common\models\QuotePrice;
 use frontend\models\TipsSplitForm;
 use common\models\local\LeadLogMessage;
+use src\exceptions\CreateModelException;
+use src\services\email\EmailServiceInterface;
+use src\services\email\EmailsNormalizeService;
 
 /**
  * Class LeadController
@@ -151,6 +154,7 @@ use common\models\local\LeadLogMessage;
  * @property UrlGenerator $fileStorageUrlGenerator
  * @property UseCaseLeadManageService $useCaseLeadManageService
  * @property EmailReviewQueueManageService $emailReviewQueueManageService
+ * @property EmailServiceInterface $emailService
  */
 class LeadController extends FController
 {
@@ -167,6 +171,7 @@ class LeadController extends FController
     private UrlGenerator $fileStorageUrlGenerator;
     private UseCaseLeadManageService $useCaseLeadManageService;
     private EmailReviewQueueManageService $emailReviewQueueManageService;
+    private EmailServiceInterface $emailService;
 
     public function __construct(
         $id,
@@ -200,6 +205,10 @@ class LeadController extends FController
         $this->fileStorageUrlGenerator = $fileStorageUrlGenerator;
         $this->useCaseLeadManageService = $useCaseLeadManageService;
         $this->emailReviewQueueManageService = $emailReviewQueueManageService;
+        $this->emailService = Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_EMAIL_NORMALIZED_FORM_ENABLE) ?
+            EmailsNormalizeService::newInstance() :
+            Yii::createObject(EmailService::class)
+        ;
     }
 
     public function behaviors(): array
@@ -498,38 +507,15 @@ class LeadController extends FController
                 /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND, Restrict access to send email in preview email */
                 $canSend = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND);
                 if ($canSend) {
-                    $mail = new Email();
-                    $mail->e_project_id = $lead->project_id;
-                    $mail->e_lead_id = $lead->id;
-                    if ($previewEmailForm->e_email_tpl_id) {
-                        $mail->e_template_type_id = $previewEmailForm->e_email_tpl_id;
-                    }
-                    $mail->e_type_id = Email::TYPE_OUTBOX;
-                    $mail->e_status_id = Email::STATUS_PENDING;
-                    $mail->e_email_subject = $previewEmailForm->e_email_subject;
-                    $mail->body_html = $previewEmailForm->e_email_message;
-                    $mail->e_email_from = $previewEmailForm->e_email_from;
-
-                    $mail->e_email_from_name = $previewEmailForm->e_email_from_name;
-                    $mail->e_email_to_name = $previewEmailForm->e_email_to_name;
-
-                    if ($previewEmailForm->e_language_id) {
-                        $mail->e_language_id = $previewEmailForm->e_language_id;
-                    }
-
-                    $mail->e_email_to = $previewEmailForm->e_email_to;
-                    $mail->e_created_dt = date('Y-m-d H:i:s');
-                    $mail->e_created_user_id = Yii::$app->user->id;
                     $attachments = [];
                     /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_ATTACH_FILES, Restrict access to attach files in lead communication block */
                     $canAttachFiles = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_ATTACH_FILES);
                     if ($canAttachFiles && FileStorageSettings::canEmailAttach() && $previewEmailForm->files) {
                         $attachments['files'] = $this->fileStorageUrlGenerator->generateForExternal($previewEmailForm->getFilesPath());
                     }
-                    $mail->e_email_data = json_encode($attachments);
-                    if ($mail->save()) {
-                        $mail->e_message_id = $mail->generateMessageId();
-                        $mail->update();
+
+                    try{
+                        $mail = $this->emailService->createFromLead($previewEmailForm, $lead, $attachments);
 
                         /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND_WITHOUT_REVIEW, Restrict access to send without review email */
                         $canSendWithoutReview = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND_WITHOUT_REVIEW);
@@ -591,9 +577,10 @@ class LeadController extends FController
                             Yii::$app->session->setFlash('send-warning', '<strong>Email Message</strong> has been sent for review');
                             $this->refresh('#communication-form');
                         }
-                    } else {
-                        $previewEmailForm->addError('e_email_subject', VarDumper::dumpAsString($mail->errors));
-                        Yii::error(VarDumper::dumpAsString($mail->errors), 'LeadController:view:Email:save');
+                    } catch (CreateModelException $e) {
+                        $errorsMessage = VarDumper::dumpAsString($e->getErrors());
+                        $previewEmailForm->addError('e_email_subject', $errorsMessage);
+                        Yii::error($errorsMessage, 'LeadController:view:Email:save');
                     }
                 } else {
                     Yii::$app->session->setFlash('send-warning', 'Access denied: you dont have permission to send email');
