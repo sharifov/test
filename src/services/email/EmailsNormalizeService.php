@@ -33,6 +33,7 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use frontend\models\LeadPreviewEmailForm;
 use src\exception\EmailNotSentException;
+use common\models\ClientEmail;
 
 /**
  *
@@ -152,6 +153,13 @@ class EmailsNormalizeService implements EmailServiceInterface
         return $command->queryScalar();
     }
 
+    public static function detectClientId(string $email): ?int
+    {
+        $clientEmail = ClientEmail::find()->byEmail($email)->one();
+
+        return $clientEmail->client_id ?? null;
+    }
+
     public function create(EmailCreateForm $form)
     {
         $transaction = \Yii::$app->db->beginTransaction();
@@ -170,7 +178,7 @@ class EmailsNormalizeService implements EmailServiceInterface
 
             //=EmailParams
             if (!$form->params->isEmpty()) {
-                $email->saveParams($form->params->getAttributesForModel());
+                $email->saveParams($form->params->getAttributesForModel(true));
             }
             //=!EmailParams
 
@@ -214,7 +222,7 @@ class EmailsNormalizeService implements EmailServiceInterface
             $email->refresh();
 
             //=link Clients
-            $clientsIds = $form->clients ?? [(Yii::createObject(EmailService::class))->detectClientId($email->emailTo)];
+            $clientsIds = $form->clients ?? [self::detectClientId($email->emailTo)];
             if (!empty($clientsIds)) {
                 foreach ($clientsIds as $id) {
                     if ($client = Client::findOne($id)) {
@@ -304,7 +312,7 @@ class EmailsNormalizeService implements EmailServiceInterface
             if (is_null($email->params)) {
                 $email->saveParams(['ep_language_id' => $language]);
             }
-            $request = $communication->mailSend($email->e_project_id, $tplType, $email->emailFrom, $email->emailTo, $content_data, $data, $language, 0);
+            $request = $communication->mailSend($email->e_project_id, $tplType, $email->emailFrom, $email->contactTo->ea_email, $content_data, $data, $language, 0);
 
             if ($request && isset($request['data']['eq_status_id'])) {
                 $email->e_status_id = $request['data']['eq_status_id'];
@@ -316,7 +324,7 @@ class EmailsNormalizeService implements EmailServiceInterface
             if ($request && isset($request['error']) && $request['error']) {
                 $errorData = @json_decode($request['error'], true);
                 $errorMessage = $errorData['message'] ?: $request['error'];
-                throw new EmailNotSentException($email->emailTo, $errorMessage);
+                throw new EmailNotSentException($email->contactTo->ea_email, $errorMessage);
             }
             /** @fflag FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES, A/B testing for email offer templates enable/disable */
             if (EmailStatus::notError($email->e_status_id) && Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES)) {
