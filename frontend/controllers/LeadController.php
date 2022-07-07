@@ -138,6 +138,8 @@ use common\models\local\LeadLogMessage;
 use src\exceptions\CreateModelException;
 use src\services\email\EmailServiceInterface;
 use src\services\email\EmailsNormalizeService;
+use modules\featureFlag\FFlag;
+use src\exception\EmailNotSentException;
 
 /**
  * Class LeadController
@@ -522,45 +524,39 @@ class LeadController extends FController
 
                         if ($canSendWithoutReview) {
                             $previewEmailForm->is_send = true;
-                            $mailResponse = $mail->sendMail($attachments);
+                            $this->emailService->sendMail($mail, $attachments);
+                            Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>' . $mail->getEmailTo() . '</strong>');
 
-                            if (isset($mailResponse['error']) && $mailResponse['error']) {
-                                //echo $mailResponse['error']; exit; //'Error: <strong>Email Message</strong> has not been sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
-                                Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>' . MaskEmailHelper::masking($mail->e_email_to) . '</strong>');
-                                Yii::error('Error: Email Message has not been sent to ' . $mail->e_email_to . "\r\n " . $mailResponse['error'], 'LeadController:view:Email:sendMail');
-                            } else {
-                                //echo '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
-
-                                if ($offerList = @json_decode($previewEmailForm->e_offer_list)) {
-                                    if (is_array($offerList)) {
-                                        $service = Yii::createObject(OfferSendLogService::class);
-                                        foreach ($offerList as $offerId) {
-                                            $service->log(new CreateDto($offerId, OfferSendLogType::EMAIL, $user->id, $previewEmailForm->e_email_to));
-                                        }
+                            if ($offerList = @json_decode($previewEmailForm->e_offer_list)) {
+                                if (is_array($offerList)) {
+                                    $service = Yii::createObject(OfferSendLogService::class);
+                                    foreach ($offerList as $offerId) {
+                                        $service->log(new CreateDto($offerId, OfferSendLogType::EMAIL, $user->id, $previewEmailForm->e_email_to));
                                     }
                                 }
-
-                                /*
-                                 * TODO: The similar logic exist in `\frontend\controllers\EmailReviewQueueController::actionSend`. Need to shrink code duplications.
-                                 */
-                                /** @var string[] $quoteIds */
-                                $quoteIds = Json::decode($previewEmailForm->e_quote_list);
-                                /** @var Quote[] $quoteObjects */
-                                $quoteObjects = Quote::find()->where(['IN', 'id', $quoteIds])->all();
-                                foreach ($quoteObjects as $quoteObject) {
-                                    Repo::createForEmail($mail->e_id, $quoteObject->id, $previewEmailForm->e_qc_uid);
-                                    $quoteObject->setStatusSend();
-                                    // - Do email should be sent if quote didn't change status?
-                                    // - Do we should call saving request in loop? Calling all updates via one request would be better way
-                                    if (!$this->quoteRepository->save($quoteObject)) {
-                                        Yii::error($quoteObject->errors, 'LeadController:view:Email:Quote:save');
-                                    }
-                                }
-
-                                Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>' . MaskEmailHelper::masking($mail->e_email_to) . '</strong>');
                             }
+
+                            /*
+                             * TODO: The similar logic exist in `\frontend\controllers\EmailReviewQueueController::actionSend`. Need to shrink code duplications.
+                             */
+                            /** @var string[] $quoteIds */
+                            $quoteIds = Json::decode($previewEmailForm->e_quote_list);
+                            /** @var Quote[] $quoteObjects */
+                            $quoteObjects = Quote::find()->where(['IN', 'id', $quoteIds])->all();
+                            foreach ($quoteObjects as $quoteObject) {
+                                Repo::createForEmail($mail->e_id, $quoteObject->id, $previewEmailForm->e_qc_uid);
+                                $quoteObject->setStatusSend();
+                                // - Do email should be sent if quote didn't change status?
+                                // - Do we should call saving request in loop? Calling all updates via one request would be better way
+                                if (!$this->quoteRepository->save($quoteObject)) {
+                                    Yii::error($quoteObject->errors, 'LeadController:view:Email:Quote:save');
+                                }
+                            }
+
+
                             $this->refresh('#communication-form');
                         } else {
+                            //TODO: update for normalized emails using service
                             $mail->statusToReview();
                             $this->emailReviewQueueManageService->createByEmail($mail, $lead->l_dep_id);
                             /** @var string[] $quoteIds */
@@ -581,6 +577,9 @@ class LeadController extends FController
                         $errorsMessage = VarDumper::dumpAsString($e->getErrors());
                         $previewEmailForm->addError('e_email_subject', $errorsMessage);
                         Yii::error($errorsMessage, 'LeadController:view:Email:save');
+                    } catch (EmailNotSentException $e) {
+                        Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>' . $e->getEmailTo() . '</strong>');
+                        Yii::error('Error: Email Message has not been sent to ' . $e->getEmailTo(false) . "\r\n " . $e->getMessage(), 'LeadController:view:Email:sendMail');
                     }
                 } else {
                     Yii::$app->session->setFlash('send-warning', 'Access denied: you dont have permission to send email');
