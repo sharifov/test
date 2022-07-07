@@ -71,12 +71,14 @@ class EmailParamsForm extends Model
         ];
     }
 
-    public function getAttributesForModel()
+    public function getAttributesForModel($skipEmpty = false)
     {
         $result = [];
         foreach ($this->fields() as $index => $name) {
             $key = is_int($index) ? $name : $index;
-            $result[$key] = $this->$name;
+            if (!$skipEmpty || ($skipEmpty && !empty($this->$name))) {
+                $result[$key] = $this->$name;
+            }
         }
         return $result;
     }
