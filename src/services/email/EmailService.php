@@ -25,6 +25,7 @@ use src\model\leadUserData\entity\LeadUserData;
 use src\model\leadUserData\repository\LeadUserDataRepository;
 use src\helpers\app\AppHelper;
 use src\exception\EmailNotSentException;
+use modules\featureFlag\FFlag;
 
 /**
  * Class EmailService
@@ -311,7 +312,7 @@ class EmailService implements EmailServiceInterface
         }
 
         if ($email->e_message_id) {
-            $content_data['email_message_id'] = $this->e_message_id;
+            $content_data['email_message_id'] = $email->e_message_id;
         }
 
         $tplType = $email->eTemplateType ? $email->eTemplateType->etp_key : null;
