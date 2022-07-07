@@ -26,6 +26,7 @@ use src\model\leadUserData\repository\LeadUserDataRepository;
 use src\helpers\app\AppHelper;
 use src\exception\EmailNotSentException;
 use modules\featureFlag\FFlag;
+use frontend\models\CasePreviewEmailForm;
 
 /**
  * Class EmailService
@@ -386,6 +387,39 @@ class EmailService implements EmailServiceInterface
             $mail = new Email();
             $mail->e_project_id = $lead->project_id;
             $mail->e_lead_id = $lead->id;
+            $mail->e_template_type_id = $previewEmailForm->e_email_tpl_id ?? null;
+            $mail->e_type_id = Email::TYPE_OUTBOX;
+            $mail->e_status_id = Email::STATUS_PENDING;
+            $mail->e_email_subject = $previewEmailForm->e_email_subject;
+            $mail->body_html = $previewEmailForm->e_email_message;
+            $mail->e_email_from = $previewEmailForm->e_email_from;
+            $mail->e_email_from_name = $previewEmailForm->e_email_from_name;
+            $mail->e_email_to_name = $previewEmailForm->e_email_to_name;
+            $mail->e_language_id = $previewEmailForm->e_language_id ?? null;
+            $mail->e_email_to = $previewEmailForm->e_email_to;
+            $mail->e_created_dt = date('Y-m-d H:i:s');
+            $mail->e_created_user_id = \Yii::$app->user->id;
+            $mail->e_email_data = json_encode($attachments);
+
+            if ($mail->save()) {
+                $mail->e_message_id = $mail->generateMessageId();
+                $mail->update();
+            } else {
+                throw new CreateModelException(get_class($mail), $mail->getErrors());
+            }
+        } catch (\Throwable $e) {
+            throw $e;
+        }
+
+        return $mail;
+    }
+
+    public function createFromCase(CasePreviewEmailForm $previewEmailForm, Cases $case, array $attachments = []): Email
+    {
+        try {
+            $mail = new Email();
+            $mail->e_project_id = $case->cs_project_id;
+            $mail->e_case_id = $case->cs_id;
             $mail->e_template_type_id = $previewEmailForm->e_email_tpl_id ?? null;
             $mail->e_type_id = Email::TYPE_OUTBOX;
             $mail->e_status_id = Email::STATUS_PENDING;
