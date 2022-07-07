@@ -49,6 +49,8 @@ class m220707_065246_change_abac_policy_2fa_access_permissions extends Migration
             'ap_enabled' => 1,
             'ap_created_dt' => date('Y-m-d H:i:s'),
         ]);
+
+        \Yii::$app->abac->invalidatePolicyCache();
     }
 
     /**
