@@ -62,10 +62,10 @@ class ShiftController extends Controller
                 }
 
                 $decisionFormModel = new ScheduleDecisionForm();
-                $decisionFormModel->status = UserShiftSchedule::STATUS_CANCELED;
+                $decisionFormModel->status = UserShiftSchedule::STATUS_DONE;
                 $decisionFormModel->description = ShiftScheduleRequest::DECLINE_BY_SYSTEM_DESCRIPTION;
 
-                $shift->uss_status_id = $decisionFormModel->status;
+                $shift->uss_status_id = UserShiftSchedule::STATUS_CANCELED;
                 $shift->uss_description = $decisionFormModel->description;
 
                 if ($shift->save()) {

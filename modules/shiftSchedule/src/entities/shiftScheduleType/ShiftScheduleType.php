@@ -50,6 +50,9 @@ class ShiftScheduleType extends \yii\db\ActiveRecord
         self::SUBTYPE_HOLIDAY => 'Holiday',
     ];
 
+    public const TYPE_KEY_WT = 'WT';
+    public const TYPE_KEY_WTR = 'WTR';
+
 
     /**
      * @return string
@@ -290,5 +293,14 @@ class ShiftScheduleType extends \yii\db\ActiveRecord
     public static function getSubtypeNameById(?int $subtypeId): string
     {
         return self::SUBTYPE_LIST[$subtypeId] ?? '-';
+    }
+
+    public static function getIdListByKeys(array $keys, bool $isEnabled = true): array
+    {
+        return self::find()
+            ->select('sst_id')
+            ->where(['IN', 'sst_key', $keys])
+            ->andWhere(['sst_enabled' => $isEnabled])
+            ->column();
     }
 }

@@ -14,6 +14,7 @@ use src\model\leadUserConversion\abac\LeadUserConversionAbacObject;
 use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\model\leadUserConversion\entity\LeadUserConversionQuery;
 use src\model\leadUserConversion\repository\LeadUserConversionRepository;
+use src\model\leadUserConversion\service\LeadUserConversionService;
 use src\repositories\lead\LeadRepository;
 use src\services\lead\LeadStateService;
 
@@ -143,6 +144,10 @@ class LeadStatusReasonService
 
     private function leadToConversion(HandleReasonDto $dto): self
     {
+        if (LeadUserConversionService::leadIsExcludeFromConversionByDescription($dto->lead->id, $dto->reason) === true) {
+            return $this;
+        }
+
         $leadClosedCount = LeadFlowQuery::countByStatus($dto->lead->id, Lead::STATUS_CLOSED);
         if (empty($dto->lead->employee_id)) {
             throw new \RuntimeException('Lead has no owner; Cannot Close;');

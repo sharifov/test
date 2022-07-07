@@ -77,8 +77,8 @@ ___________________
 
 <p align="center">
 
-![Image](assets/application.png)
+![Image](docs/imgs/crm-app.png)
 
-![Image](assets/networks.png)
+![Image](docs/imgs/crm-networks.png)
 
 </p>

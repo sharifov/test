@@ -13,7 +13,7 @@ class LeadObjectSegmentDto implements ObjectSegmentDtoInterface
     public ?int $pax_adt_count         = null;
     public ?int $pax_chd_count         = null;
     public ?int $pax_inf_count         = null;
-    public ?int $cabin_type            = null;
+    public ?string $cabin_type            = null;
     public ?string $lead_project_name       = null;
     public ?string $lead_department_name    = null;
     public ?string $created_dt            = null;

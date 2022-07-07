@@ -160,7 +160,6 @@ class ClientChatRequestController extends ApiBaseController
      * ]
      * },
      * "sources": {
-     * "crossSystemXp": "123465.1"
      * },
      * "page": {
      * "url": "https:\/\/dev-ovago.travel-dev.com\/search\/WAS-FRA%2F2021-03-22%2F2021-03-28",

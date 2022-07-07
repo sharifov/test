@@ -8,7 +8,7 @@ use common\models\Lead;
  * Class LeadPoorProcessingEvent
  *
  */
-class LeadPoorProcessingEvent
+class LeadPoorProcessingEvent implements LeadableEventInterface
 {
     private Lead $lead;
     private array $dataKeys;

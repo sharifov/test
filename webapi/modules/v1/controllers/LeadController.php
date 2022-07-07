@@ -16,6 +16,7 @@ use common\models\Sources;
 use common\models\VisitorLog;
 use frontend\helpers\RedisHelper;
 use frontend\widgets\notification\NotificationMessage;
+use modules\experiment\models\ExperimentTarget;
 use modules\featureFlag\FFlag;
 use modules\flight\models\FlightQuoteSegment;
 use modules\flight\models\FlightSegment;
@@ -142,6 +143,7 @@ class LeadController extends ApiBaseController
      * @apiParam {string{50}}           [lead.lead_data.field_key]               Lead Data Key
      * @apiParam {string{500}}          [lead.lead_data.field_value]             Lead Data Value
      * @apiParam {object[]}             [lead.client_data]                       Array of Client Data
+     * @apiParam {object[]}             [lead.experiments]                       Array of Experiment codes
      * @apiParam {string{50}}           [lead.client_data.field_key]             Client Data Key
      * @apiParam {string{500}}          [lead.client_data.field_value]           Client Data Value
      * @apiParam {datetime{YYYY-MM-DD HH:mm:ss}}  lead.visitor_log.vl_visit_dt
@@ -190,15 +192,19 @@ class LeadController extends ApiBaseController
      *                  "field_key": "example_key",
      *                  "field_value": "example_value"
      *              },
-     *               {
-     *                  "field_key": "cross_system_xp",
-     *                  "field_value": "wpl5.0"
+     *              {
+     *                  "field_key": "example_key",
+     *                  "field_value": "example_value"
      *              },
-     *               {
-     *                  "field_key": "cross_system_xp",
-     *                  "field_value": "wpl6.2"
-     *              }
      *        ],
+     *       "experiments": [
+     *           {
+     *              "ex_code": "wpl5.0"
+     *           },
+     *           {
+     *              "ex_code": "wpl6.2"
+     *           }
+     *       ]
      *       "client_data": [
      *               {
      *                  "field_key": "example_key",
@@ -542,12 +548,15 @@ class LeadController extends ApiBaseController
         $this->autoQuoteService->addAutoQuotesByJob($lead);
 
         $leadDataInserted = [];
+
         if (!empty($modelLead->lead_data)) {
             $leadDataService = new LeadDataCreateService();
             $leadDataService->createFromApi($modelLead->lead_data, $lead->id);
             $warnings = ArrayHelper::merge($warnings, $leadDataService->getErrors());
             $leadDataInserted = $leadDataService->getInserted();
         }
+
+        ExperimentTarget::processExperimentObjects(ExperimentTarget::EXT_TYPE_LEAD, $lead->id, $modelLead->experiments);
 
         $clientDataInserted = [];
         if (!empty($modelLead->client_data) && ($clientId = $lead->client->id ?? null)) {
@@ -824,6 +833,7 @@ class LeadController extends ApiBaseController
 
         try {
             $response['lead'] = $lead;
+            $response['experiments'] = $modelLead->experiments;
             $response['flights'] = $modelLead->flights;
             $response['emails'] = $modelLead->emails;
             $response['phones'] = $modelLead->phones;
@@ -927,6 +937,7 @@ class LeadController extends ApiBaseController
      * @apiParam {string{1}=E-ECONOMY,B-BUSINESS,F-FIRST,P-PREMIUM}        lead.cabin                                         Cabin
      * @apiParam {array[]}              lead.emails                                         Array of Emails (string)
      * @apiParam {array[]}              lead.phones                                         Array of Phones (string)
+     * @apiParam {object[]}             lead.experiments                                    Array of new Experiment codes (existed will be deleted)
      * @apiParam {object[]}             lead.flights                                        Array of Flights
      * @apiParam {string{3}}                                lead.flights.origin                 Flight Origin location Airport IATA-code
      * @apiParam {string{3}}                                lead.flights.destination            Flight Destination location Airport IATA-code
@@ -973,6 +984,14 @@ class LeadController extends ApiBaseController
      *        "phones": [
      *          "+373-69-487523",
      *          "022-45-7895-89",
+     *        ],
+     *        "experiments": [
+     *            {
+     *              "ex_code": "wpl5.0"
+     *            },
+     *            {
+     *              "ex_code": "wpl6.2"
+     *            }
      *        ],
      *        "source_id": 38,
      *        "adults": 1,
@@ -1090,6 +1109,10 @@ class LeadController extends ApiBaseController
                 throw new UnprocessableEntityHttpException($this->errorToString($modelLead->errors), 8);
             }
 
+            if ($modelLead->experiments && is_array($modelLead->experiments)) {
+                ExperimentTarget::deleteAll(['ext_target_id' => $lead->id, 'ext_target_type_id' => ExperimentTarget::EXT_TYPE_LEAD]);
+                ExperimentTarget::processExperimentObjects(ExperimentTarget::EXT_TYPE_LEAD, $lead->id, $modelLead->experiments);
+            }
 
             if ($modelLead->flights) {
                 LeadFlightSegment::deleteAll(['lead_id' => $lead->id]);
@@ -1146,6 +1169,7 @@ class LeadController extends ApiBaseController
             //$transaction->commit();
 
             $response['lead'] = $lead;
+            $response['experiments'] = $modelLead->experiments;
             $response['flights'] = $lead->leadFlightSegments;
             $response['emails'] = $lead->client->clientEmails;
             $response['phones'] = $lead->client->clientPhones;
@@ -1373,6 +1397,14 @@ class LeadController extends ApiBaseController
                         "cl_marketing_country": null,
                         "cl_call_recording_disabled": 0
                     },
+                    "experiments": [
+                        {
+                          "ex_code": "wpl5.0"
+                        },
+                        {
+                          "ex_code": "wpl6.2"
+                        }
+                   ],
                    "lead_preferences": {
                             "id": 155398,
                             "lead_id": 371058,
@@ -1386,7 +1418,7 @@ class LeadController extends ApiBaseController
                    },
                    "lead_data": [
                         {
-                            "key": "cross_system_xp",
+                            "key": "field_key",
                             "value": "example123"
                         }
                    ]
@@ -1455,6 +1487,7 @@ class LeadController extends ApiBaseController
 
         try {
             $response['lead'] = $lead;
+            $response['experiments'] = ExperimentTarget::getExperimentObjects(ExperimentTarget::EXT_TYPE_LEAD, $modelLead->lead_id);
             $response['flights'] = $lead->leadFlightSegments;
             $response['emails'] = $lead->client->clientEmails;
             $response['phones'] = $lead->client->clientPhones;
