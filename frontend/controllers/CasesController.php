@@ -122,6 +122,11 @@ use yii\widgets\ActiveForm;
 use modules\cases\src\abac\CasesAbacObject;
 use modules\cases\src\abac\dto\CasesAbacDto;
 use src\repositories\project\ProjectRepository;
+use src\exceptions\CreateModelException;
+use src\services\email\EmailServiceInterface;
+use src\services\email\EmailsNormalizeService;
+use modules\featureFlag\FFlag;
+use src\exception\EmailNotSentException;
 
 /**
  * Class CasesController
@@ -146,6 +151,7 @@ use src\repositories\project\ProjectRepository;
  * @property OrderCreateFromSaleService $orderCreateFromSaleService
  * @property FlightFromSaleService $flightFromSaleService
  * @property EmailReviewQueueManageService $emailReviewQueueManageService
+ * @property EmailServiceInterface $emailService
  */
 class CasesController extends FController
 {
@@ -169,6 +175,7 @@ class CasesController extends FController
     private OrderCreateFromSaleService $orderCreateFromSaleService;
     private FlightFromSaleService $flightFromSaleService;
     private EmailReviewQueueManageService $emailReviewQueueManageService;
+    private EmailServiceInterface $emailService;
 
     public const DIFFERENT_PROJECT = 'different-project';
 
@@ -218,6 +225,10 @@ class CasesController extends FController
         $this->orderCreateFromSaleService = $orderCreateFromSaleService;
         $this->flightFromSaleService = $flightFromSaleService;
         $this->emailReviewQueueManageService = $emailReviewQueueManageService;
+        $this->emailService = Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_EMAIL_NORMALIZED_FORM_ENABLE) ?
+            EmailsNormalizeService::newInstance() :
+            Yii::createObject(EmailService::class)
+        ;
     }
 
     public function behaviors(): array
