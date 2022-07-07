@@ -15,6 +15,8 @@ class FFlag
     public const FF_KEY_BADGE_COUNT_ENABLE = 'badgeCountEnable';
     public const FF_KEY_PHONE_WIDGET_ACCEPTED_PANEL_ENABLED = 'phoneWidgetAcceptedPanelEnabled';
     public const FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE = 'objectSegmentModuleEnable';
+    public const FF_KEY_SALE_VIEW_IN_LEAD_ENABLE = 'saleViewInLeadEnable';
+    public const FF_KEY_BEQ_ENABLE = 'beqEnable';
 
     public const FF_KEY_LIST = [
         self::FF_KEY_LPP_ENABLE => self::FF_KEY_LPP_ENABLE,
@@ -26,6 +28,7 @@ class FFlag
         self::FF_KEY_BADGE_COUNT_ENABLE => self::FF_KEY_BADGE_COUNT_ENABLE,
         self::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE => self::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE,
         self::FF_KEY_PHONE_WIDGET_ACCEPTED_PANEL_ENABLED => self::FF_KEY_PHONE_WIDGET_ACCEPTED_PANEL_ENABLED,
+        self::FF_KEY_SALE_VIEW_IN_LEAD_ENABLE => self::FF_KEY_SALE_VIEW_IN_LEAD_ENABLE,
     ];
 
     public const FF_CATEGORY_LEAD = 'lead';

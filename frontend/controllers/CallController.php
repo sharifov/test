@@ -38,6 +38,8 @@ use src\model\call\services\reserve\CallReserver;
 use src\model\call\services\reserve\Key;
 use src\model\call\useCase\assignUsers\UsersForm;
 use src\model\call\useCase\createCall\redialCall\CreateRedialCall;
+use src\model\callLog\abac\CallLogAbacObject;
+use src\model\callLog\abac\dto\CallLogRecordListenAbacDto;
 use src\model\callLog\entity\callLog\CallLog;
 use src\model\callLog\entity\callLog\CallLogQuery;
 use src\model\callLog\entity\callLogRecord\CallLogRecord;
@@ -1230,7 +1232,7 @@ class CallController extends FController
 
     /**
      * @param string $callSid
-     * @return void
+     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      */
     public function actionRecord(string $callSid): void

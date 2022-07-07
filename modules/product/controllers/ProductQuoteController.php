@@ -342,6 +342,11 @@ class ProductQuoteController extends FController
                         throw new \RuntimeException('Origin quote not found');
                     }
 
+                    $bookingId = !empty($case->cs_order_uid) ? $case->cs_order_uid : $originQuote->getLastBookingId();
+                    if (empty($bookingId)) {
+                        throw new BadRequestHttpException('Error: Booking ID missing.');
+                    }
+
                     $mail = new Email();
                     $mail->e_project_id = $case->cs_project_id;
                     $mail->e_case_id = $case->cs_id;
@@ -397,7 +402,7 @@ class ProductQuoteController extends FController
                             $whData = (new HybridWhData())->fillCollectedData(
                                 HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
                                 [
-                                    'booking_id' => $case->cs_order_uid,
+                                    'booking_id' => $bookingId,
                                     'product_quote_gid' => $originQuote->pq_gid,
                                     'exchange_gid' => $productQuoteChange->pqc_gid,
                                     'exchange_status' => ProductQuoteChangeStatus::getClientKeyStatusById($productQuoteChange->pqc_status_id),

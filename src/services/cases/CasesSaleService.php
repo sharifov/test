@@ -497,7 +497,6 @@ class CasesSaleService
      * @param int $requestTime
      * @param int $withRefundRules
      * @return array
-     * @throws BadRequestHttpException
      */
     public function detailRequestToBackOffice(int $sale_id, int $withFareRules = 0, int $requestTime = 120, int $withRefundRules = 0): ?array
     {

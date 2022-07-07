@@ -1030,6 +1030,12 @@ class LeadController extends FController
             ],
         ]);
 
+        $isCreatedFlightRequest = false;
+
+        if ($lead->status === Lead::STATUS_PROCESSING && $lead->leadFlightSegmentsCount > 0 && $lead->quotesCount === 0) {
+            $isCreatedFlightRequest = true;
+        }
+
 //        $tmpl = $isQA ? 'view_qa' : 'view';
         $tmpl = 'view';
 
@@ -1054,6 +1060,8 @@ class LeadController extends FController
             'callFromNumberList' => $callFromNumberList,
             'smsFromNumberList' => $smsFromNumberList,
             'emailFromList' => $emailFromList,
+
+            'isCreatedFlightRequest' => $isCreatedFlightRequest,
         ]);
     }
 
@@ -1203,7 +1211,8 @@ class LeadController extends FController
                 if ($allowRbac) {
                     $user = Auth::user();
                     $leadAbacDto = new LeadAbacDto($lead, $user->getId());
-                    if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS)) {
+                    /** @abac $leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD_FROM_CHAT, LeadAbacObject::ACTION_ACCESS, Access to take lead from chat */
+                    if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD_FROM_CHAT, LeadAbacObject::ACTION_ACCESS)) {
                         $lead->processing($user->getId(), Yii::$app->user->getId(), 'Take');
 
                         $this->transaction->wrap(function () use ($lead) {

@@ -1,5 +1,6 @@
 <?php
 
+use src\entities\cases\CasesStatus;
 use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
 use yii\helpers\Html;
@@ -78,7 +79,7 @@ echo GridView::widget([
                 $data = [];
                 if (!empty($leads)) {
                     foreach ($leads as $lead) {
-                        $data[] = '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $lead->id, ['lead/view', 'gid' => $lead->gid], ['target' => '_blank', 'data-pjax' => 0]) . ($lead->request_ip ? ' (IP: ' . $lead->request_ip . ')' : '');
+                        $data[] = '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $lead->id, ['lead/view', 'gid' => $lead->gid], ['target' => '_blank', 'data-pjax' => 0]) . ($lead->request_ip ? ' (IP: ' . $lead->request_ip . ')' : '') . ' ' . $lead->getStatusLabel();
                     }
                 }
 
@@ -104,7 +105,7 @@ echo GridView::widget([
                 $data = [];
                 if ($cases) {
                     foreach ($cases as $case) {
-                        $data[] = '<i class="fa fa-link"></i> ' . Html::a('case: ' . $case->cs_id, ['cases/view', 'gid' => $case->cs_gid], ['target' => '_blank', 'data-pjax' => 0]);
+                        $data[] = '<i class="fa fa-link"></i> ' . Html::a('case: ' . $case->cs_id, ['cases/view', 'gid' => $case->cs_gid], ['target' => '_blank', 'data-pjax' => 0]) . ' ' . CasesStatus::getLabel($case->cs_status, '');
                     }
                 }
 
