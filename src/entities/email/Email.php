@@ -10,7 +10,6 @@ use common\models\Employee;
 use common\models\Language;
 use common\models\Lead;
 use common\models\Project;
-use src\auth\Auth;
 use src\behaviors\metric\MetricEmailCounterBehavior;
 use src\entities\cases\Cases;
 use src\entities\email\events\EmailDeletedEvent;
@@ -18,18 +17,12 @@ use src\entities\email\helpers\EmailContactType;
 use src\entities\email\helpers\EmailStatus;
 use src\entities\email\helpers\EmailType;
 use src\entities\EventTrait;
-use Yii;
-use yii\helpers\ArrayHelper;
-use common\components\CommunicationService;
-use src\services\abtesting\email\EmailTemplateOfferABTestingService;
-use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
-use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
-use src\model\leadUserData\repository\LeadUserDataRepository;
-use yii\helpers\VarDumper;
 use src\exceptions\CreateModelException;
 use src\model\BaseActiveRecord;
-use yii\db\ActiveRecord;
+use Yii;
 use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "email_norm".
@@ -241,6 +234,11 @@ class Email extends BaseActiveRecord
     public function getEmailSubject(): string
     {
         return $this->emailBody->embd_email_subject;
+    }
+
+    public function getTemplateTypeName(): ?string
+    {
+        return $this->templateType->etp_name ?? null;
     }
 
     /**

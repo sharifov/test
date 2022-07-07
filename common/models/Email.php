@@ -354,6 +354,11 @@ class Email extends \yii\db\ActiveRecord
         return $this->hasOne(EmailNormalized::class, ['e_id' => 'e_id']);
     }
 
+    public function getTemplateTypeName(): ?string
+    {
+        return $this->eTemplateType->etp_name ?? null;
+    }
+
     /**
      * {@inheritdoc}
      * @return EmailQuery the active query used by this AR class.
@@ -957,7 +962,7 @@ class Email extends \yii\db\ActiveRecord
     {
         $this->updateAttributes([
             'e_error_message' => $errorMessage,
-            'e_status_id' => EmailStatus::ERROR,
+            'e_status_id' => self::STATUS_ERROR,
         ]);
 
         return $this;
