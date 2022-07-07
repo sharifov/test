@@ -351,75 +351,45 @@ class CasesController extends FController
                 /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND, Restrict access to send email in preview email */
                 $canSend = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND);
                 if ($canSend) {
-                    $mail = new Email();
-                    $mail->e_project_id = $model->cs_project_id;
-                    $mail->e_case_id = $model->cs_id;
-                    if ($previewEmailForm->e_email_tpl_id) {
-                        $mail->e_template_type_id = $previewEmailForm->e_email_tpl_id;
-                    }
-                    $mail->e_type_id = Email::TYPE_OUTBOX;
-                    $mail->e_status_id = Email::STATUS_PENDING;
-                    $mail->e_email_subject = $previewEmailForm->e_email_subject;
-                    $mail->body_html = $previewEmailForm->e_email_message;
-                    $mail->e_email_from = $previewEmailForm->e_email_from;
-
-                    $mail->e_email_from_name = $previewEmailForm->e_email_from_name;
-                    $mail->e_email_to_name = $previewEmailForm->e_email_to_name;
-
-                    if ($previewEmailForm->e_language_id) {
-                        $mail->e_language_id = $previewEmailForm->e_language_id;
-                    }
-
-                    $mail->e_email_to = $previewEmailForm->e_email_to;
-                    $mail->e_created_dt = date('Y-m-d H:i:s');
-                    $mail->e_created_user_id = Yii::$app->user->id;
                     $attachments = [];
                     /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_ATTACH_FILES, Restrict access to attach files in lead communication block*/
                     $canAttachFiles = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_ATTACH_FILES);
                     if ($canAttachFiles && FileStorageSettings::canEmailAttach() && $previewEmailForm->files) {
                         $attachments['files'] = $this->fileStorageUrlGenerator->generateForExternal($previewEmailForm->getFilesPath());
                     }
-                    $mail->e_email_data = json_encode($attachments);
-                    if ($mail->save()) {
-                        $mail->e_message_id = $mail->generateMessageId();
-                        $mail->update();
+                    try{
+                        $mail = $this->emailService->createFromCase($previewEmailForm, $model, $attachments);
 
                         /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND_WITHOUT_REVIEW, Restrict access to send without review email */
                         $canSendWithoutReview = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND_WITHOUT_REVIEW);
                         if ($canSendWithoutReview) {
                             $previewEmailForm->is_send = true;
-                            $mailResponse = $mail->sendMail($attachments);
+                            $this->emailService->sendMail($mail, $attachments);
+                            Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>' . $mail->getEmailTo() . '</strong>');
 
-                            if (isset($mailResponse['error']) && $mailResponse['error']) {
-                                //echo $mailResponse['error']; exit; //'Error: <strong>Email Message</strong> has not been sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
-                                Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>' . MaskEmailHelper::masking($mail->e_email_to, $disableMasking) . '</strong>');
-                                Yii::error('Error: Email Message has not been sent to ' . $mail->e_email_to . "\r\n " . $mailResponse['error'], 'CaseController:view:Email:sendMail');
-                            } else {
-                                //echo '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
-                                $model->addEventLog(null, $mail->eTemplateType->etp_name . ' email sent. By: ' . Auth::user()->username);
+                            //echo '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
+                            $model->addEventLog(null, $mail->eTemplateType->etp_name . ' email sent. By: ' . Auth::user()->username);
 
-
-                                if ($quoteList = @json_decode($previewEmailForm->e_quote_list)) {
-                                    if (is_array($quoteList)) {
-                                        foreach ($quoteList as $quoteId) {
-                                            $quoteId = (int)$quoteId;
-                                            $quote = Quote::findOne($quoteId);
-                                            if ($quote) {
-                                                $quote->setStatusSend();
-                                                $this->quoteRepository->save($quote);
-                                                if (!$this->quoteRepository->save($quote)) {
-                                                    Yii::error($quote->errors, 'CaseController:view:Email:Quote:save');
-                                                }
+                            if ($quoteList = @json_decode($previewEmailForm->e_quote_list)) {
+                                if (is_array($quoteList)) {
+                                    foreach ($quoteList as $quoteId) {
+                                        $quoteId = (int)$quoteId;
+                                        $quote = Quote::findOne($quoteId);
+                                        if ($quote) {
+                                            $quote->setStatusSend();
+                                            $this->quoteRepository->save($quote);
+                                            if (!$this->quoteRepository->save($quote)) {
+                                                Yii::error($quote->errors, 'CaseController:view:Email:Quote:save');
                                             }
                                         }
                                     }
                                 }
-
-                                Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>' . MaskEmailHelper::masking($mail->e_email_to, $disableMasking) . '</strong>');
                             }
+
 
                             $this->refresh(); //'#communication-form'
                         } else {
+                            //TODO: update for normalized emails using service
                             $mail->statusToReview();
                             $this->emailReviewQueueManageService->createByEmail($mail, $model->cs_dep_id);
                             $mail->update();
@@ -427,9 +397,17 @@ class CasesController extends FController
                             Yii::$app->session->setFlash('send-warning', '<strong>Email Message</strong> has been sent for review');
                             $this->refresh();
                         }
-                    } else {
-                        $previewEmailForm->addError('e_email_subject', VarDumper::dumpAsString($mail->errors));
-                        Yii::error(VarDumper::dumpAsString($mail->errors), 'CaseController:view:Email:save');
+
+                    }catch (CreateModelException $e) {
+                        $errorsMessage = VarDumper::dumpAsString($e->getErrors());
+                        $previewEmailForm->addError('e_email_subject', $errorsMessage);
+                        Yii::error($errorsMessage, 'CasesController:view:Email:save');
+                    } catch (EmailNotSentException $e) {
+                        Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>' . $e->getEmailTo() . '</strong>');
+                        Yii::error('Error: Email Message has not been sent to ' . $e->getEmailTo(false) . "\r\n " . $e->getMessage(), 'CaseController:view:Email:sendMail');
+                    } catch (\Throwable $e) {
+                        Yii::$app->session->setFlash('send-error', $e->getMessage().'<br/>'.$e->getTraceAsString());
+                        Yii::error($e->getMessage(), 'CasesController:view:Email:save');
                     }
                 } else {
                     Yii::$app->session->setFlash('send-warning', 'Access denied: you dont have permission to send email');
