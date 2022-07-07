@@ -368,7 +368,7 @@ class CasesController extends FController
                             Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>' . $mail->getEmailTo() . '</strong>');
 
                             //echo '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
-                            $model->addEventLog(null, $mail->eTemplateType->etp_name . ' email sent. By: ' . Auth::user()->username);
+                            $model->addEventLog(null, $mail->templateTypeName . ' email sent. By: ' . Auth::user()->username);
 
                             if ($quoteList = @json_decode($previewEmailForm->e_quote_list)) {
                                 if (is_array($quoteList)) {
