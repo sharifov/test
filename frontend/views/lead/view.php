@@ -507,3 +507,22 @@ $css = <<<CSS
     }
 CSS;
 $this->registerCss($css);
+
+
+$saveJs = <<<JS
+    let newSegmentSaveButtonClicked = false;
+    
+    $(document).on('click', '#lead-new-segment-button', function() {
+        newSegmentSaveButtonClicked = true;
+    });
+    
+    $(document).on('pjax:end', '#pj-itinerary', function (data, xhr) {
+        if (newSegmentSaveButtonClicked === true && $('#enable-timer-lpp').length === 0) {
+            $.pjax.reload({container: '#pjax-lead-header', async: false});
+            
+            newSegmentSaveButtonClicked = false;
+        }
+    });
+JS;
+
+$this->registerJs($saveJs);
