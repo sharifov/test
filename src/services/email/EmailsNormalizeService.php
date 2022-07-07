@@ -375,6 +375,40 @@ class EmailsNormalizeService implements EmailServiceInterface
 
     public function createFromLead(LeadPreviewEmailForm $previewEmailForm, Lead $lead, array $attachments = []): Email
     {
+        $data = [
+            'userId'        =>  Yii::$app->user->id,
+            'type'          =>  EmailType::OUTBOX,
+            'status'        =>  EmailStatus::PENDING,
+            'projectId'     =>  $lead->project_id,
+            'depId'         =>  null, //TODO: fill proper way
+            'createdDt'     =>  date('Y-m-d H:i:s'),
+            'leadsIds'      =>  [$lead->id],
+        ];
 
+        $data['params'] = [
+            'templateType'  =>  $previewEmailForm->e_email_tpl_id ?? null,
+            'language'      =>  $previewEmailForm->e_language_id ?? null,
+        ];
+
+        $data['body'] = [
+            'subject'   =>  $previewEmailForm->e_email_subject,
+            'bodyHtml'  =>  $previewEmailForm->e_email_message,
+            'data'      =>  json_encode($attachments),
+        ];
+
+        $data['contacts'] = [
+            'from' => [
+                'email' => $previewEmailForm->e_email_from,
+                'name'  =>  $previewEmailForm->e_email_from_name,
+                'type' => EmailContactType::FROM,
+            ],
+            'to' => [
+                'email' => $previewEmailForm->e_email_to,
+                'name'  =>  $previewEmailForm->e_email_to_name,
+                'type' => EmailContactType::TO,
+            ],
+        ];
+
+        return $this->create(EmailCreateForm::fromArray($data));
     }
 }
