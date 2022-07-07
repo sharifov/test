@@ -3,9 +3,12 @@
 namespace modules\objectSegment\src\entities;
 
 use common\models\Employee;
+use modules\objectSegment\src\contracts\ObjectSegmentListContract;
 use Yii;
 use yii\behaviors\AttributeBehavior;
 use yii\behaviors\TimestampBehavior;
+use yii\caching\TagDependency;
+use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 
@@ -18,15 +21,19 @@ use yii\helpers\ArrayHelper;
  * @property string $osl_title
  * @property string $osl_description
  * @property bool $osl_enabled
+ * @property bool $osl_is_system
  * @property int $osl_updated_user_id
  * @property string $osl_updated_dt
  * @property string $osl_created_dt
  * @property ObjectSegmentType $oslObjectSegmentType
  * @property Employee $oslUpdatedUser
+ * @property ObjectSegmentTask[] $objectSegmentTaskAssigns
  *
  */
 class ObjectSegmentList extends \yii\db\ActiveRecord
 {
+    public const CACHE_TAG = 'object-segment-list-tag-dependency';
+
     public static function tableName(): string
     {
         return 'object_segment_list';
@@ -46,7 +53,7 @@ class ObjectSegmentList extends \yii\db\ActiveRecord
             [['osl_key', 'osl_ost_id'], 'unique', 'targetAttribute' => ['osl_key', 'osl_ost_id']],
             [['osl_key', 'osl_title'], 'string', 'max' => 100],
             [['osl_description'], 'string', 'max' => 1000],
-            ['osl_enabled', 'boolean'],
+            [['osl_enabled', 'osl_is_system'], 'boolean'],
         ];
     }
 
@@ -58,6 +65,11 @@ class ObjectSegmentList extends \yii\db\ActiveRecord
     public function getOslUpdatedUser()
     {
         return $this->hasOne(Employee::class, ['id' => 'osl_updated_user_id']);
+    }
+
+    public function getObjectSegmentTaskAssigns(): ActiveQuery
+    {
+        return $this->hasMany(ObjectSegmentTask::class, ['ostl_osl_id' => 'osl_id']);
     }
 
 
@@ -84,6 +96,21 @@ class ObjectSegmentList extends \yii\db\ActiveRecord
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
+    public function beforeDelete()
+    {
+        if (in_array($this->osl_key, ObjectSegmentListContract::KEYS_LIST)) {
+            throw new \DomainException('This Object Segment List is restricted from delete model id' . $this->osl_id);
+        }
+        return parent::beforeDelete();
+    }
+
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        TagDependency::invalidate(Yii::$app->cache, self::CACHE_TAG);
+    }
+
     public function attributeLabels(): array
     {
         return [
@@ -96,6 +123,31 @@ class ObjectSegmentList extends \yii\db\ActiveRecord
             'osl_updated_user_id' => 'Updated User ID',
             'osl_created_dt'      => 'Created Dt',
             'osl_updated_dt'      => 'Updated Dt',
+            'osl_is_system' => 'Is System',
         ];
+    }
+
+    public static function getList(?int $objectTypeId = null): array
+    {
+        $query = self::find()->select(['osl_id', 'osl_title']);
+
+        if ($objectTypeId !== null) {
+            $query->where(['osl_ost_id' => $objectTypeId]);
+        }
+
+        return ArrayHelper::map(
+            $query->all(),
+            'osl_id',
+            'osl_title'
+        );
+    }
+
+    public static function getListCache(int $duration = 60 * 60): array
+    {
+        return Yii::$app->cache->getOrSet(self::CACHE_TAG, static function () {
+            return self::getList();
+        }, $duration, new TagDependency([
+            'tags' => self::CACHE_TAG,
+        ]));
     }
 }

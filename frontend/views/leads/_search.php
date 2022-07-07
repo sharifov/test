@@ -180,7 +180,7 @@ use frontend\extensions\DatePicker;
                         <div class="col-md-2">
                             <?= $form->field($model, 'createdRangeTime', [
                                 'options' => ['class' => 'form-group']
-                            ])->widget(\kartik\daterange\DateRangePicker::class, [
+                            ])->widget(\src\widgets\DateRangePicker::class, [
                                 'presetDropdown' => false,
                                 'hideInput' => true,
                                 'convertFormat' => true,
@@ -201,7 +201,7 @@ use frontend\extensions\DatePicker;
                         <div class="col-md-2">
                             <?= $form->field($model, 'statusRangeTime', [
                                 'options' => ['class' => 'form-group']
-                            ])->widget(\kartik\daterange\DateRangePicker::class, [
+                            ])->widget(\src\widgets\DateRangePicker::class, [
                                 'presetDropdown' => false,
                                 'hideInput' => true,
                                 'convertFormat' => true,
@@ -222,7 +222,7 @@ use frontend\extensions\DatePicker;
                         <div class="col-md-2">
                             <?= $form->field($model, 'updatedRangeTime', [
                                 'options' => ['class' => 'form-group']
-                            ])->widget(\kartik\daterange\DateRangePicker::class, [
+                            ])->widget(\src\widgets\DateRangePicker::class, [
                                 'presetDropdown' => false,
                                 'hideInput' => true,
                                 'convertFormat' => true,
@@ -243,7 +243,7 @@ use frontend\extensions\DatePicker;
                         <div class="col-md-2">
                             <?= $form->field($model, 'lastActionRangeTime', [
                                 'options' => ['class' => 'form-group']
-                            ])->widget(\kartik\daterange\DateRangePicker::class, [
+                            ])->widget(\src\widgets\DateRangePicker::class, [
                                 'presetDropdown' => false,
                                 'hideInput' => true,
                                 'convertFormat' => true,
@@ -353,7 +353,7 @@ use frontend\extensions\DatePicker;
                     <!--</div>
                     <div class="row">-->
                         <div class="col-md-2">
-                            <?= $form->field($model, 'departRangeTime', ['options' => ['class' => 'form-group']])->widget(\kartik\daterange\DateRangePicker::class, [
+                            <?= $form->field($model, 'departRangeTime', ['options' => ['class' => 'form-group']])->widget(\src\widgets\DateRangePicker::class, [
                                 'presetDropdown' => false,
                                 'hideInput' => true,
                                 'convertFormat' => true,

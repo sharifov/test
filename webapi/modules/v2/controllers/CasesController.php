@@ -4,6 +4,8 @@ namespace webapi\modules\v2\controllers;
 
 use common\components\jobs\CreateSaleFromBOJob;
 use common\components\jobs\SendEmailOnCaseCreationBOJob;
+use common\models\Lead;
+use modules\experiment\models\ExperimentTarget;
 use src\entities\cases\CaseCategory;
 use src\entities\cases\Cases;
 use src\helpers\app\AppHelper;
@@ -76,6 +78,7 @@ class CasesController extends BaseController
      * @apiParam {string{255}}          [subject]                        Subject
      * @apiParam {string{65000}}        [description]                    Description
      * @apiParam {array[]}              [order_info]                     Order Info (key => value, key: string, value: string)
+     * @apiParam {object[]}             [experiments]                    Cross system Experiments (array of objects {key=>value}, key = "ex_code", value = Experiment code (string))
      *
      * @apiParamExample {json} Request-Example:
      * {
@@ -90,7 +93,15 @@ class CasesController extends BaseController
      *       "order_info": {
      *           "Departure Date":"2020-03-07",
      *           "Departure Airport":"LON"
-     *       }
+     *       },
+     *       "experiments": [
+     *           {
+     *              "ex_code": "wpl5.0"
+     *           },
+     *           {
+     *              "ex_code": "wpl6.2"
+     *           }
+     *       ]
      *   }
      *
      * @apiSuccessExample {json} Success-Response:
@@ -227,6 +238,8 @@ class CasesController extends BaseController
             ->andWhere(['cs_category_id' => $caseCategory->cc_id, 'cs_order_uid' => $form->order_uid])
             ->withNotFinishStatus()->limit(1)->one()
         ) {
+            ExperimentTarget::processExperimentObjects(ExperimentTarget::EXT_TYPE_CASE, $case->cs_id, $form->experiments);
+
             return new SuccessResponse(
                 new DataMessage(
                     new Message('case_id', $case->cs_id),
@@ -245,6 +258,8 @@ class CasesController extends BaseController
                 new CodeMessage($e->getCode())
             );
         }
+
+        ExperimentTarget::processExperimentObjects(ExperimentTarget::EXT_TYPE_CASE, $result->csId, $form->experiments);
 
         if ($form->order_uid || $form->contact_email || $form->contact_phone) {
             try {

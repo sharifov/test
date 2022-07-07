@@ -83,6 +83,10 @@ class LeadAbacDto extends \stdClass
                 if ($lead->isBookFailed()) {
                     $fromStatuses = [Lead::STATUS_BOOK_FAILED];
                 }
+
+                if ($lead->isAlternative()) {
+                    $fromStatuses = [Lead::STATUS_ALTERNATIVE];
+                }
                 $isAccessLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes([], $fromStatuses);
                 $this->canTakeByFrequencyMinutes = $isAccessLeadByFrequency['access'];
             }

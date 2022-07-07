@@ -3,6 +3,7 @@
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\widgets\DetailView;
+use modules\objectSegment\src\contracts\ObjectSegmentListContract;
 
 /* @var $this yii\web\View */
 /* @var $model \modules\objectSegment\src\entities\ObjectSegmentList */
@@ -18,13 +19,16 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <p>
         <?= Html::a('<i class="fa fa-edit"></i> Update', ['update', 'id' => $model->osl_id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('<i class="fa fa-remove"></i> Delete', ['delete', 'id' => $model->osl_id], [
-            'class' => 'btn btn-danger',
-            'data'  => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method'  => 'post',
-            ],
-        ]) ?>
+
+        <?php if (!$model->osl_is_system) : ?>
+            <?= Html::a('<i class="fa fa-remove"></i> Delete', ['delete', 'id' => $model->osl_id], [
+                'class' => 'btn btn-danger',
+                'data'  => [
+                    'confirm' => 'Are you sure you want to delete this item?',
+                    'method'  => 'post',
+                ],
+            ]) ?>
+        <?php endif ?>
     </p>
 
     <div class="col-md-6">

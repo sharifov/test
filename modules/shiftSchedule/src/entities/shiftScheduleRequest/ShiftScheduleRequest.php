@@ -72,6 +72,8 @@ class ShiftScheduleRequest extends ActiveRecord
         self::STATUS_REMOVED => 'removed',
     ];
 
+    public const DECLINE_BY_SYSTEM_DESCRIPTION = 'Declined by system';
+
     /**
      * {@inheritdoc}
      */
@@ -373,5 +375,14 @@ class ShiftScheduleRequest extends ActiveRecord
         ]);
 
         $history->save();
+    }
+
+    /**
+     * @param int $oldStatus
+     * @return bool
+     */
+    public function isChangedStatus(int $oldStatus): bool
+    {
+        return $this->ssr_status_id !== $oldStatus;
     }
 }

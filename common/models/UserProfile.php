@@ -20,7 +20,6 @@ use yii\caching\TagDependency;
  * @property boolean $up_kpi_enable
  * @property boolean $up_2fa_enable
  * @property string|null $up_2fa_secret
- * @property mixed|null $up_2fa_timestamp
  * @property int $up_skill
  * @property boolean $up_show_in_contact_list
  *
@@ -31,6 +30,9 @@ use yii\caching\TagDependency;
  * @property string $up_rc_user_password
  * @property string $up_rc_token_expired
  * @property bool $up_call_recording_disabled
+ *
+ * @property string|null $up_otp_hashed_code
+ * @property string|null $up_otp_expired_dt
  *
  * @property Employee $upUser
  */
@@ -55,6 +57,8 @@ class UserProfile extends \yii\db\ActiveRecord
         self::SKILL_TYPE_MIDDLE => 'Middle',
         self::SKILL_TYPE_SENIOR => 'Senior',
     ];
+
+    public bool $up_2fa_reset = false;
 
     public function afterSave($insert, $changedAttributes)
     {
@@ -100,6 +104,14 @@ class UserProfile extends \yii\db\ActiveRecord
 
             ['up_call_recording_disabled', 'default', 'value' => false],
             ['up_call_recording_disabled', 'boolean'],
+
+            ['up_otp_hashed_code', 'string', 'max' => 32],
+            ['up_otp_expired_dt', 'string'],
+            ['up_otp_expired_dt',  'datetime', 'format' => 'php:Y-m-d H:i:s'],
+
+            ['up_2fa_reset', 'default', 'value' => null],
+            ['up_2fa_reset', 'boolean'],
+            ['up_2fa_reset', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
         ];
     }
 
@@ -202,5 +214,29 @@ class UserProfile extends \yii\db\ActiveRecord
             $profile->up_telegram_enable = false;
             $profile->save(false);
         }
+    }
+
+    public function updateOtpData(string $code, \DateTimeImmutable $expiredDateTime): void
+    {
+        $this->up_otp_hashed_code = $code;
+        $this->up_otp_expired_dt = $expiredDateTime->format('Y-m-d H:i:s');
+    }
+
+    public function isOtpExpiredDateTime(): bool
+    {
+        return $this->getOtpSecondsLeft() <= 0;
+    }
+
+    public function getOtpSecondsLeft(): int
+    {
+        $curDateTime = new \DateTimeImmutable();
+        $expiredDateTime = new \DateTimeImmutable($this->up_otp_expired_dt);
+        return $expiredDateTime->getTimestamp() - $curDateTime->getTimestamp();
+    }
+
+    public function removeOtpData(): void
+    {
+        $this->up_otp_hashed_code = null;
+        $this->up_otp_expired_dt = null;
     }
 }

@@ -1455,7 +1455,10 @@ class EmployeeController extends FController
                 }
 
                 $userProfile->setAttributes($form->getValuesOfAvailableAttributes());
-                if (count($userProfile->getDirtyAttributes()) > 0) {
+                if ($userProfile->up_2fa_reset) {
+                    $userProfile->setAttribute('up_2fa_secret', null);
+                }
+                if (count($userProfile->getDirtyAttributes()) > 0 || $userProfile->up_2fa_reset) {
                     $userProfile->up_updated_dt = date('Y-m-d H:i:s');
                     if ($userProfile->save()) {
                         $userUpdated = true;
@@ -1652,6 +1655,8 @@ class EmployeeController extends FController
                 $transaction->commit();
 
                 if ($userUpdated) {
+                    $targetUser->updated_at = date('Y-m-d H:i:s');
+                    $targetUser->save();
                     Yii::$app->getSession()->setFlash('success', 'User updated');
                 } else {
                     Yii::$app->getSession()->setFlash('warning', 'User is not updated');

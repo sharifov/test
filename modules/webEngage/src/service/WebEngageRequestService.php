@@ -2,7 +2,6 @@
 
 namespace modules\webEngage\src\service;
 
-use common\components\EmailService;
 use common\components\Metrics;
 use common\helpers\LogHelper;
 use modules\webEngage\form\WebEngageEventForm;

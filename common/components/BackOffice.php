@@ -12,8 +12,10 @@ use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
 use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
 use webapi\src\logger\behaviors\filters\creditCard\V5;
+use webapi\src\request\BoRequestDataHelper;
 use Yii;
 use yii\base\Exception;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\httpclient\CurlTransport;
 
@@ -325,6 +327,10 @@ class BackOffice
         }
         if ($quote) {
             $request['flightQuote'] = $quote;
+        }
+        if ($reprotectionQuoteGid) {
+            $productQuote = ProductQuote::find()->where(['pq_gid' => $reprotectionQuoteGid])->limit(1)->one();
+            $request['additionalInfo'] = BoRequestDataHelper::prepareAdditionalInfoToBoRequest($productQuote);
         }
 
         try {

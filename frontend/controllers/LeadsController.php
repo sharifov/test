@@ -117,14 +117,14 @@ class LeadsController extends FController
 
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
-        /** @abac null, LeadSearchAbacObject::SIMPLE_SEARCH, LeadSearchAbacObject::ACTION_ACCESS, Access to Simple Search Lead  */
-        $accessSimpleSearch = Yii::$app->abac->can(null, LeadSearchAbacObject::SIMPLE_SEARCH, LeadSearchAbacObject::ACTION_ACCESS);
+        /** @abac null, LeadSearchAbacObject::ADVANCED_SEARCH, LeadSearchAbacObject::ACTION_ACCESS, Access to Advanced Search Lead  */
+        $accessAdvancedSearch = Yii::$app->abac->can(null, LeadSearchAbacObject::ADVANCED_SEARCH, LeadSearchAbacObject::ACTION_ACCESS);
 
         if ($user->isSupervision()) {
             $params['LeadSearch']['supervision_id'] = $user->id;
         }
 
-        if (!$params && $accessSimpleSearch) {
+        if (!$params && !$accessAdvancedSearch) {
             $params['LeadSearch']['employee_id'] = $user->id;
         }
 
@@ -132,7 +132,7 @@ class LeadsController extends FController
             $params['LeadSearch']['l_is_test'] = '0';
         }
 
-        if ($accessSimpleSearch) {
+        if (!$accessAdvancedSearch) {
             $dataProvider = $searchModel->searchAgent($params, Auth::user());
         } else {
             $dataProvider = $searchModel->search($params, Auth::user());
@@ -165,7 +165,7 @@ class LeadsController extends FController
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'accessSimpleSearch' => $accessSimpleSearch,
+            'accessAdvancedSearch' => $accessAdvancedSearch,
         ]);
     }
 

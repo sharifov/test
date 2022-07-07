@@ -18,6 +18,7 @@ use yii\base\Model;
  * @property int $category_id
  * @property string|null $order_uid
  * @property array $order_info
+ * @property array $experiments
  * @property int|null $project_id
  * @property string|null $subject
  * @property string|null $description
@@ -33,6 +34,7 @@ class CreateForm extends Model
     public $category_id;
     public $order_uid;
     public $order_info;
+    public $experiments;
     public $project_id;
     public $subject;
     public $description;
@@ -104,8 +106,8 @@ class CreateForm extends Model
             ['description', 'default', 'value' => null],
             ['description', 'string', 'max' => 65000],
 
-            ['order_info', 'default', 'value' => []],
-            ['order_info', IsArrayValidator::class],
+            [['order_info'], 'default', 'value' => []],
+            ['experiments', IsArrayValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
             ['order_info', function () {
                 foreach ($this->order_info as $key => $value) {
                     if (!is_string($key) || !is_string($value)) {

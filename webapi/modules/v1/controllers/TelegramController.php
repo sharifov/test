@@ -23,10 +23,14 @@ class TelegramController extends Controller
         $this->enableCsrfValidation = false;
     }
 
+    //apiDoc was missing and recreated briefly todo double check carefully
     /**
-     * Displays homepage.
      *
-     * @return mixed
+     * @api {post} v1/telegram/index Telegram index action
+     * @apiVersion 0.1.0
+     * @apiName Index
+     * @apiGroup Telegram
+     *
      */
     public function actionIndex()
     {
@@ -34,8 +38,19 @@ class TelegramController extends Controller
         exit;
     }
 
+    //apiDoc was missing and recreated briefly todo double check carefully
     /**
+     * @api {post} v1/telegram/webhook Send Message To Telegram
+     * @apiVersion 0.1.0
+     * @apiName Webhook
+     * @apiGroup Telegram
      *
+     * @apiParam {Array}                                    message                         Message data array
+     * @apiParam {string{11}=bot_command}     message.entities.0.type         Type
+     * @apiParam {String}                                   message.chat.first_name         Frist Name
+     * @apiParam {String}                                   message.chat.username           User Name
+     *
+     * @apiSuccess {String} message    Message Status
      */
     public function actionWebhook()
     {
@@ -119,51 +134,57 @@ class TelegramController extends Controller
                         }
 
                         if ($user_id && $secure_code) {
-                            $user = Employee::findOne($user_id);
-                            $validCode = md5($user->id . '|' . $user->username . '|' . date('Y-m-d'));
+                            if ($user = Employee::findOne($user_id)) {
+                                $validCode = md5($user->id . '|' . $user->username . '|' . date('Y-m-d'));
+                                if ($secure_code === $validCode) {
+                                    //Yii::info('Error Telegram Auth. Invalid secure code! ' . $result['message']['text'], 'info\API:Telegram:Webhook:success');
 
-
-                            if ($secure_code === $validCode) {
-                                //Yii::info('Error Telegram Auth. Invalid secure code! ' . $result['message']['text'], 'info\API:Telegram:Webhook:success');
-
-                                $profile = $user->userProfile;
-                                if (!$profile) {
-                                    $profile = new UserProfile();
-                                    $profile->up_user_id = $user->id;
-                                }
-
-                                if (!$profile->up_telegram) {
-                                    $profile->up_telegram = (string) $chat_id;
-                                    $profile->up_telegram_enable = true;
-                                    $profile->up_updated_dt = date('Y-m-d H:i:s');
-                                    if (!$profile->save()) {
-                                        Yii::error(VarDumper::dumpAsString($profile->errors), 'API:Telegram:Webhook:UserProfile:save');
-
-                                        Yii::$app->telegram->sendMessage([
-                                            'chat_id' => $chat_id,
-                                            'text' => 'Error  Telegram Auth. Not update UserProfile',
-                                        ]);
-
-                                        Notifications::create($user->id, 'Telegram Auth', 'Hi, ' . $result['message']['chat']['first_name'] ?? '' . ' (' . $result['message']['chat']['username'] ?? '' . ')! Your Telegram Account is activated. ', Notifications::TYPE_SUCCESS, true);
-                                    } else {
-                                        if ($ntf = Notifications::create($user->id, 'Telegram Auth', 'Hi, ' . $result['message']['chat']['first_name'] ?? '' . ' (' . $result['message']['chat']['username'] ?? '' . ')! Your Telegram Account is activated. ', Notifications::TYPE_SUCCESS, true)) {
-                                            // Notifications::socket($user->id, null, 'getNewNotification', [], true);
-                                            $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                                            Notifications::publish('getNewNotification', ['user_id' => $user->id], $dataNotification);
-                                        }
-
-                                        Yii::$app->telegram->sendMessage([
-                                            'chat_id' => $chat_id,
-                                            'text' => 'Success Telegram Auth. Hi! ' . $user->username,
-                                        ]);
+                                    $profile = $user->userProfile;
+                                    if (!$profile) {
+                                        $profile = new UserProfile();
+                                        $profile->up_user_id = $user->id;
                                     }
+
+                                    if (!$profile->up_telegram) {
+                                        $profile->up_telegram = (string)$chat_id;
+                                        $profile->up_telegram_enable = true;
+                                        $profile->up_updated_dt = date('Y-m-d H:i:s');
+                                        if (!$profile->save()) {
+                                            Yii::error(VarDumper::dumpAsString($profile->errors), 'API:Telegram:Webhook:UserProfile:save');
+
+                                            Yii::$app->telegram->sendMessage([
+                                                'chat_id' => $chat_id,
+                                                'text' => 'Error  Telegram Auth. Not update UserProfile',
+                                            ]);
+
+                                            Notifications::create($user->id, 'Telegram Auth', 'Hi, ' . $result['message']['chat']['first_name'] ?? '' . ' (' . $result['message']['chat']['username'] ?? '' . ')! Your Telegram Account is activated. ', Notifications::TYPE_SUCCESS, true);
+                                        } else {
+                                            if ($ntf = Notifications::create($user->id, 'Telegram Auth', 'Hi, ' . $result['message']['chat']['first_name'] ?? '' . ' (' . $result['message']['chat']['username'] ?? '' . ')! Your Telegram Account is activated. ', Notifications::TYPE_SUCCESS, true)) {
+                                                // Notifications::socket($user->id, null, 'getNewNotification', [], true);
+                                                $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                                                Notifications::publish('getNewNotification', ['user_id' => $user->id], $dataNotification);
+                                            }
+
+                                            Yii::$app->telegram->sendMessage([
+                                                'chat_id' => $chat_id,
+                                                'text' => 'Success Telegram Auth. Hi! ' . $user->username,
+                                            ]);
+                                        }
+                                    }
+                                } else {
+                                    Yii::info('Error Telegram Auth. Invalid secure code! ' . $secure_code . ' <> ' . $validCode, 'info\API:Telegram:Webhook:code');
+
+                                    Yii::$app->telegram->sendMessage([
+                                        'chat_id' => $chat_id,
+                                        'text' => 'Error Telegram Auth. Invalid secure code!',
+                                    ]);
                                 }
                             } else {
-                                Yii::info('Error Telegram Auth. Invalid secure code! ' . $secure_code . ' <> ' . $validCode, 'info\API:Telegram:Webhook:code');
+                                Yii::warning('Employee not found by ID (' . $user_id . ')', 'API:Telegram:Webhook:user_id');
 
                                 Yii::$app->telegram->sendMessage([
                                     'chat_id' => $chat_id,
-                                    'text' => 'Error Telegram Auth. Invalid secure code!',
+                                    'text' => 'Error Telegram Auth. Employee not found!',
                                 ]);
                             }
                         }

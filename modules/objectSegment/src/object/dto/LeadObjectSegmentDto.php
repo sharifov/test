@@ -13,6 +13,7 @@ class LeadObjectSegmentDto implements ObjectSegmentDtoInterface
     public ?int $pax_adt_count         = null;
     public ?int $pax_chd_count         = null;
     public ?int $pax_inf_count         = null;
+    public ?string $cabin_type            = null;
     public ?string $lead_project_name       = null;
     public ?string $lead_department_name    = null;
     public ?string $created_dt            = null;
@@ -21,18 +22,19 @@ class LeadObjectSegmentDto implements ObjectSegmentDtoInterface
 
     public function __construct(Lead $lead)
     {
-        $this->lead_id = $lead->id;
+        $this->lead_id               = $lead->id;
         $this->flight_segments_count = $lead->getleadFlightSegments()->count();
         $firstSegment                = $lead->getleadFlightSegments()->orderBy(['departure' => SORT_ASC])->one();
         if (isset($firstSegment)) {
             $this->origin = $firstSegment->origin;
         }
-        $this->pax_adt_count = $lead->adults;
-        $this->pax_chd_count = $lead->children;
-        $this->pax_inf_count = $lead->infants;
+        $this->pax_adt_count        = $lead->adults;
+        $this->pax_chd_count        = $lead->children;
+        $this->pax_inf_count        = $lead->infants;
         $this->lead_project_name    = $lead->project->project_key ?? null;
         $this->lead_department_name = $lead->lDep->dep_key ?? null;
-        $this->created_dt         = $lead->created;
+        $this->cabin_type           = $lead->cabin;
+        $this->created_dt           = $lead->created;
     }
 
     public function getEntityId(): int

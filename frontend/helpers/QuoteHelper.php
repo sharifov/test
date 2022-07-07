@@ -5,6 +5,7 @@ namespace frontend\helpers;
 use common\models\Quote;
 use common\models\Airports;
 use common\models\Lead;
+use Yii;
 use yii\helpers\VarDumper;
 
 /**
@@ -525,5 +526,31 @@ class QuoteHelper
     private static function getMetaAuto(array $quote, int $defaultValue = 99): int
     {
         return (int) ($quote['meta']['auto'] ?? $defaultValue);
+    }
+
+    public static function clearSearchCache(Lead $lead): void
+    {
+        $keyCache = sprintf('quick-search-new-%d-%s-%s', $lead->id, '', $lead->generateLeadKey());
+
+        if (Yii::$app->cacheFile->get($keyCache) !== false) {
+            Yii::$app->cacheFile->delete($keyCache);
+        }
+    }
+
+    public static function isChangedAttribute(string $attributeName, string $attributeValue, int $key, array $leadFlightSegments): bool
+    {
+        $isChanged = true;
+
+        if (!array_key_exists($key, $leadFlightSegments) && ($countLeadFlightSegments = count($leadFlightSegments)) > 0) {
+            $key = $countLeadFlightSegments - 1;
+        }
+
+        if (array_key_exists($key, $leadFlightSegments)) {
+            if (array_key_exists($attributeName, $leadFlightSegments[$key])) {
+                $isChanged = $attributeValue !== $leadFlightSegments[$key][$attributeName];
+            }
+        }
+
+        return $isChanged;
     }
 }

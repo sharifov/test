@@ -1,6 +1,9 @@
 <?php
 
+use modules\shiftSchedule\src\events\ShiftScheduleEventChangedEvent;
+use modules\shiftSchedule\src\listeners\ShiftScheduleEventChangedListener;
 use src\events\lead\LeadBookedEvent;
+use src\events\lead\LeadCallExpertChangedEvent;
 use src\events\lead\LeadCallExpertRequestEvent;
 use src\events\lead\LeadCloseEvent;
 use src\events\lead\LeadCountPassengersChangedEvent;
@@ -32,6 +35,7 @@ use src\events\lead\LeadTaskEvent;
 use src\events\lead\LeadTrashEvent;
 use src\listeners\lead\LeadBookedEventLogListener;
 use src\listeners\lead\LeadBookedNotificationsListener;
+use src\listeners\lead\LeadCallExpertChangedListener;
 use src\listeners\lead\LeadCallExpertRequestEventListener;
 use src\listeners\lead\LeadCloseListener;
 use src\listeners\lead\LeadCountPassengersChangedEventListener;
@@ -69,7 +73,9 @@ use src\listeners\lead\LeadSnoozeNotificationsListener;
 use src\listeners\lead\LeadSoldEventLogListener;
 use src\listeners\lead\LeadSoldNotificationsListener;
 use src\listeners\lead\LeadSoldSplitListener;
+use src\listeners\lead\LeadInfoReloadListener;
 use src\listeners\lead\LeadTaskEventListener;
+use src\listeners\lead\LeadTaskListListener;
 use src\listeners\lead\LeadTipsSplitListener;
 use src\listeners\lead\LeadTrashEventLogListener;
 use src\listeners\lead\leadWebEngage\LeadBookedWebEngageListener;
@@ -108,6 +114,7 @@ return [
 
     LeadDuplicateDetectedEvent::class => [LeadDuplicateDetectedEventListener::class],
     LeadOwnerChangedEvent::class => [
+        LeadTaskListListener::class,
         LeadOwnerChangedNotificationsListener::class,
         LeadPoorProcessingRemoverOwnerChangedListener::class,
     ],
@@ -127,6 +134,7 @@ return [
     LeadPendingEvent::class => [LeadPendingEventLogListener::class],
     LeadProcessingEvent::class => [
         LeadProcessingEventLogListener::class,
+        LeadInfoReloadListener::class,
     ],
     LeadRejectEvent::class => [LeadRejectEventLogListener::class],
     LeadFollowUpEvent::class => [
@@ -163,11 +171,19 @@ return [
     LeadExtraQueueEvent::class => [
         LeadExtraQueueEventLogListener::class,
         LeadExtraQueueNotificationsListener::class,
+        LeadInfoReloadListener::class,
     ],
     LeadPoorProcessingEvent::class => [
         LeadPoorProcessingAdderListener::class,
+        LeadInfoReloadListener::class,
     ],
     LeadCloseEvent::class => [
         LeadCloseListener::class
+    ],
+    LeadCallExpertChangedEvent::class => [
+        LeadCallExpertChangedListener::class
+    ],
+    ShiftScheduleEventChangedEvent::class => [
+        ShiftScheduleEventChangedListener::class
     ]
 ];

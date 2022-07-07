@@ -222,9 +222,19 @@ class VoluntaryQuoteCreateForm extends ChangeQuoteCreateForm
         return $this->itinerary;
     }
 
+    public function setItinerary($itinerary): array
+    {
+        return $this->itinerary = $itinerary;
+    }
+
     public function getSegmentTripFormsData(): array
     {
         return $this->segmentTripFormsData;
+    }
+
+    public function setSegmentTripFormsData($segmentTripFormsData): array
+    {
+        return $this->segmentTripFormsData = $segmentTripFormsData;
     }
 
     public function getFlightQuotePaxPriceForms(): array

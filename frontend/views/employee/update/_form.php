@@ -573,6 +573,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         </div>
                     <?php endif; ?>
 
+                    <?php /*
                     <?php if ($form->fieldAccess->canShow('up_2fa_secret') || $form->fieldAccess->canShow('up_2fa_enable')) : ?>
                         <div class="col-md-3">
                             <?php if ($form->fieldAccess->canShow('up_2fa_secret')) : ?>
@@ -595,6 +596,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
+                    */ ?>
 
                     <?php if ($form->fieldAccess->canShow('up_call_type_id')) : ?>
                         <div class="col-md-3">
@@ -628,6 +630,14 @@ $this->params['breadcrumbs'][] = $this->title;
                                     ['options' => ['class' => 'form-group']]
                                 )->checkbox(['disabled' => !$form->fieldAccess->canEdit('up_telegram_enable')]) ?>
                             <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if ($form->fieldAccess->canShow('up_2fa_reset')) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm->field($form, 'up_2fa_reset', ['options' => ['class' => 'form-group']])
+                                ->checkbox(['checked' => false])
+                                ->label('Reset 2FA secret') ?>
                         </div>
                     <?php endif; ?>
 

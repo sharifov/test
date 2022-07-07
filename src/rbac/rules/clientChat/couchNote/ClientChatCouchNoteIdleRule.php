@@ -6,7 +6,7 @@ use src\model\clientChat\entity\ClientChat;
 use yii\rbac\Rule;
 
 /**
- * Class ClientChatCouchNoteInProgressRule
+ * Class ClientChatCouchNoteIdleRule
  */
 class ClientChatCouchNoteIdleRule extends Rule
 {
