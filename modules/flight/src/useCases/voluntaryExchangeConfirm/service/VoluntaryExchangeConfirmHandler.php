@@ -7,6 +7,7 @@ use common\components\purifier\Purifier;
 use common\models\CaseSale;
 use common\models\Notifications;
 use frontend\helpers\JsonHelper;
+use modules\featureFlag\FFlag;
 use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
 use modules\flight\models\FlightRequest;
@@ -27,6 +28,7 @@ use src\entities\cases\Cases;
 use src\helpers\app\AppHelper;
 use webapi\src\request\BoRequestDataHelper;
 use webapi\src\services\payment\BillingInfoApiVoluntaryService;
+use Yii;
 use yii\helpers\ArrayHelper;
 
 use function Amp\Promise\timeoutWithDefault;
@@ -94,7 +96,11 @@ class VoluntaryExchangeConfirmHandler
         $request['billing'] = BoRequestDataHelper::fillBillingData($this->confirmForm->getBillingInfoForm());
         $request['payment'] = BoRequestDataHelper::fillPaymentData($this->confirmForm->getPaymentRequestForm());
         $request['exchange'] = $this->prepareExchange();
-        $request['additionalInfo'] = BoRequestDataHelper::prepareAdditionalInfoToBoRequest($this->confirmForm->changeQuote);
+
+        /** @fflag FFlag::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS, Send additional info to BO endpoints enable\disable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS)) {
+            $request['additionalInfo'] = BoRequestDataHelper::prepareAdditionalInfoToBoRequest($this->confirmForm->changeQuote);
+        }
         return $request;
     }
 
