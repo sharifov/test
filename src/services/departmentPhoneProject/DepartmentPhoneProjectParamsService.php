@@ -29,17 +29,20 @@ class DepartmentPhoneProjectParamsService
         if (empty($this->departmentPhoneProject->dpp_params)) {
             return [];
         }
-        return array_unique(array_column(ArrayHelper::getValue(JsonHelper::decode($this->departmentPhoneProject->dpp_params), 'experiments', []), 'ex_code'));
+        $experiments = ArrayHelper::getValue(JsonHelper::decode($this->departmentPhoneProject->dpp_params), 'experiments', []);
+        $experimentCodes = [];
+        foreach ($experiments as $experiment) {
+            if ($experiment['ex_enabled']) {
+                $experimentCodes[$experiment['ex_code']] = null;
+            }
+        }
+
+        return array_keys($experimentCodes);
     }
 
     public function processExperiments(int $targetTypeId, int $phoneListId): void
     {
         ExperimentTarget::processExperimentsCodes($targetTypeId, $phoneListId, $this->getPhoneExperiments());
-    }
-
-    public function updateExperiments(int $oldTargetTypeId, int $newTargetTypeId, int $callId): void
-    {
-        ExperimentTarget::updateAll(['ext_target_type_id' => $newTargetTypeId], ['ext_target_type_id' => $oldTargetTypeId, 'ext_target_id' => $callId]);
     }
 
     public function getCallFilterGuard(): array

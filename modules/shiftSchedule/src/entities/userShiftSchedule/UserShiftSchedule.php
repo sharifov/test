@@ -156,6 +156,8 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
 
             ['uss_created_user_id', 'integer'],
             ['uss_updated_user_id', 'integer'],
+
+            ['uss_sst_id', 'required'],
             ['uss_sst_id', 'integer'],
 
             [['uss_shift_id', 'uss_ssr_id', 'uss_duration',

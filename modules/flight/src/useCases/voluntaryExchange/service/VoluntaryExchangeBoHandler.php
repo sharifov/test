@@ -70,7 +70,7 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
             [ProductQuoteChangeStatus::IN_PROGRESS]
         );
         if (!$this->productQuoteChange) {
-            throw new \RuntimeException('ProductQuoteChange not found by pqID(' . $this->originProductQuote->pq_id . ')');
+            throw new \RuntimeException('ProductQuoteChange not found by pqID(' . $this->originProductQuote->pq_id . ') bookingId(' . $this->form->booking_id . ')');
         }
 
         $this->voluntaryQuote = VoluntaryExchangeCreateService::getProductQuoteByProductQuoteChange(
@@ -78,7 +78,7 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
             [ProductQuoteStatus::IN_PROGRESS]
         );
         if (!$this->voluntaryQuote) {
-            throw new \RuntimeException('voluntaryQuote not found by pqcID(' . $this->productQuoteChange->pqc_id . ')');
+            throw new \RuntimeException('voluntaryQuote not found by pqcID(' . $this->productQuoteChange->pqc_id . ') bookingId(' . $this->form->booking_id . ')');
         }
 
         if (!$this->project = Project::findOne(['project_key' => $this->form->project_key])) {
