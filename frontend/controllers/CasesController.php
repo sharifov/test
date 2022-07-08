@@ -48,8 +48,8 @@ use modules\order\src\payment\PaymentRepository;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use modules\order\src\services\OrderManageService;
+use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
-use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use src\auth\Auth;
 use src\entities\cases\CaseEventLog;
 use src\entities\cases\CaseEventLogSearch;
@@ -1068,7 +1068,9 @@ class CasesController extends FController
                         if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_UPDATE_PRODUCT_QUOTE_STATUS_BY_BO_SALE_STATUS)) {
                             if (!empty($bookingId)) {
                                 $originalProductQuote = ProductQuoteQuery::getProductQuoteByBookingId($bookingId);
-                                ProductQuoteRepository::updateProductQuoteStatusByBOSaleStatus($originalProductQuote, $saleData);
+                                if (!empty($originalProductQuote)) {
+                                    ProductQuote::updateProductQuoteStatusByBOSaleStatus($originalProductQuote, $saleData);
+                                }
                             }
                         }
 
@@ -2030,7 +2032,9 @@ class CasesController extends FController
                 $bookingId = !empty($saleData['baseBookingId']) ? $saleData['baseBookingId'] : $saleData['bookingId'] ?? null;
                 if (!empty($bookingId)) {
                     $originalProductQuote = ProductQuoteQuery::getProductQuoteByBookingId($bookingId);
-                    ProductQuoteRepository::updateProductQuoteStatusByBOSaleStatus($originalProductQuote, $saleData);
+                    if (!empty($originalProductQuote)) {
+                        ProductQuote::updateProductQuoteStatusByBOSaleStatus($originalProductQuote, $saleData);
+                    }
                 }
             }
 
