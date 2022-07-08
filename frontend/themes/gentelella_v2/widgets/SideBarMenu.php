@@ -278,7 +278,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
 
 
         $menuItems[] = [
-            'label' => 'Shift Schedule <sup style="color: red">NEW</sup>',
+            'label' => 'Shift Schedule', //  <sup style="color: red">NEW</sup>
             'url' => 'javascript:',
             'icon' => 'calendar',
             'items' => $shiftMenuItems
