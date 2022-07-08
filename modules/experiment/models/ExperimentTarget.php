@@ -128,10 +128,10 @@ class ExperimentTarget extends ActiveRecord
     /**
      * @param int $target_type_id
      * @param int $targetId
-     * @param array $experimentObjects
+     * @param array|null $experimentObjects
      * @return void
      */
-    public static function processExperimentObjects(int $target_type_id, int $targetId, array $experimentObjects): void
+    public static function processExperimentObjects(int $target_type_id, int $targetId, ?array $experimentObjects): void
     {
         if (!empty($experimentObjects)) {
             self::processExperimentsCodes($target_type_id, $targetId, array_unique(array_column($experimentObjects, 'ex_code')));
