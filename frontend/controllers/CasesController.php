@@ -34,6 +34,7 @@ use modules\cases\src\abac\saleSearch\CaseSaleSearchAbacDto;
 use modules\cases\src\abac\saleSearch\CaseSaleSearchAbacObject;
 use modules\email\src\abac\dto\EmailPreviewDto;
 use modules\email\src\abac\EmailAbacObject;
+use modules\featureFlag\FFlag;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\entity\fileCase\FileCase;
 use modules\fileStorage\src\services\url\UrlGenerator;
@@ -47,6 +48,8 @@ use modules\order\src\payment\PaymentRepository;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use modules\order\src\services\OrderManageService;
+use modules\product\src\entities\productQuote\ProductQuoteQuery;
+use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use src\auth\Auth;
 use src\entities\cases\CaseEventLog;
 use src\entities\cases\CaseEventLogSearch;
@@ -1061,6 +1064,14 @@ class CasesController extends FController
                         }
                         $transactionOrder->commit();
                     } else {
+                        /** @fflag FFlag::FF_KEY_UPDATE_PRODUCT_QUOTE_STATUS_BY_BO_SALE_STATUS, Update product quote status if status differ from BO enable\disable */
+                        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_UPDATE_PRODUCT_QUOTE_STATUS_BY_BO_SALE_STATUS)) {
+                            if (!empty($bookingId)) {
+                                $originalProductQuote = ProductQuoteQuery::getProductQuoteByBookingId($bookingId);
+                                ProductQuoteRepository::updateProductQuoteStatusByBOSaleStatus($originalProductQuote, $saleData);
+                            }
+                        }
+
                         $this->orderCreateFromSaleService->caseOrderRelation($order->getId(), $model->cs_id);
                     }
                 }
@@ -2012,6 +2023,15 @@ class CasesController extends FController
             if ($client = $case->client) {
                 $out['locale'] = (string) ClientManageService::setLocaleFromSaleDate($client, $saleData);
                 $out['marketing_country'] = (string) ClientManageService::setMarketingCountryFromSaleDate($client, $saleData);
+            }
+
+            /** @fflag FFlag::FF_KEY_UPDATE_PRODUCT_QUOTE_STATUS_BY_BO_SALE_STATUS, Update product quote status if status differ from BO enable\disable */
+            if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_UPDATE_PRODUCT_QUOTE_STATUS_BY_BO_SALE_STATUS)) {
+                $bookingId = !empty($saleData['baseBookingId']) ? $saleData['baseBookingId'] : $saleData['bookingId'] ?? null;
+                if (!empty($bookingId)) {
+                    $originalProductQuote = ProductQuoteQuery::getProductQuoteByBookingId($bookingId);
+                    ProductQuoteRepository::updateProductQuoteStatusByBOSaleStatus($originalProductQuote, $saleData);
+                }
             }
 
             $out['message'] = 'Sale info: ' . $caseSale->css_sale_id . ' successfully refreshed';

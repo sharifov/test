@@ -69,4 +69,15 @@ class ProductQuoteRepository
         }
         throw new NotFoundException('Product Quote not found');
     }
+
+    public static function updateProductQuoteStatusByBOSaleStatus($originalProductQuote, $saleData)
+    {
+        if (!empty($originalProductQuote) && isset($saleData['saleStatus']) && is_string($saleData['saleStatus'])) {
+            $saleStatusBoMap = ProductQuoteStatus::STATUS_BO_MAP[strtolower($saleData['saleStatus'])] ?? null;
+            if (!empty($saleStatusBoMap) && $originalProductQuote->pq_status_id !== $saleStatusBoMap) {
+                $originalProductQuote->pq_status_id = $saleStatusBoMap;
+                $originalProductQuote->save();
+            }
+        }
+    }
 }
