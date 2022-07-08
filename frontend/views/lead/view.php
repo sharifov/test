@@ -99,9 +99,7 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
 
     <div class="main-sidebars">
         <div class="panel panel-main">
-            <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-header-sidebar', 'enablePushState' => false, 'enableReplaceState' => false, 'timeout' => 5000]) ?>
-                <?= $this->render('partial/_actions', ['leadForm' => $leadForm]); ?>
-            <?php yii\widgets\Pjax::end() ?>
+            <?= $this->render('partial/_actions', ['leadForm' => $leadForm]); ?>
 
             <div class="col-md-12">
                 <?= \common\widgets\Alert::widget() ?>
