@@ -114,7 +114,7 @@
 		"endroid/qr-code": "4.4.9",
 		"jp3cki/totp": "2.0.0",
 		"kartik-v/yii2-password": "1.5.7",
-		"kivork/yii2-feature-flag": "@dev"
+		"kivork/yii2-feature-flag": "dev-develop"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",
@@ -202,8 +202,8 @@
 			"url": "git@bitbucket.org:techork/yii2-prometheus-client.git"
 		},
 		{
-			"type": "path",
-			"url": "/var/www/libs/yii2-feature-flag/"
+			"type": "vcs",
+			"url": "git@bitbucket.org:techork/yii2-feature-flag.git"
 		},
 		{
 			"type": "vcs",
