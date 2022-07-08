@@ -45,6 +45,14 @@ $this->params['breadcrumbs'][] = $this->title;
                         return $model->getShiftName();
                     },
                 ],
+                [
+                    'attribute' => 'uss_sst_id',
+                    'value' => static function (
+                        UserShiftSchedule $model
+                    ) {
+                        return $model->getScheduleTypeTitle();
+                    },
+                ],
 
                 [
                     'attribute' => 'uss_ssr_id',

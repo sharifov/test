@@ -4,91 +4,44 @@ namespace frontend\controllers;
 
 use common\components\antispam\CallAntiSpamDto;
 use common\components\CommunicationService;
-use common\components\ga\GaHelper;
 use common\components\ga\GaLead;
 use common\components\ga\GaQuote;
 use common\components\jobs\CallPriceJob;
-use common\components\jobs\CreateSaleFromBOJob;
-use common\components\jobs\SendLeadInfoToGaJob;
-use common\components\jobs\SmsPriceJob;
-use common\components\jobs\WebEngageLeadRequestJob;
 use common\components\Metrics;
-use common\components\Purifier;
 use common\components\jobs\TelegramSendMessageJob;
-use common\components\RocketChat;
-use common\components\SearchService;
-use common\models\Airports;
 use common\models\Call;
-use common\models\CaseSale;
 use common\models\Client;
-use common\models\ClientEmail;
-use common\models\ClientPhone;
-use common\models\Conference;
-use common\models\ConferenceParticipant;
 use common\models\CreditCard;
 use common\models\Currency;
 use common\models\CurrencyHistory;
-use common\models\Department;
-use common\models\DepartmentEmailProject;
-use common\models\DepartmentPhoneProject;
-use common\models\Email;
-use common\models\EmailTemplateType;
 use common\models\Employee;
-use common\models\Language;
 use common\models\Lead;
-use common\models\LeadFlow;
-use common\models\LeadQcall;
 use common\models\Notifications;
-use common\models\PhoneBlacklist;
 use common\models\Project;
-use common\models\ProjectEmployeeAccess;
-use common\models\query\ConferenceParticipantQuery;
-use common\models\query\ConferenceQuery;
 use common\models\Quote;
-use common\models\search\ContactsSearch;
-use common\models\Sms;
-use common\models\Sources;
-use common\models\UserConnection;
-use common\models\UserDepartment;
-use common\models\UserGroup;
-use common\models\UserGroupAssign;
-use common\models\UserGroupSet;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
-use common\models\VisitorLog;
-use console\migrations\RbacMigrationService;
 use DateInterval;
 use DatePeriod;
 use DateTime;
 use frontend\helpers\JsonHelper;
 use frontend\models\CommunicationForm;
 use frontend\models\form\CreditCardForm;
-use frontend\models\UserFailedLogin;
-use frontend\widgets\lead\editTool\Form;
-use frontend\widgets\newWebPhone\call\socket\HoldMessage;
-use frontend\widgets\newWebPhone\call\socket\MuteMessage;
-use frontend\widgets\newWebPhone\sms\socket\Message;
-use frontend\widgets\notification\NotificationMessage;
-use frontend\widgets\notification\NotificationWidget;
-use kartik\mpdf\Pdf;
+use kivork\FeatureFlag\Models\flags\dateTime\DateTimeFeatureFlag;
+use kivork\FeatureFlag\Models\flags\dateTime\DateTimeFeatureFlagDTO;
 use modules\attraction\models\AttractionQuote;
 use modules\attraction\src\services\AttractionQuotePdfService;
 use modules\cases\src\abac\saleList\SaleListAbacObject;
-use modules\email\src\helpers\MailHelper;
-use modules\email\src\Notifier;
 use modules\eventManager\src\EventApp;
 use modules\featureFlag\FFlag;
-use modules\featureFlag\src\entities\FeatureFlag;
+use modules\featureFlag\models\debug\DebugFeatureFlag;
+use modules\featureFlag\models\debug\DebugFeatureFlagDTO;
+use modules\featureFlag\models\user\UserFeatureFlag;
+use modules\featureFlag\models\user\UserFeatureFlagDTO;
 use modules\flight\models\FlightQuote;
-use modules\flight\src\forms\api\PaymentApiForm;
 use modules\flight\src\services\flightQuote\FlightQuotePdfService;
 use modules\flight\src\services\flightQuote\FlightQuoteTicketIssuedService;
-use modules\flight\src\services\flightQuoteFlight\FlightQuoteFlightPdfService;
-use modules\flight\src\useCases\reprotectionCreate\service\ReprotectionCreateService;
-use modules\hotel\HotelModule;
-use modules\hotel\models\HotelList;
 use modules\hotel\models\HotelQuote;
-use modules\hotel\src\services\hotelQuote\CommunicationDataService;
 use modules\hotel\src\services\hotelQuote\HotelQuotePdfService;
 use modules\lead\src\abac\LeadSearchAbacObject;
 use modules\lead\src\abac\taskLIst\LeadTaskListAbacDto;
@@ -98,25 +51,8 @@ use modules\lead\src\events\LeadEvents;
 use modules\lead\src\services\LeadTaskListService;
 use modules\order\src\abac\OrderAbacObject;
 use modules\order\src\entities\order\Order;
-use modules\order\src\events\OrderFileGeneratedEvent;
 use modules\order\src\services\OrderPdfService;
 use modules\product\src\entities\productQuote\ProductQuote;
-use modules\product\src\entities\productQuote\ProductQuoteClasses;
-use modules\product\src\entities\productQuoteStatusLog\CreateDto;
-use modules\product\src\entities\productQuoteStatusLog\ProductQuoteStatusLog;
-use modules\product\src\services\productQuote\ProductQuoteCloneService;
-use modules\product\src\services\ProductQuoteStatusLogService;
-use modules\qaTask\src\entities\qaTask\QaTask;
-use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
-use modules\qaTask\src\entities\qaTaskActionReason\QaTaskActionReasonQuery;
-use modules\qaTask\src\entities\qaTaskCategory\QaTaskCategoryQuery;
-use modules\qaTask\src\entities\qaTaskRules\QaTaskRules;
-use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
-use modules\qaTask\src\useCases\qaTask\create\lead\processingQuality\QaTaskCreateLeadProcessingQualityService;
-use modules\qaTask\src\useCases\qaTask\multiple\create\QaTaskMultipleCreateForm;
-use modules\qaTask\src\useCases\qaTask\multiple\create\QaTaskMultipleCreateService;
-use modules\qaTask\src\useCases\qaTask\QaTaskActions;
-use modules\qaTask\src\useCases\qaTask\takeOver\QaTaskTakeOverForm;
 use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\rentCar\src\services\RentCarQuotePdfService;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
@@ -128,142 +64,40 @@ use modules\webEngage\src\service\WebEngageRequestService;
 use Mpdf\Tag\P;
 use PhpOffice\PhpSpreadsheet\Shared\TimeZone;
 use src\access\CallAccess;
-use src\access\EmployeeAccessHelper;
-use src\access\EmployeeDepartmentAccess;
-use src\access\EmployeeGroupAccess;
-use src\access\EmployeeProjectAccess;
-use src\access\EmployeeSourceAccess;
-use src\access\ListsAccess;
-use src\access\project\ProjectAccessService;
-use src\access\QueryAccessService;
 use src\auth\Auth;
-use src\cache\app\AppCache;
 use src\dispatchers\DeferredEventDispatcher;
-use src\dispatchers\EventDispatcher;
-use src\dispatchers\NativeEventDispatcher;
 use src\entities\cases\Cases;
-use src\entities\cases\CaseCategory;
-use src\events\lead\LeadCreatedByApiEvent;
-use src\forms\api\communication\voice\finish\FinishForm;
-use src\forms\api\communication\voice\record\RecordForm;
-use src\helpers\setting\SettingHelper;
-use src\model\airportLang\service\AirportLangService;
-use src\model\clientChat\entity\ClientChat;
-use src\model\clientChatForm\entity\ClientChatForm;
-use src\model\clientChatForm\helper\ClientChatFormTranslateHelper;
-use src\model\clientChatHold\entity\ClientChatHold;
-use src\model\clientChatLastMessage\entity\ClientChatLastMessage;
-use src\model\clientChatVisitor\entity\ClientChatVisitor;
-use src\model\clientChatVisitorData\entity\ClientChatVisitorData;
-use src\model\coupon\entity\coupon\service\CouponService;
-use src\model\project\entity\projectLocale\ProjectLocale;
-use src\model\project\entity\projectLocale\ProjectLocaleScopes;
-use src\model\user\entity\userCallStatus\events\UserCallStatusEvents;
-use src\repositories\client\ClientsQuery;
 use src\repositories\NotFoundException;
-use src\services\call\CallDeclinedException;
-use src\services\call\CallService;
 use src\services\cases\CasesCommunicationService;
-use src\services\client\ClientCreateForm;
-use src\forms\lead\EmailCreateForm;
-use src\forms\lead\PhoneCreateForm;
-use src\forms\leadflow\TakeOverReasonForm;
-use src\guards\ClientPhoneGuard;
 use src\helpers\app\AppHelper;
 use src\helpers\call\CallHelper;
-use src\helpers\lead\LeadHelper;
-use src\helpers\lead\LeadUrlHelper;
 use src\helpers\payment\CreditCardHelper;
-use src\helpers\query\QueryHelper;
-use src\helpers\user\UserFinder;
-use src\model\call\entity\callCommand\CallCommand;
-use src\model\call\useCase\UpdateCallPrice;
-use src\model\callLog\entity\callLog\CallLog;
 use src\model\conference\entity\aggregate\ConferenceLogAggregate;
 use src\model\conference\entity\aggregate\log\HtmlFormatter;
-use src\model\conference\entity\conferenceEventLog\ConferenceEventLog;
 use src\model\conference\entity\conferenceEventLog\ConferenceEventLogQuery;
 use src\model\conference\entity\conferenceEventLog\EventFactory;
-use src\model\conference\service\ManageCurrentCallsByUserService;
-use src\model\conference\useCase\DisconnectFromAllActiveClientsCreatedConferences;
 use src\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use src\model\conference\useCase\saveParticipantStats\Command;
-use src\model\coupon\useCase\request\CouponForm;
-use src\model\emailList\entity\EmailList;
-use src\model\lead\useCase\lead\api\create\Handler;
-use src\model\lead\useCase\lead\api\create\LeadForm;
-use src\model\lead\useCases\lead\api\create\LeadCreateMessage;
-use src\model\lead\useCases\lead\api\create\LeadCreateValue;
-use src\model\lead\useCases\lead\api\create\FlightForm;
-use src\model\lead\useCases\lead\import\LeadImportForm;
-use src\model\lead\useCases\lead\import\LeadImportService;
 use src\model\notification\events\NotificationEvents;
-use src\model\phoneList\entity\PhoneList;
-use src\model\user\entity\Access;
-use src\model\user\entity\ShiftTime;
-use src\model\user\entity\StartTime;
-use src\repositories\airport\AirportRepository;
-use src\repositories\cases\CasesRepository;
 use src\repositories\cases\CasesSaleRepository;
-use src\repositories\cases\CaseStatusLogRepository;
-use src\repositories\lead\LeadBadgesRepository;
-use src\repositories\lead\LeadRepository;
-use src\services\cases\CasesManageService;
 use src\services\cases\CasesSaleService;
 use src\services\client\ClientManageService;
-use src\services\clientChatMessage\ClientChatMessageService;
 use src\services\clientChatService\ClientChatService;
 use src\services\clientChatUserAccessService\ClientChatUserAccessService;
-use src\services\departmentPhoneProject\DepartmentPhoneProjectParamsService;
-use src\services\email\EmailService;
-use src\services\email\incoming\EmailIncomingService;
-use src\services\lead\LeadCloneService;
-use src\services\lead\LeadCreateApiService;
-use src\services\lead\LeadManageService;
-use src\services\lead\LeadRedialService;
-use src\services\lead\qcall\CalculateDateService;
-use src\services\lead\qcall\Config;
-use src\services\lead\qcall\DayTimeHours;
-use src\services\lead\qcall\FindPhoneParams;
-use src\services\lead\qcall\QCallService;
-use src\services\pdf\GeneratorPdfService;
-use src\services\phone\blackList\PhoneBlackListManageService;
-use src\services\phone\callFilterGuard\CallFilterGuardService;
-use src\services\sms\incoming\SmsIncomingForm;
-use src\services\sms\incoming\SmsIncomingService;
-use src\services\system\DbViewCryptService;
 use src\services\TransactionManager;
-use src\temp\LeadFlowUpdate;
-use src\widgets\PhoneSelect2Widget;
 use Twilio\TwiML\VoiceResponse;
-use webapi\models\ApiLead;
-use webapi\src\logger\StartDTO;
-use webapi\src\response\messages\DataMessage;
-use webapi\src\response\SuccessResponse;
 use Yii;
 use yii\base\Event;
-use yii\caching\DbDependency;
-use yii\db\ActiveQuery;
-use yii\db\ActiveRecord;
-use yii\db\Expression;
-use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
-use yii\helpers\Console;
 use yii\helpers\Html;
 use yii\helpers\Inflector;
 use yii\helpers\Json;
-use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
 use common\components\ReceiveEmailsJob;
-use yii\httpclient\CurlTransport;
 use yii\queue\Queue;
-use yii\web\ConflictHttpException;
-use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
-use modules\notification\src\abac\NotificationAbacObject;
-use modules\notification\src\abac\dto\NotificationAbacDto;
 
 /**
  * Test controller
@@ -2613,22 +2447,40 @@ class TestController extends FController
 
     public function actionFf()
     {
-        echo 'Feature Flag Test<br><br>';
+        echo 'Feature Flag "' . FFlag::FF_KEY_DEBUG . '"<br><br>';
 
-        /** @fflag FFlag::FF_TEST_FLAG1, Username field1 */
-        if (Yii::$app->featureFlag->isEnable('ff_test_example')) {
-            VarDumper::dump(Yii::$app->featureFlag->getValue('ff_test_example'), 10, true);
+
+        $debugDTO = new DebugFeatureFlagDTO();
+        $debugDTO->department_id = 1;
+        $debugDTO->project_key = 'ovago';
+        $debugDTO->app_type = Yii::$app->params['serviceType'] ?? null;
+
+        $userDTO = new UserFeatureFlagDTO(Auth::user());
+        $dateTimeDTO = new DateTimeFeatureFlagDTO();
+
+
+        $featureFlagDTO[DebugFeatureFlag::OBJ] = $debugDTO;
+        $featureFlagDTO[UserFeatureFlag::OBJ] = $userDTO;
+        $featureFlagDTO[DateTimeFeatureFlag::OBJ] = $dateTimeDTO;
+
+//        VarDumper::dump($featureFlagDTO, 10, true);
+
+        /** @fflag FFlag::FF_KEY_DEBUG, Username field1 */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG, $featureFlagDTO)) {
+            echo 'Enable<br>';
+            echo 'Value: ';
+            VarDumper::dump(Yii::$app->featureFlag->getValue(FFlag::FF_KEY_DEBUG), 10, true);
         } else {
-            echo 'NO1';
+            echo 'Disable';
         }
-
-        echo '<br><br>';
-
-        if (Yii::$app->featureFlag->isDue(\kivork\FeatureFlag\Models\FeatureFlag::ET_DISABLED_CONDITION, '59 * * * * *')) {
-            echo 'YES3';
-        } else {
-            echo 'NO3';
-        }
+//
+//        echo '<br><br>';
+//
+//        if (Yii::$app->featureFlag->isDue(\kivork\FeatureFlag\Models\FeatureFlag::ET_DISABLED_CONDITION, '59 * * * * *')) {
+//            echo 'YES3';
+//        } else {
+//            echo 'NO3';
+//        }
 
         echo '<br><br>';
         return date('Y-m-d H:i:s');
