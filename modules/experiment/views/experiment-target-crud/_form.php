@@ -19,7 +19,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'ext_experiment_id')->textInput() ?>
 
-    <?= $form->field($model,'ext_created_dt')->textInput() ?>
+    <?= $form->field($model, 'ext_created_dt')->textInput() ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
