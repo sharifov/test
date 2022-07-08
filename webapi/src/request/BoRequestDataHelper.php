@@ -2,6 +2,7 @@
 
 namespace webapi\src\request;
 
+use modules\featureFlag\FFlag;
 use modules\flight\models\FlightQuoteTicket;
 use modules\flight\src\entities\flightQuoteTicketRefund\FlightQuoteTicketRefund;
 use modules\flight\src\useCases\api\voluntaryRefundConfirm\VoluntaryRefundConfirmForm;
@@ -11,6 +12,7 @@ use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use src\services\CurrencyHelper;
 use webapi\src\forms\billing\BillingInfoForm;
 use webapi\src\forms\payment\PaymentRequestForm;
+use Yii;
 
 class BoRequestDataHelper
 {
@@ -64,7 +66,11 @@ class BoRequestDataHelper
         if ($form->paymentRequestForm) {
             $data['refund']['refundCost'] = $form->paymentRequestForm->amount;
         }
-        $data['additionalInfo'] = self::prepareAdditionalInfoToBoRequest($productQuoteRefund);
+
+        /** @fflag FFlag::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS, Send additional info to BO endpoints enable\disable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS)) {
+            $data['additionalInfo'] = self::prepareAdditionalInfoToBoRequest($productQuoteRefund);
+        }
         return $data;
     }
 

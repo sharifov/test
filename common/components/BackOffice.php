@@ -4,6 +4,7 @@ namespace common\components;
 
 use common\models\Project;
 use frontend\helpers\JsonHelper;
+use modules\featureFlag\FFlag;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use src\entities\cases\CaseEventLog;
@@ -329,8 +330,11 @@ class BackOffice
             $request['flightQuote'] = $quote;
         }
         if ($reprotectionQuoteGid) {
-            $productQuote = ProductQuote::find()->where(['pq_gid' => $reprotectionQuoteGid])->limit(1)->one();
-            $request['additionalInfo'] = BoRequestDataHelper::prepareAdditionalInfoToBoRequest($productQuote);
+            /** @fflag FFlag::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS, Send additional info to BO endpoints enable\disable */
+            if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS)) {
+                $productQuote = ProductQuote::find()->where(['pq_gid' => $reprotectionQuoteGid])->limit(1)->one();
+                $request['additionalInfo'] = BoRequestDataHelper::prepareAdditionalInfoToBoRequest($productQuote);
+            }
         }
 
         try {
