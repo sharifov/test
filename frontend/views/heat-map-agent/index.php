@@ -1,7 +1,7 @@
 <?php
 
 use modules\shiftSchedule\src\reports\HeatMapAgentSearch;
-use src\model\lead\reports\HeatMapLeadService;
+use modules\shiftSchedule\src\reports\HeatMapAgentService;
 use yii\helpers\Html;
 
 /* @var yii\web\View $this */
@@ -22,7 +22,7 @@ $this->params['breadcrumbs'][] = $this->title;
 $rgbaTitle = '151, 149, 149, 0.1';
 ?>
 
-<div class="heat-map-lead-index">
+<div class="heat-map-agent-index">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
@@ -37,7 +37,7 @@ $rgbaTitle = '151, 149, 149, 0.1';
 
     <div class="x_panel">
         <div class="x_title">
-            <h2><i class="fa fa-search"></i> Heat Map Lead Search</h2>
+            <h2><i class="fa fa-search"></i> Heat Map Agent Search</h2>
             <ul class="nav navbar-right panel_toolbox" style="min-width: 0;">
                 <li>
                     <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
@@ -65,7 +65,7 @@ $rgbaTitle = '151, 149, 149, 0.1';
                             <strong>Hour</strong>
                         </div>
                     </div>
-                    <?php foreach (HeatMapLeadService::generateHourMap() as $value) : ?>
+                    <?php foreach (HeatMapAgentService::generateHourMap() as $value) : ?>
                         <div class="hour_box" style="background: rgba(<?php echo $rgbaTitle ?>);">
                             <strong>
                                 <?php echo $value . ':00' ?>
@@ -82,9 +82,9 @@ $rgbaTitle = '151, 149, 149, 0.1';
                             <strong>Count</strong>
                         </div>
                     </div>
-                    <?php foreach (HeatMapLeadService::generateHourMap() as $value) : ?>
-                        <?php $cntByHour = $resultByHour[$value]['cnt'] ?? 0 ?>
-                        <?php $alphaHour = HeatMapLeadService::proportionalMap($cntByHour, 0, $maxCntByHour, 0, 0.9) ?>
+                    <?php foreach (HeatMapAgentService::generateHourMap() as $value) : ?>
+                        <?php $cntByHour = $resultByHour[$value] ?? 0 ?>
+                        <?php $alphaHour = HeatMapAgentService::proportionalMap($cntByHour, 0, $maxCntByHour, 0, 0.9) ?>
                         <?php $backgroundHour = $cntByHour ? '255, 0, 0, ' . $alphaHour : $rgbaTitle ?>
                         <?php $dataTitleCnt = $value . ':00 - ' . $value . ':59' ?>
                         <?php $cellContent = '<span>' . ($cntByHour ?: '-') . '</span>' ?>
@@ -110,7 +110,7 @@ $rgbaTitle = '151, 149, 149, 0.1';
                 <?php $prevMonth = null ?>
                 <?php foreach ($result as $keyMonthDay => $hours) : ?>
                     <div class="md_box">
-                        <?php $date = \DateTimeImmutable::createFromFormat(HeatMapLeadService::MONTH_DAY_FORMAT, $keyMonthDay); ?>
+                        <?php $date = \DateTimeImmutable::createFromFormat(HeatMapAgentService::MONTH_DAY_FORMAT, $keyMonthDay); ?>
                         <?php $month = $date->format('M') ?>
                         <div class="title_box">
                             <div class="title_row">
@@ -129,9 +129,9 @@ $rgbaTitle = '151, 149, 149, 0.1';
 
                         <?php foreach ($hours as $hour => $cnt) : ?>
                             <?php $dataTitle = $date->format('d-M') . ' (' . $hour . ':00 - ' . $hour . ':59)' ?>
-                            <?php $alpha = HeatMapLeadService::proportionalMap($cnt, 0, $maxCnt, 0, 0.9) ?>
+                            <?php $alpha = HeatMapAgentService::proportionalMap($cnt, 0, $maxCnt, 0, 0.9) ?>
 
-                            <?php $cellHourContent = '<span>' . ($cnt ?: '-') . '</span>' ?>
+                            <?php $cellHourContent = '<span>' . ($cnt > 0 ? $cnt : '-') . '</span>' ?>
                             <?php $cellHour = Html::tag(
                                 'div',
                                 $cellHourContent,
@@ -145,8 +145,8 @@ $rgbaTitle = '151, 149, 149, 0.1';
                             <?php echo $cellHour ?>
                         <?php endforeach ?>
 
-                        <?php $cntByMonthDay = $resultByMonthDay[$keyMonthDay]['cnt'] ?? 0 ?>
-                        <?php $alphaMonthDay = HeatMapLeadService::proportionalMap($cntByMonthDay, 0, $maxCntByMonthDay, 0, 0.9) ?>
+                        <?php $cntByMonthDay = $resultByMonthDay[$keyMonthDay] ?? 0 ?>
+                        <?php $alphaMonthDay = HeatMapAgentService::proportionalMap($cntByMonthDay, 0, $maxCntByMonthDay, 0, 0.9) ?>
                         <?php $backgroundMonthDay = $cntByMonthDay ? '255, 0, 0, ' . $alphaMonthDay : $rgbaTitle ?>
                         <div class="hour_box" style="background: rgba(<?php echo $backgroundMonthDay ?>);">
                             <strong>

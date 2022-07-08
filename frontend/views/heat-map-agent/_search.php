@@ -2,6 +2,8 @@
 
 use common\models\Employee;
 use common\models\UserGroup;
+use modules\shiftSchedule\src\entities\shift\ShiftQuery;
+use src\auth\Auth;
 use src\model\lead\reports\HeatMapLeadSearch;
 use yii\web\View;
 use yii\widgets\ActiveForm;
@@ -53,6 +55,16 @@ use kartik\select2\Select2;
             ])->label('From / To') ?>
         </div>
         <div class="col-md-2">
+            <?= $form->field($model, 'shifts', [
+                'options' => ['class' => 'form-group']
+            ])->widget(Select2::class, [
+                'data' => ShiftQuery::getList(),
+                'size' => Select2::SMALL,
+                'options' => ['placeholder' => 'Select Shift', 'multiple' => true],
+                'pluginOptions' => ['allowClear' => true],
+            ])->label('Shift') ?>
+        </div>
+        <div class="col-md-2">
             <?= $form->field($model, 'userGroup', [
                 'options' => ['class' => 'form-group']
             ])->widget(Select2::class, [
@@ -61,6 +73,16 @@ use kartik\select2\Select2;
                 'options' => ['placeholder' => 'Select User Group', 'multiple' => true],
                 'pluginOptions' => ['allowClear' => true],
             ])->label('User Group') ?>
+        </div>
+
+        <div class="col-md-2">
+            <?php echo $form->field($model, 'roles')
+                ->widget(Select2::class, [
+                    'data' => Employee::getAllRoles(Auth::user()),
+                    'size' => Select2::SMALL,
+                    'options' => ['placeholder' => 'Select Role'],
+                    'pluginOptions' => ['allowClear' => true, 'multiple' => true],
+                ]); ?>
         </div>
         <div class="col-md-2">
             <?= $form->field($model, 'timeZone')->widget(\kartik\select2\Select2::class, [
