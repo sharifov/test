@@ -106,8 +106,8 @@ class CreateForm extends Model
             ['description', 'default', 'value' => null],
             ['description', 'string', 'max' => 65000],
 
-            [['order_info'], 'default', 'value' => []],
-            ['experiments', IsArrayValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
+            ['order_info', 'default', 'value' => []],
+            ['order_info', IsArrayValidator::class],
             ['order_info', function () {
                 foreach ($this->order_info as $key => $value) {
                     if (!is_string($key) || !is_string($value)) {
@@ -116,6 +116,8 @@ class CreateForm extends Model
                     }
                 }
             }, 'skipOnEmpty' => true, 'skipOnError' => true],
+
+            ['experiments', IsArrayValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
 
             ['project_key', 'default', 'value' => null],
             ['project_key', 'string', 'max' => 100],
