@@ -64,14 +64,8 @@ class DepartmentPhoneProjectController extends BaseController
       *                    "language_id": "en-US",
       *                    "updated_dt": "2019-01-08 11:44:57"
       *                    "experiments": [
-      *                         {
-      *                             "ex_code": "wpl5.0",
-      *                             "ex_enabled": true
-      *                         },
-      *                         {
-      *                             "ex_code": "wpl6.2",
-      *                             "ex_enabled": true
-      *                         }
+      *                         "wpl5.0",
+      *                         "wpl6.2"
       *                     ]
       *                },
       *                {
@@ -176,7 +170,7 @@ class DepartmentPhoneProjectController extends BaseController
                 'phone' => $phone->getPhone(),
                 'cid' => $phone->dppSource ? $phone->dppSource->cid : null,
                 'department_id' => $phone->dpp_dep_id,
-                'experiments' => $departmentPhone ? $departmentPhoneProjectParamsService->getPhoneExperiments() : null,
+//                'experiments' => $departmentPhone ? $departmentPhoneProjectParamsService->getPhoneExperiments() : null,
                 'department' => $phone->dpp_dep_id ? Department::getName($phone->dpp_dep_id) : null,
                 'language_id' => $phone->dpp_language_id,
                 'updated_dt' => $phone->dpp_updated_dt,
