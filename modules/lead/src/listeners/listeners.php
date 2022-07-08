@@ -117,6 +117,7 @@ return [
         LeadTaskListListener::class,
         LeadOwnerChangedNotificationsListener::class,
         LeadPoorProcessingRemoverOwnerChangedListener::class,
+        LeadInfoReloadListener::class,
     ],
     LeadCallExpertRequestEvent::class => [LeadCallExpertRequestEventListener::class],
     LeadTaskEvent::class => [LeadTaskEventListener::class],

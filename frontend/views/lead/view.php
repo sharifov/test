@@ -99,9 +99,7 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
 
     <div class="main-sidebars">
         <div class="panel panel-main">
-            <?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-header-sidebar', 'enablePushState' => false, 'enableReplaceState' => false, 'timeout' => 5000]) ?>
-                <?= $this->render('partial/_actions', ['leadForm' => $leadForm]); ?>
-            <?php yii\widgets\Pjax::end() ?>
+            <?= $this->render('partial/_actions', ['leadForm' => $leadForm]); ?>
 
             <div class="col-md-12">
                 <?= \common\widgets\Alert::widget() ?>
@@ -507,3 +505,22 @@ $css = <<<CSS
     }
 CSS;
 $this->registerCss($css);
+
+
+$saveJs = <<<JS
+    let newSegmentSaveButtonClicked = false;
+    
+    $(document).on('click', '#lead-new-segment-button', function() {
+        newSegmentSaveButtonClicked = true;
+    });
+    
+    $(document).on('pjax:end', '#pj-itinerary', function (data, xhr) {
+        if (newSegmentSaveButtonClicked === true && $('#enable-timer-lpp').length === 0) {
+            $.pjax.reload({container: '#pjax-lead-header', async: false});
+            
+            newSegmentSaveButtonClicked = false;
+        }
+    });
+JS;
+
+$this->registerJs($saveJs);

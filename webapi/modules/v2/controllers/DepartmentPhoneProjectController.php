@@ -64,14 +64,8 @@ class DepartmentPhoneProjectController extends BaseController
       *                    "language_id": "en-US",
       *                    "updated_dt": "2019-01-08 11:44:57"
       *                    "experiments": [
-      *                         {
-      *                             "ex_code": "wpl5.0",
-      *                             "ex_enabled": true
-      *                         },
-      *                         {
-      *                             "ex_code": "wpl6.2",
-      *                             "ex_enabled": true
-      *                         }
+      *                         "wpl5.0",
+      *                         "wpl6.2"
       *                     ]
       *                },
       *                {
