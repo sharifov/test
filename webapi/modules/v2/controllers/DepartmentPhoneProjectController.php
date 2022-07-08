@@ -170,7 +170,7 @@ class DepartmentPhoneProjectController extends BaseController
                 'phone' => $phone->getPhone(),
                 'cid' => $phone->dppSource ? $phone->dppSource->cid : null,
                 'department_id' => $phone->dpp_dep_id,
-//                'experiments' => $departmentPhone ? $departmentPhoneProjectParamsService->getPhoneExperiments() : null,
+                'experiments' => $departmentPhone ? $departmentPhoneProjectParamsService->getPhoneExperiments() : null,
                 'department' => $phone->dpp_dep_id ? Department::getName($phone->dpp_dep_id) : null,
                 'language_id' => $phone->dpp_language_id,
                 'updated_dt' => $phone->dpp_updated_dt,
