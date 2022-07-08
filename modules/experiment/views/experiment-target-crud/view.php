@@ -45,6 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return Experiment::getExperimentById($model->ext_experiment_id)['ex_code'] . ' (ID ' . $model->ext_experiment_id . ')';
                 }
             ],
+            'ext_created_dt'
         ],
     ]) ?>
 

@@ -39,7 +39,7 @@ class ExperimentTargetSearch extends ExperimentTarget
      */
     public function search($params)
     {
-        $query = ExperimentTarget::find();
+        $query = ExperimentTarget::find()->orderBy("ext_id DESC");
 
         // add conditions that should always apply here
 

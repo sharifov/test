@@ -40,7 +40,7 @@ class ExperimentSearch extends Experiment
      */
     public function search($params)
     {
-        $query = Experiment::find();
+        $query = Experiment::find()->orderBy("ex_id DESC");
 
         // add conditions that should always apply here
 

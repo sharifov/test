@@ -18,6 +18,7 @@ use yii\helpers\VarDumper;
  * @property int $ext_target_id
  * @property int $ext_target_type_id
  * @property int $ext_experiment_id
+ * @property int $ext_created_dt
  *
  * @property Experiment $experiment
  */
@@ -58,6 +59,7 @@ class ExperimentTarget extends ActiveRecord
             [['ext_target_id', 'ext_experiment_id'], 'integer'],
             [['ext_target_type_id'], 'integer', 'max' => 255],
             [['ext_experiment_id'], 'exist', 'skipOnError' => true, 'targetClass' => Experiment::class, 'targetAttribute' => ['ext_experiment_id' => 'ex_id']],
+            ['ext_created_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
         ];
     }
     /**
@@ -70,6 +72,7 @@ class ExperimentTarget extends ActiveRecord
             'ext_target_id' => 'Target object ID',
             'ext_target_type_id' => 'Target object Type',
             'ext_experiment_id' => 'Experiment ID',
+            'ext_created_dt' => 'Created Dt',
         ];
     }
 
