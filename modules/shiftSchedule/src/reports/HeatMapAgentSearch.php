@@ -114,7 +114,7 @@ class HeatMapAgentSearch extends Model
      * @return array
      * @throws \Exception
      */
-    public function eventCountHeatMap(array $params): array
+    public function getEventsForHeatMap(array $params): array
     {
         $query = UserShiftSchedule::find()
             ->andWhere(['uss_type_id' => ShiftScheduleType::find()->select('sst_id')->andWhere(['sst_subtype_id' => ShiftScheduleType::SUBTYPE_WORK_TIME])])

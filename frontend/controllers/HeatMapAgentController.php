@@ -21,7 +21,7 @@ class HeatMapAgentController extends FController
         }
 
         $searchModel = new HeatMapAgentSearch(\Yii::$app->user->identity->timezone);
-        $resultHeatMap = $searchModel->eventCountHeatMap(\Yii::$app->request->queryParams);
+        $resultHeatMap = $searchModel->getEventsForHeatMap(\Yii::$app->request->queryParams);
         $headMapAgentService = (new HeatMapAgentService($resultHeatMap));
         $headMapAgentService->mapResult($searchModel->getFromDT(), $searchModel->getToDT(), $searchModel->timeZone);
 
