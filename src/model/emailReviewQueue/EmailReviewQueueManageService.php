@@ -18,7 +18,7 @@ class EmailReviewQueueManageService
         $this->repository = $repository;
     }
 
-    public function createByEmail(Email $email, ?int $departmentId): EmailReviewQueue
+    public function createByEmail($email, ?int $departmentId): EmailReviewQueue
     {
         $model = EmailReviewQueue::create(
             $email->e_id,
