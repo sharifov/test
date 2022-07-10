@@ -394,7 +394,6 @@ class CasesController extends FController
                             //TODO: update for normalized emails using service
                             $mail->statusToReview();
                             $this->emailReviewQueueManageService->createByEmail($mail, $model->cs_dep_id);
-                            $mail->update();
 
                             Yii::$app->session->setFlash('send-warning', '<strong>Email Message</strong> has been sent for review');
                             $this->refresh();

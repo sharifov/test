@@ -567,7 +567,6 @@ class LeadController extends FController
                                     Yii::error($quoteObject->errors, 'LeadController:view:Email:Quote:save');
                                 }
                             }
-                            $mail->update();
                             Yii::$app->session->setFlash('send-warning', '<strong>Email Message</strong> has been sent for review');
                             $this->refresh('#communication-form');
                         }
