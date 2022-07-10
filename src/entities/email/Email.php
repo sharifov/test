@@ -325,6 +325,12 @@ class Email extends BaseActiveRecord
         return $this;
     }
 
+    public function statusToReview()
+    {
+        $this->updateAttributes(['e_status_id' => EmailStatus::REVIEW]);
+        return $this;
+    }
+
     /**
      *
      * @param array $attributes
