@@ -128,10 +128,10 @@ class ExperimentTarget extends ActiveRecord
     /**
      * @param int $target_type_id
      * @param int $targetId
-     * @param array $experimentObjects
+     * @param array|null $experimentObjects
      * @return void
      */
-    public static function processExperimentObjects(int $target_type_id, int $targetId, array $experimentObjects): void
+    public static function processExperimentObjects(int $target_type_id, int $targetId, ?array $experimentObjects): void
     {
         if (!empty($experimentObjects)) {
             self::processExperimentsCodes($target_type_id, $targetId, array_unique(array_column($experimentObjects, 'ex_code')));
@@ -141,31 +141,18 @@ class ExperimentTarget extends ActiveRecord
     /**
      * @param int $target_type_id
      * @param int $targetId
-     * @param array $experimentCodesArray
+     * @param array $experimentsCodesArray
      * @return void
      */
     public static function processExperimentsCodes(int $target_type_id, int $targetId, array $experimentsCodesArray): void
     {
-        foreach ($experimentsCodesArray as $ex_code) {
-            if ($ex_code != '') {
-                self::processExperimentTarget($target_type_id, $targetId, $ex_code);
+        foreach ($experimentsCodesArray as $experimentCode) {
+            $experimentRecord = Experiment::getExperimentByCode($experimentCode);
+            if (empty($experimentRecord)) {
+                $experimentRecord = new Experiment(['ex_code' => $experimentCode]);
+                $experimentRecord->save();
             }
+            $experimentRecord->saveTarget($target_type_id, $targetId);
         }
-    }
-
-    /**
-     * @param string $target_type_id
-     * @param int $targetId
-     * @param string $experimentsCodes
-     * @return void
-     */
-    public static function processExperimentTarget(string $target_type_id, int $targetId, string $experimentsCodes): void
-    {
-        $experimentRecord = Experiment::getExperimentByCode($experimentsCodes);
-        if (empty($experimentRecord)) {
-            $experimentRecord = new Experiment(['ex_code' => $experimentsCodes]);
-            $experimentRecord->save();
-        }
-        $experimentRecord->saveTarget($target_type_id, $targetId);
     }
 }

@@ -515,7 +515,7 @@ class LeadController extends FController
                         $attachments['files'] = $this->fileStorageUrlGenerator->generateForExternal($previewEmailForm->getFilesPath());
                     }
 
-                    try{
+                    try {
                         $mail = $this->emailService->createFromLead($previewEmailForm, $lead, $attachments);
 
                         /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND_WITHOUT_REVIEW, Restrict access to send without review email */
@@ -579,7 +579,7 @@ class LeadController extends FController
                         Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>' . $e->getEmailTo() . '</strong>');
                         Yii::error('Error: Email Message has not been sent to ' . $e->getEmailTo(false) . "\r\n " . $e->getMessage(), 'LeadController:view:Email:sendMail');
                     } catch (\Throwable $e) {
-                        Yii::$app->session->setFlash('send-error', $e->getMessage().'<br/>'.$e->getTraceAsString());
+                        Yii::$app->session->setFlash('send-error', $e->getMessage() . '<br/>' . $e->getTraceAsString());
                         Yii::error($e->getMessage(), 'LeadController:view:Email:save');
                     }
                 } else {
@@ -722,7 +722,7 @@ class LeadController extends FController
                         $templateType = $tpl ? $tpl->etp_key : '';
                         if ($tpl) {
                             if (isset($tpl->etp_params_json['quotes']['originalRequired']) && $tpl->etp_params_json['quotes']['originalRequired'] === true) {
-                                return array_reduce($lead->quotes, function ($acc, $quote) {
+                                $checkOriginalQuoteExistence = array_reduce($lead->quotes, function ($acc, $quote) {
                                     return $quote->type_id === Quote::TYPE_ORIGINAL ? true : $acc;
                                 }, false);
                             }

@@ -34,6 +34,7 @@ use modules\cases\src\abac\saleSearch\CaseSaleSearchAbacDto;
 use modules\cases\src\abac\saleSearch\CaseSaleSearchAbacObject;
 use modules\email\src\abac\dto\EmailPreviewDto;
 use modules\email\src\abac\EmailAbacObject;
+use modules\featureFlag\FFlag;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\entity\fileCase\FileCase;
 use modules\fileStorage\src\services\url\UrlGenerator;
@@ -47,6 +48,8 @@ use modules\order\src\payment\PaymentRepository;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use modules\order\src\services\OrderManageService;
+use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use src\auth\Auth;
 use src\entities\cases\CaseEventLog;
 use src\entities\cases\CaseEventLogSearch;
@@ -125,7 +128,6 @@ use src\repositories\project\ProjectRepository;
 use src\exceptions\CreateModelException;
 use src\services\email\EmailServiceInterface;
 use src\services\email\EmailsNormalizeService;
-use modules\featureFlag\FFlag;
 use src\exception\EmailNotSentException;
 
 /**
@@ -357,7 +359,7 @@ class CasesController extends FController
                     if ($canAttachFiles && FileStorageSettings::canEmailAttach() && $previewEmailForm->files) {
                         $attachments['files'] = $this->fileStorageUrlGenerator->generateForExternal($previewEmailForm->getFilesPath());
                     }
-                    try{
+                    try {
                         $mail = $this->emailService->createFromCase($previewEmailForm, $model, $attachments);
 
                         /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND_WITHOUT_REVIEW, Restrict access to send without review email */
@@ -397,8 +399,7 @@ class CasesController extends FController
                             Yii::$app->session->setFlash('send-warning', '<strong>Email Message</strong> has been sent for review');
                             $this->refresh();
                         }
-
-                    }catch (CreateModelException $e) {
+                    } catch (CreateModelException $e) {
                         $errorsMessage = VarDumper::dumpAsString($e->getErrors());
                         $previewEmailForm->addError('e_email_subject', $errorsMessage);
                         Yii::error($errorsMessage, 'CasesController:view:Email:save');
@@ -406,7 +407,7 @@ class CasesController extends FController
                         Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>' . $e->getEmailTo() . '</strong>');
                         Yii::error('Error: Email Message has not been sent to ' . $e->getEmailTo(false) . "\r\n " . $e->getMessage(), 'CaseController:view:Email:sendMail');
                     } catch (\Throwable $e) {
-                        Yii::$app->session->setFlash('send-error', $e->getMessage().'<br/>'.$e->getTraceAsString());
+                        Yii::$app->session->setFlash('send-error', $e->getMessage() . '<br/>' . $e->getTraceAsString());
                         Yii::error($e->getMessage(), 'CasesController:view:Email:save');
                     }
                 } else {
@@ -1050,6 +1051,16 @@ class CasesController extends FController
                         }
                         $transactionOrder->commit();
                     } else {
+                        /** @fflag FFlag::FF_KEY_UPDATE_PRODUCT_QUOTE_STATUS_BY_BO_SALE_STATUS, Update product quote status if status differ from BO enable\disable */
+                        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_UPDATE_PRODUCT_QUOTE_STATUS_BY_BO_SALE_STATUS)) {
+                            if (!empty($bookingId)) {
+                                $originalProductQuote = ProductQuoteQuery::getProductQuoteByBookingId($bookingId);
+                                if (!empty($originalProductQuote)) {
+                                    ProductQuote::updateProductQuoteStatusByBOSaleStatus($originalProductQuote, $saleData);
+                                }
+                            }
+                        }
+
                         $this->orderCreateFromSaleService->caseOrderRelation($order->getId(), $model->cs_id);
                     }
                 }
@@ -2001,6 +2012,17 @@ class CasesController extends FController
             if ($client = $case->client) {
                 $out['locale'] = (string) ClientManageService::setLocaleFromSaleDate($client, $saleData);
                 $out['marketing_country'] = (string) ClientManageService::setMarketingCountryFromSaleDate($client, $saleData);
+            }
+
+            /** @fflag FFlag::FF_KEY_UPDATE_PRODUCT_QUOTE_STATUS_BY_BO_SALE_STATUS, Update product quote status if status differ from BO enable\disable */
+            if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_UPDATE_PRODUCT_QUOTE_STATUS_BY_BO_SALE_STATUS)) {
+                $bookingId = !empty($saleData['baseBookingId']) ? $saleData['baseBookingId'] : $saleData['bookingId'] ?? null;
+                if (!empty($bookingId)) {
+                    $originalProductQuote = ProductQuoteQuery::getProductQuoteByBookingId($bookingId);
+                    if (!empty($originalProductQuote)) {
+                        ProductQuote::updateProductQuoteStatusByBOSaleStatus($originalProductQuote, $saleData);
+                    }
+                }
             }
 
             $out['message'] = 'Sale info: ' . $caseSale->css_sale_id . ' successfully refreshed';

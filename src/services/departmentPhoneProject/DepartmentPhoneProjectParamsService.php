@@ -32,12 +32,12 @@ class DepartmentPhoneProjectParamsService
         $experiments = ArrayHelper::getValue(JsonHelper::decode($this->departmentPhoneProject->dpp_params), 'experiments', []);
         $experimentCodes = [];
         foreach ($experiments as $experiment) {
-            if ($experiment['ex_enabled']) {
-                $experimentCodes[$experiment['ex_code']] = null;
+            if (!empty($experiment['enabled']) && isset($experiment['ex_code']) && $experiment['ex_code'] != '') {
+                $experimentCodes[] = $experiment['ex_code'];
             }
         }
 
-        return array_keys($experimentCodes);
+        return $experimentCodes;
     }
 
     public function processExperiments(int $targetTypeId, int $phoneListId): void

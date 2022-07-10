@@ -28,6 +28,7 @@ use src\exception\AdditionalDataException;
 use src\forms\quote\QuoteCreateDataForm;
 use src\forms\quote\QuoteCreateKeyForm;
 use src\helpers\app\AppHelper;
+use src\helpers\ErrorsToStringHelper;
 use src\logger\db\GlobalLogInterface;
 use src\logger\db\LogDTO;
 use src\model\leadData\services\LeadDataService;
@@ -908,7 +909,10 @@ class QuoteController extends ApiBaseController
 
             $quote->save();
             if ($quote->hasErrors()) {
-                throw new \RuntimeException($quote->getErrorSummary(false)[0]);
+                throw new AdditionalDataException(
+                    ['quoteAttributes' => $quoteAttributes],
+                    ErrorsToStringHelper::extractFromModel($quote, ' ')
+                );
             }
 
             if (!ArrayHelper::keyExists($quote->gds, SearchService::GDS_LIST)) {

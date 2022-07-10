@@ -1252,4 +1252,16 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     {
         return $this->productQuoteOptions ? count($this->productQuoteOptions) : 0;
     }
+
+    public static function updateProductQuoteStatusByBOSaleStatus(ProductQuote $originalProductQuote, array $saleData): void
+    {
+        if (!empty($originalProductQuote) && isset($saleData['saleStatus']) && is_string($saleData['saleStatus'])) {
+            $saleStatusBoMap = ProductQuoteStatus::STATUS_BO_MAP[strtolower($saleData['saleStatus'])] ?? null;
+            if (!empty($saleStatusBoMap) && $originalProductQuote->pq_status_id !== $saleStatusBoMap) {
+                $productQuoteRepository = \Yii::createObject(ProductQuoteRepository::class);
+                $originalProductQuote->setStatusWithEvent($saleStatusBoMap);
+                $productQuoteRepository->save($originalProductQuote);
+            }
+        }
+    }
 }
