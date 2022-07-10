@@ -494,7 +494,6 @@ class LeadController extends FController
         $previewEmailForm->e_lead_id = $lead->id;
         $previewEmailForm->is_send = false;
 
-
         if ($previewEmailForm->load(Yii::$app->request->post())) {
             $previewEmailForm->e_lead_id = $lead->id;
             if ($previewEmailForm->validate()) {
@@ -552,7 +551,6 @@ class LeadController extends FController
                                     Yii::error($quoteObject->errors, 'LeadController:view:Email:Quote:save');
                                 }
                             }
-
 
                             $this->refresh('#communication-form');
                         } else {
