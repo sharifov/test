@@ -381,7 +381,7 @@ class EmailsNormalizeService implements EmailServiceInterface
             'type'          =>  EmailType::OUTBOX,
             'status'        =>  EmailStatus::PENDING,
             'projectId'     =>  $lead->project_id,
-            'depId'         =>  null, //TODO: fill proper way
+            'depId'         =>  $lead->l_dep_id,
             'createdDt'     =>  date('Y-m-d H:i:s'),
             'leadsIds'      =>  [$lead->id],
         ];
@@ -420,7 +420,7 @@ class EmailsNormalizeService implements EmailServiceInterface
             'type'          =>  EmailType::OUTBOX,
             'status'        =>  EmailStatus::PENDING,
             'projectId'     =>  $case->cs_project_id,
-            'depId'         =>  null, //TODO: fill proper way
+            'depId'         =>  $case->cs_dep_id,
             'createdDt'     =>  date('Y-m-d H:i:s'),
             'casesIds'      =>  [$case->cs_id],
         ];
