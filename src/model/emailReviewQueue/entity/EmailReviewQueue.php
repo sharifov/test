@@ -12,6 +12,7 @@ use common\models\query\EmployeeQuery;
 use common\models\query\ProjectQuery;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use src\entities\email\Email as EmailNorm;
 
 /**
  * This is the model class for table "email_review_queue".
@@ -25,9 +26,11 @@ use yii\db\ActiveRecord;
  * @property int|null $erq_user_reviewer_id
  * @property string|null $erq_created_dt
  * @property string|null $erq_updated_dt
+ * @property int|null $erq_email_is_norm
  *
  * @property Department $erqDepartment
  * @property Email $erqEmail
+ * @property Email|EmailNorm $email
  * @property Employee $erqOwner
  * @property Project $erqProject
  * @property Employee $erqUserReviewer
@@ -65,9 +68,10 @@ class EmailReviewQueue extends \yii\db\ActiveRecord
             [['erq_email_id'], 'required'],
             [['erq_email_id', 'erq_project_id', 'erq_department_id', 'erq_owner_id', 'erq_status_id', 'erq_user_reviewer_id'], 'integer'],
             [['erq_created_dt', 'erq_updated_dt'], 'safe'],
+            ['erq_email_is_norm', 'integer'],
             [['erq_status_id'], 'in', 'range' => array_keys(EmailReviewQueueStatus::getList())],
             [['erq_department_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['erq_department_id' => 'dep_id']],
-            [['erq_email_id'], 'exist', 'skipOnError' => true, 'targetClass' => Email::class, 'targetAttribute' => ['erq_email_id' => 'e_id']],
+            [['erq_email_id'], 'exist', 'skipOnError' => true, 'targetRelation' => 'email'],
             [['erq_owner_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['erq_owner_id' => 'id']],
             [['erq_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['erq_project_id' => 'id']],
             [['erq_user_reviewer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['erq_user_reviewer_id' => 'id']],
@@ -109,6 +113,19 @@ class EmailReviewQueue extends \yii\db\ActiveRecord
      */
     public function getErqEmail()
     {
+        return $this->hasOne(Email::class, ['e_id' => 'erq_email_id']);
+    }
+
+    /**
+     *
+     * @return \yii\db\ActiveQuery|EmailQuery
+     */
+    public function getEmail()
+    {
+        if ($this->erq_email_is_norm) {
+            return $this->hasOne(EmailNorm::class, ['e_id' => 'erq_email_id']);
+        }
+
         return $this->hasOne(Email::class, ['e_id' => 'erq_email_id']);
     }
 
@@ -195,13 +212,15 @@ class EmailReviewQueue extends \yii\db\ActiveRecord
         int $emailId,
         ?int $projectId,
         ?int $departmentId,
-        ?int $emailCreatorId
+        ?int $emailCreatorId,
+        ?int $emailIsNorm
     ): self {
         $self = new self();
         $self->erq_email_id = $emailId;
         $self->erq_project_id = $projectId;
         $self->erq_department_id = $departmentId;
         $self->erq_owner_id = $emailCreatorId;
+        $self->erq_email_is_norm = $emailIsNorm;
         return $self;
     }
 }
