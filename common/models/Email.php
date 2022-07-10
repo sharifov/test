@@ -928,9 +928,11 @@ class Email extends \yii\db\ActiveRecord
         return $this->e_created_user_id ? true : false;
     }
 
-    public function statusToReview(): void
+    public function statusToReview()
     {
-        $this->e_status_id = self::STATUS_REVIEW;
+        $this->updateAttributes(['e_status_id' => self::STATUS_REVIEW]);
+
+        return $this;
     }
 
     public function statusIsReview(): bool
