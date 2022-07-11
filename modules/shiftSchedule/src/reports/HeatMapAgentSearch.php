@@ -116,9 +116,7 @@ class HeatMapAgentSearch extends Model
      */
     public function getEventsForHeatMap(array $params): array
     {
-        $query = UserShiftSchedule::find()
-            ->andWhere(['uss_type_id' => ShiftScheduleType::find()->select('sst_id')->andWhere(['sst_subtype_id' => ShiftScheduleType::SUBTYPE_WORK_TIME])])
-            ->andWhere(['uss_status_id' => [UserShiftSchedule::STATUS_DONE, UserShiftSchedule::STATUS_APPROVED]]);
+        $query = UserShiftSchedule::find();
 
         $this->load($params);
 
@@ -128,6 +126,9 @@ class HeatMapAgentSearch extends Model
 
         $query->select(['uss_start_utc_dt', 'uss_end_utc_dt']);
         $this->queryCondition($query);
+
+        $query->andWhere(['uss_type_id' => ShiftScheduleType::find()->select('sst_id')->andWhere(['sst_subtype_id' => ShiftScheduleType::SUBTYPE_WORK_TIME])])
+            ->andWhere(['uss_status_id' => [UserShiftSchedule::STATUS_DONE, UserShiftSchedule::STATUS_APPROVED]]);
         $query->cache($this->cache);
 
         return array_map(
