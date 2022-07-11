@@ -66,13 +66,13 @@ class UserShiftScheduleQuery
      */
     public static function getCalendarTimelineListByUser(TimelineCalendarFilter $form): array
     {
-        $query = UserShiftSchedule::find()
-            ->join('inner join', UserGroupAssign::tableName(), 'ugs_user_id = uss_user_id');
+        $query = UserShiftSchedule::find();
+        
         if ($form->userGroups) {
-            $query->andWhere(['ugs_group_id' => $form->userGroups]);
+            $query->andWhere(['uss_user_id' => UserGroupAssign::find()->select('ugs_user_id')->andWhere(['ugs_group_id' => $form->userGroups])]);
         }
         if ($form->usersIds) {
-            $query->andWhere(['ugs_user_id' => $form->usersIds]);
+            $query->andWhere(['uss_user_id' => $form->usersIds]);
         }
         if ($form->statuses) {
             $query->andWhere(['uss_status_id' => $form->statuses]);
@@ -102,7 +102,7 @@ class UserShiftScheduleQuery
             $query->excludeDeleteStatus();
         }
 
-        $query->groupBy(['uss_id']);
+
         return $query->all();
     }
 
