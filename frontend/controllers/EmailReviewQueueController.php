@@ -97,7 +97,7 @@ class EmailReviewQueueController extends FController
         $isReview = (bool)\Yii::$app->request->get('review', false);
         $isTake = (bool)\Yii::$app->request->get('take', false);
 
-        $email = $model->erqEmail;
+        $email = $model->email;
         $previewForm = new EmailReviewQueueForm($email, $model->erq_id);
         $displayActionBtns = false;
         if ($isReview && $model->isPending()) {
