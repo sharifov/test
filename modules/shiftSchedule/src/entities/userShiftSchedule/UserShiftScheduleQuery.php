@@ -9,6 +9,7 @@ use modules\shiftSchedule\src\entities\shiftScheduleTypeLabelAssign\ShiftSchedul
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\TimelineCalendarFilter;
 use Yii;
 use yii\base\DynamicModel;
+use yii\db\Expression;
 
 class UserShiftScheduleQuery
 {
@@ -67,7 +68,6 @@ class UserShiftScheduleQuery
     public static function getCalendarTimelineListByUser(TimelineCalendarFilter $form): array
     {
         $query = UserShiftSchedule::find();
-        
         if ($form->userGroups) {
             $query->andWhere(['uss_user_id' => UserGroupAssign::find()->select('ugs_user_id')->andWhere(['ugs_group_id' => $form->userGroups])]);
         }
@@ -350,10 +350,20 @@ class UserShiftScheduleQuery
     {
         return UserShiftSchedule::find()
             ->where(['uss_user_id' => $userId])
-            ->andWhere(['AND',
-                ['>=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($startDt))],
-                ['<=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($endDt))]
-            ]);
+            ->andWhere([
+                'AND',
+                ['<', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($endDt))],
+                ['>=', 'uss_end_utc_dt',  date('Y-m-d H:i:s', strtotime($startDt))],
+                ['IS NOT', 'uss_end_utc_dt', new Expression('null')]
+            ])
+            ->orWhere(
+                [
+                    'and',
+                    ['>=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($startDt))],
+                    ['<', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($endDt))],
+                    ['IS', 'uss_end_utc_dt', new Expression('null')]
+                ]
+            );
     }
 
     /**
