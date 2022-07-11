@@ -152,20 +152,20 @@ class HeatMapAgentSearch extends Model
         $to = QueryHelper::getDateFromUserTZToUtc($this->getToDT(), $this->timeZone)->format('Y-m-d H:i');
 
         $query->andWhere([
-            'and',
-            ['<', 'uss_start_utc_dt', $to],
-            ['>=', 'uss_end_utc_dt', $from],
-            ['IS NOT', 'uss_end_utc_dt', new Expression('null')]
-        ]);
-
-        $query->orWhere(
+            'OR',
+            ['between', 'uss_start_utc_dt', $from, $to],
+            ['between', 'uss_end_utc_dt',$from, $to],
             [
-                'and',
+                'AND',
                 ['>=', 'uss_start_utc_dt', $from],
-                ['<', 'uss_start_utc_dt', $to],
-                ['IS', 'uss_end_utc_dt', new Expression('null')]
+                ['<=', 'uss_end_utc_dt', $to]
+            ],
+            [
+                'AND',
+                ['<=', 'uss_start_utc_dt', $from],
+                ['>=', 'uss_end_utc_dt', $to]
             ]
-        );
+        ]);
 
         if ($this->userGroup) {
             $query->innerJoin([
