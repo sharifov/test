@@ -7,7 +7,6 @@ use common\components\purifier\Purifier;
 use common\models\CaseSale;
 use common\models\Notifications;
 use frontend\helpers\JsonHelper;
-use modules\featureFlag\FFlag;
 use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuote;
 use modules\flight\models\FlightRequest;
@@ -98,19 +97,17 @@ class VoluntaryExchangeConfirmHandler
         $request['payment'] = BoRequestDataHelper::fillPaymentData($this->confirmForm->getPaymentRequestForm());
         $request['exchange'] = $this->prepareExchange();
 
-        /** @fflag FFlag::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS, Send additional info to BO endpoints enable\disable */
-        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS)) {
-            $service = RequestBoAdditionalSources::getServiceByType(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE);
-            if ($service) {
-                $request['additionalInfo'] = $service->prepareAdditionalInfo($this->confirmForm->changeQuote);
-            } else {
-                \Yii::error([
-                    'message' => 'Service not found by type: ' . RequestBoAdditionalSources::getTypeNameById(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE),
-                    'request' => $request,
-                    'content' => '',
-                ], 'VoluntaryExchangeConfirmHandler:prepareRequest:additionalInfo');
-            }
+        $service = RequestBoAdditionalSources::getServiceByType(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE);
+        if ($service) {
+            $request['additionalInfo'] = $service->prepareAdditionalInfo($this->confirmForm->changeQuote);
+        } else {
+            \Yii::error([
+                'message' => 'Service not found by type: ' . RequestBoAdditionalSources::getTypeNameById(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE),
+                'request' => $request,
+                'content' => '',
+            ], 'VoluntaryExchangeConfirmHandler:prepareRequest:additionalInfo');
         }
+
         return $request;
     }
 

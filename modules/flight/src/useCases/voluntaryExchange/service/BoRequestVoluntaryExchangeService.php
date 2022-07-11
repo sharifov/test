@@ -3,7 +3,6 @@
 namespace modules\flight\src\useCases\voluntaryExchange\service;
 
 use common\components\BackOffice;
-use modules\featureFlag\FFlag;
 use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
@@ -104,24 +103,22 @@ class BoRequestVoluntaryExchangeService
         $data['billing'] = BoRequestDataHelper::fillBillingData($form->billingInfoForm);
         $data['payment'] = BoRequestDataHelper::fillPaymentData($form->paymentRequestForm);
 
-        /** @fflag FFlag::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS, Send additional info to BO endpoints enable\disable */
-        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS)) {
-            $productQuote = ProductQuoteQuery::getProductQuoteByBookingId($form->bookingId);
-            if ($productQuote) {
-                $service = RequestBoAdditionalSources::getServiceByType(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE);
-                if ($service) {
-                    $data['additionalInfo'] = $service->prepareAdditionalInfo($productQuote);
-                } else {
-                    \Yii::error([
-                        'message' => 'Service not found by type: ' . RequestBoAdditionalSources::getTypeNameById(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE),
-                    ], 'BoRequestVoluntaryExchangeService:mappingBORequest:additionalInfo');
-                }
+        $productQuote = ProductQuoteQuery::getProductQuoteByBookingId($form->bookingId);
+        if ($productQuote) {
+            $service = RequestBoAdditionalSources::getServiceByType(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE);
+            if ($service) {
+                $data['additionalInfo'] = $service->prepareAdditionalInfo($productQuote);
             } else {
                 \Yii::error([
-                    'message' => 'Not found product quote by booking ID: ' . $form->bookingId,
+                    'message' => 'Service not found by type: ' . RequestBoAdditionalSources::getTypeNameById(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE),
                 ], 'BoRequestVoluntaryExchangeService:mappingBORequest:additionalInfo');
             }
+        } else {
+            \Yii::error([
+                'message' => 'Not found product quote by booking ID: ' . $form->bookingId,
+            ], 'BoRequestVoluntaryExchangeService:mappingBORequest:additionalInfo');
         }
+
         return $data;
     }
 

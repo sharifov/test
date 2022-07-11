@@ -2,8 +2,10 @@
 
 namespace webapi\src\services\quote;
 
+use modules\featureFlag\FFlag;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use webapi\src\request\RequestBoInterface;
+use Yii;
 use yii\base\Model;
 
 class ProductQuoteRefundService implements RequestBoInterface
@@ -14,6 +16,10 @@ class ProductQuoteRefundService implements RequestBoInterface
      */
     public function prepareAdditionalInfo(Model $model): array
     {
+        /** @fflag FFlag::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS, Send additional info to BO endpoints enable\disable */
+        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS)) {
+            return [];
+        }
         $additionalInfo = [
             'user' => [
                 'name' => null,

@@ -4,7 +4,6 @@ namespace common\components;
 
 use common\models\Project;
 use frontend\helpers\JsonHelper;
-use modules\featureFlag\FFlag;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use src\entities\cases\CaseEventLog;
@@ -330,27 +329,24 @@ class BackOffice
             $request['flightQuote'] = $quote;
         }
         if ($reprotectionQuoteGid) {
-            /** @fflag FFlag::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS, Send additional info to BO endpoints enable\disable */
-            if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS)) {
-                $productQuote = ProductQuote::findByGid($reprotectionQuoteGid);
-                if ($productQuote) {
-                    $service = RequestBoAdditionalSources::getServiceByType(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE);
-                    if ($service) {
-                        $request['additionalInfo'] = $service->prepareAdditionalInfo($productQuote);
-                    } else {
-                        \Yii::error([
-                            'message' => 'Service not found by type: ' . RequestBoAdditionalSources::getTypeNameById(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE),
-                            'request' => $request,
-                            'content' => '',
-                        ], 'BackOffice:reprotectionCustomerDecision:additionalInfo');
-                    }
+            $productQuote = ProductQuote::findByGid($reprotectionQuoteGid);
+            if ($productQuote) {
+                $service = RequestBoAdditionalSources::getServiceByType(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE);
+                if ($service) {
+                    $request['additionalInfo'] = $service->prepareAdditionalInfo($productQuote);
                 } else {
                     \Yii::error([
-                        'message' => 'Not found product quote by gid: ' . $reprotectionQuoteGid,
+                        'message' => 'Service not found by type: ' . RequestBoAdditionalSources::getTypeNameById(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE),
                         'request' => $request,
                         'content' => '',
                     ], 'BackOffice:reprotectionCustomerDecision:additionalInfo');
                 }
+            } else {
+                \Yii::error([
+                    'message' => 'Not found product quote by gid: ' . $reprotectionQuoteGid,
+                    'request' => $request,
+                    'content' => '',
+                ], 'BackOffice:reprotectionCustomerDecision:additionalInfo');
             }
         }
 

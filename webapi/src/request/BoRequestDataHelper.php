@@ -2,7 +2,6 @@
 
 namespace webapi\src\request;
 
-use modules\featureFlag\FFlag;
 use modules\flight\models\FlightQuoteTicket;
 use modules\flight\src\entities\flightQuoteTicketRefund\FlightQuoteTicketRefund;
 use modules\flight\src\useCases\api\voluntaryRefundConfirm\VoluntaryRefundConfirmForm;
@@ -67,17 +66,15 @@ class BoRequestDataHelper
             $data['refund']['refundCost'] = $form->paymentRequestForm->amount;
         }
 
-        /** @fflag FFlag::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS, Send additional info to BO endpoints enable\disable */
-        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS)) {
-            $service = RequestBoAdditionalSources::getServiceByType(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE_REFUND);
-            if ($service) {
-                $data['additionalInfo'] = $service->prepareAdditionalInfo($productQuoteRefund);
-            } else {
-                \Yii::error([
-                    'message' => 'Service not found by type: ' . RequestBoAdditionalSources::getTypeNameById(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE_REFUND),
-                ], 'BoRequestDataHelper:getDataForVoluntaryRefundConfirm:additionalInfo');
-            }
+        $service = RequestBoAdditionalSources::getServiceByType(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE_REFUND);
+        if ($service) {
+            $data['additionalInfo'] = $service->prepareAdditionalInfo($productQuoteRefund);
+        } else {
+            \Yii::error([
+                'message' => 'Service not found by type: ' . RequestBoAdditionalSources::getTypeNameById(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE_REFUND),
+            ], 'BoRequestDataHelper:getDataForVoluntaryRefundConfirm:additionalInfo');
         }
+
         return $data;
     }
 
