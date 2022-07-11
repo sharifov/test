@@ -337,13 +337,26 @@ class Email extends BaseActiveRecord
 
     /**
      *
-     * @param unknown $errorMessage
-     * @return \src\entities\email\Email
+     * @param string $errorMessage
+     * @return Email
      */
-    public function statusToError($errorMessage)
+    public function statusToError(string $errorMessage)
     {
         $this->saveEmailLog(['el_error_message' => $errorMessage]);
         $this->updateAttributes(['e_status_id' => EmailStatus::ERROR]);
+
+        return $this;
+    }
+
+    /**
+     *
+     * @param string $errorMessage
+     * @return Email
+     */
+    public function statusToCancel(string $errorMessage)
+    {
+        $this->saveEmailLog(['el_error_message' => $errorMessage]);
+        $this->updateAttributes(['e_status_id' => EmailStatus::CANCEL]);
 
         return $this;
     }
