@@ -25,6 +25,7 @@ use src\entities\email\Email as EmailNorm;
  * @property string $emailToName
  * @property string $emailSubject
  * @property string $emailMessage
+ * @property int|null $emailIsNorm
  */
 class EmailReviewQueueForm extends Model
 {
@@ -36,6 +37,7 @@ class EmailReviewQueueForm extends Model
     public $emailSubject;
     public $emailMessage;
     public $emailQueueId;
+    public $emailIsNorm;
     public $files;
     private $fileList;
     private $selectedFiles = [];
@@ -77,15 +79,16 @@ class EmailReviewQueueForm extends Model
 
     public function fillWithEmailNorm(EmailNorm $email)
     {
-        $this->emailFrom = $email->emailFrom;
+        $this->emailFrom = $email->contactFrom->ea_email;
         $this->emailFromName = $email->contactFrom->ea_name;
         $this->emailId = $email->e_id;
-        $this->emailTo = $email->emailTo;
+        $this->emailTo = $email->contactTo->ea_email;
         $this->emailToName = $email->contactTo->ea_name;
         $this->emailSubject = $email->emailSubject;
         $this->emailMessage = $email->emailBody->getBodyHtml();
         $this->leadId = $email->lead->id ?? null;
         $this->caseId = $email->case->cs_id ?? null;
+        $this->emailIsNorm = 1;
 
         return $this;
     }
@@ -100,11 +103,16 @@ class EmailReviewQueueForm extends Model
             [['emailQueueId', 'emailId'], 'required', 'on' => self::SCENARIO_REJECT],
             [['emailSubject', 'emailMessage'], 'trim'],
             [['emailTo', 'emailFrom'], 'email'],
-            [['emailId', 'emailQueueId', 'leadId', 'caseId'], 'integer'],
+            [['emailId', 'emailQueueId', 'leadId', 'caseId', 'emailIsNorm'], 'integer'],
             [['emailMessage'], 'string'],
             [['emailSubject'], 'string', 'max' => 200, 'min' => 5],
             [['emailFromName', 'emailToName'], 'string', 'max' => 50],
-            [['emailId'], 'exist', 'skipOnError' => true, 'targetClass' => Email::class, 'targetAttribute' => ['emailId' => 'e_id']],
+            [['emailId'], 'exist', 'skipOnError' => true, 'targetClass' => EmailNorm::class, 'targetAttribute' => ['emailId' => 'e_id'], 'when' => function($model) {
+                return $model->emailIsNorm == 1;
+            }],
+            [['emailId'], 'exist', 'skipOnError' => true, 'targetClass' => Email::class, 'targetAttribute' => ['emailId' => 'e_id'], 'when' => function($model) {
+                return $model->emailIsNorm === null;
+            }],
             [['emailQueueId'], 'exist', 'skipOnError' => true, 'targetClass' => EmailReviewQueue::class, 'targetAttribute' => ['emailQueueId' => 'erq_id']],
 
             ['files', IsArrayValidator::class],
