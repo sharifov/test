@@ -499,9 +499,9 @@ elif [ "$whatDo" == "init-local-bo" ]; then
   useLocalBo=$(cat $dockerFolder/.env | grep 'USE_LOCAL_BO' | cut -d "=" -f 2)
   useLocalBoUrl=$(cat $dockerFolder/.env | grep 'NGINX_CONTAINER_LOCAL_BO' | cut -d "=" -f 2)
 
-  boUrlReal=$(cat .env | grep 'COMMON_CONFIG_PARAMS_BACKOFFICE_SERVERURL=' | cut -d "=" -f 2)
-  boUrlReal2=$(cat .env | grep 'COMMON_CONFIG_PARAMS_BACKOFFICE_SERVERURLV2=' | cut -d "=" -f 2)
-  boUrlReal3=$(cat .env | grep 'COMMON_CONFIG_PARAMS_BACKOFFICE_SERVERURLV3=' | cut -d "=" -f 2)
+  boUrlReal=$(cat .env | grep 'COMMON_CONFIG_PARAMS_BACKOFFICE_URL=' | cut -d "=" -f 2)
+  boUrlReal2=$(cat .env | grep 'COMMON_CONFIG_PARAMS_BACKOFFICE_URLV2=' | cut -d "=" -f 2)
+  boUrlReal3=$(cat .env | grep 'COMMON_CONFIG_PARAMS_BACKOFFICE_URLV3=' | cut -d "=" -f 2)
 
   boUrlLocal="http://$useLocalBoUrl/api/sync"
   boUrlLocal2="http://$useLocalBoUrl/api/v2"

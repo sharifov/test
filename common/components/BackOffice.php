@@ -30,7 +30,7 @@ class BackOffice
      */
     public static function sendRequest(string $endpoint, string $type = 'GET', string $fields = null)
     {
-        $url = sprintf('%s/%s', Yii::$app->params['backOffice']['serverUrl'], $endpoint);
+        $url = sprintf('%s/%s', Yii::$app->params['backOffice']['url'], $endpoint);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         if ($type === 'POST') {
@@ -72,7 +72,7 @@ class BackOffice
     public static function sendRequest2(string $endpoint = '', array $fields = [], string $type = 'POST', int $curlTimeOut = 30, string $host = '', bool $addBasicAuth = false): \yii\httpclient\Response
     {
         $timeStart = microtime(true);
-        $host = $host ?: Yii::$app->params['backOffice']['serverUrl'];
+        $host = $host ?: Yii::$app->params['backOffice']['url'];
 
         $uri = $host . '/' . $endpoint;
         $signature = self::getSignatureBO(Yii::$app->params['backOffice']['apiKey'], Yii::$app->params['backOffice']['ver']);
@@ -157,9 +157,9 @@ class BackOffice
             throw new \DomainException('Not isset settings bo_web_hook_enable.');
         }
 
-        $boUrl = Yii::$app->params['backOffice']['serverUrl'];
+        $boUrl = Yii::$app->params['backOffice']['url'];
         if (!$boUrl) {
-            throw new \DomainException('Not isset settings backOffice.serverUrl');
+            throw new \DomainException('Not isset settings backOffice.url');
         }
 
         $boWhEndpoint = Yii::$app->params['backOffice']['webHookEndpoint'];
@@ -227,7 +227,7 @@ class BackOffice
     {
         $settings = \Yii::$app->params['settings'];
 
-        $uri = Yii::$app->params['backOffice']['serverUrl'] ? Yii::$app->params['backOffice']['serverUrl'] . '/' . (Yii::$app->params['backOffice']['webHookEndpoint'] ?? '') : '';
+        $uri = Yii::$app->params['backOffice']['url'] ? Yii::$app->params['backOffice']['url'] . '/' . (Yii::$app->params['backOffice']['webHookEndpoint'] ?? '') : '';
 
         if (isset($settings['bo_web_hook_enable']) && $uri) {
             if ($settings['bo_web_hook_enable']) {
@@ -334,7 +334,7 @@ class BackOffice
                 $request,
                 'POST',
                 30,
-                Yii::$app->params['backOffice']['serverUrlV3']
+                Yii::$app->params['backOffice']['urlV3']
             );
 
             if (!$response->isOk) {
@@ -402,7 +402,7 @@ class BackOffice
                 $request,
                 'POST',
                 30,
-                Yii::$app->params['backOffice']['serverUrlV3']
+                Yii::$app->params['backOffice']['urlV3']
             );
 
             $data = $response->data;
@@ -451,7 +451,7 @@ class BackOffice
                 $requestData,
                 'POST',
                 30,
-                Yii::$app->params['backOffice']['serverUrlV3']
+                Yii::$app->params['backOffice']['urlV3']
             );
         } catch (\Throwable $exception) {
             \Yii::error([
@@ -496,7 +496,7 @@ class BackOffice
                 $requestData,
                 'POST',
                 30,
-                Yii::$app->params['backOffice']['serverUrlV3']
+                Yii::$app->params['backOffice']['urlV3']
             );
         } catch (\Throwable $exception) {
             \Yii::error(AppHelper::throwableLog($exception, true), 'BackOffice:getExchangeData');
