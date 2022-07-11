@@ -952,10 +952,10 @@ class Email extends \yii\db\ActiveRecord
 
     /**
      *
-     * @param unknown $errorMessage
+     * @param string $errorMessage
      * @return Email
      */
-    public function statusToCancel($errorMessage)
+    public function statusToCancel(string $errorMessage)
     {
         $this->updateAttributes([
             'e_error_message' => $errorMessage,
@@ -967,10 +967,10 @@ class Email extends \yii\db\ActiveRecord
 
     /**
      *
-     * @param unknown $errorMessage
+     * @param string $errorMessage
      * @return Email
      */
-    public function statusToError($errorMessage)
+    public function statusToError(string $errorMessage)
     {
         $this->updateAttributes([
             'e_error_message' => $errorMessage,
