@@ -13,6 +13,8 @@ use common\models\query\ProjectQuery;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use src\entities\email\Email as EmailNorm;
+use common\models\Lead;
+use src\entities\cases\Cases;
 
 /**
  * This is the model class for table "email_review_queue".
@@ -34,6 +36,12 @@ use src\entities\email\Email as EmailNorm;
  * @property Employee $erqOwner
  * @property Project $erqProject
  * @property Employee $erqUserReviewer
+ *
+ * @property Cases $emailCase
+ * @property Lead $emailLead
+ * @property string $emailStatusName
+ * @property string $emailTemplateName
+ * @property string $emailSubject
  */
 class EmailReviewQueue extends \yii\db\ActiveRecord
 {
@@ -129,27 +137,27 @@ class EmailReviewQueue extends \yii\db\ActiveRecord
         return $this->hasOne(Email::class, ['e_id' => 'erq_email_id']);
     }
 
-    public function getEmailSubject()
+    public function getEmailSubject(): string
     {
         return ($this->erq_email_is_norm) ? $this->email->emailSubject : $this->email->e_email_subject;
     }
 
-    public function getEmailTemplateName()
+    public function getEmailTemplateName(): string
     {
         return ($this->erq_email_is_norm) ? $this->email->templateTypeName : $this->email->eTemplateType->etp_name ?? '--';
     }
 
-    public function getEmailStatusName()
+    public function getEmailStatusName(): string
     {
         return $this->email->statusName;
     }
 
-    public function getEmailLead()
+    public function getEmailLead(): ?Lead
     {
         return ($this->erq_email_is_norm) ? $this->email->lead : $this->email->eLead;
     }
 
-    public function getEmailCase()
+    public function getEmailCase(): ?Cases
     {
         return ($this->erq_email_is_norm) ? $this->email->case : $this->email->eCase;
     }
