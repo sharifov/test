@@ -44,7 +44,8 @@ use yii\helpers\ArrayHelper;
  * @property EmailParams $params
  * @property EmailBody $emailBody
  * @property EmailLog $emailLog
- * @property Case[] $cases
+ * @property Cases[] $cases
+ * @property Cases $case
  * @property Client[] $clients
  * @property Lead[] $leads
  * @property Lead $lead
@@ -55,6 +56,17 @@ use yii\helpers\ArrayHelper;
  * @property EmailContact $emailContactTo
  * @property Email $reply
  * @property EmailTemplateType $templateType
+ *
+ * @property array $leadsIds
+ * @property array $casesIds
+ * @property array $clientsIds
+ * @property string $emailFrom
+ * @property string|null $emailTo
+ * @property string|null $templateTypeName
+ * @property string|null $statusName
+ * @property string|null $emailSubject
+ *
+ *
  */
 class Email extends BaseActiveRecord
 {
@@ -131,6 +143,12 @@ class Email extends BaseActiveRecord
         return $this->hasMany(Cases::class, ['cs_id' => 'ec_case_id'])->viaTable('email_case', ['ec_email_id' => 'e_id']);
     }
 
+    //first case
+    public function getCase(): \yii\db\ActiveQuery
+    {
+        return $this->hasOne(Cases::class, ['cs_id' => 'ec_case_id'])->viaTable('email_case', ['ec_email_id' => 'e_id']);
+    }
+
     public function getClients(): \yii\db\ActiveQuery
     {
         return $this->hasMany(Client::class, ['id' => 'ecl_client_id'])->viaTable('email_client', ['ecl_email_id' => 'e_id']);
@@ -167,7 +185,7 @@ class Email extends BaseActiveRecord
         return ArrayHelper::map($this->cases, 'cs_id', 'cs_id');
     }
 
-    public function getHash(): array
+    public function getHash(): ?string
     {
         return $this->emailBody->embd_hash;
     }
@@ -216,12 +234,12 @@ class Email extends BaseActiveRecord
         return $this->contactFrom->getEmail(EmailType::isInbox($this->e_type_id));
     }
 
-    public function getEmailTo(): string
+    public function getEmailTo(): ?string
     {
         return $this->contactTo->getEmail(EmailType::isOutbox($this->e_type_id)) ?? null;
     }
 
-    public function getCommunicationId()
+    public function getCommunicationId(): ?int
     {
         return $this->emailLog->el_communication_id ?? null;
     }
@@ -234,6 +252,11 @@ class Email extends BaseActiveRecord
     public function getEmailSubject(): string
     {
         return $this->emailBody->embd_email_subject;
+    }
+
+    public function getEmailData()
+    {
+        return $this->emailBody->embd_email_data;
     }
 
     public function getTemplateTypeName(): ?string
