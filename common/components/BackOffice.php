@@ -331,15 +331,14 @@ class BackOffice
         if ($reprotectionQuoteGid) {
             $productQuote = ProductQuote::findByGid($reprotectionQuoteGid);
             if ($productQuote) {
-                $service = RequestBoAdditionalSources::getServiceByType(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE);
-                if ($service) {
+                try {
+                    $service = RequestBoAdditionalSources::getServiceByType(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE);
+                    if (!$service) {
+                        throw new \RuntimeException('Service not found by type: ' . RequestBoAdditionalSources::getTypeNameById(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE));
+                    }
                     $request['additionalInfo'] = $service->prepareAdditionalInfo($productQuote);
-                } else {
-                    \Yii::error([
-                        'message' => 'Service not found by type: ' . RequestBoAdditionalSources::getTypeNameById(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE),
-                        'request' => $request,
-                        'content' => '',
-                    ], 'BackOffice:reprotectionCustomerDecision:additionalInfo');
+                } catch (\Throwable $e) {
+                    \Yii::error(AppHelper::throwableLog($e, true), 'BackOffice:reprotectionCustomerDecision:additionalInfo');
                 }
             } else {
                 \Yii::error([

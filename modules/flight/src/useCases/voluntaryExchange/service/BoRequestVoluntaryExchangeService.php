@@ -10,6 +10,7 @@ use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use src\entities\cases\Cases;
 use src\exception\BoResponseException;
 use src\exception\ValidationException;
+use src\helpers\app\AppHelper;
 use src\helpers\ErrorsToStringHelper;
 use src\services\cases\CasesSaleService;
 use webapi\src\request\BoRequestDataHelper;
@@ -105,13 +106,14 @@ class BoRequestVoluntaryExchangeService
 
         $productQuote = ProductQuoteQuery::getProductQuoteByBookingId($form->bookingId);
         if ($productQuote) {
-            $service = RequestBoAdditionalSources::getServiceByType(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE);
-            if ($service) {
+            try {
+                $service = RequestBoAdditionalSources::getServiceByType(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE);
+                if (!$service) {
+                    throw new \RuntimeException('Service not found by type: ' . RequestBoAdditionalSources::getTypeNameById(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE));
+                }
                 $data['additionalInfo'] = $service->prepareAdditionalInfo($productQuote);
-            } else {
-                \Yii::error([
-                    'message' => 'Service not found by type: ' . RequestBoAdditionalSources::getTypeNameById(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE),
-                ], 'BoRequestVoluntaryExchangeService:mappingBORequest:additionalInfo');
+            } catch (\Throwable $e) {
+                \Yii::error(AppHelper::throwableLog($e, true), 'BoRequestVoluntaryExchangeService:mappingBORequest:additionalInfo');
             }
         } else {
             \Yii::error([

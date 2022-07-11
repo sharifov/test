@@ -8,6 +8,7 @@ use modules\flight\src\useCases\api\voluntaryRefundConfirm\VoluntaryRefundConfir
 use modules\flight\src\useCases\api\voluntaryRefundCreate\VoluntaryRefundCreateForm;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
+use src\helpers\app\AppHelper;
 use src\services\CurrencyHelper;
 use webapi\src\forms\billing\BillingInfoForm;
 use webapi\src\forms\payment\PaymentRequestForm;
@@ -66,13 +67,14 @@ class BoRequestDataHelper
             $data['refund']['refundCost'] = $form->paymentRequestForm->amount;
         }
 
-        $service = RequestBoAdditionalSources::getServiceByType(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE_REFUND);
-        if ($service) {
+        try {
+            $service = RequestBoAdditionalSources::getServiceByType(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE_REFUND);
+            if (!$service) {
+                throw new \RuntimeException('Service not found by type: ' . RequestBoAdditionalSources::getTypeNameById(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE_REFUND));
+            }
             $data['additionalInfo'] = $service->prepareAdditionalInfo($productQuoteRefund);
-        } else {
-            \Yii::error([
-                'message' => 'Service not found by type: ' . RequestBoAdditionalSources::getTypeNameById(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE_REFUND),
-            ], 'BoRequestDataHelper:getDataForVoluntaryRefundConfirm:additionalInfo');
+        } catch (\Throwable $e) {
+            \Yii::error(AppHelper::throwableLog($e, true), 'BoRequestDataHelper:getDataForVoluntaryRefundConfirm:additionalInfo');
         }
 
         return $data;

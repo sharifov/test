@@ -97,15 +97,14 @@ class VoluntaryExchangeConfirmHandler
         $request['payment'] = BoRequestDataHelper::fillPaymentData($this->confirmForm->getPaymentRequestForm());
         $request['exchange'] = $this->prepareExchange();
 
-        $service = RequestBoAdditionalSources::getServiceByType(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE);
-        if ($service) {
+        try {
+            $service = RequestBoAdditionalSources::getServiceByType(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE);
+            if (!$service) {
+                throw new \RuntimeException('Service not found by type: ' . RequestBoAdditionalSources::getTypeNameById(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE));
+            }
             $request['additionalInfo'] = $service->prepareAdditionalInfo($this->confirmForm->changeQuote);
-        } else {
-            \Yii::error([
-                'message' => 'Service not found by type: ' . RequestBoAdditionalSources::getTypeNameById(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE),
-                'request' => $request,
-                'content' => '',
-            ], 'VoluntaryExchangeConfirmHandler:prepareRequest:additionalInfo');
+        } catch (\Throwable $e) {
+            \Yii::error(AppHelper::throwableLog($e, true), 'VoluntaryExchangeConfirmHandler:prepareRequest:additionalInfo');
         }
 
         return $request;

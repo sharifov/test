@@ -38,7 +38,7 @@ class RequestBoAdditionalSources
     {
         $className = self::getServiceClassByType($type);
         if (!($object = \Yii::createObject($className)) || !($object instanceof RequestBoInterface)) {
-            throw new \RuntimeException('Service must be instanceof RequestBoService');
+            throw new \RuntimeException('Service must be instanceof RequestBoInterface');
         }
         return $object;
     }
