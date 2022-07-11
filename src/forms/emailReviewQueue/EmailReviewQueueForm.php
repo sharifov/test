@@ -11,6 +11,7 @@ use modules\fileStorage\src\services\url\FileInfo;
 use src\model\emailReviewQueue\entity\EmailReviewQueue;
 use yii\base\Model;
 use yii\helpers\ArrayHelper;
+use src\entities\email\Email as EmailNorm;
 
 /**
  * Class EmailReviewQueueForm
@@ -45,22 +46,48 @@ class EmailReviewQueueForm extends Model
     public const SCENARIO_SEND_EMAIL = 'sendEmail';
     public const SCENARIO_REJECT = 'reject';
 
-    public function __construct(?Email $email, ?int $emailQueueId, $config = [])
+    public function __construct($email, ?int $emailQueueId, $config = [])
     {
         parent::__construct($config);
         if ($email) {
-            $this->emailFrom = $email->e_email_from;
-            $this->emailFromName = $email->e_email_from_name;
-            $this->emailId = $email->e_id;
-            $this->emailTo = $email->e_email_to;
-            $this->emailToName = $email->e_email_to_name;
-            $this->emailSubject = $email->e_email_subject;
-            $this->emailMessage = $email->getEmailBodyHtml();
-            $this->leadId = $email->e_lead_id;
-            $this->caseId = $email->e_case_id;
+            if ($email instanceof Email) {
+                $this->fillWithEmail($email);
+            } else {
+                $this->fillWithEmailNorm($email);
+            }
 //            $this->selectedFiles = $this->parseSelectedFiles($email->e_email_data);
         }
         $this->emailQueueId = $emailQueueId;
+    }
+
+    public function fillWithEmail(Email $email)
+    {
+        $this->emailFrom = $email->e_email_from;
+        $this->emailFromName = $email->e_email_from_name;
+        $this->emailId = $email->e_id;
+        $this->emailTo = $email->e_email_to;
+        $this->emailToName = $email->e_email_to_name;
+        $this->emailSubject = $email->e_email_subject;
+        $this->emailMessage = $email->getEmailBodyHtml();
+        $this->leadId = $email->e_lead_id;
+        $this->caseId = $email->e_case_id;
+
+        return $this;
+    }
+
+    public function fillWithEmailNorm(EmailNorm $email)
+    {
+        $this->emailFrom = $email->emailFrom;
+        $this->emailFromName = $email->contactFrom->ea_name;
+        $this->emailId = $email->e_id;
+        $this->emailTo = $email->emailTo;
+        $this->emailToName = $email->contactTo->ea_name;
+        $this->emailSubject = $email->emailSubject;
+        $this->emailMessage = $email->emailBody->getBodyHtml();
+        $this->leadId = $email->lead->id ?? null;
+        $this->caseId = $email->case->cs_id ?? null;
+
+        return $this;
     }
 
     /**
