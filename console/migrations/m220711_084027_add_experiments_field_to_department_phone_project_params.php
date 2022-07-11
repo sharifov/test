@@ -1,9 +1,7 @@
 <?php
 
 use frontend\helpers\JsonHelper;
-use modules\experiment\models\ExperimentTarget;
 use yii\db\Migration;
-use src\services\departmentPhoneProject\DepartmentPhoneProjectParamsService;
 use common\models\DepartmentPhoneProject;
 
 /**
@@ -25,7 +23,6 @@ class m220711_084027_add_experiments_field_to_department_phone_project_params ex
                     $departmentPhone->dpp_params = JsonHelper::encode($dpp_params_array);
                     $departmentPhone->save();
                 }
-
             }
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableLog($throwable), 'm220711_084027_add_experiments_field_to_department_phone_project_params:safeUp:Throwable');
