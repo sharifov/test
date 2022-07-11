@@ -950,9 +950,19 @@ class Email extends \yii\db\ActiveRecord
         return $this->e_status_id === self::STATUS_DONE;
     }
 
-    public function statusToCancel(): void
+    /**
+     *
+     * @param unknown $errorMessage
+     * @return Email
+     */
+    public function statusToCancel($errorMessage)
     {
-        $this->e_status_id = self::STATUS_CANCEL;
+        $this->updateAttributes([
+            'e_error_message' => $errorMessage,
+            'e_status_id' => self::STATUS_CANCEL,
+        ]);
+
+        return $this;
     }
 
     /**
