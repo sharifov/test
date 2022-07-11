@@ -4,7 +4,7 @@
  * @var \src\forms\emailReviewQueue\EmailReviewQueueForm $previewForm
  * @var $this yii\web\View
  * @var $displayActionBtns bool
- * @var $files array
+ * @var $files array|null
  */
 
 use dosamigos\ckeditor\CKEditor;
@@ -51,6 +51,7 @@ use yii\widgets\Pjax;
                         <?= $form->field($previewForm, 'emailFromName')->textInput(['class' => 'form-control', 'maxlength' => true, ]) ?>
 
 
+                        <?= $form->field($previewForm, 'emailIsNorm')->hiddenInput()->label(false); ?>
                         <?= $form->field($previewForm, 'emailId')->hiddenInput()->label(false); ?>
                         <?= $form->field($previewForm, 'emailQueueId')->hiddenInput()->label(false); ?>
                         <?= $form->field($previewForm, 'leadId')->hiddenInput()->label(false); ?>
