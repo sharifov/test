@@ -6,6 +6,7 @@ use common\components\BackOffice;
 use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
+use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use src\entities\cases\Cases;
 use src\exception\BoResponseException;
 use src\exception\ValidationException;
@@ -99,6 +100,11 @@ class BoRequestVoluntaryExchangeService
 
         $data['billing'] = BoRequestDataHelper::fillBillingData($form->billingInfoForm);
         $data['payment'] = BoRequestDataHelper::fillPaymentData($form->paymentRequestForm);
+
+        $productQuote = ProductQuoteQuery::getProductQuoteByBookingId($form->bookingId);
+        if ($productQuote) {
+            $data['additionalInfo'] = BoRequestDataHelper::prepareAdditionalInfoToBoRequest($productQuote);
+        }
 
         return $data;
     }

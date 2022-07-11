@@ -74,6 +74,7 @@ class LeadCreateForm extends Model
     public $expire_at;
     public $type;
     public $lead_data;
+    public $experiments;
     public $client_data;
 
     public $flightsForm;
@@ -152,7 +153,7 @@ class LeadCreateForm extends Model
 
             [['expire_at'], 'datetime', 'format' => 'php:Y-m-d H:i:s', 'skipOnEmpty' => true],
 
-            [['lead_data', 'client_data'], IsArrayValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
+            [['lead_data', 'client_data', 'experiments'], IsArrayValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
 
             ['department_key', 'string'],
             ['department_key', 'validateDepartment', 'skipOnEmpty' => true, 'skipOnError' => true],

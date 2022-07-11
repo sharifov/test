@@ -9,6 +9,10 @@ use common\models\Employee;
 use common\models\User;
 use frontend\models\LeadForm;
 use frontend\themes\gentelella_v2\assets\groups\GentelellaAsset;
+use frontend\widgets\sale\SaleWidget;
+use modules\featureFlag\FFlag;
+use modules\lead\src\abac\sale\LeadSaleAbacDto;
+use modules\lead\src\abac\sale\LeadSaleAbacObject;
 use src\access\EmployeeProductAccess;
 use src\access\ListsAccess;
 use modules\qaTask\src\entities\qaTask\QaTaskObjectType;
@@ -198,6 +202,15 @@ $leadAbacDto = new LeadAbacDto($leadModel, $userId);
         $buttonsSubAction[] = $buttonDetailInfo;
     }
 
+    /** @fflag FFlag::FF_KEY_SALE_VIEW_IN_LEAD_ENABLE, LeadSale view enable\disable */
+    if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SALE_VIEW_IN_LEAD_ENABLE)) {
+        $leadSaleAbacDto = new LeadSaleAbacDto($leadModel, Auth::id());
+        /** @abac new $leadSaleAbacDto, LeadSaleAbacObject::LOGIC_CLIENT_DATA, LeadSaleAbacObject::ACTION_VIEW, Access to view sale in lead view */
+        if (!empty($leadModel->bo_flight_id) && Yii::$app->abac->can($leadSaleAbacDto, LeadSaleAbacObject::NS, LeadSaleAbacObject::ACTION_VIEW)) {
+            $buttonsSubAction[] = SaleWidget::widget(['leadId' => $leadModel->id]);
+        }
+    }
+
     $project = $leadModel->project;
     $projectStyles = '';
     if ($project) {
@@ -209,156 +222,158 @@ $leadAbacDto = new LeadAbacDto($leadModel, $userId);
     }
 
     ?>
-<div class="panel-main__header" id="actions-header"<?= $projectStyles?>>
 
-    <?php $productTypes = (new EmployeeProductAccess(Yii::$app->user))->getProductItemList(); ?>
-    <?php if (count($productTypes)) : ?>
-        <div class="dropdown">
-            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-                <i class="fa fa-plus"></i> Add Product
-            </button>
-            <div class="dropdown-menu">
-                <?php foreach ($productTypes as $item) :?>
-                    <a class="dropdown-item add-product" href="#" data-product-type-id="<?=Html::encode($item['pt_id'])?>">
-                        <?= $item['pt_icon_class'] ? '<i class="' . Html::encode($item['pt_icon_class']) . '"></i>' : '' ?>
-                        <?=Html::encode($item['pt_name'])?>
-                    </a>
-                <?php endforeach; ?>
-            </div>
-        </div> &nbsp;
-    <?php endif; ?>
+<?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-header-sidebar', 'enablePushState' => false, 'enableReplaceState' => false, 'timeout' => 5000]) ?>
+    <div class="panel-main__header" id="actions-header"<?= $projectStyles?>>
 
-    <?php if (!$user->isQa()) : ?>
-            <div class="panel-main__actions">
-        <?php if ($takeConditions) {
-            if (!$leadModel->isOwner($user->id) && ($leadModel->isProcessing() || $leadModel->isOnHold() || $leadModel->isExtraQueue())) {
-                echo $buttonTakeOver;
-            } elseif (
-                $leadModel->isPending() ||
-                $leadModel->isFollowUp() ||
-                $leadModel->isAlternative() ||
-                $leadModel->isBookFailed() ||
-                $leadModel->isNew() ||
-                $leadModel->isExtraQueue()
-            ) {
-                echo $buttonTake;
-            }
-        } ?>
-
-        <?php if ($buttonsSubAction) : ?>
-            <?php foreach ($buttonsSubAction as $btn) :?>
-                <?= $btn ?>
-            <?php endforeach; ?>
+        <?php $productTypes = (new EmployeeProductAccess(Yii::$app->user))->getProductItemList(); ?>
+        <?php if (count($productTypes)) : ?>
+            <div class="dropdown">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                    <i class="fa fa-plus"></i> Add Product
+                </button>
+                <div class="dropdown-menu">
+                    <?php foreach ($productTypes as $item) :?>
+                        <a class="dropdown-item add-product" href="#" data-product-type-id="<?=Html::encode($item['pt_id'])?>">
+                            <?= $item['pt_icon_class'] ? '<i class="' . Html::encode($item['pt_icon_class']) . '"></i>' : '' ?>
+                            <?=Html::encode($item['pt_name'])?>
+                        </a>
+                    <?php endforeach; ?>
+                </div>
+            </div> &nbsp;
         <?php endif; ?>
 
-        <?php  if (!empty($leadModel->bo_flight_id) && $leadModel->isOwner($user->id) && $leadModel->isBooked()) {
-            $title = empty($leadModel->getAdditionalInformationFormFirstElement()->pnr)
-                ? 'Create PNR' : 'PNR Created';
-            $options = empty($leadModel->getAdditionalInformationFormFirstElement()->pnr) ? [
-                'class' => 'btn btn-success add-pnr',
-                'id' => 'create-pnr',
-                'data-url' => Url::to(['lead/add-pnr', 'leadId' => $leadModel->id])
-            ] : [
-                'class' => 'btn btn-default',
-            ];
-            echo Html::button('<i class="fa fa-plus"></i> ' . $title . '', $options);
-        }  ?>
+        <?php if (!$user->isQa()) : ?>
+                <div class="panel-main__actions">
+            <?php if ($takeConditions) {
+                if (!$leadModel->isOwner($user->id) && ($leadModel->isProcessing() || $leadModel->isOnHold() || $leadModel->isExtraQueue())) {
+                    echo $buttonTakeOver;
+                } elseif (
+                    $leadModel->isPending() ||
+                    $leadModel->isFollowUp() ||
+                    $leadModel->isAlternative() ||
+                    $leadModel->isBookFailed() ||
+                    $leadModel->isNew() ||
+                    $leadModel->isExtraQueue()
+                ) {
+                    echo $buttonTake;
+                }
+            } ?>
 
-        <?php if (Auth::can('lead/split-profit', ['lead' => $leadModel]) && Auth::can('/lead/split-profit')) :?>
-            <?= Html::button('<i class="fa fa-money"></i> Split profit', [
+            <?php if ($buttonsSubAction) : ?>
+                <?php foreach ($buttonsSubAction as $btn) :?>
+                    <?= $btn ?>
+                <?php endforeach; ?>
+            <?php endif; ?>
+
+            <?php  if (!empty($leadModel->bo_flight_id) && $leadModel->isOwner($user->id) && $leadModel->isBooked()) {
+                $title = empty($leadModel->getAdditionalInformationFormFirstElement()->pnr)
+                    ? 'Create PNR' : 'PNR Created';
+                $options = empty($leadModel->getAdditionalInformationFormFirstElement()->pnr) ? [
+                    'class' => 'btn btn-success add-pnr',
+                    'id' => 'create-pnr',
+                    'data-url' => Url::to(['lead/add-pnr', 'leadId' => $leadModel->id])
+                ] : [
                     'class' => 'btn btn-default',
-                    'id' => 'split-profit',
-                    'data-url' => Url::to(['lead/split-profit', 'id' => $leadModel->id]),
+                ];
+                echo Html::button('<i class="fa fa-plus"></i> ' . $title . '', $options);
+            }  ?>
+
+            <?php if (Auth::can('lead/split-profit', ['lead' => $leadModel]) && Auth::can('/lead/split-profit')) :?>
+                <?= Html::button('<i class="fa fa-money"></i> Split profit', [
+                        'class' => 'btn btn-default',
+                        'id' => 'split-profit',
+                        'data-url' => Url::to(['lead/split-profit', 'id' => $leadModel->id]),
+                    ])?>
+
+                <?php Modal::begin(['id' => 'split-profit-modal',
+                    'title' => 'Split profit',
+                    'size' => Modal::SIZE_LARGE
+                ])?>
+                <?php Modal::end()?>
+            <?php endif;?>
+
+            <?php if (Auth::can('lead/split-tips', ['lead' => $leadModel]) && Auth::can('/lead/split-tips')) :?>
+                <?= Html::button('<i class="fa fa-money"></i> Split tips', [
+                    'class' => 'btn btn-default',
+                    'id' => 'split-tips',
+                    'data-url' => Url::to(['lead/split-tips', 'id' => $leadModel->id]),
                 ])?>
 
-            <?php Modal::begin(['id' => 'split-profit-modal',
-                'title' => 'Split profit',
-                'size' => Modal::SIZE_LARGE
-            ])?>
-            <?php Modal::end()?>
-        <?php endif;?>
-
-        <?php if (Auth::can('lead/split-tips', ['lead' => $leadModel]) && Auth::can('/lead/split-tips')) :?>
-            <?= Html::button('<i class="fa fa-money"></i> Split tips', [
-                'class' => 'btn btn-default',
-                'id' => 'split-tips',
-                'data-url' => Url::to(['lead/split-tips', 'id' => $leadModel->id]),
-            ])?>
-
-            <?php Modal::begin(['id' => 'split-tips-modal',
-                'title' => 'Split tips for Lead(' . $leadModel->id . ')',
-                'size' => Modal::SIZE_DEFAULT
-            ])?>
-            <?php Modal::end()?>
-        <?php endif;?>
-    </div>
-
-    <?php endif; ?>
-
-    <?php
-    $canStatusLog = Auth::can('/lead/flow-transition');
-    $canDataLogs = Auth::can('/global-log/ajax-view-general-lead-log');
-    $canVisitorLogs = Auth::can('/visitor-log/index');
-    $leadAbacDto = new LeadAbacDto($leadModel, (int) Auth::id());
-    /** @abac $leadAbacDto, LeadAbacObject::OBJ_EXTRA_QUEUE, LeadAbacObject::ACTION_ACCESS, show LeadPoorProcessingLogs in lead/view */
-    $canLeadPoorProcessingLogs = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_EXTRA_QUEUE, LeadAbacObject::ACTION_ACCESS);
-    ?>
-
-    <?php if ($canStatusLog || $canDataLogs || $canVisitorLogs || $canLeadPoorProcessingLogs) : ?>
-        &nbsp; <div class="dropdown">
-            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fa fa-bars"> </i> Logs
-            </button>
-            <div class="dropdown-menu">
-
-                <?php if ($canStatusLog) : ?>
-                    <?= Html::a('<i class="fa fa-bars"> </i> Status Logs', null, [
-                        'id' => 'view-flow-transition',
-                        'class' => 'dropdown-item',
-                        'title' => 'Status Logs LeadID #' . $leadForm->lead->id
-                    ]) ?>
-                <?php endif;?>
-
-                <?php if ($canDataLogs) : ?>
-                    <?= Html::a('<i class="fa fa-list"> </i> Data Logs', null, [
-                        'id' => 'btn-general-lead-log',
-                        'class' => 'dropdown-item showModalButton',
-                        'data-modal_id' => 'lg',
-                        'title' => 'General Lead Log #' . $leadForm->lead->id,
-                        'data-content-url' => Url::to(['global-log/ajax-view-general-lead-log', 'lid' => $leadForm->lead->id])
-                    ]) ?>
-                <?php endif; ?>
-
-                <?php if ($canVisitorLogs) : ?>
-                    <?= Html::a('<i class="fa fa-list"> </i> Visitor Logs', ['/visitor-log/index', 'VisitorLogSearch[vl_lead_id]' => $leadForm->lead->id], [
-                        'class' => 'dropdown-item',
-                        'title' => 'Visitor log #' . $leadForm->lead->id,
-                    ]) ?>
-                <?php endif; ?>
-
-                <?php if ($canLeadPoorProcessingLogs) : ?>
-                    <?= Html::a('<i class="fa fa-list"> </i> Lead Poor Processing Logs', null, [
-                        'class' => 'dropdown-item showModalButton',
-                        'data-modal_id' => 'lg',
-                        'title' => 'Lead Poor Processing Log #' . $leadForm->lead->id,
-                        'data-content-url' => Url::to(['/lead-poor-processing-log/ajax-log', 'leadId' => $leadForm->lead->id])
-                    ]) ?>
-                <?php endif; ?>
-
-            </div>
+                <?php Modal::begin(['id' => 'split-tips-modal',
+                    'title' => 'Split tips for Lead(' . $leadModel->id . ')',
+                    'size' => Modal::SIZE_DEFAULT
+                ])?>
+                <?php Modal::end()?>
+            <?php endif;?>
         </div>
 
-    <?php endif; ?>
+        <?php endif; ?>
 
-    <?php if (Auth::can('lead/view_QA_Tasks')) : ?>
-        <?= QaTaskObjectMenuWidget::widget([
-                'objectType' => QaTaskObjectType::LEAD,
-                'objectId' => $leadModel->id,
-        ]) ?>
-    <?php endif; ?>
+        <?php
+        $canStatusLog = Auth::can('/lead/flow-transition');
+        $canDataLogs = Auth::can('/global-log/ajax-view-general-lead-log');
+        $canVisitorLogs = Auth::can('/visitor-log/index');
+        $leadAbacDto = new LeadAbacDto($leadModel, (int) Auth::id());
+        /** @abac $leadAbacDto, LeadAbacObject::OBJ_EXTRA_QUEUE, LeadAbacObject::ACTION_ACCESS, show LeadPoorProcessingLogs in lead/view */
+        $canLeadPoorProcessingLogs = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_EXTRA_QUEUE, LeadAbacObject::ACTION_ACCESS);
+        ?>
 
-</div>
+        <?php if ($canStatusLog || $canDataLogs || $canVisitorLogs || $canLeadPoorProcessingLogs) : ?>
+            &nbsp; <div class="dropdown">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fa fa-bars"> </i> Logs
+                </button>
+                <div class="dropdown-menu">
 
+                    <?php if ($canStatusLog) : ?>
+                        <?= Html::a('<i class="fa fa-bars"> </i> Status Logs', null, [
+                            'id' => 'view-flow-transition',
+                            'class' => 'dropdown-item',
+                            'title' => 'Status Logs LeadID #' . $leadForm->lead->id
+                        ]) ?>
+                    <?php endif;?>
+
+                    <?php if ($canDataLogs) : ?>
+                        <?= Html::a('<i class="fa fa-list"> </i> Data Logs', null, [
+                            'id' => 'btn-general-lead-log',
+                            'class' => 'dropdown-item showModalButton',
+                            'data-modal_id' => 'lg',
+                            'title' => 'General Lead Log #' . $leadForm->lead->id,
+                            'data-content-url' => Url::to(['global-log/ajax-view-general-lead-log', 'lid' => $leadForm->lead->id])
+                        ]) ?>
+                    <?php endif; ?>
+
+                    <?php if ($canVisitorLogs) : ?>
+                        <?= Html::a('<i class="fa fa-list"> </i> Visitor Logs', ['/visitor-log/index', 'VisitorLogSearch[vl_lead_id]' => $leadForm->lead->id], [
+                            'class' => 'dropdown-item',
+                            'title' => 'Visitor log #' . $leadForm->lead->id,
+                        ]) ?>
+                    <?php endif; ?>
+
+                    <?php if ($canLeadPoorProcessingLogs) : ?>
+                        <?= Html::a('<i class="fa fa-list"> </i> Lead Poor Processing Logs', null, [
+                            'class' => 'dropdown-item showModalButton',
+                            'data-modal_id' => 'lg',
+                            'title' => 'Lead Poor Processing Log #' . $leadForm->lead->id,
+                            'data-content-url' => Url::to(['/lead-poor-processing-log/ajax-log', 'leadId' => $leadForm->lead->id])
+                        ]) ?>
+                    <?php endif; ?>
+
+                </div>
+            </div>
+
+        <?php endif; ?>
+
+        <?php if (Auth::can('lead/view_QA_Tasks')) : ?>
+            <?= QaTaskObjectMenuWidget::widget([
+                    'objectType' => QaTaskObjectType::LEAD,
+                    'objectId' => $leadModel->id,
+            ]) ?>
+        <?php endif; ?>
+
+    </div>
+<?php yii\widgets\Pjax::end() ?>
 
 <!----Popover for adding notes START---->
 <div id="popover-content-add-note" class="d-none popover-form">

@@ -58,7 +58,7 @@ if [ "$whatDo" == "init-env" ]; then
 elif [ ! -e "$dockerFolder/.env" ]; then
   printf "Not found .docker/.env Please run init-env command\n"
   exit;
-elif [ ! -e ".env" ]; then
+elif [ ! -e "$currentDir/.env" ]; then
   printf "Not found .env Please run init-env command\n"
   exit;
 fi
@@ -93,6 +93,11 @@ POSTGRES_USER=$(getEnvVar "POSTGRES_USER")
 POSTGRES_PASSWORD=$(getEnvVar "POSTGRES_PASSWORD")
 POSTGRES_DB=$(getEnvVar "POSTGRES_DB")
 
+PHP_XDEBUG_ENABLED=$(getEnvVar "PHP_XDEBUG_ENABLED")
+XDEBUG_CLIENT_HOST=$(getEnvVar "XDEBUG_CLIENT_HOST")
+XDEBUG_CLIENT_PORT=$(getEnvVar "XDEBUG_CLIENT_PORT")
+XDEBUG_IDE_KEY=$(getEnvVar "XDEBUG_IDE_KEY")
+
 tmpDirs=(
   "$dockerFolder/api-nginx/logs"
   "$dockerFolder/centrifugo/logs"
@@ -100,14 +105,26 @@ tmpDirs=(
   "$dockerFolder/console/.composer"
   "$dockerFolder/console/.composer/cache"
   "$dockerFolder/frontend-nginx/logs"
-  "$dockerFolder/mysql/data"
-  "$dockerFolder/psql/data"
   "$dockerFolder/ws-nginx/logs"
+  "$currentDir/var/fileStorage"
 )
 
-createTemporallyDirectories () {
-  printf "\nCreate temporally directories"
-  for str in ${tmpDirs[@]}; do
+tmpDatabasesDirs=(
+  "$dockerFolder/mysql/data"
+  "$dockerFolder/psql/data"
+)
+
+logoutRoot() {
+  if [ "$EUID" -eq 0 ]; then
+    printf "\nRoot user has been logout\n"
+    exit
+  fi
+}
+
+createdDatabasesTemporallyDirectories () {
+  logoutRoot
+  printf "\nCreate temporally databases directories"
+  for str in ${tmpDatabasesDirs[@]}; do
     if [ ! -e $str ]; then
       printf "\nCreate $str directory"
       mkdir -p $str
@@ -118,12 +135,56 @@ createTemporallyDirectories () {
   printf "\n"
 }
 
+createTemporallyDirectories () {
+  logoutRoot
+  printf "\nCreate temporally directories"
+  for str in ${tmpDirs[@]}; do
+    if [ ! -e $str ]; then
+      printf "\nCreate $str directory"
+      mkdir -p $str
+    else
+      printf "\nDirectory $str already exist"
+    fi
+  done
+  printf "\n"
+  createdDatabasesTemporallyDirectories
+}
+
 createDefaultCentrifugoConfig () {
   cp -l "$dockerFolder/centrifugo/config.json.example" "$dockerFolder/centrifugo/config.json"
 }
 
 removeDefaultCentrifugoConfig () {
   sudo rm "$dockerFolder/centrifugo/config.json"
+}
+
+removeDirectory () {
+  printf "Directory $1 will be removed\n";
+  read -p "Remove(r) / Skip(s)? " answer
+  case ${answer:0:1} in
+      r|R )
+          if [ ! -e $1 ]; then
+            printf "Directory $1 is not exist"
+          else
+            printf "Remove $1 directory"
+            sudo rm -r $1
+          fi
+      ;;
+      s|S ) printf "Skipped";;
+  esac
+}
+
+removeDatabasesTemporallyDirectories () {
+  printf "If you have already install application, databases directory may not be empty";
+  for str in ${tmpDatabasesDirs[@]}; do
+    if [ ! -e $str ]; then
+      printf "\nDirectory $str is not exist"
+    else
+      printf "\n"
+      removeDirectory $str
+    fi
+  done
+  printf "\n"
 }
 
 removeTemporallyDirectories () {
@@ -139,13 +200,7 @@ removeTemporallyDirectories () {
   removeDefaultCentrifugoConfig
   ls -d -1 "$dockerFolder/nginx/certs/mkcert/"*.* | xargs rm
   printf "\n"
-}
-
-logoutRoot() {
-    if [ "$EUID" -eq 0 ]; then
-      printf "\nRoot user has been logout\n"
-      exit
-    fi
+  removeDatabasesTemporallyDirectories
 }
 
 stop () {
@@ -217,26 +272,18 @@ build () {
   printf "\nDone - Build \n\n"
 }
 
-destroy () {
+destroyContainers () {
   stop
-
   for containerId in $(docker ps -f name=^crm -a -q) ; do
     docker rm "$containerId"
   done
 }
 
 applicationUninstall () {
-  destroy
-
-#  if [ -e "$currentDir/.docker/mysql/data" ]; then
-#    sudo rm -r -d "$currentDir/.docker/mysql/data"
-#    logoutRoot
-#  fi
-
+  destroyContainers
   removeTemporallyDirectories
   logoutRoot
-
-  printf "Server is destroyed\n"
+  printf "Application is uninstalled\n"
 }
 
 initChown () {
@@ -246,6 +293,7 @@ initChown () {
     sudo chown -R "$CURRENT_USER":"$CURRENT_GROUP" "$currentDir/webapi/runtime/"
     sudo chown -R "$CURRENT_USER":"$CURRENT_GROUP" "$currentDir/yii"
     sudo chown -R "$CURRENT_USER":"$CURRENT_GROUP" "$currentDir/yii_test"
+    sudo chown -R "$CURRENT_USER":"$CURRENT_GROUP" "$currentDir/var/fileStorage"
 }
 
 composerInstall () {
@@ -326,24 +374,34 @@ runMigrate () {
 }
 
 applicationInstall () {
-  printf "If you have already run the command before, running the command again \n";
-  printf "will recreate the directories and delete the existing files and database\n";
-  read -p "Continue (y/n)? " answer
+  printf "Start - Application install\n"
+  applicationUninstall
+  createTemporallyDirectories
+  build
+  initConfig
+  initChown
+
+  printf "If Mysql is already installed, you can skip this step\n";
+  read -p "Init Mysql(y) / Skip(s)? " answer
   case ${answer:0:1} in
       y|Y )
-            printf "Start - Application install\n"
-            applicationUninstall
-            createTemporallyDirectories
-            build
-            initConfig
-            initChown
-            initMysql
-            initPsql
-            composerInstall
-            npmInstall
-            printf "Done - Application install\n"
+          initMysql
       ;;
+      s|S ) printf "Skipped initMysql\n";;
   esac
+
+  printf "If PostgreSql is already installed, you can skip this step\n";
+  read -p "Init PostgreSql(y) / Skip(s)? " answer
+  case ${answer:0:1} in
+      y|Y )
+          initPsql
+      ;;
+      s|S ) printf "Skipped initPsql\n";;
+  esac
+
+  composerInstall
+  npmInstall
+  printf "Done - Application install\n"
 }
 
 dockerInstall () {
@@ -491,6 +549,9 @@ elif [ "$whatDo" == "init-config" ]; then
 
 elif [ "$whatDo" == "migrate" ]; then
   runMigrate
+
+elif [ "$whatDo" == "create-temporally-directories" ]; then
+  createTemporallyDirectories
 
 elif [ "$whatDo" == "init-local-bo" ]; then
   useLocalBo=$(cat $dockerFolder/.env | grep 'USE_LOCAL_BO' | cut -d "=" -f 2)

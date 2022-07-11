@@ -53,14 +53,13 @@ class CallLogController extends FController
      * @param $id
      * @param string $breadcrumbsPreviousPage
      * @return string
-     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      */
     public function actionView($id, $breadcrumbsPreviousPage = 'list'): string
     {
         $breadcrumbsPreviousLabel = $breadcrumbsPreviousPage === 'index' ? 'Call Logs' : 'My Call Logs';
         return $this->render('view', [
-            'model' => $this->getAvailableModel($id),
+            'model' => $this->findModel($id),
             'breadcrumbsPreviousPage' => $breadcrumbsPreviousPage,
             'breadcrumbsPreviousLabel' => $breadcrumbsPreviousLabel
         ]);
@@ -95,7 +94,7 @@ class CallLogController extends FController
             throw new ForbiddenHttpException('Access denied.');
         }
 
-        $model = $this->getAvailableModel($id);
+        $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->cl_id]);
@@ -142,8 +141,8 @@ class CallLogController extends FController
     /**
      * @param $id
      * @return Response
+     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
-     * @throws \Throwable
      * @throws \yii\db\StaleObjectException
      */
     public function actionDelete($id): Response
@@ -153,7 +152,7 @@ class CallLogController extends FController
             throw new ForbiddenHttpException('Access denied.');
         }
 
-        $this->getAvailableModel($id)->delete();
+        $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
     }
@@ -177,15 +176,11 @@ class CallLogController extends FController
     /**
      * @param $id
      * @return CallLog
-     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      */
-    protected function getAvailableModel($id): CallLog
+    protected function findModel($id): CallLog
     {
         if (($model = CallLog::findOne(['cl_id' => $id])) !== null) {
-            if (!$model->isAvailableForUser(Auth::user())) {
-                throw new ForbiddenHttpException('This record is not available for you');
-            }
             return $model;
         }
 

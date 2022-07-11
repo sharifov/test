@@ -278,7 +278,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
 
 
         $menuItems[] = [
-            'label' => 'Shift Schedule <sup style="color: red">NEW</sup>',
+            'label' => 'Shift Schedule', //  <sup style="color: red">NEW</sup>
             'url' => 'javascript:',
             'icon' => 'calendar',
             'items' => $shiftMenuItems
@@ -1027,6 +1027,16 @@ class SideBarMenu extends \yii\bootstrap\Widget
             ];
         }
 
+        if (class_exists('\modules\experiment\ExperimentModule')) {
+            $menuModuleItems[] = [
+                'label' => 'Experiments',
+                'url' => 'javascript:',
+                'icon' => 'flask',
+                'items' => \modules\experiment\ExperimentModule::getListMenu()
+            ];
+        }
+
+
         /** @fflag FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE, Object Segment module enable/disable */
         if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE)) {
             $menuModuleItems[] =  [
@@ -1070,6 +1080,25 @@ class SideBarMenu extends \yii\bootstrap\Widget
 
         $menuItems[] = ['label' => 'My Sales', 'url' => ['/sales/index'], 'icon' => 'money'];
 
+        $menuHeatMapItems[] = [
+            'label' => 'Heat Map Leads',
+            'url' => ['/heat-map-lead/index'],
+            'icon' => 'area-chart',
+            'abac' => [
+                'dto' => new LeadAbacDto(null, (int) Auth::id()),
+                'object' => LeadAbacObject::OBJ_HEAT_MAP_LEAD,
+                'action' => LeadAbacObject::ACTION_ACCESS
+            ],
+        ];
+        /** @fflag FFlag::FF_KEY_HEAT_MAP_AGENT_REPORT_ENABLE, Heat Map Agent Report enable\disable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_HEAT_MAP_AGENT_REPORT_ENABLE)) {
+            $menuHeatMapItems[] =  [
+                'label' => 'Heat Map Agent',
+                'url' => ['/heat-map-agent/index'],
+                'icon' => 'area-chart'
+            ];
+        }
+
         $menuItems[] = [
             'label' => 'Stats & Reports',
             'url' => 'javascript:',
@@ -1108,21 +1137,10 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'User Feedback Statistics', 'url' => ['/stats/user-feedback'], 'icon' => 'users'],
                 /** @abac $leadAbacDto, LeadAbacObject::OBJ_HEAT_MAP_LEAD, LeadAbacObject::ACTION_ACCESS, show heat-map-lead in menu */
                 [
-                    'label' => 'Leads',
+                    'label' => 'Heat Map',
                     'url' => 'javascript:',
                     'icon' => 'folder',
-                    'items' => [
-                        [
-                            'label' => 'Heat Map Leads',
-                            'url' => ['/heat-map-lead/index'],
-                            'icon' => 'area-chart',
-                            'abac' => [
-                                'dto' => new LeadAbacDto(null, (int) Auth::id()),
-                                'object' => LeadAbacObject::OBJ_HEAT_MAP_LEAD,
-                                'action' => LeadAbacObject::ACTION_ACCESS
-                            ],
-                        ],
-                    ],
+                    'items' => $menuHeatMapItems
                 ],
             ]
         ];
@@ -1233,7 +1251,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'url' => 'javascript:',
             'icon' => 'cogs',
             'items' => [
-                ['label' => 'ABAC Policy List', 'url' => ['/abac/abac-policy']],
+                ['label' => 'ABAC Policy List', 'url' => ['/abac/abac-policy/index']],
                 ['label' => 'Policy List Content', 'url' => ['/abac/abac-policy/list-content']],
                 ['label' => 'ABAC Doc', 'url' => ['/abac/abac-doc/index']],
             ],

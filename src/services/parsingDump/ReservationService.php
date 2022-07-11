@@ -5,6 +5,7 @@ namespace src\services\parsingDump;
 use common\models\Airline;
 use common\models\Airports;
 use DateTime;
+use modules\flight\models\FlightQuoteSegment;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use src\helpers\app\AppHelper;
@@ -122,6 +123,63 @@ class ReservationService
     }
 
     /**
+     * @param array $pastParsedSegments
+     * @param int $index
+     * @param FlightQuoteSegment $segment
+     * @return array
+     */
+    public function parseSegment(array $pastParsedSegments, int $index, FlightQuoteSegment $segment): array
+    {
+        $departureTimeZone = null;
+        if ($departureAirport = Airports::findByIata($segment->fqs_departure_airport_iata)) {
+            $departureTimeZone = new \DateTimeZone($departureAirport->timezone);
+        }
+
+        $departureDateTime = DateTime::createFromFormat('Y-m-d H:i:s', $segment->fqs_departure_dt, $departureTimeZone);
+        $arrivalDateTime = DateTime::createFromFormat('Y-m-d H:i:s', $segment->fqs_arrival_dt, $departureTimeZone);
+        $departureCity = Airports::findByIata($segment->fqs_departure_airport_iata);
+        $arrivalCity = Airports::findByIata($segment->fqs_arrival_airport_iata);
+        $airline = Airline::find()->where(['iata' => $segment->fqs_operating_airline])->limit(1)->one() ?? null;
+
+        $layoverDuration = $this->getLayoverDuration($pastParsedSegments, $index);
+        if ($layoverDuration < 0) {
+            \Yii::warning('Negative layover duration (' . $layoverDuration . ' sec) for fqs_id: ' . $segment->fqs_id, 'ReservationService:parseSegment:layoverDuration');
+            $layoverDuration = 0;
+        }
+
+        $flightDuration = $this->getFlightDurationWithLayover(
+            $departureDateTime,
+            $arrivalDateTime,
+            $layoverDuration
+        );
+        if ($flightDuration <= 0) {
+            \Yii::warning('Negative or zero flight duration (' . $flightDuration . ' sec) for fqs_id: ' . $segment->fqs_id, 'ReservationService:parseSegment:flightDuration');
+            $flightDuration = 0;
+        }
+
+        return [
+            'carrier' => $segment->fqs_operating_airline,
+            'airlineObj' => $airline,
+            'airlineName' => $airline->name ?? $segment->fqs_operating_airline,
+            'departureAirport' => $segment->fqs_departure_airport_iata,
+            'arrivalAirport' => $segment->fqs_arrival_airport_iata,
+            'segmentIata' => $segment->fqs_departure_airport_iata . $segment->fqs_arrival_airport_iata,
+            'departureDateTime' => $departureDateTime,
+            'arrivalDateTime' => $arrivalDateTime,
+            'flightNumber' => $segment->fqs_flight_number,
+            'bookingClass' => $segment->fqs_booking_class,
+            'departureCity' => $departureCity,
+            'arrivalCity' => $arrivalCity,
+            'flightDuration' => $segment->fqs_duration ?? $flightDuration,
+            'layoverDuration' => $layoverDuration,
+            'operatingAirline' => null,
+            'operatingAirlineObj' => null,
+            'operatingAirlineName' => null,
+            'cabin' => $airline ? $airline->getCabinByClass($segment->fqs_booking_class) : null,
+        ];
+    }
+
+    /**
      * @return string|null
      */
     public function getTripType(): ?string
@@ -146,6 +204,17 @@ class ReservationService
     private function getFlightDuration(DateTime $departureDateTime, DateTime $arrivalDateTime, ?Airports $departureCity, ?Airports $arrivalCity)
     {
         return intval(($arrivalDateTime->getTimestamp() - $departureDateTime->getTimestamp()) / 60);
+    }
+
+    /**
+     * @param DateTime $departureDateTime
+     * @param DateTime $arrivalDateTime
+     * @param int $layover
+     * @return float|int
+     */
+    private function getFlightDurationWithLayover(DateTime $departureDateTime, DateTime $arrivalDateTime, int $layover)
+    {
+        return intval(($arrivalDateTime->getTimestamp() - $departureDateTime->getTimestamp()) / 60 - $layover);
     }
 
     /**

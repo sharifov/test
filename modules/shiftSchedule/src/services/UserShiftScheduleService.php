@@ -25,11 +25,11 @@ use yii\helpers\VarDumper;
 
 class UserShiftScheduleService
 {
-    private UserShiftScheduleRepository $repository;
+    private ShiftScheduleRequestService $requestService;
 
-    public function __construct(UserShiftScheduleRepository $repository)
+    public function __construct(ShiftScheduleRequestService $requestService)
     {
-        $this->repository = $repository;
+        $this->requestService = $requestService;
     }
 
     /**
@@ -251,6 +251,12 @@ class UserShiftScheduleService
         $tl->uss_sst_id = $rule->ssr_sst_id;
         $tl->uss_type_id = UserShiftSchedule::TYPE_AUTO;
 
+        if ($rule->ssr_start_time_utc > $rule->ssr_start_time_loc) {
+            $newDate = new \DateTime($date);
+            $newDate->modify('-1 day');
+            $date = $newDate->format('Y-m-d');
+        }
+
         $timeStart = strtotime($date . ' ' . $rule->ssr_start_time_utc);
         $timeEnd = strtotime($date . ' ' . $rule->ssr_end_time_utc);
 
@@ -306,7 +312,7 @@ class UserShiftScheduleService
                 UserShiftSchedule::TYPE_MANUAL,
                 $form->scheduleType
             );
-            $this->repository->save($userShiftSchedule);
+            (new UserShiftScheduleRepository($userShiftSchedule))->save(true);
             $userShiftScheduleCreatedList[] = $userShiftSchedule;
 
             Notifications::createAndPublish(
@@ -334,7 +340,7 @@ class UserShiftScheduleService
             UserShiftSchedule::TYPE_MANUAL,
             $form->scheduleType
         );
-        $this->repository->save($userShiftSchedule);
+        (new UserShiftScheduleRepository($userShiftSchedule))->save(true);
         Notifications::createAndPublish(
             $userShiftSchedule->uss_user_id,
             'Shift event was created',
@@ -364,8 +370,8 @@ class UserShiftScheduleService
 
         try {
             $changedAttributes = $event->getDirtyAttributes();
-            $this->repository->save($event);
-            ShiftScheduleRequestService::createDueToEventChange($event, $oldEvent, $changedAttributes, Auth::user());
+            $event->recordChangeEvent($oldEvent, $changedAttributes, Auth::id());
+            (new UserShiftScheduleRepository($event))->save(true);
 
             Notifications::createAndPublish(
                 $event->uss_user_id,
@@ -404,8 +410,8 @@ class UserShiftScheduleService
             $event->uss_description = $form->description;
         }
         $changedAttributes = $event->getDirtyAttributes();
-        $this->repository->save($event);
-        ShiftScheduleRequestService::createDueToEventChange($event, $oldEvent, $changedAttributes, Auth::user());
+        $event->recordChangeEvent($oldEvent, $changedAttributes, Auth::id());
+        (new UserShiftScheduleRepository($event))->save(true);
 
         Notifications::createAndPublish(
             $oldEvent->uss_user_id,

@@ -1065,4 +1065,9 @@ class SettingHelper
     {
         return Yii::$app->params['settings']['otp_email_settings']['template_type'] ?? 'two_factor_auth';
     }
+
+    public static function getOtpEmailTemplateSubject(): string
+    {
+        return Yii::$app->params['settings']['otp_email_settings']['template_subject'] ?? 'Your Two-Factor verification code!';
+    }
 }

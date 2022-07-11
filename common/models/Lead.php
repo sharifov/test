@@ -322,6 +322,11 @@ class Lead extends ActiveRecord implements Objectable
         self::STATUS_BOOKED         => 'll-booked',
         self::STATUS_SNOOZE         => 'll-snooze',
         self::STATUS_CLOSED         => 'll-close',
+        self::STATUS_REJECT         => 'label-default',
+        self::STATUS_NEW            => 'label-default',
+        self::STATUS_BOOK_FAILED    => 'label-default',
+        self::STATUS_ALTERNATIVE    => 'label-default',
+        self::STATUS_EXTRA_QUEUE    => 'label-default',
     ];
 
 
@@ -2737,7 +2742,7 @@ class Lead extends ActiveRecord implements Objectable
         $statusName = self::STATUS_LIST[$this->status] ?? '-';
 
         if ($label) {
-            $class = $this->getStatusLabelClass();
+            $class = self::getStatusLabelClass($this->status);
             $statusName = '<span class="label ' . $class . '" style="font-size: 13px">' . Html::encode($statusName) . '</span>';
         }
 
@@ -2745,11 +2750,12 @@ class Lead extends ActiveRecord implements Objectable
     }
 
     /**
+     * @param int|null $status
      * @return string
      */
-    public function getStatusLabelClass(): string
+    public static function getStatusLabelClass(?int $status): string
     {
-        return self::STATUS_CLASS_LIST[$this->status] ?? 'label-default';
+        return self::STATUS_CLASS_LIST[$status] ?? 'label-default';
     }
 
 

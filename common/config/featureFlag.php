@@ -13,5 +13,6 @@ return [
         '@common/',
         '@root/src/',
     ],
+    'objectListModel' => \modules\featureFlag\FFlag::class,
     'scanExtMask' => ['*.php'],
 ];

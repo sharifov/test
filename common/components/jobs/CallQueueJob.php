@@ -11,6 +11,7 @@ namespace common\components\jobs;
 use common\components\Metrics;
 use common\models\Call;
 use common\models\Client;
+use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Notifications;
@@ -30,7 +31,9 @@ use src\services\cases\CasesCreateService;
 use src\services\cases\CasesSaleService;
 use src\services\client\ClientCreateForm;
 use src\services\client\ClientManageService;
+use src\services\departmentPhoneProject\DepartmentPhoneProjectParamsService;
 use src\services\lead\LeadManageService;
+use modules\experiment\models\ExperimentTarget;
 use yii\base\Exception;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -131,7 +134,6 @@ class CallQueueJob extends BaseJob implements JobInterface
                                             ], 'CallQueueJob:defaultSourceCidDetecting');
                                         }
                                     }
-
                                     $lead = (Yii::createObject(LeadManageService::class))
                                         ->createByIncomingCall(
                                             $call->c_from,
@@ -144,6 +146,14 @@ class CallQueueJob extends BaseJob implements JobInterface
                                 }
 
                                 $call->c_lead_id = $lead->id ?? null;
+
+                                if ($call->isGeneralLine()) {
+                                    $departmentPhone = DepartmentPhoneProject::find()->byPhone($call->c_to, false)->enabled()->limit(1)->one();
+                                    if ($departmentPhone) {
+                                        $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
+                                        $departmentPhoneProjectParamsService->processExperiments(ExperimentTarget::EXT_TYPE_LEAD, $call->c_lead_id);
+                                    }
+                                }
 
                                 if (
                                     !$departmentParams->object->lead->createOnCall &&
@@ -197,6 +207,8 @@ class CallQueueJob extends BaseJob implements JobInterface
                             $case = $this->casesCreateService->getOrCreateByCall(
                                 [new PhoneCreateForm(['phone' => $call->c_from])],
                                 $call->c_id,
+                                $call->c_to,
+                                $call->isGeneralLine(),
                                 $call->c_project_id,
                                 (int)$call->c_dep_id,
                                 $createCaseOnIncoming,
