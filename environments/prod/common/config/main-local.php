@@ -115,7 +115,7 @@ return [
             'username' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMS_USERNAME'),
             'password' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMS_PASSWORD'),
             'voipApiUsername' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMS_VOIPAPIUSERNAME'),
-            'xAccelRedirectCommunicationUrl' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMS_XACCELREDIRECTCOMMSURL'),
+            'xAccelRedirectCommsUrl' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMS_XACCELREDIRECTCOMMSURL'),
         ],
         'hybrid' => [
             'class' => \common\components\HybridService::class,
