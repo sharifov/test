@@ -67,6 +67,11 @@ use src\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
 use src\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
 use src\model\clientChatUnread\entity\ClientChatUnread;
 use src\model\clientChatVisitorData\entity\ClientChatVisitorData;
+use src\model\clientData\entity\ClientData;
+use src\model\clientData\entity\ClientDataQuery;
+use src\model\clientDataKey\entity\ClientDataKey;
+use src\model\clientDataKey\entity\ClientDataKeyDictionary;
+use src\model\clientDataKey\service\ClientDataKeyService;
 use src\model\conference\entity\aggregate\ConferenceLogAggregate;
 use src\model\conference\entity\aggregate\Duration;
 use src\model\conference\entity\aggregate\log\HtmlFormatter;
@@ -799,5 +804,15 @@ JSON;
     {
         echo 'Blameable ' . Auth::employeeId();
         die;
+    }
+
+    public function actionTestClientData()
+    {
+        $keyId = ClientDataKeyService::getIdByKeyCache(ClientDataKeyDictionary::APP_CALL_OUT_TOTAL_COUNT);
+        if ($keyId) {
+            ClientDataQuery::createOrIncrementValue(460864, $keyId, new \DateTimeImmutable());
+        } else {
+            echo Console::renderColoredString('%g --- Key not found') . PHP_EOL;
+        }
     }
 }
