@@ -198,15 +198,13 @@ class EmailReviewQueueController extends FController
             $emailReviewQueue->statusToReject();
             $emailReviewQueue->erq_user_reviewer_id = Auth::id();
             if ($emailReviewQueue->save()) {
-                $email = $emailReviewQueue->erqEmail;
+                $email = $emailReviewQueue->email;
                 $message = 'Email(' . $emailReviewQueue->erq_email_id . ') was rejected by (' . $emailReviewQueue->erqUserReviewer->username . ')';
-                $email->statusToCancel();
-                $email->e_error_message = $message;
-                $email->update();
-                if ($email->e_lead_id && ($lead = $email->eLead)) {
+                $email->statusToCancel($message);
+                if ($lead = $emailReviewQueue->emailLead) {
                     $message .= '<br> Lead (Id: ' . Purifier::createLeadShortLink($lead) . ')';
                 }
-                if ($email->e_case_id && ($case = $email->eCase)) {
+                if ($case = $emailReviewQueue->emailCase) {
                     $message .= '<br> Case (Id: ' . Purifier::createCaseShortLink($case) . ')';
                 }
                 if ($ntf = Notifications::create($emailReviewQueue->erq_owner_id, 'Email(' . $emailReviewQueue->erq_email_id . ') was rejected by (' . $emailReviewQueue->erqUserReviewer->username . ')', $message, Notifications::TYPE_WARNING, true)) {
@@ -219,7 +217,8 @@ class EmailReviewQueueController extends FController
         }
         return $this->render('partial/_preview_email', [
             'previewForm' => $form,
-            'displayActionBtns' => true
+            'displayActionBtns' => true,
+            'files' => []
         ]);
     }
 
