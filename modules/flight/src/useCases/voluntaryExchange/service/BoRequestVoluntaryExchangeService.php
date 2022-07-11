@@ -14,6 +14,7 @@ use src\exception\ValidationException;
 use src\helpers\ErrorsToStringHelper;
 use src\services\cases\CasesSaleService;
 use webapi\src\request\BoRequestDataHelper;
+use webapi\src\request\RequestBoAdditionalSources;
 use Yii;
 
 /**
@@ -107,7 +108,18 @@ class BoRequestVoluntaryExchangeService
         if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS)) {
             $productQuote = ProductQuoteQuery::getProductQuoteByBookingId($form->bookingId);
             if ($productQuote) {
-                $data['additionalInfo'] = BoRequestDataHelper::prepareAdditionalInfoToBoRequest($productQuote);
+                $service = RequestBoAdditionalSources::getServiceByType(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE);
+                if ($service) {
+                    $data['additionalInfo'] = $service->prepareAdditionalInfo($productQuote);
+                } else {
+                    \Yii::error([
+                        'message' => 'Service not found by type: ' . RequestBoAdditionalSources::getTypeNameById(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE),
+                    ], 'BoRequestVoluntaryExchangeService:mappingBORequest:additionalInfo');
+                }
+            } else {
+                \Yii::error([
+                    'message' => 'Not found product quote by booking ID: ' . $form->bookingId,
+                ], 'BoRequestVoluntaryExchangeService:mappingBORequest:additionalInfo');
             }
         }
         return $data;

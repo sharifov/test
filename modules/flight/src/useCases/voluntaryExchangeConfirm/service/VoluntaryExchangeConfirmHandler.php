@@ -27,6 +27,7 @@ use src\entities\cases\CaseEventLog;
 use src\entities\cases\Cases;
 use src\helpers\app\AppHelper;
 use webapi\src\request\BoRequestDataHelper;
+use webapi\src\request\RequestBoAdditionalSources;
 use webapi\src\services\payment\BillingInfoApiVoluntaryService;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -99,7 +100,16 @@ class VoluntaryExchangeConfirmHandler
 
         /** @fflag FFlag::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS, Send additional info to BO endpoints enable\disable */
         if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS)) {
-            $request['additionalInfo'] = BoRequestDataHelper::prepareAdditionalInfoToBoRequest($this->confirmForm->changeQuote);
+            $service = RequestBoAdditionalSources::getServiceByType(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE);
+            if ($service) {
+                $request['additionalInfo'] = $service->prepareAdditionalInfo($this->confirmForm->changeQuote);
+            } else {
+                \Yii::error([
+                    'message' => 'Service not found by type: ' . RequestBoAdditionalSources::getTypeNameById(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE),
+                    'request' => $request,
+                    'content' => '',
+                ], 'VoluntaryExchangeConfirmHandler:prepareRequest:additionalInfo');
+            }
         }
         return $request;
     }

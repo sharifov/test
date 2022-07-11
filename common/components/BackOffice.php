@@ -13,7 +13,7 @@ use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
 use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
 use webapi\src\logger\behaviors\filters\creditCard\V5;
-use webapi\src\request\BoRequestDataHelper;
+use webapi\src\request\RequestBoAdditionalSources;
 use Yii;
 use yii\base\Exception;
 use yii\helpers\ArrayHelper;
@@ -332,8 +332,25 @@ class BackOffice
         if ($reprotectionQuoteGid) {
             /** @fflag FFlag::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS, Send additional info to BO endpoints enable\disable */
             if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS)) {
-                $productQuote = ProductQuote::find()->where(['pq_gid' => $reprotectionQuoteGid])->limit(1)->one();
-                $request['additionalInfo'] = BoRequestDataHelper::prepareAdditionalInfoToBoRequest($productQuote);
+                $productQuote = ProductQuote::findByGid($reprotectionQuoteGid);
+                if ($productQuote) {
+                    $service = RequestBoAdditionalSources::getServiceByType(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE);
+                    if ($service) {
+                        $request['additionalInfo'] = $service->prepareAdditionalInfo($productQuote);
+                    } else {
+                        \Yii::error([
+                            'message' => 'Service not found by type: ' . RequestBoAdditionalSources::getTypeNameById(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE),
+                            'request' => $request,
+                            'content' => '',
+                        ], 'BackOffice:reprotectionCustomerDecision:additionalInfo');
+                    }
+                } else {
+                    \Yii::error([
+                        'message' => 'Not found product quote by gid: ' . $reprotectionQuoteGid,
+                        'request' => $request,
+                        'content' => '',
+                    ], 'BackOffice:reprotectionCustomerDecision:additionalInfo');
+                }
             }
         }
 

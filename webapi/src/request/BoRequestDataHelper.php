@@ -69,7 +69,14 @@ class BoRequestDataHelper
 
         /** @fflag FFlag::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS, Send additional info to BO endpoints enable\disable */
         if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS)) {
-            $data['additionalInfo'] = self::prepareAdditionalInfoToBoRequest($productQuoteRefund);
+            $service = RequestBoAdditionalSources::getServiceByType(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE_REFUND);
+            if ($service) {
+                $data['additionalInfo'] = $service->prepareAdditionalInfo($productQuoteRefund);
+            } else {
+                \Yii::error([
+                    'message' => 'Service not found by type: ' . RequestBoAdditionalSources::getTypeNameById(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE_REFUND),
+                ], 'BoRequestDataHelper:getDataForVoluntaryRefundConfirm:additionalInfo');
+            }
         }
         return $data;
     }
