@@ -93,6 +93,12 @@ class DepartmentPhoneProjectController extends FController
             $model->user_group_list = [];
 
             $model->dpp_params = '{
+  "experiments": [
+    {
+      "ex_code": "test.0",
+      "enabled": false
+    }
+  ],
   "ivr": {
     "voice_gather_callback_url": "/v1/twilio/voice-gather/",
     "voice_gather_callback_url_v2": "/v2/twilio/voice-gather/",
@@ -164,13 +170,7 @@ class DepartmentPhoneProjectController extends FController
     "say": "Please hold, while you are connected to the next available agent.",
     "play": "https://talkdeskapp.s3.amazonaws.com/production/audio_messages/folk_hold_music.mp3"
   },
-  "call_recording_disabled": false,
-  "experiments": [
-    {
-      "ex_code": "test.0",
-      "enabled": false
-    }
-  ]
+  "call_recording_disabled": false
 }';
         }
 

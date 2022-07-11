@@ -19,7 +19,7 @@ class m220711_084027_add_experiments_field_to_department_phone_project_params ex
             foreach ($departmentPhones as $departmentPhone) {
                 $dpp_params_array = JsonHelper::decode($departmentPhone->dpp_params);
                 if (empty($dpp_params_array['experiments'])) {
-                    $dpp_params_array['experiments'] = [['ex_code' => 'test.0', 'enabled' => false]];
+                    $dpp_params_array = array_merge(['experiments' => [['ex_code' => 'test.0', 'enabled' => false]]], $dpp_params_array);
                     $departmentPhone->dpp_params = JsonHelper::encode($dpp_params_array);
                     $departmentPhone->save();
                 }
