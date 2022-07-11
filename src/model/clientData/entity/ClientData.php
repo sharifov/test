@@ -31,7 +31,7 @@ class ClientData extends \yii\db\ActiveRecord
         return [
             [['cd_key_id', 'cd_client_id', 'cd_field_value'], 'required'],
 
-            [['cd_client_id', 'cd_key_id'], 'unique', 'targetAttribute' => ['cd_client_id', 'cd_key_id']],
+//            [['cd_client_id', 'cd_key_id'], 'unique', 'targetAttribute' => ['cd_client_id', 'cd_key_id']],
 
             ['cd_client_id', 'integer'],
             ['cd_client_id', 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['cd_client_id' => 'id']],

@@ -811,6 +811,13 @@ JSON;
         $keyId = ClientDataKeyService::getIdByKeyCache(ClientDataKeyDictionary::APP_CALL_OUT_TOTAL_COUNT);
         if ($keyId) {
             ClientDataQuery::createOrIncrementValue(460864, $keyId, new \DateTimeImmutable());
+
+            $clientData = ClientDataQuery::findByClientAndKeyId(460864, $keyId);
+            if ($clientData) {
+                echo Console::renderColoredString('%r --- Notif: Client Data id ' . $clientData->cd_id . ' value: ' . $clientData->cd_field_value . '  %r' . ' %n', true), PHP_EOL;
+            } else {
+                echo Console::renderColoredString('%g --- Client Data not found') . PHP_EOL;
+            }
         } else {
             echo Console::renderColoredString('%g --- Key not found') . PHP_EOL;
         }
