@@ -129,6 +129,31 @@ class EmailReviewQueue extends \yii\db\ActiveRecord
         return $this->hasOne(Email::class, ['e_id' => 'erq_email_id']);
     }
 
+    public function getEmailSubject()
+    {
+        return ($this->erq_email_is_norm) ? $this->email->emailSubject : $this->email->e_email_subject;
+    }
+
+    public function getEmailTemplateName()
+    {
+        return ($this->erq_email_is_norm) ? $this->email->templateTypeName : $this->email->eTemplateType->etp_name ?? '--';
+    }
+
+    public function getEmailStatusName()
+    {
+        return $this->email->statusName;
+    }
+
+    public function getEmailLead()
+    {
+        return ($this->erq_email_is_norm) ? $this->email->lead : $this->email->eLead;
+    }
+
+    public function getEmailCase()
+    {
+        return ($this->erq_email_is_norm) ? $this->email->case : $this->email->eCase;
+    }
+
     /**
      * Gets query for [[ErqOwner]].
      *
