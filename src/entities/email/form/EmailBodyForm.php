@@ -69,4 +69,25 @@ class EmailBodyForm extends Model
             ['subject', 'string', 'max' => 255],
         ];
     }
+
+    public function fields()
+    {
+        return [
+            'embd_email_subject' => 'subject',
+            'embd_email_body_text' => 'text',
+            'embd_email_data' => 'data',
+            'embd_id' => 'id',
+            'bodyHtml',
+        ];
+    }
+
+    public function getAttributesForModel()
+    {
+        $result = [];
+        foreach ($this->fields() as $index => $name) {
+            $key = is_int($index) ? $name : $index;
+            $result[$key] = $this->$name;
+        }
+        return $result;
+    }
 }

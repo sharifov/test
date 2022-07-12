@@ -45,6 +45,16 @@ class EmailContactForm extends Model
         ];
     }
 
+    public function fields()
+    {
+        return [
+            'ea_email' => 'email',
+            'ea_name' => 'name',
+            'ec_type_id' => 'type',
+            'ec_id' => 'id',
+        ];
+    }
+
     public function attributeLabels()
     {
         $typeName = EmailContactType::getName($this->type);
