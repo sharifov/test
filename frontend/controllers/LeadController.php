@@ -37,6 +37,7 @@ use modules\fileStorage\src\services\url\UrlGenerator;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\lead\src\abac\LeadExpertCallObject;
+use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\lead\src\abac\services\AbacLeadExpertCallService;
 use modules\offer\src\entities\offer\search\OfferSearch;
 use modules\offer\src\entities\offerSendLog\CreateDto;
@@ -1262,6 +1263,14 @@ class LeadController extends FController
     public function actionTake(string $gid)
     {
         $lead = $this->findLeadByGid($gid);
+
+        /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) === true && $lead->statusIsBusinessExtraQueue() === true) {
+            /** @abac LeadBusinessExtraQueueAbacObject::UI_ACCESS, LeadBusinessExtraQueueAbacObject::ACTION_ACCESS, Access to take from business extra queue */
+            if (!Yii::$app->abac->can(null, LeadBusinessExtraQueueAbacObject::UI_ACCESS, LeadBusinessExtraQueueAbacObject::ACTION_TAKE)) {
+                throw new ForbiddenHttpException('Access Denied.');
+            }
+        }
 
         if (!Auth::can('leadSection', ['lead' => $lead])) {
             throw new ForbiddenHttpException('Access Denied.');
@@ -2833,6 +2842,11 @@ class LeadController extends FController
         /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
         if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) === false) {
             throw new ForbiddenHttpException('Access denied');
+        }
+
+        /** @abac LeadBusinessExtraQueueAbacObject::UI_ACCESS, LeadBusinessExtraQueueAbacObject::ACTION_ACCESS, Access to take from business extra queue */
+        if (!Yii::$app->abac->can(null, LeadBusinessExtraQueueAbacObject::UI_ACCESS, LeadBusinessExtraQueueAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access Denied.');
         }
 
         $searchModel = new LeadSearch();

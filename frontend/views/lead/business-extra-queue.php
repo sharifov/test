@@ -1,6 +1,7 @@
 <?php
 
 use common\components\grid\project\ProjectColumn;
+use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use yii\grid\ActionColumn;
 use src\auth\Auth;
 use src\formatters\client\ClientTimeFormatter;
@@ -221,6 +222,16 @@ $this->params['breadcrumbs'][] = $this->title;
                             'title' => 'View',
                         ]);
                     }
+                ],
+                'visibleButtons' => [
+                    'take' => static function ($model, $key, $index) {
+                        /** @abac LeadBusinessExtraQueueAbacObject::UI_ACCESS, LeadBusinessExtraQueueAbacObject::ACTION_TAKE, Access to button take */
+                        return \Yii::$app->abac->can(
+                            null,
+                            LeadBusinessExtraQueueAbacObject::UI_ACCESS,
+                            LeadBusinessExtraQueueAbacObject::ACTION_TAKE
+                        );
+                    },
                 ],
             ]
         ];
