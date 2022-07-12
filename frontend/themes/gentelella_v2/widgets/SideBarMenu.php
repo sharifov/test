@@ -10,12 +10,14 @@ use common\models\Employee;
 use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
+use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use src\auth\Auth;
 use modules\user\userFeedback\abac\dto\UserFeedbackAbacDto;
 use modules\user\userFeedback\abac\UserFeedbackAbacObject;
 use src\helpers\app\AppHelper;
+use src\services\lead\LeadBusinessExtraQueueService;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -145,14 +147,12 @@ class SideBarMenu extends \yii\bootstrap\Widget
             ],
         ];
 
-        /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
-        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) === true) {
-            $menuLItems[] = [
-                'label' => 'Business Extra Queue <span id="badges-business-extra-queue" data-type="business-extra-queue" class="label-success label pull-right bginfo"></span>',
-                'url' => ['/lead/business-extra-queue'],
-                'icon' => 'history text-success'
-            ];
-        }
+        $menuLItems[] = [
+            'label' => 'Business Extra Queue <span id="badges-business-extra-queue" data-type="business-extra-queue" class="label-success label pull-right bginfo"></span>',
+            'url' => ['/lead/business-extra-queue'],
+            'icon' => 'history text-success',
+            'visible' => LeadBusinessExtraQueueService::canAccess(),
+        ];
 
         $menuLItems[] = ['label' => 'Failed Bookings <span id="badges-failed-bookings" data-type="failed-bookings" class="label-success label pull-right bginfo"></span> ',
             'url' => ['/queue/failed-bookings'], 'icon' => 'recycle', 'title' => 'Failed Bookings Leads queue'];

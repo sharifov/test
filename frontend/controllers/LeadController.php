@@ -108,6 +108,7 @@ use src\repositories\quote\QuoteRepository;
 use src\services\client\ClientManageService;
 use src\services\email\EmailService;
 use src\services\lead\LeadAssignService;
+use src\services\lead\LeadBusinessExtraQueueService;
 use src\services\lead\LeadCloneService;
 use src\services\lead\LeadManageService;
 use src\services\TransactionManager;
@@ -2839,13 +2840,7 @@ class LeadController extends FController
      */
     public function actionBusinessExtraQueue(): string
     {
-        /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
-        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) === false) {
-            throw new ForbiddenHttpException('Access denied');
-        }
-
-        /** @abac LeadBusinessExtraQueueAbacObject::UI_ACCESS, LeadBusinessExtraQueueAbacObject::ACTION_ACCESS, Access to take from business extra queue */
-        if (!Yii::$app->abac->can(null, LeadBusinessExtraQueueAbacObject::UI_ACCESS, LeadBusinessExtraQueueAbacObject::ACTION_ACCESS)) {
+        if (LeadBusinessExtraQueueService::canAccess() === false) {
             throw new ForbiddenHttpException('Access Denied.');
         }
 
