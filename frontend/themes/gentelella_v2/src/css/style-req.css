@@ -555,6 +555,10 @@ pre {
   font-size: 12px;
 }
 
+.x_panel .dropdown-menu{
+  z-index: 999;
+}
+
 .dropdown-menu p {
   margin-bottom: 4px;
 }
