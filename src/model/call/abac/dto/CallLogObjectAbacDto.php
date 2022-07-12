@@ -11,7 +11,7 @@ use src\model\callLog\entity\callLog\CallLog;
  */
 class CallLogObjectAbacDto extends \stdClass
 {
-    public array $record_department;
+    public string $record_department;
     public bool $is_call_owner;
     public integer $type_id;
     public integer $project_id;
