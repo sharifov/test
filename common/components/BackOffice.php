@@ -12,7 +12,6 @@ use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
 use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
 use webapi\src\logger\behaviors\filters\creditCard\V5;
-use webapi\src\request\RequestBoAdditionalSources;
 use Yii;
 use yii\base\Exception;
 use yii\helpers\ArrayHelper;
@@ -285,22 +284,22 @@ class BackOffice
         }
     }
 
-    public static function reprotectionCustomerDecisionConfirm(int $projectId, string $bookingId, array $quote, string $reprotectionQuoteGid): bool
+    public static function reprotectionCustomerDecisionConfirm(int $projectId, string $bookingId, array $quote, string $reprotectionQuoteGid, ?array $additionalInfo): bool
     {
-        return self::reprotectionCustomerDecision($projectId, $bookingId, 'confirm', $quote, $reprotectionQuoteGid);
+        return self::reprotectionCustomerDecision($projectId, $bookingId, 'confirm', $quote, $reprotectionQuoteGid, $additionalInfo);
     }
 
-    public static function reprotectionCustomerDecisionModify(int $projectId, string $bookingId, array $quote, string $reprotectionQuoteGid): bool
+    public static function reprotectionCustomerDecisionModify(int $projectId, string $bookingId, array $quote, string $reprotectionQuoteGid, ?array $additionalInfo): bool
     {
-        return self::reprotectionCustomerDecision($projectId, $bookingId, 'confirm', $quote, $reprotectionQuoteGid);
+        return self::reprotectionCustomerDecision($projectId, $bookingId, 'confirm', $quote, $reprotectionQuoteGid, $additionalInfo);
     }
 
     public static function reprotectionCustomerDecisionRefund(int $projectId, string $bookingId): bool
     {
-        return self::reprotectionCustomerDecision($projectId, $bookingId, 'refund', [], null);
+        return self::reprotectionCustomerDecision($projectId, $bookingId, 'refund', [], null, []);
     }
 
-    private static function reprotectionCustomerDecision(int $projectId, string $bookingId, string $type, array $quote, ?string $reprotectionQuoteGid): bool
+    private static function reprotectionCustomerDecision(int $projectId, string $bookingId, string $type, array $quote, ?string $reprotectionQuoteGid, ?array $additionalInfo): bool
     {
         if (!$bookingId) {
             throw new \DomainException('Booking ID is empty');
@@ -328,25 +327,8 @@ class BackOffice
         if ($quote) {
             $request['flightQuote'] = $quote;
         }
-        if ($reprotectionQuoteGid) {
-            $productQuote = ProductQuote::findByGid($reprotectionQuoteGid);
-            if ($productQuote) {
-                try {
-                    $service = RequestBoAdditionalSources::getServiceByType(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE);
-                    if (!$service) {
-                        throw new \RuntimeException('Service not found by type: ' . RequestBoAdditionalSources::getTypeNameById(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE));
-                    }
-                    $request['additionalInfo'] = $service->prepareAdditionalInfo($productQuote);
-                } catch (\Throwable $e) {
-                    \Yii::error(AppHelper::throwableLog($e, true), 'BackOffice:reprotectionCustomerDecision:additionalInfo');
-                }
-            } else {
-                \Yii::error([
-                    'message' => 'Not found product quote by gid: ' . $reprotectionQuoteGid,
-                    'request' => $request,
-                    'content' => '',
-                ], 'BackOffice:reprotectionCustomerDecision:additionalInfo');
-            }
+        if ($additionalInfo) {
+            $request['additionalInfo'] = $additionalInfo;
         }
 
         try {
