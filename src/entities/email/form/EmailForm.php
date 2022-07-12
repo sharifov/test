@@ -187,4 +187,32 @@ class EmailForm extends CompositeForm
     {
         return ['params', 'body', 'contacts', 'log'];
     }
+
+    public function fields()
+    {
+        return [
+            'e_id' => 'emailId',
+            'e_type_id' => 'type',
+            'e_status_id' => 'status',
+            'e_is_deleted' => 'isDeleted',
+            'e_project_id' => 'projectId',
+            'e_departament_id' => 'depId',
+            'e_created_user_id' => 'userId',
+            'e_created_dt' => 'createdDt',
+            'e_updated_dt' => 'updatedDt',
+        ];
+    }
+
+    public function getAttributesForModel($skipEmpty = false)
+    {
+        $result = [];
+        foreach ($this->fields() as $index => $name) {
+            $key = is_int($index) ? $name : $index;
+            if (!$skipEmpty || ($skipEmpty && !empty($this->$name))) {
+                $result[$key] = $this->$name;
+            }
+        }
+        return $result;
+    }
+
 }
