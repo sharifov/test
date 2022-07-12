@@ -40,9 +40,16 @@ class DepartmentPhoneProjectParamsService
         return $experimentCodes;
     }
 
-    public function processExperiments(int $targetTypeId, int $phoneListId): void
+    /**
+     * @param int $targetTypeId
+     * @param int|null $phoneListId
+     * @return void
+     */
+    public function processExperiments(int $targetTypeId, ?int $phoneListId): void
     {
-        ExperimentTarget::processExperimentsCodes($targetTypeId, $phoneListId, $this->getPhoneExperiments());
+        if ($phoneListId) {
+            ExperimentTarget::processExperimentsCodes($targetTypeId, $phoneListId, $this->getPhoneExperiments());
+        }
     }
 
     public function getCallFilterGuard(): array
