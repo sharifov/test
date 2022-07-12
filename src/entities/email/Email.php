@@ -54,6 +54,7 @@ use yii\helpers\ArrayHelper;
  * @property EmailAddress $contactTo
  * @property EmailContact $emailContactFrom
  * @property EmailContact $emailContactTo
+ * @property EmailContact[] $emailContacts
  * @property Email $reply
  * @property EmailTemplateType $templateType
  *
@@ -193,6 +194,11 @@ class Email extends BaseActiveRecord
     public function getContacts(): \yii\db\ActiveQuery
     {
         return $this->hasMany(EmailAddress::class, ['ea_id' => 'ec_address_id'])->viaTable('email_contact', ['ec_email_id' => 'e_id']);
+    }
+
+    public function getEmailContacts(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(EmailContact::class, ['ec_email_id' => 'e_id']);
     }
 
     public function getEmailContactFrom()
