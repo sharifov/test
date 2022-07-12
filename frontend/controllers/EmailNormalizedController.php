@@ -104,7 +104,7 @@ class EmailNormalizedController extends FController
      * @throws \Exception
      * @return array
      */
-    private function getEmailPreview(Employee $user, $emailFrom, Project $project, UserProjectParams $upp) : array
+    private function getEmailPreview(Employee $user, $emailFrom, Project $project, UserProjectParams $upp): array
     {
         /** @var CommunicationService $communication */
         $communication = Yii::$app->communication;
@@ -169,7 +169,7 @@ class EmailNormalizedController extends FController
 
         $action = $getParams['action'];
 
-        if (Yii::$app->request->isPost && in_array($action, ['create', 'reply', 'update'])) {
+        if (Yii::$app->request->isPost) {
             $emailForm = new EmailForm($user->id);
             if ($emailForm->load(Yii::$app->request->post()) && $emailForm->validate()) {
                 try {
@@ -184,7 +184,7 @@ class EmailNormalizedController extends FController
                     }
                     return $this->redirect(['inbox', 'id' => $email->e_id]);
                 } catch (\Throwable $e) {
-                    Yii::$app->session->setFlash('error', $e->getMessage().'<br/>'.$e->getTraceAsString());
+                    Yii::$app->session->setFlash('error', $e->getMessage() . '<br/>' . $e->getTraceAsString());
                 }
             } else {
                 Yii::$app->session->setFlash('error', $emailForm->getErrorSummary(true));
@@ -194,7 +194,7 @@ class EmailNormalizedController extends FController
                 $formData = [];
                 $formData['contacts']['from'] = [
                     'type' => EmailContactType::FROM,
-                    'email' => $getParams['email_email'],
+                    'email' => $getParams['email_email']
                 ];
 
                 $upp = UserProjectParams::find()->byEmail(strtolower($getParams['email_email']))->one();
@@ -203,7 +203,7 @@ class EmailNormalizedController extends FController
 
                 $formData['body']['subject'] = EmailBody::getDraftSubject($project->name ?? '', $user->username);
 
-                try{
+                try {
                     $mailPreview = $this->getEmailPreview($user, $getParams['email_email'], $project, $upp);
                     $formData['body']['bodyHtml'] = $mailPreview['data']['email_body_html'] ?? null;
                 } catch (\Exception $e) {
@@ -211,7 +211,6 @@ class EmailNormalizedController extends FController
                 }
 
                 $emailForm = EmailForm::fromArray($formData);
-
             } elseif ($action == 'update') {
                 $email = $this->findModel($getParams['id']);
                 $emailForm = EmailForm::fromModel($email, $user->id);
@@ -318,7 +317,7 @@ class EmailNormalizedController extends FController
      */
     protected function findModel($id): Email
     {
-        try{
+        try {
             return $this->emailRepository->find($id);
         } catch (\Exception $e) {
             throw new NotFoundHttpException('The requested page does not exist.');
@@ -350,9 +349,8 @@ class EmailNormalizedController extends FController
                 $email = EmailsNormalizeService::newInstance()->createEmailFromOld($emailOld);
 
                 $result['html'] = Html::a('<span class="label label-success">yes</span>', ['email-normalized/view', 'id' => $email->e_id], ['target' => '_blank', 'data-pjax' => 0]);
-
             } catch (\Throwable $e) {
-                $result['errors'] =  $e->getMessage() .'<br/>'.$e->getTraceAsString();
+                $result['errors'] =  $e->getMessage() . '<br/>' . $e->getTraceAsString();
             }
         }
 
