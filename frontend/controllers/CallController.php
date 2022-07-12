@@ -1263,13 +1263,11 @@ class CallController extends FController
                 }
             }
 
-            if ($callRecordSid) {
-                $dto = new CallLogObjectAbacDto(CallLog::findOne(['cl_call_sid' => $callSid]), Auth::user());
-                if (\Yii::$app->abac->can($dto, CallAbacObject::OBJ_CALL_LOG, CallAbacObject::ACTION_LISTEN_RECORD, Auth::user())) {
-                    header('X-Accel-Redirect: ' . Yii::$app->communication->xAccelRedirectCommunicationUrl . $callRecordSid);
-                } else {
-                    throw new ForbiddenHttpException('You can not hear this record');
-                }
+            $dto = new CallLogObjectAbacDto(CallLog::findOne(['cl_call_sid' => $callSid]), Auth::user());
+            if (\Yii::$app->abac->can($dto, CallAbacObject::OBJ_CALL_LOG, CallAbacObject::ACTION_LISTEN_RECORD, Auth::user())) {
+                header('X-Accel-Redirect: ' . Yii::$app->communication->xAccelRedirectCommunicationUrl . $callRecordSid);
+            } else {
+                throw new ForbiddenHttpException('You can not hear this record');
             }
         } catch (NotFoundException $e) {
             throw new NotFoundHttpException($e->getMessage());
