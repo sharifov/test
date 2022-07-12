@@ -9,6 +9,7 @@ use modules\shiftSchedule\src\entities\shiftScheduleTypeLabelAssign\ShiftSchedul
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\TimelineCalendarFilter;
 use Yii;
 use yii\base\DynamicModel;
+use yii\db\Expression;
 
 class UserShiftScheduleQuery
 {
@@ -67,7 +68,6 @@ class UserShiftScheduleQuery
     public static function getCalendarTimelineListByUser(TimelineCalendarFilter $form): array
     {
         $query = UserShiftSchedule::find();
-        
         if ($form->userGroups) {
             $query->andWhere(['uss_user_id' => UserGroupAssign::find()->select('ugs_user_id')->andWhere(['ugs_group_id' => $form->userGroups])]);
         }
@@ -83,15 +83,37 @@ class UserShiftScheduleQuery
         if ($form->duration) {
             $query->andWhere(['uss_duration' => $form->duration]);
         }
-        if ($form->startDateTime && $form->startDateTimeCondition) {
-            $query->andWhere([$form->getStartDateTimeConditionOperator(), 'uss_start_utc_dt', date('Y-m-d H:i', strtotime($form->startDateTime))]);
+
+        if (($form->startDateTime && $form->startDateTimeCondition) || ($form->endDateTime && $form->endDateTimeCondition)) {
+            if ($form->startDateTime && $form->startDateTimeCondition) {
+                $query->andWhere([$form->getStartDateTimeConditionOperator(), 'uss_start_utc_dt', date('Y-m-d H:i', strtotime($form->startDateTime))]);
+            } else {
+                $query->andWhere(['>=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($form->startDate))]);
+            }
+            if ($form->endDateTime && $form->endDateTimeCondition) {
+                $query->andWhere([$form->getEndDateTimeConditionOperator(), 'uss_end_utc_dt', date('Y-m-d H:i', strtotime($form->endDateTime))]);
+            } else {
+                $query->andWhere(['<=', 'uss_start_utc_dt', date('Y-m-d 23:59:59', strtotime($form->endDate))]);
+            }
         } else {
-            $query->andWhere(['>=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($form->startDate))]);
-        }
-        if ($form->endDateTime && $form->endDateTimeCondition) {
-            $query->andWhere([$form->getEndDateTimeConditionOperator(), 'uss_end_utc_dt', date('Y-m-d H:i', strtotime($form->endDateTime))]);
-        } else {
-            $query->andWhere(['<=', 'uss_start_utc_dt', date('Y-m-d 23:59:59', strtotime($form->endDate))]);
+            $startDateTime = date('Y-m-d H:i', strtotime($form->startDate));
+            $endDateTime = date('Y-m-d H:i', strtotime($form->endDate));
+
+            $query->andWhere([
+                'OR',
+                ['between', 'uss_start_utc_dt', $startDateTime, $endDateTime],
+                ['between', 'uss_end_utc_dt', $startDateTime, $endDateTime],
+                [
+                    'AND',
+                    ['>=', 'uss_start_utc_dt', $startDateTime],
+                    ['<=', 'uss_end_utc_dt', $endDateTime]
+                ],
+                [
+                    'AND',
+                    ['<=', 'uss_start_utc_dt', $startDateTime],
+                    ['>=', 'uss_end_utc_dt', $endDateTime]
+                ]
+            ]);
         }
         if ($form->shift) {
             $query->andWhere(['uss_shift_id' => $form->shift]);
@@ -348,12 +370,26 @@ class UserShiftScheduleQuery
      */
     private static function getQueryTimelineListByUser(int $userId, string $startDt, string $endDt): Scopes
     {
+        $startDateTime = date('Y-m-d H:i', strtotime($startDt));
+        $endDateTime = date('Y-m-d H:i', strtotime($endDt));
+
         return UserShiftSchedule::find()
-            ->where(['uss_user_id' => $userId])
-            ->andWhere(['AND',
-                ['>=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($startDt))],
-                ['<=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($endDt))]
-            ]);
+            ->andWhere([
+                'OR',
+                ['between', 'uss_start_utc_dt', $startDateTime, $endDateTime],
+                ['between', 'uss_end_utc_dt', $startDateTime, $endDateTime],
+                [
+                    'AND',
+                    ['>=', 'uss_start_utc_dt', $startDateTime],
+                    ['<=', 'uss_end_utc_dt', $endDateTime]
+                ],
+                [
+                    'AND',
+                    ['<=', 'uss_start_utc_dt', $startDateTime],
+                    ['>=', 'uss_end_utc_dt', $endDateTime]
+                ]
+            ])
+            ->andWhere(['uss_user_id' => $userId]);
     }
 
     /**
