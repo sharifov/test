@@ -64,6 +64,11 @@ class LeadQuery extends ActiveQuery
         return $this->andWhere(['client_id' => $clientId]);
     }
 
+    public function sold(): self
+    {
+        return $this->andWhere(['status' => Lead::STATUS_SOLD]);
+    }
+
     public function byId(int $id): self
     {
         return $this->andWhere(['id' => $id]);

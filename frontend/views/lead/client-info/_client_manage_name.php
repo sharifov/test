@@ -5,6 +5,8 @@
  */
 
 use common\models\Client;
+use src\auth\Auth;
+use src\helpers\client\ClientReturnHelper;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 
@@ -49,5 +51,8 @@ use yii\widgets\Pjax;
         <td><?= $client->cl_project_id ? $client->project->name : '' ?></td>
     </tr>
 </table>
+<?php if ($labels = ClientReturnHelper::displayClientReturnLabels($client->id, Auth::id())) : ?>
+    <?= $labels ?>
+<?php endif; ?>
 
 <?php Pjax::end() ?>

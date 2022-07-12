@@ -599,6 +599,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Client Data', 'url' => ['/client-data-crud/index'], 'icon' => 'list'],
                     ]
                 ],
+                ['label' => 'Client User Return', 'url' => ['/client-user-return-crud/index'], 'icon' => 'user'],
             ],
         ];
 
