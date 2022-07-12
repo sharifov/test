@@ -35,6 +35,7 @@ use frontend\models\LeadPreviewEmailForm;
 use src\exception\EmailNotSentException;
 use common\models\ClientEmail;
 use frontend\models\CasePreviewEmailForm;
+use src\forms\emailReviewQueue\EmailReviewQueueForm;
 
 /**
  *
@@ -277,6 +278,111 @@ class EmailsNormalizeService implements EmailServiceInterface
         return $email;
     }
 
+    public function update(Email $email, EmailForm $form)
+    {
+        $transaction = \Yii::$app->db->beginTransaction();
+
+        try {
+            //=update Email
+            $email->attributes = $form->getAttributesForModel(true); //->toArray();
+            $email->save();
+            //=!update Email
+
+            //=EmailParams
+            if (!$form->params->isEmpty()) {
+                $email->saveParams($form->params->getAttributesForModel(true));
+            }
+            //=!EmailParams
+
+            //=EmailLog
+            if (!$form->log->isEmpty()) {
+                $email->saveLog($form->log->toArray());
+            }
+            //=!EmailParams
+
+            //=EmailBody
+            $bodyText = $form->body->getText();
+            $emailBody = $email->emailBody;
+            $emailBody->attributes = [
+                'embd_email_subject' => $form->body->subject,
+                'embd_email_body_text' => $bodyText,
+                'embd_email_data' => $form->body->data,
+                'embd_hash' => hash('crc32b', join(' | ', [$form->body->subject, $bodyText])),
+            ];
+            $emailBody->save();
+            //=!EmailBody
+
+            //=EmailBlob
+            $emailBlob = $emailBody->emailBlob;
+            $emailBlob->updateAttributes(['embb_email_body_blob' => $form->body->getBodyHtml()]);
+            //=!EmailBlob
+
+            //=EmailContacts
+            $contacts = ArrayHelper::index($email->emailContacts, 'ec_id');
+            foreach ($form->contacts as $contactForm)
+            {
+                if ($contact = $contacts[$contactForm->id]) {
+                    $address = $this->getAddress($contactForm->email, $contactForm->name, true);
+
+                    $contact->updateAttributes( [
+                        'ec_address_id' => $address->ea_id,
+                        'ec_type_id' => $contactForm->type
+                    ]);
+                }
+            }
+            //=!EmailContacts
+
+            //=link Clients
+            $clientsIds = $form->clients;
+            if (!empty($clientsIds)) {
+                foreach ($clientsIds as $id) {
+                    if ($client = Client::findOne($id)) {
+                        $email->link('clients', $client);
+                    }
+                }
+
+            }
+            //=!link Clients
+
+            //=link Cases
+            if (!empty($form->cases)) {
+                foreach ($form->cases as $id) {
+                    if ($case = Cases::findOne($id)) {
+                        $email->link('cases', $case);
+                    }
+                }
+            }
+            //=!link Cases
+
+            //=link Leads
+            if (!empty($form->leads)) {
+                foreach ($form->leads as $id) {
+                    if ($lead = Lead::findOne($id)) {
+                        $email->link('leads', $lead);
+                    }
+                }
+            }
+            //=!link Leads
+
+            //=link Reply
+            if ($form->replyId !== null) {
+                $reply = Email::findOne($replyId);
+                if ($reply) {
+                    $email->link('reply', $reply);
+                }
+            }
+            //=!link Reply
+
+            $transaction->commit();
+
+        }catch (\Throwable $e) {
+            $transaction->rollBack();
+            throw $e;
+        }
+
+        return $email;
+    }
+
     /**
      *
      * @param Email $email
@@ -451,4 +557,11 @@ class EmailsNormalizeService implements EmailServiceInterface
 
         return $this->create(EmailForm::fromArray($data));
     }
+
+    public function sendAfterReview(EmailReviewQueueForm $form, $email)
+    {
+
+    }
+
+
 }

@@ -6,6 +6,7 @@ use frontend\models\LeadPreviewEmailForm;
 use common\models\Lead;
 use src\entities\cases\Cases;
 use frontend\models\CasePreviewEmailForm;
+use src\forms\emailReviewQueue\EmailReviewQueueForm;
 
 interface EmailServiceInterface
 {
