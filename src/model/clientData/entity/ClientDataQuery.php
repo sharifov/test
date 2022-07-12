@@ -2,6 +2,9 @@
 
 namespace src\model\clientData\entity;
 
+use yii\db\Expression;
+use yii\helpers\ArrayHelper;
+
 class ClientDataQuery
 {
     public static function createOrIncrementValue(int $clientId, int $keyId, \DateTimeImmutable $dateTime): int
@@ -25,12 +28,22 @@ class ClientDataQuery
 
     public static function existsByKeyAndClient(int $clientId, int $keyId): bool
     {
-        return self::findOneQuery($clientId, $keyId)->exists();
+        return self::findByClientAndKeyQuery($clientId, $keyId)->exists();
     }
 
-    public static function findByClientAndKeyId(int $clientId, int $keyId): ?ClientData
+    public static function findOneByClientAndKeyId(int $clientId, int $keyId): ?ClientData
     {
-        return self::findOneQuery($clientId, $keyId)->limit(1)->one();
+        return self::findByClientAndKeyQuery($clientId, $keyId)->limit(1)->one();
+    }
+
+    /**
+     * @param int $clientId
+     * @param int $keyId
+     * @return ClientData[]
+     */
+    public static function findByClientAndKeyId(int $clientId, int $keyId): array
+    {
+        return self::findByClientAndKeyQuery($clientId, $keyId)->all();
     }
 
     /**
@@ -38,8 +51,13 @@ class ClientDataQuery
      * @param int $keyId
      * @return ClientDataScopes|ClientData
      */
-    private static function findOneQuery(int $clientId, int $keyId)
+    private static function findByClientAndKeyQuery(int $clientId, int $keyId)
     {
         return ClientData::find()->byKey($keyId)->byClientId($clientId);
+    }
+
+    public static function removeByClientAndKey(int $clientId, int $key): int
+    {
+        return ClientData::deleteAll(['cd_client_id' => $clientId, 'cd_key_id' => $key]);
     }
 }

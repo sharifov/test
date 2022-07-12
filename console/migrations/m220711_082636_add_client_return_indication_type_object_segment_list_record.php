@@ -34,14 +34,26 @@ class m220711_082636_add_client_return_indication_type_object_segment_list_recor
                 '{{%object_segment_list}}',
                 [
                     'osl_ost_id' => $objectSegmentType->ost_id,
-                    'osl_title' => 'Client Return Indication',
+                    'osl_title' => 'Client Return',
                     'osl_key'         =>    ObjectSegmentListContract::OBJECT_SEGMENT_LIST_KEY_CLIENT_RETURN,
                     'osl_enabled' => true,
-                    'osl_description' => 'Client Return Indication',
+                    'osl_description' => 'Client Return',
+                    'osl_is_system' => true,
+                ]
+            );
+            $this->insert(
+                '{{%object_segment_list}}',
+                [
+                    'osl_ost_id' => $objectSegmentType->ost_id,
+                    'osl_title' => 'Client Return Diamond',
+                    'osl_key'         =>    ObjectSegmentListContract::OBJECT_SEGMENT_LIST_KEY_CLIENT_RETURN_DIAMOND,
+                    'osl_enabled' => true,
+                    'osl_description' => 'Client Return Diamond',
                     'osl_is_system' => true,
                 ]
             );
             \Yii::$app->db->getSchema()->refreshTableSchema('{{%object_segment_list}}');
+            Yii::$app->objectSegment->invalidatePolicyCache();
         } catch (\Throwable $throwable) {
             \Yii::error(
                 \src\helpers\app\AppHelper::throwableLog($throwable),
@@ -58,12 +70,14 @@ class m220711_082636_add_client_return_indication_type_object_segment_list_recor
         try {
             $objectSegmentListRecord = ObjectSegmentList
                 ::find()
-                ->where(['ost_key' => ObjectSegmentListContract::OBJECT_SEGMENT_LIST_KEY_CLIENT_RETURN])
+                ->where(['osl_key' => ObjectSegmentListContract::OBJECT_SEGMENT_LIST_KEY_CLIENT_RETURN])
+                ->limit(1)
                 ->one();
-            if (isset($objectSegmentListRecord)) {
+            if ($objectSegmentListRecord) {
                 $objectSegmentListRecord->delete();
             }
             \Yii::$app->db->getSchema()->refreshTableSchema('{{%object_segment_list}}');
+            Yii::$app->objectSegment->invalidatePolicyCache();
         } catch (\Throwable $throwable) {
             \Yii::error(
                 \src\helpers\app\AppHelper::throwableLog($throwable),

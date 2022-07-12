@@ -1070,4 +1070,9 @@ class SettingHelper
     {
         return Yii::$app->params['settings']['otp_email_settings']['template_subject'] ?? 'Your Two-Factor verification code!';
     }
+
+    public static function getClientReturnSegmentListKeys(): array
+    {
+        return Yii::$app->params['settings']['client_return_segment_list_keys'] ?? [];
+    }
 }

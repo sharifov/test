@@ -24,4 +24,9 @@ class ObjectSegmentListQuery
         }
         return $result;
     }
+
+    public static function getByKey(string $key): ?ObjectSegmentList
+    {
+        return ObjectSegmentList::find()->andWhere(['osl_key' => $key])->limit(1)->one();
+    }
 }

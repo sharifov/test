@@ -101,4 +101,12 @@ class ClientUserReturn extends \yii\db\ActiveRecord
     {
         return new Scopes(get_called_class());
     }
+
+    public static function create(int $userId, int $clientId)
+    {
+        $self = new self();
+        $self->cur_user_id = $userId;
+        $self->cur_client_id = $clientId;
+        return $self;
+    }
 }

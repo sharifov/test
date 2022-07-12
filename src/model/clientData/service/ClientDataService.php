@@ -38,14 +38,14 @@ class ClientDataService
         return [$inserted, $warnings];
     }
 
-    public static function setValue(int $clientId, string $key, string $value, bool $updateMode = true): ClientData
+    public static function setValue(int $clientId, string $key, string $value, bool $updateMode = true, ?string $valueUi = null): ClientData
     {
         if (!$keyId = ClientDataKeyService::getIdByKeyCache($key)) {
             throw new \RuntimeException('ClientDataKey not found (' . $key . ')');
         }
 
-        if (!$clientData = ClientDataQuery::findByClientAndKeyId($clientId, $keyId)) {
-            $clientData = ClientData::create($clientId, $keyId, $value);
+        if (!$clientData = ClientDataQuery::findOneByClientAndKeyId($clientId, $keyId)) {
+            $clientData = ClientData::create($clientId, $keyId, $value, $valueUi);
         } elseif (!$updateMode) {
             throw new \RuntimeException('ClientData already exist. Key(' .
                 $key . ')' . ' clientID(' . $clientId . ')');

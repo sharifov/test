@@ -31,4 +31,14 @@ class Scopes extends \yii\db\ActiveQuery
     {
         return parent::one($db);
     }
+
+    public function byClient(int $clientId)
+    {
+        return $this->andWhere(['cur_client_id' => $clientId]);
+    }
+
+    public function byUser(int $userId)
+    {
+        return $this->andWhere(['cur_user_id' => $userId]);
+    }
 }
