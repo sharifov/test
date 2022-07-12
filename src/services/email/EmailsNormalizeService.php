@@ -15,7 +15,7 @@ use src\entities\email\EmailBlob;
 use src\entities\email\EmailBody;
 use src\entities\email\EmailContact;
 use src\entities\email\EmailLog;
-use src\entities\email\form\EmailCreateForm;
+use src\entities\email\form\EmailForm;
 use src\entities\email\helpers\EmailContactType;
 use src\entities\email\helpers\EmailStatus;
 use src\entities\email\helpers\EmailType;
@@ -118,7 +118,7 @@ class EmailsNormalizeService implements EmailServiceInterface
 
     public function createEmailFromOld(EmailOld $emailOld)
     {
-        $form = EmailCreateForm::fromArray($this->getDataArrayFromOld($emailOld));
+        $form = EmailForm::fromArray($this->getDataArrayFromOld($emailOld));
 
         return $this->create($form);
     }
@@ -161,7 +161,7 @@ class EmailsNormalizeService implements EmailServiceInterface
         return $clientEmail->client_id ?? null;
     }
 
-    public function create(EmailCreateForm $form)
+    public function create(EmailForm $form)
     {
         $transaction = \Yii::$app->db->beginTransaction();
 
@@ -410,7 +410,7 @@ class EmailsNormalizeService implements EmailServiceInterface
             ],
         ];
 
-        return $this->create(EmailCreateForm::fromArray($data));
+        return $this->create(EmailForm::fromArray($data));
     }
 
     public function createFromCase(CasePreviewEmailForm $previewEmailForm, Cases $case, array $attachments = []): Email
@@ -449,6 +449,6 @@ class EmailsNormalizeService implements EmailServiceInterface
             ],
         ];
 
-        return $this->create(EmailCreateForm::fromArray($data));
+        return $this->create(EmailForm::fromArray($data));
     }
 }

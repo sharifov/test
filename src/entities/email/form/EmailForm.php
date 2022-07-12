@@ -12,7 +12,7 @@ use common\models\Project;
 use common\models\Employee;
 
 /**
- * Class EmailCreateForm
+ * Class EmailForm
  *
  * @package src\entities\email\form
  *
@@ -34,7 +34,7 @@ use common\models\Employee;
  * @property int $userId
  *
  */
-class EmailCreateForm extends CompositeForm
+class EmailForm extends CompositeForm
 {
     public $type;
     public $status;
