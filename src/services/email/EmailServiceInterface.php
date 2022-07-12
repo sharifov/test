@@ -14,4 +14,6 @@ interface EmailServiceInterface
     public function createFromCase(CasePreviewEmailForm $previewEmailForm, Cases $case, array $attachments = []);
 
     public function sendMail($email, array $data = []);
+
+    public function sendAfterReview(EmailReviewQueueForm $form, $email);
 }

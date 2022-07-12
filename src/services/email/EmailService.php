@@ -15,7 +15,7 @@ use src\repositories\NotFoundException;
 use Yii;
 use frontend\models\LeadPreviewEmailForm;
 use yii\helpers\VarDumper;
-use src\exceptions\CreateModelException;
+use src\exception\CreateModelException;
 use src\entities\email\helpers\EmailStatus;
 use src\services\abtesting\email\EmailTemplateOfferABTestingService;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
@@ -27,6 +27,7 @@ use src\helpers\app\AppHelper;
 use src\exception\EmailNotSentException;
 use modules\featureFlag\FFlag;
 use frontend\models\CasePreviewEmailForm;
+use src\forms\emailReviewQueue\EmailReviewQueueForm;
 
 /**
  * Class EmailService
@@ -445,5 +446,26 @@ class EmailService implements EmailServiceInterface
         }
 
         return $mail;
+    }
+
+    public function sendAfterReview(EmailReviewQueueForm $form, $email)
+    {
+        try {
+            $email->e_email_from = $form->emailFrom;
+            $email->e_email_from_name = $form->emailFromName;
+            $email->e_email_to = $form->emailTo;
+            $email->e_email_to_name = $form->emailToName;
+            $email->e_email_subject = $form->emailSubject;
+            $email->e_status_id = Email::STATUS_PENDING;
+            $email->body_html = $form->emailMessage;
+
+            if ($email->save()) {
+                $this->sendMail($email);
+            } else {
+                throw new \Exception($email->getErrorSummary(true)[0]);
+            }
+        } catch (\Throwable $e) {
+            throw $e;
+        }
     }
 }
