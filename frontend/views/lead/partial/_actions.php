@@ -11,6 +11,7 @@ use frontend\models\LeadForm;
 use frontend\themes\gentelella_v2\assets\groups\GentelellaAsset;
 use frontend\widgets\sale\SaleWidget;
 use modules\featureFlag\FFlag;
+use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\lead\src\abac\sale\LeadSaleAbacDto;
 use modules\lead\src\abac\sale\LeadSaleAbacObject;
 use src\access\EmployeeProductAccess;
@@ -132,6 +133,14 @@ $leadAbacDto = new LeadAbacDto($leadModel, $userId);
         ) &&
         $leadModel->getAppliedAlternativeQuotes() === null
     );
+    /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+    if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) === true && $leadModel->statusIsBusinessExtraQueue() === true) {
+        /** @abac LeadBusinessExtraQueueAbacObject::UI_ACCESS, LeadBusinessExtraQueueAbacObject::ACTION_TAKE, Access to button take */
+        if (!Yii::$app->abac->can(null, LeadBusinessExtraQueueAbacObject::UI_ACCESS, LeadBusinessExtraQueueAbacObject::ACTION_TAKE)) {
+            $takeConditions = false;
+        }
+    }
+
     $processingConditions = $leadModel->isOwner($user->id) && $leadModel->isProcessing() && $leadModel->getAppliedAlternativeQuotes() === null;
 
     if ($processingConditions) {
@@ -170,7 +179,15 @@ $leadAbacDto = new LeadAbacDto($leadModel, $userId);
         $buttonsSubAction[] = $buttonReturnLead;
         $buttonsSubAction[] = $buttonReject;
         if ($user->isAgent()) {
-            $buttonsSubAction[] = $buttonTake;
+            /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+            if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) === true && $leadModel->statusIsBusinessExtraQueue() === true) {
+                /** @abac LeadBusinessExtraQueueAbacObject::UI_ACCESS, LeadBusinessExtraQueueAbacObject::ACTION_TAKE, Access to button take */
+                if (Yii::$app->abac->can(null, LeadBusinessExtraQueueAbacObject::UI_ACCESS, LeadBusinessExtraQueueAbacObject::ACTION_TAKE)) {
+                    $buttonsSubAction[] = $buttonTake;
+                }
+            } else {
+                $buttonsSubAction[] = $buttonTake;
+            }
         }
     }
     /*if ($viwModeSuperAdminCondition) {

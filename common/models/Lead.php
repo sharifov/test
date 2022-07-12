@@ -5301,4 +5301,9 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         $this->cabin = self::CABIN_ECONOMY;
     }
+
+    public function statusIsBusinessExtraQueue(): bool
+    {
+        return $this->status === self::STATUS_BUSINESS_EXTRA_QUEUE;
+    }
 }
