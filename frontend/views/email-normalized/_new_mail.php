@@ -41,6 +41,9 @@ use common\components\widgets\BaseForm;
         <?= $form->field($emailForm, 'type')->simpleHidden(); ?>
         <?= $form->field($emailForm, 'status')->simpleHidden(); ?>
 
+		<?= $form->field($emailForm->contacts['from'], '[from]id')->simpleHidden(); ?>
+		<?= $form->field($emailForm->contacts['to'], '[to]id')->simpleHidden(); ?>
+
         <div class="row">
             <div class="col-md-4">
                 <?php if ($action) :?>
