@@ -4,6 +4,7 @@ namespace src\services\badges\objects;
 
 use common\models\Employee;
 use common\models\search\LeadQcallSearch;
+use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use src\auth\Auth;
@@ -83,6 +84,11 @@ class LeadBadgeCounter implements BadgeCounterInterface
                 case 'extra-queue':
                     if ($count = $this->getLeadExtraQueue()) {
                         $result['extra-queue'] = $count;
+                    }
+                    break;
+                case 'business-extra-queue':
+                    if ($count = $this->getLeadBusinessExtraQueue()) {
+                        $result['business-extra-queue'] = $count;
                     }
                     break;
                 case 'closed':
@@ -296,6 +302,16 @@ class LeadBadgeCounter implements BadgeCounterInterface
             return null;
         }
         return $this->leadBadgesRepository->getExtraQueueCount();
+    }
+
+    private function getLeadBusinessExtraQueue(): ?int
+    {
+        /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) === true) {
+            return null;
+        }
+
+        return $this->leadBadgesRepository->getBusinessExtraQueueCount();
     }
 
     private function getLeadClosedQueue(): ?int

@@ -70,8 +70,14 @@ class TelegramSendMessageJob extends BaseJob implements RetryableJobInterface
                     'userId' => $this->user_id,
                     'text' => $this->text,
                     'textPrepared' => TelegramService::prepareText($this->text),
+                    'attempts' => $queue->attempts,
                 ]);
-                \Yii::error($message, 'TelegramJob:execute:catch');
+
+                if ($queue->attempts > 1) {
+                    \Yii::warning($message, 'TelegramJob:execute:catch');
+                } else {
+                    \Yii::error($message, 'TelegramJob:execute:catch');
+                }
             }
         }
         return false;
