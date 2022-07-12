@@ -19,10 +19,13 @@ class LeadQuoteExtraMarkUpForm extends Model
 
     public $clientCurrencyRate;
 
+    private $maxValueExtraMarkUp;
 
-    public function __construct(float $clientCurrencyRate, $config = [])
+
+    public function __construct(float $clientCurrencyRate, ?float $maxValueExtraMarkUp, $config = [])
     {
         $this->clientCurrencyRate = $clientCurrencyRate;
+        $this->maxValueExtraMarkUp = $maxValueExtraMarkUp ?: 0;
 
         parent::__construct($config);
     }
@@ -34,9 +37,10 @@ class LeadQuoteExtraMarkUpForm extends Model
     public function rules(): array
     {
         return [
-            [['extra_mark_up'], 'number','min' => 0 ],
-            [['qp_client_extra_mark_up'], 'number','min' => 0],
+            [['extra_mark_up'], 'number', 'min' => 0],
+            [['qp_client_extra_mark_up'], 'number', 'min' => 0],
             [['qp_client_extra_mark_up'], 'validateCurrencyRate', 'message' => 'Incorrect client/default mark-up relation'],
+            ['extra_mark_up', 'validateExtraMarkUp'],
         ];
     }
 
@@ -44,6 +48,14 @@ class LeadQuoteExtraMarkUpForm extends Model
     {
         if (round($this->extra_mark_up, 2) !== round($this->qp_client_extra_mark_up * $this->clientCurrencyRate, 2)) {
             return false;
+        }
+        return true;
+    }
+
+    public function validateExtraMarkUp($attribute, $value): bool
+    {
+        if (!empty($this->maxValueExtraMarkUp) && round($this->extra_mark_up, 2) > $this->maxValueExtraMarkUp) {
+            $this->addError($attribute, 'Extra Mark Up more than Net Price');
         }
         return true;
     }
@@ -63,5 +75,10 @@ class LeadQuoteExtraMarkUpForm extends Model
     public function formName()
     {
         return '';
+    }
+
+    public function getMaxExtraMarkUp()
+    {
+        return $this->maxValueExtraMarkUp;
     }
 }
