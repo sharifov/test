@@ -145,6 +145,15 @@ class SideBarMenu extends \yii\bootstrap\Widget
             ],
         ];
 
+        /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) === true) {
+            $menuLItems[] = [
+                'label' => 'Business Extra Queue <span id="badges-business-extra-queue" data-type="business-extra-queue" class="label-success label pull-right bginfo"></span>',
+                'url' => ['/lead/business-extra-queue'],
+                'icon' => 'history text-success'
+            ];
+        }
+
         $menuLItems[] = ['label' => 'Failed Bookings <span id="badges-failed-bookings" data-type="failed-bookings" class="label-success label pull-right bginfo"></span> ',
             'url' => ['/queue/failed-bookings'], 'icon' => 'recycle', 'title' => 'Failed Bookings Leads queue'];
         $menuLItems[] = ['label' => 'Alternative <span id="badges-alternative" data-type="alternative" class="label-warning label pull-right bginfo"></span> ',
@@ -524,6 +533,9 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Lead Poor Processing Data', 'url' => ['/lead-poor-processing-data-crud/index']],
                         ['label' => 'Lead Poor Processing', 'url' => ['/lead-poor-processing-crud/index']],
                         ['label' => 'Lead Poor Processing Log', 'url' => ['/lead-poor-processing-log-crud/index']],
+                        ['label' => 'Lead Business Extra Queue Rules', 'url' => ['/lead-business-extra-queue-rule-crud/index']],
+                        ['label' => 'Lead Business Extra Queue', 'url' => ['/lead-business-extra-queue-crud/index']],
+                        ['label' => 'Lead Business Extra Queue Log', 'url' => ['/lead-business-extra-queue-log-crud/index']],
                         ['label' => 'Lead User Ratings', 'url' => ['/lead-user-rating-crud/index']],
                         ['label' => 'Lead Status Reason', 'url' => ['/lead-status-reason-crud/index']],
                         ['label' => 'Lead Status Reason Log', 'url' => ['/lead-status-reason-log-crud/index']],

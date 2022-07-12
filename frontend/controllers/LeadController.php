@@ -31,6 +31,7 @@ use frontend\models\LeadUserRatingForm;
 use kivork\rbacExportImport\src\formatters\FileSizeFormatter;
 use modules\email\src\abac\dto\EmailPreviewDto;
 use modules\email\src\abac\EmailAbacObject;
+use modules\featureFlag\FFlag;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\services\url\UrlGenerator;
 use modules\lead\src\abac\dto\LeadAbacDto;
@@ -2818,6 +2819,38 @@ class LeadController extends FController
         $dataProvider = $searchModel->searchExtraQueue($params, $user);
 
         return $this->render('extra-queue', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => $isAgent,
+        ]);
+    }
+
+    /**
+     * @throws ForbiddenHttpException
+     */
+    public function actionBusinessExtraQueue(): string
+    {
+        /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) === false) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        $searchModel = new LeadSearch();
+        $params = Yii::$app->request->queryParams;
+        $params2 = Yii::$app->request->post();
+        $params = array_merge($params, $params2);
+
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        if ($user->isAgent()) {
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
+        $dataProvider = $searchModel->searchBusinessExtraQueue($params, $user);
+
+        return $this->render('business-extra-queue', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'isAgent' => $isAgent,
