@@ -219,7 +219,8 @@ class LeadController extends FController
                     'ajax-link-to-call',
                     'extra-queue',
                     'closed',
-                    'create'
+                    'create',
+                    'business-extra-queue',
                 ],
             ],
         ];
