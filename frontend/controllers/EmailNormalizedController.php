@@ -18,7 +18,7 @@ use yii\web\ForbiddenHttpException;
 use yii\bootstrap\Html;
 use src\auth\Auth;
 use common\models\UserProjectParams;
-use src\entities\email\form\EmailCreateForm;
+use src\entities\email\form\EmailForm;
 use src\entities\email\helpers\EmailFilterType;
 use common\models\Project;
 use src\entities\email\EmailRepository;
@@ -169,18 +169,20 @@ class EmailNormalizedController extends FController
 
         $action = $getParams['action'];
 
-        //TODO: write logic for edit
-        if (Yii::$app->request->isPost && in_array($action, ['create', 'reply'])) {
-            $emailForm = new EmailCreateForm($user->id);
+        if (Yii::$app->request->isPost && in_array($action, ['create', 'reply', 'update'])) {
+            $emailForm = new EmailForm($user->id);
             if ($emailForm->load(Yii::$app->request->post()) && $emailForm->validate()) {
                 try {
-                    $email = EmailsNormalizeService::newInstance()->create($emailForm);
-                    EmailsNormalizeService::newInstance()->sendMail($email);
-
-                    Yii::$app->session->setFlash('success', 'New Email was created.');
-
+                    if (in_array($action, ['create', 'reply'])) {
+                        $email = EmailsNormalizeService::newInstance()->create($emailForm);
+                        EmailsNormalizeService::newInstance()->sendMail($email);
+                        Yii::$app->session->setFlash('success', 'New Email was created.');
+                    } elseif (in_array($action, ['update'])) {
+                        $email = $this->findModel($getParams['id']);
+                        EmailsNormalizeService::newInstance()->update($email, $emailForm);
+                        Yii::$app->session->setFlash('success', 'Email was updated.');
+                    }
                     return $this->redirect(['inbox', 'id' => $email->e_id]);
-
                 } catch (\Throwable $e) {
                     Yii::$app->session->setFlash('error', $e->getMessage().'<br/>'.$e->getTraceAsString());
                 }
@@ -192,7 +194,7 @@ class EmailNormalizedController extends FController
                 $formData = [];
                 $formData['contacts']['from'] = [
                     'type' => EmailContactType::FROM,
-                    'email' => $getParams['email_email']
+                    'email' => $getParams['email_email'],
                 ];
 
                 $upp = UserProjectParams::find()->byEmail(strtolower($getParams['email_email']))->one();
@@ -208,14 +210,14 @@ class EmailNormalizedController extends FController
                     Yii::error($e->getMessage(), 'EmailNormalizedController:inbox:getEmailPreview');
                 }
 
-                $emailForm = EmailCreateForm::fromArray($formData);
+                $emailForm = EmailForm::fromArray($formData);
 
             } elseif ($action == 'update') {
                 $email = $this->findModel($getParams['id']);
-                $emailForm = EmailCreateForm::fromModel($email, $user->id);
+                $emailForm = EmailForm::fromModel($email, $user->id);
             } elseif ($action == 'reply') {
                 $email = $this->findModel($getParams['id']);
-                $emailForm = EmailCreateForm::replyFromModel($email, $user);
+                $emailForm = EmailForm::replyFromModel($email, $user);
             } elseif ($getParams['id']) {
                 $modelEmailView = $this->findModel($getParams['id']);
                 $this->emailRepository->read($modelEmailView);
