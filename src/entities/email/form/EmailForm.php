@@ -31,7 +31,7 @@ use common\models\Employee;
  * @property array $leads
  * @property string $createdDt
  * @property string $updatedDt
- * @property int $userId
+ * @property int|null $userId
  *
  */
 class EmailForm extends CompositeForm
@@ -178,7 +178,7 @@ class EmailForm extends CompositeForm
         return Project::getListByUser($this->userId);
     }
 
-    public function getUserId(): int
+    public function getUserId(): ?int
     {
         return $this->userId;
     }
@@ -198,6 +198,7 @@ class EmailForm extends CompositeForm
             'e_project_id' => 'projectId',
             'e_departament_id' => 'depId',
             'e_created_user_id' => 'userId',
+            'e_updated_user_id' => 'userId',
             'e_created_dt' => 'createdDt',
             'e_updated_dt' => 'updatedDt',
         ];
