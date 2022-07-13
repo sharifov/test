@@ -3,6 +3,8 @@
 namespace src\services\cases;
 
 use common\models\Client;
+use common\models\DepartmentPhoneProject;
+use modules\experiment\models\ExperimentTarget;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\orderContact\OrderContact;
 use modules\order\src\entities\orderData\OrderData;
@@ -23,6 +25,7 @@ use src\repositories\cases\CasesRepository;
 use src\repositories\NotFoundException;
 use src\services\client\ClientCreateForm;
 use src\services\client\ClientManageService;
+use src\services\departmentPhoneProject\DepartmentPhoneProjectParamsService;
 use src\services\TransactionManager;
 use yii\helpers\VarDumper;
 
@@ -142,12 +145,14 @@ class CasesCreateService
     public function getOrCreateByCall(
         array $clientPhones,
         int $callId,
+        int $callTo,
+        int $callIsGeneralLine,
         int $projectId,
         int $depId,
         bool $createCaseOnIncoming,
         int $trashActiveDaysLimit
     ): ?Cases {
-        $case = $this->transaction->wrap(function () use ($clientPhones, $callId, $projectId, $depId, $createCaseOnIncoming, $trashActiveDaysLimit) {
+        $case = $this->transaction->wrap(function () use ($clientPhones, $callId, $callTo, $callIsGeneralLine, $projectId, $depId, $createCaseOnIncoming, $trashActiveDaysLimit) {
             $clientForm = ClientCreateForm::createWidthDefaultName();
             $clientForm->projectId = $projectId;
             $clientForm->typeCreate = Client::TYPE_CREATE_CALL;
@@ -167,6 +172,14 @@ class CasesCreateService
                     $depId
                 );
                 $this->casesRepository->save($case);
+
+                if ($callIsGeneralLine) {
+                    $departmentPhone = DepartmentPhoneProject::find()->byPhone($callTo, false)->enabled()->limit(1)->one();
+                    if ($departmentPhone) {
+                        $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
+                        $departmentPhoneProjectParamsService->processExperiments(ExperimentTarget::EXT_TYPE_CASE, $case->cs_id);
+                    }
+                }
             } else {
                 //\Yii::info('Find case: ' . $case->cs_id . ' - ' . VarDumper::dumpAsString(['ClientId' => $client->id, 'projectId' => $projectId, 'depId' => $depId]), 'info\getByClientProjectDepartment');
             }

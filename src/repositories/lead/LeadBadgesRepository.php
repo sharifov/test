@@ -522,11 +522,15 @@ class LeadBadgesRepository
         return $this->getExtraQueueQuery()->count();
     }
 
-    public function getExtraQueueQuery(): ActiveQuery
+    public function getBusinessExtraQueueCount(): int
+    {
+        return $this->getExtraQueueQuery(Lead::STATUS_BUSINESS_EXTRA_QUEUE)->count();
+    }
+
+    public function getExtraQueueQuery(string $status = Lead::STATUS_EXTRA_QUEUE): ActiveQuery
     {
         return Lead::find()
-            ->andWhere([Lead::tableName() . '.status' => Lead::STATUS_EXTRA_QUEUE])
-        ;
+            ->andWhere([Lead::tableName() . '.status' => $status]);
     }
 
     /**

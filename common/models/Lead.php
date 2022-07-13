@@ -277,6 +277,7 @@ class Lead extends ActiveRecord implements Objectable
     public const STATUS_NEW         = 16;
     public const STATUS_EXTRA_QUEUE = 17;
     public const STATUS_CLOSED      = 18;
+    public const STATUS_BUSINESS_EXTRA_QUEUE = 19;
 
     public const STATUS_LIST = [
         self::STATUS_PENDING        => 'Pending',
@@ -293,6 +294,7 @@ class Lead extends ActiveRecord implements Objectable
         self::STATUS_NEW            => 'New',
         self::STATUS_EXTRA_QUEUE    => 'Extra queue',
         self::STATUS_CLOSED         => 'Closed',
+        self::STATUS_BUSINESS_EXTRA_QUEUE => 'Business extra queue',
     ];
 
     public const TRAVEL_DATE_PASSED_STATUS_LIST = [
@@ -322,6 +324,12 @@ class Lead extends ActiveRecord implements Objectable
         self::STATUS_BOOKED         => 'll-booked',
         self::STATUS_SNOOZE         => 'll-snooze',
         self::STATUS_CLOSED         => 'll-close',
+        self::STATUS_REJECT         => 'label-default',
+        self::STATUS_NEW            => 'label-default',
+        self::STATUS_BOOK_FAILED    => 'label-default',
+        self::STATUS_ALTERNATIVE    => 'label-default',
+        self::STATUS_EXTRA_QUEUE    => 'label-default',
+        self::STATUS_BUSINESS_EXTRA_QUEUE => 'label-default',
     ];
 
 
@@ -2737,7 +2745,7 @@ class Lead extends ActiveRecord implements Objectable
         $statusName = self::STATUS_LIST[$this->status] ?? '-';
 
         if ($label) {
-            $class = $this->getStatusLabelClass();
+            $class = self::getStatusLabelClass($this->status);
             $statusName = '<span class="label ' . $class . '" style="font-size: 13px">' . Html::encode($statusName) . '</span>';
         }
 
@@ -2745,11 +2753,12 @@ class Lead extends ActiveRecord implements Objectable
     }
 
     /**
+     * @param int|null $status
      * @return string
      */
-    public function getStatusLabelClass(): string
+    public static function getStatusLabelClass(?int $status): string
     {
-        return self::STATUS_CLASS_LIST[$this->status] ?? 'label-default';
+        return self::STATUS_CLASS_LIST[$status] ?? 'label-default';
     }
 
 
@@ -5291,5 +5300,10 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     public function setCabinClassEconomy(): void
     {
         $this->cabin = self::CABIN_ECONOMY;
+    }
+
+    public function statusIsBusinessExtraQueue(): bool
+    {
+        return $this->status === self::STATUS_BUSINESS_EXTRA_QUEUE;
     }
 }

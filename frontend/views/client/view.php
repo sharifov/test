@@ -1,6 +1,8 @@
 <?php
 
 use common\models\Client;
+use common\models\Lead;
+use src\entities\cases\CasesStatus;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 use yii\grid\GridView;
@@ -163,7 +165,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'columns' => [
                     [
                     'value' => static function (array $model) {
-                        return '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $model['id'], ['lead/view', 'gid' => $model['gid']], ['target' => '_blank', 'data-pjax' => 0]) . ($model['request_ip'] ? ' (IP: ' . $model['request_ip'] . ')' : '');
+                        $statusLabel = Html::tag('span', Lead::getStatus($model['status']), ['class' => 'label ' . Lead::getStatusLabelClass($model['status'])]);
+                        return '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $model['id'], ['lead/view', 'gid' => $model['gid']], ['target' => '_blank', 'data-pjax' => 0]) . ($model['request_ip'] ? ' (IP: ' . $model['request_ip'] . ')' : '') . ' ' . $statusLabel;
                     },
                     'format' => 'html'
                     ]
@@ -185,7 +188,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'columns' => [
                         [
                             'value' => static function (array $model) {
-                                return '<i class="fa fa-link"></i> ' . Html::a('case: ' . $model['cs_id'], ['cases/view', 'gid' => $model['cs_gid'] ], ['target' => '_blank', 'data-pjax' => 0]);
+                                return '<i class="fa fa-link"></i> ' . Html::a('case: ' . $model['cs_id'], ['cases/view', 'gid' => $model['cs_gid'] ], ['target' => '_blank', 'data-pjax' => 0]) . ' ' . CasesStatus::getLabel($model['cs_status'], '');
                             },
                             'format' => 'html'
                         ]

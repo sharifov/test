@@ -33,6 +33,7 @@ use src\helpers\app\AppHelper;
 use src\helpers\call\CallHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\call\abac\CallAbacObject;
+use src\model\call\abac\dto\CallLogObjectAbacDto;
 use src\model\call\services\currentQueueCalls\CurrentQueueCallsService;
 use src\model\call\services\reserve\CallReserver;
 use src\model\call\services\reserve\Key;
@@ -1230,7 +1231,7 @@ class CallController extends FController
 
     /**
      * @param string $callSid
-     * @return void
+     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      */
     public function actionRecord(string $callSid): void
@@ -1238,7 +1239,8 @@ class CallController extends FController
         $cacheKey = 'call-recording-url-' . $callSid . '-user-' . Auth::id();
 
         try {
-            if (!$callRecordSid = Yii::$app->cacheFile->get($cacheKey)) {
+            $callRecordSid = Yii::$app->cacheFile->get($cacheKey);
+            if (!$callRecordSid) {
                 $callLogRecord = CallLogQuery::getCallLogRecordByCallSid($callSid);
 
                 if ($callLogRecord && !empty($callLogRecord['clr_record_sid'])) {
@@ -1260,9 +1262,17 @@ class CallController extends FController
                     }
                 }
             }
-            header('X-Accel-Redirect: ' . Yii::$app->communication->xAccelRedirectCommunicationUrl . $callRecordSid);
+
+            $dto = new CallLogObjectAbacDto(CallLog::findOne(['cl_call_sid' => $callSid]), Auth::user());
+            if (\Yii::$app->abac->can($dto, CallAbacObject::OBJ_CALL_LOG, CallAbacObject::ACTION_LISTEN_RECORD, Auth::user())) {
+                header('X-Accel-Redirect: ' . Yii::$app->communication->xAccelRedirectCommunicationUrl . $callRecordSid);
+            } else {
+                throw new ForbiddenHttpException('You can not hear this record');
+            }
         } catch (NotFoundException $e) {
             throw new NotFoundHttpException($e->getMessage());
+        } catch (ForbiddenHttpException $e) {
+            throw new ForbiddenHttpException($e->getMessage());
         }
     }
 

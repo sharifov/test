@@ -4,7 +4,9 @@ namespace webapi\modules\v2\controllers;
 
 use common\models\Department;
 use common\models\DepartmentPhoneProject;
+use modules\experiment\models\ExperimentTarget;
 use src\model\department\DepartmentCodeException;
+use src\services\departmentPhoneProject\DepartmentPhoneProjectParamsService;
 use webapi\src\Messages;
 use webapi\src\response\ErrorResponse;
 use webapi\src\response\messages\CodeMessage;
@@ -61,6 +63,10 @@ class DepartmentPhoneProjectController extends BaseController
       *                    "department": "Sales",
       *                    "language_id": "en-US",
       *                    "updated_dt": "2019-01-08 11:44:57"
+      *                    "experiments": [
+      *                         "wpl5.0",
+      *                         "wpl6.2"
+      *                     ]
       *                },
       *                {
       *                    "phone": "+15222222222",
@@ -155,10 +161,16 @@ class DepartmentPhoneProjectController extends BaseController
         $data = [];
 
         foreach ($phones as $key => $phone) {
+            $departmentPhone = DepartmentPhoneProject::find()->byPhone($phone->getPhone(), false)->enabled()->limit(1)->one();
+            if ($departmentPhone) {
+                $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
+            }
+
             $data[] = [
                 'phone' => $phone->getPhone(),
                 'cid' => $phone->dppSource ? $phone->dppSource->cid : null,
                 'department_id' => $phone->dpp_dep_id,
+                'experiments' => $departmentPhone ? $departmentPhoneProjectParamsService->getPhoneExperiments() : null,
                 'department' => $phone->dpp_dep_id ? Department::getName($phone->dpp_dep_id) : null,
                 'language_id' => $phone->dpp_language_id,
                 'updated_dt' => $phone->dpp_updated_dt,

@@ -10,12 +10,14 @@ use common\models\Employee;
 use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
+use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use src\auth\Auth;
 use modules\user\userFeedback\abac\dto\UserFeedbackAbacDto;
 use modules\user\userFeedback\abac\UserFeedbackAbacObject;
 use src\helpers\app\AppHelper;
+use src\services\lead\LeadBusinessExtraQueueService;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -143,6 +145,13 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 'object' => LeadAbacObject::OBJ_EXTRA_QUEUE,
                 'action' => LeadAbacObject::ACTION_ACCESS
             ],
+        ];
+
+        $menuLItems[] = [
+            'label' => 'Business Extra Queue <span id="badges-business-extra-queue" data-type="business-extra-queue" class="label-success label pull-right bginfo"></span>',
+            'url' => ['/lead/business-extra-queue'],
+            'icon' => 'history text-success',
+            'visible' => LeadBusinessExtraQueueService::canAccess(),
         ];
 
         $menuLItems[] = ['label' => 'Failed Bookings <span id="badges-failed-bookings" data-type="failed-bookings" class="label-success label pull-right bginfo"></span> ',
@@ -278,7 +287,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
 
 
         $menuItems[] = [
-            'label' => 'Shift Schedule <sup style="color: red">NEW</sup>',
+            'label' => 'Shift Schedule', //  <sup style="color: red">NEW</sup>
             'url' => 'javascript:',
             'icon' => 'calendar',
             'items' => $shiftMenuItems
@@ -524,6 +533,9 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Lead Poor Processing Data', 'url' => ['/lead-poor-processing-data-crud/index']],
                         ['label' => 'Lead Poor Processing', 'url' => ['/lead-poor-processing-crud/index']],
                         ['label' => 'Lead Poor Processing Log', 'url' => ['/lead-poor-processing-log-crud/index']],
+                        ['label' => 'Lead Business Extra Queue Rules', 'url' => ['/lead-business-extra-queue-rule-crud/index']],
+                        ['label' => 'Lead Business Extra Queue', 'url' => ['/lead-business-extra-queue-crud/index']],
+                        ['label' => 'Lead Business Extra Queue Log', 'url' => ['/lead-business-extra-queue-log-crud/index']],
                         ['label' => 'Lead User Ratings', 'url' => ['/lead-user-rating-crud/index']],
                         ['label' => 'Lead Status Reason', 'url' => ['/lead-status-reason-crud/index']],
                         ['label' => 'Lead Status Reason Log', 'url' => ['/lead-status-reason-log-crud/index']],
@@ -587,6 +599,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Client Data', 'url' => ['/client-data-crud/index'], 'icon' => 'list'],
                     ]
                 ],
+                ['label' => 'Client User Return', 'url' => ['/client-user-return-crud/index'], 'icon' => 'user'],
             ],
         ];
 
@@ -1027,6 +1040,16 @@ class SideBarMenu extends \yii\bootstrap\Widget
             ];
         }
 
+        if (class_exists('\modules\experiment\ExperimentModule')) {
+            $menuModuleItems[] = [
+                'label' => 'Experiments',
+                'url' => 'javascript:',
+                'icon' => 'flask',
+                'items' => \modules\experiment\ExperimentModule::getListMenu()
+            ];
+        }
+
+
         /** @fflag FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE, Object Segment module enable/disable */
         if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE)) {
             $menuModuleItems[] =  [
@@ -1070,6 +1093,25 @@ class SideBarMenu extends \yii\bootstrap\Widget
 
         $menuItems[] = ['label' => 'My Sales', 'url' => ['/sales/index'], 'icon' => 'money'];
 
+        $menuHeatMapItems[] = [
+            'label' => 'Heat Map Leads',
+            'url' => ['/heat-map-lead/index'],
+            'icon' => 'area-chart',
+            'abac' => [
+                'dto' => new LeadAbacDto(null, (int) Auth::id()),
+                'object' => LeadAbacObject::OBJ_HEAT_MAP_LEAD,
+                'action' => LeadAbacObject::ACTION_ACCESS
+            ],
+        ];
+        /** @fflag FFlag::FF_KEY_HEAT_MAP_AGENT_REPORT_ENABLE, Heat Map Agent Report enable\disable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_HEAT_MAP_AGENT_REPORT_ENABLE)) {
+            $menuHeatMapItems[] =  [
+                'label' => 'Heat Map Agent',
+                'url' => ['/heat-map-agent/index'],
+                'icon' => 'area-chart'
+            ];
+        }
+
         $menuItems[] = [
             'label' => 'Stats & Reports',
             'url' => 'javascript:',
@@ -1108,21 +1150,10 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'User Feedback Statistics', 'url' => ['/stats/user-feedback'], 'icon' => 'users'],
                 /** @abac $leadAbacDto, LeadAbacObject::OBJ_HEAT_MAP_LEAD, LeadAbacObject::ACTION_ACCESS, show heat-map-lead in menu */
                 [
-                    'label' => 'Leads',
+                    'label' => 'Heat Map',
                     'url' => 'javascript:',
                     'icon' => 'folder',
-                    'items' => [
-                        [
-                            'label' => 'Heat Map Leads',
-                            'url' => ['/heat-map-lead/index'],
-                            'icon' => 'area-chart',
-                            'abac' => [
-                                'dto' => new LeadAbacDto(null, (int) Auth::id()),
-                                'object' => LeadAbacObject::OBJ_HEAT_MAP_LEAD,
-                                'action' => LeadAbacObject::ACTION_ACCESS
-                            ],
-                        ],
-                    ],
+                    'items' => $menuHeatMapItems
                 ],
             ]
         ];

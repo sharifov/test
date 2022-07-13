@@ -2,6 +2,7 @@
 
 namespace modules\objectSegment\src\object;
 
+use common\models\Lead;
 use modules\objectSegment\components\ObjectSegmentBaseModel;
 use modules\objectSegment\src\contracts\ObjectSegmentObjectInterface;
 
@@ -140,6 +141,18 @@ class LeadObjectSegmentObject extends ObjectSegmentBaseModel implements ObjectSe
         'operators' => [self::OP_EQUAL, self::OP_NOT_EQUAL]
     ];
 
+    protected const ATTR_LEAD_CABIN_TYPE = [
+        'optgroup'  => 'Lead Cabin Type',
+        'id'        => self::NS . 'cabin_type',
+        'field' => 'cabin_type',
+        'label' => 'Lead Cabin Type',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'multiple' => false,
+        'values' => [],
+        'operators' => [self::OP_EQUAL, self::OP_NOT_EQUAL]
+    ];
+
     protected const ATTR_CREATED_DT = [
         'optgroup'  => 'Lead Info and Preferences',
         'id'        => self::NS . 'created_dt',
@@ -166,6 +179,9 @@ class LeadObjectSegmentObject extends ObjectSegmentBaseModel implements ObjectSe
         $attrLeadDepartment           = self::ATTR_LEAD_DEPARTMENT_NAME;
         $attrLeadDepartment['values'] = self::getDepartmentList();
         $attrList[self::NS][]         = $attrLeadDepartment;
+        $attrLeadCabinType            = self::ATTR_LEAD_CABIN_TYPE;
+        $attrLeadCabinType['values']  = Lead::CABIN_LIST;
+        $attrList[self::NS][]         = $attrLeadCabinType;
         return $attrList;
     }
 }

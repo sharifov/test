@@ -83,14 +83,14 @@ class ClientController extends FController
     public function actionView($id): string
     {
         $model = $this->findModel($id);
-        $leadsQuery = Lead::find()->select(['id', 'gid', 'request_ip'])->where(['client_id' => $id])->asArray();
+        $leadsQuery = Lead::find()->select(['id', 'gid', 'request_ip', 'status'])->where(['client_id' => $id])->asArray();
         $leadsDataProvider = new ActiveDataProvider([
             'query' => $leadsQuery,
             'pagination' => [
                 'pageSize' => 30,
             ],
         ]);
-        $casesQuery = Cases::find()->select(['cs_id', 'cs_gid'])->where(['cs_client_id' => $id])->asArray();
+        $casesQuery = Cases::find()->select(['cs_id', 'cs_gid', 'cs_status'])->where(['cs_client_id' => $id])->asArray();
         $casesDataProvider = new ActiveDataProvider([
             'query' => $casesQuery,
             'pagination' => [

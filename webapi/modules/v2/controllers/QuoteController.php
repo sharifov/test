@@ -161,7 +161,10 @@ class QuoteController extends ApiBaseController
      *                                   "lastPiece": 1
      *                               }
      *                           }
-     *                       }
+     *                       },
+     *                      "isChangedOrigin": false,
+     *                      "isChangedDestination": false,
+     *                      "isChangedDeparture": false
      *                   },
      *                   {
      *                       "segmentId": 2,
@@ -194,7 +197,10 @@ class QuoteController extends ApiBaseController
      *                                   "lastPiece": 1
      *                               }
      *                           }
-     *                       }
+     *                       },
+     *                      "isChangedOrigin": false,
+     *                      "isChangedDestination": false,
+     *                      "isChangedDeparture": false
      *                   },
      *                   {
      *                       "segmentId": 3,
@@ -227,7 +233,10 @@ class QuoteController extends ApiBaseController
      *                                   "lastPiece": 1
      *                               }
      *                           }
-     *                       }
+     *                       },
+     *                      "isChangedOrigin": false,
+     *                      "isChangedDestination": false,
+     *                      "isChangedDeparture": false
      *                   }
      *               ],
      *               "duration": 1185
@@ -266,7 +275,10 @@ class QuoteController extends ApiBaseController
      *                                   "lastPiece": 1
      *                               }
      *                           }
-     *                       }
+     *                       },
+     *                      "isChangedOrigin": false,
+     *                      "isChangedDestination": false,
+     *                      "isChangedDeparture": false
      *                   },
      *                   {
      *                       "segmentId": 2,
@@ -299,7 +311,10 @@ class QuoteController extends ApiBaseController
      *                                   "lastPiece": 1
      *                               }
      *                           }
-     *                       }
+     *                       },
+     *                      "isChangedOrigin": false,
+     *                      "isChangedDestination": false,
+     *                      "isChangedDeparture": false
      *                   },
      *                   {
      *                       "segmentId": 3,
@@ -332,7 +347,10 @@ class QuoteController extends ApiBaseController
      *                                   "lastPiece": 1
      *                               }
      *                           }
-     *                       }
+     *                       },
+     *                      "isChangedOrigin": false,
+     *                      "isChangedDestination": false,
+     *                      "isChangedDeparture": false
      *                   }
      *               ],
      *               "duration": 1222
@@ -443,12 +461,20 @@ class QuoteController extends ApiBaseController
      *      ],
      *      "lead_data": [
      *          {
-     *              "ld_field_key": "cross_system_xp",
-     *              "ld_field_value": "wpl5.0"
+     *              "ld_field_key": "example_key",
+     *              "ld_field_value": "example_value"
      *          },
      *          {
-     *              "ld_field_key": "cross_system_xp",
-     *              "ld_field_value": "wpl6.2"
+     *              "ld_field_key": "example_key",
+     *              "ld_field_value": "example_value"
+     *          }
+     *      ],
+     *      "experiments": [
+     *          {
+     *              "ex_code": "wpl5.0",
+     *          },
+     *          {
+     *              "ex_code": "wpl6.2",
      *          }
      *      ],
      *      "department_key": "chat",

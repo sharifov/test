@@ -93,6 +93,12 @@ class DepartmentPhoneProjectController extends FController
             $model->user_group_list = [];
 
             $model->dpp_params = '{
+  "experiments": [
+    {
+      "ex_code": "test.0",
+      "enabled": false
+    }
+  ],
   "ivr": {
     "voice_gather_callback_url": "/v1/twilio/voice-gather/",
     "voice_gather_callback_url_v2": "/v2/twilio/voice-gather/",

@@ -109,12 +109,12 @@
 		"textalk/websocket": "^1.5",
         "ext-fileinfo": "*",
         "ext-pgsql": "*",
-		"kivork/yii2-search-module": "1.09.*",
+		"kivork/yii2-search-module": "1.10.*",
 		"geoip/geoip": "~1.16",
 		"endroid/qr-code": "4.4.9",
 		"jp3cki/totp": "2.0.0",
 		"kartik-v/yii2-password": "1.5.7",
-		"kivork/yii2-feature-flag": "1.1.0"
+		"kivork/yii2-feature-flag": "dev-develop"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",

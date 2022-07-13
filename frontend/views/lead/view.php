@@ -19,6 +19,7 @@
  * @var AbacCallFromNumberList $callFromNumberList
  * @var AbacSmsFromNumberList $smsFromNumberList
  * @var AbacEmailList $emailFromList
+ * @var $isCreatedFlightRequest bool
  */
 
 use common\models\Employee;
@@ -29,6 +30,8 @@ use frontend\models\CommunicationForm;
 use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
+use frontend\widgets\sale\SaleWidget;
+use modules\featureFlag\FFlag;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\services\access\FileStorageAccessService;
 use modules\fileStorage\src\widgets\FileStorageListWidget;
@@ -37,6 +40,8 @@ use modules\lead\src\abac\communicationBlock\LeadCommunicationBlockAbacObject;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\communicationBlock\LeadCommunicationBlockAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
+use modules\lead\src\abac\sale\LeadSaleAbacDto;
+use modules\lead\src\abac\sale\LeadSaleAbacObject;
 use src\auth\Auth;
 use src\model\call\useCase\createCall\fromLead\AbacCallFromNumberList;
 use src\model\email\useCase\send\fromLead\AbacEmailList;
@@ -84,12 +89,13 @@ $leadAbacDto = new LeadAbacDto($lead, Auth::id());
 /** @abac new $leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK, Disable mask client data on Lead view */
 $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIENT_DATA, LeadAbacObject::ACTION_UNMASK);
 ?>
+<?php yii\widgets\Pjax::begin(['id' => 'pjax-lead-header', 'enablePushState' => false, 'enableReplaceState' => false, 'timeout' => 5000]) ?>
 
 <?= $this->render('partial/_view_header', [
     'lead' => $lead,
     'title' => $this->title
 ]) ?>
-
+<?php yii\widgets\Pjax::end() ?>
 
     <div class="main-sidebars">
         <div class="panel panel-main">
@@ -109,6 +115,7 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
                     'quotesProvider' => $quotesProvider,
                     'leadForm' => $leadForm,
                     'is_manager' => $is_manager,
+                    'isCreatedFlightRequest' => $isCreatedFlightRequest
                 ]) ?>
 
                 <?php if ($lead->products) : ?>
@@ -233,6 +240,7 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
                         <?php endif; ?>
                     <?php endif; ?>
                 <?php endif; ?>
+
 
             </div>
 
@@ -497,3 +505,22 @@ $css = <<<CSS
     }
 CSS;
 $this->registerCss($css);
+
+
+$saveJs = <<<JS
+    let newSegmentSaveButtonClicked = false;
+    
+    $(document).on('click', '#lead-new-segment-button', function() {
+        newSegmentSaveButtonClicked = true;
+    });
+    
+    $(document).on('pjax:end', '#pj-itinerary', function (data, xhr) {
+        if (newSegmentSaveButtonClicked === true && $('#enable-timer-lpp').length === 0) {
+            $.pjax.reload({container: '#pjax-lead-header', async: false});
+            
+            newSegmentSaveButtonClicked = false;
+        }
+    });
+JS;
+
+$this->registerJs($saveJs);

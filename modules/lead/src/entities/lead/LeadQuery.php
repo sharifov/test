@@ -2,6 +2,7 @@
 
 namespace modules\lead\src\entities\lead;
 
+use common\models\Lead;
 use common\models\LeadFlow;
 
 class LeadQuery
@@ -19,5 +20,10 @@ class LeadQuery
             return $query['lf_owner_id'];
         }
         return null;
+    }
+
+    public static function countSoldLeadsByClient(int $clientId): int
+    {
+        return (int)Lead::find()->sold()->byClient($clientId)->count();
     }
 }

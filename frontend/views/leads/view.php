@@ -220,7 +220,7 @@ $isAgent = Auth::user()->isAgent();
                         ],
 
                         [
-                            'attribute' => 'l_dep_id',
+                            'label' => 'Project',
                             'value' => function (\common\models\Lead $model) {
                                 return $model->project ? $model->project->name : '-';
                             },

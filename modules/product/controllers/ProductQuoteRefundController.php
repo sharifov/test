@@ -144,7 +144,12 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
                     throw new ForbiddenHttpException('Access denied');
                 }
 
-                $emailData = $this->casesCommunicationService->getEmailData($case, Auth::user());
+                $locale = 'en-US';
+                if ($case->client && $case->client->cl_locale) {
+                    $locale = $case->client->cl_locale;
+                }
+
+                $emailData = $this->casesCommunicationService->getEmailData($case, Auth::user(), $locale);
                 $emailData['original_quote'] = $originalQuote->serialize();
                 $emailData['refund'] = $productQuoteRefund->serialize();
                 $emailData['refundData'] = $productQuoteRefund->orderRefund->serialize() ?? [];
@@ -180,7 +185,7 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
                 if (!$emailTemplateType) {
                     throw new \RuntimeException('Email template type is not set in project params');
                 }
-                $previewEmailResult = Yii::$app->communication->mailPreview($case->cs_project_id, $emailTemplateType, $emailFrom, $form->clientEmail, $emailData);
+                $previewEmailResult = Yii::$app->communication->mailPreview($case->cs_project_id, $emailTemplateType, $emailFrom, $form->clientEmail, $emailData, $locale);
                 if ($previewEmailResult['error']) {
                     $previewEmailResult['error'] = @Json::decode($previewEmailResult['error']);
                     $form->addError('general', 'Communication service error: ' . ($previewEmailResult['error']['name'] ?? '') . ' ( ' . ($previewEmailResult['error']['message']  ?? '') . ' )');

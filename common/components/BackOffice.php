@@ -284,22 +284,22 @@ class BackOffice
         }
     }
 
-    public static function reprotectionCustomerDecisionConfirm(int $projectId, string $bookingId, array $quote, string $reprotectionQuoteGid): bool
+    public static function reprotectionCustomerDecisionConfirm(int $projectId, string $bookingId, array $quote, string $reprotectionQuoteGid, ?array $additionalInfo): bool
     {
-        return self::reprotectionCustomerDecision($projectId, $bookingId, 'confirm', $quote, $reprotectionQuoteGid);
+        return self::reprotectionCustomerDecision($projectId, $bookingId, 'confirm', $quote, $reprotectionQuoteGid, $additionalInfo);
     }
 
-    public static function reprotectionCustomerDecisionModify(int $projectId, string $bookingId, array $quote, string $reprotectionQuoteGid): bool
+    public static function reprotectionCustomerDecisionModify(int $projectId, string $bookingId, array $quote, string $reprotectionQuoteGid, ?array $additionalInfo): bool
     {
-        return self::reprotectionCustomerDecision($projectId, $bookingId, 'confirm', $quote, $reprotectionQuoteGid);
+        return self::reprotectionCustomerDecision($projectId, $bookingId, 'confirm', $quote, $reprotectionQuoteGid, $additionalInfo);
     }
 
     public static function reprotectionCustomerDecisionRefund(int $projectId, string $bookingId): bool
     {
-        return self::reprotectionCustomerDecision($projectId, $bookingId, 'refund', [], null);
+        return self::reprotectionCustomerDecision($projectId, $bookingId, 'refund', [], null, []);
     }
 
-    private static function reprotectionCustomerDecision(int $projectId, string $bookingId, string $type, array $quote, ?string $reprotectionQuoteGid): bool
+    private static function reprotectionCustomerDecision(int $projectId, string $bookingId, string $type, array $quote, ?string $reprotectionQuoteGid, ?array $additionalInfo): bool
     {
         if (!$bookingId) {
             throw new \DomainException('Booking ID is empty');
@@ -326,6 +326,9 @@ class BackOffice
         }
         if ($quote) {
             $request['flightQuote'] = $quote;
+        }
+        if ($additionalInfo) {
+            $request['additionalInfo'] = $additionalInfo;
         }
 
         try {
