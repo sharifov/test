@@ -2,6 +2,8 @@
 
 use common\models\ProfitSplit;
 use src\access\ListsAccess;
+use src\auth\Auth;
+use src\helpers\client\ClientReturnHelper;
 use src\model\client\helpers\ClientFormatter;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
@@ -220,6 +222,13 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'filter' => $lists->getEmployees(),
             'visible' => $lists->getEmployees()
+        ],
+        [
+            'label' => 'Client Return Type',
+            'value' => static function (Lead $model) {
+                return ClientReturnHelper::displayClientReturnLabels($model->client_id, Auth::id());
+            },
+            'format' => 'raw'
         ],
         [
             'label' => 'Profit',

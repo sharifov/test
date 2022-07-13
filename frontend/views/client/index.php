@@ -52,6 +52,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'disabled:boolean',
             'cl_excluded:boolean',
             [
+                'label' => 'Client Return Type',
+                'value' => static function (Client $model) {
+                    return \src\helpers\client\ClientReturnHelper::displayClientReturnLabels($model->id, Auth::id());
+                },
+                'format' => 'raw'
+            ],
+            [
                 'header' => 'Phones',
                 'attribute' => 'client_phone',
                 'value' => function (Client $model) {
