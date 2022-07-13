@@ -181,6 +181,9 @@ class LeadSearch extends Lead
     private $defaultMinDate;
     private $defaultMaxDate;
 
+    public const EXTRA_QUEUE_TYPE_DEFAULT = 'default';
+    public const EXTRA_QUEUE_TYPE_BUSINESS = 'business';
+
     public function __construct($config = [])
     {
         $this->leadBadgesRepository = new LeadBadgesRepository();
@@ -4446,9 +4449,14 @@ class LeadSearch extends Lead
      * @param Employee $user
      * @return ActiveDataProvider
      */
-    public function searchExtraQueue($params, Employee $user): ActiveDataProvider
+    public function searchExtraQueue($params, Employee $user, string $queueType = self::EXTRA_QUEUE_TYPE_DEFAULT): ActiveDataProvider
     {
-        $query = $this->leadBadgesRepository->getExtraQueueQuery();
+        if ($queueType === self::EXTRA_QUEUE_TYPE_BUSINESS) {
+            $query = $this->leadBadgesRepository->getExtraQueueQuery(Lead::STATUS_BUSINESS_EXTRA_QUEUE);
+        } else {
+            $query = $this->leadBadgesRepository->getExtraQueueQuery(Lead::STATUS_EXTRA_QUEUE);
+        }
+
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
         $leadTable = Lead::tableName();
 
@@ -4540,6 +4548,11 @@ class LeadSearch extends Lead
         $query->with(['client']);
 
         return $dataProvider;
+    }
+
+    public function searchBusinessExtraQueue($params, Employee $user): ActiveDataProvider
+    {
+        return $this->searchExtraQueue($params, $user, self::EXTRA_QUEUE_TYPE_BUSINESS);
     }
 
     /**

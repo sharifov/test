@@ -200,11 +200,12 @@ class CasesStatus
 
     /**
      * @param int|null $status
+     * @param string $style
      * @return string
      */
-    public static function getLabel(?int $status): string
+    public static function getLabel(?int $status, string $style = 'font-size: 13px'): string
     {
-        return Html::tag('span', self::getName($status), ['class' => 'label ' . self::getClass($status), 'style' => 'font-size: 13px']);
+        return Html::tag('span', self::getName($status), ['class' => 'label ' . self::getClass($status), 'style' => $style]);
     }
 
     /**

@@ -278,4 +278,16 @@ class AppHelper
 
         return -1;
     }
+
+    /**
+     * @return array
+     */
+    public static function getTypeList(): array
+    {
+        $typeList['frontend'] = 'frontend';
+        $typeList['console'] = 'console';
+        $typeList['webapi'] = 'webapi';
+
+        return $typeList;
+    }
 }

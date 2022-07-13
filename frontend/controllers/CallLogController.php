@@ -15,6 +15,10 @@ use yii\filters\VerbFilter;
 use yii\web\Response;
 use src\model\call\abac\CallAbacObject;
 
+/**
+ * Class CallLogController
+ * @package frontend\controllers
+ */
 class CallLogController extends FController
 {
     public function behaviors()
@@ -25,13 +29,14 @@ class CallLogController extends FController
                 'actions' => [
                     'delete' => ['POST'],
                 ],
-            ],
+            ]
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**
      * @return string
+     * @throws \Exception
      */
     public function actionIndex(): string
     {
@@ -79,6 +84,7 @@ class CallLogController extends FController
     /**
      * @param $id
      * @return string|Response
+     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      */
     public function actionUpdate($id)
@@ -99,6 +105,10 @@ class CallLogController extends FController
         ]);
     }
 
+    /**
+     * @return Response
+     * @throws BadRequestHttpException
+     */
     public function actionAjaxGetCallHistory()
     {
         if (Yii::$app->request->isAjax && Yii::$app->request->isPost) {
@@ -131,8 +141,8 @@ class CallLogController extends FController
     /**
      * @param $id
      * @return Response
+     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
-     * @throws \Throwable
      * @throws \yii\db\StaleObjectException
      */
     public function actionDelete($id): Response
@@ -147,6 +157,9 @@ class CallLogController extends FController
         return $this->redirect(['index']);
     }
 
+    /**
+     * @return string
+     */
     public function actionList()
     {
         $searchModel = new CallLogSearch();

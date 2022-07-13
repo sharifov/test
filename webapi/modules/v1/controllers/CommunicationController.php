@@ -412,7 +412,6 @@ class CommunicationController extends ApiBaseController
                     $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
                     $callFilterGuardService = new CallFilterGuardService($client_phone_number, $departmentPhoneProjectParamsService, $this->callService);
                     $logExecutionTime->end();
-
                     if (!$isTrustStirCall && $callFilterGuardService->isEnable() && !$callFilterGuardService->isTrusted()) {
                         $logExecutionTime->start('CallFilterGuardService:runRepression');
                         $callFilterGuardService->runRepression($postCall);
