@@ -44,10 +44,13 @@ use src\forms\emailReviewQueue\EmailReviewQueueForm;
  */
 class EmailsNormalizeService implements EmailServiceInterface
 {
+    protected $userId;
 
     public static function newInstance()
     {
-        return new static();
+        $instance = new static();
+        $instance->userId = Auth::id();
+        return $instance;
     }
 
     public function getDataArrayFromOld(EmailOld $emailOld)
@@ -173,7 +176,7 @@ class EmailsNormalizeService implements EmailServiceInterface
                 'e_status_id' => $form->status,
                 'e_project_id' => $form->projectId,
                 'e_departament_id' => $form->depId,
-                'e_created_user_id' => $form->getUserId() ?? Auth::id(),
+                'e_created_user_id' => $form->getUserId() ?? $this->userId,
             ];
             $email = Email::create($emailData);
             //=!Email
@@ -285,6 +288,7 @@ class EmailsNormalizeService implements EmailServiceInterface
         try {
             //=update Email
             $email->attributes = $form->getAttributesForModel(true); //->toArray();
+            unset($email->e_created_user_id);
             $email->save();
             //=!update Email
 
@@ -296,7 +300,7 @@ class EmailsNormalizeService implements EmailServiceInterface
 
             //=EmailLog
             if (!$form->log->isEmpty()) {
-                $email->saveLog($form->log->toArray());
+                $email->saveLog($form->log->getAttributesForModel(true));
             }
             //=!EmailParams
 
@@ -318,10 +322,17 @@ class EmailsNormalizeService implements EmailServiceInterface
             //=!EmailBlob
 
             //=EmailContacts
-            $contacts = ArrayHelper::index($email->emailContacts, 'ec_id');
+            $contactsByType = ArrayHelper::index($email->emailContacts, 'ec_type_id');
+            $contactsById = ArrayHelper::index($email->emailContacts, 'ec_id');
             foreach ($form->contacts as $contactForm)
             {
-                if ($contact = $contacts[$contactForm->id]) {
+                if (isset($contactForm->id)) {
+                    $contact = $contactsById[$contactForm->id];
+                } else {
+                    $contact = $contactsByType[$contactForm->type];
+                }
+
+                if ($contact) {
                     $address = $this->getAddress($contactForm->email, $contactForm->name, true);
 
                     $contact->updateAttributes( [
@@ -483,7 +494,7 @@ class EmailsNormalizeService implements EmailServiceInterface
     public function createFromLead(LeadPreviewEmailForm $previewEmailForm, Lead $lead, array $attachments = []): Email
     {
         $data = [
-            'userId'        =>  Yii::$app->user->id,
+            'userId'        =>  $this->userId,
             'type'          =>  EmailType::OUTBOX,
             'status'        =>  EmailStatus::PENDING,
             'projectId'     =>  $lead->project_id,
@@ -522,7 +533,7 @@ class EmailsNormalizeService implements EmailServiceInterface
     public function createFromCase(CasePreviewEmailForm $previewEmailForm, Cases $case, array $attachments = []): Email
     {
         $data = [
-            'userId'        =>  Yii::$app->user->id,
+            'userId'        =>  $this->userId,
             'type'          =>  EmailType::OUTBOX,
             'status'        =>  EmailStatus::PENDING,
             'projectId'     =>  $case->cs_project_id,
@@ -560,8 +571,33 @@ class EmailsNormalizeService implements EmailServiceInterface
 
     public function sendAfterReview(EmailReviewQueueForm $form, $email)
     {
+        try {
+            $data = [
+                'userId'        =>  $this->userId,
+                'status'        =>  EmailStatus::PENDING,
+                'body'  =>  [
+                    'subject'   =>  $form->emailSubject,
+                    'bodyHtml'  =>  $form->emailMessage,
+                ],
+                'contacts' => [
+                    'from' => [
+                        'email' => $form->emailFrom,
+                        'name'  =>  $form->emailFromName,
+                        'type' => EmailContactType::FROM,
+                    ],
+                    'to' => [
+                        'email' => $form->emailTo,
+                        'name'  =>  $form->emailToName,
+                        'type' => EmailContactType::TO,
+                    ],
+                ]
+            ];
+            $email = $this->update($email, EmailForm::fromArray($data));
+            $this->sendMail($email);
+        } catch (\Throwable $e) {
+            throw $e;
+        }
 
+        return $email;
     }
-
-
 }
