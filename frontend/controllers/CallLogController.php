@@ -29,6 +29,11 @@ class CallLogController extends FController
                 'actions' => [
                     'delete' => ['POST'],
                 ],
+            ],
+            'access' => [
+                'allowActions' => [
+                    'index'
+                ]
             ]
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
@@ -53,10 +58,15 @@ class CallLogController extends FController
      * @param $id
      * @param string $breadcrumbsPreviousPage
      * @return string
+     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      */
     public function actionView($id, $breadcrumbsPreviousPage = 'list'): string
     {
+        if (!\Yii::$app->abac->can(null, CallAbacObject::OBJ_CALL_LOG, CallAbacObject::ACTION_VIEW)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
         $breadcrumbsPreviousLabel = $breadcrumbsPreviousPage === 'index' ? 'Call Logs' : 'My Call Logs';
         return $this->render('view', [
             'model' => $this->findModel($id),
@@ -67,9 +77,14 @@ class CallLogController extends FController
 
     /**
      * @return string|Response
+     * @throws ForbiddenHttpException
      */
     public function actionCreate()
     {
+        if (!\Yii::$app->abac->can(null, CallAbacObject::OBJ_CALL_LOG, CallAbacObject::ACTION_CREATE)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
         $model = new CallLog();
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
