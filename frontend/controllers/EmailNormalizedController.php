@@ -155,7 +155,6 @@ class EmailNormalizedController extends FController
         /** @var Employee $user */
         $user = Auth::user();
         $searchModel = new EmailNormalizedSearch();
-        $modelNewEmail = new \common\models\Email();
         $modelEmailView = null;
         $emailForm = null;
 
