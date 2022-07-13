@@ -23,17 +23,34 @@ use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
+use src\services\email\EmailServiceInterface;
+use modules\featureFlag\FFlag;
+use src\services\email\EmailsNormalizeService;
+use src\services\email\EmailService;
+use src\exception\EmailNotSentException;
+use Yii;
 
+/**
+ * Class EmailReviewQueueController
+ * @property UrlGenerator $fileStorageUrlGenerator
+ * @property QuoteRepository $quoteRepository
+ * @property EmailServiceInterface $emailService
+ */
 class EmailReviewQueueController extends FController
 {
     private UrlGenerator $fileStorageUrlGenerator;
     private QuoteRepository $quoteRepository;
+    private EmailServiceInterface $emailService;
 
     public function __construct($id, $module, UrlGenerator $fileStorageUrlGenerator, QuoteRepository $quoteRepository, $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->fileStorageUrlGenerator = $fileStorageUrlGenerator;
         $this->quoteRepository = $quoteRepository;
+        $this->emailService = Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_EMAIL_NORMALIZED_FORM_ENABLE) ?
+            EmailsNormalizeService::newInstance() :
+            Yii::createObject(EmailService::class)
+        ;
     }
 
     /**
@@ -131,57 +148,50 @@ class EmailReviewQueueController extends FController
         $form = new EmailReviewQueueForm(null, null);
         $form->sendEmailScenario();
         if ($form->load(\Yii::$app->request->post()) && $form->validate()) {
-            $email = Email::findOne($form->emailId);
             $emailQueue = $this->findModel($form->emailQueueId);
+            $email = $emailQueue->email;
             if ($email) {
-                $email->e_email_from = $form->emailFrom;
-                $email->e_email_from_name = $form->emailFromName;
-                $email->e_email_to = $form->emailTo;
-                $email->e_email_to_name = $form->emailToName;
-                $email->e_email_subject = $form->emailSubject;
-                $email->e_status_id = Email::STATUS_PENDING;
-                $email->body_html = $form->emailMessage;
-                $attachments = JsonHelper::decode($email->e_email_data);
+                try{
+                    $email = $this->emailService->sendAfterReview($form, $email);
 
-                if ($email->save()) {
-                    $mailResponse = $email->sendMail($attachments);
+                    $emailQueue->statusToReviewed();
+                    $emailQueue->erq_user_reviewer_id = Auth::id();
+                    $emailQueue->save();
 
-                    if (empty($mailResponse['error'])) {
-                        $emailQueue->statusToReviewed();
-                        $emailQueue->erq_user_reviewer_id = Auth::id();
-                        $emailQueue->save();
-
-                        if ($case = $email->eCase) {
-                            $case->addEventLog(CaseEventLog::EMAIL_REVIEWED, ($email->eTemplateType->etp_name ?? '') . ' email sent. By: ' . $email->e_email_from_name, [], CaseEventLog::CATEGORY_INFO);
-                        }
-
-                        if ($email->e_lead_id) {
-                            /*
-                             * TODO: The similar logic exist in `\frontend\controllers\LeadController::actionView`. Need to shrink code duplications.
-                             */
-                            $quoteIdSubquery = (new Query())
-                                ->select(['qc_quote_id'])
-                                ->from(['qc' => QuoteCommunication::tableName()])
-                                ->where('qc_communication_type=:communication_type', [':communication_type' => CommunicationForm::TYPE_EMAIL])
-                                ->distinct();
-                            /** @var Quote[] $quotes */
-                            $quotes = Quote::find()->where(['IN', 'id', $quoteIdSubquery])->all();
-                            foreach ($quotes as $quote) {
-                                $quote->setStatusSend();
-                                $this->quoteRepository->save($quote);
-                            }
-                        }
-
-                        \Yii::$app->session->setFlash('success', 'Email(' . $email->e_id . ') was sent to ' . $email->e_email_to);
-                        return $this->redirect('/email-review-queue/index');
+                    if ($case = $emailQueue->emailCase) {
+                        $case->addEventLog(CaseEventLog::EMAIL_REVIEWED, $emailQueue->emailTemplateName . ' email sent. By: ' . $form->emailFromName, [], CaseEventLog::CATEGORY_INFO);
                     }
-                    $form->addError('general', 'Error: Email Message has not been sent to ' .  $email->e_email_to . '; Reason: ' . $email->e_error_message);
+
+                    if ($email->e_lead_id ?? $email->lead) {
+                        /*
+                         * TODO: The similar logic exist in `\frontend\controllers\LeadController::actionView`. Need to shrink code duplications.
+                         */
+                        $quoteIdSubquery = (new Query())
+                        ->select(['qc_quote_id'])
+                        ->from(['qc' => QuoteCommunication::tableName()])
+                        ->where('qc_communication_type=:communication_type', [':communication_type' => CommunicationForm::TYPE_EMAIL])
+                        ->distinct();
+                        /** @var Quote[] $quotes */
+                        $quotes = Quote::find()->where(['IN', 'id', $quoteIdSubquery])->all();
+                        foreach ($quotes as $quote) {
+                            $quote->setStatusSend();
+                            $this->quoteRepository->save($quote);
+                        }
+                    }
+
+                    Yii::$app->session->setFlash('success', '<strong>Email (' . $email->e_id . ')</strong> was sent to <strong>' . $email->getEmailTo() . '</strong>');
+                    return $this->redirect('/email-review-queue/index');
+                } catch (EmailNotSentException $e) {
+                    $form->addError('general', 'Error: Email Message has not been sent to ' .  $e->getEmailTo() . '; Reason: ' . $e->getMessage());
+                } catch (\Throwable $e) {
+                    $form->addError('general', 'Error: Email Message has not been sent to ' .  $form->emailTo . '; Reason: ' . $e->getMessage() . '<br/>' . $e->getTraceAsString());
                 }
             }
         }
         return $this->render('partial/_preview_email', [
             'previewForm' => $form,
-            'displayActionBtns' => true
+            'displayActionBtns' => true,
+            'files' => []
         ]);
     }
 
