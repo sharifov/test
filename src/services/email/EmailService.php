@@ -467,5 +467,7 @@ class EmailService implements EmailServiceInterface
         } catch (\Throwable $e) {
             throw $e;
         }
+
+        return $email;
     }
 }
