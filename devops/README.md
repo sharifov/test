@@ -102,7 +102,7 @@ In this directory, you will find manifests that describe AWS infrastructure.
 
 # [Ansible](ansible/README.md)
 This directory contains playbooks that are used in server provisioning and application deployment.
-s
+
 # [Jenkins](jenkins/README.md)
 Jenkins dir contains CI/CD pipelines that interact with ansible playbooks.
 
