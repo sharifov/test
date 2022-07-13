@@ -77,7 +77,7 @@ class LeadTaskListService
                         (new ShiftScheduleEventTaskRepository($shiftScheduleEventTask))->save();
                     } catch (TaskListAssignException $exception) {
                         $message = AppHelper::throwableLog($exception);
-                        \Yii::info($message, 'LeadTaskListService:assignReAssign:TaskListAssignException');
+                        \Yii::info($message, 'info\LeadTaskListService:assignReAssign:TaskListAssignException');
                     } catch (\RuntimeException | \DomainException $throwable) {
                         $message = AppHelper::throwableLog($throwable);
                         if (isset($userTask)) {
@@ -97,7 +97,7 @@ class LeadTaskListService
             throw new TaskListAssignException('TaskList not found by LeadId (' . $this->lead->id . ')');
         } catch (TaskListAssignException $exception) {
             $message = AppHelper::throwableLog($exception);
-            \Yii::info($message, 'LeadTaskListService:assignReAssign:TaskListAssignException');
+            \Yii::info($message, 'info\LeadTaskListService:assignReAssign:TaskListAssignException');
         }
     }
 
