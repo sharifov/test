@@ -391,7 +391,6 @@ class CasesController extends FController
 
                             $this->refresh(); //'#communication-form'
                         } else {
-                            //TODO: update for normalized emails using service
                             $mail->statusToReview();
                             $this->emailReviewQueueManageService->createByEmail($mail, $model->cs_dep_id);
 
