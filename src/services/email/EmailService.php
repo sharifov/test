@@ -385,7 +385,7 @@ class EmailService implements EmailServiceInterface
      * @param EmailPreviewFromInterface $previewEmailForm
      * @return \common\models\Email
      */
-    public function createFromPreviewForm(EmailPreviewFromInterface $previewEmailForm)
+    public function createFromPreviewForm(EmailPreviewFromInterface $previewEmailForm, array $attachments = [])
     {
         $mail = new Email();
         $mail->e_template_type_id = $previewEmailForm->e_email_tpl_id ?? null;
@@ -400,6 +400,7 @@ class EmailService implements EmailServiceInterface
         $mail->e_email_to = $previewEmailForm->e_email_to;
         $mail->e_created_dt = date('Y-m-d H:i:s');
         $mail->e_created_user_id = \Yii::$app->user->id;
+        $mail->e_email_data = json_encode($attachments);
 
         return $mail;
     }
@@ -407,10 +408,9 @@ class EmailService implements EmailServiceInterface
     public function createFromLead(EmailPreviewFromInterface $previewEmailForm, Lead $lead, array $attachments = []): Email
     {
         try {
-            $mail = $this->createFromPreviewForm($previewEmailForm);
+            $mail = $this->createFromPreviewForm($previewEmailForm, $attachments);
             $mail->e_project_id = $lead->project_id;
             $mail->e_lead_id = $lead->id;
-            $mail->e_email_data = json_encode($attachments);
 
             if ($mail->save()) {
                 $mail->e_message_id = $mail->generateMessageId();
