@@ -31,7 +31,7 @@ class CallLogController extends FController
                 ],
             ],
             'access' => [
-                'allowActions' => [
+                'only' => [
                     'index'
                 ]
             ]
