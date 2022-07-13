@@ -498,23 +498,23 @@ class EmailsNormalizeService implements EmailServiceInterface
             'status'        =>  EmailStatus::PENDING,
             'createdDt'     =>  date('Y-m-d H:i:s'),
             'params'        => [
-                'templateType'  =>  $previewEmailForm->e_email_tpl_id ?? null,
-                'language'      =>  $previewEmailForm->e_language_id ?? null,
+                'templateType'  =>  $previewEmailForm->getEmailTemplateId() ?? null,
+                'language'      =>  $previewEmailForm->getLanguageId() ?? null,
             ],
             'body'          =>  [
-                'subject'   =>  $previewEmailForm->e_email_subject,
-                'bodyHtml'  =>  $previewEmailForm->e_email_message,
+                'subject'   =>  $previewEmailForm->getEmailSubject(),
+                'bodyHtml'  =>  $previewEmailForm->getEmailMessage(),
                 'data'      =>  json_encode($attachments),
             ],
             'contacts'      =>  [
                 'from' => [
-                    'email' => $previewEmailForm->e_email_from,
-                    'name'  =>  $previewEmailForm->e_email_from_name,
+                    'email' => $previewEmailForm->getEmailFrom(),
+                    'name'  =>  $previewEmailForm->getEmailFromName(),
                     'type' => EmailContactType::FROM,
                 ],
                 'to' => [
-                    'email' => $previewEmailForm->e_email_to,
-                    'name'  =>  $previewEmailForm->e_email_to_name,
+                    'email' => $previewEmailForm->getEmailTo(),
+                    'name'  =>  $previewEmailForm->getEmailToName(),
                     'type' => EmailContactType::TO,
                 ],
             ]

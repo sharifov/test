@@ -4,14 +4,14 @@ namespace frontend\models;
 
 interface EmailPreviewFromInterface
 {
-    public $e_email_from;
-    public $e_email_to;
-    public $e_email_from_name;
-    public $e_email_to_name;
-    public $e_email_subject;
-    public $e_email_message;
-    public $e_email_tpl_id;
-    public $e_language_id;
+    public function getEmailFrom(): string;
+    public function getEmailTo(): string;
+    public function getEmailFromName(): ?string;
+    public function getEmailToName(): ?string;
+    public function getEmailSubject(): ?string;
+    public function getEmailMessage(): ?string;
+    public function getEmailTemplateId(): ?int;
+    public function getLanguageId(): ?string;
 
     public function countLettersInEmailMessage(): int;
 }

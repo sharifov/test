@@ -44,6 +44,8 @@ use yii\helpers\ArrayHelper;
 
 class CasePreviewEmailForm extends Model implements EmailPreviewFromInterface
 {
+    use EmailPreviewFormTrait;
+
     public $e_case_id;
     public $e_email_from;
     public $e_email_to;
