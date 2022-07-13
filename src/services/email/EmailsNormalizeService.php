@@ -31,11 +31,10 @@ use src\services\abtesting\email\EmailTemplateOfferABTestingService;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
-use frontend\models\LeadPreviewEmailForm;
 use src\exception\EmailNotSentException;
 use common\models\ClientEmail;
-use frontend\models\CasePreviewEmailForm;
 use src\forms\emailReviewQueue\EmailReviewQueueForm;
+use frontend\models\EmailPreviewFromInterface;
 
 /**
  *
@@ -491,80 +490,55 @@ class EmailsNormalizeService implements EmailServiceInterface
         }
     }
 
-    public function createFromLead(LeadPreviewEmailForm $previewEmailForm, Lead $lead, array $attachments = []): Email
+    public function getDataArrayFromPreviewForm(EmailPreviewFromInterface $previewEmailForm, array $attachments = [])
     {
         $data = [
             'userId'        =>  $this->userId,
             'type'          =>  EmailType::OUTBOX,
             'status'        =>  EmailStatus::PENDING,
-            'projectId'     =>  $lead->project_id,
-            'depId'         =>  $lead->l_dep_id,
             'createdDt'     =>  date('Y-m-d H:i:s'),
-            'leadsIds'      =>  [$lead->id],
-        ];
-
-        $data['params'] = [
-            'templateType'  =>  $previewEmailForm->e_email_tpl_id ?? null,
-            'language'      =>  $previewEmailForm->e_language_id ?? null,
-        ];
-
-        $data['body'] = [
-            'subject'   =>  $previewEmailForm->e_email_subject,
-            'bodyHtml'  =>  $previewEmailForm->e_email_message,
-            'data'      =>  json_encode($attachments),
-        ];
-
-        $data['contacts'] = [
-            'from' => [
-                'email' => $previewEmailForm->e_email_from,
-                'name'  =>  $previewEmailForm->e_email_from_name,
-                'type' => EmailContactType::FROM,
+            'params'        => [
+                'templateType'  =>  $previewEmailForm->e_email_tpl_id ?? null,
+                'language'      =>  $previewEmailForm->e_language_id ?? null,
             ],
-            'to' => [
-                'email' => $previewEmailForm->e_email_to,
-                'name'  =>  $previewEmailForm->e_email_to_name,
-                'type' => EmailContactType::TO,
+            'body'          =>  [
+                'subject'   =>  $previewEmailForm->e_email_subject,
+                'bodyHtml'  =>  $previewEmailForm->e_email_message,
+                'data'      =>  json_encode($attachments),
             ],
+            'contacts'      =>  [
+                'from' => [
+                    'email' => $previewEmailForm->e_email_from,
+                    'name'  =>  $previewEmailForm->e_email_from_name,
+                    'type' => EmailContactType::FROM,
+                ],
+                'to' => [
+                    'email' => $previewEmailForm->e_email_to,
+                    'name'  =>  $previewEmailForm->e_email_to_name,
+                    'type' => EmailContactType::TO,
+                ],
+            ]
         ];
+
+        return $data;
+    }
+
+    public function createFromLead(EmailPreviewFromInterface $previewEmailForm, Lead $lead, array $attachments = []): Email
+    {
+        $data = $this->getDataArrayFromPreviewForm($previewEmailForm, $attachments);
+        $data['projectId'] = $lead->project_id;
+        $data['depId'] = $lead->l_dep_id;
+        $data['leadsIds'] = [$lead->id];
 
         return $this->create(EmailForm::fromArray($data));
     }
 
-    public function createFromCase(CasePreviewEmailForm $previewEmailForm, Cases $case, array $attachments = []): Email
+    public function createFromCase(EmailPreviewFromInterface $previewEmailForm, Cases $case, array $attachments = []): Email
     {
-        $data = [
-            'userId'        =>  $this->userId,
-            'type'          =>  EmailType::OUTBOX,
-            'status'        =>  EmailStatus::PENDING,
-            'projectId'     =>  $case->cs_project_id,
-            'depId'         =>  $case->cs_dep_id,
-            'createdDt'     =>  date('Y-m-d H:i:s'),
-            'casesIds'      =>  [$case->cs_id],
-        ];
-
-        $data['params'] = [
-            'templateType'  =>  $previewEmailForm->e_email_tpl_id ?? null,
-            'language'      =>  $previewEmailForm->e_language_id ?? null,
-        ];
-
-        $data['body'] = [
-            'subject'   =>  $previewEmailForm->e_email_subject,
-            'bodyHtml'  =>  $previewEmailForm->e_email_message,
-            'data'      =>  json_encode($attachments),
-        ];
-
-        $data['contacts'] = [
-            'from' => [
-                'email' => $previewEmailForm->e_email_from,
-                'name'  =>  $previewEmailForm->e_email_from_name,
-                'type' => EmailContactType::FROM,
-            ],
-            'to' => [
-                'email' => $previewEmailForm->e_email_to,
-                'name'  =>  $previewEmailForm->e_email_to_name,
-                'type' => EmailContactType::TO,
-            ],
-        ];
+        $data = $this->getDataArrayFromPreviewForm($previewEmailForm, $attachments);
+        $data['projectId'] = $case->cs_project_id;
+        $data['depId'] = $case->cs_dep_id;
+        $data['casesIds'] = [$case->cs_id];
 
         return $this->create(EmailForm::fromArray($data));
     }
