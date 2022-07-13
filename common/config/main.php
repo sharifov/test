@@ -139,7 +139,7 @@ return [
             'url2' => 'https://communication.api.travelinsides.com/v2/',
             'username' => 'sales',
             'password' => '',
-            'xAccelRedirectCommunicationUrl' => '',
+            'xAccelRedirectCommsUrl' => '',
             'voipApiUsername' => 'sales',
             'host' => ''
         ],

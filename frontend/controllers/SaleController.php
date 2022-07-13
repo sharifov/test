@@ -255,7 +255,7 @@ class SaleController extends FController
                 'emails' => $emails,
                 'visibilityType' => 'all',
             ];
-            $host = Yii::$app->params['backOffice']['serverUrlV3'];
+            $host = Yii::$app->params['backOffice']['urlV3'];
             $responseBO = BackOffice::sendRequest2('flight-request/resend-tickets', $data, 'POST', 120, $host);
 
             if (!$responseBO->isOk) {
@@ -393,7 +393,7 @@ class SaleController extends FController
                     'uid' => $caseSale->css_sale_book_id,
                 ]
             ];
-            $host = Yii::$app->params['backOffice']['serverUrlV2'];
+            $host = Yii::$app->params['backOffice']['urlV2'];
             $responseBO = BackOffice::sendRequest2('flight-request/cancel', $data, 'POST', 120, $host);
 
             if (!$responseBO->isOk) {
