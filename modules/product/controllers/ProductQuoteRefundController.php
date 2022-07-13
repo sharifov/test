@@ -185,7 +185,7 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
                 if (!$emailTemplateType) {
                     throw new \RuntimeException('Email template type is not set in project params');
                 }
-                $previewEmailResult = Yii::$app->communication->mailPreview($case->cs_project_id, $emailTemplateType, $emailFrom, $form->clientEmail, $emailData, $locale);
+                $previewEmailResult = Yii::$app->comms->mailPreview($case->cs_project_id, $emailTemplateType, $emailFrom, $form->clientEmail, $emailData, $locale);
                 if ($previewEmailResult['error']) {
                     $previewEmailResult['error'] = @Json::decode($previewEmailResult['error']);
                     $form->addError('general', 'Communication service error: ' . ($previewEmailResult['error']['name'] ?? '') . ' ( ' . ($previewEmailResult['error']['message']  ?? '') . ' )');

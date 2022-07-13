@@ -296,7 +296,7 @@ class ToolsController extends FController
                     if ($twilioDbResult = ContactPhoneInfoService::findByPhoneAndService($phone, ContactPhoneServiceInfo::SERVICE_TWILIO)) {
                         $dbResult['twilio'] = $twilioDbResult->toArray();
                     } else {
-                        $apiResult['twilio'] = \Yii::$app->communication->twilioLookup($phone);
+                        $apiResult['twilio'] = \Yii::$app->comms->twilioLookup($phone);
                         $contactPhoneList = ContactPhoneListService::getOrCreate($phone);
                         ContactPhoneInfoService::getOrCreate(
                             $contactPhoneList->cpl_id,

@@ -181,7 +181,7 @@ class OfferEmailController extends ApiBaseController
             $emailData = $lead->getEmailData2([$quote->id], $projectContactInfo, $lang, $agent);
             $emailData = ArrayHelper::merge($emailData, $sendQuoteApiForm->additional_data);
 
-            $mailPreview = \Yii::$app->communication->mailPreview(
+            $mailPreview = \Yii::$app->comms->mailPreview(
                 $lead->project_id,
                 $sendQuoteApiForm->template_key,
                 $sendQuoteApiForm->email_from,

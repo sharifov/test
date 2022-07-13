@@ -22,7 +22,7 @@ class ReturnToHoldCall
 
     public function __construct()
     {
-        $this->communication = \Yii::$app->communication;
+        $this->communication = \Yii::$app->comms;
     }
 
     public function return(Call $call, int $userId, string $deviceIdentity): bool

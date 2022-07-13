@@ -694,7 +694,7 @@ class LeadController extends FController
                     $comForm->c_preview_email = 1;
 
                     /** @var CommunicationService $communication */
-                    $communication = Yii::$app->communication;
+                    $communication = Yii::$app->comms;
                     $data['origin'] = '';
 
                     $content_data['email_body_html'] = $comForm->c_email_message;
@@ -818,7 +818,7 @@ class LeadController extends FController
                     $comForm->c_preview_sms = 1;
 
                     /** @var CommunicationService $communication */
-                    $communication = Yii::$app->communication;
+                    $communication = Yii::$app->comms;
 
                     //$data['origin'] = 'ORIGIN';
                     //$data['destination'] = 'DESTINATION';

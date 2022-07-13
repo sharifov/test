@@ -74,8 +74,8 @@ class TwilioController extends ApiBaseNoAuthController
         $this->enableCsrfValidation = false;
         $schemeHost = Yii::$app->params['scheme_host'] ?? 'https';
 
-        if (isset(Yii::$app->params['autodetect_host']) && Yii::$app->communication->host && Yii::$app->params['autodetect_host'] === false) {
-            $serverHost = Yii::$app->communication->host;
+        if (isset(Yii::$app->params['autodetect_host']) && Yii::$app->comms->host && Yii::$app->params['autodetect_host'] === false) {
+            $serverHost = Yii::$app->comms->host;
         } else {
             $serverHost = $_SERVER['HTTP_HOST'];
         }

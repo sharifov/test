@@ -277,7 +277,7 @@ class SmsDistributionList extends ActiveRecord
         }
 
         $out = ['error' => false];
-        $communication = Yii::$app->communication;
+        $communication = Yii::$app->comms;
         $data = [];
 
         $data['project_id'] = $this->sdl_project_id;

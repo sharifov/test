@@ -480,7 +480,7 @@ class CommunicationController extends ApiBaseController
                         if (SettingHelper::callSpamFilterEnabled() && ($callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate()) || $callLogFilterGuard->guardTrust(SettingHelper::getCallTrustFilterRate()))) {
                             if (CallRedialGuard::guard($callModel->cProject->project_key ?? '', $callModel->cDep->dep_key ?? '')) {
                                 $logExecutionTime->start('redial');
-                                $result = Yii::$app->communication->twilioDial(
+                                $result = Yii::$app->comms->twilioDial(
                                     $incoming_phone_number,
                                     $client_phone_number,
                                     SettingHelper::getCallbackToCallerCurlTimeout(),
@@ -619,7 +619,7 @@ class CommunicationController extends ApiBaseController
                             if (SettingHelper::callSpamFilterEnabled() && ($callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate()) || $callLogFilterGuard->guardTrust(SettingHelper::getCallTrustFilterRate()))) {
                                 if (CallRedialGuard::guard($callModel->cProject->project_key ?? '', $callModel->cDep->dep_key ?? '')) {
                                     $logExecutionTime->start('redial');
-                                    $result = Yii::$app->communication->twilioDial(
+                                    $result = Yii::$app->comms->twilioDial(
                                         $incoming_phone_number,
                                         $client_phone_number,
                                         SettingHelper::getCallbackToCallerCurlTimeout(),

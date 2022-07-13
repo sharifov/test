@@ -21,7 +21,7 @@ class CompleteAllSimpleCalls
 
     public function __construct()
     {
-        $this->communication = \Yii::$app->communication;
+        $this->communication = \Yii::$app->comms;
     }
 
     public function complete(int $userId): bool

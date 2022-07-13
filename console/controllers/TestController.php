@@ -300,7 +300,7 @@ JSON;
 
     public function actionQ()
     {
-        echo \Yii::$app->communication->makeCallClientNotification(
+        echo \Yii::$app->comms->makeCallClientNotification(
             '+14157693509',
             '+37369305726',
             'Hello world',

@@ -437,7 +437,7 @@ class Sms extends \yii\db\ActiveRecord
         $out = ['error' => false];
 
         /** @var CommunicationService $communication */
-        $communication = Yii::$app->communication;
+        $communication = Yii::$app->comms;
         $data = [];
         $data['project_id'] = $this->s_project_id;
         $data['s_id'] = $this->s_id;

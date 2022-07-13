@@ -178,7 +178,7 @@ class OfferSmsController extends ApiBaseController
             $contentData = $lead->getEmailData2([$quote->id], $projectContactInfo, $lang, $agent);
             $contentData = ArrayHelper::merge($contentData, $sendQuoteApiForm->additional_data);
 
-            $smsPreview = Yii::$app->communication->smsPreview(
+            $smsPreview = Yii::$app->comms->smsPreview(
                 $lead->project_id,
                 $sendQuoteApiForm->template_key,
                 $sendQuoteApiForm->sms_from,

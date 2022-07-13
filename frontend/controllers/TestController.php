@@ -635,7 +635,7 @@ class TestController extends FController
 //        }
 //
 //        die;
-//        $service = Yii::$app->communication;
+//        $service = Yii::$app->comms;
 //
 //        $call = Call::findOne(['c_call_sid' => 'CA78c6d347bc1db1e33550997bb9b0b6c2']);
         ////
@@ -701,7 +701,7 @@ class TestController extends FController
     public function actionComPreview()
     {
         /** @var CommunicationService $communication */
-        $communication = Yii::$app->communication;
+        $communication = Yii::$app->comms;
         $data['origin'] = 'ORIGIN';
         $data['destination'] = 'DESTINATION';
 
@@ -1651,7 +1651,7 @@ class TestController extends FController
         $lead = Lead::find()->where(['gid' => $gid])->limit(1)->one();
 
         /** @var CommunicationService $communication */
-        $communication = Yii::$app->communication;
+        $communication = Yii::$app->comms;
 
         $comForm = new CommunicationForm();
         $language = $comForm->c_language_id ?: 'en-US';

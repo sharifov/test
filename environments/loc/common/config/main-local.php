@@ -109,7 +109,7 @@ return [
             'class' => 'common\components\email\EmailComponent',
             'defaultFromEmail' => env('COMMON_CONFIG_MAIN_COMPONENTS_EMAIL_DEFAULTFROMEMAIL'),
         ],
-        'communication' => [
+        'comms' => [
             'class' => \common\components\CommunicationService::class,
             'host' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMS_HOST'),
             'url' => env('COMMON_CONFIG_MAIN_COMPONENTS_COMMS_URL'),

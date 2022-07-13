@@ -42,8 +42,8 @@ $envData = [
         <tr>
             <td>2</td>
             <td>communication</td>
-            <td><?=Html::encode(Yii::$app->communication->url)?></td>
-            <td><?=Html::encode(Yii::$app->communication->username)?></td>
+            <td><?=Html::encode(Yii::$app->comms->url)?></td>
+            <td><?=Html::encode(Yii::$app->comms->username)?></td>
         </tr>
         <tr>
             <td>3</td>

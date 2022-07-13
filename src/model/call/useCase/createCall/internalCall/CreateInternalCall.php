@@ -38,7 +38,7 @@ class CreateInternalCall
 
             $recordingManager = RecordManager::toUser($form->createdUser->id);
 
-            $result = \Yii::$app->communication->callToUser(
+            $result = \Yii::$app->comms->callToUser(
                 $form->getVoipDevice(),
                 $toUserVoipDevice,
                 $form->toUserId,

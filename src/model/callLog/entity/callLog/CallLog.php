@@ -287,7 +287,7 @@ class CallLog extends \yii\db\ActiveRecord
 
     public function getRecordingUrl(): string
     {
-        return \Yii::$app->communication->getCallRecordingUrl($this->cl_call_sid);
+        return \Yii::$app->comms->getCallRecordingUrl($this->cl_call_sid);
     }
 
     public function isClientNotification(): bool
