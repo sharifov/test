@@ -125,7 +125,7 @@ use yii\widgets\ActiveForm;
 use modules\cases\src\abac\CasesAbacObject;
 use modules\cases\src\abac\dto\CasesAbacDto;
 use src\repositories\project\ProjectRepository;
-use src\exceptions\CreateModelException;
+use src\exception\CreateModelException;
 use src\services\email\EmailServiceInterface;
 use src\services\email\EmailsNormalizeService;
 use src\exception\EmailNotSentException;
