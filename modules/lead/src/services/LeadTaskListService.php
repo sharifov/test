@@ -18,6 +18,7 @@ use modules\taskList\src\entities\taskList\TaskList;
 use modules\taskList\src\entities\taskList\TaskListQuery;
 use modules\taskList\src\entities\userTask\repository\UserTaskRepository;
 use modules\taskList\src\entities\userTask\UserTask;
+use modules\taskList\src\exceptions\TaskListAssignException;
 use src\helpers\app\AppHelper;
 use src\helpers\ErrorsToStringHelper;
 use src\model\leadData\entity\LeadData;
@@ -44,49 +45,59 @@ class LeadTaskListService
     public function assign(): void
     {
         $dtNow = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')));
+        try {
+            if ($taskLists = TaskListQuery::getTaskListByLeadId($this->lead->id)) {
+                foreach ($taskLists as $taskList) {
+                    try {
+                        $dtNowWithDuration = $dtNow->modify(sprintf('+%d hour', $taskList->getDurationParam()));
+                        if (!$userShiftSchedule = UserShiftScheduleQuery::getNextTimeLineByUser($this->lead->employee_id, $dtNowWithDuration)) {
+                            throw new TaskListAssignException('UserShiftSchedule not found by EmployeeId (' . $this->lead->employee_id . ') and StartDateTime:' . $dtNowWithDuration->format('Y-m-d H:i:s'));
+                        }
 
-        if ($taskLists = TaskListQuery::getTaskListByLeadId($this->lead->id)) {
-            if (!$userShiftSchedule = UserShiftScheduleQuery::getNextTimeLineByUser($this->lead->employee_id, $dtNow)) {
-                throw new \RuntimeException('UserShiftSchedule not found by EmployeeId (' . $this->lead->employee_id . ')');
-            }
+                        $userTask = UserTask::create(
+                            $this->lead->employee_id,
+                            TargetObject::TARGET_OBJ_LEAD,
+                            $this->lead->id,
+                            $taskList->tl_id,
+                            $dtNow->format('Y-m-d H:i:s'),
+                            $userShiftSchedule->uss_end_utc_dt
+                        );
+                        if (!$userTask->validate()) {
+                            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($userTask, ' '));
+                        }
+                        (new UserTaskRepository($userTask))->save();
 
-            foreach ($taskLists as $taskList) {
-                try {
-                    $userTask = UserTask::create(
-                        $this->lead->employee_id,
-                        TargetObject::TARGET_OBJ_LEAD,
-                        $this->lead->id,
-                        $taskList->tl_id,
-                        $dtNow->format('Y-m-d H:i:s'),
-                        $userShiftSchedule->uss_end_utc_dt
-                    );
-                    if (!$userTask->validate()) {
-                        throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($userTask, ' '));
+                        $shiftScheduleEventTask = ShiftScheduleEventTask::create(
+                            $userShiftSchedule->uss_id,
+                            $userTask->ut_id
+                        );
+                        if (!$shiftScheduleEventTask->validate()) {
+                            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($shiftScheduleEventTask, ' '));
+                        }
+                        (new ShiftScheduleEventTaskRepository($shiftScheduleEventTask))->save();
+                    } catch (TaskListAssignException $exception) {
+                        $message = AppHelper::throwableLog($exception);
+                        \Yii::info($message, 'LeadTaskListService:assignReAssign:TaskListAssignException');
+                    } catch (\RuntimeException | \DomainException $throwable) {
+                        $message = AppHelper::throwableLog($throwable);
+                        if (isset($userTask)) {
+                            $message['userTask'] = ArrayHelper::toArray($userTask);
+                        }
+                        \Yii::warning($message, 'LeadTaskListService:assignReAssign:Exception');
+                    } catch (\Throwable $throwable) {
+                        $message = AppHelper::throwableLog($throwable);
+                        if (isset($userTask)) {
+                            $message['userTask'] = ArrayHelper::toArray($userTask);
+                        }
+                        \Yii::error($message, 'LeadTaskListService:assignReAssign:Throwable');
                     }
-                    (new UserTaskRepository($userTask))->save();
-
-                    $shiftScheduleEventTask = ShiftScheduleEventTask::create(
-                        $userShiftSchedule->uss_id,
-                        $userTask->ut_id
-                    );
-                    if (!$shiftScheduleEventTask->validate()) {
-                        throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($shiftScheduleEventTask, ' '));
-                    }
-                    (new ShiftScheduleEventTaskRepository($shiftScheduleEventTask))->save();
-                } catch (\RuntimeException | \DomainException $throwable) {
-                    $message = AppHelper::throwableLog($throwable);
-                    if (isset($userTask)) {
-                        $message['userTask'] = ArrayHelper::toArray($userTask);
-                    }
-                    \Yii::warning($message, 'LeadTaskListService:assignReAssign:Exception');
-                } catch (\Throwable $throwable) {
-                    $message = AppHelper::throwableLog($throwable);
-                    if (isset($userTask)) {
-                        $message['userTask'] = ArrayHelper::toArray($userTask);
-                    }
-                    \Yii::error($message, 'LeadTaskListService:assignReAssign:Throwable');
                 }
+                return;
             }
+            throw new TaskListAssignException('TaskList not found by LeadId (' . $this->lead->id . ')');
+        } catch (TaskListAssignException $exception) {
+            $message = AppHelper::throwableLog($exception);
+            \Yii::info($message, 'LeadTaskListService:assignReAssign:TaskListAssignException');
         }
     }
 

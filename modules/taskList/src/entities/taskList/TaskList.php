@@ -4,6 +4,7 @@ namespace modules\taskList\src\entities\taskList;
 
 use common\components\validators\CheckJsonValidator;
 use common\models\Employee;
+use frontend\helpers\JsonHelper;
 use modules\objectSegment\src\entities\ObjectSegmentTask;
 use modules\taskList\src\objects\TargetObjectList;
 use modules\taskList\src\services\TaskListService;
@@ -285,5 +286,11 @@ class TaskList extends ActiveRecord
         }, $duration, new TagDependency([
             'tags' => self::CACHE_TAG,
         ]));
+    }
+
+    public function getDurationParam(): int
+    {
+        $params = JsonHelper::decode($this->tl_params_json);
+        return (int)$params['duration'] ?? 0;
     }
 }
