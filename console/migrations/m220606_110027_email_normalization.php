@@ -49,6 +49,7 @@ class m220606_110027_email_normalization extends Migration
             'e_is_deleted' => $this->boolean()->defaultValue(false)->notNull(),
             'e_status_id' => $this->tinyInteger(1)->defaultValue(1)->notNull(),
             'e_created_user_id' => $this->integer(),
+            'e_updated_user_id' => $this->integer(),
             'e_created_dt' => $this->dateTime(),
             'e_updated_dt' => $this->dateTime(),
             'e_body_id' => $this->integer(),
@@ -57,6 +58,7 @@ class m220606_110027_email_normalization extends Migration
         $this->addForeignKey('FK-e_project_id', '{{%email_norm}}', ['e_project_id'], '{{%projects}}', ['id'], 'SET NULL', 'CASCADE');
         $this->addForeignKey('FK-e_departament_id', '{{%email_norm}}', ['e_departament_id'], '{{%department}}', ['dep_id'], 'SET NULL', 'CASCADE');
         $this->addForeignKey('FK-e_created_user_id', '{{%email_norm}}', ['e_created_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
+        $this->addForeignKey('FK-e_updated_user_id', '{{%email_norm}}', ['e_updated_user_id'], '{{%employees}}', ['id'], 'SET NULL', 'CASCADE');
 
 
         $this->createTable('{{%email_params}}', [

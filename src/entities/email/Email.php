@@ -34,6 +34,7 @@ use yii\helpers\ArrayHelper;
  * @property int $e_is_deleted
  * @property int $e_status_id
  * @property int|null $e_created_user_id
+ * @property int|null $e_updated_user_id
  * @property string|null $e_created_dt
  * @property string|null $e_updated_dt
  * @property int|null $e_body_id
@@ -76,25 +77,12 @@ class Email extends BaseActiveRecord
     public function rules(): array
     {
         return [
-            ['e_body_id', 'integer'],
-
             ['e_created_dt', 'safe'],
-
-            ['e_created_user_id', 'integer'],
+            [['e_body_id', 'e_project_id', 'e_status_id', 'e_type_id', 'e_is_deleted', 'e_created_user_id', 'e_updated_user_id', 'e_departament_id'], 'integer'],
             ['e_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_created_user_id' => 'id']],
-
-            ['e_departament_id', 'integer'],
+            ['e_updated_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_updated_user_id' => 'id']],
             ['e_departament_id', 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['e_departament_id' => 'dep_id']],
-
-            ['e_is_deleted', 'integer'],
-
-            ['e_project_id', 'integer'],
             ['e_project_id', 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['e_project_id' => 'id']],
-
-            ['e_status_id', 'integer'],
-
-            ['e_type_id', 'integer'],
-
             ['e_updated_dt', 'safe'],
         ];
     }
@@ -102,6 +90,11 @@ class Email extends BaseActiveRecord
     public function getCreatedUser(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'e_created_user_id']);
+    }
+
+    public function getUpdatedUser(): \yii\db\ActiveQuery
+    {
+        return $this->hasOne(Employee::class, ['id' => 'e_updated_user_id']);
     }
 
     public function getDepartament(): \yii\db\ActiveQuery
