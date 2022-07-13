@@ -10,9 +10,9 @@ return [
     'backOffice' => [
         'ver' => '1.0.0',
         'apiKey' => env('COMMON_CONFIG_PARAMS_BACKOFFICE_APIKEY'),
-        'serverUrl' => env('COMMON_CONFIG_PARAMS_BACKOFFICE_SERVERURL'),
-        'serverUrlV2' => env('COMMON_CONFIG_PARAMS_BACKOFFICE_SERVERURLV2'),
-        'serverUrlV3' => env('COMMON_CONFIG_PARAMS_BACKOFFICE_SERVERURLV3'),
+        'url' => env('COMMON_CONFIG_PARAMS_BACKOFFICE_URL'),
+        'urlV2' => env('COMMON_CONFIG_PARAMS_BACKOFFICE_URLV2'),
+        'urlV3' => env('COMMON_CONFIG_PARAMS_BACKOFFICE_URLV3'),
         'webHookEndpoint' => 'webhook/ping',
         'username' => env('COMMON_CONFIG_PARAMS_BACKOFFICE_USERNAME'),
         'password' => env('COMMON_CONFIG_PARAMS_BACKOFFICE_PASSWORD')
