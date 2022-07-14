@@ -900,7 +900,7 @@ class LeadSearch extends Lead
         }
 
         if (ArrayHelper::isIn($this->is_conversion, ['1', '0'], false)) {
-            if (isset($this->employee_id)) {
+            if (!empty($this->employee_id)) {
                 $leadIds = LeadUserConversion
                     ::find()
                     ->select(['luc_lead_id'])
