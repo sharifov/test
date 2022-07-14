@@ -1426,7 +1426,6 @@ class CasesController extends FController
                         $this->casesManageService->solved($case->cs_id, $user->id, $statusForm->message, $user->username);
                         if ($statusForm->isSendFeedback()) {
                             $this->casesCommunicationService->sendFeedbackEmail($case, $statusForm, Auth::user(), true);
-                            //$this->sendFeedbackEmailProcess($case, $statusForm, Auth::user());
                         }
                         break;
                     case CasesStatus::STATUS_PENDING:
@@ -1468,91 +1467,7 @@ class CasesController extends FController
             'statusForm' => $statusForm,
         ]);
     }
-    //TODO: need remove before merge with master. Unused method
-    private function sendFeedbackEmailProcess(Cases $case, CasesChangeStatusForm $form, Employee $user): void
-    {
-        if (!$project = $case->project) {
-            return;
-        }
-        if (!$params = $project->getParams()) {
-            return;
-        }
 
-        $content = $this->casesCommunicationService->getEmailData($case, $user);
-
-        try {
-            $mailPreview = Yii::$app->comms->mailPreview(
-                $case->cs_project_id,
-                $params->object->case->feedbackTemplateTypeKey,
-                $params->object->case->feedbackEmailFrom,
-                $form->sendTo,
-                $content,
-                $form->language
-            );
-
-            if ($mailPreview['error'] !== false) {
-                throw new \DomainException($mailPreview['error']);
-            }
-
-            $this->sendFeedbackEmail(
-                $params,
-                $case,
-                $form,
-                $user,
-                $mailPreview['data']['email_subject'],
-                $mailPreview['data']['email_body_html']
-            );
-        } catch (\Throwable $e) {
-            Yii::$app->session->addFlash('error', 'Send email error: ' . $e->getMessage());
-            return;
-        }
-
-        Yii::$app->session->addFlash('success', 'Email has been successfully sent.');
-    }
-    //TODO: need remove before merge with master. Unused method
-    private function sendFeedbackEmail(
-        \src\model\project\entity\params\Params $params,
-        Cases $case,
-        CasesChangeStatusForm $form,
-        Employee $user,
-        $subject,
-        $body
-    ): void {
-        $mail = new Email();
-        $mail->e_project_id = $case->cs_project_id;
-        $mail->e_case_id = $case->cs_id;
-        $templateTypeId = EmailTemplateType::find()
-            ->select(['etp_id'])
-            ->andWhere(['etp_key' => $params->object->case->feedbackTemplateTypeKey])
-            ->asArray()
-            ->one();
-        if ($templateTypeId) {
-            $mail->e_template_type_id = $templateTypeId['etp_id'];
-        }
-        $mail->e_type_id = Email::TYPE_OUTBOX;
-        $mail->e_status_id = Email::STATUS_PENDING;
-        $mail->e_email_subject = $subject;
-        $mail->body_html = $body;
-        $mail->e_email_from = $params->object->case->feedbackEmailFrom;
-        $mail->e_email_from_name = $params->object->case->feedbackNameFrom ?: $user->nickname;
-        $mail->e_email_to_name = $case->client ? $case->client->full_name : '';
-        $mail->e_language_id = $form->language;
-        $mail->e_email_to = $form->sendTo;
-        $mail->e_created_dt = date('Y-m-d H:i:s');
-        $mail->e_created_user_id = $user->id;
-
-        if (!$mail->save()) {
-            throw new \DomainException(VarDumper::dumpAsString($mail->getErrors()));
-        }
-
-        $mail->e_message_id = $mail->generateMessageId();
-        $mail->save();
-        $mailResponse = $mail->sendMail();
-
-        if ($mailResponse['error'] !== false) {
-            throw new \DomainException('Email(Id: ' . $mail->e_id . ') has not been sent.');
-        }
-    }
 
     /**
      * @return string
