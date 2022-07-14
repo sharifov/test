@@ -543,7 +543,7 @@ class EmailsNormalizeService implements EmailServiceInterface
         return $this->create(EmailForm::fromArray($data));
     }
 
-    public function sendAfterReview(EmailReviewQueueForm $form, $email)
+    public function updateAfterReview(EmailReviewQueueForm $form, $email)
     {
         try {
             $data = [
@@ -567,7 +567,6 @@ class EmailsNormalizeService implements EmailServiceInterface
                 ]
             ];
             $email = $this->update($email, EmailForm::fromArray($data));
-            $this->sendMail($email);
         } catch (\Throwable $e) {
             throw $e;
         }

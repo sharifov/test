@@ -15,5 +15,5 @@ interface EmailServiceInterface
 
     public function sendMail($email, array $data = []);
 
-    public function sendAfterReview(EmailReviewQueueForm $form, $email);
+    public function updateAfterReview(EmailReviewQueueForm $form, $email);
 }

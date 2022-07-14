@@ -447,7 +447,7 @@ class EmailService implements EmailServiceInterface
         return $mail;
     }
 
-    public function sendAfterReview(EmailReviewQueueForm $form, $email)
+    public function updateAfterReview(EmailReviewQueueForm $form, $email)
     {
         try {
             $email->e_email_from = $form->emailFrom;
@@ -458,9 +458,7 @@ class EmailService implements EmailServiceInterface
             $email->e_status_id = Email::STATUS_PENDING;
             $email->body_html = $form->emailMessage;
 
-            if ($email->save()) {
-                $this->sendMail($email);
-            } else {
+            if (!$email->save()) {
                 throw new \Exception($email->getErrorSummary(true)[0]);
             }
         } catch (\Throwable $e) {
