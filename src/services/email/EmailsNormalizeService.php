@@ -32,10 +32,10 @@ use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use src\exception\EmailNotSentException;
-use common\models\ClientEmail;
 use src\forms\emailReviewQueue\EmailReviewQueueForm;
 use frontend\models\EmailPreviewFromInterface;
 use src\dto\email\EmailDTO;
+use src\entities\email\EmailRepository;
 
 /**
  *
@@ -158,13 +158,6 @@ class EmailsNormalizeService implements EmailServiceInterface
         return $command->queryScalar();
     }
 
-    public static function detectClientId(string $email): ?int
-    {
-        $clientEmail = ClientEmail::find()->byEmail($email)->one();
-
-        return $clientEmail->client_id ?? null;
-    }
-
     public function create(EmailForm $form)
     {
         $transaction = \Yii::$app->db->beginTransaction();
@@ -227,7 +220,7 @@ class EmailsNormalizeService implements EmailServiceInterface
             $email->refresh();
 
             //=link Clients
-            $clientsIds = $form->clients ?? [self::detectClientId($email->emailTo)];
+            $clientsIds = $form->clients ?? [EmailRepository::detectClientId($email->emailTo)];
             if (!empty($clientsIds)) {
                 foreach ($clientsIds as $id) {
                     if ($client = Client::findOne($id)) {
