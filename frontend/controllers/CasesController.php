@@ -8,28 +8,25 @@ use common\components\CommunicationService;
 use common\helpers\LogHelper;
 use common\models\CaseNote;
 use common\models\CaseSale;
-use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Department;
-use common\models\DepartmentEmailProject;
-use common\models\DepartmentPhoneProject;
 use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\Lead;
-use common\models\Payment;
 use common\models\Quote;
 use common\models\search\CaseSaleSearch;
 use common\models\search\LeadSearch;
 use common\models\search\SaleSearch;
 use common\models\Sms;
 use common\models\SmsTemplateType;
-use common\models\UserProjectParams;
 use common\widgets\Alert;
 use frontend\helpers\JsonHelper;
 use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
+use modules\cases\src\abac\CasesAbacObject;
+use modules\cases\src\abac\dto\CasesAbacDto;
 use modules\cases\src\abac\saleSearch\CaseSaleSearchAbacDto;
 use modules\cases\src\abac\saleSearch\CaseSaleSearchAbacObject;
 use modules\email\src\abac\dto\EmailPreviewDto;
@@ -43,7 +40,6 @@ use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\entities\order\search\OrderSearch;
-use modules\order\src\payment\helpers\PaymentHelper;
 use modules\order\src\payment\PaymentRepository;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
@@ -53,11 +49,14 @@ use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use src\auth\Auth;
 use src\entities\cases\CaseEventLog;
 use src\entities\cases\CaseEventLogSearch;
-use src\entities\cases\CasesSourceType;
+use src\entities\cases\Cases;
+use src\entities\cases\CasesSearch;
 use src\entities\cases\CasesStatus;
 use src\entities\cases\CaseStatusLogSearch;
 use src\exception\AccessDeniedException;
 use src\exception\BoResponseException;
+use src\exception\CreateModelException;
+use src\exception\EmailNotSentException;
 use src\forms\cases\CasesAddEmailForm;
 use src\forms\cases\CasesAddPhoneForm;
 use src\forms\cases\CasesChangeStatusForm;
@@ -66,20 +65,17 @@ use src\forms\cases\CasesCreateByChatForm;
 use src\forms\cases\CasesCreateByWebForm;
 use src\forms\cases\CasesLinkChatForm;
 use src\forms\cases\CasesSaleForm;
+use src\guards\cases\CaseManageSaleInfoGuard;
 use src\helpers\app\AppHelper;
-use src\helpers\email\MaskEmailHelper;
 use src\helpers\ErrorsToStringHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\call\useCase\createCall\fromCase\AbacCallFromNumberList;
 use src\model\callLog\entity\callLog\CallLogType;
-use src\model\caseOrder\entity\CaseOrder;
 use src\model\cases\useCases\cases\updateInfo\FieldAccess;
-use src\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
-use src\guards\cases\CaseManageSaleInfoGuard;
 use src\model\cases\useCases\cases\updateInfo\Handler;
+use src\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
 use src\model\clientChat\entity\ClientChat;
 use src\model\clientChat\permissions\ClientChatActionPermission;
-use src\model\clientChat\services\ClientChatAssignService;
 use src\model\clientChatCase\entity\ClientChatCase;
 use src\model\clientChatCase\entity\ClientChatCaseRepository;
 use src\model\coupon\entity\couponCase\CouponCase;
@@ -92,21 +88,20 @@ use src\model\sms\useCase\send\fromCase\AbacSmsFromNumberList;
 use src\repositories\cases\CaseCategoryRepository;
 use src\repositories\cases\CasesRepository;
 use src\repositories\cases\CasesSaleRepository;
-use src\repositories\client\ClientEmailRepository;
 use src\repositories\NotFoundException;
+use src\repositories\project\ProjectRepository;
 use src\repositories\quote\QuoteRepository;
-use src\services\cases\CasesSaleService;
-use src\services\cases\CasesCommunicationService;
 use src\repositories\user\UserRepository;
+use src\services\cases\CasesCommunicationService;
 use src\services\cases\CasesCreateService;
 use src\services\cases\CasesManageService;
+use src\services\cases\CasesSaleService;
 use src\services\client\ClientManageService;
 use src\services\client\ClientUpdateFromEntityService;
+use src\services\email\EmailMainService;
 use src\services\email\EmailService;
 use src\services\TransactionManager;
 use Yii;
-use src\entities\cases\Cases;
-use src\entities\cases\CasesSearch;
 use yii\base\Exception;
 use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
@@ -115,20 +110,12 @@ use yii\db\Query;
 use yii\db\Transaction;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
-use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
-use modules\cases\src\abac\CasesAbacObject;
-use modules\cases\src\abac\dto\CasesAbacDto;
-use src\repositories\project\ProjectRepository;
-use src\exception\CreateModelException;
-use src\services\email\EmailServiceInterface;
-use src\services\email\EmailsNormalizeService;
-use src\exception\EmailNotSentException;
 
 /**
  * Class CasesController
@@ -153,7 +140,7 @@ use src\exception\EmailNotSentException;
  * @property OrderCreateFromSaleService $orderCreateFromSaleService
  * @property FlightFromSaleService $flightFromSaleService
  * @property EmailReviewQueueManageService $emailReviewQueueManageService
- * @property EmailServiceInterface $emailService
+ * @property EmailMainService $emailService
  */
 class CasesController extends FController
 {
@@ -177,7 +164,7 @@ class CasesController extends FController
     private OrderCreateFromSaleService $orderCreateFromSaleService;
     private FlightFromSaleService $flightFromSaleService;
     private EmailReviewQueueManageService $emailReviewQueueManageService;
-    private EmailServiceInterface $emailService;
+    private EmailMainService $emailService;
 
     public const DIFFERENT_PROJECT = 'different-project';
 
@@ -204,6 +191,7 @@ class CasesController extends FController
         OrderCreateFromSaleService $orderCreateFromSaleService,
         FlightFromSaleService $flightFromSaleService,
         EmailReviewQueueManageService $emailReviewQueueManageService,
+        EmailMainService $emailService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -227,10 +215,7 @@ class CasesController extends FController
         $this->orderCreateFromSaleService = $orderCreateFromSaleService;
         $this->flightFromSaleService = $flightFromSaleService;
         $this->emailReviewQueueManageService = $emailReviewQueueManageService;
-        $this->emailService = Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_EMAIL_NORMALIZED_FORM_ENABLE) ?
-            EmailsNormalizeService::newInstance() :
-            Yii::createObject(EmailService::class)
-        ;
+        $this->emailService = $emailService;
     }
 
     public function behaviors(): array
