@@ -7,50 +7,42 @@ use common\models\Email;
 use common\models\Notifications;
 use common\models\Quote;
 use common\models\QuoteCommunication;
-use frontend\helpers\JsonHelper;
 use frontend\models\CommunicationForm;
 use frontend\widgets\notification\NotificationMessage;
-use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\services\url\UrlGenerator;
 use src\auth\Auth;
 use src\entities\cases\CaseEventLog;
+use src\exception\EmailNotSentException;
 use src\forms\emailReviewQueue\EmailReviewQueueForm;
 use src\model\emailReviewQueue\entity\EmailReviewQueue;
 use src\model\emailReviewQueue\entity\EmailReviewQueueSearch;
 use src\model\emailReviewQueue\entity\EmailReviewQueueStatus;
 use src\repositories\quote\QuoteRepository;
+use src\services\email\EmailService;
+use Yii;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
-use src\services\email\EmailServiceInterface;
-use modules\featureFlag\FFlag;
-use src\services\email\EmailsNormalizeService;
-use src\services\email\EmailService;
-use src\exception\EmailNotSentException;
-use Yii;
 
 /**
  * Class EmailReviewQueueController
  * @property UrlGenerator $fileStorageUrlGenerator
  * @property QuoteRepository $quoteRepository
- * @property EmailServiceInterface $emailService
+ * @property EmailMainService $emailService
  */
 class EmailReviewQueueController extends FController
 {
     private UrlGenerator $fileStorageUrlGenerator;
     private QuoteRepository $quoteRepository;
-    private EmailServiceInterface $emailService;
+    private EmailMainService $emailService;
 
-    public function __construct($id, $module, UrlGenerator $fileStorageUrlGenerator, QuoteRepository $quoteRepository, $config = [])
+    public function __construct($id, $module, UrlGenerator $fileStorageUrlGenerator, QuoteRepository $quoteRepository, EmailMainService $emailService, $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->fileStorageUrlGenerator = $fileStorageUrlGenerator;
         $this->quoteRepository = $quoteRepository;
-        $this->emailService = Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_EMAIL_NORMALIZED_FORM_ENABLE) ?
-            EmailsNormalizeService::newInstance() :
-            Yii::createObject(EmailService::class)
-        ;
+        $this->emailService = $emailService;
     }
 
     /**
