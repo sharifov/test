@@ -23,6 +23,7 @@ use src\helpers\app\AppHelper;
 use src\helpers\ErrorsToStringHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\saleTicket\useCase\create\SaleTicketService;
+use src\repositories\cases\CasesRepository;
 use src\repositories\cases\CasesSaleRepository;
 use Yii;
 use yii\db\Transaction;
@@ -75,6 +76,11 @@ class CasesSaleService
      */
     private $namref = [];
 
+    /**
+     * @var CasesRepository
+     */
+    private $casesRepository;
+
     private SaleTicketService $saleTicketService;
     private OrderCreateFromSaleService $orderCreateFromSaleService;
     private OrderRepository $orderRepository;
@@ -85,13 +91,15 @@ class CasesSaleService
         SaleTicketService $saleTicketService,
         OrderCreateFromSaleService $orderCreateFromSaleService,
         OrderRepository $orderRepository,
-        FlightFromSaleService $flightFromSaleService
+        FlightFromSaleService $flightFromSaleService,
+        CasesRepository $casesRepository
     ) {
         $this->casesSaleRepository = $casesSaleRepository;
         $this->saleTicketService = $saleTicketService;
         $this->orderCreateFromSaleService = $orderCreateFromSaleService;
         $this->orderRepository = $orderRepository;
         $this->flightFromSaleService = $flightFromSaleService;
+        $this->casesRepository = $casesRepository;
     }
 
     /**
@@ -782,10 +790,15 @@ class CasesSaleService
                 }
 
                 if (count($allCaseSalesProjectApi) == 1 && isset($allCaseSalesProjectApi[0])) {
-                    if (trim($allCaseSalesProjectApi[0]) !== trim($saleProjectApiKey)) {
-                        $newProject = Project::findOne(['project_key' => $saleProjectApiKey]);
-                        if ($newProject) {
-                            $case->update(false, ['cs_project_id' => $newProject->id]);
+                    $caseProject = $case->getProject()->limit(1)->one();
+                    if ($caseProject) {
+                        if ($caseProject->api_key !== trim($saleProjectApiKey)) {
+                            $newProject = Project::findOne(['api_key' => $saleProjectApiKey]);
+                            if ($newProject) {
+                                $updatedCase = $this->casesRepository->find($case->cs_id);
+                                $updatedCase->cs_project_id = $newProject->id;
+                                $updatedCase->save();
+                            }
                         }
                     }
                 }
