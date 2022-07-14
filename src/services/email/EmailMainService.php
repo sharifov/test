@@ -8,6 +8,7 @@ use frontend\models\EmailPreviewFromInterface;
 use common\models\Lead;
 use src\entities\cases\Cases;
 use src\forms\emailReviewQueue\EmailReviewQueueForm;
+use src\dto\email\EmailDTO;
 
 /**
  *
@@ -42,6 +43,7 @@ class EmailMainService implements EmailServiceInterface
             $this->normalizedService->sendMail($email, $data);
         } else {
             $this->oldService->sendMail($email, $data);
+            //TODO: if called norm service need to change status,error message to older version. So need to devide method to smaller parts
         }
     }
 
@@ -74,6 +76,17 @@ class EmailMainService implements EmailServiceInterface
 
         if ($this->normalizedService !== null) {
             $email = $this->normalizedService->updateAfterReview($form, $email);
+        }
+
+        return $email;
+    }
+
+    public function createFromDTO(EmailDTO $emailDTO)
+    {
+        $email = $this->oldService->createFromDTO($emailDTO);
+
+        if ($this->normalizedService !== null) {
+            $email = $this->normalizedService->createFromDTO($emailDTO);
         }
 
         return $email;
