@@ -25,7 +25,7 @@ class UpdateSmsPrice
         $result = [];
 
         try {
-            $result = \Yii::$app->communication->getSmsPrice($smsSids);
+            $result = \Yii::$app->comms->getSmsPrice($smsSids);
 
             if ($result['error']) {
                 throw new \DomainException($result['message']);

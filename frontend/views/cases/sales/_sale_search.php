@@ -38,7 +38,7 @@ $differentProject = CasesController::DIFFERENT_PROJECT
     <div class="x_content" style="display: block;">
         <div class="sale-search">
 
-            <h1 title="<?=Yii::$app->params['backOffice']['serverUrl']?>"></h1>
+            <h1 title="<?=Yii::$app->params['backOffice']['url']?>"></h1>
 
             <?php Pjax::begin(['id' => 'pjax-sale-search-list', 'timeout' => 15000, 'enablePushState' => true]); ?>
 

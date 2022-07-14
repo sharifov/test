@@ -2079,7 +2079,7 @@ class ClientChatController extends FController
      */
     private function generateQuoteCapture(Quote $quote, ?string $qc_uid = null): array
     {
-        $communication = Yii::$app->communication;
+        $communication = Yii::$app->comms;
 
         $project = $quote->lead->project;
         $projectContactInfo = [];

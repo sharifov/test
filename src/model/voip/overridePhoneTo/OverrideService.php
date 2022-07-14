@@ -81,7 +81,7 @@ class OverrideService
     private function getOriginalForwardedFromNumber(string $callSid): ?string
     {
         try {
-            return \Yii::$app->communication->getOriginalForwardedFromNumber($callSid);
+            return \Yii::$app->comms->getOriginalForwardedFromNumber($callSid);
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => 'Cant get forwarded from number',

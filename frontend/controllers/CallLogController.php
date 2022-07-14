@@ -2,8 +2,10 @@
 
 namespace frontend\controllers;
 
+use common\models\Employee;
 use src\auth\Auth;
 use src\helpers\call\CallHelper;
+use src\model\call\abac\dto\CallLogObjectAbacDto;
 use Yii;
 use src\model\callLog\entity\callLog\CallLog;
 use src\model\callLog\entity\callLog\search\CallLogSearch;
@@ -21,6 +23,9 @@ use src\model\call\abac\CallAbacObject;
  */
 class CallLogController extends FController
 {
+    /**
+     * @return array
+     */
     public function behaviors()
     {
         $behaviors = [
@@ -29,6 +34,12 @@ class CallLogController extends FController
                 'actions' => [
                     'delete' => ['POST'],
                 ],
+            ],
+            'access' => [
+                'only' => [
+                    'index',
+                    'create'
+                ]
             ]
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
@@ -53,13 +64,22 @@ class CallLogController extends FController
      * @param $id
      * @param string $breadcrumbsPreviousPage
      * @return string
+     * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
      */
     public function actionView($id, $breadcrumbsPreviousPage = 'list'): string
     {
+        $model = $this->findModel($id);
+        /** @var Employee $user */
+        $user = \Yii::$app->user->identity;
+        $dto = new CallLogObjectAbacDto($model, $user);
+        if (!\Yii::$app->abac->can($dto, CallAbacObject::OBJ_CALL_LOG, CallAbacObject::ACTION_VIEW, $user)) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
         $breadcrumbsPreviousLabel = $breadcrumbsPreviousPage === 'index' ? 'Call Logs' : 'My Call Logs';
         return $this->render('view', [
-            'model' => $this->findModel($id),
+            'model' => $model,
             'breadcrumbsPreviousPage' => $breadcrumbsPreviousPage,
             'breadcrumbsPreviousLabel' => $breadcrumbsPreviousLabel
         ]);
@@ -89,12 +109,14 @@ class CallLogController extends FController
      */
     public function actionUpdate($id)
     {
+        $model = $this->findModel($id);
+        /** @var Employee $user */
+        $user = \Yii::$app->user->identity;
+        $dto = new CallLogObjectAbacDto($model, $user);
         /** @abac $callLogAbacDto, CallLogAbacObject::OBJ_CALL_LOG, CallLogAbacObject::ACTION_UPDATE, Call log act update */
-        if (!Yii::$app->abac->can(null, CallAbacObject::OBJ_CALL_LOG, CallAbacObject::ACTION_UPDATE)) {
+        if (!Yii::$app->abac->can($dto, CallAbacObject::OBJ_CALL_LOG, CallAbacObject::ACTION_UPDATE, $user)) {
             throw new ForbiddenHttpException('Access denied.');
         }
-
-        $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->cl_id]);
@@ -147,12 +169,16 @@ class CallLogController extends FController
      */
     public function actionDelete($id): Response
     {
+        $model = $this->findModel($id);
+        /** @var Employee $user */
+        $user = \Yii::$app->user->identity;
+        $dto = new CallLogObjectAbacDto($model, $user);
         /** @abac $callLogAbacDto, CallLogAbacObject::OBJ_CALL_LOG, CallLogAbacObject::ACTION_UPDATE, Call log act update */
-        if (!Yii::$app->abac->can(null, CallAbacObject::OBJ_CALL_LOG, CallAbacObject::ACTION_DELETE)) {
+        if (!Yii::$app->abac->can($dto, CallAbacObject::OBJ_CALL_LOG, CallAbacObject::ACTION_DELETE, $user)) {
             throw new ForbiddenHttpException('Access denied.');
         }
 
-        $this->findModel($id)->delete();
+        $model->delete();
 
         return $this->redirect(['index']);
     }

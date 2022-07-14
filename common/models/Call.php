@@ -1659,7 +1659,7 @@ class Call extends \yii\db\ActiveRecord
                     $call->update();
                 }
 
-                $res = \Yii::$app->communication->acceptConferenceCall(
+                $res = \Yii::$app->comms->acceptConferenceCall(
                     $call->c_id,
                     $call->c_call_sid,
                     $deviceIdentity,
@@ -1791,7 +1791,7 @@ class Call extends \yii\db\ActiveRecord
                 $departmentId = $userDepartment['upp_dep_id'];
             }
 
-            $res = \Yii::$app->communication->acceptWarmTransferCall(
+            $res = \Yii::$app->comms->acceptWarmTransferCall(
                 $call->c_id,
                 $call->c_call_sid,
                 $deviceIdentity,
@@ -2521,7 +2521,7 @@ class Call extends \yii\db\ActiveRecord
      */
     public function cancelCall(): bool
     {
-        $communication = \Yii::$app->communication;
+        $communication = \Yii::$app->comms;
         $callbackUrl = Yii::$app->params['url_api'] . '/twilio/cancel-call?id=' . $this->c_id;
         $data = [];
         $data['c_id'] = $this->c_id;
@@ -2569,7 +2569,7 @@ class Call extends \yii\db\ActiveRecord
      */
     public function getRecordingUrl(): string
     {
-        return $this->c_recording_sid ? Yii::$app->communication->getCallRecordingUrl($this->c_call_sid) : '';
+        return $this->c_recording_sid ? Yii::$app->comms->getCallRecordingUrl($this->c_call_sid) : '';
     }
 
     public function isConferenceType(): bool

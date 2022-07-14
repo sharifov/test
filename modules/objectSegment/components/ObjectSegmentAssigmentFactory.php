@@ -4,6 +4,7 @@ namespace modules\objectSegment\components;
 
 use modules\objectSegment\src\contracts\ObjectSegmentAssigmentServiceInterface;
 use modules\objectSegment\src\contracts\ObjectSegmentKeyContract;
+use modules\objectSegment\src\service\client\ClientUserReturnService;
 use modules\objectSegment\src\service\lead\LeadObjectSegmentAssignService;
 
 class ObjectSegmentAssigmentFactory
@@ -18,7 +19,8 @@ class ObjectSegmentAssigmentFactory
         switch ($objectType) {
             case ObjectSegmentKeyContract::TYPE_KEY_LEAD:
                 return \Yii::createObject(LeadObjectSegmentAssignService::class);
-                break;
+            case ObjectSegmentKeyContract::TYPE_KEY_CLIENT:
+                return \Yii::createObject(ClientUserReturnService::class);
             default:
                 throw new \DomainException('Object Type is not valid');
         }

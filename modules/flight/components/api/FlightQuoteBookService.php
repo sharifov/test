@@ -37,7 +37,7 @@ class FlightQuoteBookService
     public static function requestBook(array $data)
     {
         $requestData = self::prepareRequestData($data);
-        $host = Yii::$app->params['backOffice']['serverUrlV2'];
+        $host = Yii::$app->params['backOffice']['urlV2'];
         $responseBO = BackOffice::sendRequest2('products/book-flight', $requestData, 'POST', 120, $host);
 
         if ($responseBO->isOk) {
@@ -137,7 +137,7 @@ class FlightQuoteBookService
                 'uid' => $uid,
             ]
         ];
-        $host = Yii::$app->params['backOffice']['serverUrlV2'];
+        $host = Yii::$app->params['backOffice']['urlV2'];
         $responseBO = BackOffice::sendRequest2('flight-request/cancel', $data, 'POST', 120, $host);
 
         if (!$responseBO->isOk) {
@@ -213,7 +213,7 @@ class FlightQuoteBookService
                 'uid' => $uid,
             ]
         ];
-        $host = Yii::$app->params['backOffice']['serverUrlV2'];
+        $host = Yii::$app->params['backOffice']['urlV2'];
         $responseBO = BackOffice::sendRequest2('flight-request/void', $data, 'POST', 120, $host);
 
         if (!$responseBO->isOk) {

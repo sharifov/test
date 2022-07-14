@@ -27,7 +27,7 @@ class DisconnectFromAllActiveClientsCreatedConferences
 
     public function __construct()
     {
-        $this->communication = \Yii::$app->communication;
+        $this->communication = \Yii::$app->comms;
     }
 
     public function disconnect(int $userId): bool

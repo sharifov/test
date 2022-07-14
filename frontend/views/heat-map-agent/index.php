@@ -100,12 +100,8 @@ $rgbaTitle = '151, 149, 149, 0.1';
                         ) ?>
                         <?php echo $cellCnt ?>
                     <?php endforeach ?>
-                    <div class="hour_box" style="background: rgba(<?php echo $rgbaTitle ?>);" data-toggle="tooltip" data-original-title="Total by day">
-                        <strong>
-                            Total:
-                        </strong>
-                    </div>
                 </div>
+
 
                 <?php $prevMonth = null ?>
                 <?php foreach ($result as $keyMonthDay => $hours) : ?>
@@ -145,14 +141,7 @@ $rgbaTitle = '151, 149, 149, 0.1';
                             <?php echo $cellHour ?>
                         <?php endforeach ?>
 
-                        <?php $cntByMonthDay = $resultByMonthDay[$keyMonthDay] ?? 0 ?>
-                        <?php $alphaMonthDay = HeatMapAgentService::proportionalMap($cntByMonthDay, 0, $maxCntByMonthDay, 0, 0.9) ?>
-                        <?php $backgroundMonthDay = $cntByMonthDay ? '255, 0, 0, ' . $alphaMonthDay : $rgbaTitle ?>
-                        <div class="hour_box" style="background: rgba(<?php echo $backgroundMonthDay ?>);">
-                            <strong>
-                                <?php echo $cntByMonthDay ?: '-' ?>
-                            </strong>
-                        </div>
+
                     </div>
                 <?php endforeach ?>
             </div>

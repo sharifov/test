@@ -5,6 +5,7 @@ namespace src\model\clientData\service;
 use src\helpers\app\AppHelper;
 use src\helpers\ErrorsToStringHelper;
 use src\model\clientData\entity\ClientData;
+use src\model\clientData\entity\ClientDataQuery;
 use src\model\clientData\repository\ClientDataRepository;
 use src\model\clientDataKey\service\ClientDataKeyService;
 use Yii;
@@ -37,14 +38,14 @@ class ClientDataService
         return [$inserted, $warnings];
     }
 
-    public static function setValue(int $clientId, string $key, string $value, bool $updateMode = true): ClientData
+    public static function setValue(int $clientId, string $key, string $value, bool $updateMode = true, ?string $valueUi = null): ClientData
     {
         if (!$keyId = ClientDataKeyService::getIdByKeyCache($key)) {
             throw new \RuntimeException('ClientDataKey not found (' . $key . ')');
         }
 
-        if (!$clientData = self::findByClientAndKeyId($clientId, $keyId)) {
-            $clientData = ClientData::create($clientId, $keyId, $value);
+        if (!$clientData = ClientDataQuery::findOneByClientAndKeyId($clientId, $keyId)) {
+            $clientData = ClientData::create($clientId, $keyId, $value, $valueUi);
         } elseif (!$updateMode) {
             throw new \RuntimeException('ClientData already exist. Key(' .
                 $key . ')' . ' clientID(' . $clientId . ')');
@@ -59,14 +60,6 @@ class ClientDataService
         $clientDataRepository = new ClientDataRepository($clientData);
         $clientDataRepository->save();
         return $clientDataRepository->getModel();
-    }
-
-    public static function findByClientAndKeyId(int $clientId, int $keyId): ?ClientData
-    {
-        return ClientData::find()
-            ->where(['cd_key_id' => $keyId])
-            ->andWhere(['cd_client_id' => $clientId])
-            ->one();
     }
 
     public static function existByClientKeyIdValue(int $clientId, string $key, string $value): bool

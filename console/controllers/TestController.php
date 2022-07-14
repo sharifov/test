@@ -67,6 +67,11 @@ use src\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
 use src\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
 use src\model\clientChatUnread\entity\ClientChatUnread;
 use src\model\clientChatVisitorData\entity\ClientChatVisitorData;
+use src\model\clientData\entity\ClientData;
+use src\model\clientData\entity\ClientDataQuery;
+use src\model\clientDataKey\entity\ClientDataKey;
+use src\model\clientDataKey\entity\ClientDataKeyDictionary;
+use src\model\clientDataKey\service\ClientDataKeyService;
 use src\model\conference\entity\aggregate\ConferenceLogAggregate;
 use src\model\conference\entity\aggregate\Duration;
 use src\model\conference\entity\aggregate\log\HtmlFormatter;
@@ -89,6 +94,7 @@ use src\model\project\entity\params\Params;
 use src\model\user\reports\stats\UserStatsReport;
 use src\model\voip\phoneDevice\device\ReadyVoipDevice;
 use src\model\voip\phoneDevice\PhoneDeviceLogForm;
+use src\repositories\lead\LeadRepository;
 use src\services\clientChatMessage\ClientChatMessageService;
 use src\services\clientChatUserAccessService\ClientChatUserAccessService;
 use src\services\sms\incoming\SmsIncomingForm;
@@ -294,7 +300,7 @@ JSON;
 
     public function actionQ()
     {
-        echo \Yii::$app->communication->makeCallClientNotification(
+        echo \Yii::$app->comms->makeCallClientNotification(
             '+14157693509',
             '+37369305726',
             'Hello world',
@@ -799,5 +805,32 @@ JSON;
     {
         echo 'Blameable ' . Auth::employeeId();
         die;
+    }
+
+    public function actionTestClientData()
+    {
+        $keyId = ClientDataKeyService::getIdByKeyCache(ClientDataKeyDictionary::APP_CALL_OUT_TOTAL_COUNT);
+        if ($keyId) {
+            ClientDataQuery::createOrIncrementValue(460864, $keyId, new \DateTimeImmutable());
+
+            $clientData = ClientDataQuery::findOneByClientAndKeyId(460864, $keyId);
+            if ($clientData) {
+                echo Console::renderColoredString('%r --- Notif: Client Data id ' . $clientData->cd_id . ' value: ' . $clientData->cd_field_value . '  %r' . ' %n', true), PHP_EOL;
+            } else {
+                echo Console::renderColoredString('%g --- Client Data not found') . PHP_EOL;
+            }
+        } else {
+            echo Console::renderColoredString('%g --- Key not found') . PHP_EOL;
+        }
+    }
+
+    public function actionClientReturn($leadId)
+    {
+        $lead = Lead::findOne($leadId);
+        if ($lead) {
+            $lead->sold(464);
+            $repo = \Yii::createObject(LeadRepository::class);
+            $repo->save($lead);
+        }
     }
 }

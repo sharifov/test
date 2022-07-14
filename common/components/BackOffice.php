@@ -12,7 +12,6 @@ use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
 use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
 use webapi\src\logger\behaviors\filters\creditCard\V5;
-use webapi\src\request\BoRequestDataHelper;
 use Yii;
 use yii\base\Exception;
 use yii\helpers\ArrayHelper;
@@ -31,7 +30,7 @@ class BackOffice
      */
     public static function sendRequest(string $endpoint, string $type = 'GET', string $fields = null)
     {
-        $url = sprintf('%s/%s', Yii::$app->params['backOffice']['serverUrl'], $endpoint);
+        $url = sprintf('%s/%s', Yii::$app->params['backOffice']['url'], $endpoint);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         if ($type === 'POST') {
@@ -73,7 +72,7 @@ class BackOffice
     public static function sendRequest2(string $endpoint = '', array $fields = [], string $type = 'POST', int $curlTimeOut = 30, string $host = '', bool $addBasicAuth = false): \yii\httpclient\Response
     {
         $timeStart = microtime(true);
-        $host = $host ?: Yii::$app->params['backOffice']['serverUrl'];
+        $host = $host ?: Yii::$app->params['backOffice']['url'];
 
         $uri = $host . '/' . $endpoint;
         $signature = self::getSignatureBO(Yii::$app->params['backOffice']['apiKey'], Yii::$app->params['backOffice']['ver']);
@@ -158,9 +157,9 @@ class BackOffice
             throw new \DomainException('Not isset settings bo_web_hook_enable.');
         }
 
-        $boUrl = Yii::$app->params['backOffice']['serverUrl'];
+        $boUrl = Yii::$app->params['backOffice']['url'];
         if (!$boUrl) {
-            throw new \DomainException('Not isset settings backOffice.serverUrl');
+            throw new \DomainException('Not isset settings backOffice.url');
         }
 
         $boWhEndpoint = Yii::$app->params['backOffice']['webHookEndpoint'];
@@ -228,7 +227,7 @@ class BackOffice
     {
         $settings = \Yii::$app->params['settings'];
 
-        $uri = Yii::$app->params['backOffice']['serverUrl'] ? Yii::$app->params['backOffice']['serverUrl'] . '/' . (Yii::$app->params['backOffice']['webHookEndpoint'] ?? '') : '';
+        $uri = Yii::$app->params['backOffice']['url'] ? Yii::$app->params['backOffice']['url'] . '/' . (Yii::$app->params['backOffice']['webHookEndpoint'] ?? '') : '';
 
         if (isset($settings['bo_web_hook_enable']) && $uri) {
             if ($settings['bo_web_hook_enable']) {
@@ -285,22 +284,22 @@ class BackOffice
         }
     }
 
-    public static function reprotectionCustomerDecisionConfirm(int $projectId, string $bookingId, array $quote, string $reprotectionQuoteGid): bool
+    public static function reprotectionCustomerDecisionConfirm(int $projectId, string $bookingId, array $quote, string $reprotectionQuoteGid, ?array $additionalInfo): bool
     {
-        return self::reprotectionCustomerDecision($projectId, $bookingId, 'confirm', $quote, $reprotectionQuoteGid);
+        return self::reprotectionCustomerDecision($projectId, $bookingId, 'confirm', $quote, $reprotectionQuoteGid, $additionalInfo);
     }
 
-    public static function reprotectionCustomerDecisionModify(int $projectId, string $bookingId, array $quote, string $reprotectionQuoteGid): bool
+    public static function reprotectionCustomerDecisionModify(int $projectId, string $bookingId, array $quote, string $reprotectionQuoteGid, ?array $additionalInfo): bool
     {
-        return self::reprotectionCustomerDecision($projectId, $bookingId, 'confirm', $quote, $reprotectionQuoteGid);
+        return self::reprotectionCustomerDecision($projectId, $bookingId, 'confirm', $quote, $reprotectionQuoteGid, $additionalInfo);
     }
 
     public static function reprotectionCustomerDecisionRefund(int $projectId, string $bookingId): bool
     {
-        return self::reprotectionCustomerDecision($projectId, $bookingId, 'refund', [], null);
+        return self::reprotectionCustomerDecision($projectId, $bookingId, 'refund', [], null, []);
     }
 
-    private static function reprotectionCustomerDecision(int $projectId, string $bookingId, string $type, array $quote, ?string $reprotectionQuoteGid): bool
+    private static function reprotectionCustomerDecision(int $projectId, string $bookingId, string $type, array $quote, ?string $reprotectionQuoteGid, ?array $additionalInfo): bool
     {
         if (!$bookingId) {
             throw new \DomainException('Booking ID is empty');
@@ -328,9 +327,8 @@ class BackOffice
         if ($quote) {
             $request['flightQuote'] = $quote;
         }
-        if ($reprotectionQuoteGid) {
-            $productQuote = ProductQuote::find()->where(['pq_gid' => $reprotectionQuoteGid])->limit(1)->one();
-            $request['additionalInfo'] = BoRequestDataHelper::prepareAdditionalInfoToBoRequest($productQuote);
+        if ($additionalInfo) {
+            $request['additionalInfo'] = $additionalInfo;
         }
 
         try {
@@ -339,7 +337,7 @@ class BackOffice
                 $request,
                 'POST',
                 30,
-                Yii::$app->params['backOffice']['serverUrlV3']
+                Yii::$app->params['backOffice']['urlV3']
             );
 
             if (!$response->isOk) {
@@ -407,7 +405,7 @@ class BackOffice
                 $request,
                 'POST',
                 30,
-                Yii::$app->params['backOffice']['serverUrlV3']
+                Yii::$app->params['backOffice']['urlV3']
             );
 
             $data = $response->data;
@@ -456,7 +454,7 @@ class BackOffice
                 $requestData,
                 'POST',
                 30,
-                Yii::$app->params['backOffice']['serverUrlV3']
+                Yii::$app->params['backOffice']['urlV3']
             );
         } catch (\Throwable $exception) {
             \Yii::error([
@@ -501,7 +499,7 @@ class BackOffice
                 $requestData,
                 'POST',
                 30,
-                Yii::$app->params['backOffice']['serverUrlV3']
+                Yii::$app->params['backOffice']['urlV3']
             );
         } catch (\Throwable $exception) {
             \Yii::error(AppHelper::throwableLog($exception, true), 'BackOffice:getExchangeData');

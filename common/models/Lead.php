@@ -277,6 +277,7 @@ class Lead extends ActiveRecord implements Objectable
     public const STATUS_NEW         = 16;
     public const STATUS_EXTRA_QUEUE = 17;
     public const STATUS_CLOSED      = 18;
+    public const STATUS_BUSINESS_EXTRA_QUEUE = 19;
 
     public const STATUS_LIST = [
         self::STATUS_PENDING        => 'Pending',
@@ -293,6 +294,7 @@ class Lead extends ActiveRecord implements Objectable
         self::STATUS_NEW            => 'New',
         self::STATUS_EXTRA_QUEUE    => 'Extra queue',
         self::STATUS_CLOSED         => 'Closed',
+        self::STATUS_BUSINESS_EXTRA_QUEUE => 'Business extra queue',
     ];
 
     public const TRAVEL_DATE_PASSED_STATUS_LIST = [
@@ -327,6 +329,7 @@ class Lead extends ActiveRecord implements Objectable
         self::STATUS_BOOK_FAILED    => 'label-default',
         self::STATUS_ALTERNATIVE    => 'label-default',
         self::STATUS_EXTRA_QUEUE    => 'label-default',
+        self::STATUS_BUSINESS_EXTRA_QUEUE => 'label-default',
     ];
 
 
@@ -5297,5 +5300,10 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     public function setCabinClassEconomy(): void
     {
         $this->cabin = self::CABIN_ECONOMY;
+    }
+
+    public function statusIsBusinessExtraQueue(): bool
+    {
+        return $this->status === self::STATUS_BUSINESS_EXTRA_QUEUE;
     }
 }

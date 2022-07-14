@@ -24,7 +24,7 @@ class UpdateCallPrice
     {
         $result = [];
         try {
-            $result = \Yii::$app->communication->getCallPrice($callSids);
+            $result = \Yii::$app->comms->getCallPrice($callSids);
 
             if ($result['error']) {
                 throw new \DomainException($result['message']);

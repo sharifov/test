@@ -265,7 +265,7 @@ class CasesCommunicationService
         $content = $this->getEmailData($case, $user);
 
         try {
-            $mailPreview = Yii::$app->communication->mailPreview(
+            $mailPreview = Yii::$app->comms->mailPreview(
                 $case->cs_project_id,
                 $params->object->case->feedbackTemplateTypeKey,
                 $params->object->case->feedbackEmailFrom,

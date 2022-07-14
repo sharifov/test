@@ -202,7 +202,7 @@ class SmsTemplateType extends \yii\db\ActiveRecord
         ];
 
         /** @var CommunicationService $communication */
-        $communication = Yii::$app->communication;
+        $communication = Yii::$app->comms;
         $smsTypes = $communication->smsTypes();
 
         if ($smsTypes && isset($smsTypes['data']['types'])) {

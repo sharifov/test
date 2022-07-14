@@ -364,7 +364,7 @@ class SiteController extends FController
 
     public function actionGetAirport($term)
     {
-        $response = file_get_contents(sprintf('%s?term=%s', Yii::$app->params['backOffice']['serverUrlV2'] . '/airport/search', $term));
+        $response = file_get_contents(sprintf('%s?term=%s', Yii::$app->params['backOffice']['urlV2'] . '/airport/search', $term));
         $response = json_decode($response, true);
         if (isset($response['success']) && $response['success']) {
             if (isset($response['data'])) {

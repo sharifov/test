@@ -518,7 +518,7 @@ class CasesController extends FController
                     $comForm->c_preview_email = 1;
 
                     /** @var CommunicationService $communication */
-                    $communication = Yii::$app->communication;
+                    $communication = Yii::$app->comms;
                     $data['origin'] = '';
 
                     $content_data['email_body_html'] = $comForm->c_email_message;
@@ -612,7 +612,7 @@ class CasesController extends FController
                     $comForm->c_preview_sms = 1;
 
                     /** @var CommunicationService $communication */
-                    $communication = Yii::$app->communication;
+                    $communication = Yii::$app->comms;
 
                     //$data['origin'] = 'ORIGIN';
                     //$data['destination'] = 'DESTINATION';
@@ -1511,7 +1511,7 @@ class CasesController extends FController
         $content = $this->casesCommunicationService->getEmailData($case, $user);
 
         try {
-            $mailPreview = Yii::$app->communication->mailPreview(
+            $mailPreview = Yii::$app->comms->mailPreview(
                 $case->cs_project_id,
                 $params->object->case->feedbackTemplateTypeKey,
                 $params->object->case->feedbackEmailFrom,

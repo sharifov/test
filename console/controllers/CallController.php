@@ -213,7 +213,7 @@ class CallController extends Controller
                             (new CallTerminateLogRepository())->save($callTerminateLog);
                         }
 
-                        $result = Yii::$app->communication->hangUp($call->c_call_sid);
+                        $result = Yii::$app->comms->hangUp($call->c_call_sid);
 
                         if (
                             SettingHelper::getCallTerminateBlackListByKey('enable_to_black_list')

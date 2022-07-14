@@ -542,7 +542,7 @@ class CasesSaleService
                 ]
             ];
 
-            $host = Yii::$app->params['backOffice']['serverUrlV3'];
+            $host = Yii::$app->params['backOffice']['urlV3'];
             $responseBO = BackOffice::sendRequest2('payment/add-credit-card', $data, 'POST', $requestTime, $host);
 
             if ($responseBO->isOk) {
@@ -735,7 +735,7 @@ class CasesSaleService
             ],
             'email' => $email
         ];
-        $response = BackOffice::sendRequest2('payment/invoke-new-cc-info', $data, 'POST', 30, Yii::$app->params['backOffice']['serverUrlV3'], true);
+        $response = BackOffice::sendRequest2('payment/invoke-new-cc-info', $data, 'POST', 30, Yii::$app->params['backOffice']['urlV3'], true);
         if ($response->isOk) {
             $responseData = $response->data;
             Yii::info(VarDumper::dumpAsString($responseData), 'info\CasesSaleService::sendCcInfo::BOResponse');

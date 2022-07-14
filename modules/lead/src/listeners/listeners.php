@@ -70,6 +70,7 @@ use src\listeners\lead\LeadRejectEventLogListener;
 use src\listeners\lead\LeadSendToGaListener;
 use src\listeners\lead\LeadSnoozeEventLogListener;
 use src\listeners\lead\LeadSnoozeNotificationsListener;
+use src\listeners\lead\LeadSoldClientReturnIndicationListener;
 use src\listeners\lead\LeadSoldEventLogListener;
 use src\listeners\lead\LeadSoldNotificationsListener;
 use src\listeners\lead\LeadSoldSplitListener;
@@ -149,6 +150,7 @@ return [
         LeadTipsSplitListener::class,
         LeadPhoneTrustListener::class,
         LeadSoldWebEngageListener::class,
+        LeadSoldClientReturnIndicationListener::class
     ],
     LeadTrashEvent::class => [
         LeadTrashEventLogListener::class,
