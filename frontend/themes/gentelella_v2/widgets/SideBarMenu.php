@@ -758,6 +758,12 @@ class SideBarMenu extends \yii\bootstrap\Widget
                             'title' => 'User Shift Schedule Request History'
                         ],
 
+                        [
+                            'label' => 'Shift Summary Report',
+                            'url' => ['/shift-schedule/summary-report'],
+                            'title' => 'Shift Summary Report'
+                        ],
+
                         /** @abac ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_ACCESS, Access menu UserShiftAssign */
                         [
                             'label' => 'User Shift Schedule Assign',
