@@ -38,7 +38,6 @@ class CallAbacObject extends AbacBaseModel implements AbacInterface
 
     /** --------------- ACTIONS --------------------------- */
     public const ACTION_VIEW  = 'view';
-    public const ACTION_CREATE  = 'create';
     public const ACTION_UPDATE  = 'update';
     public const ACTION_DELETE  = 'delete';
     public const ACTION_TOGGLE_DATA  = 'toggle_data';
@@ -52,7 +51,7 @@ class CallAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_DATA_AUTO_CREATE_CASE_OFF => [self::ACTION_TOGGLE_DATA],
         self::ACT_DATA_AUTO_CREATE_LEAD_OFF => [self::ACTION_TOGGLE_DATA],
         self::ACT_DATA_INVALID              => [self::ACTION_TOGGLE_DATA],
-        self::OBJ_CALL_LOG                  => [self::ACTION_VIEW, self::ACTION_CREATE, self::ACTION_UPDATE, self:: ACTION_DELETE, self::ACTION_LISTEN_RECORD]
+        self::OBJ_CALL_LOG                  => [self::ACTION_VIEW, self::ACTION_UPDATE, self::ACTION_DELETE, self::ACTION_LISTEN_RECORD]
     ];
 
     public const OBJECT_ATTRIBUTE_LIST = [];
