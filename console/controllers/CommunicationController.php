@@ -16,7 +16,6 @@ use yii\helpers\Console;
 use yii\helpers\VarDumper;
 use yii\queue\Queue;
 use src\dto\email\EmailDTO;
-use src\services\email\EmailService;
 use src\exception\CreateModelException;
 use src\services\email\EmailMainService;
 
