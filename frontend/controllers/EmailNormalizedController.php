@@ -107,7 +107,7 @@ class EmailNormalizedController extends FController
     private function getEmailPreview(Employee $user, $emailFrom, Project $project, UserProjectParams $upp): array
     {
         /** @var CommunicationService $communication */
-        $communication = Yii::$app->communication;
+        $communication = Yii::$app->comms;
 
         $content_data['email_body_html'] = '';
         $content_data['email_subject'] = '';

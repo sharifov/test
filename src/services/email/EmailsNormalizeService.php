@@ -403,7 +403,7 @@ class EmailsNormalizeService implements EmailServiceInterface
     public function sendMail($email, array $data = [])
     {
         /** @var CommunicationService $communication */
-        $communication = Yii::$app->communication;
+        $communication = Yii::$app->comms;
         $data['project_id'] = $email->e_project_id;
 
         $content_data['email_body_html'] = $email->emailBody->getBodyHtml();
