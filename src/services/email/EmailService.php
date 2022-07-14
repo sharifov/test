@@ -27,6 +27,7 @@ use src\exception\EmailNotSentException;
 use modules\featureFlag\FFlag;
 use src\forms\emailReviewQueue\EmailReviewQueueForm;
 use frontend\models\EmailPreviewFromInterface;
+use src\dto\email\EmailDTO;
 
 /**
  * Class EmailService
@@ -461,6 +462,34 @@ class EmailService implements EmailServiceInterface
                 $this->sendMail($email);
             } else {
                 throw new \Exception($email->getErrorSummary(true)[0]);
+            }
+        } catch (\Throwable $e) {
+            throw $e;
+        }
+
+        return $email;
+    }
+
+    public function createFromDTO(EmailDTO $emailDTO): Email
+    {
+        try {
+            $email = new Email();
+            $email->e_type_id = $emailDTO->typeId;
+            $email->e_status_id = $emailDTO->statusId;
+            $email->e_is_new = $emailDTO->isNew;
+            $email->e_email_to = $emailDTO->emailTo;
+            $email->e_email_from = $emailDTO->emailFrom;
+            $email->e_email_subject = $emailDTO->emailSubject;
+            $email->e_project_id = $emailDTO->projectId;
+            $email->body_html = $emailDTO->bodyHtml;
+            $email->e_created_dt = $emailDTO->createdDt;
+            $email->e_inbox_email_id = $emailDTO->inboxEmailId;
+            $email->e_inbox_created_dt = $emailDTO->inboxCreatedDt;
+            $email->e_ref_message_id = $emailDTO->refMessageId;
+            $email->e_message_id = $emailDTO->messageId;
+
+            if (!$email->save()) {
+                throw new CreateModelException(get_class($email), $email->getErrors());
             }
         } catch (\Throwable $e) {
             throw $e;
