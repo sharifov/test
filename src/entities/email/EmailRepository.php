@@ -4,6 +4,9 @@ namespace src\entities\email;
 
 use src\repositories\NotFoundException;
 use src\dispatchers\EventDispatcher;
+use common\models\ClientEmail;
+use common\models\DepartmentEmailProject;
+use common\models\UserProjectParams;
 
 class EmailRepository
 {
@@ -125,5 +128,23 @@ class EmailRepository
             WHERE ec_case_id = $caseId"
             );
         return $command->queryScalar();
+    }
+
+    public static function detectClientId(string $email): ?int
+    {
+        $clientEmail = ClientEmail::find()->byEmail($email)->one();
+
+        return $clientEmail->client_id ?? null;
+    }
+
+    public static function getProjectIdByDepOrUpp($emailTo): ?int
+    {
+        if ($dep = DepartmentEmailProject::find()->byEmail($emailTo)->one()) {
+            return $dep->dep_project_id;
+        } else if ($upp = UserProjectParams::find()->byEmail($emailTo)->one()) {
+            return $upp->upp_project_id;
+        }
+
+        return null;
     }
 }
