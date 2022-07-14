@@ -26,7 +26,9 @@ use src\entities\cases\CaseEventLog;
 use src\entities\cases\Cases;
 use src\helpers\app\AppHelper;
 use webapi\src\request\BoRequestDataHelper;
+use webapi\src\request\RequestBoAdditionalSources;
 use webapi\src\services\payment\BillingInfoApiVoluntaryService;
+use Yii;
 use yii\helpers\ArrayHelper;
 
 use function Amp\Promise\timeoutWithDefault;
@@ -94,7 +96,17 @@ class VoluntaryExchangeConfirmHandler
         $request['billing'] = BoRequestDataHelper::fillBillingData($this->confirmForm->getBillingInfoForm());
         $request['payment'] = BoRequestDataHelper::fillPaymentData($this->confirmForm->getPaymentRequestForm());
         $request['exchange'] = $this->prepareExchange();
-        $request['additionalInfo'] = BoRequestDataHelper::prepareAdditionalInfoToBoRequest($this->confirmForm->changeQuote);
+
+        try {
+            $service = RequestBoAdditionalSources::getServiceByType(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE);
+            if (!$service) {
+                throw new \RuntimeException('Service not found by type: ' . RequestBoAdditionalSources::getTypeNameById(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE));
+            }
+            $request['additionalInfo'] = $service->prepareAdditionalInfo($this->confirmForm->changeQuote);
+        } catch (\Throwable $e) {
+            \Yii::error(AppHelper::throwableLog($e, true), 'VoluntaryExchangeConfirmHandler:prepareRequest:additionalInfo');
+        }
+
         return $request;
     }
 

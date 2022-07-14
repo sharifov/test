@@ -148,7 +148,7 @@ class EmailController extends FController
 
 
                     /** @var CommunicationService $communication */
-                    $communication = Yii::$app->communication;
+                    $communication = Yii::$app->comms;
                     $data['origin'] = '';
 
 

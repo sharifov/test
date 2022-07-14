@@ -26,7 +26,7 @@ class SetUp implements BootstrapInterface
                     CURLOPT_ENCODING => 'gzip',
                     'timeout' => 28,
                 ]);
-            return new RequestBo($request, $app->params['backOffice']['serverUrlV2']);
+            return new RequestBo($request, $app->params['backOffice']['urlV2']);
         });
     }
 }

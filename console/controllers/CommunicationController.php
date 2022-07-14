@@ -18,6 +18,7 @@ use yii\queue\Queue;
 use src\dto\email\EmailDTO;
 use src\services\email\EmailService;
 use src\exception\CreateModelException;
+use src\services\email\EmailMainService;
 
 class CommunicationController extends Controller
 {
@@ -96,8 +97,8 @@ class CommunicationController extends Controller
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
         /** @var CommunicationService $communication */
-        $communication = Yii::$app->communication;
-        $emailService = Yii::createObject(EmailService::class);
+        $communication = Yii::$app->comms;
+        $emailService = EmailMainService::newInstance();
 
         $filter = [];
         $dateTime = null;
@@ -137,10 +138,11 @@ class CommunicationController extends Controller
             * @property string $ei_message_id
                 */
 
+
             foreach ($res['data']['emails'] as $mail) {
                 print_r($mail['ei_id']);
 
-                try{
+                try {
                     $emailDTO = EmailDTO::newInstance()->fillFromCommunication($mail);
                     $emailService->createFromDTO($emailDTO);
                 } catch (CreateModelException $e) {

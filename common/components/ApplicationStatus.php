@@ -118,7 +118,7 @@ class ApplicationStatus extends Component
     public function communicationStatus(): string
     {
         try {
-            return \Yii::$app->communication->ping() ? 'ok' : 'error';
+            return \Yii::$app->comms->ping() ? 'ok' : 'error';
         } catch (\Throwable $e) {
             return 'error';
         }

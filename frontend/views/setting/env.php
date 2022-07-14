@@ -42,8 +42,8 @@ $envData = [
         <tr>
             <td>2</td>
             <td>communication</td>
-            <td><?=Html::encode(Yii::$app->communication->url)?></td>
-            <td><?=Html::encode(Yii::$app->communication->username)?></td>
+            <td><?=Html::encode(Yii::$app->comms->url)?></td>
+            <td><?=Html::encode(Yii::$app->comms->username)?></td>
         </tr>
         <tr>
             <td>3</td>
@@ -218,13 +218,13 @@ $envData = [
             </tr>
             <tr>
                 <td><?php echo $paramsNum++ ?></td>
-                <td>backOffice serverUrl</td>
-                <td><?=Yii::$app->params['backOffice']['serverUrl'] ?? ''?></td>
+                <td>backOffice url</td>
+                <td><?=Yii::$app->params['backOffice']['url'] ?? ''?></td>
             </tr>
             <tr>
                 <td><?php echo $paramsNum++ ?></td>
-                <td>backOffice serverUrlV3</td>
-                <td><?=Yii::$app->params['backOffice']['serverUrlV3'] ?? ''?></td>
+                <td>backOffice urlV3</td>
+                <td><?=Yii::$app->params['backOffice']['urlV3'] ?? ''?></td>
             </tr>
             <tr>
                 <td><?php echo $paramsNum++ ?></td>

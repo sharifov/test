@@ -105,7 +105,7 @@ class PhoneController extends FController
             throw new NotFoundHttpException('Not found device Id (' . $deviceId . ') relation with user.');
         }
         try {
-            $data = Yii::$app->communication->generateJwtToken($device->pd_device_identity);
+            $data = Yii::$app->comms->generateJwtToken($device->pd_device_identity);
         } catch (\Throwable $e) {
             Yii::error([
                 'message' => $e->getMessage(),
@@ -449,7 +449,7 @@ class PhoneController extends FController
                 Yii::error(VarDumper::dumpAsString(['message' => 'Cant save last child call', 'errors' => $lastChild->getErrors()]), 'PhoneController:actionAjaxCallRedirect');
             }
 
-            $communication = \Yii::$app->communication;
+            $communication = \Yii::$app->comms;
 
 //            Yii::error(VarDumper::dumpAsString([$sid, $type, $from, $to, $firstTransferToNumber]));
 
@@ -760,7 +760,7 @@ class PhoneController extends FController
             }
 
 
-            $communication = \Yii::$app->communication;
+            $communication = \Yii::$app->comms;
 
             if (!$originCall->isConferenceType()) {
                 $communication->updateRecordingStatus($sid, Call::TW_RECORDING_STATUS_PAUSED);
@@ -1041,7 +1041,7 @@ class PhoneController extends FController
                 if (!$call->currentParticipant->isJoin()) {
                     throw new \Exception('Invalid type of Participant');
                 }
-                $result = Yii::$app->communication->holdConferenceCall($data['conferenceSid'], $data['keeperSid']);
+                $result = Yii::$app->comms->holdConferenceCall($data['conferenceSid'], $data['keeperSid']);
                 if ($result['error']) {
                     throw new \DomainException($result['message']);
                 }
@@ -1068,7 +1068,7 @@ class PhoneController extends FController
                 if (!$call->currentParticipant->isJoin()) {
                     throw new \Exception('Invalid type of Participant');
                 }
-                $result = Yii::$app->communication->holdConferenceCall($data['conferenceSid'], $data['keeperSid']);
+                $result = Yii::$app->comms->holdConferenceCall($data['conferenceSid'], $data['keeperSid']);
                 if ($result['error']) {
                     throw new \DomainException($result['message']);
                 }
@@ -1118,7 +1118,7 @@ class PhoneController extends FController
                 throw new BadRequestHttpException('Call status is not correct');
             }
 
-            $result = Yii::$app->communication->hangUp($call->c_call_sid);
+            $result = Yii::$app->comms->hangUp($call->c_call_sid);
 
             if (isset($result['result']['status']) && (!$call->isEqualTwStatus((string)$result['result']['status']) || $call->isTwFinishStatus())) {
                 $this->processCall($call, (string)$result['result']['status']);
@@ -1262,7 +1262,7 @@ class PhoneController extends FController
     private function getConferenceInfo(string $conferenceSid): array
     {
         try {
-            $result = \Yii::$app->communication->getConferenceInfo($conferenceSid);
+            $result = \Yii::$app->comms->getConferenceInfo($conferenceSid);
             if ($result['error']) {
                 \Yii::error(VarDumper::dumpAsString([
                     'result' => $result,
@@ -1289,7 +1289,7 @@ class PhoneController extends FController
     private function getCallInfo(string $callSid): array
     {
         try {
-            $result = \Yii::$app->communication->getCallInfo($callSid);
+            $result = \Yii::$app->comms->getCallInfo($callSid);
             if ($result['error']) {
                 \Yii::error(VarDumper::dumpAsString([
                     'result' => $result,
@@ -1323,7 +1323,7 @@ class PhoneController extends FController
             if (!$call->currentParticipant->isJoin()) {
                 throw new \Exception('Invalid type of Participant');
             }
-            $result = Yii::$app->communication->holdConferenceCall($data['conferenceSid'], $data['keeperSid']);
+            $result = Yii::$app->comms->holdConferenceCall($data['conferenceSid'], $data['keeperSid']);
         } catch (\Throwable $e) {
             $result = [
                 'error' => true,
@@ -1382,7 +1382,7 @@ class PhoneController extends FController
             }
             //
 
-            $result = Yii::$app->communication->unholdConferenceCall(
+            $result = Yii::$app->comms->unholdConferenceCall(
                 $data['conferenceSid'],
                 $data['keeperSid'],
                 $data['recordingDisabled']
@@ -1435,7 +1435,7 @@ class PhoneController extends FController
                 throw new \DomainException('Conference not found. SID: ' . $call->c_conference_sid);
             }
 
-            $result = Yii::$app->communication->joinToConference(
+            $result = Yii::$app->comms->joinToConference(
                 $call->c_call_sid,
                 $call->c_conference_sid,
                 $call->c_project_id,
@@ -1468,7 +1468,7 @@ class PhoneController extends FController
             if ($call->currentParticipant->isMute()) {
                 throw new \Exception('Participant already is mute');
             }
-            $result = Yii::$app->communication->muteParticipant($call->c_conference_sid, $call->c_call_sid);
+            $result = Yii::$app->comms->muteParticipant($call->c_conference_sid, $call->c_call_sid);
         } catch (\Throwable $e) {
             $result = [
                 'error' => true,
@@ -1486,7 +1486,7 @@ class PhoneController extends FController
             if ($call->currentParticipant->isUnMute()) {
                 throw new \Exception('Participant already is unMute');
             }
-            $result = Yii::$app->communication->unmuteParticipant($call->c_conference_sid, $call->c_call_sid);
+            $result = Yii::$app->comms->unmuteParticipant($call->c_conference_sid, $call->c_call_sid);
         } catch (\Throwable $e) {
             $result = [
                 'error' => true,
@@ -1510,7 +1510,7 @@ class PhoneController extends FController
             if ($call->c_recording_disabled) {
                 throw new \DomainException('Recording already disabled.');
             }
-            $result = Yii::$app->communication->recordingDisable($call->c_conference_sid);
+            $result = Yii::$app->comms->recordingDisable($call->c_conference_sid);
             $isError = (bool)($result['error'] ?? true);
             if ($isError) {
                 throw new \DomainException($result['message']);
@@ -1858,7 +1858,7 @@ class PhoneController extends FController
                 throw new BadRequestHttpException('You are not conference creator. Sid: ' . $sid);
             }
 
-            $result = Yii::$app->communication->sendDigitToConference($sid, $digit);
+            $result = Yii::$app->comms->sendDigitToConference($sid, $digit);
         } catch (\Throwable $e) {
             $result = [
                 'error' => true,

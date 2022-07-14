@@ -41,7 +41,7 @@ use yii\httpclient\Response;
  * @property string $securityVoiceMailRecordingUrl
  * @property string $securityCallRecordingUrl
  * @property string $securityConferenceRecordingUrl
- * @property string $xAccelRedirectCommunicationUrl
+ * @property string $xAccelRedirectCommsUrl
  * @property Request $request
  * @property string $voipApiUsername
  */
@@ -56,7 +56,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
     public $securityVoiceMailRecordingUrl = '/voice-mail-record/record/';
     public $securityCallRecordingUrl = '/call/record/';
     public $securityConferenceRecordingUrl = '/conference/record/';
-    public $xAccelRedirectCommunicationUrl = '';
+    public $xAccelRedirectCommsUrl = '';
     public $voipApiUsername = '';
     public $host = '';
 

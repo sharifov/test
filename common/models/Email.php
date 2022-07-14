@@ -434,7 +434,7 @@ class Email extends \yii\db\ActiveRecord
         $out = ['error' => false];
 
         /** @var CommunicationService $communication */
-        $communication = Yii::$app->communication;
+        $communication = Yii::$app->comms;
         $data['project_id'] = $this->e_project_id;
 
         $content_data['email_body_html'] = $this->getEmailBodyHtml();
@@ -982,11 +982,11 @@ class Email extends \yii\db\ActiveRecord
 
     public function getEmailFrom(): string
     {
-        return EmailType::isInbox($this->e_type_id) ?  MaskEmailHelper::masking($this->e_email_from): $this->e_email_from;
+        return EmailType::isInbox($this->e_type_id) ?  MaskEmailHelper::masking($this->e_email_from) : $this->e_email_from;
     }
 
     public function getEmailTo(): string
     {
-        return EmailType::isOutbox($this->e_type_id) ?  MaskEmailHelper::masking($this->e_email_to): $this->e_email_to;
+        return EmailType::isOutbox($this->e_type_id) ?  MaskEmailHelper::masking($this->e_email_to) : $this->e_email_to;
     }
 }
