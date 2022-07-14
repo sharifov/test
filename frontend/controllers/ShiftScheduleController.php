@@ -1090,6 +1090,10 @@ class ShiftScheduleController extends FController
 
     public function actionSummaryReport()
     {
+        if (UserShiftScheduleService::shiftSummaryReportIsEnable() === false) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
         $searchModel = new AgentShiftSummaryReportSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
         $totalCountData = $searchModel->countData($this->request->queryParams);

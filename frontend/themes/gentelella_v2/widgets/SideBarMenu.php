@@ -12,6 +12,7 @@ use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
+use modules\shiftSchedule\src\services\UserShiftScheduleService;
 use src\auth\Auth;
 use modules\user\userFeedback\abac\dto\UserFeedbackAbacDto;
 use modules\user\userFeedback\abac\UserFeedbackAbacObject;
@@ -761,7 +762,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         [
                             'label' => 'Shift Summary Report',
                             'url' => ['/shift-schedule/summary-report'],
-                            'title' => 'Shift Summary Report'
+                            'title' => 'Shift Summary Report',
+                            'visible' => UserShiftScheduleService::shiftSummaryReportIsEnable(),
                         ],
 
                         /** @abac ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_ACCESS, Access menu UserShiftAssign */
