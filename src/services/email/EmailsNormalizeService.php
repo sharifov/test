@@ -35,21 +35,24 @@ use src\exception\EmailNotSentException;
 use src\forms\emailReviewQueue\EmailReviewQueueForm;
 use frontend\models\EmailPreviewFromInterface;
 use src\dto\email\EmailDTO;
-use src\entities\email\EmailRepository;
 
 /**
  *
  * Class EmailsNormalizeService
  *
+ * @property EmailServiceHelper $helper
+ *
  */
 class EmailsNormalizeService implements EmailServiceInterface
 {
     protected $userId;
+    private $helper;
 
     public static function newInstance()
     {
         $instance = new static();
         $instance->userId = Auth::id();
+        $instance->helper = Yii::createObject(EmailServiceHelper::class);
         return $instance;
     }
 
@@ -220,7 +223,7 @@ class EmailsNormalizeService implements EmailServiceInterface
             $email->refresh();
 
             //=link Clients
-            $clientsIds = $form->clients ?? [EmailRepository::detectClientId($email->emailTo)];
+            $clientsIds = $form->clients ?? [$this->helper->detectClientId($email->emailTo)];
             if (!empty($clientsIds)) {
                 foreach ($clientsIds as $id) {
                     if ($client = Client::findOne($id)) {

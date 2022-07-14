@@ -6,6 +6,7 @@ use src\repositories\lead\LeadRepository;
 use src\repositories\cases\CasesRepository;
 use common\models\Lead;
 use src\entities\cases\Cases;
+use common\models\ClientEmail;
 
 /**
  *
@@ -66,6 +67,11 @@ class EmailServiceHelper
     }
 
 
+    /**
+     *
+     * @param string $email
+     * @return int|NULL
+     */
     public function detectClientId(string $email): ?int
     {
         $clientEmail = ClientEmail::find()->byEmail($email)->one();
