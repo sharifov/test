@@ -476,7 +476,9 @@ class EmailService implements EmailServiceInterface
             $email->e_status_id = $emailDTO->statusId;
             $email->e_is_new = $emailDTO->isNew;
             $email->e_email_to = $emailDTO->emailTo;
+            $email->e_email_to_name = $emailDTO->emailToName;
             $email->e_email_from = $emailDTO->emailFrom;
+            $email->e_email_from_name = $emailDTO->emailFromName;
             $email->e_email_subject = $emailDTO->emailSubject;
             $email->e_project_id = $emailDTO->projectId;
             $email->body_html = $emailDTO->bodyHtml;
@@ -485,6 +487,9 @@ class EmailService implements EmailServiceInterface
             $email->e_inbox_created_dt = $emailDTO->inboxCreatedDt;
             $email->e_ref_message_id = $emailDTO->refMessageId;
             $email->e_message_id = $emailDTO->messageId;
+            $email->e_client_id = $emailDTO->clientId;
+            $email->e_language_id = $emailDTO->languageId;
+            $email->e_template_type_id = $emailDTO->templateTypeId;
 
             if (!$email->save()) {
                 throw new CreateModelException(get_class($email), $email->getErrors());

@@ -35,6 +35,7 @@ use src\exception\EmailNotSentException;
 use common\models\ClientEmail;
 use src\forms\emailReviewQueue\EmailReviewQueueForm;
 use frontend\models\EmailPreviewFromInterface;
+use src\dto\email\EmailDTO;
 
 /**
  *
@@ -572,5 +573,48 @@ class EmailsNormalizeService implements EmailServiceInterface
         }
 
         return $email;
+    }
+
+    public function createFromDTO(EmailDTO $emailDTO): Email
+    {
+        $data = [
+            'userId'        =>  $this->userId,
+            'status'        =>  $emailDTO->statusId,
+            'type'          =>  $emailDTO->typeId,
+            'projectId'     =>  $emailDTO->projectId,
+            'clientsIds'    =>  $emailDTO->clientId ? [$emailDTO->clientId] : null,
+            'body'  =>  [
+                'subject'   =>  $emailDTO->emailSubject,
+                'bodyHtml'  =>  $emailDTO->bodyHtml,
+            ],
+            'contacts' => [
+                'from' => [
+                    'email' => $emailDTO->emailFrom,
+                    'name'  =>  $emailDTO->emailFromName,
+                    'type' => EmailContactType::FROM,
+                ],
+                'to' => [
+                    'email' => $emailDTO->emailTo,
+                    'name'  =>  $emailDTO->emailToName,
+                    'type' => EmailContactType::TO,
+                ],
+            ],
+            'log'   =>  [
+                'messageId'         =>  $emailDTO->messageId,
+                'refMessageId'      =>  $emailDTO->refMessageId,
+                'inboxCreatedDt'    =>  $emailDTO->inboxCreatedDt,
+                'inboxEmailId'      =>  $emailDTO->inboxEmailId,
+                'isNew'             =>  $emailDTO->isNew,
+            ]
+        ];
+
+        if (!empty($emailDTO->templateTypeId) || !empty($emailDTO->languageId)) {
+            $data['params'] = [
+                'templateType'  =>  $emailDTO->templateTypeId,
+                'language'      =>  $emailDTO->languageId,
+            ];
+        }
+
+        return $this->create(EmailForm::fromArray($data));
     }
 }

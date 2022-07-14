@@ -6,6 +6,7 @@ use common\models\Lead;
 use src\entities\cases\Cases;
 use src\forms\emailReviewQueue\EmailReviewQueueForm;
 use frontend\models\EmailPreviewFromInterface;
+use src\dto\email\EmailDTO;
 
 interface EmailServiceInterface
 {
@@ -16,4 +17,6 @@ interface EmailServiceInterface
     public function sendMail($email, array $data = []);
 
     public function updateAfterReview(EmailReviewQueueForm $form, $email);
+
+    public function createFromDTO(EmailDTO $emailDTO);
 }
