@@ -4,13 +4,11 @@ namespace frontend\controllers;
 
 use common\components\BackOffice;
 use common\components\CommunicationService;
-use common\components\jobs\LeadPoorProcessingRemoverJob;
 use common\models\Call;
 use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Department;
-use common\models\DepartmentPhoneProject;
 use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\GlobalLog;
@@ -19,16 +17,25 @@ use common\models\LeadCallExpert;
 use common\models\LeadChecklist;
 use common\models\LeadFlow;
 //use common\models\LeadLog;
+use common\models\Employee;
 use common\models\LeadQcall;
 use common\models\LeadTask;
 use common\models\local\LeadAdditionalInformation;
 use common\models\Note;
-use common\models\ProjectEmailTemplate;
-use common\models\QuoteCommunication;
+use common\models\Quote;
+use common\models\QuotePrice;
 use common\models\search\LeadCallExpertSearch;
 use common\models\search\LeadChecklistSearch;
+use common\models\search\LeadSearch;
+use common\models\Sms;
+use common\models\SmsTemplateType;
+use frontend\models\CommunicationForm;
+use frontend\models\LeadForm;
+use frontend\models\LeadPreviewEmailForm;
+use frontend\models\LeadPreviewSmsForm;
 use frontend\models\LeadUserRatingForm;
-use kivork\rbacExportImport\src\formatters\FileSizeFormatter;
+use frontend\models\ProfitSplitForm;
+use frontend\models\TipsSplitForm;
 use modules\email\src\abac\dto\EmailPreviewDto;
 use modules\email\src\abac\EmailAbacObject;
 use modules\featureFlag\FFlag;
@@ -43,28 +50,18 @@ use modules\offer\src\entities\offer\search\OfferSearch;
 use modules\offer\src\entities\offerSendLog\CreateDto;
 use modules\offer\src\entities\offerSendLog\OfferSendLogType;
 use modules\offer\src\services\OfferSendLogService;
-use modules\order\src\entities\order\search\OrderCrudSearch;
-use common\models\Sms;
-use common\models\SmsTemplateType;
-use common\models\UserProjectParams;
-use frontend\models\CommunicationForm;
-use frontend\models\LeadForm;
-use frontend\models\LeadPreviewEmailForm;
-use frontend\models\LeadPreviewSmsForm;
-use frontend\models\SendEmailForm;
 use modules\order\src\entities\order\search\OrderSearch;
-use modules\twilio\components\TwilioCommunicationService;
 use PHPUnit\Framework\Warning;
-use src\access\EmployeeAccess;
 use src\auth\Auth;
 use src\entities\cases\Cases;
+use src\exception\EmailNotSentException;
+use src\exceptions\CreateModelException;
 use src\forms\CompositeFormHelper;
 use src\forms\lead\CloneReasonForm;
 use src\forms\lead\ItineraryEditForm;
 use src\forms\lead\LeadCreateForm;
 use src\forms\leadflow\TakeOverReasonForm;
 use src\helpers\app\AppHelper;
-use src\helpers\email\MaskEmailHelper;
 use src\helpers\setting\SettingHelper;
 use src\logger\db\GlobalLogInterface;
 use src\logger\db\LogDTO;
@@ -76,17 +73,13 @@ use src\model\clientChat\entity\ClientChat;
 use src\model\clientChat\permissions\ClientChatActionPermission;
 use src\model\clientChatLead\entity\ClientChatLead;
 use src\model\clientChatLead\entity\ClientChatLeadRepository;
-use src\model\contactPhoneData\entity\ContactPhoneData;
 use src\model\contactPhoneList\service\ContactPhoneListService;
-use src\model\department\department\DefaultPhoneType;
 use src\model\email\useCase\send\fromLead\AbacEmailList;
 use src\model\emailReviewQueue\EmailReviewQueueManageService;
-use src\model\emailReviewQueue\entity\EmailReviewQueue;
 use src\model\lead\useCases\lead\create\CreateLeadByChatDTO;
 use src\model\lead\useCases\lead\create\LeadCreateByChatForm;
 use src\model\lead\useCases\lead\create\LeadManageForm;
 use src\model\lead\useCases\lead\create\LeadManageService as UseCaseLeadManageService;
-use src\model\lead\useCases\lead\import\LeadImportForm;
 use src\model\lead\useCases\lead\import\LeadImportParseService;
 use src\model\lead\useCases\lead\import\LeadImportService;
 use src\model\lead\useCases\lead\import\LeadImportUploadForm;
@@ -94,11 +87,11 @@ use src\model\lead\useCases\lead\link\LeadLinkChatForm;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
+use src\model\leadUserConversion\service\LeadUserConversionDictionary;
+use src\model\leadUserConversion\service\LeadUserConversionService;
 use src\model\leadUserRating\abac\dto\LeadUserRatingAbacDto;
 use src\model\leadUserRating\abac\LeadUserRatingAbacObject;
 use src\model\leadUserRating\service\LeadUserRatingService;
-use src\model\leadUserConversion\service\LeadUserConversionDictionary;
-use src\model\leadUserConversion\service\LeadUserConversionService;
 use src\model\sms\useCase\send\fromLead\AbacSmsFromNumberList;
 use src\quoteCommunication\Repo;
 use src\repositories\cases\CasesRepository;
@@ -106,6 +99,7 @@ use src\repositories\lead\LeadRepository;
 use src\repositories\NotFoundException;
 use src\repositories\quote\QuoteRepository;
 use src\services\client\ClientManageService;
+use src\services\email\EmailMainService;
 use src\services\email\EmailService;
 use src\services\lead\LeadAssignService;
 use src\services\lead\LeadBusinessExtraQueueService;
@@ -122,7 +116,6 @@ use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
-use yii\validators\StringValidator;
 use yii\web\BadRequestHttpException;
 use yii\web\Cookie;
 use yii\web\ForbiddenHttpException;
@@ -131,17 +124,6 @@ use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
 use yii\web\UploadedFile;
 use yii\widgets\ActiveForm;
-use common\models\Quote;
-use common\models\Employee;
-use common\models\search\LeadSearch;
-use frontend\models\ProfitSplitForm;
-use common\models\QuotePrice;
-use frontend\models\TipsSplitForm;
-use common\models\local\LeadLogMessage;
-use src\exceptions\CreateModelException;
-use src\services\email\EmailServiceInterface;
-use src\services\email\EmailsNormalizeService;
-use src\exception\EmailNotSentException;
 
 /**
  * Class LeadController
@@ -158,7 +140,7 @@ use src\exception\EmailNotSentException;
  * @property UrlGenerator $fileStorageUrlGenerator
  * @property UseCaseLeadManageService $useCaseLeadManageService
  * @property EmailReviewQueueManageService $emailReviewQueueManageService
- * @property EmailServiceInterface $emailService
+ * @property EmailMainService $emailService
  */
 class LeadController extends FController
 {
@@ -175,7 +157,7 @@ class LeadController extends FController
     private UrlGenerator $fileStorageUrlGenerator;
     private UseCaseLeadManageService $useCaseLeadManageService;
     private EmailReviewQueueManageService $emailReviewQueueManageService;
-    private EmailServiceInterface $emailService;
+    private EmailMainService $emailService;
 
     public function __construct(
         $id,
@@ -193,6 +175,7 @@ class LeadController extends FController
         UrlGenerator $fileStorageUrlGenerator,
         UseCaseLeadManageService $useCaseLeadManageService,
         EmailReviewQueueManageService $emailReviewQueueManageService,
+        EmailMainService $emailService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -209,10 +192,7 @@ class LeadController extends FController
         $this->fileStorageUrlGenerator = $fileStorageUrlGenerator;
         $this->useCaseLeadManageService = $useCaseLeadManageService;
         $this->emailReviewQueueManageService = $emailReviewQueueManageService;
-        $this->emailService = Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_EMAIL_NORMALIZED_FORM_ENABLE) ?
-            EmailsNormalizeService::newInstance() :
-            Yii::createObject(EmailService::class)
-        ;
+        $this->emailService = $emailService;
     }
 
     public function behaviors(): array
