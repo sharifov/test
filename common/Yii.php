@@ -35,7 +35,7 @@ abstract class BaseApplication extends yii\base\Application
  * Include only Web application related components here
  *
  * @property \aki\telegram\Telegram $telegram The Telegram component. This property is read-only. Extended component.
- * @property \common\components\CommunicationService $communication The CommunicationService component. This property is read-only. Extended component.
+ * @property \common\components\CommunicationService $comms The CommunicationService component. This property is read-only. Extended component.
  * @property \common\components\HybridService $hybrid The HybridService component. This property is read-only. Extended component.
  * @property \common\components\CurrencyService $currency The CurrencyService component.
  * @property \common\components\AirSearchService $airsearch The AirSearchService component.

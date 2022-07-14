@@ -114,7 +114,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
             $filter['email_list'] = Json::encode(['list' => $this->getEmailsForReceivedMessages()]);
 
             /** @var CommunicationService $communication */
-            $communication = Yii::$app->communication;
+            $communication = Yii::$app->comms;
             $fileSystem = Yii::createObject(FileSystem::class);
             $fileStorageRepository = Yii::createObject(FileStorageRepository::class);
             $fileClientRepository = Yii::createObject(FileClientRepository::class);

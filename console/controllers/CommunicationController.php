@@ -93,7 +93,7 @@ class CommunicationController extends Controller
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
         /** @var CommunicationService $communication */
-        $communication = Yii::$app->communication;
+        $communication = Yii::$app->comms;
 
         $filter = [];
         $dateTime = null;

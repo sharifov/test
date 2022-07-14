@@ -227,7 +227,7 @@ class EmailTemplateType extends \yii\db\ActiveRecord
         ];
 
         /** @var CommunicationService $communication */
-        $communication = Yii::$app->communication;
+        $communication = Yii::$app->comms;
         $mailTypes = $communication->mailTypes();
 
         if ($mailTypes && isset($mailTypes['data']['types'])) {

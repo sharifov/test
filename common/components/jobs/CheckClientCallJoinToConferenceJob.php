@@ -144,7 +144,7 @@ class CheckClientCallJoinToConferenceJob extends BaseJob implements JobInterface
 
         foreach ($children as $child) {
             try {
-                $result = \Yii::$app->communication->cancelCall($child['c_call_sid']);
+                $result = \Yii::$app->comms->cancelCall($child['c_call_sid']);
                 if ($result['error']) {
                     \Yii::error(VarDumper::dumpAsString([
                         'result' => $result,
@@ -165,7 +165,7 @@ class CheckClientCallJoinToConferenceJob extends BaseJob implements JobInterface
     private function callIsActive(string $callSid): bool
     {
         try {
-            $result = \Yii::$app->communication->getCallInfo($callSid);
+            $result = \Yii::$app->comms->getCallInfo($callSid);
             if ($result['error']) {
                 \Yii::error(VarDumper::dumpAsString([
                     'result' => $result,

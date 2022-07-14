@@ -117,7 +117,7 @@ class DownloadEmails
                     echo "Cycle #" . $cycleCount . PHP_EOL;
                 }
 
-                $res = Yii::$app->communication->mailGetMessages($filter);
+                $res = Yii::$app->comms->mailGetMessages($filter);
 
                 if (isset($res['error']) && $res['error']) {
                     $response['error'] = 'Error mailGetMessages';

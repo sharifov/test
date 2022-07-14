@@ -47,6 +47,11 @@ new="'xAccelRedirectCommsUrl'"
 sed -i -e "s/$old/$new/g" .env
 sed -i -e "s/$old/$new/g" "$currentDir"/common/config/main-local.php
 
+old="'communication'"
+new="'comms'"
+
+sed -i -e "s/$old/$new/g" "$currentDir"/common/config/main-local.php
+
 printf "Rename env COMMUNICATION - finish\n"
 
 
