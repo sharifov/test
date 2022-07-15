@@ -23,12 +23,6 @@ use src\helpers\lead\LeadUrlHelper;
 $leadAbacDto = new LeadAbacDto($lead, Auth::id());
 
 $addAutoQuoteBtn = '';
-try {
-    $priceResearchLinks = SettingHelper::getPriceResearchLinksNamesArray();
-} catch (\RuntimeException | \DomainException $e) {
-    Yii::warning(AppHelper::throwableFormatter($e), 'SettingHelper::getPriceResearchLinksNamesArray:exception');
-    $priceResearchLinks = [];
-}
 $leadAbacDto = new LeadAbacDto($lead, Auth::id());
 /** @abac $leadAbacDto, LeadAbacObject::ACT_PRICE_LINK_RESEARCH, LeadAbacObject::ACTION_ACCESS, Access to edit price research links  */
 $canAccessPriceResearchLinks = \Yii::$app->abac->can(
@@ -39,7 +33,7 @@ $canAccessPriceResearchLinks = \Yii::$app->abac->can(
 
 if ($canAccessPriceResearchLinks) {
     try {
-        $priceResearchLinks = SettingHelper::getPriceResearchLinksNamesArray();
+        $priceResearchLinks = SettingHelper::getPriceResearchLinksNamesArray($lead);
     } catch (\RuntimeException | \DomainException $e) {
         Yii::warning(AppHelper::throwableFormatter($e), 'SettingHelper::getPriceResearchLinksNamesArray:exception');
         $priceResearchLinks = [];
