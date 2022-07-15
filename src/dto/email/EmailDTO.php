@@ -4,7 +4,7 @@ namespace src\dto\email;
 
 use src\entities\email\helpers\EmailType;
 use src\entities\email\helpers\EmailStatus;
-use src\entities\email\EmailRepository;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class EmailDTO
@@ -28,6 +28,8 @@ use src\entities\email\EmailRepository;
  * @property string $languageId
  * @property int $statusId
  * @property bool $isNew
+ * @property int $communicationId
+ * @property array|null $attachPaths
  */
 class EmailDTO
 {
@@ -49,6 +51,8 @@ class EmailDTO
     public $languageId;
     public $templateTypeId;
     public $isNew;
+    public $communicationId;
+    public $attachPaths;
 
     public static function newInstance()
     {
@@ -69,13 +73,17 @@ class EmailDTO
         if (isset($mail['ei_email_subject'])) {
             $this->emailSubject = $this->filter($mail['ei_email_subject']);
         }
-        $this->projectId = EmailRepository::getProjectIdByDepOrUpp($mail['ei_email_to']);
         $this->bodyHtml = $mail['ei_email_text'];
         $this->createdDt = $mail['ei_created_dt'];
         $this->inboxEmailId = $mail['ei_id'];
         $this->inboxCreatedDt = $mail['ei_received_dt'] ?: $mail['ei_created_dt'];
         $this->refMessageId = $mail['ei_ref_mess_ids'];
         $this->messageId = $mail['ei_message_id'];
+        $this->communicationId = $mail['ei_id'];
+
+        if ($attachPaths = ArrayHelper::getValue($mail, 'attach_paths')){
+            $this->attachPaths = explode(',', $attachPaths);
+        }
 
         return $this;
     }
