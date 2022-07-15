@@ -81,12 +81,12 @@ class EmailMainService implements EmailServiceInterface
         return $email;
     }
 
-    public function createFromDTO(EmailDTO $emailDTO)
+    public function createFromDTO(EmailDTO $emailDTO, $autoDetectEmpty = true)
     {
-        $email = $this->oldService->createFromDTO($emailDTO);
+        $email = $this->oldService->createFromDTO($emailDTO, $autoDetectEmpty);
 
         if ($this->normalizedService !== null) {
-            $email = $this->normalizedService->createFromDTO($emailDTO);
+            $email = $this->normalizedService->createFromDTO($emailDTO, $autoDetectEmpty);
         }
 
         return $email;
