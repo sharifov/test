@@ -632,9 +632,8 @@ class CasesSaleService
                     $caseSale->css_cs_id = $csId;
                     $caseSale->css_sale_id = $saleId;
                     $caseSale->css_sale_book_id = $saleData['bookingId'] ?? $saleData['confirmationNumber'] ?? null;
-                    $updatedCase = $this->casesRepository->find($csId);
-                    $updatedCase->cs_order_uid = $caseSale->css_sale_book_id;
-                    $updatedCase->save();
+                    $case->cs_order_uid = $caseSale->css_sale_book_id;
+                    $this->casesRepository->save($case);
 
                     $caseSale = $this->saveAdditionalData($caseSale, $case, $refreshSaleData);
 
@@ -801,9 +800,8 @@ class CasesSaleService
                         if ($caseProject->api_key !== trim($saleProjectApiKey)) {
                             $newProject = Project::findOne(['api_key' => $saleProjectApiKey]);
                             if ($newProject) {
-                                $updatedCase = $this->casesRepository->find($case->cs_id);
-                                $updatedCase->cs_project_id = $newProject->id;
-                                $updatedCase->save();
+                                $case->cs_project_id = $newProject->id;
+                                $this->casesRepository->save($case);
 
                                 $description = 'Case project was changed.';
                                 $data = [
