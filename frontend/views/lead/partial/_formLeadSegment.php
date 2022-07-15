@@ -136,20 +136,43 @@ $select2Properties = [
 <?php
 
 $js = <<<JS
+function setLastDataToNewElement(lastElement, curElement) {
+    lastElement.select2('data').forEach((e) => {
+        let newOption = new Option(e.text, e.id, false, false);
+        curElement.append(newOption).trigger('change');
+    });
+    
+    curElement.val(lastElement.val()).trigger('change');
+}
+$('#default-flight-multiple-input').on('afterAddRow', function(e, row, currentIndex) {
+    let block = $(e.currentTarget),
+        items = block.find('.multiple-input-list__item');
+    
+    if (items.length > 1) {
+        let lastElemNum = items.length - 2,
+            lastDestination = items.eq(lastElemNum).find('[name $= "[destination]"]'),
+            curDestination = items.last().find('[name $= "[destination]"]'),
+            lastOrigin = items.eq(lastElemNum).find('[name $= "[origin]"]'),
+            curOrigin = items.last().find('[name $= "[origin]"]');
+        
+        setLastDataToNewElement(lastDestination, curOrigin);
+        setLastDataToNewElement(lastOrigin, curDestination);
+    }
+});
 function formatRepo( repo ) {
-				if (repo.loading) return repo.text;
+        if (repo.loading) return repo.text;
 
-				var markup = "<div class='select2-result-repository clearfix'>" +
-					//"<div class='select2-result-repository__avatar'><i class=\"fa fa-plane\"></div>" +
-					"<div class='select2-result-repository__meta'>" +
-						"<div class='select2-result-repository__title'>" + repo.text + "</div>";
-				
-				/*markup += "<div class='select2-result-repository__statistics'>" +
-							"<div class='select2-result-repository__forks'>" + repo.id + "</div>" +
-						"</div>" +*/
-				markup +=	"</div></div>";
+        var markup = "<div class='select2-result-repository clearfix'>" +
+            //"<div class='select2-result-repository__avatar'><i class=\"fa fa-plane\"></div>" +
+            "<div class='select2-result-repository__meta'>" +
+                "<div class='select2-result-repository__title'>" + repo.text + "</div>";
+        
+        /*markup += "<div class='select2-result-repository__statistics'>" +
+                    "<div class='select2-result-repository__forks'>" + repo.id + "</div>" +
+                "</div>" +*/
+        markup +=	"</div></div>";
 
-				return markup;
-			}
+        return markup;
+    }
 JS;
 $this->registerJs($js, View::POS_HEAD);
