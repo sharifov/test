@@ -2,11 +2,13 @@
 
 namespace src\entities\email;
 
-use src\repositories\NotFoundException;
-use src\dispatchers\EventDispatcher;
-use common\models\ClientEmail;
+use common\models\Client;
 use common\models\DepartmentEmailProject;
+use common\models\Lead;
 use common\models\UserProjectParams;
+use src\dispatchers\EventDispatcher;
+use src\entities\cases\Cases;
+use src\repositories\NotFoundException;
 
 class EmailRepository
 {
@@ -61,6 +63,76 @@ class EmailRepository
             $removedIds[] = $this->delete($model);
         }
         return $removedIds;
+    }
+
+    /**
+     *
+     * @param Email $email
+     * @param array $leadsIds
+     * @return array
+     */
+    public function linkLeads(Email $email, array $leadsIds): array
+    {
+        $linked = [];
+        foreach ($leadsIds as $id) {
+            if ($lead = Lead::findOne($id)) {
+                $email->link('leads', $lead);
+                $linked[] = $id;
+            }
+        }
+        return $linked;
+    }
+
+    /**
+     *
+     * @param Email $email
+     * @param array $casesIds
+     * @return array
+     */
+    public function linkCases(Email $email, array $casesIds): array
+    {
+        $linked = [];
+        foreach ($casesIds as $id) {
+            if ($case = Cases::findOne($id)) {
+                $email->link('cases', $case);
+                $linked[] = $id;
+            }
+        }
+        return $linked;
+    }
+
+    /**
+     *
+     * @param Email $email
+     * @param array $clientsIds
+     * @return array
+     */
+    public function linkClients(Email $email, array $clientsIds): array
+    {
+        $linked = [];
+        foreach ($clientsIds as $id) {
+            if ($client = Client::findOne($id)) {
+                $email->link('clients', $client);
+                $linked[] = $id;
+            }
+        }
+        return $linked;
+    }
+
+    /**
+     *
+     * @param Email $email
+     * @param int $replyId
+     * @return bool
+     */
+    public function linkReply(Email $email, int $replyId): bool
+    {
+        $reply = Email::findOne($replyId);
+        if ($reply) {
+            $email->link('reply', $reply);
+            return true;
+        }
+        return false;
     }
 
     /**
