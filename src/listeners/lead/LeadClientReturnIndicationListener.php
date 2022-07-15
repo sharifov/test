@@ -7,7 +7,7 @@ use src\events\lead\LeadSoldEvent;
 use src\helpers\app\AppHelper;
 use Yii;
 
-class LeadSoldClientReturnIndicationListener
+class LeadClientReturnIndicationListener
 {
     public function handle(LeadSoldEvent $event): void
     {
