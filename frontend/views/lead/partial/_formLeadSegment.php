@@ -6,6 +6,7 @@
  * @var $model src\forms\lead\ItineraryEditForm
  */
 
+use modules\featureFlag\FFlag;
 use yii\widgets\ActiveForm;
 use dosamigos\datepicker\DatePicker;
 use yii\web\JsExpression;
@@ -134,8 +135,7 @@ $select2Properties = [
 ])->label(false) ?>
 
 <?php
-
-$js = <<<JS
+$returnFlightAutocomplete = <<<JS_RFA
 function setLastDataToNewElement(lastElement, curElement) {
     lastElement.select2('data').forEach((e) => {
         let newOption = new Option(e.text, e.id, false, false);
@@ -159,6 +159,16 @@ $('#default-flight-multiple-input').on('afterAddRow', function(e, row, currentIn
         setLastDataToNewElement(lastOrigin, curDestination);
     }
 });
+JS_RFA;
+
+/** @fflag FFlag::FF_KEY_RETURN_FLIGHT_SEGMENT_AUTOCOMPLETE_ENABLE, Return flight segment autocomplete enable */
+if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_RETURN_FLIGHT_SEGMENT_AUTOCOMPLETE_ENABLE)) {
+    $this->registerJs($returnFlightAutocomplete, View::POS_HEAD);
+}
+?>
+
+<?php
+$js = <<<JS
 function formatRepo( repo ) {
         if (repo.loading) return repo.text;
 
