@@ -7,6 +7,9 @@ use src\repositories\cases\CasesRepository;
 use common\models\Lead;
 use src\entities\cases\Cases;
 use common\models\ClientEmail;
+use common\models\UserProjectParams;
+use common\models\Employee;
+use common\models\DepartmentEmailProject;
 
 /**
  *
@@ -216,5 +219,58 @@ class EmailServiceHelper
         }
 
         return $lead ?? null;
+    }
+
+    /**
+     * @param string $email
+     * @return bool
+     */
+    public function isNotInternalEmail(string $email): bool
+    {
+        if (UserProjectParams::find()->byEmail($email)->one()) {
+            return false;
+        }
+        if (Employee::find()->byEmail($email)->one()) {
+            return false;
+        }
+        if (DepartmentEmailProject::find()->byEmail($email)->one()) {
+            return false;
+        }
+        return true;
+    }
+
+
+    /**
+     * @return array
+     */
+    public function getUsersIdByEmail(string $email): array
+    {
+        $users = [];
+        $params = UserProjectParams::find()->byEmail($email, false)->all();
+        if ($params) {
+            foreach ($params as $param) {
+                $users[$param->upp_user_id] = $param->upp_user_id;
+            }
+        }
+
+        $employees = Employee::find()->where(['email' => $this->$email])->all();
+        if ($employees) {
+            foreach ($employees as $employe) {
+                $users[$employe->id] = $employe->id;
+            }
+        }
+
+        return $users;
+    }
+
+    /**
+     *
+     * @param string $email
+     * @return int
+     */
+    public function getUserIdByEmail(string $email): int
+    {
+        $user = $this->getUsersIdByEmail($email);
+        return reset($user);
     }
 }
