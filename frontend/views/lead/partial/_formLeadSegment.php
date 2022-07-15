@@ -6,6 +6,7 @@
  * @var $model src\forms\lead\ItineraryEditForm
  */
 
+use modules\featureFlag\FFlag;
 use yii\widgets\ActiveForm;
 use dosamigos\datepicker\DatePicker;
 use yii\web\JsExpression;
@@ -134,22 +135,54 @@ $select2Properties = [
 ])->label(false) ?>
 
 <?php
+$returnFlightAutocomplete = <<<JS_RFA
+function setLastDataToNewElement(lastElement, curElement) {
+    lastElement.select2('data').forEach((e) => {
+        let newOption = new Option(e.text, e.id, false, false);
+        curElement.append(newOption).trigger('change');
+    });
+    
+    curElement.val(lastElement.val()).trigger('change');
+}
+$('#default-flight-multiple-input').on('afterAddRow', function(e, row, currentIndex) {
+    let block = $(e.currentTarget),
+        items = block.find('.multiple-input-list__item');
+    
+    if (items.length === 2) {
+        let lastElemNum = items.length - 2,
+            lastDestination = items.eq(lastElemNum).find('[name $= "[destination]"]'),
+            curDestination = items.last().find('[name $= "[destination]"]'),
+            lastOrigin = items.eq(lastElemNum).find('[name $= "[origin]"]'),
+            curOrigin = items.last().find('[name $= "[origin]"]');
+        
+        setLastDataToNewElement(lastDestination, curOrigin);
+        setLastDataToNewElement(lastOrigin, curDestination);
+    }
+});
+JS_RFA;
 
+/** @fflag FFlag::FF_KEY_RETURN_FLIGHT_SEGMENT_AUTOCOMPLETE_ENABLE, Return flight segment autocomplete enable */
+if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_RETURN_FLIGHT_SEGMENT_AUTOCOMPLETE_ENABLE)) {
+    $this->registerJs($returnFlightAutocomplete, View::POS_HEAD);
+}
+?>
+
+<?php
 $js = <<<JS
 function formatRepo( repo ) {
-				if (repo.loading) return repo.text;
+        if (repo.loading) return repo.text;
 
-				var markup = "<div class='select2-result-repository clearfix'>" +
-					//"<div class='select2-result-repository__avatar'><i class=\"fa fa-plane\"></div>" +
-					"<div class='select2-result-repository__meta'>" +
-						"<div class='select2-result-repository__title'>" + repo.text + "</div>";
-				
-				/*markup += "<div class='select2-result-repository__statistics'>" +
-							"<div class='select2-result-repository__forks'>" + repo.id + "</div>" +
-						"</div>" +*/
-				markup +=	"</div></div>";
+        var markup = "<div class='select2-result-repository clearfix'>" +
+            //"<div class='select2-result-repository__avatar'><i class=\"fa fa-plane\"></div>" +
+            "<div class='select2-result-repository__meta'>" +
+                "<div class='select2-result-repository__title'>" + repo.text + "</div>";
+        
+        /*markup += "<div class='select2-result-repository__statistics'>" +
+                    "<div class='select2-result-repository__forks'>" + repo.id + "</div>" +
+                "</div>" +*/
+        markup +=	"</div></div>";
 
-				return markup;
-			}
+        return markup;
+    }
 JS;
 $this->registerJs($js, View::POS_HEAD);
