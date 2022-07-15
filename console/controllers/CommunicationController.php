@@ -143,7 +143,7 @@ class CommunicationController extends Controller
 
                 try {
                     $emailDTO = EmailDTO::newInstance()->fillFromCommunication($mail);
-                    $emailService->createFromDTO($emailDTO);
+                    $emailService->createFromDTO($emailDTO, false);
                 } catch (CreateModelException $e) {
                     Yii::error(VarDumper::dumpAsString($e->getErrors()), 'API:Communication:newMessagesReceived:Email:save');
                 } catch (\Throwable $e) {
