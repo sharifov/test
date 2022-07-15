@@ -138,7 +138,15 @@ $select2Properties = [
 $returnFlightAutocomplete = <<<JS_RFA
 function setLastDataToNewElement(lastElement, curElement) {
     lastElement.select2('data').forEach((e) => {
-        let newOption = new Option(e.text, e.id, false, false);
+        let title = '';
+        
+        if ('selection' in e) {
+            title = e.selection;
+        } else {
+            title = e.text;
+        }
+        
+        let newOption = new Option(title, e.id, false, false);
         curElement.append(newOption).trigger('change');
     });
     
