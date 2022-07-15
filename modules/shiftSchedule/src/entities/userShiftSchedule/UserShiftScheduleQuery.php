@@ -4,6 +4,7 @@ namespace modules\shiftSchedule\src\entities\userShiftSchedule;
 
 use common\models\UserGroupAssign;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
+use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\shiftScheduleTypeLabelAssign\ShiftScheduleTypeLabelAssign;
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\TimelineCalendarFilter;
@@ -398,13 +399,8 @@ class UserShiftScheduleQuery
     public static function getPendingListWithIntersectionByWTAndWTR(): array
     {
         $curTime = date('Y-m-d H:i:s');
-        $shiftScheduleTypesAsString = implode(
-            ', ',
-            ShiftScheduleType::getIdListByKeys([ShiftScheduleType::TYPE_KEY_WT, ShiftScheduleType::TYPE_KEY_WTR])
-        );
         $ussTableName = UserShiftSchedule::tableName();
-        $ussStatusDone = UserShiftSchedule::STATUS_DONE;
-        $ussStatusApproved = UserShiftSchedule::STATUS_APPROVED;
+        $ssrTableName = ShiftScheduleRequest::tableName();
 
         return UserShiftSchedule::find()
             ->alias('ussPending')
@@ -418,11 +414,25 @@ class UserShiftScheduleQuery
             ->rightJoin(
                 "{$ussTableName} AS ussDone",
                 "ussPending.uss_user_id = ussDone.uss_user_id 
-                AND ussDone.uss_start_utc_dt <= '{$curTime}' 
-                AND ussDone.uss_end_utc_dt >= '{$curTime}' 
-                AND ussDone.uss_status_id IN ({$ussStatusDone}, {$ussStatusApproved})
-                AND ussDone.uss_sst_id IN ({$shiftScheduleTypesAsString})"
+                AND ussDone.uss_start_utc_dt <= :curTime 
+                AND ussDone.uss_end_utc_dt >= :curTime",
+                [
+                    'curTime' => $curTime,
+                ]
             )
+            ->andOnCondition([
+                'IN',
+                'ussDone.uss_status_id',
+                [UserShiftSchedule::STATUS_DONE, UserShiftSchedule::STATUS_APPROVED]
+            ])
+            ->andOnCondition([
+                'IN',
+                'ussDone.uss_sst_id',
+                ShiftScheduleType::getIdListByKeys([
+                    ShiftScheduleType::TYPE_KEY_WT, ShiftScheduleType::TYPE_KEY_WTR
+                ])
+            ])
+            ->rightJoin($ssrTableName, "ussPending.uss_id = {$ssrTableName}.ssr_uss_id")
             ->all();
     }
 
