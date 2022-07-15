@@ -31,8 +31,8 @@ MonitorCallIncomingAsset::register($this);
                         <div class="clearfix"></div>
                     </div>
                     <div class="x_content">
-                        <transition-group name="fade2" tag="div" class="card-body">
-                            <div v-for="(item, index) in userOnlineList()" class="list-item truncate" :key="item" style="width: 150px;">
+                        <transition-group name="fade" tag="div" class="card-body">
+                            <div v-for="(item, index) in userDataList()" class="list-item truncate" :key="item" style="width: 150px;">
                                 <user-component :item="item" :key="item.uo_user_id" :index="index"></user-component>
                             </div>
                         </transition-group>
@@ -162,10 +162,10 @@ centrifuge.on('connect', function(ctx){
         let jsonData = message.data;
         if (jsonData.object === 'userOnline') {
             if (jsonData.action === 'delete') {
-                callMapApp.deleteUserOnline(jsonData.data.userOnline);
+                callMapApp.deleteUserData(jsonData.data.userOnline);
             } else {
                 //console.info(jsonData.data);
-                callMapApp.addUserOnline(jsonData.data.userOnline);
+                callMapApp.addUserData(jsonData.data.userOnline, 'online');
             }
         }
     });
@@ -175,9 +175,9 @@ centrifuge.on('connect', function(ctx){
         // console.log(jsonData.data);
         if (jsonData.object === 'userStatus') {
             if (jsonData.action === 'delete') {
-                callMapApp.deleteUserStatus(jsonData.data.userStatus);
+                callMapApp.deleteUserData(jsonData.data.userStatus);
             } else {
-                callMapApp.addUserStatus(jsonData.data.userStatus);
+                callMapApp.addUserData(jsonData.data.userStatus, 'status');
             }
         }
         //console.log(jsonData.data.userOnline.uo_idle_state);
