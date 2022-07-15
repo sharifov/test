@@ -130,13 +130,6 @@ class EmailRepository
         return $command->queryScalar();
     }
 
-    public static function detectClientId(string $email): ?int
-    {
-        $clientEmail = ClientEmail::find()->byEmail($email)->one();
-
-        return $clientEmail->client_id ?? null;
-    }
-
     public static function getProjectIdByDepOrUpp($emailTo): ?int
     {
         if ($dep = DepartmentEmailProject::find()->byEmail($emailTo)->one()) {
