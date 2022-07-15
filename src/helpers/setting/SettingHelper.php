@@ -8,6 +8,7 @@ use common\models\Lead;
 use frontend\helpers\JsonHelper;
 use http\Exception\InvalidArgumentException;
 use modules\shiftSchedule\src\services\ShiftScheduleDictionary;
+use src\model\priceResearchLink\service\PriceResearchLinkService;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
@@ -911,7 +912,7 @@ class SettingHelper
      * @return array
      * @throws \RuntimeException
      */
-    public static function getPriceResearchLinksNamesArray(): array
+    public static function getPriceResearchLinksNamesArray(?Lead $lead = null): array
     {
         $researchLinks = Yii::$app->params['settings']['price_research_links'] ?? null;
         if (empty($researchLinks)) {
@@ -923,6 +924,8 @@ class SettingHelper
             throw new \RuntimeException($error);
         }
         $results = [];
+        $typeList = PriceResearchLinkService::getTypeListEquivalentLeadTypes();
+
         foreach ($researchLinks as $key => $researchLink) {
             if (!is_array($researchLink)) {
                 $error = 'Price research links settings is invalid. Link value must be array, arrayKey is ' . $researchLink;
@@ -931,6 +934,14 @@ class SettingHelper
             if (!ArrayHelper::getValue($researchLink, 'enabled')) {
                 continue;
             }
+
+            if ($lead !== null && $lead->hasFlightDetails()) {
+                $tripTypeKey = $typeList[$lead->trip_type];
+                if (!isset($researchLink['types'][$tripTypeKey]) || !isset($researchLink['cabinClassMappings'][$lead->cabin])) {
+                    continue;
+                }
+            }
+
             $linkName  = ArrayHelper::getValue($researchLink, 'name');
             $results[$key] = $linkName;
         }

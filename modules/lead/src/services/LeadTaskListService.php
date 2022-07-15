@@ -119,12 +119,19 @@ class LeadTaskListService
             throw new \RuntimeException('Feature Flag(' . FFlag::FF_KEY_LEAD_TASK_ASSIGN . ') is disabled');
         }
 
+        if (!$employee = $this->lead->employee ?? null) {
+            if ($isResultBool) {
+                return false;
+            }
+            throw new \RuntimeException('Lead owner is empty');
+        }
+
         /** @abac $leadTaskListAbacDto, LeadTaskListAbacObject::ASSIGN_TASK, LeadTaskListAbacObject::ACTION_ACCESS, Lead to task List assign checker */
         $can = Yii::$app->abac->can(
             new LeadTaskListAbacDto($this->lead, $this->lead->employee_id),
             LeadTaskListAbacObject::ASSIGN_TASK,
             LeadTaskListAbacObject::ACTION_ACCESS,
-            $this->lead->employee ?? null
+            $employee
         );
         if (!$can) {
             if ($isResultBool) {
@@ -133,18 +140,23 @@ class LeadTaskListService
             throw new \RuntimeException('ABAC(' . LeadTaskListAbacObject::ASSIGN_TASK . ') is failed');
         }
 
-        if ($this->hasActiveLeadObjectSegment()) {
-            return true;
+        if (!$this->hasActiveLeadObjectSegment()) {
+            if ($isResultBool) {
+                return false;
+            }
+            throw new \RuntimeException('Has ActiveLeadObjectSegment is false');
         }
 
-        if ($isResultBool) {
-            return false;
-        }
-        throw new \RuntimeException('Has ActiveLeadObjectSegment is false');
+        return true;
     }
 
     public function getLead(): Lead
     {
         return $this->lead;
+    }
+
+    public function isNewOwner(): bool
+    {
+        return $this->isNewOwner;
     }
 }

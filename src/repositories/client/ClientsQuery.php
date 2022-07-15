@@ -76,4 +76,9 @@ class ClientsQuery
             ->limit(1)
             ->one();
     }
+
+    public static function findById(int $id): ?Client
+    {
+        return Client::find()->where(['id' => $id])->limit(1)->one();
+    }
 }
