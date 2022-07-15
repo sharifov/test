@@ -18,6 +18,7 @@ use yii\helpers\ArrayHelper;
  * @property int $lbeql_lbeqr_id
  * @property int $lbeql_status
  * @property int|null $lbeql_owner_id
+ * @property string|null $lbeql_description
  * @property string|null $lbeql_created_dt
  * @property string|null $lbeql_updated_dt
  *
@@ -114,13 +115,15 @@ class LeadBusinessExtraQueueLog extends \yii\db\ActiveRecord
         int $leadId,
         int $dataId,
         ?int $ownerId,
-        int $status
+        int $status,
+        ?string $description = null
     ): LeadBusinessExtraQueueLog {
         $model = new self();
         $model->lbeql_lead_id = $leadId;
         $model->lbeql_lbeqr_id = $dataId;
         $model->lbeql_owner_id = $ownerId;
         $model->lbeql_status = $status;
+        $model->lbeql_description = $description;
         return $model;
     }
 }
