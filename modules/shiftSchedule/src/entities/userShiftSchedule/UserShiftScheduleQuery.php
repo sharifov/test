@@ -4,10 +4,13 @@ namespace modules\shiftSchedule\src\entities\userShiftSchedule;
 
 use common\models\UserGroupAssign;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
+use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\shiftScheduleTypeLabelAssign\ShiftScheduleTypeLabelAssign;
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\TimelineCalendarFilter;
 use Yii;
+use yii\base\DynamicModel;
+use yii\db\Expression;
 
 class UserShiftScheduleQuery
 {
@@ -65,13 +68,12 @@ class UserShiftScheduleQuery
      */
     public static function getCalendarTimelineListByUser(TimelineCalendarFilter $form): array
     {
-        $query = UserShiftSchedule::find()
-            ->join('inner join', UserGroupAssign::tableName(), 'ugs_user_id = uss_user_id');
+        $query = UserShiftSchedule::find();
         if ($form->userGroups) {
-            $query->andWhere(['ugs_group_id' => $form->userGroups]);
+            $query->andWhere(['uss_user_id' => UserGroupAssign::find()->select('ugs_user_id')->andWhere(['ugs_group_id' => $form->userGroups])]);
         }
         if ($form->usersIds) {
-            $query->andWhere(['ugs_user_id' => $form->usersIds]);
+            $query->andWhere(['uss_user_id' => $form->usersIds]);
         }
         if ($form->statuses) {
             $query->andWhere(['uss_status_id' => $form->statuses]);
@@ -82,15 +84,37 @@ class UserShiftScheduleQuery
         if ($form->duration) {
             $query->andWhere(['uss_duration' => $form->duration]);
         }
-        if ($form->startDateTime && $form->startDateTimeCondition) {
-            $query->andWhere([$form->getStartDateTimeConditionOperator(), 'uss_start_utc_dt', date('Y-m-d H:i', strtotime($form->startDateTime))]);
+
+        if (($form->startDateTime && $form->startDateTimeCondition) || ($form->endDateTime && $form->endDateTimeCondition)) {
+            if ($form->startDateTime && $form->startDateTimeCondition) {
+                $query->andWhere([$form->getStartDateTimeConditionOperator(), 'uss_start_utc_dt', date('Y-m-d H:i', strtotime($form->startDateTime))]);
+            } else {
+                $query->andWhere(['>=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($form->startDate))]);
+            }
+            if ($form->endDateTime && $form->endDateTimeCondition) {
+                $query->andWhere([$form->getEndDateTimeConditionOperator(), 'uss_end_utc_dt', date('Y-m-d H:i', strtotime($form->endDateTime))]);
+            } else {
+                $query->andWhere(['<=', 'uss_start_utc_dt', date('Y-m-d 23:59:59', strtotime($form->endDate))]);
+            }
         } else {
-            $query->andWhere(['>=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($form->startDate))]);
-        }
-        if ($form->endDateTime && $form->endDateTimeCondition) {
-            $query->andWhere([$form->getEndDateTimeConditionOperator(), 'uss_end_utc_dt', date('Y-m-d H:i', strtotime($form->endDateTime))]);
-        } else {
-            $query->andWhere(['<=', 'uss_start_utc_dt', date('Y-m-d 23:59:59', strtotime($form->endDate))]);
+            $startDateTime = date('Y-m-d H:i', strtotime($form->startDate));
+            $endDateTime = date('Y-m-d H:i', strtotime($form->endDate));
+
+            $query->andWhere([
+                'OR',
+                ['between', 'uss_start_utc_dt', $startDateTime, $endDateTime],
+                ['between', 'uss_end_utc_dt', $startDateTime, $endDateTime],
+                [
+                    'AND',
+                    ['>=', 'uss_start_utc_dt', $startDateTime],
+                    ['<=', 'uss_end_utc_dt', $endDateTime]
+                ],
+                [
+                    'AND',
+                    ['<=', 'uss_start_utc_dt', $startDateTime],
+                    ['>=', 'uss_end_utc_dt', $endDateTime]
+                ]
+            ]);
         }
         if ($form->shift) {
             $query->andWhere(['uss_shift_id' => $form->shift]);
@@ -101,7 +125,7 @@ class UserShiftScheduleQuery
             $query->excludeDeleteStatus();
         }
 
-        $query->groupBy(['uss_id']);
+
         return $query->all();
     }
 
@@ -347,12 +371,26 @@ class UserShiftScheduleQuery
      */
     private static function getQueryTimelineListByUser(int $userId, string $startDt, string $endDt): Scopes
     {
+        $startDateTime = date('Y-m-d H:i', strtotime($startDt));
+        $endDateTime = date('Y-m-d H:i', strtotime($endDt));
+
         return UserShiftSchedule::find()
-            ->where(['uss_user_id' => $userId])
-            ->andWhere(['AND',
-                ['>=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($startDt))],
-                ['<=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($endDt))]
-            ]);
+            ->andWhere([
+                'OR',
+                ['between', 'uss_start_utc_dt', $startDateTime, $endDateTime],
+                ['between', 'uss_end_utc_dt', $startDateTime, $endDateTime],
+                [
+                    'AND',
+                    ['>=', 'uss_start_utc_dt', $startDateTime],
+                    ['<=', 'uss_end_utc_dt', $endDateTime]
+                ],
+                [
+                    'AND',
+                    ['<=', 'uss_start_utc_dt', $startDateTime],
+                    ['>=', 'uss_end_utc_dt', $endDateTime]
+                ]
+            ])
+            ->andWhere(['uss_user_id' => $userId]);
     }
 
     /**
@@ -361,13 +399,8 @@ class UserShiftScheduleQuery
     public static function getPendingListWithIntersectionByWTAndWTR(): array
     {
         $curTime = date('Y-m-d H:i:s');
-        $shiftScheduleTypesAsString = implode(
-            ', ',
-            ShiftScheduleType::getIdListByKeys([ShiftScheduleType::TYPE_KEY_WT, ShiftScheduleType::TYPE_KEY_WTR])
-        );
         $ussTableName = UserShiftSchedule::tableName();
-        $ussStatusDone = UserShiftSchedule::STATUS_DONE;
-        $ussStatusApproved = UserShiftSchedule::STATUS_APPROVED;
+        $ssrTableName = ShiftScheduleRequest::tableName();
 
         return UserShiftSchedule::find()
             ->alias('ussPending')
@@ -381,11 +414,50 @@ class UserShiftScheduleQuery
             ->rightJoin(
                 "{$ussTableName} AS ussDone",
                 "ussPending.uss_user_id = ussDone.uss_user_id 
-                AND ussDone.uss_start_utc_dt <= '{$curTime}' 
-                AND ussDone.uss_end_utc_dt >= '{$curTime}' 
-                AND ussDone.uss_status_id IN ({$ussStatusDone}, {$ussStatusApproved})
-                AND ussDone.uss_sst_id IN ({$shiftScheduleTypesAsString})"
+                AND ussDone.uss_start_utc_dt <= :curTime 
+                AND ussDone.uss_end_utc_dt >= :curTime",
+                [
+                    'curTime' => $curTime,
+                ]
             )
+            ->andOnCondition([
+                'IN',
+                'ussDone.uss_status_id',
+                [UserShiftSchedule::STATUS_DONE, UserShiftSchedule::STATUS_APPROVED]
+            ])
+            ->andOnCondition([
+                'IN',
+                'ussDone.uss_sst_id',
+                ShiftScheduleType::getIdListByKeys([
+                    ShiftScheduleType::TYPE_KEY_WT, ShiftScheduleType::TYPE_KEY_WTR
+                ])
+            ])
+            ->rightJoin($ssrTableName, "ussPending.uss_id = {$ssrTableName}.ssr_uss_id")
             ->all();
+    }
+
+    public static function getNextTimeLineByUser(
+        int $userId,
+        \DateTimeImmutable $startDt,
+        array $status = [UserShiftSchedule::STATUS_APPROVED],
+        array $shiftScheduleType = [ShiftScheduleType::SUBTYPE_WORK_TIME]
+    ): ?UserShiftSchedule {
+        return UserShiftSchedule::find()
+            ->alias('user_shift_schedule')
+            ->select('user_shift_schedule.*')
+            ->innerJoin(
+                ShiftScheduleType::tableName() . ' AS shift_schedule_type',
+                'shift_schedule_type.sst_id = user_shift_schedule.uss_sst_id',
+            )
+            ->where(['uss_user_id' => $userId])
+            ->andWhere(['uss_year_start' => $startDt->format('Y')])
+            ->andWhere(['uss_month_start' => $startDt->format('m')])
+            ->andWhere(['>=', 'uss_start_utc_dt', $startDt->format('Y-m-d H:i:s')])
+            ->andWhere(['IN', 'uss_status_id', $status])
+            ->andWhere(['IN', 'shift_schedule_type.sst_subtype_id', $shiftScheduleType])
+            ->orderBy(['uss_end_utc_dt' => SORT_ASC])
+            ->limit(1)
+            ->one()
+        ;
     }
 }

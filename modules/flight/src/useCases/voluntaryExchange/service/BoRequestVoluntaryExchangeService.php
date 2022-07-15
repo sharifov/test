@@ -6,12 +6,16 @@ use common\components\BackOffice;
 use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
+use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use src\entities\cases\Cases;
 use src\exception\BoResponseException;
 use src\exception\ValidationException;
+use src\helpers\app\AppHelper;
 use src\helpers\ErrorsToStringHelper;
 use src\services\cases\CasesSaleService;
 use webapi\src\request\BoRequestDataHelper;
+use webapi\src\request\RequestBoAdditionalSources;
+use Yii;
 
 /**
  * Class BoRequestReProtectionService
@@ -99,6 +103,23 @@ class BoRequestVoluntaryExchangeService
 
         $data['billing'] = BoRequestDataHelper::fillBillingData($form->billingInfoForm);
         $data['payment'] = BoRequestDataHelper::fillPaymentData($form->paymentRequestForm);
+
+        $productQuote = ProductQuoteQuery::getProductQuoteByBookingId($form->bookingId);
+        if ($productQuote) {
+            try {
+                $service = RequestBoAdditionalSources::getServiceByType(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE);
+                if (!$service) {
+                    throw new \RuntimeException('Service not found by type: ' . RequestBoAdditionalSources::getTypeNameById(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE));
+                }
+                $data['additionalInfo'] = $service->prepareAdditionalInfo($productQuote);
+            } catch (\Throwable $e) {
+                \Yii::error(AppHelper::throwableLog($e, true), 'BoRequestVoluntaryExchangeService:mappingBORequest:additionalInfo');
+            }
+        } else {
+            \Yii::error([
+                'message' => 'Not found product quote by booking ID: ' . $form->bookingId,
+            ], 'BoRequestVoluntaryExchangeService:mappingBORequest:additionalInfo');
+        }
 
         return $data;
     }

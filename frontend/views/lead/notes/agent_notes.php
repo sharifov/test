@@ -98,17 +98,15 @@ $this->registerJs(
 //            return false;
 //        });
 
-        $("#pjax-notes").on("pjax:start", function () {            
+        $(document).on("beforeSubmit", "#notes-form", function() {
             $("#btn-submit-note").attr("disabled", true).prop("disabled", true).addClass("disabled");
             $("#btn-submit-note i").attr("class", "fa fa-spinner fa-pulse fa-fw")
-
         });
 
         $("#pjax-notes").on("pjax:end", function () {           
             $("#btn-submit-note").attr("disabled", false).prop("disabled", false).removeClass("disabled");
             $("#btn-submit-note i").attr("class", "fa fa-plus");
             $("#pjax-notes .x_content").show();
-           
         }); 
     '
 );

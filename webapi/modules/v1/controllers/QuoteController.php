@@ -28,6 +28,7 @@ use src\exception\AdditionalDataException;
 use src\forms\quote\QuoteCreateDataForm;
 use src\forms\quote\QuoteCreateKeyForm;
 use src\helpers\app\AppHelper;
+use src\helpers\ErrorsToStringHelper;
 use src\logger\db\GlobalLogInterface;
 use src\logger\db\LogDTO;
 use src\model\leadData\services\LeadDataService;
@@ -352,12 +353,20 @@ class QuoteController extends ApiBaseController
      *      ],
      *      "lead_data": [
      *          {
-     *              "ld_field_key": "cross_system_xp",
-     *              "ld_field_value": "wpl5.0"
+     *              "ld_field_key": "example_key",
+     *              "ld_field_value": "example_value"
      *          },
      *          {
-     *              "ld_field_key": "cross_system_xp",
-     *              "ld_field_value": "wpl6.2"
+     *              "ld_field_key": "example_key",
+     *              "ld_field_value": "example_value"
+     *          }
+     *      ],
+     *      "experiments": [
+     *          {
+     *              "ex_code": "wpl5.0",
+     *          },
+     *          {
+     *              "ex_code": "wpl6.2",
      *          }
      *      ],
      *      "department_key": "chat",
@@ -900,7 +909,10 @@ class QuoteController extends ApiBaseController
 
             $quote->save();
             if ($quote->hasErrors()) {
-                throw new \RuntimeException($quote->getErrorSummary(false)[0]);
+                throw new AdditionalDataException(
+                    ['quoteAttributes' => $quoteAttributes],
+                    ErrorsToStringHelper::extractFromModel($quote, ' ')
+                );
             }
 
             if (!ArrayHelper::keyExists($quote->gds, SearchService::GDS_LIST)) {

@@ -70,11 +70,13 @@ use src\listeners\lead\LeadRejectEventLogListener;
 use src\listeners\lead\LeadSendToGaListener;
 use src\listeners\lead\LeadSnoozeEventLogListener;
 use src\listeners\lead\LeadSnoozeNotificationsListener;
+use src\listeners\lead\LeadSoldClientReturnIndicationListener;
 use src\listeners\lead\LeadSoldEventLogListener;
 use src\listeners\lead\LeadSoldNotificationsListener;
 use src\listeners\lead\LeadSoldSplitListener;
 use src\listeners\lead\LeadInfoReloadListener;
 use src\listeners\lead\LeadTaskEventListener;
+use src\listeners\lead\LeadTaskListListener;
 use src\listeners\lead\LeadTipsSplitListener;
 use src\listeners\lead\LeadTrashEventLogListener;
 use src\listeners\lead\leadWebEngage\LeadBookedWebEngageListener;
@@ -113,8 +115,10 @@ return [
 
     LeadDuplicateDetectedEvent::class => [LeadDuplicateDetectedEventListener::class],
     LeadOwnerChangedEvent::class => [
+        LeadTaskListListener::class,
         LeadOwnerChangedNotificationsListener::class,
         LeadPoorProcessingRemoverOwnerChangedListener::class,
+        LeadInfoReloadListener::class,
     ],
     LeadCallExpertRequestEvent::class => [LeadCallExpertRequestEventListener::class],
     LeadTaskEvent::class => [LeadTaskEventListener::class],
@@ -146,6 +150,7 @@ return [
         LeadTipsSplitListener::class,
         LeadPhoneTrustListener::class,
         LeadSoldWebEngageListener::class,
+        LeadSoldClientReturnIndicationListener::class
     ],
     LeadTrashEvent::class => [
         LeadTrashEventLogListener::class,

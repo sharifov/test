@@ -3,6 +3,7 @@
 namespace src\model\clientData\entity;
 
 use common\models\Client;
+use modules\objectSegment\src\contracts\ObjectSegmentListContract;
 use src\model\clientDataKey\entity\ClientDataKey;
 use src\traits\FieldsTrait;
 use Yii;
@@ -21,6 +22,7 @@ use yii\helpers\ArrayHelper;
  *
  * @property Client $cdClient
  * @property ClientDataKey $cdKey
+ * @property string $cd_field_value_ui [varchar(500)]
  */
 class ClientData extends \yii\db\ActiveRecord
 {
@@ -31,14 +33,14 @@ class ClientData extends \yii\db\ActiveRecord
         return [
             [['cd_key_id', 'cd_client_id', 'cd_field_value'], 'required'],
 
-            [['cd_client_id', 'cd_key_id'], 'unique', 'targetAttribute' => ['cd_client_id', 'cd_key_id']],
+//            [['cd_client_id', 'cd_key_id'], 'unique', 'targetAttribute' => ['cd_client_id', 'cd_key_id']],
 
             ['cd_client_id', 'integer'],
             ['cd_client_id', 'exist', 'skipOnError' => true, 'targetClass' => Client::class, 'targetAttribute' => ['cd_client_id' => 'id']],
 
             ['cd_created_dt', 'datetime', 'format' => 'php:Y-m-d H:i:s', 'skipOnError' => true],
 
-            ['cd_field_value', 'string', 'max' => 500],
+            [['cd_field_value', 'cd_field_value_ui'], 'string', 'max' => 500],
 
             ['cd_key_id', 'integer'],
             ['cd_key_id', 'exist', 'skipOnError' => true, 'targetClass' => ClientDataKey::class, 'targetAttribute' => ['cd_key_id' => 'cdk_id']],
@@ -77,6 +79,7 @@ class ClientData extends \yii\db\ActiveRecord
             'cd_key_id' => 'Key',
             'cd_field_value' => 'Field Value',
             'cd_created_dt' => 'Created Dt',
+            'cd_field_value_ui' => 'Field Value UI'
         ];
     }
 
@@ -90,12 +93,18 @@ class ClientData extends \yii\db\ActiveRecord
         return 'client_data';
     }
 
-    public static function create(int $clientId, int $keyId, string $value): ClientData
+    public static function create(int $clientId, int $keyId, string $value, ?string $valueUi = null): ClientData
     {
         $model = new self();
         $model->cd_client_id = $clientId;
         $model->cd_key_id = $keyId;
         $model->cd_field_value = $value;
+        $model->cd_field_value_ui = $valueUi;
         return $model;
+    }
+
+    public function isClientReturn(): bool
+    {
+        return $this->cd_field_value === ObjectSegmentListContract::OBJECT_SEGMENT_LIST_KEY_CLIENT_RETURN;
     }
 }

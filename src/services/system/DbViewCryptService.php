@@ -77,7 +77,7 @@ class DbViewCryptService
     {
         $columns = $this->getNonCryptColumns();
         foreach ($this->cryptColumns as $columnName) {
-            $columns[] = "TO_BASE64(AES_ENCRYPT({$columnName}, '" . $this->settingKeyStr . "', '" . $this->settingInitVector . "')) AS {$columnName}";
+            $columns[] = "TO_BASE64(AES_ENCRYPT(LOWER({$columnName}), '" . $this->settingKeyStr . "', '" . $this->settingInitVector . "')) AS {$columnName}";
         }
         return implode(',', $columns);
     }

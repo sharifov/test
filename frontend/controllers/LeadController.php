@@ -31,11 +31,13 @@ use frontend\models\LeadUserRatingForm;
 use kivork\rbacExportImport\src\formatters\FileSizeFormatter;
 use modules\email\src\abac\dto\EmailPreviewDto;
 use modules\email\src\abac\EmailAbacObject;
+use modules\featureFlag\FFlag;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\services\url\UrlGenerator;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\lead\src\abac\LeadExpertCallObject;
+use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\lead\src\abac\services\AbacLeadExpertCallService;
 use modules\offer\src\entities\offer\search\OfferSearch;
 use modules\offer\src\entities\offerSendLog\CreateDto;
@@ -106,6 +108,7 @@ use src\repositories\quote\QuoteRepository;
 use src\services\client\ClientManageService;
 use src\services\email\EmailService;
 use src\services\lead\LeadAssignService;
+use src\services\lead\LeadBusinessExtraQueueService;
 use src\services\lead\LeadCloneService;
 use src\services\lead\LeadManageService;
 use src\services\TransactionManager;
@@ -216,7 +219,8 @@ class LeadController extends FController
                     'ajax-link-to-call',
                     'extra-queue',
                     'closed',
-                    'create'
+                    'create',
+                    'business-extra-queue',
                 ],
             ],
         ];
@@ -1261,6 +1265,14 @@ class LeadController extends FController
     public function actionTake(string $gid)
     {
         $lead = $this->findLeadByGid($gid);
+
+        /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) === true && $lead->statusIsBusinessExtraQueue() === true) {
+            /** @abac LeadBusinessExtraQueueAbacObject::UI_ACCESS, LeadBusinessExtraQueueAbacObject::ACTION_ACCESS, Access to take from business extra queue */
+            if (!Yii::$app->abac->can(null, LeadBusinessExtraQueueAbacObject::UI_ACCESS, LeadBusinessExtraQueueAbacObject::ACTION_TAKE)) {
+                throw new ForbiddenHttpException('Access Denied.');
+            }
+        }
 
         if (!Auth::can('leadSection', ['lead' => $lead])) {
             throw new ForbiddenHttpException('Access Denied.');
@@ -2818,6 +2830,37 @@ class LeadController extends FController
         $dataProvider = $searchModel->searchExtraQueue($params, $user);
 
         return $this->render('extra-queue', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => $isAgent,
+        ]);
+    }
+
+    /**
+     * @throws ForbiddenHttpException
+     */
+    public function actionBusinessExtraQueue(): string
+    {
+        if (LeadBusinessExtraQueueService::canAccess() === false) {
+            throw new ForbiddenHttpException('Access Denied.');
+        }
+
+        $searchModel = new LeadSearch();
+        $params = Yii::$app->request->queryParams;
+        $params2 = Yii::$app->request->post();
+        $params = array_merge($params, $params2);
+
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        if ($user->isAgent()) {
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
+        $dataProvider = $searchModel->searchBusinessExtraQueue($params, $user);
+
+        return $this->render('business-extra-queue', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'isAgent' => $isAgent,
