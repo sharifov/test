@@ -16,6 +16,7 @@ use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use modules\order\src\services\OrderManageService;
+use src\entities\cases\CaseEventLog;
 use src\entities\cases\Cases;
 use src\exception\BoResponseException;
 use src\forms\caseSale\CaseSaleRequestBoForm;
@@ -631,7 +632,9 @@ class CasesSaleService
                     $caseSale->css_cs_id = $csId;
                     $caseSale->css_sale_id = $saleId;
                     $caseSale->css_sale_book_id = $saleData['bookingId'] ?? $saleData['confirmationNumber'] ?? null;
-                    $case->update(false, ['cs_order_uid' => $caseSale->css_sale_book_id]);
+                    $updatedCase = $this->casesRepository->find($csId);
+                    $updatedCase->cs_order_uid = $caseSale->css_sale_book_id;
+                    $updatedCase->save();
 
                     $caseSale = $this->saveAdditionalData($caseSale, $case, $refreshSaleData);
 
@@ -790,6 +793,9 @@ class CasesSaleService
                 }
 
                 if (count($allCaseSalesProjectApi) == 1 && isset($allCaseSalesProjectApi[0])) {
+                    /**
+                     * @var Project $caseProject
+                     */
                     $caseProject = $case->getProject()->limit(1)->one();
                     if ($caseProject) {
                         if ($caseProject->api_key !== trim($saleProjectApiKey)) {
@@ -798,6 +804,14 @@ class CasesSaleService
                                 $updatedCase = $this->casesRepository->find($case->cs_id);
                                 $updatedCase->cs_project_id = $newProject->id;
                                 $updatedCase->save();
+
+                                $description = 'Case project was changed.';
+                                $data = [
+                                    'old_project' => $caseProject->name,
+                                    'new_project' => $newProject->name,
+                                ];
+
+                                $case->addEventLog(CaseEventLog::CASE_UPDATE_INFO, $description, $data);
                             }
                         }
                     }
