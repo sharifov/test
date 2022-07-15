@@ -18,5 +18,5 @@ interface EmailServiceInterface
 
     public function updateAfterReview(EmailReviewQueueForm $form, $email);
 
-    public function createFromDTO(EmailDTO $emailDTO);
+    public function createFromDTO(EmailDTO $emailDTO, $autoDetectEmpty = true);
 }

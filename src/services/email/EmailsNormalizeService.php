@@ -571,14 +571,22 @@ class EmailsNormalizeService implements EmailServiceInterface
         return $email;
     }
 
-    public function createFromDTO(EmailDTO $emailDTO): Email
+    public function createFromDTO(EmailDTO $emailDTO, $autoDetectEmpty = true): Email
     {
+        if ($autoDetectEmpty) {
+            $clientId = $emailDTO->clientId ?? $this->helper->detectClientId($emailDTO->emailTo);
+            $leadId =  $this->helper->detectLeadId($emailDTO->emailSubject, $emailDTO->refMessageId);
+            $caseId = $this->helper->detectCaseId($emailDTO->emailSubject, $emailDTO->refMessageId);
+            $this->userId = $this->helper->getUserIdByEmail($emailDTO->emailTo);
+        }
+
+
         $data = [
             'userId'        =>  $this->userId,
             'status'        =>  $emailDTO->statusId,
             'type'          =>  $emailDTO->typeId,
-            'projectId'     =>  $emailDTO->projectId,
-            'clientsIds'    =>  $emailDTO->clientId ? [$emailDTO->clientId] : null,
+            'projectId'     =>  $emailDTO->projectId ?? $this->helper->getProjectIdByDepOrUpp($emailDTO->emailTo),
+            'clientsIds'    =>  $clientId ? [$clientId] : null,
             'body'  =>  [
                 'subject'   =>  $emailDTO->emailSubject,
                 'bodyHtml'  =>  $emailDTO->bodyHtml,
@@ -610,6 +618,9 @@ class EmailsNormalizeService implements EmailServiceInterface
                 'language'      =>  $emailDTO->languageId,
             ];
         }
+
+        $data['leadsIds'] = $leadId ? [$leadId]: null;
+        $data['casesIds'] = $caseId ? [$caseId]: null;
 
         return $this->create(EmailForm::fromArray($data));
     }

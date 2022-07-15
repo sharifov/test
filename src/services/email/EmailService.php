@@ -48,14 +48,20 @@ class EmailService implements EmailServiceInterface
     private $casesRepository;
 
     /**
+     * @var EmailServiceHelper
+     */
+    private $helper;
+
+    /**
      * EmailService constructor.
      * @param LeadRepository $leadRepository
      * @param CasesRepository $casesRepository
      */
-    public function __construct(LeadRepository $leadRepository, CasesRepository $casesRepository)
+    public function __construct(LeadRepository $leadRepository, CasesRepository $casesRepository, EmailServiceHelper $helper)
     {
         $this->leadRepository = $leadRepository;
         $this->casesRepository = $casesRepository;
+        $this->helper = $helper;
     }
 
     /**
@@ -468,7 +474,7 @@ class EmailService implements EmailServiceInterface
         return $email;
     }
 
-    public function createFromDTO(EmailDTO $emailDTO): Email
+    public function createFromDTO(EmailDTO $emailDTO, $autoDetectEmpty = true): Email
     {
         try {
             $email = new Email();
@@ -480,16 +486,22 @@ class EmailService implements EmailServiceInterface
             $email->e_email_from = $emailDTO->emailFrom;
             $email->e_email_from_name = $emailDTO->emailFromName;
             $email->e_email_subject = $emailDTO->emailSubject;
-            $email->e_project_id = $emailDTO->projectId;
+            $email->e_project_id = $emailDTO->projectId ?? $this->helper->getProjectIdByDepOrUpp($emailDTO->emailTo);
             $email->body_html = $emailDTO->bodyHtml;
             $email->e_created_dt = $emailDTO->createdDt;
             $email->e_inbox_email_id = $emailDTO->inboxEmailId;
             $email->e_inbox_created_dt = $emailDTO->inboxCreatedDt;
             $email->e_ref_message_id = $emailDTO->refMessageId;
             $email->e_message_id = $emailDTO->messageId;
-            $email->e_client_id = $emailDTO->clientId;
             $email->e_language_id = $emailDTO->languageId;
             $email->e_template_type_id = $emailDTO->templateTypeId;
+            $email->e_client_id = $emailDTO->clientId;
+            if ($autoDetectEmpty) {
+                $email->e_client_id = $emailDTO->clientId ?? $this->helper->detectClientId($emailDTO->emailTo);
+                $email->e_lead_id = $this->helper->detectLeadId($emailDTO->emailSubject, $emailDTO->refMessageId);
+                $email->e_case_id = $this->helper->detectCaseId($emailDTO->emailSubject, $emailDTO->refMessageId);
+                $email->e_created_user_id = $this->helper->getUserIdByEmail($emailDTO->emailTo);
+            }
 
             if (!$email->save()) {
                 throw new CreateModelException(get_class($email), $email->getErrors());
