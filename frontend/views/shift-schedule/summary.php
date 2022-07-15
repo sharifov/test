@@ -148,7 +148,6 @@ $pjaxContainerId = 'pjax-summary';
             'options' => ['min-width' => '320px'],
             'pluginOptions' => ['allowClear' => true],
             'format' => 'raw',
-//                'filter' => \common\models\Employee::getAllRoles(\src\auth\Auth::user()),
             'contentOptions' => ['style' => 'width: 10%; white-space: pre-wrap'],
             'footer' => 'Total hours',
             'footerOptions' => [
