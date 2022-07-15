@@ -148,7 +148,7 @@ $('#default-flight-multiple-input').on('afterAddRow', function(e, row, currentIn
     let block = $(e.currentTarget),
         items = block.find('.multiple-input-list__item');
     
-    if (items.length > 1) {
+    if (items.length === 2) {
         let lastElemNum = items.length - 2,
             lastDestination = items.eq(lastElemNum).find('[name $= "[destination]"]'),
             curDestination = items.last().find('[name $= "[destination]"]'),
