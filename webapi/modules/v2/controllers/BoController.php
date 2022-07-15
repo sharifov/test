@@ -259,6 +259,7 @@ class BoController extends BaseController
      * @apiParam {string{8}}               data.booking_id               Booking Id
      * @apiParam {string{20}}               data.project_key            Project Key (ovago, hop2)
      * @apiParam {string{20}=Processing,Exchanged,Canceled}               data.status   Exchange status
+     * @apiParam {string{32}}               data.gid            GID (08671a147555ba45f74306bc9d95e41a)
      *
      *
      * @apiParamExample {json} Request-Example Voluntary Flight Exchange:
