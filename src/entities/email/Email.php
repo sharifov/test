@@ -228,14 +228,14 @@ class Email extends BaseActiveRecord
             );
     }
 
-    public function getEmailFrom(): string
+    public function getEmailFrom($masking = true): string
     {
-        return $this->contactFrom->getEmail(EmailType::isInbox($this->e_type_id));
+        return $this->contactFrom->getEmail(EmailType::isInbox($this->e_type_id) && $masking);
     }
 
-    public function getEmailTo(): ?string
+    public function getEmailTo($masking = true): ?string
     {
-        return $this->contactTo->getEmail(EmailType::isOutbox($this->e_type_id)) ?? null;
+        return $this->contactTo->getEmail(EmailType::isOutbox($this->e_type_id) && $masking) ?? null;
     }
 
     public function getCommunicationId(): ?int

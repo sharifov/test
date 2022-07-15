@@ -29,6 +29,7 @@ use yii\helpers\VarDumper;
 use src\entities\email\Email as EmailNormalized;
 use src\entities\email\helpers\EmailType;
 use src\helpers\email\MaskEmailHelper;
+use src\services\email\EmailServiceHelper;
 
 /**
  * This is the model class for table "email".
@@ -896,8 +897,8 @@ class Email extends \yii\db\ActiveRecord
             }
 
             if (!$this->e_client_id) {
-                $emailService = Yii::createObject(EmailService::class);
-                $this->e_client_id = $emailService->detectClientId($this->e_email_to);
+                $emailServiceHelper = Yii::createObject(EmailServiceHelper::class);
+                $this->e_client_id = $emailServiceHelper->detectClientId($this->e_email_to);
             }
 
             return true;
@@ -980,13 +981,13 @@ class Email extends \yii\db\ActiveRecord
         return $this;
     }
 
-    public function getEmailFrom(): string
+    public function getEmailFrom($masking = true): string
     {
-        return EmailType::isInbox($this->e_type_id) ?  MaskEmailHelper::masking($this->e_email_from) : $this->e_email_from;
+        return (EmailType::isInbox($this->e_type_id) && $masking) ?  MaskEmailHelper::masking($this->e_email_from) : $this->e_email_from;
     }
 
-    public function getEmailTo(): string
+    public function getEmailTo($masking = true): string
     {
-        return EmailType::isOutbox($this->e_type_id) ?  MaskEmailHelper::masking($this->e_email_to) : $this->e_email_to;
+        return (EmailType::isOutbox($this->e_type_id) && $masking) ?  MaskEmailHelper::masking($this->e_email_to) : $this->e_email_to;
     }
 }
