@@ -87,15 +87,21 @@ class VoluntaryExchangeCreateService
     }
 
     public static function getOriginProductQuote(
-        string $bookingId
+        string $bookingId,
+        string $gid = null
     ): ?ProductQuote {
-        return ProductQuote::find()
+        $query = ProductQuote::find()
             ->select(ProductQuote::tableName() . '.*')
-            ->innerJoin(FlightQuote::tableName(), 'fq_product_quote_id = pq_id')
+            ->orderBy(['pq_id' => SORT_DESC]);
+        if ($gid) {
+            $query->with('flightQuote')
+                ->where(['pq_gid' => $gid]);
+        } else {
+            $query->innerJoin(FlightQuote::tableName(), 'fq_product_quote_id = pq_id')
             ->innerJoin(FlightQuoteFlight::tableName(), 'fqf_fq_id = fq_id')
-            ->where(['fqf_booking_id' => $bookingId])
-            ->orderBy(['pq_id' => SORT_DESC])
-            ->one();
+            ->where(['fqf_booking_id' => $bookingId]);
+        }
+        return $query->one();
     }
 
     public static function getProductQuoteByProductQuoteChange(
