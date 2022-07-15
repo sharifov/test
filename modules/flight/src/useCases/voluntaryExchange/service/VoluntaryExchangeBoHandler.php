@@ -61,8 +61,8 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
         }
 
         $this->form = $form;
-        if (!$this->originProductQuote = VoluntaryExchangeCreateService::getOriginProductQuote($this->form->booking_id, $this->form->gid)) {
-            throw new \RuntimeException('OriginProductQuote not found by booking_id(' . $this->form->booking_id . ') or gid(' . $this->form->gid . ')');
+        if (!$this->originProductQuote = VoluntaryExchangeCreateService::getOriginProductQuote($this->form->booking_id, $this->form->quote_gid)) {
+            throw new \RuntimeException('OriginProductQuote not found by booking_id(' . $this->form->booking_id . ') or gid(' . $this->form->quote_gid . ')');
         }
 
         $this->productQuoteChange = VoluntaryExchangeCreateService::getLastProductQuoteChangeByPqId(

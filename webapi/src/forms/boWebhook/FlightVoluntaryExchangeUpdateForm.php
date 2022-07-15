@@ -28,7 +28,7 @@ class FlightVoluntaryExchangeUpdateForm extends \yii\base\Model
     public $booking_id;
     public $project_key;
     public $status;
-    public $gid;
+    public $quote_gid;
 
     public function rules(): array
     {
@@ -36,7 +36,7 @@ class FlightVoluntaryExchangeUpdateForm extends \yii\base\Model
             [['booking_id'], 'required'],
             [['booking_id'], 'string'],
 
-            [['gid'], 'string', 'max' => 32],
+            [['quote_gid'], 'string', 'max' => 32],
 
             [['project_key'], 'string'],
             [['project_key'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['project_key' => 'project_key']],
