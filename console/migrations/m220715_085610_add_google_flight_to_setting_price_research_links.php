@@ -9,8 +9,8 @@ use yii\helpers\Json;
  */
 class m220715_085610_add_google_flight_to_setting_price_research_links extends Migration
 {
-    private const LINK_KEY = 'google_flight';
-    private const LINK_NAME = 'Google Flight';
+    private const LINK_KEY = 'google_flights';
+    private const LINK_NAME = 'Google Flights';
     private const SETTING_KEY = 'price_research_links';
 
     /**
