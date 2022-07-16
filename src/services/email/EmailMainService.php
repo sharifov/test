@@ -21,6 +21,7 @@ use src\model\leadData\services\LeadDataCreateService;
 use src\model\leadDataKey\services\LeadDataKeyDictionary;
 use common\components\jobs\WebEngageLeadRequestJob;
 use modules\webEngage\settings\WebEngageDictionary;
+use src\entities\cases\CaseEventLog;
 
 /**
  *
@@ -223,6 +224,10 @@ class EmailMainService implements EmailServiceInterface
             if ($caseId) {
                 $this->emailRepository->linkCases($email, [$caseId]);
             }
+        }
+
+        if ($caseId) {
+            CaseEventLog::add($caseId, null, 'Email received from customer');
         }
     }
 
