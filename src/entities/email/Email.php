@@ -48,6 +48,7 @@ use yii\helpers\ArrayHelper;
  * @property Cases[] $cases
  * @property Cases $case
  * @property Client[] $clients
+ * @property Client $client
  * @property Lead[] $leads
  * @property Lead $lead
  * @property EmailAddress[] $contacts
@@ -141,6 +142,12 @@ class Email extends BaseActiveRecord
     public function getCase(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Cases::class, ['cs_id' => 'ec_case_id'])->viaTable('email_case', ['ec_email_id' => 'e_id']);
+    }
+
+    //first Client
+    public function getClient(): \yii\db\ActiveQuery
+    {
+        return $this->hasOne(Client::class, ['id' => 'ecl_client_id'])->viaTable('email_client', ['ecl_email_id' => 'e_id']);
     }
 
     public function getClients(): \yii\db\ActiveQuery
@@ -420,6 +427,12 @@ class Email extends BaseActiveRecord
         return $this;
     }
 
+    public function updateEmailData($emailData)
+    {
+        $this->emailBody->updateAttributes(['embd_email_data' => json_encode($emailData)]);
+        return $this;
+    }
+
     /**
      * @return string
      */
@@ -446,20 +459,13 @@ class Email extends BaseActiveRecord
         return $this->saveEmailLog(['el_message_id' => $this->generateMessageId()]);
     }
 
-    public static function createFromEmailObject(EmailOld $emailOld)
+    public function hasLead(): bool
     {
-        $email = self::findOneOrNew(['e_id' => $emailOld->e_id]);
+        return $this->lead !== null;
+    }
 
-        $email->e_id = $emailOld->e_id;
-        $email->e_type_id = $emailOld->e_type_id;
-        $email->e_status_id = $emailOld->e_status_id;
-        $email->e_is_deleted = $emailOld->e_is_deleted;
-        $email->e_project_id = $emailOld->e_project_id;
-        $email->e_created_dt = $emailOld->e_created_dt;
-        $email->e_created_user_id = $emailOld->e_created_user_id;
-        $email->e_updated_dt = $emailOld->e_updated_dt;
-        //$email->e_message_id = $email->generateMessageId();
-
-        return $email;
+    public function hasCase(): bool
+    {
+        return $this->case !== null;
     }
 }
