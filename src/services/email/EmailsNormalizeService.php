@@ -3,11 +3,12 @@
 namespace src\services\email;
 
 use common\components\CommunicationService;
-use common\models\Client;
 use common\models\Email as EmailOld;
 use common\models\Lead;
+use frontend\models\EmailPreviewFromInterface;
 use modules\featureFlag\FFlag;
 use src\auth\Auth;
+use src\dto\email\EmailDTO;
 use src\entities\cases\Cases;
 use src\entities\email\Email;
 use src\entities\email\EmailAddress;
@@ -15,10 +16,13 @@ use src\entities\email\EmailBlob;
 use src\entities\email\EmailBody;
 use src\entities\email\EmailContact;
 use src\entities\email\EmailLog;
+use src\entities\email\EmailRepository;
 use src\entities\email\form\EmailForm;
 use src\entities\email\helpers\EmailContactType;
 use src\entities\email\helpers\EmailStatus;
 use src\entities\email\helpers\EmailType;
+use src\exception\EmailNotSentException;
+use src\forms\emailReviewQueue\EmailReviewQueueForm;
 use src\helpers\app\AppHelper;
 use src\helpers\email\TextConvertingHelper;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
@@ -31,28 +35,34 @@ use src\services\abtesting\email\EmailTemplateOfferABTestingService;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
-use src\exception\EmailNotSentException;
-use src\forms\emailReviewQueue\EmailReviewQueueForm;
-use frontend\models\EmailPreviewFromInterface;
-use src\dto\email\EmailDTO;
 
 /**
  *
  * Class EmailsNormalizeService
  *
  * @property EmailServiceHelper $helper
+ * @property EmailRepository $emailRepository
  *
  */
 class EmailsNormalizeService implements EmailServiceInterface
 {
     protected $userId;
+    /**
+     * @var EmailServiceHelper
+     */
     private $helper;
+    /**
+     * @var EmailRepository
+     */
+    private $emailRepository;
+
 
     public static function newInstance()
     {
         $instance = new static();
         $instance->userId = Auth::id();
         $instance->helper = Yii::createObject(EmailServiceHelper::class);
+        $instance->emailRepository = Yii::createObject(EmailRepository::class);
         return $instance;
     }
 
@@ -225,41 +235,26 @@ class EmailsNormalizeService implements EmailServiceInterface
             //=link Clients
             $clientsIds = $form->clients ?? [$this->helper->detectClientId($email->emailTo)];
             if (!empty($clientsIds)) {
-                foreach ($clientsIds as $id) {
-                    if ($client = Client::findOne($id)) {
-                        $email->link('clients', $client);
-                    }
-                }
+                $this->emailRepository->linkClients($email, $clientsIds);
 
             }
             //=!link Clients
 
             //=link Cases
             if (!empty($form->cases)) {
-                foreach ($form->cases as $id) {
-                    if ($case = Cases::findOne($id)) {
-                        $email->link('cases', $case);
-                    }
-                }
+                $this->emailRepository->linkCases($email, $form->cases);
             }
             //=!link Cases
 
             //=link Leads
             if (!empty($form->leads)) {
-                foreach ($form->leads as $id) {
-                    if ($lead = Lead::findOne($id)) {
-                        $email->link('leads', $lead);
-                    }
-                }
+                $this->emailRepository->linkLeads($email, $form->leads);
             }
             //=!link Leads
 
             //=link Reply
             if ($form->replyId !== null) {
-                $reply = Email::findOne($replyId);
-                if ($reply) {
-                    $email->link('reply', $reply);
-                }
+                $this->emailRepository->linkReply($email, $form->replyId);
             }
             //=!link Reply
 
@@ -342,41 +337,26 @@ class EmailsNormalizeService implements EmailServiceInterface
             //=link Clients
             $clientsIds = $form->clients;
             if (!empty($clientsIds)) {
-                foreach ($clientsIds as $id) {
-                    if ($client = Client::findOne($id)) {
-                        $email->link('clients', $client);
-                    }
-                }
+                $this->emailRepository->linkClients($email, $clientsIds);
 
             }
             //=!link Clients
 
             //=link Cases
             if (!empty($form->cases)) {
-                foreach ($form->cases as $id) {
-                    if ($case = Cases::findOne($id)) {
-                        $email->link('cases', $case);
-                    }
-                }
+                $this->emailRepository->linkCases($email, $form->cases);
             }
             //=!link Cases
 
             //=link Leads
             if (!empty($form->leads)) {
-                foreach ($form->leads as $id) {
-                    if ($lead = Lead::findOne($id)) {
-                        $email->link('leads', $lead);
-                    }
-                }
+                $this->emailRepository->linkLeads($email, $form->leads);
             }
             //=!link Leads
 
             //=link Reply
             if ($form->replyId !== null) {
-                $reply = Email::findOne($replyId);
-                if ($reply) {
-                    $email->link('reply', $reply);
-                }
+                $this->emailRepository->linkReply($email, $form->replyId);
             }
             //=!link Reply
 
