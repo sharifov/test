@@ -379,6 +379,12 @@ class Email extends \yii\db\ActiveRecord
         return json_decode($this->e_email_data, true);
     }
 
+    public function updateEmailData($emailData)
+    {
+        $this->updateAttributes(['e_email_data' => json_encode($emailData)]);
+        return $this;
+    }
+
     public function setQuotes($quotes)
     {
         $this->quotes = implode(',', $quotes);
@@ -990,4 +996,15 @@ class Email extends \yii\db\ActiveRecord
     {
         return (EmailType::isOutbox($this->e_type_id) && $masking) ?  MaskEmailHelper::masking($this->e_email_to) : $this->e_email_to;
     }
+
+    public function hasLead(): bool
+    {
+        return $this->e_lead_id !== null;
+    }
+
+    public function hasCase(): bool
+    {
+        return $this->e_case_id !== null;
+    }
+
 }
