@@ -497,7 +497,7 @@ class EmailService implements EmailServiceInterface
             $email->e_template_type_id = $emailDTO->templateTypeId;
             $email->e_client_id = $emailDTO->clientId;
             if ($autoDetectEmpty) {
-                $email->e_client_id = $emailDTO->clientId ?? $this->helper->detectClientId($emailDTO->emailTo);
+                $email->e_client_id = $emailDTO->clientId ?? $this->helper->detectClientId($emailDTO->emailFrom);
                 $email->e_lead_id = $this->helper->detectLeadId($emailDTO->emailSubject, $emailDTO->refMessageId);
                 $email->e_case_id = $this->helper->detectCaseId($emailDTO->emailSubject, $emailDTO->refMessageId);
                 $email->e_created_user_id = $this->helper->getUserIdByEmail($emailDTO->emailTo);

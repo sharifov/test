@@ -554,7 +554,7 @@ class EmailsNormalizeService implements EmailServiceInterface
     public function createFromDTO(EmailDTO $emailDTO, $autoDetectEmpty = true): Email
     {
         if ($autoDetectEmpty) {
-            $clientId = $emailDTO->clientId ?? $this->helper->detectClientId($emailDTO->emailTo);
+            $clientId = $emailDTO->clientId ?? $this->helper->detectClientId($emailDTO->emailFrom);
             $leadId =  $this->helper->detectLeadId($emailDTO->emailSubject, $emailDTO->refMessageId);
             $caseId = $this->helper->detectCaseId($emailDTO->emailSubject, $emailDTO->refMessageId);
             $this->userId = $this->helper->getUserIdByEmail($emailDTO->emailTo);
