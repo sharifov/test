@@ -79,7 +79,7 @@ class EmailDTO
         $this->inboxCreatedDt = $mail['ei_received_dt'] ?: $mail['ei_created_dt'];
         $this->refMessageId = $mail['ei_ref_mess_ids'];
         $this->messageId = $mail['ei_message_id'];
-        $this->communicationId = $mail['ei_id'];
+        //$this->communicationId = $mail['ei_id'];
 
         if ($attachPaths = ArrayHelper::getValue($mail, 'attach_paths')){
             $this->attachPaths = explode(',', $attachPaths);
