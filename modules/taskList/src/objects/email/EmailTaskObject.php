@@ -87,7 +87,7 @@ class EmailTaskObject extends BaseTaskObject implements TaskObjectInterface
      */
     public static function getObjectOptionList(): array
     {
-        return self::OBJECT_OPTION_LIST;
+        return array_merge(self::OBJECT_OPTION_LIST, parent::DEFAULT_OBJECT_OPTION_LIST);
     }
 
     /**
