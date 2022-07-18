@@ -4,6 +4,7 @@ namespace src\model\clientChatRequest\useCase\api\create\requestEvent;
 
 use common\models\Notifications;
 use frontend\widgets\clientChat\ClientChatAccessMessage;
+use modules\featureFlag\FFlag;
 use src\model\clientChat\entity\ClientChat;
 use src\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use src\model\clientChat\useCase\create\ClientChatRepository;
@@ -13,6 +14,8 @@ use src\model\clientChatMessage\entity\ClientChatMessage;
 use src\model\clientChatRequest\entity\ClientChatRequest;
 use src\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
 use src\model\clientChatStatusLog\entity\ClientChatStatusLog;
+use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
+use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogStatus;
 use src\services\clientChatMessage\ClientChatMessageService;
 use src\services\clientChatService\ClientChatService;
 use src\services\TransactionManager;
@@ -81,7 +84,18 @@ class GuestUtteredEvent implements ChatRequestEvent
 
             if ($clientChat) {
                 $this->clientChatMessageService->assignMessageToChat($message, $clientChat);
-
+                /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+                if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE)) {
+                    $leads = $clientChat->getLeads()->all();
+                    foreach ($leads as $lead) {
+                        if (isset($lead) && $lead->isBusinessType()) {
+                            LeadBusinessExtraQueueService::addLeadBusinessExtraQueueRemoverJob(
+                                $lead->id,
+                                LeadBusinessExtraQueueLogStatus::REASON_RECEIVED_MESSAGE_FROM_CHAT
+                            );
+                        }
+                    }
+                }
                 if ($clientChat->isClosed() && $owner = $clientChat->cchOwnerUser) {
                     if ($owner->isOnline()) {
                         $this->clientChatService->autoReopen($clientChat);

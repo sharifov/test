@@ -10,9 +10,14 @@ class ClientDataQuery
     public static function createOrIncrementValue(int $clientId, int $keyId, \DateTimeImmutable $dateTime): int
     {
         if (self::existsByKeyAndClient($clientId, $keyId)) {
-            return ClientData::getDb()->createCommand('update ' . ClientData::tableName() . ' set `cd_field_value` = `cd_field_value` + :value', [
-                ':value' => 1
-            ])->execute();
+            return ClientData::getDb()->createCommand(
+                'update ' . ClientData::tableName() . ' set `cd_field_value` = `cd_field_value` + :value where cd_client_id = :clientId and cd_key_id = :keyId',
+                [
+                    ':value' => 1,
+                    ':clientId' => $clientId,
+                    ':keyId' => $keyId
+                ]
+            )->execute();
         }
 
         return ClientData::getDb()->createCommand(
