@@ -17,6 +17,7 @@ class UserAbacDto extends stdClass
     public array $targetUserProjects = [];
     public array $targetUserGroups = [];
     public array $targetUserDepartments = [];
+    public array $selectedRoles = [];
 
     public function __construct(?string $attributeName = null)
     {
@@ -27,7 +28,7 @@ class UserAbacDto extends stdClass
     }
 
     public static function createForUpdate(
-        string $attributeName,
+        ?string $attributeName,
         bool $targetUserIsSameUser,
         bool $targetUserIsSameGroup,
         bool $targetUserIsSameDepartment,
@@ -47,6 +48,32 @@ class UserAbacDto extends stdClass
         $dto->targetUserProjects = $targetUserProjects;
         $dto->targetUserGroups = $targetUserGroups;
         $dto->targetUserDepartments = $targetUserDepartments;
+        return $dto;
+    }
+
+    public static function createForValidationRole(
+        bool $targetUserIsSameUser,
+        bool $targetUserIsSameGroup,
+        bool $targetUserIsSameDepartment,
+        string $targetUserUsername,
+        array $targetUserRoles,
+        array $targetUserProjects,
+        array $targetUserGroups,
+        array $targetUserDepartments,
+        string $selectedRole,
+    ): self {
+        $dto = self::createForUpdate(
+            null,
+            $targetUserIsSameUser,
+            $targetUserIsSameGroup,
+            $targetUserIsSameDepartment,
+            $targetUserUsername,
+            $targetUserRoles,
+            $targetUserProjects,
+            $targetUserGroups,
+            $targetUserDepartments,
+        );
+        $dto->selectedRoles = [$selectedRole];
         return $dto;
     }
 }
