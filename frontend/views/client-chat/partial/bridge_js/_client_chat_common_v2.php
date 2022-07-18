@@ -1610,6 +1610,52 @@ $(document).on('click', '#take_button', function(e) {
         });
 });
 
+window.clientChatHoldTimeProgressbar =  function (
+    formatTimer,
+    maxProgressBar,
+    leftProgressBar,
+    warningZone
+    ){
+
+    var progressBoxObj = $('#progressBar');
+    var progressLineObj = progressBoxObj.find('.progress-bar');
+    var progressBarWidth = 0;
+    var timerProgressBar;
+    
+    startTimer(leftProgressBar);
+
+    function startTimer(sec) {
+        let seconds = new Date().getTime() + (1000 * sec);
+        $('#clock').countdown(seconds)
+            .on('update.countdown', function(event) {
+                let format = formatTimer;
+                $(this).html(event.strftime(format));
+                
+            })
+            .on('finish.countdown', function(event) {
+                 $('#clock').html('00:00');  
+                 $('#progress_bar_box').hide();               
+            });
+    }
+
+    timerProgressBar = setInterval(function() {
+        
+        if (leftProgressBar <= 0) {
+            progressLineObj.removeClass('bg-warning progress-bar-animated progress-bar-striped');
+            progressLineObj.width(0);
+            clearInterval(timerProgressBar);
+            return false;
+        }
+        leftProgressBar--;
+        progressBarWidth = leftProgressBar * progressBoxObj.width() / maxProgressBar;
+        
+        if (leftProgressBar < warningZone) {
+            progressLineObj.removeClass('bg-info').addClass('bg-warning');
+        } 
+        progressLineObj.width(progressBarWidth);       
+
+    }, 1000);
+}
 
 JS;
 $this->registerJs($js);
