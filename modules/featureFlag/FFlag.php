@@ -28,6 +28,7 @@ class FFlag
     public const FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS = 'sendAdditionalInfoToBoEndpoints';
     public const FF_KEY_RETURN_FLIGHT_SEGMENT_AUTOCOMPLETE_ENABLE = 'returnFlightSegmentAutocompleteEnable';
     public const FF_KET_SHIFT_SUMMARY_REPORT_ENABLE = 'shiftSummaryReportEnable';
+    public const FF_KEY_TELEGRAM_MESSAGE_DELAY_ENABLE = 'telegramMessageDelayEnable';
 
     public const FF_KEY_LIST = [
         self::FF_KEY_LPP_ENABLE => self::FF_KEY_LPP_ENABLE,
@@ -48,6 +49,7 @@ class FFlag
         self::FF_KEY_HEAT_MAP_AGENT_REPORT_ENABLE => self::FF_KEY_HEAT_MAP_AGENT_REPORT_ENABLE,
         self::FF_KEY_RETURN_FLIGHT_SEGMENT_AUTOCOMPLETE_ENABLE => self::FF_KEY_RETURN_FLIGHT_SEGMENT_AUTOCOMPLETE_ENABLE,
         self::FF_KET_SHIFT_SUMMARY_REPORT_ENABLE => self::FF_KET_SHIFT_SUMMARY_REPORT_ENABLE,
+        self::FF_KEY_TELEGRAM_MESSAGE_DELAY_ENABLE => self::FF_KEY_TELEGRAM_MESSAGE_DELAY_ENABLE,
     ];
 
 

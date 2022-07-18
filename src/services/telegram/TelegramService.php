@@ -4,6 +4,7 @@ namespace src\services\telegram;
 
 use common\models\UserProfile;
 use frontend\helpers\JsonHelper;
+use modules\featureFlag\FFlag;
 use src\helpers\app\AppHelper;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -132,5 +133,11 @@ class TelegramService
     private static function getRedisKeyForLastMessageToUser(int $userId): string
     {
         return self::LAST_MESSAGE_TO_USER . $userId;
+    }
+
+    public static function delayForTelegramMessagesIsEnable(): bool
+    {
+        /** @fflag FFlag::FF_KEY_TELEGRAM_MESSAGE_DELAY_ENABLE, Delay for telegram notification messages */
+        return Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_TELEGRAM_MESSAGE_DELAY_ENABLE);
     }
 }

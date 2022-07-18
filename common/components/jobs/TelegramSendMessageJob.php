@@ -33,17 +33,19 @@ class TelegramSendMessageJob extends BaseJob implements RetryableJobInterface
     {
         $this->waitingTimeRegister();
 
-        $lastMessageToUser = TelegramService::getTimeForLastSentMessageToUser($this->user_id);
+        if (TelegramService::delayForTelegramMessagesIsEnable() === true) {
+            $lastMessageToUser = TelegramService::getTimeForLastSentMessageToUser($this->user_id);
 
-        if ($lastMessageToUser >= time()) {
-            $job = new TelegramSendMessageJob();
-            $job->user_id = $this->user_id;
-            $job->text = $this->text;
-            $job->delayJob = self::DELAY_SECONDS;
+            if ($lastMessageToUser >= time()) {
+                $job = new TelegramSendMessageJob();
+                $job->user_id = $this->user_id;
+                $job->text = $this->text;
+                $job->delayJob = self::DELAY_SECONDS;
 
-            Yii::$app->queue_job->delay(self::DELAY_SECONDS)->priority(100)->push($job);
+                Yii::$app->queue_job->delay(self::DELAY_SECONDS)->priority(100)->push($job);
 
-            return false;
+                return false;
+            }
         }
 
         try {
@@ -60,7 +62,9 @@ class TelegramSendMessageJob extends BaseJob implements RetryableJobInterface
                     'disable_web_page_preview' => false
                 ]);
 
-                TelegramService::setLastTimeMessageToUser($this->user_id);
+                if (TelegramService::delayForTelegramMessagesIsEnable() === true) {
+                    TelegramService::setLastTimeMessageToUser($this->user_id);
+                }
 
                 unset($tgm);
                 return true;
