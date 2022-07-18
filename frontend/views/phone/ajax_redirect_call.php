@@ -111,7 +111,10 @@ use yii\helpers\Html;
                 <thead>
                 <tr class="bg-info">
                     <th style="width: 40px" class="text-center">Nr</th>
-                    <th style="width: 150px" class="text-center">Username</th>
+                    <th style="width: 150px" class="text-center">
+                        Username
+
+                    </th>
                     <th class="text-center">Roles</th>
                     <th class="text-center" style="width: 100px">Action</th>
                 </tr>

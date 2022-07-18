@@ -33,6 +33,9 @@ $this->title = 'Home Page'; // . $user->username;
                         <div class="jumbotron">
                             <h1>Hello, <?=Html::encode($user->username)?>!</h1>
                             <p></p>
+                            <a class="js-test">
+                                Click
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -209,3 +212,21 @@ $this->title = 'Home Page'; // . $user->username;
         </div>
     </div>
 </div>
+
+<?php
+$js = <<<JS
+
+
+    $('.js-test').on('click', function (e) {
+        e.preventDefault();
+         let modal = $('#web-phone-redirect-agents-modal');
+        modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+        $('#web-phone-redirect-agents-modal-label').html('Transfer Call');
+         $.post('/phone/ajax-call-get-agents', { sid: 'CAb7f60d06d522903e43f136abf87dcc58' })
+            .done(function(data) {
+                modal.find('.modal-body').html(data);
+            });
+    });
+
+JS;
+$this->registerJs($js);
