@@ -8,26 +8,16 @@ use common\models\Email;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\UserProjectParams;
+use frontend\models\EmailPreviewFromInterface;
+use src\dto\email\EmailDTO;
 use src\entities\cases\Cases;
+use src\exception\CreateModelException;
+use src\forms\emailReviewQueue\EmailReviewQueueForm;
 use src\repositories\cases\CasesRepository;
 use src\repositories\lead\LeadRepository;
 use src\repositories\NotFoundException;
 use Yii;
-use yii\helpers\VarDumper;
-use src\exception\CreateModelException;
-use src\entities\email\helpers\EmailStatus;
-use src\services\abtesting\email\EmailTemplateOfferABTestingService;
-use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
-use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
-use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
-use src\model\leadUserData\entity\LeadUserData;
-use src\model\leadUserData\repository\LeadUserDataRepository;
-use src\helpers\app\AppHelper;
-use src\exception\EmailNotSentException;
-use modules\featureFlag\FFlag;
-use src\forms\emailReviewQueue\EmailReviewQueueForm;
-use frontend\models\EmailPreviewFromInterface;
-use src\dto\email\EmailDTO;
+use src\entities\email\EmailInterface;
 
 /**
  * Class EmailService
@@ -35,7 +25,7 @@ use src\dto\email\EmailDTO;
  * @property LeadRepository $leadRepository
  * @property CasesRepository $casesRepository
  */
-class EmailService implements EmailServiceInterface
+class EmailService extends SendMail implements EmailServiceInterface
 {
     /**
      * @var LeadRepository
@@ -295,15 +285,10 @@ class EmailService implements EmailServiceInterface
     /**
      *
      * @param Email $email
-     * @param array $data
-     * @throws \RuntimeException|EmailNotSentException
+     * @return array
      */
-    public function sendMail($email, array $data = [])
+    private function generateContentData(Email $email)
     {
-        /** @var CommunicationService $communication */
-        $communication = Yii::$app->comms;
-        $data['project_id'] = $email->e_project_id;
-
         $content_data['email_body_html'] = $email->getEmailBodyHtml();
         $content_data['email_body_text'] = $email->e_email_body_text;
         $content_data['email_subject'] = $email->e_email_subject;
@@ -314,79 +299,37 @@ class EmailService implements EmailServiceInterface
         if ($email->e_email_from_name) {
             $content_data['email_from_name'] = $email->e_email_from_name;
         }
-
         if ($email->e_email_to_name) {
             $content_data['email_to_name'] = $email->e_email_to_name;
         }
-
         if ($email->e_message_id) {
             $content_data['email_message_id'] = $email->e_message_id;
         }
 
-        $tplType = $email->eTemplateType ? $email->eTemplateType->etp_key : null;
-        $language = $email->e_language_id ?? 'en-US';
-
-        try {
-            $request = $communication->mailSend($email->e_project_id, $tplType, $email->e_email_from, $email->e_email_to, $content_data, $data, $language, 0);
-
-            if ($request && isset($request['data']['eq_status_id'])) {
-                $email->e_status_id = $request['data']['eq_status_id'];
-                $email->e_communication_id = $request['data']['eq_id'];
-                $email->save();
-            }
-
-            if ($request && isset($request['error']) && $request['error']) {
-                $errorData = @json_decode($request['error'], true);
-                $errorMessage = $errorData['message'] ?: $request['error'];
-                throw new EmailNotSentException($email->e_email_to, $errorMessage);
-            }
-            /** @fflag FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES, A/B testing for email offer templates enable/disable */
-            if (EmailStatus::notError($email->e_status_id) && \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES)) {
-                if ($email->e_template_type_id && $email->e_project_id && isset($email->eLead)) {
-                    EmailTemplateOfferABTestingService::incrementCounterByTemplateAndProjectIds(
-                        $email->e_template_type_id,
-                        $email->e_project_id,
-                        $email->eLead->l_dep_id
-                        );
-                }
-            }
-            if ($email->e_id && $email->e_lead_id && LeadPoorProcessingService::checkEmailTemplate($tplType)) {
-                LeadPoorProcessingService::addLeadPoorProcessingRemoverJob(
-                    $email->e_lead_id,
-                    [
-                        LeadPoorProcessingDataDictionary::KEY_NO_ACTION,
-                        LeadPoorProcessingDataDictionary::KEY_EXPERT_IDLE,
-                        LeadPoorProcessingDataDictionary::KEY_SEND_SMS_OFFER,
-                    ],
-                    LeadPoorProcessingLogStatus::REASON_EMAIL
-                    );
-
-                if (($lead = $email->eLead) && $lead->employee_id && $lead->isProcessing()) {
-                    try {
-                        $leadUserData = LeadUserData::create(
-                            LeadUserDataDictionary::TYPE_EMAIL_OFFER,
-                            $lead->id,
-                            $lead->employee_id,
-                            (new \DateTimeImmutable())
-                            );
-                        (new LeadUserDataRepository($leadUserData))->save(true);
-                    } catch (\RuntimeException | \DomainException $throwable) {
-                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['emailId' => $email->e_id]);
-                        \Yii::warning($message, 'EmailService:LeadUserData:Exception');
-                    } catch (\Throwable $throwable) {
-                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['emailId' => $email->e_id]);
-                        \Yii::error($message, 'EmailService:LeadUserData:Throwable');
-                    }
-                }
-            }
-        } catch (\Throwable $exception) {
-            $error = VarDumper::dumpAsString($exception->getMessage());
-            \Yii::error($error, 'EmailService:sendMail:mailSend:exception');
-            $email->statusToError('Communication error: ' . $error);
-            throw new \RuntimeException($error);
-        }
+        return $content_data;
     }
 
+
+    public function sendMail(EmailInterface $email, array $data = [])
+    {
+        $contentData = $this->generateContentData($email);
+        return $this->sendToCommunication($email, $contentData, $data);
+    }
+
+    /**
+     *
+     * @param Email $email
+     * @param array $requestData
+     */
+    public function updataAfterSendMail(Email $email, $requestData)
+    {
+        if ($requestData && isset($requestData['eq_status_id'])) {
+            $email->updateAttributes([
+                'e_status_id' => $requestData['eq_status_id'],
+                'e_communication_id' =>  $requestData['eq_id']
+            ]);
+        }
+    }
     /**
      *
      * @param EmailPreviewFromInterface $previewEmailForm
