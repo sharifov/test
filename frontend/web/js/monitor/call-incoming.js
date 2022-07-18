@@ -10,13 +10,13 @@ let userComponent = {
     },
     methods: {
         userName() {
-            return this.$root.getUserName(this.item.uo_user_id);
+            return this.item.userName;
         },
         userIconClass() {
-            return this.$root.getUserIconClass(this.item.uo_user_id);
+            return this.$root.getUserIconClass(this.item);
         },
         userTooltip() {
-            return this.$root.getUserTooltipName(this.item.uo_user_id);
+            return this.$root.getUserTooltipName(this.item);
         }
         // stateClass() {
         //     return 'text-' + (this.item.uo_idle_state ? 'info' : 'success')
@@ -151,7 +151,6 @@ const callJoinUserComponent = {
     }
 };
 
-
 const callItemComponent = {
     template: '#call-item-tpl',
     components: {
@@ -199,7 +198,7 @@ const callItemComponent = {
         },
         showTransferLabelForCall()
         {
-            return this.item.c_is_transfer ? true : false;
+            return !!this.item.c_is_transfer;
         },
         callTypeName() {
             return this.item.c_call_type_id > 0 ? this.$root.callTypeList[this.item.c_call_type_id] : '-';
@@ -349,8 +348,6 @@ var callMapApp = Vue.createApp({
             callUserAccessStatusTypeList: [],
             callUserAccessStatusTypeListLabel: [],
             callList: [],
-            onlineUserList: [],
-            userStatusList: [],
             sortingOnline: -1,
             isAdmin: false,
             userAccessDepartments: [],
@@ -360,6 +357,9 @@ var callMapApp = Vue.createApp({
             userDepartments: [],
             userProjects: [],
             showStatusList: [],
+
+            userListData: [],
+            userData: []
         };
     },
     created() {
@@ -396,11 +396,11 @@ var callMapApp = Vue.createApp({
             return this.getCallListByStatusId([3, 4], this.availableCallTypeList, this.availableCallSourceList);
         },
         onlineUserCounter: function () {
-            return this.onlineUserList.length;
+            return this.userData.length;
         },
         idleUserList: function () {
-            return this.onlineUserList.filter(function (item) {
-                if (item.uo_idle_state) {
+            return this.userData.filter(function (item) {
+                if (item.online.uo_idle_state) {
                     return item;
                 }
             });
@@ -418,45 +418,6 @@ var callMapApp = Vue.createApp({
                     }
                 }
             });
-        },
-
-        userOnlineFindIndex(userId) {
-            let index = -1;
-            userId = parseInt(userId);
-            if (this.onlineUserList) {
-                index = this.onlineUserList.findIndex(x => parseInt(x.uo_user_id) === userId);
-            }
-            return index;
-        },
-        deleteUserOnline(data) {
-            let index = this.userOnlineFindIndex(data.uo_user_id);
-            this.onlineUserList.splice(index, 1);
-        },
-        addUserOnline(data) {
-            let index = this.userOnlineFindIndex(data.uo_user_id);
-            if (index > -1) {
-                return this.updateUserOnline(data);
-            }
-
-            if (!this.isAdmin && (!this.userAccessDepartments.includes(data.uo_user_id.toString()) || !this.userAccessProjects.includes(data.uo_user_id.toString()))) {
-                return false;
-            }
-
-            this.onlineUserList = [data, ...this.onlineUserList];
-            //this.callList.push(callData);
-        },
-
-        updateUserOnline(data) {
-            this.onlineUserList = this.onlineUserList.map((x) => {
-                if (x.uo_user_id === data.uo_user_id) {
-                    return data;
-                }
-                return x;
-            });
-        },
-
-        userOnlineList() {
-            return this.onlineUserList.slice(0).sort((a, b) => this.getUserName(a.uo_user_id).toUpperCase() < this.getUserName(b.uo_user_id).toUpperCase() ? this.sortingOnline : -this.sortingOnline)
         },
         findCallIndexById(id) {
             let index = -1;
@@ -533,9 +494,7 @@ var callMapApp = Vue.createApp({
                     this.availableCallSourceList = response.data.availableCallSourceList;
                     this.callUserAccessStatusTypeList = response.data.callUserAccessStatusTypeList;
                     this.callUserAccessStatusTypeListLabel = response.data.callUserAccessStatusTypeListLabel;
-                    this.onlineUserList = response.data.onlineUserList;
                     this.userTimeZone = response.data.userTimeZone;
-                    this.userStatusList = response.data.userStatusList;
                     this.isAdmin = response.data.isAdmin;
                     this.userAccessDepartments = response.data.userAccessDepartments;
                     this.userAccessProjects = response.data.userAccessProjects;
@@ -544,6 +503,8 @@ var callMapApp = Vue.createApp({
                     this.userDepartments = response.data.userDepartments;
                     this.userProjects = response.data.userProjects;
                     this.showStatusList = response.data.showCallStatusList;
+
+                    this.userData = response.data.userData || [];
                 })
                 .catch(error => {
                     console.error("There was an error!", error);
@@ -602,74 +563,88 @@ var callMapApp = Vue.createApp({
             return userId > 0 ? this.userList[userId] : userId;
         },
 
-        getUserIconClass(userId) {
-            let iconClass = 'fa fa-user text-success'
-            let item = this.userStatusFind(userId)
-            let isUserIdle = this.idleUserList.find(x => parseInt(x.uo_user_id) === userId);
-            if (item) {
-                if ((+item.us_is_on_call)) {
-                    iconClass = 'fa fa-phone text-success'
-                } else if (!(+item.us_call_phone_status)) {
-                    iconClass = 'fa fa-tty text-danger'
-                } else if (+item.us_has_call_access) {
-                    iconClass = 'fa fa-random'
-                }
-            } else if (isUserIdle) {
-                iconClass = 'fa fa-user text-warning';
-            }
-            return iconClass
+        userDataList() {
+            return this.userData
+                .slice(0)
+                .sort((a, b) => (a.userName && a.userName.toUpperCase() || '') < (b.userName && b.userName.toUpperCase() || '') ?
+                    this.sortingOnline :
+                    -this.sortingOnline
+                );
         },
-
-        getUserTooltipName(userId) {
-            let tooltip = 'Ready'
-            let item = this.userStatusFind(userId)
-            let isUserIdle = this.idleUserList.find(x => parseInt(x.uo_user_id) === userId);
-            if (item) {
-                if ((+item.us_is_on_call)) {
-                    tooltip = 'On Call'
-                } else if (!(+item.us_call_phone_status)) {
-                    tooltip = 'Busy'
-                } else if (+item.us_has_call_access) {
-                    tooltip = 'Assigned'
-                }
-            } else if (isUserIdle) {
-                tooltip = 'Idle';
-            }
-            return tooltip
-        },
-
-        userStatusFindIndex(userId) {
-            let index = -1
-            userId = parseInt(userId)
-            if (this.userStatusList) {
-                index = this.userStatusList.findIndex(x => parseInt(x.us_user_id) === userId)
-            }
-            return index
-        },
-
-        userStatusFind(userId) {
-            userId = parseInt(userId)
-            return this.userStatusList.find(x => parseInt(x.us_user_id) === userId);
-        },
-
-        deleteUserStatus(data) {
-            let index = this.userStatusFindIndex(data.us_user_id)
-            this.userStatusList.splice(index, 1);
-        },
-        addUserStatus(data) {
-            let index = this.userStatusFindIndex(data.us_user_id)
-            if (index > -1) {
-                return this.updateUserStatus(data);
-            }
-            this.userStatusList = [data, ...this.userStatusList];
-        },
-        updateUserStatus(data) {
-            this.userStatusList = this.userStatusList.map((x) => {
-                if (parseInt(x.us_user_id) === parseInt(data.us_user_id)) {
-                    return data;
+        updateUserData(data, updateType) {
+            this.userData = this.userData.map((x) => {
+                if (x.user_id === data.user_id) {
+                    x[updateType] = data[updateType];
+                    return x;
                 }
                 return x;
             });
         },
+        userDataIndex(userId) {
+            if (!this.userListData.length) {
+                this.userListData = this.userData.map(function (item) {
+                    return item.user_id;
+                });
+            }
+            return this.userListData.indexOf(userId);
+        },
+        deleteUserData(data) {
+            let index = this.userDataIndex(data.user_id);
+            if (index !== -1) {
+                this.userData.splice(index, 1);
+                this.userListData.splice(index, 1);
+            }
+        },
+        addUserData(data, updateType) {
+            let index = this.userDataIndex(data.user_id);
+            if (index > -1) {
+                return this.updateUserData(data, updateType);
+            }
+
+            if (!this.isAdmin && (!this.userAccessDepartments.includes(data.user_id.toString()) || !this.userAccessProjects.includes(data.user_id.toString()))) {
+                return false;
+            }
+
+            this.userData.push(data);
+            this.userListData.push(data.user_id);
+        },
+        getUserIconClass(item) {
+            let iconClass = 'fa fa-user text-success';
+            let isUserIdle;
+            if (item && item.status) {
+                if ((+item.status.us_is_on_call)) {
+                    iconClass = 'fa fa-phone text-success';
+                } else if (!(+item.status.us_call_phone_status)) {
+                    iconClass = 'fa fa-tty text-danger';
+                } else if (+item.status.us_has_call_access) {
+                    iconClass = 'fa fa-random';
+                }
+            } else {
+                isUserIdle = this.idleUserList.find(x => parseInt(x.user_id) === item.user_id);
+                if (isUserIdle) {
+                    iconClass = 'fa fa-user text-warning';
+                }
+            }
+            return iconClass;
+        },
+        getUserTooltipName(item) {
+            let tooltip = 'Ready';
+            let isUserIdle;
+            if (item && item.status) {
+                if ((+item.status.us_is_on_call)) {
+                    tooltip = 'On Call';
+                } else if (!(+item.status.us_call_phone_status)) {
+                    tooltip = 'Busy';
+                } else if (+item.status.us_has_call_access) {
+                    tooltip = 'Assigned';
+                }
+            } else {
+                isUserIdle = this.idleUserList.find(x => parseInt(x.user_id) === item.user_id);
+                if (isUserIdle) {
+                    tooltip = 'Idle';
+                }
+            }
+            return tooltip;
+        }
     }
 }).mount('#realtime-map-app');
