@@ -22,6 +22,16 @@ use src\model\leadDataKey\services\LeadDataKeyDictionary;
 use common\components\jobs\WebEngageLeadRequestJob;
 use modules\webEngage\settings\WebEngageDictionary;
 use src\entities\cases\CaseEventLog;
+use src\entities\email\helpers\EmailStatus;
+use src\services\abtesting\email\EmailTemplateOfferABTestingService;
+use src\entities\email\EmailInterface;
+use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
+use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
+use src\model\leadUserData\entity\LeadUserData;
+use src\model\leadUserData\entity\LeadUserDataDictionary;
+use src\model\leadUserData\repository\LeadUserDataRepository;
+use yii\helpers\VarDumper;
 
 /**
  *
@@ -39,6 +49,9 @@ class EmailMainService implements EmailServiceInterface
     private $helper;
     private $emailRepository;
 
+    private $emailObj;
+    private $emailNormObj;
+
     public function __construct()
     {
         $this->emailRepository = Yii::createObject(EmailRepository::class);
@@ -55,22 +68,118 @@ class EmailMainService implements EmailServiceInterface
         return new static();
     }
 
-    public function sendMail($email, array $data = [])
+    private function setEmailObj(Email $email)
     {
-        if ($this->normalizedService !== null) {
-            $this->normalizedService->sendMail($email, $data);
-        } else {
-            $this->oldService->sendMail($email, $data);
-            //TODO: if called norm service need to change status,error message to older version. So need to devide method to smaller parts
+        $this->emailObj = $email;
+    }
+
+    private function getEmailObj()
+    {
+        return $this->emailObj;
+    }
+
+    private function setEmailNormObj(EmailNorm $email)
+    {
+        $this->emailNormObj = $email;
+    }
+
+    private function getEmailNormObj()
+    {
+        return $this->emailNormObj;
+    }
+
+    public function sendMail(EmailInterface $email, array $data = [])
+    {
+        try {
+            if ($this->normalizedService !== null) {
+                $requestData = $this->normalizedService->sendMail($this->getEmailNormObj(), $data);
+                $this->normalizedService->updataAfterSendMail($this->getEmailNormObj(), $requestData);
+            } else {
+                $requestData = $this->oldService->sendMail($this->getEmailObj(), $data);
+            }
+
+            if ($this->getEmailObj()) {
+                $this->oldService->updataAfterSendMail($this->getEmailObj(),$requestData);
+            }
+
+            $email = $this->getEmailNormObj() ?? $this->getEmailObj() ?? $email;
+            $this->addToABTesting($email);
+            $tplType = $email->templateType ? $email->templateType->etp_key : null;
+            $this->leadProcessAfterEmailSending($email->e_id, $tplType, $email->lead);
+        } catch (\Throwable $exception) {
+            $error = VarDumper::dumpAsString($exception->getMessage());
+            \Yii::error($error, 'EmailMainService:sendMail:exception');
+
+            if ($this->getEmailObj()) {
+                $this->getEmailObj()->statusToError('Communication error: ' . $error);
+            }
+            if ($this->getEmailNormObj()) {
+                $this->getEmailNormObj()->statusToError('Communication error: ' . $error);
+            }
+            throw new \RuntimeException($error);
+        }
+    }
+
+    private function addToABTesting(EmailInterface $email)
+    {
+        /** @fflag FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES, A/B testing for email offer templates enable/disable */
+        if (EmailStatus::notError($email->e_status_id) && Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES)) {
+            $templateTypeId = $email->getTemplateTypeId();
+            $projectId = $email->getProjectId();
+            $departmentId = $email->getDepartmentId();
+            if ($templateTypeId && $projectId && $departmentId) {
+                EmailTemplateOfferABTestingService::incrementCounterByTemplateAndProjectIds(
+                    $templateTypeId,
+                    $projectId,
+                    $departmentId
+                    );
+            }
+        }
+    }
+
+    private function leadProcessAfterEmailSending(int $emailId, ?string $tplType, ?Lead $lead)
+    {
+        if ($emailId && $lead && LeadPoorProcessingService::checkEmailTemplate($tplType)) {
+            LeadPoorProcessingService::addLeadPoorProcessingRemoverJob(
+                $lead->id,
+                [
+                    LeadPoorProcessingDataDictionary::KEY_NO_ACTION,
+                    LeadPoorProcessingDataDictionary::KEY_EXPERT_IDLE,
+                    LeadPoorProcessingDataDictionary::KEY_SEND_SMS_OFFER,
+                ],
+                LeadPoorProcessingLogStatus::REASON_EMAIL
+                );
+
+            if ($lead->employee_id && $lead->isProcessing()) {
+                try {
+                    $leadUserData = LeadUserData::create(
+                        LeadUserDataDictionary::TYPE_EMAIL_OFFER,
+                        $lead->id,
+                        $lead->employee_id,
+                        (new \DateTimeImmutable())
+                        );
+                    (new LeadUserDataRepository($leadUserData))->save(true);
+                } catch (\RuntimeException | \DomainException $throwable) {
+                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['emailId' => $emailId]);
+                    \Yii::warning($message, 'EmailMainService:leadProcessAfterEmailSending:Exception');
+                } catch (\Throwable $throwable) {
+                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['emailId' => $emailId]);
+                    \Yii::error($message, 'EmailMainService:leadProcessAfterEmailSending:Throwable');
+                }
+            }
         }
     }
 
     public function createFromLead(EmailPreviewFromInterface $previewEmailForm, Lead $lead, array $attachments = [])
     {
         $email = $this->oldService->createFromLead($previewEmailForm, $lead, $attachments);
+        $email->refresh();
+        $this->setEmailObj($email);
 
         if ($this->normalizedService !== null) {
             $email = $this->normalizedService->createFromLead($previewEmailForm, $lead, $attachments);
+            $email->refresh();
+            $this->setEmailNormObj($email);
         }
 
         return $email;
@@ -79,9 +188,13 @@ class EmailMainService implements EmailServiceInterface
     public function createFromCase(EmailPreviewFromInterface $previewEmailForm, Cases $case, array $attachments = [])
     {
         $email = $this->oldService->createFromCase($previewEmailForm, $case, $attachments);
+        $email->refresh();
+        $this->setEmailObj($email);
 
         if ($this->normalizedService !== null) {
             $email = $this->normalizedService->createFromCase($previewEmailForm, $case, $attachments);
+            $email->refresh();
+            $this->setEmailNormObj($email);
         }
 
         return $email;
@@ -91,9 +204,13 @@ class EmailMainService implements EmailServiceInterface
     public function updateAfterReview(EmailReviewQueueForm $form, $email)
     {
         $email = $this->oldService->updateAfterReview($form, $email);
+        $email->refresh();
+        $this->setEmailObj($email);
 
         if ($this->normalizedService !== null) {
             $email = $this->normalizedService->updateAfterReview($form, $email);
+            $email->refresh();
+            $this->setEmailNormObj($email);
         }
 
         return $email;
@@ -102,9 +219,13 @@ class EmailMainService implements EmailServiceInterface
     public function createFromDTO(EmailDTO $emailDTO, $autoDetectEmpty = true)
     {
         $email = $this->oldService->createFromDTO($emailDTO, $autoDetectEmpty);
+        $email->refresh();
+        $this->setEmailObj($email);
 
         if ($this->normalizedService !== null) {
             $email = $this->normalizedService->createFromDTO($emailDTO, $autoDetectEmpty);
+            $email->refresh();
+            $this->setEmailNormObj($email);
         }
 
         return $email;
@@ -114,6 +235,8 @@ class EmailMainService implements EmailServiceInterface
     {
         $notifications = [];
         $email = $this->oldService->createFromDTO($emailDTO, true);
+        $email->refresh();
+        $this->setEmailObj($email);
 
         if (!$email->hasLead() && !$email->hasCase() && $this->helper->isNotInternalEmail($emailDTO->emailFrom)) {
             $process = $this->processIncoming($email);
@@ -121,7 +244,7 @@ class EmailMainService implements EmailServiceInterface
         }
 
         $userID = $email->e_created_user_id;
-        $case = $email->eCase ?? $email->case;
+        $case = $email->case ?? null;
         if ($case) {
             (Yii::createObject(CasesManageService::class))->needAction($case->cs_id);
             $this->addCreateSaleJob($case->cs_id, $emailDTO->emailFrom);
@@ -135,7 +258,7 @@ class EmailMainService implements EmailServiceInterface
             }
         }
 
-        $lead = $email->eLead ?? $email->lead;
+        $lead = $email->lead ?? null;
         if ($lead) {
             if ($userID) {
                 $notifyData = [
@@ -157,6 +280,8 @@ class EmailMainService implements EmailServiceInterface
 
         if ($this->normalizedService !== null) {
             $email = $this->normalizedService->createFromDTO($emailDTO, true);
+            $email->refresh();
+            $this->setEmailNormObj($email);
             if (isset($process)) {
                 $this->linkLeadCase($email, $process->leadId, $process->caseId);
             }
