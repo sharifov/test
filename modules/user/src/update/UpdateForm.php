@@ -358,7 +358,8 @@ class UpdateForm extends Model
             ['form_roles', 'default', 'value' => []],
             ['form_roles', 'required', 'when' => fn () => $this->fieldAccess->canEdit('form_roles')],
             ['form_roles', IsArrayValidator::class],
-            ['form_roles', 'each', 'rule' => ['in', 'range' => array_keys($this->availableList->getRoles())]],
+            ['form_roles', 'each', 'rule' => ['string'], 'skipOnEmpty' => true, 'skipOnError' => true],
+            ['form_roles', 'validateRoles', 'skipOnEmpty' => true, 'skipOnError' => true],
 
             ['user_groups', 'default', 'value' => []],
             ['user_groups', IsArrayValidator::class],
@@ -486,6 +487,24 @@ class UpdateForm extends Model
             ['up_2fa_reset', 'boolean'],
             ['up_2fa_reset', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
         ];
+    }
+
+    public function validateRoles()
+    {
+        $availableRoles = $this->availableList->getRoles();
+        $errorRoles = [];
+        foreach ($this->form_roles as $role) {
+            if (!$this->fieldAccess->isAvailableSelectedRole($role)) {
+                if (array_key_exists($role, $availableRoles)) {
+                    $errorRoles[] = $availableRoles[$role];
+                } else {
+                    $errorRoles[] = $role;
+                }
+            }
+        }
+        if ($errorRoles) {
+            $this->addError('form_roles', 'Selected roles: (' . implode(', ', $errorRoles)  . ') is not available.');
+        }
     }
 
     public function validateUniqueUsername()

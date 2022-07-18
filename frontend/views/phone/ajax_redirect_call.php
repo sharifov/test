@@ -12,6 +12,11 @@ use yii\helpers\Html;
 /* @var $error string */
 /* @var $canWarmTransfer bool */
 ?>
+<style>
+    .department-table-block {
+        overflow-x: auto;
+    }
+</style>
 <div class="ajax-redirect-call">
     <?php if ($error) :?>
         <pre><?=$error?></pre>
@@ -55,7 +60,8 @@ use yii\helpers\Html;
 
         <?php if ($departments) :?>
             <h2><i class="fa fa-list"></i> Departments:</h2>
-            <table class="table table-bordered table-hover" style="margin: 0">
+            <div class="department-table-block">
+                <table class="table table-bordered table-hover" style="margin: 0">
                 <thead>
                 <tr class="bg-info">
                     <th style="width: 40px" class="text-center">Nr</th>
@@ -101,6 +107,7 @@ use yii\helpers\Html;
                 <?php endforeach;?>
                 </tbody>
             </table>
+            </div>
         <?php endif;?>
 
 

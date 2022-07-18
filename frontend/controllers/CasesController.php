@@ -943,12 +943,12 @@ class CasesController extends FController
             $saleProjectApiKey = $saleData['projectApiKey'] ?? null;
 
             if (trim($caseProjectApiKey) !== trim($saleProjectApiKey)) {
-                throw new \DomainException('[Different Project] Case Id (' . $model->cs_id . ') Case project (' . $project->name . ') Sale project (' . $saleData['project'] . ')');
+                throw new \RuntimeException('[Different Project] Case Id (' . $model->cs_id . ') Case project (' . $project->name . ') Sale project (' . $saleData['project'] . ')');
             }
         } catch (\Throwable $exception) {
             $out['error'] = $exception->getMessage();
             $out['error_type'] = self::DIFFERENT_PROJECT;
-            \Yii::error(VarDumper::dumpAsString($exception, 10), 'CasesController::actionAddSale:Exception');
+            \Yii::warning(VarDumper::dumpAsString($exception, 10), 'CasesController::actionAddSale:Exception');
             return $out;
         }
 

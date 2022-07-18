@@ -180,4 +180,13 @@ class PriceResearchLinkService
         }
         return $url;
     }
+
+    public static function getTypeListEquivalentLeadTypes(): array
+    {
+        return [
+            Lead::TRIP_TYPE_ONE_WAY => PriceResearchLinkForm::TYPE_ONE_TRIP,
+            Lead::TRIP_TYPE_ROUND_TRIP => PriceResearchLinkForm::TYPE_ROUND_TRIP,
+            Lead::TRIP_TYPE_MULTI_DESTINATION => PriceResearchLinkForm::TYPE_MULTI_DESTINATION,
+        ];
+    }
 }

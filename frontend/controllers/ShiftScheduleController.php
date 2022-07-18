@@ -16,6 +16,7 @@ use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftSchedule
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\shiftScheduleTypeLabel\ShiftScheduleTypeLabel;
 use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
+use modules\shiftSchedule\src\entities\userShiftSchedule\search\AgentShiftSummaryReportSearch;
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\SearchUserShiftSchedule;
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\TimelineCalendarFilter;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
@@ -28,6 +29,7 @@ use modules\shiftSchedule\src\forms\SingleEventCreateForm;
 use modules\shiftSchedule\src\forms\UserShiftCalendarMultipleUpdateForm;
 use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use modules\shiftSchedule\src\forms\ScheduleRequestForm;
+use modules\shiftSchedule\src\reports\AgentShiftSummaryReport;
 use modules\shiftSchedule\src\services\ShiftScheduleRequestService;
 use modules\shiftSchedule\src\services\UserShiftScheduleService;
 use src\auth\Auth;
@@ -72,7 +74,7 @@ class ShiftScheduleController extends FController
                 'rules' => [
                     [
                         'actions' => ['ajax-multiple-delete', 'add-multiple-events', 'ajax-event-details', 'ajax-get-logs',
-                            'ajax-edit-event-form', 'ajax-multiple-update', 'ajax-edit-event', 'add-event', 'delete-event'],
+                            'ajax-edit-event-form', 'ajax-multiple-update', 'ajax-edit-event', 'add-event', 'delete-event', 'summary-report'],
                         'allow' => true,
                         'roles' => ['@']
                     ],
@@ -1083,6 +1085,26 @@ class ShiftScheduleController extends FController
         return $this->asJson([
             'error' => true,
             'message' => $form->getErrorSummary(true)[0]
+        ]);
+    }
+
+    public function actionSummaryReport()
+    {
+        if (UserShiftScheduleService::shiftSummaryReportIsEnable() === false) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        $searchModel = new AgentShiftSummaryReportSearch();
+        $dataProvider = $searchModel->search($this->request->queryParams);
+        $totalCountData = $searchModel->countData($this->request->queryParams);
+        $scheduleTypeList = ShiftScheduleType::find()
+            ->orderBy(['sst_sort_order' => SORT_ASC])->all();
+
+        return $this->render('summary', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'scheduleTypeList' => $scheduleTypeList,
+            'totalCountData' => $totalCountData,
         ]);
     }
 }

@@ -13,6 +13,7 @@ use modules\lead\src\abac\LeadAbacObject;
 use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
+use modules\shiftSchedule\src\services\UserShiftScheduleService;
 use src\auth\Auth;
 use modules\user\userFeedback\abac\dto\UserFeedbackAbacDto;
 use modules\user\userFeedback\abac\UserFeedbackAbacObject;
@@ -769,6 +770,13 @@ class SideBarMenu extends \yii\bootstrap\Widget
                             'label' => 'Shift Requests History',
                             'url' => ['/shift/shift-schedule-request/index'],
                             'title' => 'User Shift Schedule Request History'
+                        ],
+
+                        [
+                            'label' => 'Shift Summary Report',
+                            'url' => ['/shift-schedule/summary-report'],
+                            'title' => 'Shift Summary Report',
+                            'visible' => UserShiftScheduleService::shiftSummaryReportIsEnable(),
                         ],
 
                         /** @abac ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_ACCESS, Access menu UserShiftAssign */

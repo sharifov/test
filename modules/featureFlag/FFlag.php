@@ -27,6 +27,8 @@ class FFlag
     public const FF_KEY_EXCLUDE_TAKE_CREATE_FROM_LEAD_USER_CONVERSION_BY_SOURCE_ENABLED = 'excludeTakeCreateFromLeadUserConversionBySourceEnabled';
     public const FF_KEY_UPDATE_PRODUCT_QUOTE_STATUS_BY_BO_SALE_STATUS = 'updateProductQuoteStatusByBOSaleStatus';
     public const FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS = 'sendAdditionalInfoToBoEndpoints';
+    public const FF_KEY_RETURN_FLIGHT_SEGMENT_AUTOCOMPLETE_ENABLE = 'returnFlightSegmentAutocompleteEnable';
+    public const FF_KET_SHIFT_SUMMARY_REPORT_ENABLE = 'shiftSummaryReportEnable';
 
     public const FF_KEY_LIST = [
         self::FF_KEY_LPP_ENABLE => self::FF_KEY_LPP_ENABLE,
@@ -46,6 +48,8 @@ class FFlag
         self::FF_KEY_UPDATE_PRODUCT_QUOTE_STATUS_BY_BO_SALE_STATUS => self::FF_KEY_UPDATE_PRODUCT_QUOTE_STATUS_BY_BO_SALE_STATUS,
         self::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS => self::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS,
         self::FF_KEY_HEAT_MAP_AGENT_REPORT_ENABLE => self::FF_KEY_HEAT_MAP_AGENT_REPORT_ENABLE,
+        self::FF_KEY_RETURN_FLIGHT_SEGMENT_AUTOCOMPLETE_ENABLE => self::FF_KEY_RETURN_FLIGHT_SEGMENT_AUTOCOMPLETE_ENABLE,
+        self::FF_KET_SHIFT_SUMMARY_REPORT_ENABLE => self::FF_KET_SHIFT_SUMMARY_REPORT_ENABLE,
     ];
 
 
@@ -60,12 +64,14 @@ class FFlag
     public const FF_CATEGORY_SYSTEM             = 'system';
     public const FF_CATEGORY_A_B_TESTING        = 'aBTesting';
     public const FF_CATEGORY_VOIP               = 'voip';
+    public const FF_CATEGORY_SHIFT_SCHEDULE     = 'shiftSchedule';
 
     public const FF_CATEGORY_LIST = [
         self::FF_CATEGORY_LEAD,
         self::FF_CATEGORY_SYSTEM,
         self::FF_CATEGORY_A_B_TESTING,
         self::FF_CATEGORY_VOIP,
+        self::FF_CATEGORY_SHIFT_SCHEDULE,
     ];
 
     /**
