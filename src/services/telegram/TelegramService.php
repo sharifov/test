@@ -44,6 +44,8 @@ class TelegramService
         '_', '@', '*', '`',
     ];
 
+    public const LAST_MESSAGE_TO_USER = 'lastMessageToUser';
+
     /**
      * @param string $responseBody
      * @return array|null
@@ -113,5 +115,22 @@ class TelegramService
             $message .= ' Environment: ' . $env;
         }
         return $message;
+    }
+
+    public static function setLastTimeMessageToUser(int $userId): void
+    {
+        Yii::$app->redis->set(self::getRedisKeyForLastMessageToUser($userId), time());
+    }
+
+    public static function getTimeForLastSentMessageToUser(int $userId): int
+    {
+        $timestamp = Yii::$app->redis->get(self::getRedisKeyForLastMessageToUser($userId)) ?? 0;
+
+        return intval($timestamp);
+    }
+
+    private static function getRedisKeyForLastMessageToUser(int $userId): string
+    {
+        return self::LAST_MESSAGE_TO_USER . $userId;
     }
 }

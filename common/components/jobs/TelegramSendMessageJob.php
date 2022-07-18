@@ -23,6 +23,8 @@ class TelegramSendMessageJob extends BaseJob implements RetryableJobInterface
     public $user_id;
     public $text;
 
+    public const DELAY_SECONDS = 2;
+
     /**
      * @param Queue $queue
      * @return bool
@@ -30,6 +32,20 @@ class TelegramSendMessageJob extends BaseJob implements RetryableJobInterface
     public function execute($queue): bool
     {
         $this->waitingTimeRegister();
+
+        $lastMessageToUser = TelegramService::getTimeForLastSentMessageToUser($this->user_id);
+
+        if ($lastMessageToUser >= time()) {
+            $job = new TelegramSendMessageJob();
+            $job->user_id = $this->user_id;
+            $job->text = $this->text;
+            $job->delayJob = self::DELAY_SECONDS;
+
+            Yii::$app->queue_job->delay(self::DELAY_SECONDS)->priority(100)->push($job);
+
+            return false;
+        }
+
         try {
             if (!is_string($this->text)) {
                 throw new \RuntimeException('Text is not string');
@@ -43,6 +59,9 @@ class TelegramSendMessageJob extends BaseJob implements RetryableJobInterface
                     'parse_mode' => 'markdown',
                     'disable_web_page_preview' => false
                 ]);
+
+                TelegramService::setLastTimeMessageToUser($this->user_id);
+
                 unset($tgm);
                 return true;
             }
