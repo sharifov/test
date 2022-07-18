@@ -42,6 +42,7 @@ use src\model\voip\phoneDevice\device\PhoneDevice;
 use src\model\voip\phoneDevice\device\ReadyVoipDevice;
 use src\model\voip\phoneDevice\device\VoipDevice;
 use src\services\client\ClientManageService;
+use src\services\departmentPhoneProject\DepartmentPhoneProjectParamsService;
 use thamtech\uuid\helpers\UuidHelper;
 use yii\base\Exception;
 use yii\data\ArrayDataProvider;
@@ -647,7 +648,7 @@ class PhoneController extends FController
 
         $departments = [];
         if ($call) {
-            $departments = DepartmentPhoneProject::find()->where(['dpp_project_id' => $call->c_project_id, 'dpp_enable' => true, 'dpp_allow_transfer' => true])->andWhere(['>', 'dpp_dep_id', 0])->withPhoneList()->orderBy(['dpp_dep_id' => SORT_ASC])->all();
+            $departments = DepartmentPhoneProjectParamsService::getDepartmentsWithCountOnlineUserByProjectId($call->c_project_id, $dataProvider->getModels());
         }
         $phones = \Yii::$app->params['settings']['support_phone_numbers'] ?? [];
 

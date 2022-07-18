@@ -66,13 +66,14 @@ class EmployeeRedirectCallSearch extends Model
                 if ($agentId === $userId) {
                     continue;
                 }
+                /** @var ?Employee $userModel */
                 $userModel = $userModels[(int)$userItem['tbl_user_id']] ?? null;
 
-                //    var_dump($userModel && ($userModel->isAgent() || $userModel->isSupAgent() || $userModel->isExAgent() || $userModel->isSupervision() || $userModel->isSupSuper() || $userModel->isExSuper()));die;
-                if ($userModel) {
+                if ($userModel && ($userModel->isAgent() || $userModel->isSupAgent() || $userModel->isExAgent() || $userModel->isSupervision() || $userModel->isSupSuper() || $userModel->isExSuper())) {
                     $users[] = [
                         'model' => $userModel,
                         'isBusy' => (int)$userItem['tbl_has_lead_redial_access'] > 0,
+                        'departments' => $userModel->getUserDepartments()->select('ud_dep_id')->indexBy('ud_dep_id')->column()
                     ];
                 }
             }

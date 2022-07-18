@@ -111,4 +111,40 @@ class DepartmentPhoneProjectParamsService
         }
         return null;
     }
+
+    /**
+     * @param int $projectId
+     * @param array $users
+     * @return array|DepartmentPhoneProject[]
+     */
+    public static function getDepartmentsWithCountOnlineUserByProjectId(int $projectId, array $users): array
+    {
+        $departments = [];
+        $departmentsCount = [];
+        /** @var DepartmentPhoneProject[] $departments */
+        $departmentPhoneProjects = DepartmentPhoneProject::find()
+            ->where(['dpp_project_id' => $projectId, 'dpp_enable' => true, 'dpp_allow_transfer' => true])
+            ->andWhere(['>', 'dpp_dep_id', 0])
+            ->withPhoneList()
+            ->orderBy(['dpp_dep_id' => SORT_ASC])
+            ->all();
+
+        if (count($users) > 0) {
+            foreach ($users as $model) {
+                foreach ($model['departments'] as $dpId) {
+                    if (array_key_exists($dpId, $departmentsCount)) {
+                        $departmentsCount[$dpId]++;
+                    } else {
+                        $departmentsCount[$dpId] = 1;
+                    }
+                }
+            }
+        }
+
+        foreach ($departmentPhoneProjects as $departmentPhoneProject) {
+            $departments[$departmentPhoneProject->dpp_dep_id]['data'] = $departmentPhoneProject;
+            $departments[$departmentPhoneProject->dpp_dep_id]['countAgents'] = array_key_exists($departmentPhoneProject->dpp_dep_id, $departmentsCount) ? $departmentsCount[$departmentPhoneProject->dpp_dep_id] : 0;
+        }
+        return $departments;
+    }
 }
