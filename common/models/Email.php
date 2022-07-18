@@ -574,6 +574,7 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
     }
 
     /**
+     * @deprecated
      * @return int|mixed
      */
     public function detectLeadId()
@@ -643,6 +644,7 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
 
 
     /**
+     * @deprecated
      * @return array
      */
     public function getUsersIdByEmail(): array
@@ -668,6 +670,9 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
         return $users;
     }
 
+    /**
+     * @deprecated
+     */
     public function getUserIdByEmail(string $email): int
     {
         $user = [];
@@ -886,6 +891,9 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
         return $emailStats;
     }
 
+    /**
+     * @deprecated
+     */
     public static function getProjectIdByDepOrUpp($emailTo)
     {
         if ($dep = DepartmentEmailProject::find()->byEmail($emailTo)->one()) {
