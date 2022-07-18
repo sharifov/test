@@ -73,7 +73,7 @@ class BaseTaskObject
     public const OP_NOT_EQUAL2          = '!=';
 
     public const DEFAULT_OBJECT_OPTION_LIST = [
-        'duration' => ['label' => 'Duration (hour)', 'type' => self::ATTR_TYPE_INTEGER, 'value' => 0],
+        'delayHours' => ['label' => 'Delay hours', 'type' => self::ATTR_TYPE_INTEGER, 'value' => 0],
     ];
 
     protected const ATTR_OBJ_AVAILABLE = [

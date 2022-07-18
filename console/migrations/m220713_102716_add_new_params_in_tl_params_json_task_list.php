@@ -20,7 +20,7 @@ class m220713_102716_add_new_params_in_tl_params_json_task_list extends Migratio
         try {
             foreach ($taskLists as $taskList) {
                 $params = JsonHelper::decode($taskList['tl_params_json'], true, 512, JSON_THROW_ON_ERROR);
-                $params['duration'] = 0;
+                $params['delayHours'] = 0;
 
                 (new Query())->createCommand()->update('{{%task_list}}', [
                     'tl_params_json' => $params
@@ -42,8 +42,8 @@ class m220713_102716_add_new_params_in_tl_params_json_task_list extends Migratio
         try {
             foreach ($taskLists as $taskList) {
                 $params = JsonHelper::decode($taskList['tl_params_json'], true, 512, JSON_THROW_ON_ERROR);
-                if (isset($params['duration'])) {
-                    unset($params['duration']);
+                if (isset($params['delayHours'])) {
+                    unset($params['delayHours']);
                 }
 
                 (new Query())->createCommand()->update('{{%task_list}}', [

@@ -49,9 +49,9 @@ class LeadTaskListService
             if ($taskLists = TaskListQuery::getTaskListByLeadId($this->lead->id)) {
                 foreach ($taskLists as $taskList) {
                     try {
-                        $dtNowWithDuration = $dtNow->modify(sprintf('+%d hour', $taskList->getDurationParam()));
-                        if (!$userShiftSchedule = UserShiftScheduleQuery::getNextTimeLineByUser($this->lead->employee_id, $dtNowWithDuration)) {
-                            throw new TaskListAssignException('UserShiftSchedule not found by EmployeeId (' . $this->lead->employee_id . ') and StartDateTime:' . $dtNowWithDuration->format('Y-m-d H:i:s'));
+                        $dtNowWithDelay = $dtNow->modify(sprintf('+%d hour', $taskList->getDelayHoursParam()));
+                        if (!$userShiftSchedule = UserShiftScheduleQuery::getNextTimeLineByUser($this->lead->employee_id, $dtNowWithDelay)) {
+                            throw new TaskListAssignException('UserShiftSchedule not found by EmployeeId (' . $this->lead->employee_id . ') and StartDateTime:' . $dtNowWithDelay->format('Y-m-d H:i:s'));
                         }
 
                         $userTask = UserTask::create(
