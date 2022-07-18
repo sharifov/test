@@ -5,6 +5,7 @@ namespace src\dto\email;
 use src\entities\email\helpers\EmailType;
 use src\entities\email\helpers\EmailStatus;
 use yii\helpers\ArrayHelper;
+use modules\email\src\protocol\gmail\message\Gmail;
 
 /**
  * Class EmailDTO
@@ -84,6 +85,25 @@ class EmailDTO
         if ($attachPaths = ArrayHelper::getValue($mail, 'attach_paths')){
             $this->attachPaths = explode(',', $attachPaths);
         }
+
+        return $this;
+    }
+
+    public function fillFromGmail(Gmail $gmail, string $emailTo, $typeId = EmailType::INBOX, $statusId = EmailStatus::DONE): EmailDTO
+    {
+        $this->typeId = $typeId;
+        $this->statusId = $statusId;
+        $this->isNew = true;
+        $this->emailTo = $emailTo;
+        $this->emailFrom = $gmail->getFromEmail();
+        $this->emailFromName = $gmail->getFromName();
+        $this->emailSubject = $gmail->getSubject();
+        $this->bodyHtml = $gmail->getContent();
+        $this->createdDt = date('Y-m-d H:i:s');
+        $this->inboxEmailId = $mail['ei_id'];
+        $this->inboxCreatedDt = $gmail->getDate();
+        $this->refMessageId = $gmail->getReferences();
+        $this->messageId = $gmail->getMessageId();
 
         return $this;
     }
