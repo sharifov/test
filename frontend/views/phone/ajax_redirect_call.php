@@ -107,20 +107,33 @@ use yii\helpers\Html;
 
         <?php if ($users) :?>
             <h2><i class="fa fa-users"></i> Users:</h2>
+
+            <?php
+            echo \yii\grid\GridView::widget([
+                'dataProvider' => $dataProvider,
+                'showHeader' => true,
+                'summary' => false,
+                'columns' => [
+                    ['class' => 'yii\grid\SerialColumn'],
+                ],
+            ]);
+
+            ?>
             <table class="table table-bordered table-hover" style="margin: 0">
                 <thead>
                 <tr class="bg-info">
                     <th style="width: 40px" class="text-center">Nr</th>
                     <th style="width: 150px" class="text-center">
                         Username
-
                     </th>
-                    <th class="text-center">Roles</th>
+                    <th class="text-center">Roles
+                    </th>
                     <th class="text-center" style="width: 100px">Action</th>
                 </tr>
                 </thead>
                 <tbody>
                 <?php $n = 1; ?>
+
                 <?php foreach ($users as $user) : ?>
                     <?php
                     $userModel = $user['model'];

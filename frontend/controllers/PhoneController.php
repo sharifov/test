@@ -43,6 +43,7 @@ use src\model\voip\phoneDevice\device\VoipDevice;
 use src\services\client\ClientManageService;
 use thamtech\uuid\helpers\UuidHelper;
 use yii\base\Exception;
+use yii\data\ArrayDataProvider;
 use yii\helpers\Html;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
@@ -642,7 +643,8 @@ class PhoneController extends FController
                         continue;
                     }
                     $userModel = \common\models\Employee::findOne($agentId);
-                    if ($userModel && ($userModel->isAgent() || $userModel->isSupAgent() || $userModel->isExAgent() || $userModel->isSupervision() || $userModel->isSupSuper() || $userModel->isExSuper())) {
+                //    var_dump($userModel && ($userModel->isAgent() || $userModel->isSupAgent() || $userModel->isExAgent() || $userModel->isSupervision() || $userModel->isSupSuper() || $userModel->isExSuper()));die;
+                    if ($userModel) {
                         $users[] = [
                             'model' => $userModel,
                             'isBusy' => (int)$userItem['tbl_has_lead_redial_access'] > 0,
@@ -650,6 +652,12 @@ class PhoneController extends FController
                     }
                 }
             }
+
+            $dataProvider = new ArrayDataProvider([
+                'allModels' => $users,
+                'pagination' => false
+            ]);
+
 
 //            $lead_id = $call->c_lead_id ?: 0;
 //            $case_id = $call->c_case_id ?: 0;
@@ -671,6 +679,7 @@ class PhoneController extends FController
             'departments' => $departments,
             'call' => $call,
             'error' => $error,
+            'dataProvider' => $dataProvider,
             'canWarmTransfer' => $call ? $call->isIn() : false
         ]);
     }
