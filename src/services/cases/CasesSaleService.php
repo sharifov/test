@@ -792,10 +792,7 @@ class CasesSaleService
                 }
 
                 if (count($allCaseSalesProjectApi) == 1 && isset($allCaseSalesProjectApi[0])) {
-                    /**
-                     * @var Project $caseProject
-                     */
-                    $caseProject = $case->getProject()->limit(1)->one();
+                    $caseProject = $case->project;
                     if ($caseProject) {
                         if ($caseProject->api_key !== trim($saleProjectApiKey)) {
                             $newProject = Project::findOne(['api_key' => $saleProjectApiKey]);
