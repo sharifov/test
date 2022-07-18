@@ -66,11 +66,12 @@ use src\listeners\lead\LeadProcessingEventLogListener;
 use src\listeners\lead\LeadQcallAddListener;
 use src\listeners\lead\LeadQcallProcessingListener;
 use src\listeners\lead\LeadQuoteCloneEventListener;
+use src\listeners\lead\LeadRejectClientReturnIndicationListener;
 use src\listeners\lead\LeadRejectEventLogListener;
 use src\listeners\lead\LeadSendToGaListener;
 use src\listeners\lead\LeadSnoozeEventLogListener;
 use src\listeners\lead\LeadSnoozeNotificationsListener;
-use src\listeners\lead\LeadClientReturnIndicationListener;
+use src\listeners\lead\LeadSoldClientReturnIndicationListener;
 use src\listeners\lead\LeadSoldEventLogListener;
 use src\listeners\lead\LeadSoldNotificationsListener;
 use src\listeners\lead\LeadSoldSplitListener;
@@ -140,7 +141,7 @@ return [
     ],
     LeadRejectEvent::class => [
         LeadRejectEventLogListener::class,
-        LeadClientReturnIndicationListener::class
+        LeadRejectClientReturnIndicationListener::class
     ],
     LeadFollowUpEvent::class => [
         LeadFollowUpEventLogListener::class,
@@ -153,7 +154,7 @@ return [
         LeadTipsSplitListener::class,
         LeadPhoneTrustListener::class,
         LeadSoldWebEngageListener::class,
-        LeadClientReturnIndicationListener::class
+        LeadSoldClientReturnIndicationListener::class
     ],
     LeadTrashEvent::class => [
         LeadTrashEventLogListener::class,
