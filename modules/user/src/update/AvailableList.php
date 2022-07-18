@@ -5,6 +5,7 @@ namespace modules\user\src\update;
 use common\models\Employee;
 use modules\shiftSchedule\src\entities\shift\Shift;
 use src\model\clientChatChannel\entity\ClientChatChannel;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class AvailableList
@@ -27,8 +28,7 @@ class AvailableList
 
     public function getRoles(): array
     {
-        //todo validate available roles for updater user
-        return Employee::getAllRoles($this->user);
+        return ArrayHelper::map(\Yii::$app->authManager->getRoles(), 'name', 'description');
     }
 
     public function getUserShiftAssign(): array
