@@ -4,7 +4,6 @@ namespace src\entities\email;
 
 use common\models\Client;
 use common\models\Department;
-use common\models\Email as EmailOld;
 use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\Language;
@@ -71,7 +70,7 @@ use yii\helpers\ArrayHelper;
  *
  *
  */
-class Email extends BaseActiveRecord
+class Email extends BaseActiveRecord implements EmailInterface
 {
     use EventTrait;
 
@@ -409,24 +408,6 @@ class Email extends BaseActiveRecord
         return $this;
     }
 
-    /**
-     *
-     * @param array $attributes
-     * @return \src\entities\email\Email
-     * @throws \src\exception\CreateModelException
-     */
-    public function saveLog(array $attributes)
-    {
-        if (!$this->emailLog) {
-            $attributes = array_merge($attributes, ['el_email_id' => $this->e_id]);
-            EmailLog::create($attributes);
-        } else {
-            $this->emailLog->updateAttributes($attributes);
-        }
-
-        return $this;
-    }
-
     public function updateEmailData($emailData)
     {
         $this->emailBody->updateAttributes(['embd_email_data' => json_encode($emailData)]);
@@ -467,5 +448,40 @@ class Email extends BaseActiveRecord
     public function hasCase(): bool
     {
         return $this->case !== null;
+    }
+
+    public function getProjectId(): ?int
+    {
+        return $this->e_project_id;
+    }
+
+    public function getDepartmentId(): ?int
+    {
+        return $this->e_departament_id;
+    }
+
+    public function getTemplateTypeId(): ?int
+    {
+        return $this->templateType->etp_id ?? null;
+    }
+
+    public function getLeadId(): ?int
+    {
+        return $this->lead->id ?? null;
+    }
+
+    public function getCaseId(): ?int
+    {
+        return $this->case->cs_id ?? null;
+    }
+
+    public function getClientId(): ?int
+    {
+        return $this->client->id ?? null;
+    }
+
+    public function getLanguageId(): ?string
+    {
+        return $this->params->ep_language_id ?? null;
     }
 }

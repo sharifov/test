@@ -20,7 +20,6 @@ use src\model\leadUserData\entity\LeadUserData;
 use src\model\leadUserData\entity\LeadUserDataDictionary;
 use src\model\leadUserData\repository\LeadUserDataRepository;
 use src\services\abtesting\email\EmailTemplateOfferABTestingService;
-use src\services\email\EmailService;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -30,6 +29,7 @@ use src\entities\email\Email as EmailNormalized;
 use src\entities\email\helpers\EmailType;
 use src\helpers\email\MaskEmailHelper;
 use src\services\email\EmailServiceHelper;
+use src\entities\email\EmailInterface;
 
 /**
  * This is the model class for table "email".
@@ -89,7 +89,7 @@ use src\services\email\EmailServiceHelper;
  * @property string|mixed $priorityName
  * @property Employee $eUpdatedUser
  */
-class Email extends \yii\db\ActiveRecord
+class Email extends \yii\db\ActiveRecord implements EmailInterface
 {
     public const TYPE_DRAFT     = 0;
     public const TYPE_OUTBOX    = 1;
@@ -297,6 +297,14 @@ class Email extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
+    public function getCase()
+    {
+        return $this->hasOne(Cases::class, ['cs_id' => 'e_case_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
     public function getECreatedUser()
     {
         return $this->hasOne(Employee::class, ['id' => 'e_created_user_id']);
@@ -314,6 +322,14 @@ class Email extends \yii\db\ActiveRecord
      * @return \yii\db\ActiveQuery
      */
     public function getELead()
+    {
+        return $this->hasOne(Lead::class, ['id' => 'e_lead_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getLead()
     {
         return $this->hasOne(Lead::class, ['id' => 'e_lead_id']);
     }
@@ -436,6 +452,9 @@ class Email extends \yii\db\ActiveRecord
         return $text;
     }
 
+    /*
+     * deprecated. use through EmailMainService
+     */
     public function sendMail(array $data = []): array
     {
         $out = ['error' => false];
@@ -987,12 +1006,12 @@ class Email extends \yii\db\ActiveRecord
         return $this;
     }
 
-    public function getEmailFrom($masking = true): string
+    public function getEmailFrom($masking = true): ?string
     {
         return (EmailType::isInbox($this->e_type_id) && $masking) ?  MaskEmailHelper::masking($this->e_email_from) : $this->e_email_from;
     }
 
-    public function getEmailTo($masking = true): string
+    public function getEmailTo($masking = true): ?string
     {
         return (EmailType::isOutbox($this->e_type_id) && $masking) ?  MaskEmailHelper::masking($this->e_email_to) : $this->e_email_to;
     }
@@ -1007,4 +1026,43 @@ class Email extends \yii\db\ActiveRecord
         return $this->e_case_id !== null;
     }
 
+    public function getProjectId(): ?int
+    {
+        return $this->e_project_id;
+    }
+
+    public function getDepartmentId(): ?int
+    {
+        return $this->eLead->l_dep_id ?? null;
+    }
+
+    public function getTemplateTypeId(): ?int
+    {
+        return $this->e_template_type_id;
+    }
+
+    public function getLeadId(): ?int
+    {
+        return $this->e_lead_id;
+    }
+
+    public function getCaseId(): ?int
+    {
+        return $this->e_case_id;
+    }
+
+    public function getClientId(): ?int
+    {
+        return $this->e_client_id;
+    }
+
+    public function getTemplateType()
+    {
+        return $this->eTemplateType;
+    }
+
+    public function getLanguageId(): ?string
+    {
+        return $this->e_language_id;
+    }
 }
