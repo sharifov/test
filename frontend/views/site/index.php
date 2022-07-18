@@ -222,7 +222,7 @@ $js = <<<JS
          let modal = $('#web-phone-redirect-agents-modal');
         modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
         $('#web-phone-redirect-agents-modal-label').html('Transfer Call');
-         $.post('/phone/ajax-call-get-agents', { sid: 'CAb7f60d06d522903e43f136abf87dcc58' })
+         $.get('/phone/ajax-call-get-agents', { sid: 'CAb7f60d06d522903e43f136abf87dcc58' })
             .done(function(data) {
                 modal.find('.modal-body').html(data);
             });

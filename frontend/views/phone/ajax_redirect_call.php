@@ -1,8 +1,11 @@
 <?php
 
+use common\components\grid\Select2Column;
 use common\models\DepartmentPhoneProject;
+use common\models\Employee;
 use src\auth\Auth;
 use yii\helpers\Html;
+use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $users \common\models\Employee[] */
@@ -12,6 +15,11 @@ use yii\helpers\Html;
 /* @var $error string */
 /* @var $canWarmTransfer bool */
 ?>
+<style>
+    #user-redirect-grid .select2-selection__rendered {
+        width: 150px
+    }
+</style>
 <div class="ajax-redirect-call">
     <?php if ($error) :?>
         <pre><?=$error?></pre>
@@ -103,85 +111,90 @@ use yii\helpers\Html;
             </table>
         <?php endif;?>
 
+        <?php Pjax::begin(['id' => 'redirect-call-employee-pjax', 'enablePushState' => false]); ?>
 
-
-        <?php if ($users) :?>
             <h2><i class="fa fa-users"></i> Users:</h2>
 
             <?php
             echo \yii\grid\GridView::widget([
+                'id' => 'user-redirect-grid',
                 'dataProvider' => $dataProvider,
+                'filterModel' => $searchModel,
+                'filterUrl' => \yii\helpers\Url::to(['/phone/ajax-call-get-agents', 'sid' => $call->c_call_sid]),
                 'showHeader' => true,
                 'summary' => false,
+                'tableOptions' => ['class' => 'table table-bordered table-hover'],
+                'rowOptions' => function ($user) {
+                    $isBusy = $user['isBusy'];
+                    if ($isBusy) {
+                        return ['style' => 'background-color: #ccc'];
+                    }
+                },
+                'headerRowOptions' => ['class' => 'bg-info'],
                 'columns' => [
-                    ['class' => 'yii\grid\SerialColumn'],
+                    ['class' => 'yii\grid\SerialColumn', 'header' => 'Nr', 'headerOptions' => ['style' => 'width:40px', 'class' => 'text-center']],
+                    [
+                        'attribute' => 'username',
+                        'format' => 'raw',
+                        'headerOptions' => ['style' => 'width:150px', 'class' => 'text-center'],
+                        'value' => function ($user) {
+                            $userModel = $user['model'];
+                            $isBusy = $user['isBusy'];
+
+                            return '<i class="fa fa-user"></i> <b>' . Html::encode($userModel->username) . '</b>' . ($isBusy ? ' (Busy)' : '');
+                        }],
+                    [
+                        'class' => Select2Column::class,
+                        'attribute' => 'roles',
+                        'id' => 'roles-search',
+                        'format' => 'raw',
+                        'value' => function ($user) {
+                            $userModel = $user['model'];
+                            $roles = $userModel->getRoles();
+                            return (is_array($roles) ? implode(', ', $roles) : '-');
+                        },
+                        'pluginOptions' => ['allowClear' => true, 'multiple' => true],
+                        'data' => Employee::getAllRoles(Auth::user()),
+                    ],
+                    [
+                        'attribute' => 'action',
+                        'format' => 'raw',
+                        'headerOptions' => ['class' => 'text-center', 'style' => 'width:100px'],
+                        'contentOptions' => ['class' => 'text-center'],
+                        'value' => function ($user) use ($call, $canWarmTransfer) {
+                            $action = '';
+                            $userModel = $user['model'];
+                            $isBusy = $user['isBusy'];
+
+                            $isReady = $userModel->isCallStatusReady();
+
+                            if ($isBusy) {
+                                $btnClass = 'btn-danger';
+                            } elseif (!$isReady) {
+                                $btnClass = 'btn-warning';
+                            } else {
+                                $btnClass = 'btn-success';
+                            }
+                            if (Auth::can('PhoneWidget_TransferToUser', ['call' => $call])) {
+                                $action .= Html::button('<i class="fa fa-forward"></i> Redirect', [
+                                    'class' => 'btn btn-xs ' . $btnClass . ' btn-transfer',
+                                    'data-type' => 'user',
+                                    'data-value' => $userModel->id,
+                                    'data-call-sid' => $call->c_call_sid
+                                ]);
+                            }
+                            if ($canWarmTransfer && Auth::can('PhoneWidget_WarmTransferToUser')) {
+                                $action .= Html::button('<i class="fa fa-feed"></i> Warm transfer', [
+                                    'class' => 'btn btn-xs ' . $btnClass . ' btn-warm-transfer-to-user',
+                                    'data-user-id' => $userModel->id,
+                                    'data-call-sid' => $call->c_call_sid
+                                ]);
+                            }
+                            return $action;
+                        }],
                 ],
             ]);
-
             ?>
-            <table class="table table-bordered table-hover" style="margin: 0">
-                <thead>
-                <tr class="bg-info">
-                    <th style="width: 40px" class="text-center">Nr</th>
-                    <th style="width: 150px" class="text-center">
-                        Username
-                    </th>
-                    <th class="text-center">Roles
-                    </th>
-                    <th class="text-center" style="width: 100px">Action</th>
-                </tr>
-                </thead>
-                <tbody>
-                <?php $n = 1; ?>
-
-                <?php foreach ($users as $user) : ?>
-                    <?php
-                    $userModel = $user['model'];
-                    $isBusy = $user['isBusy'];
-
-                    $roles = $userModel->getRoles();
-                    $isReady = $userModel->isCallStatusReady();
-
-                    if ($isBusy) {
-                        $btnClass = 'btn-danger';
-                    } elseif (!$isReady) {
-                        $btnClass = 'btn-warning';
-                    } else {
-                        $btnClass = 'btn-success';
-                    }
-                    ?>
-                    <tr<?= $isBusy ? ' style="background-color: #ccc"' : '' ?>>
-                        <td class="text-right"><?=$n++;?>.</td>
-                        <td>
-                            <i class="fa fa-user"></i> <b><?=Html::encode($userModel->username)?></b>
-                            <?= $isBusy ? ' (Busy)' : '' ?>
-                        </td>
-                        <td><?=( is_array($roles) ? implode(', ', $roles) : '-')?></td>
-                        <td class="text-center">
-                            <?php if (Auth::can('PhoneWidget_TransferToUser', ['call' => $call])) : ?>
-                                <?= Html::button('<i class="fa fa-forward"></i> Redirect', [
-                                        'class' => 'btn btn-xs ' . $btnClass . ' btn-transfer',
-                                        'data-type' => 'user',
-                                        //'data-user_id' => $userModel->id,
-                                        'data-value' => $userModel->id,
-                                        // 'data-project_id' => $call->c_project_id,
-                                        // 'data-dep_id' => $call->c_dep_id
-                                    'data-call-sid' => $call->c_call_sid
-                                ])?>
-                            <?php endif; ?>
-
-                            <?php if ($canWarmTransfer && Auth::can('PhoneWidget_WarmTransferToUser')) : ?>
-                                <?= Html::button('<i class="fa fa-feed"></i> Warm transfer', [
-                                        'class' => 'btn btn-xs ' . $btnClass . ' btn-warm-transfer-to-user',
-                                        'data-user-id' => $userModel->id,
-                                        'data-call-sid' => $call->c_call_sid
-                                ])?>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                <?php endforeach;?>
-                </tbody>
-            </table>
-        <?php endif;?>
-    <?php endif;?>
+        <?php Pjax::end() ?>
+    <?php endif; ?>
 </div>
