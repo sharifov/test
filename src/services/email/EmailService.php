@@ -287,7 +287,7 @@ class EmailService extends SendMail implements EmailServiceInterface
      * @param Email $email
      * @return array
      */
-    private function generateContentData(Email $email)
+    protected function generateContentData(EmailInterface $email)
     {
         $content_data['email_body_html'] = $email->getEmailBodyHtml();
         $content_data['email_body_text'] = $email->e_email_body_text;

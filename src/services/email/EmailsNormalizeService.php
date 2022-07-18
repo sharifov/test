@@ -376,7 +376,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
      * @param Email $email
      * @return array
      */
-    private function generateContentData(Email $email)
+    protected function generateContentData(EmailInterface $email)
     {
         $content_data['email_body_html'] = $email->emailBody->getBodyHtml();
         $content_data['email_body_text'] = $email->emailBody->embd_email_body_text;
@@ -507,7 +507,6 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             $caseId = $this->helper->detectCaseId($emailDTO->emailSubject, $emailDTO->refMessageId);
             $this->userId = $this->helper->getUserIdByEmail($emailDTO->emailTo);
         }
-
 
         $data = [
             'userId'        =>  $this->userId,
