@@ -8,6 +8,8 @@ use src\exception\EmailNotSentException;
 
 abstract class SendMail
 {
+    abstract protected function generateContentData(EmailInterface $email);
+
     public function sendToCommunication(EmailInterface $email, array $contentData, array $data = [])
     {
         $templateType = $email->templateType;

@@ -110,6 +110,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 
                         $filter['last_id'] = $mail['ei_id'] + 1;
 
+                        //TODO: update for email normalized
                         $find = Email::find()->where(
                             [
                                 "e_message_id" => $mail['ei_message_id'],
