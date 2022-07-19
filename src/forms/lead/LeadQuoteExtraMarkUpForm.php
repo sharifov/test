@@ -6,6 +6,8 @@ use yii\base\Model;
 
 class LeadQuoteExtraMarkUpForm extends Model
 {
+    private const MAX_EXTRA_MARK_UP_FACTOR = 10;
+
     /**
      * @var float
      */
@@ -25,7 +27,7 @@ class LeadQuoteExtraMarkUpForm extends Model
     public function __construct(float $clientCurrencyRate, ?float $maxValueExtraMarkUp, $config = [])
     {
         $this->clientCurrencyRate = $clientCurrencyRate;
-        $this->maxValueExtraMarkUp = $maxValueExtraMarkUp ?: 0;
+        $this->maxValueExtraMarkUp = $maxValueExtraMarkUp ? ($maxValueExtraMarkUp * self::MAX_EXTRA_MARK_UP_FACTOR) : 0;
 
         parent::__construct($config);
     }
