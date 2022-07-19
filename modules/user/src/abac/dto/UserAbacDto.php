@@ -63,7 +63,7 @@ class UserAbacDto extends stdClass
         string $selectedRole,
     ): self {
         $dto = self::createForUpdate(
-            null,
+            'form_roles',
             $targetUserIsSameUser,
             $targetUserIsSameGroup,
             $targetUserIsSameDepartment,
