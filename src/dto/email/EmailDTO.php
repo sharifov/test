@@ -6,6 +6,8 @@ use src\entities\email\helpers\EmailType;
 use src\entities\email\helpers\EmailStatus;
 use yii\helpers\ArrayHelper;
 use modules\email\src\protocol\gmail\message\Gmail;
+use modules\order\src\entities\order\Order;
+use common\models\EmailTemplateType;
 
 /**
  * Class EmailDTO
@@ -23,6 +25,7 @@ use modules\email\src\protocol\gmail\message\Gmail;
  * @property string $refMessageId
  * @property string $messageId
  * @property int $projectId
+ * @property int $leadId
  * @property int $clientId
  * @property int $typeId
  * @property int $templateTypeId
@@ -31,6 +34,7 @@ use modules\email\src\protocol\gmail\message\Gmail;
  * @property bool $isNew
  * @property int $communicationId
  * @property array|null $attachPaths
+ * @property array|null $attachments
  */
 class EmailDTO
 {
@@ -46,6 +50,7 @@ class EmailDTO
     public $refMessageId;
     public $messageId;
     public $projectId;
+    public $leadId;
     public $clientId;
     public $typeId;
     public $statusId;
@@ -54,6 +59,7 @@ class EmailDTO
     public $isNew;
     public $communicationId;
     public $attachPaths;
+    public $attachments;
 
     public static function newInstance()
     {
@@ -106,6 +112,49 @@ class EmailDTO
         $this->messageId = $gmail->getMessageId();
 
         return $this;
+    }
+
+    public function fillFromOrderConfirm(
+        Order $order,
+        $templateKey,
+        $from,
+        $fromName,
+        $to,
+        $languageId,
+        $subject,
+        $body,
+        array $attachments = [],
+        $typeId = EmailType::OUTBOX,
+        $statusId = EmailStatus::PENDING
+        )
+    {
+        $this->projectId = $order->or_project_id;
+        $this->leadId = $order->or_lead_id;
+        $this->typeId = $typeId;
+        $this->statusId = $statusId;
+        $this->isNew = true;
+        $this->emailTo = $to;
+        $this->emailFrom = $from;
+        $this->emailFromName = $fromName;
+        $this->languageId = $languageId;
+        $this->emailSubject = $subject;
+        $this->bodyHtml = $body;
+        $this->createdDt = date('Y-m-d H:i:s');
+        $this->templateTypeId = $this->getTemplateIdByKey($templateKey);
+        $this->attachments = $attachments;
+
+        return $this;
+    }
+
+    private function getTemplateIdByKey(string $templateKey)
+    {
+        $templateTypeId = EmailTemplateType::find()
+            ->select(['etp_id'])
+            ->andWhere(['etp_key' => $templateKey])
+            ->asArray()
+            ->one();
+
+        return $templateTypeId['etp_id'] ?? null;
     }
 
     private function filter($str)
