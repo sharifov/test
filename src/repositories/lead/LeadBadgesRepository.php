@@ -364,8 +364,7 @@ class LeadBadgesRepository
 
         /** @fflag FFlag::FF_KEY_BOOKED_QUEUE_CONDITION_BY_DEPARTMENT, Booked Queue condition by department enable */
         if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BOOKED_QUEUE_CONDITION_BY_DEPARTMENT) && $user->userDepartments) {
-            $subQuery = UserDepartment::find()->usersByDep(ArrayHelper::map($user->userDepartments, 'ud_dep_id', 'ud_dep_id'));
-            $conditions = ['IN', Lead::tableName() . '.employee_id', $subQuery];
+            $conditions = ['IN', Lead::tableName() . '.l_dep_id', ArrayHelper::map($user->userDepartments, 'ud_dep_id', 'ud_dep_id')];
         }
 
         $query->andWhere($this->createSubQuery($user->id, $conditions));
