@@ -17,4 +17,30 @@ class CreateModelException extends \RuntimeException
     {
         return $this->errors;
     }
+
+    public function getFirstErrors()
+    {
+        if (empty($this->errors)) {
+            return [];
+        }
+
+        $errors = [];
+        foreach ($this->errors as $name => $es) {
+            if (!empty($es)) {
+                $errors[$name] = reset($es);
+            }
+        }
+
+        return $errors;
+    }
+
+    public function getErrorSummary($showAllErrors)
+    {
+        $lines = [];
+        $errors = $showAllErrors ? $this->getErrors() : $this->getFirstErrors();
+        foreach ($errors as $es) {
+            $lines = array_merge($lines, (array)$es);
+        }
+        return $lines;
+    }
 }
