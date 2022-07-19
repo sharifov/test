@@ -710,21 +710,45 @@ class EmployeeController extends FController
                                 }
 
                                 if (!empty($needToAddRoles) || !empty($needToRemoveRoles)) {
-                                    $transaction = Yii::$app->db->beginTransaction();
-                                    try {
-                                        if ($needToRemoveRoles) {
-                                            $user->removeRoles($needToRemoveRoles);
+                                    $errorRoles = [];
+                                    $availableRoles = $multipleForm->availableList->getRoles();
+                                    foreach ($needToAddRoles as $needToAddRole) {
+                                        if (!$fieldAccess->isAvailableSelectedRole($needToAddRole)) {
+                                            if (array_key_exists($needToAddRole, $availableRoles)) {
+                                                $errorRoles[] = $availableRoles[$needToAddRole];
+                                            } else {
+                                                $errorRoles[] = $needToAddRole;
+                                            }
                                         }
-
-                                        if ($needToAddRoles) {
-                                            $user->addNewRoles($needToAddRoles);
+                                    }
+                                    foreach ($needToRemoveRoles as $needToRemoveRole) {
+                                        if (!$fieldAccess->isAvailableSelectedRole($needToRemoveRole)) {
+                                            if (array_key_exists($needToRemoveRole, $availableRoles)) {
+                                                $errorRoles[] = $availableRoles[$needToRemoveRole];
+                                            } else {
+                                                $errorRoles[] = $needToRemoveRole;
+                                            }
                                         }
+                                    }
+                                    if ($errorRoles) {
+                                        $multipleErrors[$user_id][] = 'Selected roles: (' . implode(', ', $errorRoles)  . ') is not available.';
+                                    } else {
+                                        $transaction = Yii::$app->db->beginTransaction();
+                                        try {
+                                            if ($needToRemoveRoles) {
+                                                $user->removeRoles($needToRemoveRoles);
+                                            }
 
-                                        $transaction->commit();
-                                    } catch (\Throwable $e) {
-                                        $transaction->rollBack();
-                                        Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:userRoles');
-                                        $multipleErrors[$user_id][] = $e->getMessage();
+                                            if ($needToAddRoles) {
+                                                $user->addNewRoles($needToAddRoles);
+                                            }
+
+                                            $transaction->commit();
+                                        } catch (\Throwable $e) {
+                                            $transaction->rollBack();
+                                            Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:userRoles');
+                                            $multipleErrors[$user_id][] = $e->getMessage();
+                                        }
                                     }
                                 }
                             } else {
@@ -734,21 +758,36 @@ class EmployeeController extends FController
 
                         if (empty($multipleForm->form_roles) && (int)$multipleForm->form_roles_action === $multipleForm::ROLE_REPLACE) {
                             if ($fieldAccess->canEdit('form_roles')) {
-                                $transaction = Yii::$app->db->beginTransaction();
-                                try {
-                                    $oldRoles = $user->getRoles(true);
-                                    $user->removeAllRoles();
-                                    $transaction->commit();
-                                    $user->addLog(
-                                        \Yii::$app->id,
-                                        Yii::$app->user->id,
-                                        ["roles" => $oldRoles],
-                                        ["roles" => $multipleForm->form_roles]
-                                    );
-                                } catch (\Throwable $e) {
-                                    $transaction->rollBack();
-                                    Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:userRoles');
-                                    $multipleErrors[$user_id][] = $e->getMessage();
+                                $errorRoles = [];
+                                $oldRoles = $user->getRoles(true);
+                                $availableRoles = $multipleForm->availableList->getRoles();
+                                foreach ($oldRoles as $oldRole) {
+                                    if (!$fieldAccess->isAvailableSelectedRole($oldRole)) {
+                                        if (array_key_exists($oldRole, $availableRoles)) {
+                                            $errorRoles[] = $availableRoles[$oldRole];
+                                        } else {
+                                            $errorRoles[] = $oldRole;
+                                        }
+                                    }
+                                }
+                                if ($errorRoles) {
+                                    $multipleErrors[$user_id][] = 'User roles: (' . implode(', ', $errorRoles)  . ') is not available.';
+                                } else {
+                                    $transaction = Yii::$app->db->beginTransaction();
+                                    try {
+                                        $user->removeAllRoles();
+                                        $transaction->commit();
+                                        $user->addLog(
+                                            \Yii::$app->id,
+                                            Yii::$app->user->id,
+                                            ["roles" => $oldRoles],
+                                            ["roles" => $multipleForm->form_roles]
+                                        );
+                                    } catch (\Throwable $e) {
+                                        $transaction->rollBack();
+                                        Yii::error($e->getMessage(), 'Employee:list:multipleUpdate:userRoles');
+                                        $multipleErrors[$user_id][] = $e->getMessage();
+                                    }
                                 }
                             } else {
                                 $multipleErrors[$user_id][] = 'Update property Roles: access denied';

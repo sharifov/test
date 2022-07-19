@@ -2,8 +2,7 @@
 
 namespace src\listeners\lead;
 
-use modules\objectSegment\src\contracts\ObjectSegmentKeyContract;
-use modules\objectSegment\src\object\dto\ClientSegmentObjectDto;
+use common\components\jobs\ClientReturnIndicationJob;
 use src\events\lead\LeadSoldEvent;
 use src\helpers\app\AppHelper;
 use Yii;
@@ -13,9 +12,8 @@ class LeadSoldClientReturnIndicationListener
     public function handle(LeadSoldEvent $event): void
     {
         try {
-            $client = $event->lead->client;
-            $dto = new ClientSegmentObjectDto($client);
-            Yii::$app->objectSegment->segment($dto, ObjectSegmentKeyContract::TYPE_KEY_CLIENT);
+            $job = new ClientReturnIndicationJob($event->lead->client_id);
+            Yii::$app->queue_job->priority(10)->push($job);
         } catch (\Throwable $e) {
             Yii::error(AppHelper::throwableLog($e, true), 'Listeners:LeadSoldEventLogListener::objectSegment');
         }

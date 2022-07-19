@@ -149,4 +149,21 @@ class FieldAccess
         $this->cache['edit'][$field] = \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, $this->updaterUser);
         return $this->cache['edit'][$field];
     }
+
+    public function isAvailableSelectedRole(string $role): bool
+    {
+        $userAbacDto = UserAbacDto::createForValidationRole(
+            $this->targetUser->isSameUser(),
+            $this->targetUser->isSameGroup(),
+            $this->targetUser->isSameDepartment(),
+            $this->targetUser->getUsername(),
+            $this->targetUser->getRoles(),
+            $this->targetUser->getProjects(),
+            $this->targetUser->getGroups(),
+            $this->targetUser->getDepartments(),
+            $role
+        );
+        /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, User field edit*/
+        return \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, $this->updaterUser);
+    }
 }

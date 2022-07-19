@@ -15,6 +15,7 @@ use frontend\widgets\notification\NotificationMessage;
 use kivork\search\core\urlsig\UrlSignature;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
+use modules\objectSegment\src\contracts\ObjectSegmentListContract;
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\product\Product;
@@ -67,6 +68,7 @@ use src\model\clientChatLead\entity\ClientChatLead;
 use src\model\lead\useCases\lead\api\create\LeadCreateForm;
 use src\model\lead\useCases\lead\import\LeadImportForm;
 use src\model\leadData\entity\LeadData;
+use src\model\leadDataKey\services\LeadDataKeyDictionary;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
@@ -5305,5 +5307,14 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     public function statusIsBusinessExtraQueue(): bool
     {
         return $this->status === self::STATUS_BUSINESS_EXTRA_QUEUE;
+    }
+
+    public function isBusinessType(): bool
+    {
+        return (bool) $this
+            ->getLeadData()
+            ->where(['ld_filed_key' => LeadDataKeyDictionary::KEY_LEAD_OBJECT_SEGMENT])
+            ->andWhere(['ld_field_value' => ObjectSegmentListContract::OBJECT_SEGMENT_LIST_KEY_LEAD_TYPE_BUSINESS])
+            ->count();
     }
 }

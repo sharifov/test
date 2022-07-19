@@ -31,6 +31,10 @@ class PriceResearchLinkForm extends Model
         self::CHILDREN_PARAMETER_TYPE_ENUMERABLE
     ];
 
+    public const TYPE_ONE_TRIP = 'oneTrip';
+    public const TYPE_ROUND_TRIP = 'roundTrip';
+    public const TYPE_MULTI_DESTINATION = 'multiCity';
+
     public $name;
     public $enabled;
 
