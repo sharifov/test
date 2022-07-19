@@ -643,6 +643,7 @@ class PhoneController extends FController
                 'allModels' => [],
                 'pagination' => false
             ]);
+            $searchModel = new EmployeeRedirectCallSearch();
             $error = $e->getMessage();
         }
 
@@ -659,7 +660,7 @@ class PhoneController extends FController
             'error' => $error,
             'dataProvider' => $dataProvider,
             'canWarmTransfer' => $call ? $call->isIn() : false,
-            'searchModel' => $searchModel ?? (new EmployeeRedirectCallSearch())
+            'searchModel' => $searchModel
         ]);
     }
 

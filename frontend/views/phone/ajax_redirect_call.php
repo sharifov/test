@@ -78,7 +78,7 @@ use yii\widgets\Pjax;
                     <?php $n = 1; ?>
                     <?php foreach ($departments as $department) : ?>
                         <?php
-                        $countAgents = $department['countAgents'];
+                        $countAgents = $department['countAgents'] ?? 0;
                         $department = $department['data'];
                         ?>
                         <tr>
