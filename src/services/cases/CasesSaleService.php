@@ -645,7 +645,7 @@ class CasesSaleService
                         ]));
                     }
 
-                    $this->updateCaseProjectBySale($case, $refreshSaleData);
+//                    $this->updateCaseProjectBySale($case, $refreshSaleData);
 
                     if ($caseSale->css_cs_id && SettingHelper::isEnableOrderFromSale()) {
                         $transaction = new Transaction(['db' => Yii::$app->db]);
