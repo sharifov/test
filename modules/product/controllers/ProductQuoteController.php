@@ -64,6 +64,7 @@ use src\exception\EmailNotSentException;
  * @property CasesCommunicationService $casesCommunicationService
  * @property ProductQuoteDataManageService $productQuoteDataManageService
  * @property ProductQuoteChangeRepository $productQuoteChangeRepository
+ * @property EmailMainService $emailService
  */
 class ProductQuoteController extends FController
 {
