@@ -7,6 +7,7 @@ use yii\base\Model;
 class LeadQuoteExtraMarkUpForm extends Model
 {
     private const MAX_EXTRA_MARK_UP_FACTOR = 10;
+
     /**
      * @var float
      */
