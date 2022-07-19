@@ -6,8 +6,9 @@ use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\Language;
 use src\entities\cases\Cases;
+use frontend\models\EmailPreviewFromInterface;
 
-class ProductPreviewEmailForm extends \yii\base\Model
+class ProductPreviewEmailForm extends \yii\base\Model implements EmailPreviewFromInterface
 {
     public $case_id;
 
@@ -79,5 +80,50 @@ class ProductPreviewEmailForm extends \yii\base\Model
             'language_id'     => 'Language',
             'user_id'         => 'Agent ID',
         ];
+    }
+
+    public function getEmailFrom(): string
+    {
+        return $this->email_from;
+    }
+
+    public function getEmailTo(): string
+    {
+        return $this->email_to;
+    }
+
+    public function getEmailFromName(): ?string
+    {
+        return $this->email_from_name;
+    }
+
+    public function getEmailToName(): ?string
+    {
+        return $this->email_to_name;
+    }
+
+    public function getEmailSubject(): ?string
+    {
+        return $this->email_subject;
+    }
+
+    public function getEmailMessage(): ?string
+    {
+        return $this->email_message;
+    }
+
+    public function getEmailTemplateId(): ?int
+    {
+        return $this->email_tpl_id;
+    }
+
+    public function getLanguageId(): ?string
+    {
+        return $this->language_id;
+    }
+
+    public function countLettersInEmailMessage(): int
+    {
+        return !empty($this->email_message) ? mb_strlen($this->email_message) : 0;
     }
 }
