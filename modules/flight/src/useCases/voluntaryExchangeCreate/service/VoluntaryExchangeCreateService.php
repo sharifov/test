@@ -87,21 +87,31 @@ class VoluntaryExchangeCreateService
     }
 
     public static function getOriginProductQuote(
-        string $bookingId,
-        string $gid = null
+        string $bookingId
     ): ?ProductQuote {
-        $query = ProductQuote::find()
+        return ProductQuote::find()
             ->select(ProductQuote::tableName() . '.*')
-            ->orderBy(['pq_id' => SORT_DESC]);
-        if ($gid) {
-            $query->with('flightQuote')
-                ->where(['pq_gid' => $gid]);
-        } else {
-            $query->innerJoin(FlightQuote::tableName(), 'fq_product_quote_id = pq_id')
+            ->innerJoin(FlightQuote::tableName(), 'fq_product_quote_id = pq_id')
             ->innerJoin(FlightQuoteFlight::tableName(), 'fqf_fq_id = fq_id')
-            ->where(['fqf_booking_id' => $bookingId]);
-        }
-        return $query->one();
+            ->where(['fqf_booking_id' => $bookingId])
+            ->orderBy(['pq_id' => SORT_DESC])
+            ->one();
+    }
+
+    public static function getOriginProductQuoteById(
+        int $productQuoteId
+    ): ?ProductQuote {
+        return ProductQuote::find()
+            ->where(['pq_id' => $productQuoteId])
+            ->one();
+    }
+
+    public static function getVoluntaryProductQuote(
+        string $gid
+    ): ?ProductQuote {
+        return ProductQuote::find()
+            ->where(['pq_gid' => $gid])
+            ->one();
     }
 
     public static function getProductQuoteByProductQuoteChange(
@@ -116,6 +126,23 @@ class VoluntaryExchangeCreateService
 
         if ($statuses) {
             $query->andWhere(['IN', 'pq_status_id', $statuses]);
+        }
+
+        return $query->one();
+    }
+
+    public static function getProductQuoteChangeByProductQuote(
+        int $productQuoteId,
+        ?array $statuses = null
+    ): ?ProductQuoteChange {
+        $query = ProductQuoteChange::find()
+            ->select(ProductQuoteChange::tableName() . '.*')
+            ->innerJoin(ProductQuoteChangeRelation::tableName(), 'pqc_id = pqcr_pqc_id')
+            ->where(['pqcr_pq_id' => $productQuoteId])
+            ->orderBy(['pqc_id' => SORT_DESC]);
+
+        if ($statuses) {
+            $query->andWhere(['IN', 'pqc_status_id', $statuses]);
         }
 
         return $query->one();
