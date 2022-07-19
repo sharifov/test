@@ -70,7 +70,7 @@ resource "aws_route53_record" "private_mysql" {
   name    = "mysql"
   type    = "CNAME"
   ttl     = "300"
-  records = ["prod-crm-mysql.cmcnc9sukklm.us-east-1.rds.amazonaws.com."]
+  records = [module.mysql.db_instance_address]
 }
 
 # PostgreSQL
@@ -79,7 +79,7 @@ resource "aws_route53_record" "private_pgsql" {
   name    = "pgsql"
   type    = "CNAME"
   ttl     = "300"
-  records = ["prod-crm-postgres.cmcnc9sukklm.us-east-1.rds.amazonaws.com."]
+  records = [module.pgsql.this_db_instance_address]
 }
 
 # Redis

@@ -16,6 +16,7 @@ module "mysql" {
   password               = var.MYSQL_RDS_PASSWORD
   create_random_password = false
 
+  multi_az                            = false
   vpc_security_group_ids              = [aws_security_group.mysql.id]
   iam_database_authentication_enabled = true
 
@@ -94,8 +95,9 @@ module "mysql_replica" {
 
   port = "3306"
 
-  multi_az               = false
-  vpc_security_group_ids = [aws_security_group.mysql.id]
+  multi_az                            = false
+  vpc_security_group_ids              = [aws_security_group.mysql.id]
+  iam_database_authentication_enabled = true
 
   maintenance_window = "Tue:00:00-Tue:03:00"
   backup_window      = "03:00-06:00"
@@ -152,7 +154,7 @@ resource "aws_security_group" "mysql" {
     from_port   = 3306
     to_port     = 3306
     protocol    = "tcp"
-    cidr_blocks = [var.VPC_CIDR]
+    cidr_blocks = [var.VPC_CIDR, "172.31.5.0/24"]
   }
 
   egress {
