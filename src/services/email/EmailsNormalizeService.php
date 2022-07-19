@@ -2,11 +2,9 @@
 
 namespace src\services\email;
 
-use common\components\CommunicationService;
 use common\models\Email as EmailOld;
 use common\models\Lead;
 use frontend\models\EmailPreviewFromInterface;
-use modules\featureFlag\FFlag;
 use src\auth\Auth;
 use src\dto\email\EmailDTO;
 use src\entities\cases\Cases;
@@ -15,27 +13,17 @@ use src\entities\email\EmailAddress;
 use src\entities\email\EmailBlob;
 use src\entities\email\EmailBody;
 use src\entities\email\EmailContact;
+use src\entities\email\EmailInterface;
 use src\entities\email\EmailLog;
 use src\entities\email\EmailRepository;
 use src\entities\email\form\EmailForm;
 use src\entities\email\helpers\EmailContactType;
 use src\entities\email\helpers\EmailStatus;
 use src\entities\email\helpers\EmailType;
-use src\exception\EmailNotSentException;
 use src\forms\emailReviewQueue\EmailReviewQueueForm;
-use src\helpers\app\AppHelper;
 use src\helpers\email\TextConvertingHelper;
-use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
-use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
-use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
-use src\model\leadUserData\entity\LeadUserData;
-use src\model\leadUserData\entity\LeadUserDataDictionary;
-use src\model\leadUserData\repository\LeadUserDataRepository;
-use src\services\abtesting\email\EmailTemplateOfferABTestingService;
 use Yii;
 use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
-use src\entities\email\EmailInterface;
 
 /**
  *
@@ -76,7 +64,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             'status'        =>  $emailOld->e_status_id,
             'isDeleted'     =>  $emailOld->e_is_deleted,
             'projectId'     =>  $emailOld->e_project_id,
-            'depId'         =>  null, //TODO: get from
+            'depId'         =>  $emailOld->eLead ? $emailOld->eLead->l_dep_id : null,
             'createdDt'     =>  $emailOld->e_created_dt,
             'updatedDt'     =>  $emailOld->e_updated_dt,
             'clientsIds'    =>  $emailOld->e_client_id ? [$emailOld->e_client_id] : null,
