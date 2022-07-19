@@ -25,7 +25,7 @@ class CallLogObjectAbacDto extends \stdClass
      */
     public function __construct(CallLog $callLog, Employee $user)
     {
-        $this->record_department = !is_null($callLog->department) ? mb_strtolower($callLog->department->dep_name) : null;
+        $this->record_department = $callLog->department ? $callLog->department->dep_key : null;
         $this->is_call_owner = $callLog->isOwner($user->getPrimaryKey());
         $this->type_id = $callLog->cl_type_id;
         $this->project_id = $callLog->cl_project_id;
