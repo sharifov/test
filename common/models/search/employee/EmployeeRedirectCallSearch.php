@@ -13,7 +13,6 @@ class EmployeeRedirectCallSearch extends Model
 {
     public $username;
     public $roles;
-    public $sid;
 
     private bool $_filtered = false;
 
@@ -21,7 +20,6 @@ class EmployeeRedirectCallSearch extends Model
     {
         return [
             ['username', 'string'],
-            ['sid', 'required'],
             ['roles', IsArrayValidator::class]
         ];
     }

@@ -143,7 +143,7 @@ class DepartmentPhoneProjectParamsService
 
         foreach ($departmentPhoneProjects as $departmentPhoneProject) {
             $departments[$departmentPhoneProject->dpp_dep_id]['data'] = $departmentPhoneProject;
-            $departments[$departmentPhoneProject->dpp_dep_id]['countAgents'] = array_key_exists($departmentPhoneProject->dpp_dep_id, $departmentsCount) ? $departmentsCount[$departmentPhoneProject->dpp_dep_id] : 0;
+            $departments[$departmentPhoneProject->dpp_dep_id]['countAgents'] = $departmentsCount[$departmentPhoneProject->dpp_dep_id] ?? 0;
         }
         return $departments;
     }

@@ -3,6 +3,7 @@
 use common\components\grid\Select2Column;
 use common\models\DepartmentPhoneProject;
 use common\models\Employee;
+use modules\featureFlag\FFlag;
 use src\auth\Auth;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
@@ -144,6 +145,8 @@ use yii\widgets\Pjax;
                 [
                     'attribute' => 'username',
                     'format' => 'raw',
+                    /** @fflag FFlag::FF_KEY_FILTER_USERNAME_ROLES_IN_TRANSFER_TAB, Filter Username And Roles In Transfer Tab Enable */
+                    'filter' => Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_FILTER_USERNAME_ROLES_IN_TRANSFER_TAB),
                     'headerOptions' => ['style' => 'width:150px', 'class' => 'text-center'],
                     'value' => function ($user) {
                         $userModel = $user['model'];
@@ -154,6 +157,8 @@ use yii\widgets\Pjax;
                 [
                     'class' => Select2Column::class,
                     'attribute' => 'roles',
+                    /** @fflag FFlag::FF_KEY_FILTER_USERNAME_ROLES_IN_TRANSFER_TAB, Filter Username And Roles In Transfer Tab Enable */
+                    'filter' => Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_FILTER_USERNAME_ROLES_IN_TRANSFER_TAB),
                     'id' => 'roles-search',
                     'format' => 'raw',
                     'value' => function ($user) {
