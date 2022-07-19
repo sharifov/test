@@ -111,7 +111,7 @@ class FieldAccess
     public function canView(string $field): bool
     {
         if (array_key_exists($field, $this->cache['view'])) {
-            return true;
+            return $this->cache['view'][$field];
         }
         $userAbacDto = UserAbacDto::createForUpdate(
             $field,
@@ -126,13 +126,13 @@ class FieldAccess
         );
         /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, User field view*/
         $this->cache['view'][$field] = \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_VIEW, $this->updaterUser);
-        return true;
+        return $this->cache['view'][$field];
     }
 
     public function canEdit(string $field): bool
     {
         if (array_key_exists($field, $this->cache['edit'])) {
-            return true;
+            return $this->cache['view'][$field];
         }
         $userAbacDto = UserAbacDto::createForUpdate(
             $field,
@@ -147,6 +147,6 @@ class FieldAccess
         );
         /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, User field edit*/
         $this->cache['edit'][$field] = \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, $this->updaterUser);
-        return true;
+        return $this->cache['view'][$field];
     }
 }
