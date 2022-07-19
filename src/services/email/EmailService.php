@@ -350,7 +350,7 @@ class EmailService extends SendMail implements EmailServiceInterface
         $mail->e_email_to = $previewEmailForm->getEmailTo();
         $mail->e_created_dt = date('Y-m-d H:i:s');
         $mail->e_created_user_id = \Yii::$app->user->id;
-        $mail->e_email_data = json_encode($attachments);
+        $mail->e_email_data = !empty($attachments) ? json_encode($attachments) : null;
 
         return $mail;
     }
@@ -378,10 +378,9 @@ class EmailService extends SendMail implements EmailServiceInterface
     public function createFromCase(EmailPreviewFromInterface $previewEmailForm, Cases $case, array $attachments = []): Email
     {
         try {
-            $mail = $this->createFromPreviewForm($previewEmailForm);
+            $mail = $this->createFromPreviewForm($previewEmailForm, $attachments);
             $mail->e_project_id = $case->cs_project_id;
             $mail->e_case_id = $case->cs_id;
-            $mail->e_email_data = json_encode($attachments);
 
             if ($mail->save()) {
                 $mail->e_message_id = $mail->generateMessageId();
@@ -439,6 +438,8 @@ class EmailService extends SendMail implements EmailServiceInterface
             $email->e_language_id = $emailDTO->languageId;
             $email->e_template_type_id = $emailDTO->templateTypeId;
             $email->e_client_id = $emailDTO->clientId;
+            $email->e_lead_id = $emailDTO->leadId;
+            $email->e_email_data = !empty($emailDTO->attachments) ? json_encode($emailDTO->attachments) : null;
             if ($autoDetectEmpty) {
                 $email->e_client_id = $emailDTO->clientId ?? $this->helper->detectClientId($emailDTO->emailFrom);
                 $email->e_lead_id = $this->helper->detectLeadId($emailDTO->emailSubject, $emailDTO->refMessageId);
