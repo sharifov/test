@@ -417,7 +417,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             'body'          =>  [
                 'subject'   =>  $previewEmailForm->getEmailSubject(),
                 'bodyHtml'  =>  $previewEmailForm->getEmailMessage(),
-                'data'      =>  json_encode($attachments),
+                'data'      =>  $attachments,
             ],
             'contacts'      =>  [
                 'from' => [
@@ -505,6 +505,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             'body'  =>  [
                 'subject'   =>  $emailDTO->emailSubject,
                 'bodyHtml'  =>  $emailDTO->bodyHtml,
+                'data'      =>  $emailDTO->attachments,
             ],
             'contacts' => [
                 'from' => [
