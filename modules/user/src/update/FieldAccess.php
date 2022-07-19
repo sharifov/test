@@ -132,7 +132,7 @@ class FieldAccess
     public function canEdit(string $field): bool
     {
         if (array_key_exists($field, $this->cache['edit'])) {
-            return $this->cache['view'][$field];
+            return $this->cache['edit'][$field];
         }
         $userAbacDto = UserAbacDto::createForUpdate(
             $field,
@@ -147,6 +147,6 @@ class FieldAccess
         );
         /** @abac new $userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, User field edit*/
         $this->cache['edit'][$field] = \Yii::$app->abac->can($userAbacDto, UserAbacObject::USER_FORM, UserAbacObject::ACTION_EDIT, $this->updaterUser);
-        return $this->cache['view'][$field];
+        return $this->cache['edit'][$field];
     }
 }
