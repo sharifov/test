@@ -66,6 +66,7 @@ use src\listeners\lead\LeadProcessingEventLogListener;
 use src\listeners\lead\LeadQcallAddListener;
 use src\listeners\lead\LeadQcallProcessingListener;
 use src\listeners\lead\LeadQuoteCloneEventListener;
+use src\listeners\lead\LeadRejectClientReturnIndicationListener;
 use src\listeners\lead\LeadRejectEventLogListener;
 use src\listeners\lead\LeadSendToGaListener;
 use src\listeners\lead\LeadSnoozeEventLogListener;
@@ -82,6 +83,7 @@ use src\listeners\lead\LeadTrashEventLogListener;
 use src\listeners\lead\leadWebEngage\LeadBookedWebEngageListener;
 use src\listeners\lead\leadWebEngage\LeadSoldWebEngageListener;
 use src\listeners\lead\leadWebEngage\LeadTrashedWebEngageListener;
+use src\listeners\lead\leadBusinessExtraQueue\LeadBusinessExtraQueueRemoveOnStatusChangeListener;
 
 return [
     LeadCreatedEvent::class => [LeadCreatedEventListener::class],
@@ -132,13 +134,17 @@ return [
         LeadQcallProcessingListener::class,
         LeadFromSnoozeNotificationListener::class,
         LeadPoorProcessingRemoverListener::class,
+        LeadBusinessExtraQueueRemoveOnStatusChangeListener::class,
     ],
     LeadPendingEvent::class => [LeadPendingEventLogListener::class],
     LeadProcessingEvent::class => [
         LeadProcessingEventLogListener::class,
         LeadInfoReloadListener::class,
     ],
-    LeadRejectEvent::class => [LeadRejectEventLogListener::class],
+    LeadRejectEvent::class => [
+        LeadRejectEventLogListener::class,
+        LeadRejectClientReturnIndicationListener::class
+    ],
     LeadFollowUpEvent::class => [
         LeadFollowUpEventLogListener::class,
         LeadFollowUpNotificationsListener::class,

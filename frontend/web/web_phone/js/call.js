@@ -688,7 +688,7 @@ var PhoneWidget = function () {
         modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
         $('#web-phone-redirect-agents-modal-label').html('Transfer Call');
 
-        $.post(settings.ajaxCallRedirectGetAgents, { sid: callSid })
+        $.get(settings.ajaxCallRedirectGetAgents, { sid: callSid })
             .done(function(data) {
                 modal.find('.modal-body').html(data);
             });

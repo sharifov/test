@@ -141,6 +141,19 @@ class MonitorController extends FController
         $response['accessCallSourceType'] = [Call::SOURCE_GENERAL_LINE, Call::SOURCE_REDIRECT_CALL];
         $response['accessCallType'] = [Call::CALL_TYPE_IN];
 
+        $response['userData'] = [];
+        foreach ($response['onlineUserList'] as $user) {
+            $item = [
+                'user_id' => $user['uo_user_id'],
+                'userName' => $response['userList'][$user['uo_user_id']] ?? '',
+                'online' => $user,
+                'status' => array_values(array_filter($response['userStatusList'], function ($userStatus) use ($user) {
+                    return $userStatus['us_user_id'] === $user['uo_user_id'];
+                }))[0] ?? [],
+            ];
+            $response['userData'][] = $item;
+        }
+
         return $response;
     }
 

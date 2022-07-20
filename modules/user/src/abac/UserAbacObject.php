@@ -4,6 +4,7 @@ namespace modules\user\src\abac;
 
 use modules\abac\components\AbacBaseModel;
 use modules\abac\src\entities\AbacInterface;
+use yii\helpers\ArrayHelper;
 
 class UserAbacObject extends AbacBaseModel implements AbacInterface
 {
@@ -166,6 +167,19 @@ class UserAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_IN_ARRAY, self::OP_NOT_IN_ARRAY]
     ];
 
+    protected const ATTR_SELECTED_ROLES = [
+        'optgroup' => 'Form',
+        'id' => self::NS . 'selectedRoles',
+        'field' => 'selectedRoles',
+        'label' => 'Selected Roles',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => true,
+        'operators' => [self::OP_CONTAINS]
+    ];
+
+
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
         self::USER_FORM => [
@@ -255,6 +269,10 @@ class UserAbacObject extends AbacBaseModel implements AbacInterface
 
         $attributeList[self::USER_FORM][] = $attrFieldsList;
         $attributeList[self::USER_FORM][] = $attrMultiFieldsList;
+
+        $attrSelectedRoles = self::ATTR_SELECTED_ROLES;
+        $attrSelectedRoles['values'] = ArrayHelper::map(\Yii::$app->authManager->getRoles(), 'name', 'description');
+        $attributeList[self::USER_FORM][] = $attrSelectedRoles;
 
         $attributeList[self::USER_FEEDBACK][] = $attrFieldsList;
         $attributeList[self::USER_FEEDBACK][] = $attrMultiFieldsList;

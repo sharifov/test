@@ -4,6 +4,7 @@ namespace common\components\jobs;
 
 use common\models\Call;
 use common\models\Client;
+use modules\featureFlag\FFlag;
 use modules\webEngage\form\WebEngageEventForm;
 use modules\webEngage\settings\WebEngageDictionary;
 use modules\webEngage\src\service\webEngageEventData\call\CallEventService;
@@ -18,6 +19,8 @@ use src\model\clientData\entity\ClientData;
 use src\model\clientData\entity\ClientDataQuery;
 use src\model\clientDataKey\entity\ClientDataKeyDictionary;
 use src\model\clientDataKey\service\ClientDataKeyService;
+use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
+use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogStatus;
 use src\model\leadData\services\LeadDataCreateService;
 use src\model\leadDataKey\services\LeadDataKeyDictionary;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
@@ -184,6 +187,31 @@ class CallOutEndedJob extends BaseJob implements JobInterface
                 $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['callId' => $this->callId]);
                 \Yii::warning($message, 'CallOutEndedJob:addLeadPoorProcessingRemoverJob:Throwable');
             }
+            $this->checkAndDeleteFromBusinessExtraQueue($call);
+        }
+    }
+
+    private function checkAndDeleteFromBusinessExtraQueue(Call $call)
+    {
+        try {
+            /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+            if (!\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE)) {
+                return;
+            }
+            if ($lead = CallEventService::getLead($this->callId, $this->clientId)) {
+                if (!$lead->isBusinessType()) {
+                    return;
+                }
+                if ($call->c_call_duration >= SettingHelper::getUserPrickedCallDuration() && $call->isStatusCompleted()) {
+                    LeadBusinessExtraQueueService::addLeadBusinessExtraQueueRemoverJob($lead->id, LeadBusinessExtraQueueLogStatus::REASON_CALL);
+                }
+                return;
+            }
+            throw new \DomainException('Lead not found, callId - ' . $call->c_id . ' clientId - ' . $this->clientId);
+        } catch (\RuntimeException | \DomainException $throwable) {
+            \Yii::warning(AppHelper::throwableLog($throwable), 'CallOutEndedJob:UserPickedCall:checkAndDeleteFromBusinessExtraQueue:Exception');
+        } catch (\Throwable $throwable) {
+            \Yii::error(AppHelper::throwableLog($throwable, true), 'CallOutEndedJob:UserPickedCall:checkAndDeleteFromBusinessExtraQueue:Throwable');
         }
     }
 }

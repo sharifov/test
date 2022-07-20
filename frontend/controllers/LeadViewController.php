@@ -946,7 +946,11 @@ class LeadViewController extends FController
                 throw new \RuntimeException('Currency not Founded');
             }
             $quotePrice = QuotePriceRepository::findByQuoteIdAndPaxCode($quoteId, $paxCode);
-            $form = new LeadQuoteExtraMarkUpForm($quote->q_client_currency_rate, $quotePrice->net);
+            $form = new LeadQuoteExtraMarkUpForm(
+                $quote->q_client_currency_rate,
+                $quotePrice->net *
+                (isset($quote->getPricesData()['prices'][mb_strtoupper($paxCode)]) ? $quote->getPricesData()['prices'][mb_strtoupper($paxCode)]['tickets'] : 1)
+            );
             $form->load($quotePrice->toArray());
             return $this->renderAjax('partial/_quote_edit_extra_mark_up_content', [
                 'quote'                    => $quote,
@@ -1008,7 +1012,11 @@ class LeadViewController extends FController
                 throw new \RuntimeException('Currency not Founded');
             }
             $quotePriceModel = QuotePriceRepository::findByQuoteIdAndPaxCode($quoteId, $paxCode);
-            $form = new LeadQuoteExtraMarkUpForm($quote->q_client_currency_rate, $quotePriceModel->net);
+            $form = new LeadQuoteExtraMarkUpForm(
+                $quote->q_client_currency_rate,
+                $quotePriceModel->net *
+                (isset($quote->getPricesData()['prices'][mb_strtoupper($paxCode)]) ? $quote->getPricesData()['prices'][mb_strtoupper($paxCode)]['tickets'] : 1)
+            );
             $form->load(Yii::$app->request->post());
             if (!$form->validate()) {
                 throw new \RuntimeException(implode(', ', $form->getErrorSummary(true)));
