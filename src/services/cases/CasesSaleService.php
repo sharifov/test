@@ -580,13 +580,13 @@ class CasesSaleService
     }
 
     /**
-     * @param string|null $project_key
      * @param string|null $order_uid
      * @param string|null $email
      * @param string|null $phone
+     * @param string|null $project_key
      * @return array
      */
-    public function getSaleFromBo(?string $project_key = null, ?string $order_uid = null, ?string $email = null, ?string $phone = null): array
+    public function getSaleFromBo(?string $order_uid = null, ?string $email = null, ?string $phone = null, ?string $project_key = null): array
     {
         $form = new CaseSaleRequestBoForm();
         $form->orderUid = $order_uid;
@@ -765,7 +765,7 @@ class CasesSaleService
 
     public function getSaleData(string $project_key, string $bookingId): array
     {
-        $saleSearch = $this->getSaleFromBo($project_key, $bookingId);
+        $saleSearch = $this->getSaleFromBo($bookingId, null, null, $project_key);
         if (empty($saleSearch['saleId'])) {
             throw new BoResponseException('Sale not found by Booking ID(' . $bookingId . ') and Project Key (' . $project_key . ') from "cs/search"');
         }

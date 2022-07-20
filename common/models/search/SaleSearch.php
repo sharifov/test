@@ -188,7 +188,9 @@ class SaleSearch extends Model
                 $data['limit'] = $pageSize;
             }
 
-            $data['project_key'] = $this->project_key;
+            if ($this->project_key) {
+                $data['project_key'] = $this->project_key;
+            }
 
 
 
