@@ -36,7 +36,7 @@ class TelegramSendMessageJob extends BaseJob implements RetryableJobInterface
         if (TelegramService::delayForTelegramMessagesIsEnable() === true) {
             $lastMessageToUser = TelegramService::getTimeForLastSentMessageToUser($this->user_id);
 
-            if ($lastMessageToUser >= time()) {
+            if (($lastMessageToUser + self::DELAY_SECONDS) >= time()) {
                 $job = new TelegramSendMessageJob();
                 $job->user_id = $this->user_id;
                 $job->text = $this->text;
