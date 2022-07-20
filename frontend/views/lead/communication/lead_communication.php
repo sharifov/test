@@ -25,6 +25,7 @@ use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
 use modules\email\src\abac\dto\EmailPreviewDto;
 use modules\email\src\abac\EmailAbacObject;
+use modules\featureFlag\FFlag;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\widgets\FileStorageEmailSendListWidget;
 use src\auth\Auth;
@@ -406,20 +407,26 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
                                         <?= $communicationActiveForm->field($comForm, 'c_email_tpl_key')->dropDownList([], ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_key']) ?>
                                     </div>
 
-                                    <div class="col-sm-3 form-group" id="language-group" style="display: none;">
-
-                                        <?php
-                                            $localeList = ProjectLocale::getLocaleListByProject((int) $lead->project_id);
-                                            $comForm->c_language_id = null;
-                                        ?>
-
-                                        <?php echo $communicationActiveForm->field($comForm, 'c_language_id')->hiddenInput(['value' => 'en-US'])->label(false)
-//                                            ->dropDownList(
-//                                                $localeList,
-//                                                ['prompt' => '---', 'class' => 'form-control', 'id' => 'language']
-//                                            )
-                                        ?>
-                                    </div>
+                                    <?php
+                                    $localeList = ProjectLocale::getLocaleListByProject((int)$lead->project_id);
+                                    $comForm->c_language_id = null;
+                                    ?>
+                                    <?php
+                                    /** @fflag FFlag::FF_KEY_HIDE_LANGUAGE_FIELD_COMMUNICATION_BLOCK, Hide Language Field In CommunicationBlock */
+                                    if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_HIDE_LANGUAGE_FIELD_COMMUNICATION_BLOCK)) : ?>
+                                        <div class="col-sm-3 form-group" id="language-group" style="display: none;">
+                                            <?php echo $communicationActiveForm->field($comForm, 'c_language_id')->hiddenInput(['value' => 'en-US'])->label(false); ?>
+                                        </div>
+                                    <?php else : ?>
+                                        <div class="col-sm-3 form-group message-field-sms message-field-email"
+                                             id="language-group" style="display: block;">
+                                            <?php echo $communicationActiveForm->field($comForm, 'c_language_id')
+                                                ->dropDownList(
+                                                    $localeList,
+                                                    ['prompt' => '---', 'class' => 'form-control', 'id' => 'language']
+                                                ) ?>
+                                        </div>
+                                    <?php endif; ?>
 
                                     <div class="col-sm-12 form-group message-field-email" id="email-subtitle-group" style="display: none;">
                                         <?= $communicationActiveForm->field($comForm, 'c_email_subject')->textInput(['class' => 'form-control', 'id' => 'email-subtitle', 'maxlength' => true]) ?>
