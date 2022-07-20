@@ -59,7 +59,7 @@ class SendEmailByCase
             if ($emailConfigs->enabled) {
                 $emailTemplate = $this->getEmailTemplate($emailConfigs->templateTypeKey);
 
-                $mailPreview = \Yii::$app->communication->mailPreview($case->cs_project_id, $emailTemplate->etp_key, $emailConfigs->emailFrom, $this->contact_email, $this->emailData);
+                $mailPreview = \Yii::$app->comms->mailPreview($case->cs_project_id, $emailTemplate->etp_key, $emailConfigs->emailFrom, $this->contact_email, $this->emailData);
                 if ($mailPreview['error'] !== false) {
                     throw new \DomainException($mailPreview['error']);
                 }

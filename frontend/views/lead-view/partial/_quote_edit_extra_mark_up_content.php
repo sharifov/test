@@ -35,6 +35,17 @@ $extra_mark_up = (float)$leadQuoteExtraMarkUpForm->extra_mark_up;
         <?= $form->errorSummary($leadQuoteExtraMarkUpForm) ?>
         <div class="row">
             <div class="col-md-12">
+                <?php
+                $options = [
+                    'min' => 0,
+                    'step' => '0.01',
+                    'value' => $qp_client_extra_mark_up
+                ];
+                if (!empty($leadQuoteExtraMarkUpForm->getMaxExtraMarkUp())) {
+                    $options['max'] = $leadQuoteExtraMarkUpForm->getMaxExtraMarkUp();
+                }
+                ?>
+
                 <?= $form->field(
                     $leadQuoteExtraMarkUpForm,
                     'qp_client_extra_mark_up',
@@ -45,11 +56,7 @@ $extra_mark_up = (float)$leadQuoteExtraMarkUpForm->extra_mark_up;
                 )
                     ->input(
                         'number',
-                        [
-                            'min' => 0,
-                            'step' => '0.01',
-                            'value' => $qp_client_extra_mark_up
-                        ]
+                        $options
                     )
                     ->label('Client Currency ' . ' (' . $quote->q_client_currency . ')')
                 ?>
@@ -139,6 +146,7 @@ $('#lead-quote-extra-mark-up-edit-form').on('beforeSubmit', function (e) {
             if (data.error) {
                 btn.html(btnTextDefalut);
                 btn.prop("disabled", false); 
+                title = data.error;
             }
             
             if (!data.error) {

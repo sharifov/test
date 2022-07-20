@@ -857,7 +857,7 @@ class ClientChatFlightQuoteController extends FController
      */
     private function generateQuoteCapture(Quote $quote, ?string $qcUid = null): array
     {
-        $communication = Yii::$app->communication;
+        $communication = Yii::$app->comms;
 
         $project = $quote->lead->project;
         $projectContactInfo = [];

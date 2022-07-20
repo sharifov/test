@@ -397,7 +397,7 @@ class Project extends \yii\db\ActiveRecord
         $out['data'] = false;
         $out['error'] = false;
 
-        $uri = Yii::$app->params['backOffice']['serverUrl'] . '/default/projects';
+        $uri = Yii::$app->params['backOffice']['url'] . '/default/projects';
         $signature = self::getSignatureBO(
             Yii::$app->params['backOffice']['apiKey'],
             Yii::$app->params['backOffice']['ver']

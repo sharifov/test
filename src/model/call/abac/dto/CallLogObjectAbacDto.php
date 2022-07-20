@@ -11,12 +11,12 @@ use src\model\callLog\entity\callLog\CallLog;
  */
 class CallLogObjectAbacDto extends \stdClass
 {
-    public string $record_department;
-    public bool $is_call_owner;
-    public integer $type_id;
-    public integer $project_id;
-    public integer $category_id;
-    public integer $status_id;
+    public ?string $record_department;
+    public ?bool $is_call_owner;
+    public ?int $type_id;
+    public ?int $project_id;
+    public ?int $category_id;
+    public ?int $status_id;
 
     /**
      * CallLogRecordListenAbacDto constructor.
@@ -25,7 +25,7 @@ class CallLogObjectAbacDto extends \stdClass
      */
     public function __construct(CallLog $callLog, Employee $user)
     {
-        $this->record_department = mb_strtolower($callLog->department->dep_name);
+        $this->record_department = $callLog->department ? $callLog->department->dep_key : null;
         $this->is_call_owner = $callLog->isOwner($user->getPrimaryKey());
         $this->type_id = $callLog->cl_type_id;
         $this->project_id = $callLog->cl_project_id;

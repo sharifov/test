@@ -87,6 +87,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'cl_locale',
             'cl_marketing_country',
             'cl_call_recording_disabled:booleanByLabel',
+            [
+                'label' => 'Client Return Type',
+                'value' => static function (Client $model) {
+                    return \src\helpers\client\ClientReturnHelper::displayClientReturnLabels($model->id, \src\auth\Auth::id());
+                },
+                'format' => 'raw'
+            ],
         ],
     ]) ?>
     </div>

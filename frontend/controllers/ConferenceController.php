@@ -141,7 +141,7 @@ class ConferenceController extends FController
                     }
                 }
             }
-            header('X-Accel-Redirect: ' . Yii::$app->communication->xAccelRedirectCommunicationUrl . $conferenceRecordSid);
+            header('X-Accel-Redirect: ' . Yii::$app->comms->xAccelRedirectCommsUrl . $conferenceRecordSid);
         } catch (NotFoundException $e) {
             throw new NotFoundHttpException($e->getMessage());
         }

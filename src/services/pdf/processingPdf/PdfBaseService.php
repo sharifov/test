@@ -133,7 +133,7 @@ abstract class PdfBaseService
         if ($this->communicationData === null) {
             throw new \RuntimeException('CommunicationData cannot be empty');
         }
-        $content = \Yii::$app->communication->getContent($this->templateKey, $this->communicationData);
+        $content = \Yii::$app->comms->getContent($this->templateKey, $this->communicationData);
         if ($content['error'] !== false) {
             throw new \RuntimeException(VarDumper::dumpAsString($content['error']));
         }

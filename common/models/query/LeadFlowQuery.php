@@ -90,4 +90,18 @@ class LeadFlowQuery extends ActiveQuery
     {
         return LeadFlow::find()->byLeadId($leadId)->notEmptyOwner()->orderBy(['id' => SORT_ASC])->one();
     }
+
+    /**
+     * @param int $clientId
+     * @return LeadFlow[]
+     */
+    public static function findSoldByClient(int $clientId): array
+    {
+        $subQuery = Lead::find()->select(['id'])->where(['client_id' => $clientId, 'status' => Lead::STATUS_SOLD]);
+
+        return LeadFlow::find()
+            ->where(['IN', 'lead_id', $subQuery])
+            ->andWhere(['status' => Lead::STATUS_SOLD])
+            ->all();
+    }
 }

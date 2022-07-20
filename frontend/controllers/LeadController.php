@@ -37,6 +37,7 @@ use modules\fileStorage\src\services\url\UrlGenerator;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\lead\src\abac\LeadExpertCallObject;
+use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\lead\src\abac\services\AbacLeadExpertCallService;
 use modules\offer\src\entities\offer\search\OfferSearch;
 use modules\offer\src\entities\offerSendLog\CreateDto;
@@ -107,6 +108,7 @@ use src\repositories\quote\QuoteRepository;
 use src\services\client\ClientManageService;
 use src\services\email\EmailService;
 use src\services\lead\LeadAssignService;
+use src\services\lead\LeadBusinessExtraQueueService;
 use src\services\lead\LeadCloneService;
 use src\services\lead\LeadManageService;
 use src\services\TransactionManager;
@@ -217,7 +219,8 @@ class LeadController extends FController
                     'ajax-link-to-call',
                     'extra-queue',
                     'closed',
-                    'create'
+                    'create',
+                    'business-extra-queue',
                 ],
             ],
         ];
@@ -691,7 +694,7 @@ class LeadController extends FController
                     $comForm->c_preview_email = 1;
 
                     /** @var CommunicationService $communication */
-                    $communication = Yii::$app->communication;
+                    $communication = Yii::$app->comms;
                     $data['origin'] = '';
 
                     $content_data['email_body_html'] = $comForm->c_email_message;
@@ -815,7 +818,7 @@ class LeadController extends FController
                     $comForm->c_preview_sms = 1;
 
                     /** @var CommunicationService $communication */
-                    $communication = Yii::$app->communication;
+                    $communication = Yii::$app->comms;
 
                     //$data['origin'] = 'ORIGIN';
                     //$data['destination'] = 'DESTINATION';
@@ -1262,6 +1265,14 @@ class LeadController extends FController
     public function actionTake(string $gid)
     {
         $lead = $this->findLeadByGid($gid);
+
+        /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) === true && $lead->statusIsBusinessExtraQueue() === true) {
+            /** @abac LeadBusinessExtraQueueAbacObject::UI_ACCESS, LeadBusinessExtraQueueAbacObject::ACTION_ACCESS, Access to take from business extra queue */
+            if (!Yii::$app->abac->can(null, LeadBusinessExtraQueueAbacObject::UI_ACCESS, LeadBusinessExtraQueueAbacObject::ACTION_TAKE)) {
+                throw new ForbiddenHttpException('Access Denied.');
+            }
+        }
 
         if (!Auth::can('leadSection', ['lead' => $lead])) {
             throw new ForbiddenHttpException('Access Denied.');
@@ -2830,9 +2841,8 @@ class LeadController extends FController
      */
     public function actionBusinessExtraQueue(): string
     {
-        /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
-        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) === false) {
-            throw new ForbiddenHttpException('Access denied');
+        if (LeadBusinessExtraQueueService::canAccess() === false) {
+            throw new ForbiddenHttpException('Access Denied.');
         }
 
         $searchModel = new LeadSearch();

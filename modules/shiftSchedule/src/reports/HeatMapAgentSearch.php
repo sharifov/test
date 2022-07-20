@@ -116,7 +116,9 @@ class HeatMapAgentSearch extends Model
      */
     public function getEventsForHeatMap(array $params): array
     {
-        $query = UserShiftSchedule::find();
+        $query = UserShiftSchedule::find()
+            ->innerJoin(Employee::tableName(), 'uss_user_id = employees.id')
+            ->andWhere(['<>', 'status', Employee::STATUS_DELETED]);
 
         $this->load($params);
 
@@ -154,7 +156,7 @@ class HeatMapAgentSearch extends Model
         $query->andWhere([
             'OR',
             ['between', 'uss_start_utc_dt', $from, $to],
-            ['between', 'uss_end_utc_dt',$from, $to],
+            ['between', 'uss_end_utc_dt', $from, $to],
             [
                 'AND',
                 ['>=', 'uss_start_utc_dt', $from],

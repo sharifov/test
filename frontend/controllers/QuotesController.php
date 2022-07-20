@@ -116,7 +116,7 @@ class QuotesController extends FController
         $lead = Lead::find()->where(['gid' => $gid])->limit(1)->one();
 
         /** @var CommunicationService $communication */
-        $communication = Yii::$app->communication;
+        $communication = Yii::$app->comms;
 
         $tpl = 'chat_offer';
         $language = Yii::$app->language ?: 'en-US';

@@ -43,13 +43,14 @@ $this->params['breadcrumbs'][] = $this->title;
                     return Experiment::getExperimentById($model->ext_experiment_id)['ex_code'] . ' (ID ' . $model->ext_experiment_id . ')';
                 }
             ],
+            'ext_created_dt',
             [
                 'class' => ActionColumn::class,
                 'urlCreator' => function ($action, ExperimentTarget $model, $key, $index, $column) {
-                    return Url::toRoute([$action, 'ext_id' => $model->ext_id]);
+                     return Url::toRoute([$action, 'ext_id' => $model->ext_id]);
                 }
-            ],
-        ],
+            ]
+        ]
     ]); ?>
 
 

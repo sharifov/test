@@ -113,7 +113,15 @@ use yii\widgets\ActiveForm;
                                   'multiple' => true,
                               ],
                               'size' => Select2::SMALL,
-                          ]) ?>
+                          ])->label('Event Shift') ?>
+
+                          <?= $form->field($timelineCalendarFilter, 'userShift')->widget(Select2::class, [
+                              'data' => Shift::getList(true),
+                              'options' => [
+                                  'multiple' => true,
+                              ],
+                              'size' => Select2::SMALL,
+                          ])->label('User Shift') ?>
 
                           <?= $form->field($timelineCalendarFilter, 'duration')->widget(TimePicker::class, [
                               'pluginOptions' => [
@@ -125,7 +133,6 @@ use yii\widgets\ActiveForm;
                               ],
                           ]) ?>
 
-                          <?= $form->field($timelineCalendarFilter, 'displayUsersWithoutEvents')->checkbox() ?>
                       </div>
                       <div class="col-md-5">
                           <?= $form->field($timelineCalendarFilter, 'userGroups')->widget(Select2::class, [
@@ -135,6 +142,8 @@ use yii\widgets\ActiveForm;
                               ],
                               'size' => Select2::SMALL,
                           ]) ?>
+
+                          <?= $form->field($timelineCalendarFilter, 'displayUsersWithoutEvents')->checkbox() ?>
                       </div>
                       <input type="hidden" id="shift_calendar_tab_state" name="tab_state" value="">
                   </div>

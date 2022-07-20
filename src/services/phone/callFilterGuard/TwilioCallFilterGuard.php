@@ -69,7 +69,7 @@ class TwilioCallFilterGuard implements CheckServiceInterface
 
     public function getApiResponseData(): array
     {
-        return \Yii::$app->communication->twilioLookup($this->phone);
+        return \Yii::$app->comms->twilioLookup($this->phone);
     }
 
     public function getTrustPercent(): int

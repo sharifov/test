@@ -40,9 +40,16 @@ class DepartmentPhoneProjectParamsService
         return $experimentCodes;
     }
 
-    public function processExperiments(int $targetTypeId, int $phoneListId): void
+    /**
+     * @param int $targetTypeId
+     * @param int|null $phoneListId
+     * @return void
+     */
+    public function processExperiments(int $targetTypeId, ?int $phoneListId): void
     {
-        ExperimentTarget::processExperimentsCodes($targetTypeId, $phoneListId, $this->getPhoneExperiments());
+        if ($phoneListId) {
+            ExperimentTarget::processExperimentsCodes($targetTypeId, $phoneListId, $this->getPhoneExperiments());
+        }
     }
 
     public function getCallFilterGuard(): array
@@ -103,5 +110,41 @@ class DepartmentPhoneProjectParamsService
             return $enabledToDt;
         }
         return null;
+    }
+
+    /**
+     * @param int $projectId
+     * @param array $users
+     * @return array|DepartmentPhoneProject[]
+     */
+    public static function getDepartmentsWithCountOnlineUserByProjectId(int $projectId, array $users): array
+    {
+        $departments = [];
+        $departmentsCount = [];
+        /** @var DepartmentPhoneProject[] $departments */
+        $departmentPhoneProjects = DepartmentPhoneProject::find()
+            ->where(['dpp_project_id' => $projectId, 'dpp_enable' => true, 'dpp_allow_transfer' => true])
+            ->andWhere(['>', 'dpp_dep_id', 0])
+            ->withPhoneList()
+            ->orderBy(['dpp_dep_id' => SORT_ASC])
+            ->all();
+
+        if (count($users) > 0) {
+            foreach ($users as $model) {
+                foreach ($model['departments'] as $dpId) {
+                    if (array_key_exists($dpId, $departmentsCount)) {
+                        $departmentsCount[$dpId]++;
+                    } else {
+                        $departmentsCount[$dpId] = 1;
+                    }
+                }
+            }
+        }
+
+        foreach ($departmentPhoneProjects as $departmentPhoneProject) {
+            $departments[$departmentPhoneProject->dpp_dep_id]['data'] = $departmentPhoneProject;
+            $departments[$departmentPhoneProject->dpp_dep_id]['countAgents'] = $departmentsCount[$departmentPhoneProject->dpp_dep_id] ?? 0;
+        }
+        return $departments;
     }
 }

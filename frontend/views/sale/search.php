@@ -20,7 +20,7 @@ $this->params['breadcrumbs'][] = $this->title;
 </style>
 <div class="sale-search">
 
-    <h1 title="<?=Yii::$app->params['backOffice']['serverUrl']?>"><?= Html::encode($this->title) ?></h1>
+    <h1 title="<?=Yii::$app->params['backOffice']['url']?>"><?= Html::encode($this->title) ?></h1>
 
     <?php Pjax::begin(['id' => 'sale-pjax-list', 'timeout' => 15000, 'enablePushState' => true]); ?>
 

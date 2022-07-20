@@ -46,7 +46,7 @@ class CallQueueRepeatMessageJob extends BaseJob implements JobInterface
 
             $params = $this->findParams();
 
-            $result = \Yii::$app->communication->repeatMessage([
+            $result = \Yii::$app->comms->repeatMessage([
                 'callSid' => $call->c_call_sid,
                 'language' => $params['language'],
                 'voice' => $params['voice'],

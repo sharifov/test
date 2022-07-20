@@ -53,7 +53,7 @@ class ClientNotificationPhoneExecutor
             $notification->processing(new \DateTimeImmutable());
             $this->clientNotificationPhoneListRepository->save($notification);
 
-            $callSid = \Yii::$app->communication->makeCallClientNotification(
+            $callSid = \Yii::$app->comms->makeCallClientNotification(
                 $fromPhone,
                 $toPhone,
                 $notification->cnfl_message,

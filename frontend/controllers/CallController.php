@@ -33,6 +33,7 @@ use src\helpers\app\AppHelper;
 use src\helpers\call\CallHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\call\abac\CallAbacObject;
+use src\model\call\abac\dto\CallLogObjectAbacDto;
 use src\model\call\services\currentQueueCalls\CurrentQueueCallsService;
 use src\model\call\services\reserve\CallReserver;
 use src\model\call\services\reserve\Key;
@@ -1204,7 +1205,7 @@ class CallController extends FController
     private function getCallInfo(string $callSid): array
     {
         try {
-            $result = \Yii::$app->communication->getCallInfo($callSid);
+            $result = \Yii::$app->comms->getCallInfo($callSid);
             if ($result['error']) {
                 \Yii::error(VarDumper::dumpAsString([
                     'result' => $result,
@@ -1262,13 +1263,11 @@ class CallController extends FController
                 }
             }
 
-            if ($callRecordSid) {
-                $dto = new CallLogRecordListenAbacDto(CallLog::findOne(['cl_call_sid' => $callSid]), Auth::user());
-                if (\Yii::$app->abac->can($dto, CallAbacObject::OBJ_CALL_LOG, CallAbacObject::ACTION_LISTEN_RECORD, Auth::user())) {
-                    header('X-Accel-Redirect: ' . Yii::$app->communication->xAccelRedirectCommunicationUrl . $callRecordSid);
-                } else {
-                    throw new ForbiddenHttpException('You can not hear this record');
-                }
+            $dto = new CallLogObjectAbacDto(CallLog::findOne(['cl_call_sid' => $callSid]), Auth::user());
+            if (\Yii::$app->abac->can($dto, CallAbacObject::OBJ_CALL_LOG, CallAbacObject::ACTION_LISTEN_RECORD, Auth::user())) {
+                header('X-Accel-Redirect: ' . Yii::$app->comms->xAccelRedirectCommsUrl . $callRecordSid);
+            } else {
+                throw new ForbiddenHttpException('You can not hear this record');
             }
         } catch (NotFoundException $e) {
             throw new NotFoundHttpException($e->getMessage());

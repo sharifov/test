@@ -10,12 +10,15 @@ use common\models\Employee;
 use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
+use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
+use modules\shiftSchedule\src\services\UserShiftScheduleService;
 use src\auth\Auth;
 use modules\user\userFeedback\abac\dto\UserFeedbackAbacDto;
 use modules\user\userFeedback\abac\UserFeedbackAbacObject;
 use src\helpers\app\AppHelper;
+use src\services\lead\LeadBusinessExtraQueueService;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -145,14 +148,12 @@ class SideBarMenu extends \yii\bootstrap\Widget
             ],
         ];
 
-        /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
-        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) === true) {
-            $menuLItems[] = [
-                'label' => 'Business Extra Queue <span id="badges-business-extra-queue" data-type="business-extra-queue" class="label-success label pull-right bginfo"></span>',
-                'url' => ['/lead/business-extra-queue'],
-                'icon' => 'history text-success'
-            ];
-        }
+        $menuLItems[] = [
+            'label' => 'Business Extra Queue <span id="badges-business-extra-queue" data-type="business-extra-queue" class="label-success label pull-right bginfo"></span>',
+            'url' => ['/lead/business-extra-queue'],
+            'icon' => 'history text-success',
+            'visible' => LeadBusinessExtraQueueService::canAccess(),
+        ];
 
         $menuLItems[] = ['label' => 'Failed Bookings <span id="badges-failed-bookings" data-type="failed-bookings" class="label-success label pull-right bginfo"></span> ',
             'url' => ['/queue/failed-bookings'], 'icon' => 'recycle', 'title' => 'Failed Bookings Leads queue'];
@@ -599,6 +600,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Client Data', 'url' => ['/client-data-crud/index'], 'icon' => 'list'],
                     ]
                 ],
+                ['label' => 'Client User Return', 'url' => ['/client-user-return-crud/index'], 'icon' => 'user'],
             ],
         ];
 
@@ -768,6 +770,13 @@ class SideBarMenu extends \yii\bootstrap\Widget
                             'label' => 'Shift Requests History',
                             'url' => ['/shift/shift-schedule-request/index'],
                             'title' => 'User Shift Schedule Request History'
+                        ],
+
+                        [
+                            'label' => 'Shift Summary Report',
+                            'url' => ['/shift-schedule/summary-report'],
+                            'title' => 'Shift Summary Report',
+                            'visible' => UserShiftScheduleService::shiftSummaryReportIsEnable(),
                         ],
 
                         /** @abac ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_ACCESS, Access menu UserShiftAssign */

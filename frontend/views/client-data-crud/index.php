@@ -46,6 +46,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
             ],
             'cd_field_value',
+            'cd_field_value_ui',
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'cd_created_dt',

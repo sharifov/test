@@ -133,13 +133,13 @@ return [
             'class' => 'common\components\email\EmailComponent',
             'defaultFromEmail' => '',
         ],
-        'communication' => [
+        'comms' => [
             'class' => \common\components\CommunicationService::class,
             'url' => 'https://communication.api.travelinsides.com/v1/',
             'url2' => 'https://communication.api.travelinsides.com/v2/',
             'username' => 'sales',
             'password' => '',
-            'xAccelRedirectCommunicationUrl' => '',
+            'xAccelRedirectCommsUrl' => '',
             'voipApiUsername' => 'sales',
             'host' => ''
         ],

@@ -139,7 +139,8 @@ class MultipleUpdateForm extends Model
 
             ['form_roles', 'default', 'value' => []],
             ['form_roles', IsArrayValidator::class],
-            ['form_roles', 'each', 'rule' => ['in', 'range' => array_keys($this->availableList->getRoles())]],
+            ['form_roles', 'each', 'rule' => ['string'], 'skipOnEmpty' => true, 'skipOnError' => true],
+            ['form_roles', 'each', 'rule' => ['in', 'range' => array_keys($this->availableList->getRoles())], 'skipOnEmpty' => true, 'skipOnError' => true],
 
             ['form_roles_action', 'default', 'value' => self::ROLE_ADD],
             ['form_roles_action', 'integer'],

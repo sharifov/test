@@ -10,7 +10,7 @@ class SimplePaymentService implements PaymentService
 {
     public function capture(array $data): array
     {
-        $host = Yii::$app->params['backOffice']['serverUrlV2'];
+        $host = Yii::$app->params['backOffice']['urlV2'];
         $responseBO = BackOffice::sendRequest2('payment/capture-amount', $data, 'POST', 120, $host);
 
         if (!$responseBO->isOk) {
@@ -75,7 +75,7 @@ class SimplePaymentService implements PaymentService
 
     public function refund(array $data): array
     {
-        $host = Yii::$app->params['backOffice']['serverUrlV2'];
+        $host = Yii::$app->params['backOffice']['urlV2'];
         $responseBO = BackOffice::sendRequest2('payment/refund-amount', $data, 'POST', 120, $host);
 
         if (!$responseBO->isOk) {
