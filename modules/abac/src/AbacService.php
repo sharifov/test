@@ -45,7 +45,6 @@ class AbacService
         //$rules = json_decode($this->r_rules_data)
 
 
-
         if (!empty($rules['condition'])) {
             switch ($rules['condition']) {
                 case 'AND':
@@ -72,7 +71,6 @@ class AbacService
                     $value = $rule['value'];
 
 
-
                     if (in_array($rule['operator'], [AbacBaseModel::OP_IN, AbacBaseModel::OP_NOT_IN], true)) {
                         if (is_string($value)) {
                             $values = explode(',', $value);
@@ -88,8 +86,6 @@ class AbacService
                             $value = '"' . $value . '"';
                         }
                     }
-
-
 
 
                     if (($rule['operator'] === AbacBaseModel::OP_EQUAL2 || $rule['operator'] === '===') && is_array($value)) {
@@ -204,7 +200,7 @@ class AbacService
                             if (is_array($value)) {
                                 $opList = [];
                                 foreach ($value as $val) {
-                                    $opList[] =  '"' . $val . '" in ' . $field;
+                                    $opList[] = '"' . $val . '" in ' . $field;
                                 }
                                 if ($opList) {
                                     $operator .= implode(' || ', $opList);
@@ -214,7 +210,6 @@ class AbacService
                         default:
                             $operator = $field;
                     }
-
 
 
                     $strItem .= $operator;
@@ -285,7 +280,7 @@ class AbacService
                 $policy->ap_action = $data->ap_action;
                 $policy->ap_action_json = $data->ap_action_json;
                 $policy->ap_effect = $data->ap_effect;
-                $policy->ap_enabled = isset($data->ap_enabled) ? (bool) $data->ap_enabled : true;
+                $policy->ap_enabled = isset($data->ap_enabled) ? (bool)$data->ap_enabled : true;
                 $policy->ap_sort_order = $data->ap_sort_order ?? 50;
                 $policy->ap_rule_type = $data->ap_rule_type ?? 'p';
                 $policy->ap_title = $data->ap_title ?? 'Import from dump';
@@ -372,5 +367,9 @@ class AbacService
     public static function generateHashCode(array $data)
     {
         return substr(md5(implode('|', $data)), 0, 10);
+    }
+
+    public function insert()
+    {
     }
 }
