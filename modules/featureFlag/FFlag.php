@@ -30,7 +30,6 @@ class FFlag
     public const FF_KET_SHIFT_SUMMARY_REPORT_ENABLE = 'shiftSummaryReportEnable';
     public const FF_KEY_BOOKED_QUEUE_CONDITION_BY_DEPARTMENT = 'bookedQueueConditionByDepartment';
     public const FF_KEY_FILTER_USERNAME_ROLES_IN_TRANSFER_TAB = 'filterUsernameAndRolesInTransferTabEnable';
-
     public const FF_KEY_TELEGRAM_MESSAGE_DELAY_ENABLE = 'telegramMessageDelayEnable';
 
     public const FF_KEY_LIST = [
