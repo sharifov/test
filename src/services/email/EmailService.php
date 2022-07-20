@@ -427,6 +427,7 @@ class EmailService extends SendMail implements EmailServiceInterface
             $email->e_email_to_name = $emailDTO->emailToName;
             $email->e_email_from = $emailDTO->emailFrom;
             $email->e_email_from_name = $emailDTO->emailFromName;
+            $email->e_email_cc = !empty($emailDTO->emailCc) ? $emailDTO->emailCc : null;
             $email->e_email_subject = $emailDTO->emailSubject;
             $email->e_project_id = $emailDTO->projectId ?? $this->helper->getProjectIdByDepOrUpp($emailDTO->emailTo);
             $email->body_html = $emailDTO->bodyHtml;
