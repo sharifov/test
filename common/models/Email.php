@@ -452,8 +452,8 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
         return $text;
     }
 
-    /*
-     * deprecated. use through EmailMainService
+    /**
+     * @deprecated. use through EmailMainService
      */
     public function sendMail(array $data = []): array
     {
