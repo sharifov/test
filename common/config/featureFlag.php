@@ -15,4 +15,5 @@ return [
     ],
     'objectListModel' => \modules\featureFlag\FFlag::class,
     'scanExtMask' => ['*.php'],
+    'experimentLogCategory' => 'info\FeatureFlagExperimentLog'
 ];

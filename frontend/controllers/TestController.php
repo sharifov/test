@@ -2449,6 +2449,11 @@ class TestController extends FController
     {
         echo 'Feature Flag "' . FFlag::FF_KEY_DEBUG . '"<br><br>';
 
+//        Yii::$app->featureFlag->invalidateCache();
+//
+//        VarDumper::dump(Yii::$app->featureFlag->getFFListWOCache() /*getFFList()*/, 10, true);
+//        exit;
+
 
         $debugDTO = new DebugFeatureFlagDTO();
         $debugDTO->department_id = 1;
@@ -2469,10 +2474,22 @@ class TestController extends FController
         if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG, $featureFlagDTO)) {
             echo 'Enable<br>';
             echo 'Value: ';
-            VarDumper::dump(Yii::$app->featureFlag->getValue(FFlag::FF_KEY_DEBUG), 10, true);
+            // VarDumper::dump(Yii::$app->featureFlag->getValueItem(FFlag::FF_KEY_DEBUG, $featureFlagDTO), 10, true);
+
+            for ($i = 0; $i <= 100; $i++) {
+                //VarDumper::dump(
+                    Yii::$app->featureFlag->getValue(FFlag::FF_KEY_DEBUG);
+                    //, 10, true);
+            }
         } else {
             echo 'Disable';
         }
+
+
+
+        VarDumper::dump(Yii::$app->featureFlag->getExperimentLogList(), 10, true);
+        VarDumper::dump(Yii::$app->featureFlag->getExperimentLogByKey(FFlag::FF_KEY_DEBUG), 10, true);
+
 //
 //        echo '<br><br>';
 //
