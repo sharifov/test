@@ -123,6 +123,7 @@ class LeadSearch extends Lead
     public $createdRangeTime;
     public $updatedRangeTime;
     public $lastActionRangeTime;
+    public $conversionRangeTime;
     public $statusRangeTime;
     public $soldRangeTime;
     public $createTimeRange;
@@ -227,7 +228,7 @@ class LeadSearch extends Lead
                 return is_array($value) ? $value : [];
             }, 'skipOnEmpty' => true],
 
-            [['departRangeTime', 'createdRangeTime', 'soldRangeTime', 'updatedRangeTime', 'lastActionRangeTime', 'statusRangeTime'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            [['departRangeTime', 'createdRangeTime', 'soldRangeTime', 'updatedRangeTime', 'lastActionRangeTime', 'statusRangeTime', 'conversionRangeTime'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
 
             ['remainingDays', 'integer'],
             ['remainingDays', 'filter', 'filter' => static function ($value) {

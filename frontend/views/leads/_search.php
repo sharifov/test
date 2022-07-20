@@ -280,10 +280,6 @@ use frontend\extensions\DatePicker;
                             ?>
                         </div>
 
-                        <div class="col-md-1">
-                            <?= $form->field($model, 'is_conversion')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '-']) ?>
-                        </div>
-
                         <div class="row" style="padding-left: 10px;">
                             <div class="col-md-6">
                                 <?= $form->field($model, 'lead_data_key')->dropDownList(LeadDataKey::getListCache(), ['prompt' => '-']) ?>
@@ -304,6 +300,42 @@ use frontend\extensions\DatePicker;
                                     ]);
                                     ?>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                <div class=" profile-bottom text-center">
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-12 col-sm-12  profile_details">
+            <div class="well profile_view" style="width: 100%">
+                <div class="col-sm-12">
+                    <h4 class="brief"><i>Conversion</i></h4>
+
+                    <div class="row">
+                        <div class="col-md-2">
+                            <?= $form->field($model, 'is_conversion')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '-']) ?>
+                        </div>
+                        <div class="col-md-2">
+                            <?= $form->field($model, 'conversionRangeTime', [
+                                'options' => ['class' => 'form-group']
+                            ])->widget(\src\widgets\DateRangePicker::class, [
+                                'presetDropdown' => false,
+                                'hideInput' => true,
+                                'convertFormat' => true,
+                                'pluginOptions' => [
+                                    'timePicker' => true,
+                                    'timePickerIncrement' => 1,
+                                    'timePicker24Hour' => true,
+                                    'locale' => [
+                                        'format' => 'd-M-Y H:i',
+                                        'separator' => ' - '
+                                    ]
+                                ]
+                            ])->label('Conversion Date From / To');
+                            ?>
                         </div>
                     </div>
                 </div>
