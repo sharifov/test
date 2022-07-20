@@ -7,6 +7,7 @@ use src\dispatchers\EventDispatcher;
 use src\model\clientChat\ClientChatCodeException;
 use src\model\clientChat\entity\ClientChat;
 use src\model\clientChatRequest\entity\ClientChatRequest;
+use src\model\userClientChatData\entity\UserClientChatData;
 use src\repositories\department\DepartmentRepository;
 use src\repositories\NotFoundException;
 use src\repositories\project\ProjectRepository;
@@ -139,7 +140,8 @@ class ClientChatRepository
         $query = ClientChat::find()->alias('cc')->andWhere(['cch_rid' => $rid])->orderBy(['cch_id' => SORT_DESC]);
         if (!is_null($ownerUsername)) {
             $query->leftJoin(['e' => Employee::tableName()], 'cc.cch_owner_user_id=e.id');
-            $query->where('e.username=:username', [':username' => $ownerUsername]);
+            $query->leftJoin(['uccd' => UserClientChatData::tableName()], 'uccd.uccd_employee_id=e.id');
+            $query->where('uccd.uccd_username=:username', [':username' => $ownerUsername]);
         }
 
         return $query->one();
