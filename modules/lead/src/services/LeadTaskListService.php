@@ -20,6 +20,7 @@ use modules\taskList\src\entities\userTask\repository\UserTaskRepository;
 use modules\taskList\src\entities\userTask\UserTask;
 use modules\taskList\src\exceptions\TaskListAssignException;
 use src\helpers\app\AppHelper;
+use src\helpers\DateHelper;
 use src\helpers\ErrorsToStringHelper;
 use src\model\leadData\entity\LeadData;
 use src\model\leadData\services\LeadDataService;
@@ -50,8 +51,12 @@ class LeadTaskListService
                 foreach ($taskLists as $taskList) {
                     try {
                         $dtNowWithDelay = $dtNow->modify(sprintf('+%d hour', $taskList->getDelayHoursParam()));
-                        if (!$userShiftSchedule = UserShiftScheduleQuery::getNextTimeLineByUser($this->lead->employee_id, $dtNowWithDelay)) {
-                            throw new TaskListAssignException('UserShiftSchedule not found by EmployeeId (' . $this->lead->employee_id . ') and StartDateTime:' . $dtNowWithDelay->format('Y-m-d H:i:s'));
+                        $userShiftSchedules = UserShiftScheduleQuery::getAllFromStartDateByUserId($this->lead->employee_id, $dtNowWithDelay);
+                        $duration = $taskList->tl_duration_min;
+                        $userTaskListEndDate = null;
+
+                        if ($userShiftSchedules === null) {
+                            throw new TaskListAssignException('UserShiftSchedules not found by EmployeeId (' . $this->lead->employee_id . ') and StartDateTime:' . $dtNowWithDelay->format('Y-m-d H:i:s'));
                         }
 
                         $userTask = UserTask::create(
@@ -59,22 +64,54 @@ class LeadTaskListService
                             TargetObject::TARGET_OBJ_LEAD,
                             $this->lead->id,
                             $taskList->tl_id,
-                            $dtNow->format('Y-m-d H:i:s'),
-                            $userShiftSchedule->uss_end_utc_dt
+                            $dtNow->format('Y-m-d H:i:s')
                         );
+
                         if (!$userTask->validate()) {
                             throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($userTask, ' '));
                         }
+
                         (new UserTaskRepository($userTask))->save();
 
-                        $shiftScheduleEventTask = ShiftScheduleEventTask::create(
-                            $userShiftSchedule->uss_id,
-                            $userTask->ut_id
-                        );
-                        if (!$shiftScheduleEventTask->validate()) {
-                            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($shiftScheduleEventTask, ' '));
+                        foreach ($userShiftSchedules as $userShiftSchedule) {
+                            $shiftScheduleEventTask = ShiftScheduleEventTask::create(
+                                $userShiftSchedule->uss_id,
+                                $userTask->ut_id
+                            );
+
+                            if (!$shiftScheduleEventTask->validate()) {
+                                throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($shiftScheduleEventTask, ' '));
+                            }
+
+                            (new ShiftScheduleEventTaskRepository($shiftScheduleEventTask))->save();
+
+                            if ($taskList->tl_duration_min !== null) {
+                                if (DateHelper::toFormatByUTC($userShiftSchedule->uss_start_utc_dt) === $dtNowWithDelay->format('Y-m-d')) {
+                                    $leftMinutes = DateHelper::getDifferentInMinutesByDatesUTC($dtNowWithDelay->format('Y-m-d H:i:s'), $userShiftSchedule->uss_end_utc_dt);
+                                    $calculatedDuration = $duration - $leftMinutes;
+                                } else {
+                                    $calculatedDuration = $duration - $userShiftSchedule->uss_duration;
+                                }
+
+                                if ($calculatedDuration <= 0) {
+                                    $userTaskListEndDate = DateHelper::getDateTimeWithAddedMinutesUTC($userShiftSchedule->uss_end_utc_dt, $duration);
+
+                                    break;
+                                } else {
+                                    $duration = $calculatedDuration;
+                                }
+                            }
                         }
-                        (new ShiftScheduleEventTaskRepository($shiftScheduleEventTask))->save();
+
+                        if ($userTaskListEndDate !== null) {
+                            $userTask->ut_end_dt = $userTaskListEndDate;
+
+                            if (!$userTask->validate()) {
+                                throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($userTask, ' '));
+                            }
+
+                            (new UserTaskRepository($userTask))->save();
+                        }
                     } catch (TaskListAssignException $exception) {
                         $message = AppHelper::throwableLog($exception);
                         \Yii::info($message, 'info\LeadTaskListService:assignReAssign:TaskListAssignException');
