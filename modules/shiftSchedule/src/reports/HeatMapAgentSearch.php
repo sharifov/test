@@ -117,7 +117,7 @@ class HeatMapAgentSearch extends Model
     public function getEventsForHeatMap(array $params): array
     {
         $query = UserShiftSchedule::find()
-            ->leftJoin(Employee::tableName(), 'uss_user_id = employees.id')
+            ->innerJoin(Employee::tableName(), 'uss_user_id = employees.id')
             ->andWhere(['<>', 'status', Employee::STATUS_DELETED]);
 
         $this->load($params);
