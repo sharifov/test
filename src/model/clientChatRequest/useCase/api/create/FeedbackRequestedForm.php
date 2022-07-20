@@ -5,7 +5,7 @@ namespace src\model\clientChatRequest\useCase\api\create;
 use common\models\ClientChatSurvey;
 use common\models\Employee;
 use src\model\clientChat\entity\ClientChat;
-use src\model\clientChatRequest\useCase\api\create\query\EmployeeQuery;
+use src\model\clientChatRequest\useCase\api\create\query\UserClientChatDataQuery;
 use src\model\userClientChatData\entity\UserClientChatData;
 
 /**
@@ -45,10 +45,10 @@ class FeedbackRequestedForm extends FeedbackFormBase
         $requestedByUsername = isset($this->requestedBy['username']) ? $this->requestedBy['username'] : null;
 
         $requestedByEmployee = !is_null($requestedByUsername)
-            ? EmployeeQuery::getEmployeeByUsernameClientChatData($this->requestedBy['username'])
+            ? UserClientChatDataQuery::getUserClientChatDataByUsername($this->requestedBy['username'])
             : null;
 
-        $requestedForEmployee = EmployeeQuery::getEmployeeByUsernameClientChatData($this->requestedFor['username']);
+        $requestedForEmployee = UserClientChatDataQuery::getUserClientChatDataByUsername($this->requestedFor['username']);
 
         $model = new ClientChatSurvey();
         $model->load([
@@ -57,8 +57,8 @@ class FeedbackRequestedForm extends FeedbackFormBase
             'ccs_type' => $this->type,
             'ccs_template' => $this->template,
             'ccs_trigger_source' => $this->triggerSource,
-            'ccs_requested_by' => ($requestedByEmployee !== null) ? $requestedByEmployee->getPrimaryKey() : null,
-            'ccs_requested_for' => $requestedForEmployee->getPrimaryKey(),
+            'ccs_requested_by' => ($requestedByEmployee !== null) ? $requestedByEmployee->uccd_employee_id : null,
+            'ccs_requested_for' => $requestedForEmployee->uccd_employee_id,
             'ccs_rc_created_dt' => date('Y-m-d H:i:s', strtotime($this->createdAt)),
             'ccs_status' => ClientChatSurvey::STATUS_PENDING
         ], '');
