@@ -86,9 +86,8 @@ class VoluntaryExchangeCreateService
         return $query->one();
     }
 
-    public static function getOriginProductQuote(
-        string $bookingId
-    ): ?ProductQuote {
+    public static function getOriginProductQuote(string $bookingId): ?ProductQuote
+    {
         return ProductQuote::find()
             ->select(ProductQuote::tableName() . '.*')
             ->innerJoin(FlightQuote::tableName(), 'fq_product_quote_id = pq_id')
@@ -98,9 +97,8 @@ class VoluntaryExchangeCreateService
             ->one();
     }
 
-    public static function getOriginProductQuoteById(
-        int $productQuoteId
-    ): ?ProductQuote {
+    public static function getOriginProductQuoteById(int $productQuoteId): ?ProductQuote
+    {
         return ProductQuote::find()
             ->where(['pq_id' => $productQuoteId])
             ->one();
@@ -114,10 +112,8 @@ class VoluntaryExchangeCreateService
             ->one();
     }
 
-    public static function getProductQuoteByProductQuoteChange(
-        int $productQuoteChangeId,
-        ?array $statuses = null
-    ): ?ProductQuote {
+    public static function getProductQuoteByProductQuoteChange(int $productQuoteChangeId, ?array $statuses = null): ?ProductQuote
+    {
         $query = ProductQuote::find()
             ->select(ProductQuote::tableName() . '.*')
             ->innerJoin(ProductQuoteChangeRelation::tableName(), 'pq_id = pqcr_pq_id')
@@ -131,10 +127,8 @@ class VoluntaryExchangeCreateService
         return $query->one();
     }
 
-    public static function getProductQuoteChangeByProductQuote(
-        int $productQuoteId,
-        ?array $statuses = null
-    ): ?ProductQuoteChange {
+    public static function getProductQuoteChangeByProductQuote(int $productQuoteId, ?array $statuses = null): ?ProductQuoteChange
+    {
         $query = ProductQuoteChange::find()
             ->select(ProductQuoteChange::tableName() . '.*')
             ->innerJoin(ProductQuoteChangeRelation::tableName(), 'pqc_id = pqcr_pqc_id')
