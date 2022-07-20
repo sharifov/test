@@ -12,7 +12,6 @@ use http\Url;
 use modules\email\src\abac\dto\EmailAbacDto;
 use modules\email\src\abac\EmailAbacObject;
 use src\auth\Auth;
-use src\model\email\useCase\send\EmailSenderService;
 use src\model\emailList\entity\EmailList;
 use Yii;
 use yii\filters\VerbFilter;
@@ -21,20 +20,25 @@ use yii\helpers\Html;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
+use src\services\email\EmailMainService;
+use src\dto\email\EmailDTO;
+use src\exception\CreateModelException;
+use yii\helpers\VarDumper;
+use src\exception\EmailNotSentException;
 
 /**
  * EmailController implements the CRUD actions for Email model.
  *
- * @property EmailSenderService $emailSender
+ * @property EmailMainService $emailService
  */
 class EmailController extends FController
 {
-    private $emailSender;
+    private $emailService;
 
-    public function __construct($id, $module, EmailSenderService $emailSender, $config = [])
+    public function __construct($id, $module, EmailMainService $emailService, $config = [])
     {
         parent::__construct($id, $module, $config);
-        $this->emailSender = $emailSender;
+        $this->emailService = $emailService;
     }
 
     public function behaviors()
@@ -448,7 +452,28 @@ class EmailController extends FController
 
         if ($form->load(Yii::$app->request->post())) {
             if ($form->validate()) {
-                $result = array_merge($result, $this->emailSender->send($form));
+                try{
+                    $emailDTO = EmailDTO::fromArray([
+                        'projectId' => $form->getProjectId(),
+                        'emailSubject' => $form->subject,
+                        'bodyHtml' => $form->text,
+                        'emailFrom' => $form->userEmail,
+                        'emailFromName' => $form->user->full_name,
+                        'emailToName' => $form->getContactName(),
+                        'emailTo' => $form->getContactEmail(),
+                        'createdUserId' => $form->user->id,
+                    ]);
+                    $mail = $this->emailService->createFromDTO($emailDTO, false);
+                    $this->emailService->sendMail($mail);
+                    $result['success'] = true;
+                } catch (CreateModelException $e) {
+                    $result['errors'] = $e->getErrors();
+                    Yii::error(VarDumper::dumpAsString($e->getErrors()), 'EmailController:send:Email:save');
+                } catch (EmailNotSentException $e) {
+                    $error = $e->getMessage();
+                    $result['errors'] = ['communication' => [$error]];
+                    Yii::error('Error: Email Message has not been sent to ' . $mail->getEmailTo(false) . "\r\n" . $error, 'EmailController:send:Email:sendMail');
+                }
             } else {
                 $result['errors'] = $form->getErrors();
             }
