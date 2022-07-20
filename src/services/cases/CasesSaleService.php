@@ -580,13 +580,13 @@ class CasesSaleService
     }
 
     /**
-     * @param string $project_key
+     * @param string|null $project_key
      * @param string|null $order_uid
      * @param string|null $email
      * @param string|null $phone
      * @return array
      */
-    public function getSaleFromBo(string $project_key, ?string $order_uid = null, ?string $email = null, ?string $phone = null): array
+    public function getSaleFromBo(?string $project_key = null, ?string $order_uid = null, ?string $email = null, ?string $phone = null): array
     {
         $form = new CaseSaleRequestBoForm();
         $form->orderUid = $order_uid;

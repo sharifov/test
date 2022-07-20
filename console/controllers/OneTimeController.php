@@ -377,7 +377,7 @@ class OneTimeController extends Controller
                 $job = new CreateSaleFromBOJob();
                 $job->case_id = $value['cs_id'];
                 $job->phone = $this->getPhoneByClient($value['cs_client_id'])['phone'];
-                $job->project_key = $project->api_key;
+                $job->project_key = $project->api_key ?? null;
                 Yii::$app->queue_job->priority(100)->push($job);
                 $processed++;
                 Console::updateProgress($processed, $countCases);
@@ -467,7 +467,7 @@ class OneTimeController extends Controller
                     $job = new CreateSaleFromBOJob();
                     $job->case_id = $value['cs_id'];
                     $job->phone = $this->getPhoneByClient($value['cs_client_id'])['phone'];
-                    $job->project_key = $project->api_key;
+                    $job->project_key = $project->api_key ?? null;
                     Yii::$app->queue_job->priority(10)->push($job);
                 } else {
                     $job = new UpdateSaleFromBOJob();
