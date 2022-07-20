@@ -419,7 +419,7 @@ class VoluntaryRefundService
             ['fr_booking_id' => $bookingId],
             CaseEventLog::CATEGORY_INFO
         );
-        $saleSearch = $this->casesSaleService->getSaleData($bookingId);
+        $saleSearch = $this->casesSaleService->getSaleData($case->project->api_key, $bookingId);
         if (empty($saleSearch['saleId'])) {
             throw new BoResponseException('Sale not found by Booking ID(' . $bookingId . ') from "cs/search"');
         }

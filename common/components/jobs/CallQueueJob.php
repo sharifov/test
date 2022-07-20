@@ -241,6 +241,7 @@ class CallQueueJob extends BaseJob implements JobInterface
                                     $job = new CreateSaleFromBOJob();
                                     $job->case_id = $case->cs_id;
                                     $job->phone = $call->c_from;
+                                    $job->project_key = $case->project->api_key;
                                     Yii::$app->queue_job->priority(100)->push($job);
                                 } catch (\Throwable $throwable) {
                                     Yii::error(

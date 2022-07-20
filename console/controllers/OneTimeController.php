@@ -373,9 +373,11 @@ class OneTimeController extends Controller
             Console::startProgress(0, $countCases);
 
             foreach ($cases as $key => $value) {
+                $project = Project::findOne($value['cs_project_id']);
                 $job = new CreateSaleFromBOJob();
                 $job->case_id = $value['cs_id'];
                 $job->phone = $this->getPhoneByClient($value['cs_client_id'])['phone'];
+                $job->project_key = $project->api_key;
                 Yii::$app->queue_job->priority(100)->push($job);
                 $processed++;
                 Console::updateProgress($processed, $countCases);
@@ -416,7 +418,8 @@ class OneTimeController extends Controller
             SELECT 
                 cases.cs_id,
                 cases.cs_client_id,
-                case_sale.css_sale_id
+                case_sale.css_sale_id,
+                cases.cs_project_id
             FROM
                 cases
             INNER JOIN
@@ -460,9 +463,11 @@ class OneTimeController extends Controller
 
             foreach ($cases as $key => $value) {
                 if (empty($value['css_sale_id'])) {
+                    $project = Project::findOne($value['cs_project_id']);
                     $job = new CreateSaleFromBOJob();
                     $job->case_id = $value['cs_id'];
                     $job->phone = $this->getPhoneByClient($value['cs_client_id'])['phone'];
+                    $job->project_key = $project->api_key;
                     Yii::$app->queue_job->priority(10)->push($job);
                 } else {
                     $job = new UpdateSaleFromBOJob();
@@ -603,7 +608,8 @@ class OneTimeController extends Controller
         return Yii::$app->db->createCommand(
             'SELECT 
                     cases.cs_id,
-                    cases.cs_client_id
+                    cases.cs_client_id,
+                    cases.cs_project_id
                 FROM
                     cases
                 LEFT JOIN

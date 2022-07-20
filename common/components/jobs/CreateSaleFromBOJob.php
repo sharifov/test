@@ -23,6 +23,7 @@ class CreateSaleFromBOJob extends BaseJob implements JobInterface
     public $order_uid;
     public $email;
     public $phone;
+    public $project_key;
 
     private $casesSaleService;
 
@@ -37,7 +38,7 @@ class CreateSaleFromBOJob extends BaseJob implements JobInterface
             if ($this->checkParams()) {
                 $this->casesSaleService = Yii::createObject(CasesSaleService::class);
 
-                $saleData = $this->casesSaleService->getSaleFromBo($this->order_uid, $this->email, $this->phone);
+                $saleData = $this->casesSaleService->getSaleFromBo($this->project_key, $this->order_uid, $this->email, $this->phone);
                 if (count($saleData) && isset($saleData['saleId'])) {
                     $keyCasesSale = $this->case_id . '-' . $saleData['saleId'];
                     $existCasesSale = Yii::$app->cache->get($keyCasesSale);

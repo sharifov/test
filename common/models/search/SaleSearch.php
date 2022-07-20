@@ -45,6 +45,7 @@ class SaleSearch extends Model
     public $phone;
     public $email;
     public $card;
+    public $project_key;
 
 
 //    public $datetime_start;
@@ -68,7 +69,7 @@ class SaleSearch extends Model
             //[['datetime_start', 'datetime_end'], 'safe'],
             //[['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
 
-            [['sale_id', 'first_name', 'last_name', 'phone', 'email', 'card', 'acn', 'pnr', 'booking_id', 'ticket_number'], 'trim'],
+            [['sale_id', 'first_name', 'last_name', 'phone', 'email', 'card', 'acn', 'pnr', 'booking_id', 'ticket_number', 'project_key'], 'trim'],
 
             [['sale_id'], 'integer'],
             [['phone', 'card', 'ticket_number', 'booking_id'], 'string', 'min' => 6, 'max' => 20],
@@ -186,6 +187,8 @@ class SaleSearch extends Model
             if ($pageSize) {
                 $data['limit'] = $pageSize;
             }
+
+            $data['project_key'] = $this->project_key;
 
 
 

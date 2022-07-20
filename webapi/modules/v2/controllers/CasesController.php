@@ -268,6 +268,7 @@ class CasesController extends BaseController
                 $job->order_uid = $form->order_uid;
                 $job->email = $form->contact_email;
                 $job->phone = $form->contact_phone;
+                $job->project_key = $form->project_key;
                 Yii::$app->queue_job->priority(100)->push($job);
             } catch (\Throwable $throwable) {
                 Yii::error(

@@ -80,6 +80,7 @@ use yii\widgets\ActiveForm;
             <div class="row">
                     <div class="col-md-12">
                     <?= $form->field($model, 'phone')->textInput(['maxlength' => true]) ?>
+                    <?= $form->field($model, 'project_key')->hiddenInput(['value' => $caseModel->project->api_key])->label(false); ?>
                     </div>
 <!--                        <div class="col-md-4">-->
 <!--                            --><?php ////= $form->field($model, 'card')->textInput(['maxlength' => true]) ?>
