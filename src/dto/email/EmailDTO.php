@@ -25,7 +25,9 @@ use common\models\EmailTemplateType;
  * @property string $refMessageId
  * @property string $messageId
  * @property int $projectId
+ * @property int $depId
  * @property int $leadId
+ * @property int $caseId
  * @property int $clientId
  * @property int $typeId
  * @property int $templateTypeId
@@ -33,6 +35,7 @@ use common\models\EmailTemplateType;
  * @property int $statusId
  * @property bool $isNew
  * @property int $communicationId
+ * @property int $createdUserId
  * @property array|null $attachPaths
  * @property array|null $attachments
  */
@@ -50,7 +53,9 @@ class EmailDTO
     public $refMessageId;
     public $messageId;
     public $projectId;
+    public $depId;
     public $leadId;
+    public $caseId;
     public $clientId;
     public $typeId;
     public $statusId;
@@ -58,6 +63,7 @@ class EmailDTO
     public $templateTypeId;
     public $isNew;
     public $communicationId;
+    public $createdUserId;
     public $attachPaths;
     public $attachments;
 
@@ -144,6 +150,40 @@ class EmailDTO
         $this->attachments = $attachments;
 
         return $this;
+    }
+
+    /**
+     *
+     * @param array $data
+     * @return \src\dto\email\EmailDTO
+     */
+    public static function fromArray(array $data)
+    {
+        $instance = new static();
+        $instance->projectId = $data['projectId'] ?? null;
+        $instance->leadId = $data['leadId'] ?? null;
+        $instance->caseId = $data['caseId'] ?? null;
+        $instance->depId = $data['depId'] ?? null;
+        $instance->clientId = $data['clientId'] ?? null;
+        $instance->type = $data['typeId'] ?? EmailType::OUTBOX;
+        $instance->statusId = $data['statusId'] ?? EmailStatus::PENDING;
+        $instance->isNew = true;
+        $instance->emailTo = $data['emailTo'] ?? null;
+        $instance->emailToName = $data['emailToName'] ?? null;
+        $instance->emailFrom = $data['emailFrom'] ?? null;
+        $instance->emailFromName = $data['emailFromName'] ?? null;
+        $instance->languageId =  $data['languageId'] ?? null;
+        $instance->emailSubject = $data['emailSubject'] ?? null;
+        $instance->bodyHtml = $data['bodyHtml'] ?? null;
+        $instance->createdDt = $data['createdDt'] ?? date('Y-m-d H:i:s');
+        $instance->createdUserId = $data['createdUserId'] ?? null;
+        $instance->templateTypeId = $data['templateTypeId'] ?? ($data['templateKey'] ? $this->getTemplateIdByKey($templateKey) : null);
+        $instance->inboxEmailId = $data['inboxEmailId'] ?? null;
+        $instance->inboxCreatedDt = $data['inboxCreatedDt'] ?? null;
+        $instance->refMessageId = $data['refMessageId'] ?? null;
+        $instance->messageId = $data['messageId'] ?? null;
+
+        return $instance;
     }
 
     private function getTemplateIdByKey(string $templateKey)
