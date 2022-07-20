@@ -76,7 +76,7 @@ class UserTask extends \yii\db\ActiveRecord
             [['ut_user_id'], 'integer'],
             [['ut_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ut_user_id' => 'id']],
 
-            [['ut_start_dt', 'ut_end_dt'], 'required'],
+            [['ut_start_dt'], 'required'],
             [['ut_start_dt', 'ut_end_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
             [['ut_start_dt'], 'compare', 'compareAttribute' => 'ut_end_dt', 'operator' => '<=', 'enableClientValidation' => false],
 
@@ -140,7 +140,7 @@ class UserTask extends \yii\db\ActiveRecord
         int $targetObjectId,
         int $taskListId,
         string $startDt,
-        string $endDt,
+        ?string $endDt = null,
         ?int $priorityId = null,
         ?int $statusId = null
     ): UserTask {
