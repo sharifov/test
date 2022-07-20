@@ -74,7 +74,7 @@ class DateHelper
         $diff = $startDateTime->diff($endDateTime)->format('%a-%h-%i-%s');
         $diffParts = explode('-', $diff);
 
-        return ((int)$diffParts[0] * 24) + ((int)$diffParts[1] * 60) + (int)$diffParts[2];
+        return ((int)$diffParts[0] * 24 * 60) + ((int)$diffParts[1] * 60) + (int)$diffParts[2];
     }
 
     public static function getDateTimeWithAddedMinutesUTC(string $date, int $minutes, string $format = 'Y-m-d H:i:s'): string
