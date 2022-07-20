@@ -97,7 +97,7 @@ module "mysql_replica" {
 
   multi_az                            = false
   vpc_security_group_ids              = [aws_security_group.mysql.id]
-  iam_database_authentication_enabled = true
+  iam_database_authentication_enabled = false
 
   maintenance_window = "Tue:00:00-Tue:03:00"
   backup_window      = "03:00-06:00"
