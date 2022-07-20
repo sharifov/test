@@ -6,6 +6,9 @@ use common\models\Client;
 use common\models\Department;
 use common\models\Project;
 use common\models\Sources;
+use modules\featureFlag\FFlag;
+use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
+use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogStatus;
 use src\services\cases\CasesSaleService;
 use src\services\client\ClientCreateForm;
 use src\services\lead\LeadManageService;
@@ -86,7 +89,7 @@ class EmailIncomingService
 
                 if ($departmentParams->object->type->isLead()) {
                     $createLeadOnEmail = ($projectParams->object->lead->allow_auto_lead_create && $departmentParams->object->lead->isIncludeEmail($internalEmail));
-                    $leadId = $this->getOrCreateLead(
+                    $lead = $this->getOrCreateLead(
                         $client->id,
                         $clientEmail,
                         $contact->projectId,
@@ -95,8 +98,12 @@ class EmailIncomingService
                         $contact->department->dep_id,
                         $createLeadOnEmail
                     );
+                    /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+                    if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) && isset($lead) && $lead->isBusinessType()) {
+                        LeadBusinessExtraQueueService::addLeadBusinessExtraQueueRemoverJob($lead->id, LeadBusinessExtraQueueLogStatus::REASON_RECEIVED_EMAIL);
+                    }
                     $contact->releaseLog('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | ', 'EmailIncomingService');
-                    return new Process($leadId, null);
+                    return new Process($lead->id, null);
                 }
 
                 if ($departmentParams->object->type->isCase()) {
@@ -133,7 +140,7 @@ class EmailIncomingService
      * @param int $emailId
      * @param int $departmentId
      * @param bool $createLeadOnEmail
-     * @return int|null
+     * @return Lead|null
      */
     private function getOrCreateLead(
         int $clientId,
@@ -143,7 +150,7 @@ class EmailIncomingService
         int $emailId,
         int $departmentId,
         bool $createLeadOnEmail
-    ): ?int {
+    ): ?Lead {
         if ($lead = Lead::find()->findLastActiveLeadByDepartmentClient($departmentId, $clientId, $projectId)->one()) {
             return $lead->id;
         }
@@ -155,10 +162,10 @@ class EmailIncomingService
                 $this->findSource($projectId),
                 $departmentId
             );
-            return $lead->id;
+            return $lead;
         }
         if ($lead = Lead::find()->findLastLeadByDepartmentClient($departmentId, $clientId, $projectId)->one()) {
-            return $lead->id;
+            return $lead;
         }
 //        Yii::info('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . '. | No new lead creation allowed on email.', 'info\EmailIncomingService');
         return null;

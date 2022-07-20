@@ -5,6 +5,7 @@ namespace common\models\query;
 use common\models\Employee;
 use common\models\UserGroup;
 use common\models\UserGroupAssign;
+use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\TimelineCalendarFilter;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use yii\helpers\ArrayHelper;
@@ -82,6 +83,9 @@ class UserGroupQuery extends \yii\db\ActiveQuery
         }
         if ($form->usersIds) {
             $query->andWhere(['ugs_user_id' => $form->usersIds]);
+        }
+        if ($form->userShift) {
+            $query->andWhere(['ugs_user_id' => UserShiftAssign::find()->select('usa_user_id')->andWhere(['usa_sh_id' => $form->userShift])]);
         }
         if (!$form->displayUsersWithoutEvents) {
             $query->innerJoin(UserShiftSchedule::tableName(), 'uss_user_id = id');
