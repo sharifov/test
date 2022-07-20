@@ -42,9 +42,7 @@ class FeedbackRequestedForm extends FeedbackFormBase
      */
     public function syncWithDb(ClientChat $clientChat): bool
     {
-        $requestedByUsername = isset($this->requestedBy['username']) ? $this->requestedBy['username'] : null;
-
-        $requestedByEmployee = !is_null($requestedByUsername)
+        $requestedByEmployee = !empty($this->requestedBy['username'])
             ? UserClientChatDataQuery::getUserClientChatDataByUsername($this->requestedBy['username'])
             : null;
 
@@ -57,8 +55,8 @@ class FeedbackRequestedForm extends FeedbackFormBase
             'ccs_type' => $this->type,
             'ccs_template' => $this->template,
             'ccs_trigger_source' => $this->triggerSource,
-            'ccs_requested_by' => ($requestedByEmployee !== null) ? $requestedByEmployee->uccd_employee_id : null,
-            'ccs_requested_for' => $requestedForEmployee->uccd_employee_id,
+            'ccs_requested_by' => $requestedByEmployee->uccd_employee_id ?? null,
+            'ccs_requested_for' => $requestedForEmployee->uccd_employee_id ?? null,
             'ccs_rc_created_dt' => date('Y-m-d H:i:s', strtotime($this->createdAt)),
             'ccs_status' => ClientChatSurvey::STATUS_PENDING
         ], '');
