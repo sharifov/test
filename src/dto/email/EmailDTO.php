@@ -17,6 +17,7 @@ use common\models\EmailTemplateType;
  * @property string $emailFromName
  * @property string $emailTo
  * @property string $emailToName
+ * @property string $emailCc
  * @property string $emailSubject
  * @property string $bodyHtml
  * @property string $createdDt
@@ -45,6 +46,7 @@ class EmailDTO
     public $emailFromName;
     public $emailTo;
     public $emailToName;
+    public $emailCc;
     public $emailSubject;
     public $bodyHtml;
     public $createdDt;
@@ -172,6 +174,7 @@ class EmailDTO
         $instance->emailToName = $data['emailToName'] ?? null;
         $instance->emailFrom = $data['emailFrom'] ?? null;
         $instance->emailFromName = $data['emailFromName'] ?? null;
+        $instance->emailCc = !empty($data['emailCc']) ? $data['emailCc'] : null;
         $instance->languageId =  $data['languageId'] ?? null;
         $instance->emailSubject = $data['emailSubject'] ?? null;
         $instance->bodyHtml = $data['bodyHtml'] ?? null;
