@@ -30,6 +30,8 @@ class FFlag
     public const FF_KET_SHIFT_SUMMARY_REPORT_ENABLE = 'shiftSummaryReportEnable';
     public const FF_KEY_BOOKED_QUEUE_CONDITION_BY_DEPARTMENT = 'bookedQueueConditionByDepartment';
     public const FF_KEY_FILTER_USERNAME_ROLES_IN_TRANSFER_TAB = 'filterUsernameAndRolesInTransferTabEnable';
+    public const FF_KEY_HIDE_LANGUAGE_FIELD_COMMUNICATION_BLOCK = 'hideLanguageFieldInCommunicationBlock';
+
 
     public const FF_KEY_LIST = [
         self::FF_KEY_LPP_ENABLE => self::FF_KEY_LPP_ENABLE,
@@ -52,6 +54,7 @@ class FFlag
         self::FF_KET_SHIFT_SUMMARY_REPORT_ENABLE => self::FF_KET_SHIFT_SUMMARY_REPORT_ENABLE,
         self::FF_KEY_BOOKED_QUEUE_CONDITION_BY_DEPARTMENT => self::FF_KEY_BOOKED_QUEUE_CONDITION_BY_DEPARTMENT,
         self::FF_KEY_FILTER_USERNAME_ROLES_IN_TRANSFER_TAB => self::FF_KEY_FILTER_USERNAME_ROLES_IN_TRANSFER_TAB,
+        self::FF_KEY_HIDE_LANGUAGE_FIELD_COMMUNICATION_BLOCK => self::FF_KEY_HIDE_LANGUAGE_FIELD_COMMUNICATION_BLOCK,
     ];
 
 
