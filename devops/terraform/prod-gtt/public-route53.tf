@@ -15,8 +15,11 @@ resource "aws_route53_record" "public_app" {
   zone_id = aws_route53_zone.public.zone_id
   name    = var.DOMAIN
   type    = "A"
-  ttl     = "300"
-  records = ["3.95.178.45"]
+  alias {
+    name                   = aws_lb.app.dns_name
+    zone_id                = aws_lb.app.zone_id
+    evaluate_target_health = true
+  }
 }
 
 # API

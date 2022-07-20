@@ -24,6 +24,88 @@ resource "aws_lb_listener" "http" {
   }
 }
 
+# HTTPS Listener
+resource "aws_lb_listener" "app" {
+  load_balancer_arn = aws_lb.app.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = aws_acm_certificate.wildcard_cert.arn
+
+  default_action {
+    target_group_arn = aws_lb_target_group.app.arn
+    type             = "forward"
+  }
+}
+
+# App
+resource "aws_lb_listener_rule" "app" {
+  listener_arn = aws_lb_listener.app.arn
+  priority     = 100
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.app.arn
+  }
+
+  condition {
+    host_header {
+      values = ["${var.DOMAIN}"]
+    }
+  }
+}
+
+# API
+resource "aws_lb_listener_rule" "api" {
+  listener_arn = aws_lb_listener.app.arn
+  priority     = 99
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.api.arn
+  }
+
+  condition {
+    host_header {
+      values = ["api.${var.DOMAIN}"]
+    }
+  }
+}
+
+# WebSocket
+resource "aws_lb_listener_rule" "ws" {
+  listener_arn = aws_lb_listener.app.arn
+  priority     = 98
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.ws.arn
+  }
+
+  condition {
+    host_header {
+      values = ["ws.${var.DOMAIN}"]
+    }
+  }
+}
+
+# Centrifugo
+resource "aws_lb_listener_rule" "centrifugo" {
+  listener_arn = aws_lb_listener.app.arn
+  priority     = 97
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.centrifugo.arn
+  }
+
+  condition {
+    host_header {
+      values = ["centrifugo.${var.DOMAIN}"]
+    }
+  }
+}
+
 # Public Security Group
 resource "aws_security_group" "lb" {
   name        = "lb-${var.PROJECT}-${var.NAMESPACE}"
