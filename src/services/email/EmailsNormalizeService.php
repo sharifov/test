@@ -491,9 +491,9 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
     {
         if ($autoDetectEmpty) {
             $clientId = $emailDTO->clientId ?? $this->helper->detectClientId($emailDTO->emailFrom);
-            $leadId =  $this->helper->detectLeadId($emailDTO->emailSubject, $emailDTO->refMessageId);
-            $caseId = $this->helper->detectCaseId($emailDTO->emailSubject, $emailDTO->refMessageId);
-            $this->userId = $this->helper->getUserIdByEmail($emailDTO->emailTo);
+            $leadId =  $emailDTO->leadId ?? $this->helper->detectLeadId($emailDTO->emailSubject, $emailDTO->refMessageId);
+            $caseId = $emailDTO->caseId ?? $this->helper->detectCaseId($emailDTO->emailSubject, $emailDTO->refMessageId);
+            $this->userId = $emailDTO->createdUserId ??$this->helper->getUserIdByEmail($emailDTO->emailTo);
         }
 
         $data = [

@@ -437,14 +437,16 @@ class EmailService extends SendMail implements EmailServiceInterface
             $email->e_message_id = $emailDTO->messageId;
             $email->e_language_id = $emailDTO->languageId;
             $email->e_template_type_id = $emailDTO->templateTypeId;
-            $email->e_client_id = $emailDTO->clientId;
-            $email->e_lead_id = $emailDTO->leadId;
+            $email->e_client_id = $emailDTO->clientId ?? null;
+            $email->e_lead_id = $emailDTO->leadId ?? null;
+            $email->e_case_id = $emailDTO->caseId ?? null;
+            $email->e_created_user_id = $emailDTO->createdUserId ?? null;
             $email->e_email_data = !empty($emailDTO->attachments) ? json_encode($emailDTO->attachments) : null;
             if ($autoDetectEmpty) {
                 $email->e_client_id = $emailDTO->clientId ?? $this->helper->detectClientId($emailDTO->emailFrom);
-                $email->e_lead_id = $this->helper->detectLeadId($emailDTO->emailSubject, $emailDTO->refMessageId);
-                $email->e_case_id = $this->helper->detectCaseId($emailDTO->emailSubject, $emailDTO->refMessageId);
-                $email->e_created_user_id = $this->helper->getUserIdByEmail($emailDTO->emailTo);
+                $email->e_lead_id = $emailDTO->leadId ?? $this->helper->detectLeadId($emailDTO->emailSubject, $emailDTO->refMessageId);
+                $email->e_case_id = $emailDTO->caseId ?? $this->helper->detectCaseId($emailDTO->emailSubject, $emailDTO->refMessageId);
+                $email->e_created_user_id = $emailDTO->createdUserId ?? $this->helper->getUserIdByEmail($emailDTO->emailTo);
             }
 
             if (!$email->save()) {
