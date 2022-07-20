@@ -5,6 +5,7 @@ namespace src\model\clientChatRequest\useCase\api\create;
 use common\models\ClientChatSurvey;
 use common\models\Employee;
 use src\model\clientChat\entity\ClientChat;
+use src\model\clientChatRequest\useCase\api\create\query\EmployeeQuery;
 use src\model\userClientChatData\entity\UserClientChatData;
 
 /**
@@ -44,16 +45,10 @@ class FeedbackRequestedForm extends FeedbackFormBase
         $requestedByUsername = isset($this->requestedBy['username']) ? $this->requestedBy['username'] : null;
 
         $requestedByEmployee = !is_null($requestedByUsername)
-            ? Employee::find()->alias('e')
-                ->leftJoin(['uccd' => UserClientChatData::tableName()], 'uccd.uccd_employee_id=e.id')
-                ->where('uccd.uccd_username=:username', [':username' => $this->requestedBy['username']])
-                ->one()
+            ? EmployeeQuery::getEmployeeByUsernameClientChatData($this->requestedBy['username'])
             : null;
 
-        $requestedForEmployee = Employee::find()->alias('e')
-            ->leftJoin(['uccd' => UserClientChatData::tableName()], 'uccd.uccd_employee_id=e.id')
-            ->where('uccd.uccd_username=:username', [':username' => $this->requestedFor['username']])
-            ->one();
+        $requestedForEmployee = EmployeeQuery::getEmployeeByUsernameClientChatData($this->requestedFor['username']);
 
         $model = new ClientChatSurvey();
         $model->load([
