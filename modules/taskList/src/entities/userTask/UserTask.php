@@ -78,7 +78,8 @@ class UserTask extends \yii\db\ActiveRecord
 
             [['ut_start_dt'], 'required'],
             [['ut_start_dt', 'ut_end_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
-            [['ut_start_dt'], 'compare', 'compareAttribute' => 'ut_end_dt', 'operator' => '<=', 'enableClientValidation' => false],
+
+            [['ut_end_dt'], 'compare', 'compareAttribute' => 'ut_start_dt', 'operator' => '>=', 'enableClientValidation' => false, 'skipOnEmpty' => true],
 
             [['ut_created_dt'], 'default', 'value' => date('Y-m-d H:i:s')],
             [['ut_created_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
