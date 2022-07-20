@@ -1,7 +1,7 @@
 ---
 plugin: aws_ec2
 # uncomment this to run localy
-boto_profile: aws-prod-infra
+#boto_profile: aws-prod-infra
 cache: false
 regions:
   - us-east-1
