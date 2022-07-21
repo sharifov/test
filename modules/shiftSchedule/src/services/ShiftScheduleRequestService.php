@@ -2,21 +2,26 @@
 
 namespace modules\shiftSchedule\src\services;
 
+use common\components\jobs\ShiftScheduleRequestNotificationsAfterSaveJob;
 use common\models\Employee;
 use common\models\Notifications;
 use frontend\widgets\notification\NotificationMessage;
+use modules\featureFlag\FFlag;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\repository\ShiftScheduleRequestRepository;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
 use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use modules\shiftSchedule\src\events\ShiftScheduleSaveRequestEvent;
 use modules\shiftSchedule\src\forms\ScheduleDecisionForm;
 use modules\shiftSchedule\src\forms\ScheduleRequestForm;
 use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
 use src\auth\Auth;
+use src\helpers\app\AppHelper;
 use Yii;
 use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 class ShiftScheduleRequestService
 {
@@ -165,16 +170,29 @@ class ShiftScheduleRequestService
                 'ssr_description' => $requestForm->description,
                 'ssr_created_user_id' => $user->id,
             ]);
+
             if ($requestModel->save()) {
-                self::sendNotification(
-                    Employee::ROLE_SUPERVISION,
-                    $requestModel,
-                    $user,
-                    self::NOTIFICATION_TYPE_CREATE
-                );
+
+                /** @fflag FFlag::FF_KEY_SHIFT_SCHEDULE_REQUEST_SAVE_SEND_NOTIFICATION_BY_JOB_ENABLE, Enable send notification from job, when request was saved */
+                if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SHIFT_SCHEDULE_REQUEST_SAVE_SEND_NOTIFICATION_BY_JOB_ENABLE)) {
+                    $job = new ShiftScheduleRequestNotificationsAfterSaveJob();
+                    $job->shiftScheduleRequest = $requestModel;
+                    $job->employee = $user;
+
+                    Yii::$app->queue_job->push($job);
+                } else {
+                    self::sendNotification(
+                        Employee::ROLE_SUPERVISION,
+                        $requestModel,
+                        $user,
+                        self::NOTIFICATION_TYPE_CREATE
+                    );
+                }
+
                 return true;
             }
         }
+
         return false;
     }
 
