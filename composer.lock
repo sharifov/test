@@ -584,16 +584,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.231.9",
+            "version": "3.231.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "fbda3e544226b44f79ead89de78f220d30ef3796"
+                "reference": "e46b7c5fcb70fadf38079755982cc1d3f0583c41"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/fbda3e544226b44f79ead89de78f220d30ef3796",
-                "reference": "fbda3e544226b44f79ead89de78f220d30ef3796",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/e46b7c5fcb70fadf38079755982cc1d3f0583c41",
+                "reference": "e46b7c5fcb70fadf38079755982cc1d3f0583c41",
                 "shasum": ""
             },
             "require": {
@@ -670,9 +670,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.231.9"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.231.10"
             },
-            "time": "2022-07-19T18:14:37+00:00"
+            "time": "2022-07-20T18:17:18+00:00"
         },
         {
             "name": "bacon/bacon-qr-code",
@@ -1952,16 +1952,16 @@
         },
         {
             "name": "giggsey/libphonenumber-for-php",
-            "version": "8.12.51",
+            "version": "8.12.52",
             "source": {
                 "type": "git",
                 "url": "https://github.com/giggsey/libphonenumber-for-php.git",
-                "reference": "a42d89a46797083a95aa48393485fdac22fcac94"
+                "reference": "9a5269012e21d5a357f93d413fcc7a854a36b69d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/giggsey/libphonenumber-for-php/zipball/a42d89a46797083a95aa48393485fdac22fcac94",
-                "reference": "a42d89a46797083a95aa48393485fdac22fcac94",
+                "url": "https://api.github.com/repos/giggsey/libphonenumber-for-php/zipball/9a5269012e21d5a357f93d413fcc7a854a36b69d",
+                "reference": "9a5269012e21d5a357f93d413fcc7a854a36b69d",
                 "shasum": ""
             },
             "require": {
@@ -2021,7 +2021,7 @@
                 "issues": "https://github.com/giggsey/libphonenumber-for-php/issues",
                 "source": "https://github.com/giggsey/libphonenumber-for-php"
             },
-            "time": "2022-07-11T08:12:34+00:00"
+            "time": "2022-07-20T12:38:47+00:00"
         },
         {
             "name": "giggsey/locale",
@@ -4255,7 +4255,7 @@
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:techork/yii2-feature-flag.git",
-                "reference": "e8199f368ce445c800470fbdd43fd344d9a0cddb"
+                "reference": "b502d70ed75a5e9df65739ccbf3d484fc1fd0d2c"
             },
             "require": {
                 "ext-json": "*",
@@ -4287,7 +4287,7 @@
             "support": {
                 "source": "https://bitbucket.org/techork/yii2-feature-flag.git"
             },
-            "time": "2022-07-08T00:00:00+00:00"
+            "time": "2022-07-21T00:00:00+00:00"
         },
         {
             "name": "kivork/yii2-mattermost-log-target",
@@ -5293,10 +5293,10 @@
         },
         {
             "name": "npm-asset/ace-builds",
-            "version": "1.7.1",
+            "version": "1.8.0",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/ace-builds/-/ace-builds-1.7.1.tgz"
+                "url": "https://registry.npmjs.org/ace-builds/-/ace-builds-1.8.0.tgz"
             },
             "type": "npm-asset",
             "license": [
@@ -11679,16 +11679,16 @@
         },
         {
             "name": "fakerphp/faker",
-            "version": "v1.19.0",
+            "version": "v1.20.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/FakerPHP/Faker.git",
-                "reference": "d7f08a622b3346766325488aa32ddc93ccdecc75"
+                "reference": "37f751c67a5372d4e26353bd9384bc03744ec77b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/FakerPHP/Faker/zipball/d7f08a622b3346766325488aa32ddc93ccdecc75",
-                "reference": "d7f08a622b3346766325488aa32ddc93ccdecc75",
+                "url": "https://api.github.com/repos/FakerPHP/Faker/zipball/37f751c67a5372d4e26353bd9384bc03744ec77b",
+                "reference": "37f751c67a5372d4e26353bd9384bc03744ec77b",
                 "shasum": ""
             },
             "require": {
@@ -11715,7 +11715,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "v1.19-dev"
+                    "dev-main": "v1.20-dev"
                 }
             },
             "autoload": {
@@ -11740,9 +11740,9 @@
             ],
             "support": {
                 "issues": "https://github.com/FakerPHP/Faker/issues",
-                "source": "https://github.com/FakerPHP/Faker/tree/v1.19.0"
+                "source": "https://github.com/FakerPHP/Faker/tree/v1.20.0"
             },
-            "time": "2022-02-02T17:38:57+00:00"
+            "time": "2022-07-20T13:12:54+00:00"
         },
         {
             "name": "felixfbecker/advanced-json-rpc",
