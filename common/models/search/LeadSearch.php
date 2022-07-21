@@ -2688,6 +2688,37 @@ class LeadSearch extends Lead
             $leadTable . '.l_type' => $this->l_type,
         ]);
 
+        if ($this->departRangeTime) {
+            $departRange = explode(" - ", $this->departRangeTime);
+            $having = [];
+            if ($departRange[0] && $departRange[1]) {
+                $having[] = "MAX(departure) >= '" . date('Y-m-d', strtotime($departRange[0])) . "'";
+                $having[] = "MIN(departure) <= '" . date('Y-m-d', strtotime($departRange[1])) . "'";
+                $subQuery = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->groupBy('lead_id')->having(implode(" AND ", $having));
+                $query->andWhere(['IN', 'leads.id', $subQuery]);
+            }
+        }
+
+        if (!empty($this->origin_airport)) {
+            $query->innerJoin([
+                'segment_origin_airport' => LeadFlightSegment
+                    ::find()
+                    ->select(['lead_id'])
+                    ->where(['origin' => $this->origin_airport])
+                    ->groupBy(['lead_id'])
+            ], 'leads.id = segment_origin_airport.lead_id');
+        }
+
+        if (!empty($this->destination_airport)) {
+            $query->innerJoin([
+                'segment_destination_airport' => LeadFlightSegment
+                    ::find()
+                    ->select(['lead_id'])
+                    ->where(['destination' => $this->destination_airport])
+                    ->groupBy(['lead_id'])
+            ], 'leads.id = segment_destination_airport.lead_id');
+        }
+
 //        $query
 //        ->andWhere(['IN','leads.status', [self::STATUS_FOLLOW_UP]])
 //        ->andWhere(['IN', $leadTable . '.project_id', $projectIds])

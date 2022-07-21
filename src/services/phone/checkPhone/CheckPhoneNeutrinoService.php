@@ -31,7 +31,7 @@ class CheckPhoneNeutrinoService
     {
         $this->phone = $phone;
         $this->isEnableCheckPhoneByApi = $isEnableCheckPhoneByApi ?? SettingHelper::isEnableCheckPhoneByNeutrino();
-        $this->communicationService = Yii::$app->communication;
+        $this->communicationService = Yii::$app->comms;
     }
 
     public function checkRequest(): ?array

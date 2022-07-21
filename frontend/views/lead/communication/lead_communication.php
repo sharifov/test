@@ -25,6 +25,7 @@ use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
 use modules\email\src\abac\dto\EmailPreviewDto;
 use modules\email\src\abac\EmailAbacObject;
+use modules\featureFlag\FFlag;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\widgets\FileStorageEmailSendListWidget;
 use src\auth\Auth;
@@ -406,17 +407,15 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
                                         <?= $communicationActiveForm->field($comForm, 'c_email_tpl_key')->dropDownList([], ['prompt' => '---', 'class' => 'form-control', 'id' => 'c_email_tpl_key']) ?>
                                     </div>
 
+                                    <?php
+                                    $localeList = ProjectLocale::getLocaleListByProject((int)$lead->project_id);
+                                    $comForm->c_language_id = null;
+                                    ?>
                                     <div class="col-sm-3 form-group message-field-sms message-field-email" id="language-group" style="display: block;">
-
-                                        <?php
-                                            $localeList = ProjectLocale::getLocaleListByProject((int) $lead->project_id);
-                                            $comForm->c_language_id = null;
-                                        ?>
-
                                         <?php echo $communicationActiveForm->field($comForm, 'c_language_id')
                                             ->dropDownList(
                                                 $localeList,
-                                                ['prompt' => '---', 'class' => 'form-control', 'id' => 'language']
+                                                ['class' => 'form-control', 'id' => 'language']
                                             ) ?>
                                     </div>
 

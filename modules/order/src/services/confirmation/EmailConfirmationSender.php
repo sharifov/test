@@ -143,7 +143,7 @@ class EmailConfirmationSender
         $languageId = $this->getLanguage($order);
 
         foreach ($orderContacts as $orderContact) {
-            $mailPreview = \Yii::$app->communication->mailPreview(
+            $mailPreview = \Yii::$app->comms->mailPreview(
                 $projectId,
                 $this->template,
                 $from,

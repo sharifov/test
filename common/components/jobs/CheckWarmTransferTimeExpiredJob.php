@@ -82,7 +82,7 @@ class CheckWarmTransferTimeExpiredJob extends BaseJob implements JobInterface
             if (!$agentParticipant) {
                 return;
             }
-            $result = \Yii::$app->communication->unholdConferenceCall(
+            $result = \Yii::$app->comms->unholdConferenceCall(
                 $this->conferenceSid,
                 $this->keeperSid,
                 $this->recordingDisabled
@@ -112,7 +112,7 @@ class CheckWarmTransferTimeExpiredJob extends BaseJob implements JobInterface
     private function cancelCall(string $sid): void
     {
         try {
-            $result = \Yii::$app->communication->hangUp($sid);
+            $result = \Yii::$app->comms->hangUp($sid);
             $isError = (bool)($result['error'] ?? true);
             if ($isError) {
                 \Yii::error([

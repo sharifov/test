@@ -418,7 +418,7 @@ class Email extends \yii\db\ActiveRecord
         $out = ['error' => false];
 
         /** @var CommunicationService $communication */
-        $communication = Yii::$app->communication;
+        $communication = Yii::$app->comms;
         $data['project_id'] = $this->e_project_id;
 
         $content_data['email_body_html'] = $this->getEmailBodyHtml();

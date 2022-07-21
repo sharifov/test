@@ -39,7 +39,7 @@ class CreateCallFromCase
                 $case->cs_client_id
             ))->isDisabledRecord();
 
-            $result = \Yii::$app->communication->createCall(
+            $result = \Yii::$app->comms->createCall(
                 new \src\model\call\useCase\conference\create\CreateCallForm([
                     'device' => $form->getVoipDevice(),
                     'user_id' => $form->getCreatedUserId(),

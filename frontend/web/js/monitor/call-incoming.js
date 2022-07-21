@@ -246,9 +246,6 @@ const callItemComponent = {
         },
 
         //check() { this.checked = !this.checked; },
-        getUserName: function (userId) {
-            return this.$root.getUserName(userId);
-        },
         getUserAccessStatusTypeName: function (statusTypeId) {
             return statusTypeId > 0 ? this.$root.callUserAccessStatusTypeList[statusTypeId] : statusTypeId;
         },
@@ -558,9 +555,6 @@ var callMapApp = Vue.createApp({
                     }
                 }
             }
-        },
-        getUserName: function (userId) {
-            return userId > 0 ? this.userList[userId] : userId;
         },
 
         userDataList() {

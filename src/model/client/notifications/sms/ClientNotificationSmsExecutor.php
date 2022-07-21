@@ -121,7 +121,7 @@ class ClientNotificationSmsExecutor
 
     private function getSmsContent(int $notificationId, string $templateKey, array $contentData, string $languageId): string
     {
-        $result = \Yii::$app->communication->getContent(
+        $result = \Yii::$app->comms->getContent(
             $templateKey,
             $contentData,
             $languageId,

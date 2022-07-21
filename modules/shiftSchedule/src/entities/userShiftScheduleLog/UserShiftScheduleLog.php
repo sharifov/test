@@ -87,7 +87,6 @@ class UserShiftScheduleLog extends \yii\db\ActiveRecord
 
     public function beforeSave($insert): bool
     {
-        $this->ussl_action_type = $insert ? self::ACTION_TYPE_INSERT : self::ACTION_TYPE_UPDATE;
         if (!$this->ussl_year_start) {
             $this->ussl_year_start = (int) date('Y');
         }

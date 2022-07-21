@@ -74,6 +74,34 @@ $rgbaTitle = '151, 149, 149, 0.1';
                     <?php endforeach ?>
                 </div>
 
+                <div class="md_box">
+                    <div class="title_box">
+                        <div class="title_row"></div>
+                        <div class="title_row"></div>
+                        <div class="title_row_last" data-toggle="tooltip" data-original-title="Count by hour">
+                            <strong>Count</strong>
+                        </div>
+                    </div>
+                    <?php foreach (HeatMapAgentService::generateHourMap() as $value) : ?>
+                        <?php $cntByHour = $resultByHour[$value] ?? 0 ?>
+                        <?php $alphaHour = HeatMapAgentService::proportionalMap($cntByHour, 0, $maxCntByHour, 0, 0.9) ?>
+                        <?php $backgroundHour = $cntByHour ? '255, 0, 0, ' . $alphaHour : $rgbaTitle ?>
+                        <?php $dataTitleCnt = $value . ':00 - ' . $value . ':59' ?>
+                        <?php $cellContent = '<span>' . ($cntByHour ?: '-') . '</span>' ?>
+                        <?php $cellCnt = Html::tag(
+                            'div',
+                            $cellContent,
+                            [
+                                'class' => 'hour_box',
+                                'data-toggle' => 'tooltip',
+                                'data-original-title' => $dataTitleCnt,
+                                'style' => 'background: rgba(' . $backgroundHour . ')',
+                            ]
+                        ) ?>
+                        <?php echo $cellCnt ?>
+                    <?php endforeach ?>
+                </div>
+
 
                 <?php $prevMonth = null ?>
                 <?php foreach ($result as $keyMonthDay => $hours) : ?>

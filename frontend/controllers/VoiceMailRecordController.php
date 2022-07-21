@@ -201,6 +201,6 @@ class VoiceMailRecordController extends FController
             throw new NotFoundHttpException();
         }
         //todo validate permissions
-        header('X-Accel-Redirect: ' . Yii::$app->communication->xAccelRedirectCommunicationUrl . $record['vmr_record_sid']);
+        header('X-Accel-Redirect: ' . Yii::$app->comms->xAccelRedirectCommsUrl . $record['vmr_record_sid']);
     }
 }

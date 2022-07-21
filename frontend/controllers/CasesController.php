@@ -518,7 +518,7 @@ class CasesController extends FController
                     $comForm->c_preview_email = 1;
 
                     /** @var CommunicationService $communication */
-                    $communication = Yii::$app->communication;
+                    $communication = Yii::$app->comms;
                     $data['origin'] = '';
 
                     $content_data['email_body_html'] = $comForm->c_email_message;
@@ -612,7 +612,7 @@ class CasesController extends FController
                     $comForm->c_preview_sms = 1;
 
                     /** @var CommunicationService $communication */
-                    $communication = Yii::$app->communication;
+                    $communication = Yii::$app->comms;
 
                     //$data['origin'] = 'ORIGIN';
                     //$data['destination'] = 'DESTINATION';
@@ -973,12 +973,12 @@ class CasesController extends FController
             $saleProjectApiKey = $saleData['projectApiKey'] ?? null;
 
             if (trim($caseProjectApiKey) !== trim($saleProjectApiKey)) {
-                throw new \DomainException('[Different Project] Case Id (' . $model->cs_id . ') Case project (' . $project->name . ') Sale project (' . $saleData['project'] . ')');
+                throw new \RuntimeException('[Different Project] Case Id (' . $model->cs_id . ') Case project (' . $project->name . ') Sale project (' . $saleData['project'] . ')');
             }
         } catch (\Throwable $exception) {
             $out['error'] = $exception->getMessage();
             $out['error_type'] = self::DIFFERENT_PROJECT;
-            \Yii::error(VarDumper::dumpAsString($exception, 10), 'CasesController::actionAddSale:Exception');
+            \Yii::warning(VarDumper::dumpAsString($exception, 10), 'CasesController::actionAddSale:Exception');
             return $out;
         }
 
@@ -1511,7 +1511,7 @@ class CasesController extends FController
         $content = $this->casesCommunicationService->getEmailData($case, $user);
 
         try {
-            $mailPreview = Yii::$app->communication->mailPreview(
+            $mailPreview = Yii::$app->comms->mailPreview(
                 $case->cs_project_id,
                 $params->object->case->feedbackTemplateTypeKey,
                 $params->object->case->feedbackEmailFrom,

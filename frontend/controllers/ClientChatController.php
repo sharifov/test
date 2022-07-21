@@ -676,6 +676,19 @@ class ClientChatController extends FController
                     'couchNoteForm' => new ClientChatCouchNoteForm($clientChat, Auth::user()),
                 ]);
             }
+
+            if ($clientChatHold = $clientChat->clientChatHold) {
+                $formatTimer = ClientChatHoldService::isMoreThanHourLeft($clientChatHold) ? "%H:%M:%S" : "%M:%S";
+                $maxProgressBar = $clientChatHold->deadlineStartDiffInSeconds();
+                $leftProgressBar = $clientChatHold->deadlineNowDiffInSeconds();
+                $warningZone = $clientChatHold->halfWarningSeconds();
+                $result['timer'] = [
+                    'formatTimer' => $formatTimer,
+                    'maxProgressBar' => $maxProgressBar,
+                    'leftProgressBar' => $leftProgressBar,
+                    'warningZone' => $warningZone
+                ];
+            }
         } catch (NotFoundException $e) {
             $result['message'][] = $e->getMessage();
         } catch (\DomainException | ForbiddenHttpException $e) {
@@ -1256,14 +1269,8 @@ class ClientChatController extends FController
                     $this->clientChatHoldRepository->save($clientChatHold);
                 }
 
-                $formatTimer = ClientChatHoldService::isMoreThanHourLeft($clientChatHold) ? "%H:%M:%S" : "%M:%S";
-                $maxProgressBar = $clientChatHold->deadlineStartDiffInSeconds();
-                $leftProgressBar = $clientChatHold->deadlineNowDiffInSeconds();
-                $warningZone = $clientChatHold->halfWarningSeconds();
-
                 return '<script>$("#modal-sm").modal("hide"); 
-                    refreshChatPage(' . $form->cchId . ');
-                    setTimeout(() => clientChatHoldTimeProgressbar("' . $formatTimer . '",' . $maxProgressBar . ',' . $leftProgressBar . ',' . $warningZone . '), 5500);                    
+                    refreshChatPage(' . $form->cchId . ');                  
                     createNotify("Success", "Chat status changed to Hold", "success");</script>';
             } catch (\Throwable $throwable) {
                 $form->addError('general', 'Internal Server Error');
@@ -2079,7 +2086,7 @@ class ClientChatController extends FController
      */
     private function generateQuoteCapture(Quote $quote, ?string $qc_uid = null): array
     {
-        $communication = Yii::$app->communication;
+        $communication = Yii::$app->comms;
 
         $project = $quote->lead->project;
         $projectContactInfo = [];
