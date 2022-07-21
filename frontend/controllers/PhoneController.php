@@ -15,6 +15,7 @@ use common\models\Employee;
 use common\models\Notifications;
 use common\models\PhoneBlacklist;
 use common\models\Project;
+use common\models\search\employee\EmployeeRedirectCallSearch;
 use common\models\UserCallStatus;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
@@ -41,8 +42,10 @@ use src\model\voip\phoneDevice\device\PhoneDevice;
 use src\model\voip\phoneDevice\device\ReadyVoipDevice;
 use src\model\voip\phoneDevice\device\VoipDevice;
 use src\services\client\ClientManageService;
+use src\services\departmentPhoneProject\DepartmentPhoneProjectParamsService;
 use thamtech\uuid\helpers\UuidHelper;
 use yii\base\Exception;
+use yii\data\ArrayDataProvider;
 use yii\helpers\Html;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
@@ -595,12 +598,7 @@ class PhoneController extends FController
      */
     public function actionAjaxCallGetAgents(): string
     {
-
-        if (!Yii::$app->request->isPost) {
-            throw new BadRequestHttpException('Not POST data', 1);
-        }
-
-        $sid = Yii::$app->request->post('sid');
+        $sid = Yii::$app->request->get('sid');
         // $userId = (int) Yii::$app->request->post('user_id');
 
         $userId = Auth::id();
@@ -633,45 +631,36 @@ class PhoneController extends FController
                 throw new \Exception('Project id not found in call by callSID: ' . $sid);
             }
 
-            $userList = Employee::getUsersForRedirectCall($call);
+            $searchModel = new EmployeeRedirectCallSearch();
+            $dataProvider = $searchModel->search($call, $userId, Yii::$app->request->queryParams);
 
-            if ($userList) {
-                foreach ($userList as $userItem) {
-                    $agentId = (int)$userItem['tbl_user_id'];
-                    if ($agentId === $userId) {
-                        continue;
-                    }
-                    $userModel = \common\models\Employee::findOne($agentId);
-                    if ($userModel && ($userModel->isAgent() || $userModel->isSupAgent() || $userModel->isExAgent() || $userModel->isSupervision() || $userModel->isSupSuper() || $userModel->isExSuper())) {
-                        $users[] = [
-                            'model' => $userModel,
-                            'isBusy' => (int)$userItem['tbl_has_lead_redial_access'] > 0,
-                        ];
-                    }
-                }
-            }
 
 //            $lead_id = $call->c_lead_id ?: 0;
 //            $case_id = $call->c_case_id ?: 0;
         } catch (\Throwable $e) {
             $call = null;
+            $dataProvider = new ArrayDataProvider([
+                'allModels' => [],
+                'pagination' => false
+            ]);
+            $searchModel = new EmployeeRedirectCallSearch();
             $error = $e->getMessage();
         }
 
-
         $departments = [];
         if ($call) {
-            $departments = DepartmentPhoneProject::find()->where(['dpp_project_id' => $call->c_project_id, 'dpp_enable' => true, 'dpp_allow_transfer' => true])->andWhere(['>', 'dpp_dep_id', 0])->withPhoneList()->orderBy(['dpp_dep_id' => SORT_ASC])->all();
+            $departments = DepartmentPhoneProjectParamsService::getDepartmentsWithCountOnlineUserByProjectId($call->c_project_id, $dataProvider->getModels());
         }
         $phones = \Yii::$app->params['settings']['support_phone_numbers'] ?? [];
 
         return $this->renderAjax('ajax_redirect_call', [
-            'users' => $users,
             'phones' => $phones,
             'departments' => $departments,
             'call' => $call,
             'error' => $error,
-            'canWarmTransfer' => $call ? $call->isIn() : false
+            'dataProvider' => $dataProvider,
+            'canWarmTransfer' => $call ? $call->isIn() : false,
+            'searchModel' => $searchModel
         ]);
     }
 

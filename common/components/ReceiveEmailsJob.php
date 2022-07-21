@@ -167,7 +167,6 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                     }
                 }
             }
-
         } catch (\Throwable $e) {
             if ($debug) {
                 echo "error: " . VarDumper::dumpAsString($e);

@@ -99,7 +99,7 @@ class EmailMainService implements EmailServiceInterface
             }
 
             if ($this->getEmailObj()) {
-                $this->oldService->updataAfterSendMail($this->getEmailObj(),$requestData);
+                $this->oldService->updataAfterSendMail($this->getEmailObj(), $requestData);
             }
 
             $email = $this->getEmailNormObj() ?? $this->getEmailObj() ?? $email;
@@ -132,7 +132,7 @@ class EmailMainService implements EmailServiceInterface
                     $templateTypeId,
                     $projectId,
                     $departmentId
-                    );
+                );
             }
         }
     }
@@ -148,7 +148,7 @@ class EmailMainService implements EmailServiceInterface
                     LeadPoorProcessingDataDictionary::KEY_SEND_SMS_OFFER,
                 ],
                 LeadPoorProcessingLogStatus::REASON_EMAIL
-                );
+            );
 
             if ($lead->employee_id && $lead->isProcessing()) {
                 try {
@@ -157,7 +157,7 @@ class EmailMainService implements EmailServiceInterface
                         $lead->id,
                         $lead->employee_id,
                         (new \DateTimeImmutable())
-                        );
+                    );
                     (new LeadUserDataRepository($leadUserData))->save(true);
                 } catch (\RuntimeException | \DomainException $throwable) {
                     $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['emailId' => $emailId]);
@@ -247,7 +247,7 @@ class EmailMainService implements EmailServiceInterface
         $case = $email->case ?? null;
         if ($case) {
             (Yii::createObject(CasesManageService::class))->needAction($case->cs_id);
-            $this->addCreateSaleJob($case->cs_id, $emailDTO->emailFrom);
+            $this->addCreateSaleJob($case, $emailDTO->emailFrom);
 
             if ($userID) {
                 $notifyData = [
@@ -313,12 +313,13 @@ class EmailMainService implements EmailServiceInterface
         return $emailDataAttachments;
     }
 
-    public function addCreateSaleJob(int $caseId, string $emailFrom)
+    public function addCreateSaleJob(Cases $case, string $emailFrom)
     {
         try {
             $job = new CreateSaleFromBOJob();
-            $job->case_id = $caseId;
+            $job->case_id = $case->cs_id;
             $job->email = $emailFrom;
+            $job->project_key = $case->project->api_key ?? null;
             Yii::$app->queue_job->priority(100)->push($job);
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableFormatter($throwable), 'EmailMainService:addCreateSaleJob');
@@ -368,6 +369,6 @@ class EmailMainService implements EmailServiceInterface
             $email->getEmailFrom(false),
             $email->getEmailTo(false),
             $email->e_project_id
-            );
+        );
     }
 }

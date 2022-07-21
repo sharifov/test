@@ -1200,12 +1200,18 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'System Logs', 'url' => ['/log/index'], 'icon' => 'bug text-warning'],
                 ['label' => 'API Logs', 'url' => ['/api-log/index'], 'icon' => 'sitemap'],
                 [
-                    'label' => Yii::t('language', 'Feature Flag'), 'url' => 'javascript:', 'icon' => 'folder',
+                    'label' => Yii::t('language', 'Feature Flag'), 'url' => 'javascript:', 'icon' => 'flag',
                     'items' => [
                         ['label' => Yii::t('menu', 'Feature Flag'), 'url' => ['/flag/feature-flag/index'],
-                            'icon' => 'flag', 'title' => 'Feature Flag CRUD'],
+                            'title' => 'Feature Flag CRUD'],
+                        ['label' => Yii::t('menu', 'Feature Flag Values'), 'url' => ['/flag/feature-flag-value/index'],
+                            'title' => 'Feature Flag Values'],
+                        ['label' => Yii::t('menu', 'Feature Flag Experiment'), 'url' => ['/flag/feature-flag-experiment/index'],
+                            'title' => 'Feature Flag Experiment'],
                         ['label' => Yii::t('menu', 'Feature Flag Docs'), 'url' => ['/flag/feature-flag/doc'],
                             'title' => 'Feature Flag Docs'],
+                        ['label' => Yii::t('menu', 'Feature Flag Test'), 'url' => ['/flag/feature-flag/test'],
+                            'title' => 'Feature Flag Test'],
                     ]
                 ],
                 [

@@ -967,7 +967,7 @@ class CasesController extends FController
 
             $cs = $this->casesSaleService->prepareAdditionalData($cs, $saleData);
 
-            if (empty($model->cs_order_uid) && !$bookingId) {
+            if (empty($model->cs_order_uid) && $bookingId) {
                 $model->updateBookingId($bookingId, Auth::id());
                 $out['caseBookingId'] = $model->cs_order_uid;
             } elseif ($model->cs_order_uid !== $bookingId) {

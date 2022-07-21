@@ -19,7 +19,7 @@ if (typeof window.stackPaginate === 'undefined') {
     window.stackPaginate = new PNotify.Stack({
         dir1: 'down',
         dir2: 'left',
-        firstpos1: 25,
+        firstpos1: 75,
         firstpos2: 25,
         modal: false
     });

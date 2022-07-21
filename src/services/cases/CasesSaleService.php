@@ -583,9 +583,10 @@ class CasesSaleService
      * @param string|null $order_uid
      * @param string|null $email
      * @param string|null $phone
+     * @param string|null $project_key
      * @return array
      */
-    public function getSaleFromBo(?string $order_uid = null, ?string $email = null, ?string $phone = null): array
+    public function getSaleFromBo(?string $order_uid = null, ?string $email = null, ?string $phone = null, ?string $project_key = null): array
     {
         $form = new CaseSaleRequestBoForm();
         $form->orderUid = $order_uid;
@@ -600,13 +601,13 @@ class CasesSaleService
             return [];
         }
 
-        if ($order_uid && $result = $this->searchRequestToBackOffice(['confirmation_number' => $order_uid])) {
+        if ($order_uid && $result = $this->searchRequestToBackOffice(['confirmation_number' => $order_uid, 'project_key' => $project_key])) {
             return $result;
         }
-        if ($email && $result = $this->searchRequestToBackOffice(['email' => $email])) {
+        if ($email && $result = $this->searchRequestToBackOffice(['email' => $email, 'project_key' => $project_key])) {
             return $result;
         }
-        if ($phone && $result = $this->searchRequestToBackOffice(['phone' => $phone])) {
+        if ($phone && $result = $this->searchRequestToBackOffice(['phone' => $phone, 'project_key' => $project_key])) {
             return $result;
         }
         return [];
@@ -645,7 +646,7 @@ class CasesSaleService
                         ]));
                     }
 
-                    $this->updateCaseProjectBySale($case, $refreshSaleData);
+//                    $this->updateCaseProjectBySale($case, $refreshSaleData);
 
                     if ($caseSale->css_cs_id && SettingHelper::isEnableOrderFromSale()) {
                         $transaction = new Transaction(['db' => Yii::$app->db]);
@@ -762,11 +763,11 @@ class CasesSaleService
         return $result;
     }
 
-    public function getSaleData(string $bookingId): array
+    public function getSaleData(string $project_key, string $bookingId): array
     {
-        $saleSearch = $this->getSaleFromBo($bookingId);
+        $saleSearch = $this->getSaleFromBo($bookingId, null, null, $project_key);
         if (empty($saleSearch['saleId'])) {
-            throw new BoResponseException('Sale not found by Booking ID(' . $bookingId . ') from "cs/search"');
+            throw new BoResponseException('Sale not found by Booking ID(' . $bookingId . ') and Project Key (' . $project_key . ') from "cs/search"');
         }
         return $this->detailRequestToBackOffice($saleSearch['saleId'], 0, 120, 1);
     }
