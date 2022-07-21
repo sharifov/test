@@ -30,6 +30,7 @@ class ProductQuoteService implements RequestBoInterface
                 'created' => null,
                 'expire' => null,
             ],
+            'quote_gid' => null,
         ];
 
         if (!$model instanceof ProductQuote) {
@@ -43,6 +44,7 @@ class ProductQuoteService implements RequestBoInterface
         }
         $additionalInfo['quote']['created'] = $model->pq_created_dt ?? null;
         $additionalInfo['quote']['expire'] = $model->pq_expiration_dt ?? null;
+        $additionalInfo['quote_gid'] = $model->pq_gid ?? null;
 
         return $additionalInfo;
     }

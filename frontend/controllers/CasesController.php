@@ -973,12 +973,12 @@ class CasesController extends FController
             $saleProjectApiKey = $saleData['projectApiKey'] ?? null;
 
             if (trim($caseProjectApiKey) !== trim($saleProjectApiKey)) {
-                throw new \DomainException('[Different Project] Case Id (' . $model->cs_id . ') Case project (' . $project->name . ') Sale project (' . $saleData['project'] . ')');
+                throw new \RuntimeException('[Different Project] Case Id (' . $model->cs_id . ') Case project (' . $project->name . ') Sale project (' . $saleData['project'] . ')');
             }
         } catch (\Throwable $exception) {
             $out['error'] = $exception->getMessage();
             $out['error_type'] = self::DIFFERENT_PROJECT;
-            \Yii::error(VarDumper::dumpAsString($exception, 10), 'CasesController::actionAddSale:Exception');
+            \Yii::warning(VarDumper::dumpAsString($exception, 10), 'CasesController::actionAddSale:Exception');
             return $out;
         }
 
@@ -997,7 +997,7 @@ class CasesController extends FController
 
             $cs = $this->casesSaleService->prepareAdditionalData($cs, $saleData);
 
-            if (empty($model->cs_order_uid) && !$bookingId) {
+            if (empty($model->cs_order_uid) && $bookingId) {
                 $model->updateBookingId($bookingId, Auth::id());
                 $out['caseBookingId'] = $model->cs_order_uid;
             } elseif ($model->cs_order_uid !== $bookingId) {

@@ -66,6 +66,7 @@ use src\listeners\lead\LeadProcessingEventLogListener;
 use src\listeners\lead\LeadQcallAddListener;
 use src\listeners\lead\LeadQcallProcessingListener;
 use src\listeners\lead\LeadQuoteCloneEventListener;
+use src\listeners\lead\LeadRejectClientReturnIndicationListener;
 use src\listeners\lead\LeadRejectEventLogListener;
 use src\listeners\lead\LeadSendToGaListener;
 use src\listeners\lead\LeadSnoozeEventLogListener;
@@ -140,7 +141,10 @@ return [
         LeadProcessingEventLogListener::class,
         LeadInfoReloadListener::class,
     ],
-    LeadRejectEvent::class => [LeadRejectEventLogListener::class],
+    LeadRejectEvent::class => [
+        LeadRejectEventLogListener::class,
+        LeadRejectClientReturnIndicationListener::class
+    ],
     LeadFollowUpEvent::class => [
         LeadFollowUpEventLogListener::class,
         LeadFollowUpNotificationsListener::class,

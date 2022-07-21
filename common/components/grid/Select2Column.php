@@ -28,6 +28,10 @@ class Select2Column extends DataColumn
             return $this->filter;
         }
 
+        if ($this->filter === false) {
+            return parent::renderFilterCellContent();
+        }
+
         $widgetOptions = [
             'model' => $this->grid->filterModel,
             'attribute' => $this->attribute,
