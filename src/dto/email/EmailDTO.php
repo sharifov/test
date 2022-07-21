@@ -189,12 +189,18 @@ class EmailDTO
         return $instance;
     }
 
+    /**
+     *
+     * @param string $templateKey
+     * @return int|null
+     */
     private function getTemplateIdByKey(string $templateKey)
     {
         $templateTypeId = EmailTemplateType::find()
             ->select(['etp_id'])
             ->andWhere(['etp_key' => $templateKey])
             ->asArray()
+            ->limit(1)
             ->one();
 
         return $templateTypeId['etp_id'] ?? null;
