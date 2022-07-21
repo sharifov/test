@@ -24,6 +24,7 @@ use common\models\TipsSplit;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserProfile;
+use modules\featureFlag\FFlag;
 use modules\fileStorage\src\entity\fileLead\FileLead;
 use src\access\EmployeeGroupAccess;
 use src\access\EmployeeProjectAccess;
@@ -176,6 +177,7 @@ class LeadSearch extends Lead
     public $extra_timer;
     public $excludeExtraQueue;
     public $excludeBonusQueue;
+    public $luc_user_id;
     private $leadBadgesRepository;
 
     private $defaultDateRange;
@@ -202,7 +204,7 @@ class LeadSearch extends Lead
         return [
             [['datetime_start', 'datetime_end', 'createTimeRange'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'projectId', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id', 'l_type_create'], 'integer'],
+            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'projectId', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id', 'l_type_create', 'luc_user_id'], 'integer'],
             [['email_status', 'quote_status', 'l_is_test', 'l_type'], 'integer'],
             [['lfOwnerId', 'userGroupId', 'departmentId', 'projectId', 'createdType', 'lead_type'], 'integer'],
 
@@ -547,6 +549,29 @@ class LeadSearch extends Lead
             $query->andWhere(['IN', 'leads.id', $subQuery]);
         }
 
+        /** @fflag FFlag::FF_KEY_HIDE_LANGUAGE_FIELD_COMMUNICATION_BLOCK, Filter Conversion Date and User In LeadSearch Enable */
+        $filterByConversionDateAndUserIsEnable = Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_FILTER_CONVERSION_DATE_AND_USER_IN_LEAD_SEARCH);
+
+        if ($filterByConversionDateAndUserIsEnable) {
+            if ($this->conversionRangeTime) {
+                $conversionRange = explode(" - ", $this->conversionRangeTime);
+                $subQuery = LeadUserConversion::find()->select(['DISTINCT(lead_user_conversion.luc_lead_id)'])->where('lead_user_conversion.luc_lead_id = leads.id');
+
+                if ($conversionRange[0]) {
+                    $subQuery->andFilterWhere(['>=', 'luc_created_dt', date('Y-m-d', (strtotime($conversionRange[0])))]);
+                }
+                if ($conversionRange[1]) {
+                    $subQuery->andFilterWhere(['<=', 'luc_created_dt', date('Y-m-d', (strtotime($conversionRange[1])))]);
+                }
+                $query->andWhere(['IN', 'leads.id', $subQuery]);
+            }
+
+            if ($this->luc_user_id) {
+                $subQuery = LeadUserConversion::find()->select(['DISTINCT(lead_user_conversion.luc_lead_id)'])->where('lead_user_conversion.luc_lead_id = leads.id');
+                $subQuery->andWhere(['luc_user_id' => $this->luc_user_id]);
+                $query->andWhere(['IN', 'leads.id', $subQuery]);
+            }
+        }
         if ($this->client_name) {
             $query->joinWith(['client' => function ($q) {
                 if ($this->client_name) {
@@ -901,17 +926,32 @@ class LeadSearch extends Lead
         }
 
         if (ArrayHelper::isIn($this->is_conversion, ['1', '0'], false)) {
-            if (!empty($this->employee_id)) {
-                $leadIds = LeadUserConversion
-                    ::find()
-                    ->select(['luc_lead_id'])
-                    ->where(['luc_user_id' => $this->employee_id])
-                    ->groupBy(['luc_lead_id']);
+            if ($filterByConversionDateAndUserIsEnable) {
+                if (!empty($this->luc_user_id)) {
+                    $leadIds = LeadUserConversion
+                        ::find()
+                        ->select(['luc_lead_id'])
+                        ->where(['luc_user_id' => $this->luc_user_id])
+                        ->groupBy(['luc_lead_id']);
+                } else {
+                    $leadIds = LeadUserConversion
+                        ::find()
+                        ->select('luc_lead_id')
+                        ->groupBy(['luc_lead_id']);
+                }
             } else {
-                $leadIds = LeadUserConversion
-                    ::find()
-                    ->select('luc_lead_id')
-                    ->groupBy(['luc_lead_id']);
+                if (!empty($this->employee_id)) {
+                    $leadIds = LeadUserConversion
+                        ::find()
+                        ->select(['luc_lead_id'])
+                        ->where(['luc_user_id' => $this->employee_id])
+                        ->groupBy(['luc_lead_id']);
+                } else {
+                    $leadIds = LeadUserConversion
+                        ::find()
+                        ->select('luc_lead_id')
+                        ->groupBy(['luc_lead_id']);
+                }
             }
 
 
@@ -1065,6 +1105,30 @@ class LeadSearch extends Lead
             }
 
             $query->andWhere(['IN', 'leads.id', $subQuery]);
+        }
+
+        /** @fflag FFlag::FF_KEY_HIDE_LANGUAGE_FIELD_COMMUNICATION_BLOCK, Filter Conversion Date and User In LeadSearch Enable */
+        $filterByConversionDateAndUserIsEnable = Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_FILTER_CONVERSION_DATE_AND_USER_IN_LEAD_SEARCH);
+
+        if ($filterByConversionDateAndUserIsEnable) {
+            if ($this->conversionRangeTime) {
+                $conversionRange = explode(" - ", $this->conversionRangeTime);
+                $subQuery = LeadUserConversion::find()->select(['DISTINCT(lead_user_conversion.luc_lead_id)'])->where('lead_user_conversion.luc_lead_id = leads.id');
+
+                if ($conversionRange[0]) {
+                    $subQuery->andFilterWhere(['>=', 'luc_created_dt', date('Y-m-d', (strtotime($conversionRange[0])))]);
+                }
+                if ($conversionRange[1]) {
+                    $subQuery->andFilterWhere(['<=', 'luc_created_dt', date('Y-m-d', (strtotime($conversionRange[1])))]);
+                }
+                $query->andWhere(['IN', 'leads.id', $subQuery]);
+            }
+
+            if ($this->luc_user_id) {
+                $subQuery = LeadUserConversion::find()->select(['DISTINCT(lead_user_conversion.luc_lead_id)'])->where('lead_user_conversion.luc_lead_id = leads.id');
+                $subQuery->andWhere(['luc_user_id' => $this->luc_user_id]);
+                $query->andWhere(['IN', 'leads.id', $subQuery]);
+            }
         }
 
         if ($this->client_name) {
@@ -1243,6 +1307,32 @@ class LeadSearch extends Lead
                 ->andWhere(Quote::tableName() . '.lead_id = ' . Lead::tableName() . '.id')
                 ->limit(1)
         ]);
+
+        if ($filterByConversionDateAndUserIsEnable) {
+            if (ArrayHelper::isIn($this->is_conversion, ['1', '0'], false)) {
+                if (!empty($this->luc_user_id)) {
+                    $leadIds = LeadUserConversion
+                        ::find()
+                        ->select(['luc_lead_id'])
+                        ->where(['luc_user_id' => $this->luc_user_id])
+                        ->groupBy(['luc_lead_id']);
+                } else {
+                    $leadIds = LeadUserConversion
+                        ::find()
+                        ->select('luc_lead_id')
+                        ->groupBy(['luc_lead_id']);
+                }
+
+
+                $command = $this->is_conversion ? 'IN' : 'NOT IN';
+
+                $query->andWhere([
+                    $command,
+                    'leads.id',
+                    $leadIds
+                ]);
+            }
+        }
 
 //        $sqlRaw = $query->createCommand()->getRawSql();
 //        VarDumper::dump($sqlRaw, 10, true); die;
