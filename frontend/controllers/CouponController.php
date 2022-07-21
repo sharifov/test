@@ -7,8 +7,11 @@ use common\models\EmailTemplateType;
 use frontend\models\CaseCouponPreviewEmailForm;
 use src\auth\Auth;
 use src\entities\cases\Cases;
-use src\helpers\app\AppHelper;
+use src\exception\CreateModelException;
+use src\exception\EmailNotSentException;
+use src\model\coupon\entity\coupon\Coupon;
 use src\model\coupon\entity\coupon\CouponStatus;
+use src\model\coupon\entity\coupon\search\CouponSearch;
 use src\model\coupon\entity\couponCase\CouponCase;
 use src\model\coupon\entity\couponClient\CouponClient;
 use src\model\coupon\entity\couponClient\repository\CouponClientRepository;
@@ -19,22 +22,16 @@ use src\model\coupon\useCase\request\RequestForm;
 use src\model\coupon\useCase\send\SendCouponsForm;
 use src\model\coupon\useCase\send\SendCouponsService;
 use src\repositories\cases\CasesRepository;
+use src\services\email\EmailMainService;
+use src\services\email\EmailService;
 use Yii;
-use src\model\coupon\entity\coupon\Coupon;
-use src\model\coupon\entity\coupon\search\CouponSearch;
+use yii\db\StaleObjectException;
+use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 use yii\web\Response;
-use yii\db\StaleObjectException;
-use src\services\email\EmailServiceInterface;
-use src\services\email\EmailsNormalizeService;
-use src\services\email\EmailService;
-use modules\featureFlag\FFlag;
-use src\exception\EmailNotSentException;
-use src\exception\CreateModelException;
 
 /**
  * Class CouponController
@@ -42,25 +39,30 @@ use src\exception\CreateModelException;
  * @property RequestCouponService $requestCoupon
  * @property SendCouponsService $sendCouponsService
  * @property CasesRepository $casesRepository
+ * @property EmailMainService $emailService
  */
 class CouponController extends FController
 {
     private $requestCoupon;
     private $sendCouponsService;
     private $casesRepository;
-    private EmailServiceInterface $emailService;
+    private EmailMainService $emailService;
 
-    public function __construct($id, $module, RequestCouponService $requestCoupon, SendCouponsService $sendCouponsService, CasesRepository $casesRepository, $config = [])
+    public function __construct(
+        $id,
+        $module,
+        RequestCouponService $requestCoupon,
+        SendCouponsService $sendCouponsService,
+        CasesRepository $casesRepository,
+        EmailMainService $emailService,
+        $config = []
+    )
     {
         parent::__construct($id, $module, $config);
         $this->requestCoupon = $requestCoupon;
         $this->sendCouponsService = $sendCouponsService;
         $this->casesRepository = $casesRepository;
-
-        $this->emailService = Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_EMAIL_NORMALIZED_FORM_ENABLE) ?
-            EmailsNormalizeService::newInstance() :
-            Yii::createObject(EmailService::class)
-        ;
+        $this->emailService = $emailService;
     }
 
     /**
