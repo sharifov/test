@@ -9,13 +9,13 @@ use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
 use yii\helpers\ArrayHelper;
 use yii\queue\JobInterface;
 
-class LeadBusinessExtraQueueRemoverJob extends BaseJob implements JobInterface
+class LeadBusinessExtraQueueJob extends BaseJob implements JobInterface
 {
-    private int $leadId;
+    private Lead $lead;
     private ?string $description = null;
-    public function __construct(int $leadId, ?string $description = null, ?float $timeStart = null, array $config = [])
+    public function __construct(Lead $lead, ?string $description = null, ?float $timeStart = null, array $config = [])
     {
-        $this->leadId = $leadId;
+        $this->lead = $lead;
         $this->description = $description;
         parent::__construct($timeStart, $config);
     }
@@ -27,22 +27,19 @@ class LeadBusinessExtraQueueRemoverJob extends BaseJob implements JobInterface
     {
         $this->waitingTimeRegister();
         $logData = [
-            'leadId' => $this->leadId,
+            'leadId' => $this->lead->id,
         ];
         try {
-            if (!$lead = Lead::find()->where(['id' => $this->leadId])->limit(1)->one()) {
-                throw new \RuntimeException('Lead not found by ID(' . $this->leadId . ')');
-            }
-            LeadBusinessExtraQueueService::removeFromLead($lead, $this->description);
+            LeadBusinessExtraQueueService::addToLead($this->lead, $this->description);
         } catch (\RuntimeException | \DomainException $throwable) {
             /** @fflag FFlag::FF_KEY_DEBUG, Info log enable */
             if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG)) {
                 $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
-                \Yii::info($message, 'LeadBusinessExtraQueueRemoverJob:execute:Exception');
+                \Yii::info($message, 'LeadBusinessExtraQueueJob:execute:Exception');
             }
         } catch (\Throwable $throwable) {
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
-            \Yii::error($message, 'LeadBusinessExtraQueueRemoverJob:execute:Throwable');
+            \Yii::error($message, 'LeadBusinessExtraQueueJob:execute:Throwable');
         }
     }
 }

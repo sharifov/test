@@ -2,7 +2,10 @@
 
 namespace modules\objectSegment\src\service\lead;
 
+use modules\featureFlag\FFlag;
 use modules\objectSegment\src\contracts\ObjectSegmentAssigmentServiceInterface;
+use modules\objectSegment\src\contracts\ObjectSegmentListContract;
+use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
 use src\model\leadData\entity\LeadData;
 use src\model\leadDataKey\services\LeadDataKeyDictionary;
 use src\repositories\lead\LeadRepository;
@@ -16,7 +19,7 @@ class LeadObjectSegmentAssignService implements ObjectSegmentAssigmentServiceInt
         $this->leadRepository = $leadRepository;
     }
 
-    public function assign(int $entityId, array $values): void
+    public function assign(int $entityId, array $objectSegmentListKeys): void
     {
         try {
             $transaction = \Yii::$app->db->beginTransaction();
@@ -33,13 +36,17 @@ class LeadObjectSegmentAssignService implements ObjectSegmentAssigmentServiceInt
             );
             $currentDateTime = date('Y-m-d H:i:s');
             $inserts = [];
-            foreach ($values as $value) {
+            foreach ($objectSegmentListKeys as $value) {
                 $inserts[] = [
                     'ld_lead_id' => $lead->id,
                     'ld_field_key' => LeadDataKeyDictionary::KEY_LEAD_OBJECT_SEGMENT,
                     'ld_field_value' => $value,
                     'ld_created_dt' => $currentDateTime
                 ];
+                /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+                if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) && $value === ObjectSegmentListContract::OBJECT_SEGMENT_LIST_KEY_LEAD_TYPE_BUSINESS) {
+                    LeadBusinessExtraQueueService::addLeadBusinessExtraQueueJob($lead, 'Added new Business Extra Queue');
+                }
             }
             if (count($inserts)) {
                 \Yii::$app

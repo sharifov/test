@@ -5180,6 +5180,16 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $this->setStatus(self::STATUS_EXTRA_QUEUE);
     }
 
+    public function toBusinessExtraQueue(?int $newOwnerId = null): void
+    {
+        if ($this->isExtraQueue()) {
+            return;
+        }
+        $this->changeOwner($newOwnerId);
+
+        $this->setStatus(self::STATUS_BUSINESS_EXTRA_QUEUE);
+    }
+
     public function hasTakenFromExtraToProcessing(): bool
     {
         if ($this->isProcessing()) {
@@ -5219,6 +5229,11 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     public function isExtraQueue(): bool
     {
         return $this->status === self::STATUS_EXTRA_QUEUE;
+    }
+
+    public function isBusinessExtraQueue(): bool
+    {
+        return $this->status === self::STATUS_BUSINESS_EXTRA_QUEUE;
     }
 
     public function isClosed(): bool
