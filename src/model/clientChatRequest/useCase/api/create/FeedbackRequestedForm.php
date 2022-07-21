@@ -3,10 +3,8 @@
 namespace src\model\clientChatRequest\useCase\api\create;
 
 use common\models\ClientChatSurvey;
-use common\models\Employee;
 use src\model\clientChat\entity\ClientChat;
-use src\model\clientChatRequest\useCase\api\create\query\UserClientChatDataQuery;
-use src\model\userClientChatData\entity\UserClientChatData;
+use src\model\userClientChatData\entity\UserClientChatDataQuery;
 
 /**
  * Class FeedbackRequestedForm

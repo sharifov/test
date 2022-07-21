@@ -1,8 +1,7 @@
 <?php
 
-namespace src\model\clientChatRequest\useCase\api\create\query;
+namespace src\model\userClientChatData\entity;
 
-use src\model\userClientChatData\entity\UserClientChatData;
 use yii\db\ActiveQuery;
 
 /**
