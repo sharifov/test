@@ -103,7 +103,7 @@ class EmailIncomingService
                         LeadBusinessExtraQueueService::addLeadBusinessExtraQueueRemoverJob($lead->id, LeadBusinessExtraQueueLogStatus::REASON_RECEIVED_EMAIL);
                     }
                     $contact->releaseLog('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | ', 'EmailIncomingService');
-                    return new Process(isset($lead) ?? $lead->id, null);
+                    return new Process($lead?->id, null);
                 }
 
                 if ($departmentParams->object->type->isCase()) {
