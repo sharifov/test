@@ -69,6 +69,8 @@ $canAttachFiles = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EM
 /** @abac $abacDto, EmailAbacObject::ACT_VIEW, EmailAbacObject::ACTION_SHOW_EMAIL_DATA, Restrict access to view emails on case or lead*/
 $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SHOW_EMAIL_DATA);
 
+$caseAddBookingIdAjaxUrl = \yii\helpers\Url::to(['cases/ajax-add-booking-id', 'gid' => $model->cs_gid]);
+$bookingId = $model->cs_order_uid;
 ?>
 
 <div class="x_panel">
@@ -485,9 +487,21 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
                             <div class="btn-wrapper">
                                 <?= Html::submitButton(
                                     '<i class="fa fa-envelope-o"></i> Preview and Send Email',
-                                    ['class' => 'btn btn-lg btn-primary', 'id' => 'preview_email_btn']
+                                    [
+                                        'class' => 'btn btn-lg btn-primary',
+                                        'id' => 'preview_email_btn',
+                                        'disabled' => empty($bookingId),
+                                    ]
                                 ) ?>
                             </div>
+
+                            <?php
+                            if (empty($bookingId)) { ?>
+                                <div class="text-danger">
+                                    To send email need to add Booking ID to case.
+                                </div>
+
+                            <?php } ?>
                         </div>
 
                         <?= $previewEmailActiveForm->field($comForm, 'c_voice_status')->hiddenInput(['id' => 'c_voice_status'])->label(false); ?>
@@ -764,6 +778,17 @@ $js = <<<JS
     });
     
     $(document).on('beforeSubmit', '#communication-form', function(e) {
+        if(!'{$bookingId}') {
+            let modal = $('#modalCaseSm'),
+            title = 'Please add booking ID to send email.';
+            modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+            modal.modal('show').find('.modal-header').html('<h4 class="text-danger font-weight-bold">' + title + ' ' + '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h4>');
+            
+            $.get('$caseAddBookingIdAjaxUrl', function(data) {
+                modal.find('.modal-body').html(data);
+            });
+            return false;
+        }
         let btn = $('#preview_email_btn'),
             loaderInner = '<span class="spinner-border spinner-border-sm"></span> Loading';
         btn.html(loaderInner).prop('disabled', true);
