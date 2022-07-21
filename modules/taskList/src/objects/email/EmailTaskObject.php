@@ -29,12 +29,11 @@ class EmailTaskObject extends BaseTaskObject implements TaskObjectInterface
         TargetObjectList::TARGET_OBJ_LEAD
     ];
 
-
     protected const ATTR_PROJECT_KEY = [
         'optgroup' => self::OPTGROUP_CALL,
         'id' => self::NS . self::FIELD_PROJECT_KEY,
         'field' => self::FIELD_PROJECT_KEY,
-        'label' => 'Call Project',
+        'label' => 'Email Project',
         'type' => self::ATTR_TYPE_STRING,
         'input' => self::ATTR_INPUT_SELECT,
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN],
@@ -45,14 +44,12 @@ class EmailTaskObject extends BaseTaskObject implements TaskObjectInterface
         'optgroup' => self::OPTGROUP_CALL,
         'id' => self::NS . self::FIELD_DEPARTMENT_ID,
         'field' => self::FIELD_DEPARTMENT_ID,
-        'label' => 'Call Department',
+        'label' => 'Call Department(wrong - TODO)',
         'type' => self::ATTR_TYPE_INTEGER,
         'input' => self::ATTR_INPUT_SELECT,
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN],
         'icon' => 'fa fa-list',
     ];
-
-
 
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [

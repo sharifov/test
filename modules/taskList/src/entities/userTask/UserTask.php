@@ -181,4 +181,10 @@ class UserTask extends \yii\db\ActiveRecord
     {
         return self::PRIORITY_LIST[$priorityId] ?? '-';
     }
+
+    public function setStatusComplete(): UserTask
+    {
+        $this->ut_status_id = self::STATUS_COMPLETE;
+        return $this;
+    }
 }
