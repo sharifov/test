@@ -4255,7 +4255,7 @@
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:techork/yii2-feature-flag.git",
-                "reference": "b502d70ed75a5e9df65739ccbf3d484fc1fd0d2c"
+                "reference": "2a4b78e9bb812a594e497107b9bb5eb3ee7cf2b2"
             },
             "require": {
                 "ext-json": "*",
