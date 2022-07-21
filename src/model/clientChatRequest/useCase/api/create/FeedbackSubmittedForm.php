@@ -92,14 +92,14 @@ class FeedbackSubmittedForm extends FeedbackFormBase
         }
 
         Yii::$app->db->createCommand()
-            ->delete(ClientChatSurveyResponse::tableName(), 'ccsr_client_chat_survey_id = :ccsr_client_chat_survey_id', [':ccsr_client_chat_survey_id' => $model->getPrimaryKey()])
+            ->delete(ClientChatSurveyResponse::tableName(), 'ccsr_client_chat_survey_id = :ccsr_client_chat_survey_id', [':ccsr_client_chat_survey_id' => $model->ccs_id])
             ->execute();
 
         $model->ccs_status = ClientChatSurvey::STATUS_SUBMITTED;
         $columns = ['ccsr_client_chat_survey_id', 'ccsr_question', 'ccsr_response', 'ccsr_created_dt'];
         $rows = array_map(function ($response) use ($model) {
             return [
-                'ccsr_client_chat_survey_id' => $model->getPrimaryKey(),
+                'ccsr_client_chat_survey_id' => $model->ccs_id,
                 'ccsr_question' => $response['question'],
                 'ccsr_response' => $response['response'],
                 'ccsr_created_dt' => date('Y-m-d H:i:s')
