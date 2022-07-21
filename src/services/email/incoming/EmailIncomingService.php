@@ -152,7 +152,7 @@ class EmailIncomingService
         bool $createLeadOnEmail
     ): ?Lead {
         if ($lead = Lead::find()->findLastActiveLeadByDepartmentClient($departmentId, $clientId, $projectId)->one()) {
-            return $lead->id;
+            return $lead;
         }
         if ($createLeadOnEmail) {
             $lead = $this->leadManageService->createByIncomingEmail(
