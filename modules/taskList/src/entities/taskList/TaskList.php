@@ -291,6 +291,6 @@ class TaskList extends ActiveRecord
     public function getDelayHoursParam(): int
     {
         $params = JsonHelper::decode($this->tl_params_json);
-        return (int)$params['delayHours'] ?? 0;
+        return (int) ($params['delayHours'] ?? 0);
     }
 }
