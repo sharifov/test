@@ -34,6 +34,7 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_TELEGRAM_MESSAGE_DELAY_ENABLE = 'telegramMessageDelayEnable';
     public const FF_KEY_SHIFT_SCHEDULE_REQUEST_SAVE_SEND_NOTIFICATION_BY_JOB_ENABLE = 'shiftScheduleRequestSaveSendNotificationByJobEnable';
 
+
     public const FF_KEY_LIST = [
         self::FF_KEY_LPP_ENABLE,
         self::FF_KEY_DEBUG,

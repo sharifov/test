@@ -666,6 +666,10 @@ window.refreshChatInfo = function (cch_id, callable, ref, socketConnectionId) {
         success: function (data) {
             $('#_client-chat-info').html(data.html);
             $('#_client-chat-note').html(data.noteHtml);
+            
+            if ('timer' in data) {    
+                window.clientChatHoldTimeProgressbar(data.timer.formatTimer, data.timer.maxProgressBar, data.timer.leftProgressBar, data.timer.warningZone)
+            }
             if (callable) {
                 callable(cch_id, data, ref);
             }          
