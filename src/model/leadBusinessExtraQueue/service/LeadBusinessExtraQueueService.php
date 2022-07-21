@@ -7,6 +7,7 @@ use common\models\Lead;
 use frontend\helpers\RedisHelper;
 use modules\featureFlag\FFlag;
 use src\helpers\app\AppHelper;
+use src\model\leadBusinessExtraQueue\entity\LeadBusinessExtraQueue;
 use src\model\leadBusinessExtraQueue\entity\LeadBusinessExtraQueueQuery;
 use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLog;
 use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogQuery;
@@ -86,5 +87,22 @@ class LeadBusinessExtraQueueService
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
             \Yii::error($message, 'LeadBusinessExtraQueueService:addLeadPoorProcessingRemoverJob:Throwable');
         }
+    }
+
+    public static function getLeadBusinessExtraQueueByMinExpire(Lead $lead): ?LeadBusinessExtraQueue
+    {
+        return LeadBusinessExtraQueue::find()
+            ->where([
+                'lbeq_lead_id' => $lead->id,
+            ])
+            ->orderBy('lbeq_expiration_dt', 'ASC')
+            ->limit(1)
+            ->one();
+    }
+
+    public static function ffIsEnabled(): bool
+    {
+        /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+        return Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE);
     }
 }

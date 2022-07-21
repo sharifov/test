@@ -13,6 +13,7 @@ use frontend\helpers\RedisHelper;
 use frontend\helpers\JsonHelper;
 use frontend\widgets\notification\NotificationMessage;
 use kivork\search\core\urlsig\UrlSignature;
+use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\objectSegment\src\contracts\ObjectSegmentListContract;
@@ -4407,12 +4408,19 @@ Reason: {reason}',
      */
     public static function getProcessingStatuses(): array
     {
-        return [
+        $list = [
             self::STATUS_SNOOZE => self::STATUS_LIST[self::STATUS_SNOOZE],
             self::STATUS_PROCESSING => self::STATUS_LIST[self::STATUS_PROCESSING],
             self::STATUS_ON_HOLD => self::STATUS_LIST[self::STATUS_ON_HOLD],
             self::STATUS_EXTRA_QUEUE => self::STATUS_LIST[self::STATUS_EXTRA_QUEUE],
         ];
+
+        /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) === true) {
+            $list[self::STATUS_BUSINESS_EXTRA_QUEUE] = self::STATUS_LIST[self::STATUS_BUSINESS_EXTRA_QUEUE];
+        }
+
+        return $list;
     }
 
     /**
