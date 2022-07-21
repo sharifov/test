@@ -5313,7 +5313,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         return (bool) $this
             ->getLeadData()
-            ->where(['ld_filed_key' => LeadDataKeyDictionary::KEY_LEAD_OBJECT_SEGMENT])
+            ->where(['ld_field_key' => LeadDataKeyDictionary::KEY_LEAD_OBJECT_SEGMENT])
             ->andWhere(['ld_field_value' => ObjectSegmentListContract::OBJECT_SEGMENT_LIST_KEY_LEAD_TYPE_BUSINESS])
             ->count();
     }
