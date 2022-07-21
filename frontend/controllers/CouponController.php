@@ -280,7 +280,7 @@ class CouponController extends FController
                                 $couponClient = CouponClient::create($coupon->c_id, $clientId);
                                 (new CouponClientRepository())->save($couponClient);
 
-                                $couponSend = CouponSend::create($coupon->c_id, Auth::id(), $mail->e_email_to);
+                                $couponSend = CouponSend::create($coupon->c_id, Auth::id(), $mail->getEmailTo(false));
                                 (new CouponSendRepository())->save($couponSend);
                             }
                         }
