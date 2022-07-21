@@ -147,6 +147,13 @@ class CreateForm extends Model
                 ->scalar();
         }
 
+        if (empty($this->project_key) && $this->project_id) {
+            $this->project_key = Project::find()
+                ->select('api_key')
+                ->where(['id' => $this->project_id])
+                ->scalar();
+        }
+
         return new Command(
             $this->contact_email,
             $this->contact_phone,

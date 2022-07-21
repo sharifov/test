@@ -239,6 +239,7 @@ class DownloadEmails
                                 $job = new CreateSaleFromBOJob();
                                 $job->case_id = $email->e_case_id;
                                 $job->email = $email->e_email_from;
+                                $job->project_key = $email->eProject->api_key ?? null;
                                 Yii::$app->queue_job->priority(100)->push($job);
                             } catch (\Throwable $throwable) {
                                 Yii::error(AppHelper::throwableFormatter($throwable), 'DownloadEmails:createSaleFromBo:addToJobFailed');

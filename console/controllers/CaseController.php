@@ -97,6 +97,7 @@ class CaseController extends Controller
                     $job->order_uid = $refund['bookingid'];
                     $job->email = $refund['email'];
                     $job->phone = '';
+                    $job->project_key = $case->project->api_key ?? null;
                     Yii::$app->queue_job->priority(100)->push($job);
 
                     $transaction->commit();
