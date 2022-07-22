@@ -33,6 +33,8 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_FILTER_USERNAME_ROLES_IN_TRANSFER_TAB = 'filterUsernameAndRolesInTransferTabEnable';
     public const FF_KEY_TELEGRAM_MESSAGE_DELAY_ENABLE = 'telegramMessageDelayEnable';
     public const FF_KEY_SHIFT_SCHEDULE_REQUEST_SAVE_SEND_NOTIFICATION_BY_JOB_ENABLE = 'shiftScheduleRequestSaveSendNotificationByJobEnable';
+    public const FF_KEY_FILTER_CONVERSION_DATE_AND_USER_IN_LEAD_SEARCH = 'filterConversionDateAndUserInLeadSearch';
+
 
 
     public const FF_KEY_LIST = [
@@ -58,6 +60,7 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_FILTER_USERNAME_ROLES_IN_TRANSFER_TAB,
         self::FF_KEY_TELEGRAM_MESSAGE_DELAY_ENABLE,
         self::FF_KEY_SHIFT_SCHEDULE_REQUEST_SAVE_SEND_NOTIFICATION_BY_JOB_ENABLE,
+        FF_KEY_FILTER_CONVERSION_DATE_AND_USER_IN_LEAD_SEARCH,
     ];
 
 
