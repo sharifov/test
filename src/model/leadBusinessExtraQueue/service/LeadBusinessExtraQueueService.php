@@ -173,4 +173,21 @@ class LeadBusinessExtraQueueService
             \Yii::error($message, 'LeadBusinessExtraQueueService:addLeadPoorProcessingRemoverJob:Throwable');
         }
     }
+
+    public static function getLeadBusinessExtraQueueByMinExpire(Lead $lead): ?LeadBusinessExtraQueue
+    {
+        return LeadBusinessExtraQueue::find()
+            ->where([
+                'lbeq_lead_id' => $lead->id,
+            ])
+            ->orderBy('lbeq_expiration_dt', 'ASC')
+            ->limit(1)
+            ->one();
+    }
+
+    public static function ffIsEnabled(): bool
+    {
+        /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+        return Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE);
+    }
 }
