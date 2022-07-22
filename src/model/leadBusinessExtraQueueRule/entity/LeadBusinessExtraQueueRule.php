@@ -29,6 +29,9 @@ use yii\helpers\Inflector;
  * @property array|null $lbeqr_params_json
  * @property string|null $lbeqr_updated_dt
  * @property int|null $lbeqr_updated_user_id
+ * @property string $lbeqr_start_time
+ * @property string $lbeqr_end_time
+ * @property int $lbeqr_duration
  *
  * @property LeadBusinessExtraQueueLog[] $leadBusinessExtraQueueLogs
  * @property LeadBusinessExtraQueue[] $leadBusinessExtraQueues
@@ -41,9 +44,11 @@ class LeadBusinessExtraQueueRule extends \yii\db\ActiveRecord
         return [
             ['lbeqr_description', 'string', 'max' => 500],
 
-            ['lbeqr_enabled', 'integer'],
+            ['lbeqr_enabled', 'boolean'],
 
-            ['lbeqr_key', 'required'],
+            [['lbeqr_key', 'lbeqr_params_json', 'lbeqr_start_time', 'lbeqr_end_time', 'lbeqr_duration'], 'required'],
+            ['lbeqr_duration', 'integer'],
+            [['lbeqr_start_time', 'lbeqr_end_time'], 'datetime', 'format' => 'H:m'],
             ['lbeqr_key', 'string', 'max' => 50],
             ['lbeqr_key', 'unique'],
             ['lbeqr_key', 'filter', 'filter' => static function ($value) {
@@ -115,6 +120,9 @@ class LeadBusinessExtraQueueRule extends \yii\db\ActiveRecord
             'lbeqr_params_json' => 'Params',
             'lbeqr_updated_dt' => 'Updated Dt',
             'lbeqr_updated_user_id' => 'Updated User',
+            'lbeqr_start_time' => 'Start Time',
+            'lbeqr_end_time' => 'End Time',
+            'lbeqr_duration' => 'Duration (minutes)',
         ];
     }
 

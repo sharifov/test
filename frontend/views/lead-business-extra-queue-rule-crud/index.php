@@ -28,17 +28,29 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-
-            'lbeqr_id',
             'lbeqr_key',
             'lbeqr_name',
-            'lbeqr_description:ntext',
-            'lbeqr_params_json',
-            //'lbeqr_updated_user_id',
-            //'lbeqr_created_dt',
-            //'lbeqr_updated_dt',
+            'lbeqr_description:text',
             [
-                'class' => ActionColumn::className(),
+                'attribute' => 'lbeqr_enabled',
+                'value' => static function (LeadBusinessExtraQueueRule $model) {
+                    return \Yii::$app->formatter->asBooleanByLabel($model->lbeqr_enabled);
+                },
+                'filter' => [1 => 'Yes', 0 => 'No'],
+                'format' => 'raw',
+            ],
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'lbeqr_updated_user_id',
+                'relation' => 'lbeqrUpdatedUser',
+                'placeholder' => 'Updated User'
+            ],
+            'lbeqr_updated_user_id',
+            'lbeqr_duration',
+            'lbeqr_start_time',
+            'lbeqr_end_time',
+            [
+                'class' => ActionColumn::class,
                 'urlCreator' => function ($action, LeadBusinessExtraQueueRule $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'lbeqr_id' => $model->lbeqr_id]);
                 }

@@ -4,11 +4,15 @@ namespace common\models;
 
 use common\components\ChartTools;
 use common\components\CommunicationService;
+use common\components\jobs\UserTaskCompletionJob;
 use common\models\query\EmailQuery;
 use common\models\DepartmentEmailProject;
 use common\models\UserProjectParams;
 use DateTime;
 use modules\featureFlag\FFlag;
+use modules\lead\src\services\LeadTaskListService;
+use modules\taskList\src\entities\TargetObject;
+use modules\taskList\src\entities\TaskObject;
 use src\behaviors\metric\MetricEmailCounterBehavior;
 use src\entities\cases\Cases;
 use src\helpers\app\AppHelper;
@@ -499,6 +503,17 @@ class Email extends \yii\db\ActiveRecord
                         \Yii::error($message, 'Email:LeadUserData:Throwable');
                     }
                 }
+            }
+
+            if ($this->e_id && ($lead = $this->eLead) && (new LeadTaskListService($lead))->isProcessAllowed()) {
+                $job = new UserTaskCompletionJob(
+                    TargetObject::TARGET_OBJ_LEAD,
+                    $lead->id,
+                    TaskObject::OBJ_EMAIL,
+                    $this->e_id,
+                    $lead->employee_id
+                );
+                Yii::$app->queue_job->push($job);
             }
         } catch (\Throwable $exception) {
             $error = VarDumper::dumpAsString($exception->getMessage());
