@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "62f1c05e4a074d8a421919d42322ba5f",
+    "content-hash": "6b1975a4917dfaeda0bd7a614c644360",
     "packages": [
         {
             "name": "2amigos/yii2-arrayquery-component",
@@ -584,16 +584,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.231.10",
+            "version": "3.231.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "e46b7c5fcb70fadf38079755982cc1d3f0583c41"
+                "reference": "6a37c3d5fe2d6b401f689aa37c9f962df55e680b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/e46b7c5fcb70fadf38079755982cc1d3f0583c41",
-                "reference": "e46b7c5fcb70fadf38079755982cc1d3f0583c41",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/6a37c3d5fe2d6b401f689aa37c9f962df55e680b",
+                "reference": "6a37c3d5fe2d6b401f689aa37c9f962df55e680b",
                 "shasum": ""
             },
             "require": {
@@ -670,9 +670,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.231.10"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.231.11"
             },
-            "time": "2022-07-20T18:17:18+00:00"
+            "time": "2022-07-21T18:17:02+00:00"
         },
         {
             "name": "bacon/bacon-qr-code",
@@ -4251,11 +4251,11 @@
         },
         {
             "name": "kivork/yii2-feature-flag",
-            "version": "dev-develop",
+            "version": "2.0.0",
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:techork/yii2-feature-flag.git",
-                "reference": "2a4b78e9bb812a594e497107b9bb5eb3ee7cf2b2"
+                "reference": "2ba759a14149940cbc6d238fa76f89467a7455fe"
             },
             "require": {
                 "ext-json": "*",
@@ -16231,7 +16231,6 @@
         "kivork/yii2-virtual-cron": 20,
         "kivork/yii2-prometheus-client": 20,
         "kartik-v/yii2-widget-fileinput": 20,
-        "kivork/yii2-feature-flag": 20,
         "eaglewu/swoole-ide-helper": 20,
         "redcomponent/teststatistics": 20,
         "phpcompatibility/php-compatibility": 20
@@ -16253,5 +16252,5 @@
         "ext-pgsql": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.0.0"
 }
