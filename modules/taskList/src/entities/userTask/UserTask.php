@@ -6,6 +6,7 @@ use common\models\Employee;
 use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTask;
 use modules\taskList\src\entities\TargetObject;
 use modules\taskList\src\entities\taskList\TaskList;
+use modules\taskList\src\entities\userTask\behaviors\UserTaskStatusLogDeleteBehavior;
 use src\behaviors\dateTime\CreatedYearMonthBehavior;
 use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
@@ -102,6 +103,9 @@ class UserTask extends \yii\db\ActiveRecord
                 'createdColumn' => 'ut_created_dt',
                 'yearColumn' => 'ut_year',
                 'monthColumn' => 'ut_month',
+            ],
+            'deleteStatusLogs' => [
+                'class' => UserTaskStatusLogDeleteBehavior::class
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
