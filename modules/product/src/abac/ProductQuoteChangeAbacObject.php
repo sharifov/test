@@ -239,6 +239,18 @@ class ProductQuoteChangeAbacObject extends AbacBaseModel implements AbacInterfac
         'operators' =>  [self::OP_EQUAL2]
     ];
 
+    protected const ATTR_HAS_PQ_NEW = [
+        'optgroup' => 'PRODUCT QUOTE',
+        'id' => self::NS . 'hasPqNew',
+        'field' => 'hasPqNew',
+        'label' => 'Has New Quote Change',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2]
+    ];
+
     protected const ATTR_HAS_PQC_INVOLUNTARY_ACTIVE = [
         'optgroup' => 'PRODUCT QUOTE',
         'id' => self::NS . 'hasPqcInvoluntaryActive',
@@ -385,6 +397,7 @@ class ProductQuoteChangeAbacObject extends AbacBaseModel implements AbacInterfac
             self::ATTR_IS_PQ_CHANGEABLE,
             self::ATTR_HAS_PQR_ACTIVE,
             self::ATTR_HAS_PQC_ACTIVE,
+            self::ATTR_HAS_PQ_NEW,
             self::ATTR_ORDER_OWNER,
             self::ATTR_MAX_CONFIRMABLE_QUOTES_CNT,
             self::ATTR_HAS_PQC_INVOLUNTARY_ACTIVE,
