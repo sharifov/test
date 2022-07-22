@@ -2,6 +2,7 @@
 
 namespace modules\taskList\src\entities\userTask;
 
+use common\models\Employee;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use modules\taskList\src\entities\userTask\UserTaskStatusLog;
@@ -18,17 +19,9 @@ class UserTaskStatusLogSearch extends UserTaskStatusLog
     {
         return [
             [['utsl_id', 'utsl_ut_id', 'utsl_old_status', 'utsl_new_status', 'utsl_created_user_id'], 'integer'],
-            [['utsl_description', 'utsl_created_dt'], 'safe'],
+            [['utsl_description'], 'string'],
+            [['utsl_created_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function scenarios()
-    {
-        // bypass scenarios() implementation in the parent class
-        return Model::scenarios();
     }
 
     /**
@@ -51,9 +44,14 @@ class UserTaskStatusLogSearch extends UserTaskStatusLog
         $this->load($params);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
+
             return $dataProvider;
+        }
+
+        if ($this->utsl_created_dt) {
+            $query->andFilterWhere(['>=', 'utsl_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->utsl_created_dt))])
+                ->andFilterWhere(['<=', 'utsl_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->utsl_created_dt))]);
         }
 
         // grid filtering conditions
@@ -63,7 +61,6 @@ class UserTaskStatusLogSearch extends UserTaskStatusLog
             'utsl_old_status' => $this->utsl_old_status,
             'utsl_new_status' => $this->utsl_new_status,
             'utsl_created_user_id' => $this->utsl_created_user_id,
-            'utsl_created_dt' => $this->utsl_created_dt,
         ]);
 
         $query->andFilterWhere(['like', 'utsl_description', $this->utsl_description]);

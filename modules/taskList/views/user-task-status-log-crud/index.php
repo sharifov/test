@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
 use modules\taskList\src\entities\userTask\UserTask;
 use modules\taskList\src\entities\userTask\UserTaskHelper;
@@ -57,6 +58,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'relation' => 'utslCreatedUser',
                 'placeholder' => 'Employee',
                 'format' => 'userNameWithId',
+            ],
+            [
+                'class' => DateTimeColumn::class,
+                'limitEndDay' => false,
+                'attribute' => 'utsl_created_dt',
+                'format' => 'byUserDateTimeAndUTC',
             ],
             [
                 'class' => ActionColumn::class,
