@@ -23,14 +23,6 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'utsl_new_status')->dropDownList(UserTask::STATUS_LIST, ['prompt' => 'Select status']) ?>
 
-    <?= $form->field($model, 'utsl_created_user_id')->widget(UserSelect2Widget::class, [
-        'data' => $model->utsl_created_user_id ? [
-            $model->utsl_created_user_id => $model->utslCreatedUser->username
-        ] : [],
-    ]) ?>
-
-    <?= $form->field($model, 'utsl_created_dt')->widget(DateTimePicker::class) ?>
-
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>

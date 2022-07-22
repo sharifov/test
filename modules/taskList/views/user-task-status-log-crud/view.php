@@ -52,7 +52,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => UserTask::STATUS_LIST,
             ],
             'utsl_created_user_id:userNameWithId',
-            'utsl_created_dt',
+            'utsl_created_dt:byUserDateTimeAndUTC',
         ],
     ]) ?>
 

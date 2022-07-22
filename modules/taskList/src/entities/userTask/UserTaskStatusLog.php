@@ -5,7 +5,10 @@ namespace modules\taskList\src\entities\userTask;
 use common\models\Employee;
 use common\models\query\EmployeeQuery;
 use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
+use yii\db\BaseActiveRecord;
 
 /**
  * This is the model class for table "user_task_status_log".
@@ -68,6 +71,27 @@ class UserTaskStatusLog extends \yii\db\ActiveRecord
             'utsl_new_status' => 'New Status',
             'utsl_created_user_id' => 'Created User ID',
             'utsl_created_dt' => 'Created Datetime',
+        ];
+    }
+
+
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    BaseActiveRecord::EVENT_BEFORE_INSERT => ['utsl_created_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s'),
+            ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'attributes' => [
+                    BaseActiveRecord::EVENT_BEFORE_INSERT => ['utsl_created_user_id'],
+                ],
+                'defaultValue' => null,
+            ],
         ];
     }
 
