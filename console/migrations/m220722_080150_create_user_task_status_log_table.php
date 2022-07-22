@@ -23,7 +23,7 @@ class m220722_080150_create_user_task_status_log_table extends Migration
         ]);
 
         $this->createIndex(
-            'idx-user_task_status_log-utsl_ut_id',
+            'IND-user_task_status_log-utsl_ut_id',
             '{{%user_task_status_log}}',
             'utsl_ut_id'
         );
