@@ -4,6 +4,7 @@ namespace modules\taskList\src\entities;
 
 use modules\taskList\src\objects\call\CallTaskObject;
 use modules\taskList\src\objects\email\EmailTaskObject;
+use modules\taskList\src\objects\sms\SmsTaskObject;
 use yii\helpers\VarDumper;
 
 class TaskObject
@@ -14,13 +15,13 @@ class TaskObject
 
     public const OBJ_LIST = [
         self::OBJ_CALL => 'Call',
-        //self::OBJ_SMS => 'SMS',
+        self::OBJ_SMS => 'SMS',
         self::OBJ_EMAIL => 'Email',
     ];
 
     public const OBJ_CLASS_LIST = [
         self::OBJ_CALL => CallTaskObject::class,
-        //self::OBJ_SMS => CallTaskObject::class,
+        self::OBJ_SMS => SmsTaskObject::class,
         self::OBJ_EMAIL => EmailTaskObject::class,
     ];
 
