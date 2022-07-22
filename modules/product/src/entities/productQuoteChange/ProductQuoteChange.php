@@ -46,6 +46,8 @@ use src\auth\Auth;
  * @property Employee $pqcCreatedUser
  * @property ProductQuote $pqcPq
  * @property ProductQuoteChangeRelation[]|null $productQuoteChangeRelations
+ * @property-read  ProductQuoteChangeRelation[]|null $newProductQuoteChangeRelations
+ * @property-read bool $isNewProductQuote
  */
 class ProductQuoteChange extends \yii\db\ActiveRecord
 {
@@ -310,6 +312,26 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
     public function getProductQuoteChangeRelations(): \yii\db\ActiveQuery
     {
         return $this->hasMany(ProductQuoteChangeRelation::class, ['pqcr_pqc_id' => 'pqc_id']);
+    }
+
+    /**
+     * Returns Quote change relations with quote data in status NEW
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getNewProductQuoteChangeRelations(): \yii\db\ActiveQuery
+    {
+         return $this->getProductQuoteChangeRelations()->innerJoinWith(['newProductQuote']);
+    }
+
+    /**
+     * Returns true if a product quote in status NEW exists
+     *
+     * @return bool
+     */
+    public function getIsNewProductQuote(): bool
+    {
+        return $this->getNewProductQuoteChangeRelations()->exists();
     }
 
     public static function find(): Scopes
