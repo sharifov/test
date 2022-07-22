@@ -12,7 +12,7 @@ use src\dto\email\EmailDTO;
 use src\services\email\incoming\EmailIncomingService;
 use src\entities\email\Email as EmailNorm;
 use common\models\Email;
-use src\entities\email\EmailRepository;
+use src\repositories\email\EmailRepository;
 use src\services\cases\CasesManageService;
 use common\components\jobs\CreateSaleFromBOJob;
 use src\helpers\app\AppHelper;

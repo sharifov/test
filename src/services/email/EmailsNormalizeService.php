@@ -15,7 +15,7 @@ use src\entities\email\EmailBody;
 use src\entities\email\EmailContact;
 use src\entities\email\EmailInterface;
 use src\entities\email\EmailLog;
-use src\entities\email\EmailRepository;
+use src\repositories\email\EmailRepository;
 use src\entities\email\form\EmailForm;
 use src\entities\email\helpers\EmailContactType;
 use src\entities\email\helpers\EmailStatus;
@@ -154,9 +154,9 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
         $connection = \Yii::$app->getDb();
         $command = $connection->createCommand(
             "SELECT COUNT(emo.e_id)
-             FROM `".Email::tableName()."` emn
-            INNER JOIN `".EmailOld::tableName()."` emo ON emo.e_id = emn.e_id"
-            );
+             FROM `" . Email::tableName() . "` emn
+            INNER JOIN `" . EmailOld::tableName() . "` emo ON emo.e_id = emn.e_id"
+        );
         return $command->queryScalar();
     }
 
@@ -208,8 +208,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             //=!EmailBlob
 
             //=EmailContacts
-            foreach ($form->contacts as $contactForm)
-            {
+            foreach ($form->contacts as $contactForm) {
                 $address = $this->getAddress($contactForm->email, $contactForm->name, true);
                 EmailContact::create([
                     'ec_address_id' => $address->ea_id,
@@ -225,7 +224,6 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             $clientsIds = $form->clients ?? [$this->helper->detectClientId($email->emailTo)];
             if (!empty($clientsIds)) {
                 $this->emailRepository->linkClients($email, $clientsIds);
-
             }
             //=!link Clients
 
@@ -252,8 +250,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             }
 
             $transaction->commit();
-
-        }catch (\Throwable $e) {
+        } catch (\Throwable $e) {
             $transaction->rollBack();
             throw $e;
         }
@@ -304,8 +301,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             //=EmailContacts
             $contactsByType = ArrayHelper::index($email->emailContacts, 'ec_type_id');
             $contactsById = ArrayHelper::index($email->emailContacts, 'ec_id');
-            foreach ($form->contacts as $contactForm)
-            {
+            foreach ($form->contacts as $contactForm) {
                 if (isset($contactForm->id)) {
                     $contact = $contactsById[$contactForm->id];
                 } else {
@@ -315,7 +311,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
                 if ($contact) {
                     $address = $this->getAddress($contactForm->email, $contactForm->name, true);
 
-                    $contact->updateAttributes( [
+                    $contact->updateAttributes([
                         'ec_address_id' => $address->ea_id,
                         'ec_type_id' => $contactForm->type
                     ]);
@@ -327,7 +323,6 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             $clientsIds = $form->clients;
             if (!empty($clientsIds)) {
                 $this->emailRepository->linkClients($email, $clientsIds);
-
             }
             //=!link Clients
 
@@ -350,12 +345,10 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             //=!link Reply
 
             $transaction->commit();
-
-        }catch (\Throwable $e) {
+        } catch (\Throwable $e) {
             $transaction->rollBack();
             throw $e;
         }
-
         return $email;
     }
 
@@ -493,7 +486,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             $clientId = $emailDTO->clientId ?? $this->helper->detectClientId($emailDTO->emailFrom);
             $leadId =  $emailDTO->leadId ?? $this->helper->detectLeadId($emailDTO->emailSubject, $emailDTO->refMessageId);
             $caseId = $emailDTO->caseId ?? $this->helper->detectCaseId($emailDTO->emailSubject, $emailDTO->refMessageId);
-            $this->userId = $emailDTO->createdUserId ??$this->helper->getUserIdByEmail($emailDTO->emailTo);
+            $this->userId = $emailDTO->createdUserId ?? $this->helper->getUserIdByEmail($emailDTO->emailTo);
         }
 
         $data = [
@@ -535,8 +528,8 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             ];
         }
 
-        $data['leadsIds'] = $leadId ? [$leadId]: null;
-        $data['casesIds'] = $caseId ? [$caseId]: null;
+        $data['leadsIds'] = $leadId ? [$leadId] : null;
+        $data['casesIds'] = $caseId ? [$caseId] : null;
 
         return $this->create(EmailForm::fromArray($data));
     }

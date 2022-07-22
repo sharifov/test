@@ -2,35 +2,34 @@
 
 namespace frontend\controllers;
 
+use common\components\CommunicationService;
+use common\models\EmailTemplateType;
+use common\models\Employee;
+use common\models\Project;
 use common\models\search\EmailSearch;
-use src\entities\email\Email;
-use src\entities\email\EmailSearch as EmailNormalizedSearch;
-use src\model\email\useCase\send\EmailSenderService;
-use src\services\email\EmailsNormalizeService;
-use Yii;
-use yii\filters\VerbFilter;
-use yii\helpers\ArrayHelper;
-use yii\web\NotFoundHttpException;
-use yii\web\Response;
+use common\models\UserProjectParams;
 use modules\email\src\abac\dto\EmailAbacDto;
 use modules\email\src\abac\EmailAbacObject;
-use yii\web\ForbiddenHttpException;
-use yii\bootstrap\Html;
 use src\auth\Auth;
-use common\models\UserProjectParams;
-use src\entities\email\form\EmailForm;
-use src\entities\email\helpers\EmailFilterType;
-use common\models\Project;
-use src\entities\email\EmailRepository;
-use src\entities\email\helpers\EmailContactType;
-use common\components\CommunicationService;
-use common\models\Employee;
+use src\entities\email\Email;
 use src\entities\email\EmailBody;
+use src\entities\email\EmailSearch as EmailNormalizedSearch;
+use src\entities\email\form\EmailForm;
+use src\entities\email\helpers\EmailContactType;
+use src\entities\email\helpers\EmailFilterType;
+use src\services\email\EmailsNormalizeService;
+use Yii;
+use yii\bootstrap\Html;
+use yii\filters\VerbFilter;
+use yii\helpers\ArrayHelper;
+use yii\web\ForbiddenHttpException;
+use yii\web\NotFoundHttpException;
+use yii\web\Response;
+use src\repositories\email\EmailRepository;
 
 /**
  * EmailNormalizedController implements the CRUD actions for Email model.
  *
- * @property EmailSenderService $emailSender
  * @property EmailRepository $emailRepository
  */
 class EmailNormalizedController extends FController
@@ -39,10 +38,9 @@ class EmailNormalizedController extends FController
 
     private $emailRepository;
 
-    public function __construct($id, $module, EmailSenderService $emailSender, EmailRepository $emailRepository, $config = [])
+    public function __construct($id, $module, EmailRepository $emailRepository, $config = [])
     {
         parent::__construct($id, $module, $config);
-        $this->emailSender = $emailSender;
         $this->emailRepository = $emailRepository;
     }
 

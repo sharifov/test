@@ -1,6 +1,6 @@
 <?php
 
-namespace src\entities\email;
+namespace src\repositories\email;
 
 use common\models\Client;
 use common\models\DepartmentEmailProject;
@@ -9,6 +9,7 @@ use common\models\UserProjectParams;
 use src\dispatchers\EventDispatcher;
 use src\entities\cases\Cases;
 use src\repositories\NotFoundException;
+use src\entities\email\Email;
 
 class EmailRepository
 {
@@ -187,8 +188,8 @@ class EmailRepository
             "SELECT COUNT(*) as cnt
              FROM email_lead
              WHERE el_lead_id = $leadId"
-            );
-       return $command->queryScalar();
+        );
+        return $command->queryScalar();
     }
 
     public static function getEmailCountByCase(int $caseId): int
@@ -198,7 +199,7 @@ class EmailRepository
             "SELECT COUNT(*) as cnt
             FROM email_case
             WHERE ec_case_id = $caseId"
-            );
+        );
         return $command->queryScalar();
     }
 
