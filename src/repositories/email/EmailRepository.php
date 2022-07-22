@@ -11,7 +11,7 @@ use src\entities\cases\Cases;
 use src\repositories\NotFoundException;
 use src\entities\email\Email;
 
-class EmailRepository
+class EmailRepository implements EmailRepositoryInterface
 {
     private $eventDispatcher;
 
