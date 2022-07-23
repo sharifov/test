@@ -84,7 +84,7 @@ MonitorCallIncomingAsset::register($this);
                                 <div class="tile_count">
                                     <div class="col-md-4 col-sm-4  tile_stats_count">
                                         <span class="count_top"><i class="fa fa-list"></i> Call Items</span>
-                                        <div class="count" v-cloak>{{ callList.length }}</div>
+                                        <div class="count" v-cloak>{{ callCounter }}</div>
                                     </div>
                                     <div class="col-md-4 col-sm-4  tile_stats_count">
                                         <span class="count_top"><i class="fa fa-recycle"></i> IVR</span>
