@@ -364,8 +364,8 @@ var callMapApp = Vue.createApp({
             filteredUserData: null,
             filteredUserListData: null,
 
-            filteredPhoneData: null,
-            filteredPhoneListData: null,
+            filteredCallData: null,
+            filteredCallListData: null,
             filters: {
                 selectedDep: null,
             }
@@ -385,6 +385,13 @@ var callMapApp = Vue.createApp({
             },
             set: function (value) {
                 this.filters.selectedDep = value;
+            }
+        },
+        callCounter: function () {
+            if (this.filteredCallData !== null) {
+                return this.filteredCallData.length;
+            } else {
+                return this.callList && this.callList.length || 0;
             }
         },
         ivrCounter: function () {
@@ -428,7 +435,14 @@ var callMapApp = Vue.createApp({
             return userId > 0 ? this.userList[userId] : userId;
         },
         getCallListByStatusId(statusList, typeList, sourceList) {
-            return this.callList.filter(function (item) {
+            let data;
+            if (this.filteredCallData !== null) {
+                data = this.filteredCallData;
+            } else {
+                data = this.callList;
+            }
+
+            return data.filter(function (item) {
                 if (item.c_status_id) {
                     let statusId = parseInt(item.c_status_id);
                     let callTypeId = parseInt(item.c_call_type_id);
@@ -466,7 +480,7 @@ var callMapApp = Vue.createApp({
                 } else {
                     this.callList.splice(index, 1);
                     this.callListData.splice(index, 1);
-                    // this.deleteFilteredUserData(data);
+                    this.deleteFilteredCallData(callData);
                     return false;
                 }
             }
@@ -478,7 +492,7 @@ var callMapApp = Vue.createApp({
         addCall(callData) {
             this.callList = [...this.callList, callData];
             this.callListData.push(callData.c_id);
-            // this.addFilteredUserData(data);
+            this.addFilteredCallData(callData);
         },
         validateCall(callData) {
             let statusId = parseInt(callData.c_status_id);
@@ -495,6 +509,7 @@ var callMapApp = Vue.createApp({
                 }
                 return x;
             });
+            this.updateFilteredCallData(callData);
         },
         getCalls() {
             axios
@@ -705,6 +720,8 @@ var callMapApp = Vue.createApp({
         resetFilters() {
             this.filteredUserData = null;
             this.filteredUserListData = null;
+            this.filteredCallData = null;
+            this.filteredCallListData = null;
         },
         applyFilters() {
             if (this.selectedDep) {
@@ -714,6 +731,18 @@ var callMapApp = Vue.createApp({
                 this.filteredUserListData = this.filteredUserData.map(function (item) {
                     return item.user_id;
                 });
+
+                this.filteredCallData = this.callList.filter(function (item) {
+                    if (!Array.isArray(item.c_dep_id)) {
+                        userDepList = [item.c_dep_id];
+                    } else {
+                        userDepList = item.c_dep_id;
+                    }
+                    return userDepList.indexOf(this.selectedDep) !== -1;
+                }.bind(this));
+                this.filteredCallListData = this.filteredCallData.map(function (item) {
+                    return item.c_id;
+                });
             } else {
                 this.resetFilters();
             }
@@ -721,6 +750,7 @@ var callMapApp = Vue.createApp({
         isFilterEnabled() {
             return !!this.selectedDep;
         },
+
         filteredUserDataIndex(userId) {
             if (!this.filteredUserListData.length) {
                 this.filteredUserListData = this.filteredUserData.map(function (item) {
@@ -759,9 +789,61 @@ var callMapApp = Vue.createApp({
                 }
             }
         },
+
+        filteredCallDataIndex(callId) {
+            if (!this.filteredCallListData.length) {
+                this.filteredCallListData = this.filteredCallData.map(function (item) {
+                    return item.c_id;
+                });
+            }
+            return this.filteredCallListData.indexOf(callId);
+        },
+        updateFilteredCallData(data) {
+            if (this.isFilterEnabled()) {
+                let index = this.filteredCallDataIndex(data.c_id);
+                if (index !== -1) {
+                    this.filteredCallData = this.filteredCallData.map((x) => {
+                        if (x.c_id === data.c_id) {
+                            return data;
+                        }
+                        return x;
+                    });
+                }
+            }
+        },
+        addFilteredCallData(data) {
+            if (this.isFilterEnabled() && this.matchesTheFilterCriteria(data)) {
+                this.filteredCallData.push(data);
+                this.filteredCallListData.push(data.c_id);
+            }
+        },
+        deleteFilteredCallData(data) {
+            if (this.isFilterEnabled()) {
+                let index = this.filteredCallDataIndex(data.c_id);
+                if (index !== -1) {
+                    this.filteredCallData.splice(index, 1);
+                    this.filteredCallListData.splice(index, 1);
+                }
+            }
+        },
+
         matchesTheFilterCriteria(data) {
             if (this.selectedDep) {
-                return data.userDep.indexOf(this.selectedDep) !== -1;
+                var userDepList;
+                if (data.userDep) {
+                    userDepList = data.userDep;
+                } else if (data.c_dep_id) {
+                    if (!Array.isArray(data.c_dep_id)) {
+                        userDepList = [data.c_dep_id];
+                    } else {
+                        userDepList = data.c_dep_id;
+                    }
+                }
+                if (userDepList) {
+                    return data.userDep.indexOf(this.selectedDep) !== -1;
+                }
+
+                return false;
             }
 
             return false;
