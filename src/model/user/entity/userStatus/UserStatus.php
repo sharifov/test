@@ -225,6 +225,15 @@ class UserStatus extends ActiveRecord
                                         'status' => function (UserStatus $us) {
                                             return $us->attributes;
                                         },
+                                        'userDep' => function (UserStatus $us) {
+                                            $deps = [];
+                                            foreach ($us->usUser->udDeps as $dep) {
+                                                if (isset($dep->dep_id)) {
+                                                    $deps[] = $dep->dep_id;
+                                                }
+                                            }
+                                            return $deps;
+                                        },
                                     ],
                                 ]),
                             ]
