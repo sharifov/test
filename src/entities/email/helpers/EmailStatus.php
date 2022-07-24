@@ -41,4 +41,19 @@ class EmailStatus
     {
         return $status !== self::ERROR;
     }
+
+    public static function isDone(int $status): bool
+    {
+        return $status === self::DONE;
+    }
+
+    public static function isReview(int $status): bool
+    {
+        return $status === self::REVIEW;
+    }
+
+    public static function isErrorGroup(int $status): bool
+    {
+        return in_array($status, [self::ERROR, self::CANCEL]);
+    }
 }
