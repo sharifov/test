@@ -351,6 +351,11 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
         return $this->hasOne(Project::class, ['id' => 'e_project_id']);
     }
 
+    public function getProject(): \yii\db\ActiveQuery
+    {
+        return $this->hasOne(Project::class, ['id' => 'e_project_id']);
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */
