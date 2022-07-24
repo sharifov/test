@@ -6,6 +6,7 @@ use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 use src\entities\email\helpers\EmailType;
 use yii\db\Expression;
+use src\entities\email\helpers\EmailContactType;
 
 class EmailQuery extends ActiveQuery
 {
@@ -42,10 +43,15 @@ class EmailQuery extends ActiveQuery
     public function unread()
     {
         return $this
-            ->join('LEFT JOIN', ['el' => EmailLog::tableName()], 'el.el_email_id = e_id')
+            ->leftJoin(['el' => EmailLog::tableName()], 'el.el_email_id = e_id')
             ->andWhere(['el_is_new' => true]);
     }
 
+    /**
+     *
+     * @param array $mailList
+     * @return \src\entities\email\EmailQuery
+     */
     public function withContact(array $mailList)
     {
         $addresses = EmailAddress::find()
@@ -53,7 +59,6 @@ class EmailQuery extends ActiveQuery
                 ->where(['ea_email' => $mailList])
                 ->asArray()
                 ->all();
-
         $address_ids = ArrayHelper::getColumn($addresses, 'ea_id');
 
         return $this
@@ -69,5 +74,15 @@ class EmailQuery extends ActiveQuery
     public function case(int $caseId)
     {
         return $this->leftJoin('email_case', 'email_case.ec_email_id = e_id')->andWhere(['email_case.ec_case_id' => $caseId]);
+    }
+
+    public function byMessageId(string $messageId)
+    {
+        return $this->leftJoin(['el' => EmailLog::tableName()], 'el.el_email_id = e_id')->andWhere(['el.el_message_id' => $messageId]);
+    }
+
+    public function byEmailToList(array $mailList)
+    {
+        return $this->withContact($mailList)->andWhere(['ec.ec_type_id' => EmailContactType::TO]);
     }
 }
