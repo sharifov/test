@@ -20,6 +20,10 @@ interface EmailInterface
 
     public function getEmailTo($masking = true): ?string;
 
+    public function getEmailFromName(): ?string;
+
+    public function getEmailToName(): ?string;
+
     public function getLanguageId(): ?string;
 
     public function getTemplateType();
@@ -31,4 +35,16 @@ interface EmailInterface
     public function getLead();
 
     public function getCase();
+
+    public function getStatusDoneDt();
+
+    public function getErrorMessage();
+
+    public function getCommunicationId();
+
+    public function getCreatedUser();
+
+    public function isCreatedUser(int $userId): bool;
+
+    public function hasCreatedUser(): bool;
 }
