@@ -276,7 +276,7 @@ class Email extends BaseActiveRecord implements EmailInterface
 
     public function getEmailBodyHtml(): ?string
     {
-        return $this->emailBody->emailBlob->getBodyHtml() ?? '';
+        return $this->emailBody->getBodyHtml() ?? '';
     }
 
     public function getTemplateTypeName(): ?string
