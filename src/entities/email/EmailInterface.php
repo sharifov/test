@@ -36,6 +36,8 @@ interface EmailInterface
 
     public function getCase();
 
+    public function getProject();
+
     public function getStatusDoneDt();
 
     public function getErrorMessage();
