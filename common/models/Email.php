@@ -301,7 +301,7 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getCase()
+    public function getCase(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Cases::class, ['cs_id' => 'e_case_id']);
     }
@@ -310,6 +310,11 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
      * @return \yii\db\ActiveQuery
      */
     public function getECreatedUser()
+    {
+        return $this->hasOne(Employee::class, ['id' => 'e_created_user_id']);
+    }
+
+    public function getCreatedUser(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'e_created_user_id']);
     }
@@ -333,7 +338,7 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getLead()
+    public function getLead(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Lead::class, ['id' => 'e_lead_id']);
     }
@@ -1039,6 +1044,16 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
         return (EmailType::isOutbox($this->e_type_id) && $masking) ?  MaskEmailHelper::masking($this->e_email_to) : $this->e_email_to;
     }
 
+    public function getEmailFromName(): ?string
+    {
+        return $this->e_email_from_name;
+    }
+
+    public function getEmailToName(): ?string
+    {
+        return $this->e_email_to_name;
+    }
+
     public function hasLead(): bool
     {
         return $this->e_lead_id !== null;
@@ -1088,4 +1103,26 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
     {
         return $this->e_language_id;
     }
+
+    public function getStatusDoneDt(): ?string
+    {
+        return $this->e_status_done_dt;
+    }
+
+    public function getErrorMessage(): ?string
+    {
+        return $this->e_error_message;
+    }
+
+    public function getCommunicationId()
+    {
+        return $this->e_communication_id;
+    }
+
+    public function getEmailSubject()
+    {
+        return $this->e_email_subject;
+    }
+
+
 }

@@ -244,6 +244,16 @@ class Email extends BaseActiveRecord implements EmailInterface
         return $this->contactTo->getEmail(EmailType::isOutbox($this->e_type_id) && $masking) ?? null;
     }
 
+    public function getEmailFromName(): string
+    {
+        return $this->contactFrom->ea_name ?? null;
+    }
+
+    public function getEmailToName(): ?string
+    {
+        return $this->contactTo->ea_name ?? null;
+    }
+
     public function getCommunicationId(): ?int
     {
         return $this->emailLog->el_communication_id ?? null;
@@ -262,6 +272,11 @@ class Email extends BaseActiveRecord implements EmailInterface
     public function getEmailData()
     {
         return $this->emailBody->embd_email_data;
+    }
+
+    public function getEmailBodyHtml(): ?string
+    {
+        return $this->emailBody->emailBlob->getBodyHtml() ?? '';
     }
 
     public function getTemplateTypeName(): ?string
@@ -483,5 +498,25 @@ class Email extends BaseActiveRecord implements EmailInterface
     public function getLanguageId(): ?string
     {
         return $this->params->ep_language_id ?? null;
+    }
+
+    public function getStatusDoneDt(): ?string
+    {
+        return $this->emailLog->el_status_done_dt ?? null;
+    }
+
+    public function getErrorMessage(): ?string
+    {
+        return $this->emailLog->el_error_message ?? null;
+    }
+
+    public function isCreatedUser(int $userId): bool
+    {
+        return $this->e_created_user_id === $userId;
+    }
+
+    public function hasCreatedUser(): bool
+    {
+        return $this->e_created_user_id ? true : false;
     }
 }
