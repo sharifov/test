@@ -2,10 +2,10 @@
 
 namespace modules\email\src\abac\dto;
 
-use common\models\Email;
 use src\auth\Auth;
 use common\models\UserProjectParams;
 use src\access\EmployeeGroupAccess;
+use src\entities\email\EmailInterface;
 
 class EmailAbacDto extends \stdClass
 {
@@ -16,20 +16,20 @@ class EmailAbacDto extends \stdClass
     public bool $is_address_owner = false;
     public bool $is_common_group = false;
 
-    public function __construct(?Email $email)
+    public function __construct(EmailInterface $email)
     {
         if ($email) {
             $this->is_email_owner = $email->isCreatedUser(Auth::id());
             $this->has_creator = $email->hasCreatedUser();
-            if ($email->eCase) {
-                $this->is_case_owner = $email->eCase->isOwner(Auth::id());
+            if ($email->hasCase()) {
+                $this->is_case_owner = $email->case->isOwner(Auth::id());
             }
 
-            if ($email->eLead) {
-                $this->is_lead_owner = $email->eLead->isOwner(Auth::id());
+            if ($email->hasLead()) {
+                $this->is_lead_owner = $email->lead->isOwner(Auth::id());
             }
 
-            $this->is_address_owner = self::isUserEmailAddressOwner($email);
+            $this->is_address_owner = self::isUserEmailAddressOwner($email->getEmailFrom(false), $email->getEmailTo(false));
 
             if ($email->hasCreatedUser()) {
                 $this->is_common_group = EmployeeGroupAccess::isUserInCommonGroup(Auth::id(), $email->e_created_user_id);
@@ -37,11 +37,11 @@ class EmailAbacDto extends \stdClass
         }
     }
 
-    private static function isUserEmailAddressOwner(Email $email): bool
+    private static function isUserEmailAddressOwner(string $emailFrom, string $emailTo): bool
     {
         return UserProjectParams::find()
             ->byUserId(Auth::id())
-            ->byEmail([$email->e_email_from, $email->e_email_to], false)
+            ->byEmail([$emailFrom, $emailTo], false)
             ->exists();
     }
 }
