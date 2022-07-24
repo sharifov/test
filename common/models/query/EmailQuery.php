@@ -86,4 +86,13 @@ class EmailQuery extends ActiveQuery
     {
         return $this->andWhere(['e_is_new' => true]);
     }
+    public function lead(int $leadId)
+    {
+        return $this->andWhere(['e_lead_id' => $leadId]);
+    }
+
+    public function case(int $caseId)
+    {
+        return $this->andWhere(['e_case_id' => $caseId]);
+    }
 }
