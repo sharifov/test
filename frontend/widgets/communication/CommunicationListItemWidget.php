@@ -87,6 +87,12 @@ class CommunicationListItemWidget extends Widget
         if ($type == 'email') {
             try {
                 $mail = EmailRepositoryFactory::getRepository()->find($id);
+                if (EmailType::isDraftOrOutbox($mail->e_type_id)) {
+                    $createdUser = Html::encode(($mail->createdUser->username ?? '-')) . ', ';
+                    $unsubscribedEmails = array_column($mail->project ? $mail->project->emailUnsubscribes : [], 'eu_email');
+                    $unsubscribed = in_array($mail->getEmailTo(false), $unsubscribedEmails);
+                }
+
                 $data = [
                     'class' => EmailType::isInbox($mail->e_type_id) ? 'client' : 'system',
                     'icon' => $this->getEmailIcon($mail),
@@ -96,12 +102,13 @@ class CommunicationListItemWidget extends Widget
                     'toName' => Html::encode($mail->emailToName),
                     'language' => $mail->languageId ? '(' . $mail->languageId . ')' : '',
                     'createdDate' => Yii::$app->formatter->asDatetime(strtotime($mail->e_created_dt)),
-                    'createdUser' => (EmailType::isDraftOrOutbox($mail->e_type_id)) ? Html::encode(($mail->createdUser->username ?? '-')) . ', ' : '',
+                    'createdUser' => $createdUser ?? '',
                     'shortSubject' => wordwrap(Html::encode($mail->emailSubject), 60, '<br />', true),
                     'subject' => Html::encode($mail->emailSubject),
                     'body' => StringHelper::truncate(EmailBody::stripHtmlTags($mail->getEmailBodyHtml()), 300, '...', null, true),
                     'id' => $mail->e_id,
                     'emailData' => $mail->emailData,
+                    'unsubscribed' => $unsubscribed ?? false,
                 ];
 
                 if (Yii::$app->abac->can(new EmailAbacDto($mail), EmailAbacObject::ACT_VIEW, EmailAbacObject::ACTION_ACCESS)) {

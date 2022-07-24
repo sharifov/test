@@ -9,7 +9,7 @@
      <div class="chat__message-heading">
        <div class="chat__sender">
           Email from <?= $data['createdUser']?> (<?= $data['fromName']?> <<strong><?= $data['from']?> )</strong>
-          to (<?= $data['toName']?> <<strong><?= $data['to']?></strong>>)
+          to (<?= $data['toName']?> <<strong class="<?= $data['unsubscribed'] ? 'text-line-through' : ''?>"><?= $data['to']?></strong>>)
         </div>
         <div class="chat__date"><?= $data['createdDate']?> <?= $data['language']?></div>
     </div>
