@@ -28,7 +28,7 @@ class EmailRepository implements EmailRepositoryInterface
         throw new NotFoundException('Email not found. ID: ' . $id);
     }
 
-    public function save(Email $email): int
+    public function save($email): int
     {
         if (!$email->save()) {
             throw new \RuntimeException('Email save failed: ' . $email->getErrorSummary(true)[0]);
@@ -37,7 +37,7 @@ class EmailRepository implements EmailRepositoryInterface
         return $email->e_id;
     }
 
-    public function read(Email $email): void
+    public function read($email): void
     {
         if ($email->emailLog && $email->emailLog->el_is_new === true) {
             $email->saveEmailLog([
@@ -47,7 +47,7 @@ class EmailRepository implements EmailRepositoryInterface
         }
     }
 
-    public function delete(Email $email): int
+    public function delete($email): int
     {
         $id = $email->e_id;
         if ($email->delete() === false) {
@@ -72,7 +72,7 @@ class EmailRepository implements EmailRepositoryInterface
      * @param array $leadsIds
      * @return array
      */
-    public function linkLeads(Email $email, array $leadsIds): array
+    public function linkLeads($email, array $leadsIds): array
     {
         $linked = [];
         foreach ($leadsIds as $id) {

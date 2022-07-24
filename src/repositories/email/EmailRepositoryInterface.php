@@ -7,7 +7,7 @@ use src\entities\email\EmailInterface;
 
 interface EmailRepositoryInterface
 {
-    public function find(int $id);
+    public function find(int $id): EmailInterface;
 
     public function save(EmailInterface $email);
 

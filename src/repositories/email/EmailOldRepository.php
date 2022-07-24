@@ -4,6 +4,7 @@ namespace src\repositories\email;
 
 use src\repositories\NotFoundException;
 use common\models\Email;
+use src\dispatchers\EventDispatcher;
 
 class EmailOldRepository implements EmailRepositoryInterface
 {
@@ -22,7 +23,7 @@ class EmailOldRepository implements EmailRepositoryInterface
         throw new NotFoundException('Email not found. ID: ' . $id);
     }
 
-    public function save(Email $email): int
+    public function save($email): int
     {
         if (!$email->save()) {
             throw new \RuntimeException('Email save failed: ' . $email->getErrorSummary(true)[0]);
@@ -31,7 +32,7 @@ class EmailOldRepository implements EmailRepositoryInterface
         return $email->e_id;
     }
 
-    public function read(Email $email): void
+    public function read($email): void
     {
         if ($email->e_is_new === true) {
             $email->updateAttributes([
@@ -41,7 +42,7 @@ class EmailOldRepository implements EmailRepositoryInterface
         }
     }
 
-    public function delete(Email $email): int
+    public function delete($email): int
     {
         $id = $email->e_id;
         if ($email->delete() === false) {
