@@ -5,6 +5,7 @@ namespace src\repositories\email;
 use src\repositories\NotFoundException;
 use common\models\Email;
 use src\dispatchers\EventDispatcher;
+use yii\db\Expression;
 
 class EmailOldRepository implements EmailRepositoryInterface
 {
@@ -59,5 +60,12 @@ class EmailOldRepository implements EmailRepositoryInterface
             $removedIds[] = $this->delete($model);
         }
         return $removedIds;
+    }
+
+    public function getCommunicationLogQueryForLead(int $leadId)
+    {
+        return Email::find()
+            ->lead($leadId)
+            ->select(['e_id AS id', new Expression('"email" AS type'), 'e_lead_id AS lead_id', 'e_created_dt AS created_dt']);
     }
 }

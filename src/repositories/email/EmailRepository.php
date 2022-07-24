@@ -10,6 +10,7 @@ use src\dispatchers\EventDispatcher;
 use src\entities\cases\Cases;
 use src\repositories\NotFoundException;
 use src\entities\email\Email;
+use yii\db\Expression;
 
 class EmailRepository implements EmailRepositoryInterface
 {
@@ -212,5 +213,12 @@ class EmailRepository implements EmailRepositoryInterface
         }
 
         return null;
+    }
+
+    public function getCommunicationLogQueryForLead(int $leadId)
+    {
+        return Email::find()
+            ->lead($leadId)
+            ->select(['e_id AS id', new Expression('"email" AS type'), 'el_lead_id AS lead_id', 'e_created_dt AS created_dt']);
     }
 }
