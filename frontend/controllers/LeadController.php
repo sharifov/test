@@ -124,6 +124,7 @@ use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
 use yii\web\UploadedFile;
 use yii\widgets\ActiveForm;
+use src\repositories\email\EmailRepositoryFactory;
 
 /**
  * Class LeadController
@@ -872,11 +873,7 @@ class LeadController extends FController
 
         $quotesProvider = $lead->getQuotesProvider([]);
 
-
-        $queryEmail = (new \yii\db\Query())
-            ->select(['e_id AS id', new Expression('"email" AS type'), 'e_lead_id AS lead_id', 'e_created_dt AS created_dt'])
-            ->from('email')
-            ->where(['e_lead_id' => $lead->id]);
+        $queryEmail = EmailRepositoryFactory::getRepository()->getCommunicationLogQueryForLead($lead->id);
 
         $querySms = (new \yii\db\Query())
             ->select(['s_id AS id', new Expression('"sms" AS type'), 's_lead_id AS lead_id', 's_created_dt AS created_dt'])
