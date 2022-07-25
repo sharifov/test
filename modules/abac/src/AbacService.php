@@ -5,9 +5,7 @@ namespace modules\abac\src;
 use modules\abac\components\AbacBaseModel;
 use modules\abac\src\entities\AbacPolicy;
 use src\helpers\app\AppHelper;
-use yii\base\Exception;
 use yii\helpers\Json;
-use yii\helpers\VarDumper;
 
 class AbacService
 {
@@ -367,9 +365,5 @@ class AbacService
     public static function generateHashCode(array $data)
     {
         return substr(md5(implode('|', $data)), 0, 10);
-    }
-
-    public function insert()
-    {
     }
 }
