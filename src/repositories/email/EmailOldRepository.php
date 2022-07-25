@@ -64,6 +64,11 @@ class EmailOldRepository implements EmailRepositoryInterface
         return $removedIds;
     }
 
+    public function getTodayCount($cache = 0)
+    {
+        return Email::find()->createdToday()->cache($cache)->count();
+    }
+
     public function getCommunicationLogQueryForLead(int $leadId)
     {
         return Email::find()

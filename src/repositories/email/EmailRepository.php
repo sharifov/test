@@ -185,6 +185,11 @@ class EmailRepository implements EmailRepositoryInterface
         return Email::find()->withContact($mailList)->deleted()->count();
     }
 
+    public function getTodayCount($cache = 0)
+    {
+        return Email::find()->createdToday()->cache($cache)->count();
+    }
+
     public static function getEmailCountByLead(int $leadId): int
     {
         $connection = \Yii::$app->getDb();

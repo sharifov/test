@@ -20,4 +20,6 @@ interface EmailRepositoryInterface
     public function getCommunicationLogQueryForLead(int $leadId);
 
     public function getCommunicationLogQueryForCase(int $caseId);
+
+    public function getTodayCount(int $cache);
 }
