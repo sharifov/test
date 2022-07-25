@@ -7,7 +7,9 @@ use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTask;
 use modules\taskList\src\entities\TargetObject;
 use modules\taskList\src\entities\taskList\TaskList;
 use modules\taskList\src\entities\userTask\behaviors\UserTaskStatusLogDeleteBehavior;
+use modules\taskList\src\services\UserTaskStatusLogService;
 use src\behaviors\dateTime\CreatedYearMonthBehavior;
+use yii\base\Event;
 use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 
@@ -52,6 +54,13 @@ class UserTask extends \yii\db\ActiveRecord
         self::PRIORITY_MEDIUM => 'Medium',
         self::PRIORITY_HIGH => 'High',
     ];
+
+    public function init(): void
+    {
+        $this->on(self::EVENT_AFTER_INSERT, [$this, 'saveStatusLog']);
+        $this->on(self::EVENT_AFTER_UPDATE, [$this, 'saveStatusLog']);
+        parent::init();
+    }
 
     public function rules(): array
     {
@@ -191,5 +200,23 @@ class UserTask extends \yii\db\ActiveRecord
     {
         $this->ut_status_id = self::STATUS_COMPLETE;
         return $this;
+    }
+
+    public function saveStatusLog(Event $event): void
+    {
+        if ($event->name === self::EVENT_AFTER_INSERT) {
+            UserTaskStatusLogService::createLog(
+                $this->ut_id,
+                $this->ut_status_id
+            );
+        } elseif ($event->name === self::EVENT_AFTER_UPDATE) {
+            if (isset($event->changedAttributes['ut_status_id']) && (int)$event->changedAttributes['ut_status_id'] !== (int)$this->ut_status_id) {
+                UserTaskStatusLogService::createLog(
+                    $this->ut_id,
+                    $this->ut_status_id,
+                    $event->changedAttributes['ut_status_id']
+                );
+            }
+        }
     }
 }
