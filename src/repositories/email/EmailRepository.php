@@ -198,7 +198,7 @@ class EmailRepository implements EmailRepositoryInterface
         return Email::find()->createdToday()->cache($cache)->count();
     }
 
-    public static function getEmailCountByLead(int $leadId): int
+    public function getEmailCountByLead(int $leadId, $cache = 0): int
     {
         $connection = \Yii::$app->getDb();
         $command = $connection->createCommand(
@@ -206,10 +206,10 @@ class EmailRepository implements EmailRepositoryInterface
              FROM email_lead
              WHERE el_lead_id = $leadId"
         );
-        return $command->queryScalar();
+        return $command->cache($cache)->queryScalar();
     }
 
-    public static function getEmailCountByCase(int $caseId): int
+    public function getEmailCountByCase(int $caseId, $cache = 0): int
     {
         $connection = \Yii::$app->getDb();
         $command = $connection->createCommand(
@@ -217,7 +217,7 @@ class EmailRepository implements EmailRepositoryInterface
             FROM email_case
             WHERE ec_case_id = $caseId"
         );
-        return $command->queryScalar();
+        return $command->cache($cache)->queryScalar();
     }
 
     public static function getProjectIdByDepOrUpp($emailTo): ?int
