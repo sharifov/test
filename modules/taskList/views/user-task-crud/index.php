@@ -58,9 +58,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'ut_task_list_id',
                 'value' => static function (UserTask $model) {
-                    $taskList = $model->taskList;
-
-                    if (!$taskList) {
+                    if (!$model->taskList) {
                         return Yii::$app->formatter->nullDisplay;
                     }
 
