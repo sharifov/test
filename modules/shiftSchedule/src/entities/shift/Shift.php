@@ -37,6 +37,7 @@ use yii\helpers\Html;
  * @property int $sh_category_id [int]
  * @property ShiftCategory $category
  * @property UserShiftAssign[] $userShiftAssigns
+ * @property UserShiftAssign[] $userShiftAssignsExcludeDeletedUser
  * @property Employee[] $usaUsers
  */
 class Shift extends ActiveRecord
@@ -120,6 +121,13 @@ class Shift extends ActiveRecord
     public function getUserShiftAssigns(): ActiveQuery
     {
         return $this->hasMany(UserShiftAssign::class, ['usa_sh_id' => 'sh_id']);
+    }
+
+    public function getUserShiftAssignsExcludeDeletedUser(): ActiveQuery
+    {
+        return $this->getUserShiftAssigns()
+            ->innerJoin('employees', 'usa_user_id = employees.id')
+            ->andWhere(['<>', 'employees.status', Employee::STATUS_DELETED]);
     }
 
     /**

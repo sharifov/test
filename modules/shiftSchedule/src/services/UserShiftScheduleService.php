@@ -172,8 +172,8 @@ class UserShiftScheduleService
                     if ($isDue) {
                         if ($rule->shift && $rule->shift->sh_enabled) {
                             // echo $rule->shift->sh_id . "\r\n";
-                            if ($rule->shift->userShiftAssigns) {
-                                foreach ($rule->shift->userShiftAssigns as $user) {
+                            if ($rule->shift->userShiftAssignsExcludeDeletedUser) {
+                                foreach ($rule->shift->userShiftAssignsExcludeDeletedUser as $user) {
                                     if (!empty($userList)) {
                                         if (!in_array($user->usa_user_id, $userList)) {
                                             continue;
