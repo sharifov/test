@@ -14,6 +14,7 @@ use yii\db\Expression;
 use common\models\EmailTemplateType;
 use src\entities\email\helpers\EmailType;
 use src\entities\email\EmailParams;
+use yii\db\ActiveQuery;
 
 class EmailRepository implements EmailRepositoryInterface
 {
@@ -68,6 +69,13 @@ class EmailRepository implements EmailRepositoryInterface
             $removedIds[] = $this->delete($model);
         }
         return $removedIds;
+    }
+
+    public function saveInboxId($email, int $inboxId): void
+    {
+        $email->saveEmailLog([
+            'el_inbox_email_id' => $inboxId
+        ]);
     }
 
     /**
@@ -260,5 +268,10 @@ class EmailRepository implements EmailRepositoryInterface
                     $condition
                 ]
             ]);
+    }
+
+    public function findReceived(string $messageId, string $emailTo): ActiveQuery
+    {
+        return Email::find()->byMessageId($messageId)->byEmailToList([$emailTo]);
     }
 }

@@ -4,6 +4,7 @@ namespace src\repositories\email;
 
 use src\entities\email\Email;
 use src\entities\email\EmailInterface;
+use yii\db\ActiveQuery;
 
 interface EmailRepositoryInterface
 {
@@ -22,4 +23,8 @@ interface EmailRepositoryInterface
     public function getCommunicationLogQueryForCase(int $caseId);
 
     public function getTodayCount(int $cache);
+
+    public function findReceived(string $messageId, string $emailTo): ActiveQuery;
+
+    public function saveInboxId(EmailInterface $email, int $inboxId): void;
 }

@@ -8,6 +8,7 @@ use src\dispatchers\EventDispatcher;
 use yii\db\Expression;
 use common\models\EmailTemplateType;
 use src\entities\email\helpers\EmailType;
+use yii\db\ActiveQuery;
 
 class EmailOldRepository implements EmailRepositoryInterface
 {
@@ -33,6 +34,13 @@ class EmailOldRepository implements EmailRepositoryInterface
         }
         $this->eventDispatcher->dispatchAll($email->releaseEvents());
         return $email->e_id;
+    }
+
+    public function saveInboxId($email, int $inboxId): void
+    {
+        $email->updateAttributes([
+            'e_inbox_email_id' => $inboxId
+        ]);
     }
 
     public function read($email): void
@@ -105,5 +113,10 @@ class EmailOldRepository implements EmailRepositoryInterface
                     $condition
                 ]
             ]);
+    }
+
+    public function findReceived(string $messageId, string $emailTo): ActiveQuery
+    {
+        return Email::find()->byMessageId($messageId)->byEmailToList([$emailTo]);
     }
 }
