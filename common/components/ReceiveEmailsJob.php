@@ -17,6 +17,7 @@ use yii\base\BaseObject;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
+use src\repositories\email\EmailRepositoryFactory;
 
 /**
  * Class ReceiveEmailsJob
@@ -110,16 +111,10 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 
                         $filter['last_id'] = $mail['ei_id'] + 1;
 
-                        //TODO: update for email normalized
-                        $find = Email::find()->where(
-                            [
-                                "e_message_id" => $mail['ei_message_id'],
-                                "e_email_to" => $mail['ei_email_to']]
-                        )->one();
-
+                        $emailRepository = EmailRepositoryFactory::getRepository();
+                        $find = $emailRepository->findReceived($mail['ei_message_id'], $mail['ei_email_to'])->one();
                         if ($find) {
-                            $find->e_inbox_email_id = $mail['ei_id'];
-                            $find->save();
+                            $emailRepository->saveInboxId($find, $mail['ei_id']);
                             continue;
                         }
 
