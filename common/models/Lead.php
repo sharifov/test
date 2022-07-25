@@ -93,6 +93,7 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
+use src\repositories\email\EmailRepositoryFactory;
 
 /**
  * This is the model class for table "leads".
@@ -4731,15 +4732,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
      */
     public function getCountEmails(int $type_id = 0): int
     {
-        $query = Email::find();
-        $query->where(['e_lead_id' => $this->id, 'e_is_deleted' => false]);
-
-        if ($type_id !== 0) {
-            $query->andWhere(['e_type_id' => $type_id]);
-        }
-        $count = $query->count();
-
-        return (int) $count;
+        return EmailRepositoryFactory::getRepository()->getEmailCountForLead($this->id, $type_id);
     }
 
     /**
