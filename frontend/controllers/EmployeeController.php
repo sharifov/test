@@ -1852,6 +1852,7 @@ class EmployeeController extends FController
             $data = $query->select(['id', 'text' => 'username'])
                 ->where(['like', 'username', $q])
                 ->orWhere(['id' => (int) $q])
+                ->andWhere(['<>', 'status', Employee::STATUS_DELETED])
                 ->limit(20)
                 //->indexBy('id')
                 ->asArray()
