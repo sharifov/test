@@ -62,19 +62,24 @@ class EmailQuery extends ActiveQuery
         return $this->andWhere(['e_is_deleted' => true]);
     }
 
+    public function byType(int $type)
+    {
+        return $this->andWhere(['e_type_id' => $type]);
+    }
+
     public function inbox()
     {
-        return $this->andWhere(['e_type_id' => EmailType::INBOX]);
+        return $this->byType(EmailType::INBOX);
     }
 
     public function outbox()
     {
-        return $this->andWhere(['e_type_id' => EmailType::OUTBOX]);
+        return $this->byType(EmailType::OUTBOX);
     }
 
     public function draft()
     {
-        return $this->andWhere(['e_type_id' => EmailType::DRAFT]);
+        return $this->byType(EmailType::DRAFT);
     }
 
     public function createdToday()
