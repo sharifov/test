@@ -103,7 +103,7 @@ class EmailIncomingService
                         LeadBusinessExtraQueueService::addLeadBusinessExtraQueueRemoverJob($lead->id, LeadBusinessExtraQueueLogStatus::REASON_RECEIVED_EMAIL);
                     }
                     $contact->releaseLog('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | ', 'EmailIncomingService');
-                    return new Process($lead->id, null);
+                    return new Process(isset($lead) ? $lead->id : null, null);
                 }
 
                 if ($departmentParams->object->type->isCase()) {
@@ -152,7 +152,7 @@ class EmailIncomingService
         bool $createLeadOnEmail
     ): ?Lead {
         if ($lead = Lead::find()->findLastActiveLeadByDepartmentClient($departmentId, $clientId, $projectId)->one()) {
-            return $lead->id;
+            return $lead;
         }
         if ($createLeadOnEmail) {
             $lead = $this->leadManageService->createByIncomingEmail(

@@ -228,6 +228,7 @@ class UserAbacObject extends AbacBaseModel implements AbacInterface
             'up_bonus_active' => 'Bonus Is Active',
             'up_leaderboard_enabled' => 'Leader Board Enabled',
             'up_inbox_show_limit_leads' => 'Inbox show limit leads',
+            'up_business_inbox_show_limit_leads' => 'Business Inbox show limit leads',
             'up_default_take_limit_leads' => 'Default take limit leads',
             'up_min_percent_for_take_leads' => 'Min percent for take leads',
             'up_frequency_minutes' => 'Take Frequency minutes',

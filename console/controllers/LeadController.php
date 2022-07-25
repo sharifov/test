@@ -14,6 +14,9 @@ use src\exception\BoResponseException;
 use src\helpers\app\AppHelper;
 use src\helpers\DateHelper;
 use src\helpers\setting\SettingHelper;
+use src\model\leadBusinessExtraQueue\entity\LeadBusinessExtraQueue;
+use src\model\leadBusinessExtraQueue\service\LeadToBusinessExtraQueueService;
+use src\model\leadBusinessExtraQueueRule\entity\LeadBusinessExtraQueueRule;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
 use src\model\leadPoorProcessing\service\LeadFromExtraQueueToClosedService;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingChecker;
@@ -822,6 +825,73 @@ class LeadController extends Controller
         Console::endProgress(false);
         $time_end = microtime(true);
         $time     = number_format(round($time_end - $time_start, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- Processed: %w[' . $processed . '/' . $count . '] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+                                          self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+    }
+
+    public function actionToBusinessExtraQueue(): void
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+                                          self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue Enable/Disable */
+        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE)) {
+            echo Console::renderColoredString('%y --- Feature Flag (' . FFlag::FF_KEY_BEQ_ENABLE . ') not enabled %n'), PHP_EOL;
+            exit();
+        }
+
+        $time_start = microtime(true);
+        $currentDT = new \DateTimeImmutable();
+        $leadsExpiration = LeadBusinessExtraQueue
+            ::find()
+            ->select([
+                'lbeq_lead_id AS leadId',
+                'lbeqr_id',
+                'MAX(lbeq_expiration_dt) AS max_expiration',
+            ])
+            ->innerJoin(LeadBusinessExtraQueueRule::tableName() . ' AS lead_business_extra_queue_rule', 'lbeq_lbeqr_id = lbeqr_id')
+            ->innerJoin(
+                Lead::tableName() . ' AS leads',
+                'leads.id = lbeq_lead_id AND leads.status = :status',
+                ['status' => Lead::STATUS_PROCESSING]
+            )
+            ->andWhere(['<=', 'lbeq_expiration_dt', $currentDT->format('Y-m-d H:i:s')])
+            ->indexBy('leadId')
+            ->orderBy(['max_expiration' => SORT_ASC])
+            ->groupBy(['lbeq_lead_id', 'lbeqr_id'])
+            ->asArray()
+            ->all()
+        ;
+
+        $count = count($leadsExpiration);
+        $processed = 0;
+        Console::startProgress($processed, $count);
+
+        foreach ($leadsExpiration as $leadId => $item) {
+            try {
+                (new LeadToBusinessExtraQueueService($leadId, $item['lbeqr_id'], $this->leadRepository))->handle();
+                $processed++;
+                Console::updateProgress($processed, $count);
+            } catch (\RuntimeException | \DomainException $throwable) {
+                /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
+                if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG)) {
+                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $item);
+                    \Yii::warning($message, 'LeadController:actionToBusinessExtraQueue:Exception');
+                }
+            } catch (\Throwable $throwable) {
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $item);
+                \Yii::error($message, 'LeadController:actionToBusinessExtraQueue:Throwable');
+            }
+            Console::updateProgress($processed, $count);
+        }
+
+        LeadBusinessExtraQueue::deleteAll(['IN', 'lbeq_lead_id', array_keys($leadsExpiration)]);
+        Console::endProgress(false);
+
+        $time_end = microtime(true);
+        $time = number_format(round($time_end - $time_start, 2), 2);
         echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %g %n'), PHP_EOL;
         echo Console::renderColoredString('%g --- Processed: %w[' . $processed . '/' . $count . '] %g %n'), PHP_EOL;
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .

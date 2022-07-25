@@ -6,6 +6,7 @@ use common\components\grid\UserSelect2Column;
 use common\models\Employee;
 use common\models\UserProfile;
 use kartik\select2\Select2;
+use modules\featureFlag\FFlag;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
 use modules\user\src\update\MultipleUpdateForm;
@@ -643,6 +644,14 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
                                         <?= $form->field($multipleForm, 'up_default_take_limit_leads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
                                     </div>
                                 </div>
+                                <?php /** @fflag FFlag::FF_KEY_BUSINESS_QUEUE_LIMIT, Business Queue Limit Enable */
+                                if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BUSINESS_QUEUE_LIMIT)) : ?>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <?= $form->field($multipleForm, 'up_business_inbox_show_limit_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 500]) ?>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <?= $form->field($multipleForm, 'up_work_start_tm')->widget(

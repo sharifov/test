@@ -121,6 +121,26 @@ class LeadBadgeCounter implements BadgeCounterInterface
         }
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
+        /** @fflag FFlag::FF_KEY_BUSINESS_QUEUE_LIMIT, Business Queue Limit Enable */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BUSINESS_QUEUE_LIMIT)) {
+            $limit = 0;
+            if ($user->isAgent()) {
+                $userParams = $user->userParams;
+                if ($userParams) {
+                    if ($userParams->up_business_inbox_show_limit_leads > 0) {
+                        $limit = $userParams->up_business_inbox_show_limit_leads;
+                    }
+                } else {
+                    return null;
+                }
+            }
+            $count = $this->leadBadgesRepository->getBusinessInboxCount($user);
+
+            if ($limit > 0 && $count > 0 && $count > $limit) {
+                return $limit;
+            }
+            return $count;
+        }
         return $this->leadBadgesRepository->getBusinessInboxCount($user);
     }
 

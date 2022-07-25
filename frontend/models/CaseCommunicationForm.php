@@ -115,6 +115,8 @@ class CaseCommunicationForm extends Model
     private AbacSmsFromNumberList $smsFromNumberList;
     private AbacEmailList $emailFromList;
 
+    public ?string $cs_order_uid;
+
     public function __construct(AbacSmsFromNumberList $smsFromNumberList, AbacEmailList $emailFromList, $config = [])
     {
         parent::__construct($config);
@@ -148,6 +150,12 @@ class CaseCommunicationForm extends Model
                 return (int) $model->c_type_id === self::TYPE_SMS;
             },
                 'whenClient' => "function (attribute, value) { return $('#c_type_id').val() == " . self::TYPE_SMS . '; }'
+            ],
+
+            [['cs_order_uid'], 'required', 'when' => function (self $model) {
+                return (int) $model->c_type_id === self::TYPE_EMAIL;
+            },
+                'message' => 'To preview/send email need to add booking ID to case.'
             ],
 
 

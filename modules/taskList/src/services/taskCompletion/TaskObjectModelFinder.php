@@ -2,9 +2,10 @@
 
 namespace modules\taskList\src\services\taskCompletion;
 
-use common\models\Sms;
 use modules\taskList\src\entities\TaskObject;
-use src\repositories\email\EmailRepositoryFactory;
+use ReflectionClass;
+use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 class TaskObjectModelFinder
 {
@@ -21,20 +22,15 @@ class TaskObjectModelFinder
 
     public function findModel()
     {
-        switch ($this->taskObject) {
-            case TaskObject::OBJ_EMAIL:
-                try {
-                    $model = EmailRepositoryFactory::getRepository()->find($this->taskModelId);
-                } catch (\Throwable $e) {
-                    throw new \RuntimeException($e->getMessage());
-                }
-                return $model;
-            case TaskObject::OBJ_SMS:
-                if (!$model = Sms::find()->where(['s_id' => $this->taskModelId])->limit(1)->one()) {
-                    throw new \RuntimeException('Sms not found by ID(' . $this->taskModelId . ')');
-                }
-                return $model;
+        if (ArrayHelper::keyExists($this->taskObject, TaskObject::OBJ_TASK_LIST)) {
+            /** @var ActiveRecord $taskObjectClass */
+            $taskObjectClass = TaskObject::OBJ_TASK_LIST[$this->taskObject];
+            if (!$model = $taskObjectClass::findOne($this->taskModelId)) {
+                throw new \RuntimeException((new ReflectionClass($taskObjectClass))->getShortName() . ' not found by ID(' . $this->taskModelId . ')');
+            }
+            return $model;
         }
+
         throw new \RuntimeException('TaskObject (' . $this->taskObject . ') unprocessed');
     }
 }

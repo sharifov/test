@@ -5,6 +5,7 @@ namespace src\model\clientChatRequest\useCase\api\create;
 use common\models\ClientChatSurvey;
 use common\models\ClientChatSurveyResponse;
 use src\model\clientChat\entity\ClientChat;
+use Yii;
 use yii\base\DynamicModel;
 use yii\base\Model;
 use yii\db\Transaction;
@@ -90,11 +91,15 @@ class FeedbackSubmittedForm extends FeedbackFormBase
             return false;
         }
 
+        Yii::$app->db->createCommand()
+            ->delete(ClientChatSurveyResponse::tableName(), 'ccsr_client_chat_survey_id = :ccsr_client_chat_survey_id', [':ccsr_client_chat_survey_id' => $model->ccs_id])
+            ->execute();
+
         $model->ccs_status = ClientChatSurvey::STATUS_SUBMITTED;
         $columns = ['ccsr_client_chat_survey_id', 'ccsr_question', 'ccsr_response', 'ccsr_created_dt'];
         $rows = array_map(function ($response) use ($model) {
             return [
-                'ccsr_client_chat_survey_id' => $model->getPrimaryKey(),
+                'ccsr_client_chat_survey_id' => $model->ccs_id,
                 'ccsr_question' => $response['question'],
                 'ccsr_response' => $response['response'],
                 'ccsr_created_dt' => date('Y-m-d H:i:s')
@@ -103,8 +108,9 @@ class FeedbackSubmittedForm extends FeedbackFormBase
 
         /** @var \yii\db\Command $query */
         $query = \Yii::$app->db->createCommand()->batchInsert(ClientChatSurveyResponse::tableName(), $columns, $rows);
+        $model->update();
 
-        if ($model->update() && $query->execute() > 0) {
+        if (empty($model->getErrors()) && $query->execute() > 0) {
             $transaction->commit();
             return true;
         } else {

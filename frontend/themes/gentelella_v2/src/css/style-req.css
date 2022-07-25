@@ -6168,3 +6168,11 @@ td.selected-cell {
 .top-custom {
     top: 75px !important;
 }
+
+li.select2-selection__choice:first-of-type {
+  max-width: 85%;
+}
+
+li.select2-selection__choice {
+  white-space: pre-line;
+}
