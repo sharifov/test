@@ -1,5 +1,6 @@
 <?php
 
+use modules\featureFlag\FFlag;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -75,7 +76,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'up_work_start_tm',
             'up_work_minutes',
             'up_inbox_show_limit_leads',
-            'up_business_inbox_show_limit_leads',
+            [
+                'attribute' => 'up_business_inbox_show_limit_leads',
+                /** @fflag FFlag::FF_KEY_BUSINESS_QUEUE_LIMIT, Business Queue Limit Enable */
+                'visible' => \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BUSINESS_QUEUE_LIMIT)
+            ],
             'up_default_take_limit_leads',
             'up_min_percent_for_take_leads',
             'up_call_expert_limit',

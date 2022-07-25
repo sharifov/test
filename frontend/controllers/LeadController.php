@@ -1682,14 +1682,17 @@ class LeadController extends FController
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
 
-        if ($user->isAgent()) {
-            $userParams = $user->userParams;
-            if ($userParams) {
-                if ($userParams->up_business_inbox_show_limit_leads > 0) {
-                    $params['LeadSearch']['limit'] = $userParams->up_business_inbox_show_limit_leads;
+        /** @fflag FFlag::FF_KEY_BUSINESS_QUEUE_LIMIT, Business Queue Limit Enable */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BUSINESS_QUEUE_LIMIT)) {
+            if ($user->isAgent()) {
+                $userParams = $user->userParams;
+                if ($userParams) {
+                    if ($userParams->up_business_inbox_show_limit_leads > 0) {
+                        $params['LeadSearch']['limit'] = $userParams->up_business_inbox_show_limit_leads;
+                    }
+                } else {
+                    throw new NotFoundHttpException('Not set user params for agent! Please ask supervisor to set shift time and other.');
                 }
-            } else {
-                throw new NotFoundHttpException('Not set user params for agent! Please ask supervisor to set shift time and other.');
             }
         }
 

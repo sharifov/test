@@ -4,6 +4,7 @@ use common\models\EmployeeAcl;
 use frontend\helpers\PasswordHelper;
 use kartik\password\PasswordInput;
 use kartik\select2\Select2;
+use modules\featureFlag\FFlag;
 use modules\user\src\update\UpdateForm;
 use yii\bootstrap\ActiveForm;
 use yii\bootstrap\Html;
@@ -377,20 +378,22 @@ $this->params['breadcrumbs'][] = $this->title;
                             ]) ?>
                         </div>
                     <?php endif; ?>
-
-                    <?php if ($form->fieldAccess->canShow('up_business_inbox_show_limit_leads')) : ?>
-                        <div class="col-md-3">
-                            <?= $activeForm->field($form, 'up_business_inbox_show_limit_leads', [
-                                'options' => [
-                                    'class' => 'form-group'
-                                ]
-                            ])->input('number', [
-                                'step' => 1,
-                                'min' => 0,
-                                'max' => 500,
-                                'readonly' => !$form->fieldAccess->canEdit('up_business_inbox_show_limit_leads')
-                            ]) ?>
-                        </div>
+                    <?php /** @fflag FFlag::FF_KEY_BUSINESS_QUEUE_LIMIT, Business Queue Limit Enable */
+                    if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BUSINESS_QUEUE_LIMIT)) : ?>
+                        <?php if ($form->fieldAccess->canShow('up_business_inbox_show_limit_leads')) : ?>
+                            <div class="col-md-3">
+                                <?= $activeForm->field($form, 'up_business_inbox_show_limit_leads', [
+                                    'options' => [
+                                        'class' => 'form-group'
+                                    ]
+                                ])->input('number', [
+                                    'step' => 1,
+                                    'min' => 0,
+                                    'max' => 500,
+                                    'readonly' => !$form->fieldAccess->canEdit('up_business_inbox_show_limit_leads')
+                                ]) ?>
+                            </div>
+                        <?php endif; ?>
                     <?php endif; ?>
                     <?php if ($form->fieldAccess->canShow('up_default_take_limit_leads')) : ?>
                         <div class="col-md-3">

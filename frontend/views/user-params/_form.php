@@ -1,5 +1,6 @@
 <?php
 
+use modules\featureFlag\FFlag;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use common\models\Employee;
@@ -35,7 +36,10 @@ use common\models\Employee;
         <?= $form->field($model, 'up_inbox_show_limit_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 500])?>
         <?= $form->field($model, 'up_default_take_limit_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 100])?>
         <?= $form->field($model, 'up_min_percent_for_take_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 100])?>
-        <?= $form->field($model, 'up_business_inbox_show_limit_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 500])?>
+        <?php /** @fflag FFlag::FF_KEY_BUSINESS_QUEUE_LIMIT, Business Queue Limit Enable */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BUSINESS_QUEUE_LIMIT)) : ?>
+            <?= $form->field($model, 'up_business_inbox_show_limit_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 500]) ?>
+        <?php endif; ?>
 
         <?= $form->field($model, 'up_timezone')->dropDownList(Employee::timezoneList(true), ['prompt' => '-'])?>
 
