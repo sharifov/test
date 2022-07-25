@@ -75,6 +75,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'up_work_start_tm',
             'up_work_minutes',
             'up_inbox_show_limit_leads',
+            'up_business_inbox_show_limit_leads',
             'up_default_take_limit_leads',
             'up_min_percent_for_take_leads',
             'up_call_expert_limit',

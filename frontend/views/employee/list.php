@@ -643,6 +643,12 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
                                         <?= $form->field($multipleForm, 'up_default_take_limit_leads')->input('number', ['step' => 1, 'max' => 100, 'min' => 0]) ?>
                                     </div>
                                 </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <?= $form->field($multipleForm, 'up_business_inbox_show_limit_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 500]) ?>
+                                    </div>
+                                </div>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <?= $form->field($multipleForm, 'up_work_start_tm')->widget(

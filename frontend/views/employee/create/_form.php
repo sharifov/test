@@ -535,6 +535,9 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                             <div class="col-md-3">
                                 <?= $form->field($modelUserParams, 'up_frequency_minutes')->input('number', ['step' => 1, 'max' => 1000, 'min' => 0]) ?>
                             </div>
+                            <div class="col-md-3">
+                                <?= $form->field($modelUserParams, 'up_business_inbox_show_limit_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 500]) ?>
+                            </div>
                         </div>
                     <?php endif; ?>
 

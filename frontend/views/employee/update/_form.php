@@ -354,7 +354,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 </div>
             <?php endif; ?>
 
-            <?php if ($form->fieldAccess->canShow('up_inbox_show_limit_leads') || $form->fieldAccess->canShow('up_default_take_limit_leads') || $form->fieldAccess->canShow('up_min_percent_for_take_leads') || $form->fieldAccess->canShow('up_frequency_minutes')) : ?>
+            <?php if (
+                $form->fieldAccess->canShow('up_inbox_show_limit_leads')
+                || $form->fieldAccess->canShow('up_default_take_limit_leads')
+                || $form->fieldAccess->canShow('up_min_percent_for_take_leads')
+                || $form->fieldAccess->canShow('up_frequency_minutes')
+                || $form->fieldAccess->canShow('up_business_inbox_show_limit_leads')
+) : ?>
                 <hr>
                 <div class="row">
                     <?php if ($form->fieldAccess->canShow('up_inbox_show_limit_leads')) : ?>
@@ -368,6 +374,21 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'min' => 0,
                                 'max' => 500,
                                 'readonly' => !$form->fieldAccess->canEdit('up_inbox_show_limit_leads')
+                            ]) ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if ($form->fieldAccess->canShow('up_business_inbox_show_limit_leads')) : ?>
+                        <div class="col-md-3">
+                            <?= $activeForm->field($form, 'up_business_inbox_show_limit_leads', [
+                                'options' => [
+                                    'class' => 'form-group'
+                                ]
+                            ])->input('number', [
+                                'step' => 1,
+                                'min' => 0,
+                                'max' => 500,
+                                'readonly' => !$form->fieldAccess->canEdit('up_business_inbox_show_limit_leads')
                             ]) ?>
                         </div>
                     <?php endif; ?>

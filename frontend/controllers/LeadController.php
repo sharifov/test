@@ -1677,11 +1677,23 @@ class LeadController extends FController
     public function actionBusinessInbox(): string
     {
         $searchModel = new LeadSearch();
+        $params = Yii::$app->request->queryParams;
 
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
 
-        $dataProvider = $searchModel->searchBusinessInbox(Yii::$app->request->queryParams, $user);
+        if ($user->isAgent()) {
+            $userParams = $user->userParams;
+            if ($userParams) {
+                if ($userParams->up_business_inbox_show_limit_leads > 0) {
+                    $params['LeadSearch']['limit'] = $userParams->up_business_inbox_show_limit_leads;
+                }
+            } else {
+                throw new NotFoundHttpException('Not set user params for agent! Please ask supervisor to set shift time and other.');
+            }
+        }
+
+        $dataProvider = $searchModel->searchBusinessInbox($params, $user);
 
         return $this->render('business-inbox', [
             'searchModel' => $searchModel,

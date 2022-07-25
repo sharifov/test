@@ -40,6 +40,7 @@ use yii\base\Model;
  * @property $up_bonus_active
  * @property $up_leaderboard_enabled
  * @property $up_inbox_show_limit_leads
+ * @property $up_business_inbox_show_limit_leads
  * @property $up_default_take_limit_leads
  * @property $up_min_percent_for_take_leads
  * @property $up_frequency_minutes
@@ -90,6 +91,7 @@ class UpdateForm extends Model
     public $up_bonus_active;
     public $up_leaderboard_enabled;
     public $up_inbox_show_limit_leads;
+    public $up_business_inbox_show_limit_leads;
     public $up_default_take_limit_leads;
     public $up_min_percent_for_take_leads;
     public $up_frequency_minutes;
@@ -295,6 +297,7 @@ class UpdateForm extends Model
             'up_bonus_active',
             'up_leaderboard_enabled',
             'up_inbox_show_limit_leads',
+            'up_business_inbox_show_limit_leads',
             'up_default_take_limit_leads',
             'up_min_percent_for_take_leads',
             'up_frequency_minutes',
@@ -418,6 +421,10 @@ class UpdateForm extends Model
             ['up_inbox_show_limit_leads', 'default', 'value' => null],
             ['up_inbox_show_limit_leads', 'integer'],
             ['up_inbox_show_limit_leads', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
+
+            ['up_business_inbox_show_limit_leads', 'default', 'value' => null],
+            ['up_business_inbox_show_limit_leads', 'integer'],
+            ['up_business_inbox_show_limit_leads', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
 
             ['up_default_take_limit_leads', 'default', 'value' => null],
             ['up_default_take_limit_leads', 'integer'],
@@ -550,6 +557,7 @@ class UpdateForm extends Model
             'up_bonus_active' => 'Bonus Is Active',
             'up_leaderboard_enabled' => 'Leader Board Enabled',
             'up_inbox_show_limit_leads' => 'Inbox show limit leads',
+            'up_business_inbox_show_limit_leads' => 'Business Inbox show limit leads',
             'up_default_take_limit_leads' => 'Default take limit leads',
             'up_min_percent_for_take_leads' => 'Min percent for take leads',
             'up_frequency_minutes' => 'Take Frequency Minutes',
