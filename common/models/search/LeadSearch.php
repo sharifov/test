@@ -3027,7 +3027,7 @@ class LeadSearch extends Lead
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['created' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['created' => SORT_ASC]],
             'pagination' => $this->limit > 0 ? false : ['pageSize' => 20],
             'key' => function (Lead $model) {
                 return md5($model->id);
