@@ -64,9 +64,8 @@ class TaskObject
      */
     public static function getAttributeListByObject(string $objectName): array
     {
-
         $object = self::getByName($objectName);
-        $list = $object::getObjectAttributeList();
+        $list = $object ? $object::getObjectAttributeList() : [];
         /*
         $defaultList = $this->getDefaultAttributeList();
         $objList = [];
