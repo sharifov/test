@@ -254,6 +254,20 @@ class SideBarMenu extends \yii\bootstrap\Widget
             $menuItems[] = ['label' => 'KPI <span id="kpi" class="label-info label pull-right"></span> ', 'url' => ['/kpi/index'], 'icon' => 'money'];
         }
 
+
+        /** @abac ShiftAbacObject::ACT_MY_TASK_LIST, TaskListAbacObject::ACTION_ACCESS, Access menu My Task List */
+        $menuItems[] = [
+            'label' => 'My Task List <sup style="color: red">NEW</sup>',
+            'url' => ['/task-list/index'],
+            'icon' => 'check-square-o',
+            'abac'  => [
+                'dto'    => null,
+                //'object' => ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE,
+                //'action' => ShiftAbacObject::ACTION_ACCESS,
+            ],
+        ];
+
+
         /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access menu My Shift Schedule */
         $shiftMenuItems[] = [
             'label' => 'My Shift',
