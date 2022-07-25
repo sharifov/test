@@ -485,7 +485,10 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
                             <div class="btn-wrapper">
                                 <?= Html::submitButton(
                                     '<i class="fa fa-envelope-o"></i> Preview and Send Email',
-                                    ['class' => 'btn btn-lg btn-primary', 'id' => 'preview_email_btn']
+                                    [
+                                        'class' => 'btn btn-lg btn-primary',
+                                        'id' => 'preview_email_btn',
+                                    ]
                                 ) ?>
                             </div>
                         </div>
