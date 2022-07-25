@@ -11,6 +11,7 @@ use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use src\access\EmployeeDepartmentAccess;
 use src\auth\Auth;
+use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 
@@ -221,5 +222,20 @@ class LeadHelper
     public static function checkCallExpertNeededChange(Lead $lead): bool
     {
         return $lead->status !== Lead::STATUS_PROCESSING && $lead->isCalledExpert();
+    }
+
+    public static function displayBusinessExtraQueueTimerIfExists(Lead $lead, string $style = ''): string
+    {
+        $leadBusinessExtraQueue = LeadBusinessExtraQueueService::getLeadBusinessExtraQueueByMinExpire($lead);
+
+        if ($leadBusinessExtraQueue !== null && $leadBusinessExtraQueue->lbeq_expiration_dt !== null) {
+            return self::displayLeadPoorProcessingTimer(
+                $leadBusinessExtraQueue->lbeq_expiration_dt,
+                $leadBusinessExtraQueue->lbeqLbeqr->lbeqr_name,
+                $style
+            );
+        }
+
+        return '';
     }
 }

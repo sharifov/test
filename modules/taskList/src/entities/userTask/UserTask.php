@@ -6,7 +6,10 @@ use common\models\Employee;
 use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTask;
 use modules\taskList\src\entities\TargetObject;
 use modules\taskList\src\entities\taskList\TaskList;
+use modules\taskList\src\entities\userTask\behaviors\UserTaskStatusLogDeleteBehavior;
+use src\behaviors\dateTime\CreatedYearMonthBehavior;
 use yii\db\ActiveQuery;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "user_task".
@@ -76,9 +79,10 @@ class UserTask extends \yii\db\ActiveRecord
             [['ut_user_id'], 'integer'],
             [['ut_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ut_user_id' => 'id']],
 
-            [['ut_start_dt', 'ut_end_dt'], 'required'],
+            [['ut_start_dt'], 'required'],
             [['ut_start_dt', 'ut_end_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
-            [['ut_start_dt'], 'compare', 'compareAttribute' => 'ut_end_dt', 'operator' => '<=', 'enableClientValidation' => false],
+
+            [['ut_end_dt'], 'compare', 'compareAttribute' => 'ut_start_dt', 'operator' => '>=', 'enableClientValidation' => false, 'skipOnEmpty' => true],
 
             [['ut_created_dt'], 'default', 'value' => date('Y-m-d H:i:s')],
             [['ut_created_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
@@ -89,6 +93,22 @@ class UserTask extends \yii\db\ActiveRecord
             [['ut_month'], 'integer'],
             [['ut_month'], 'default', 'value' => date('m')],
         ];
+    }
+
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'createdDt' => [
+                'class' => CreatedYearMonthBehavior::class,
+                'createdColumn' => 'ut_created_dt',
+                'yearColumn' => 'ut_year',
+                'monthColumn' => 'ut_month',
+            ],
+            'deleteStatusLogs' => [
+                'class' => UserTaskStatusLogDeleteBehavior::class
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     public function getShiftScheduleEventTasks(): ActiveQuery
@@ -140,7 +160,7 @@ class UserTask extends \yii\db\ActiveRecord
         int $targetObjectId,
         int $taskListId,
         string $startDt,
-        string $endDt,
+        ?string $endDt = null,
         ?int $priorityId = null,
         ?int $statusId = null
     ): UserTask {
@@ -154,15 +174,6 @@ class UserTask extends \yii\db\ActiveRecord
         $model->ut_priority = $priorityId;
         $model->ut_status_id = $statusId;
 
-        return $model::fillSystemFields($model);
-    }
-
-    private static function fillSystemFields(UserTask $model): UserTask
-    {
-        $nowDT = (new \DateTimeImmutable());
-        $model->ut_created_dt = $nowDT->format('Y-m-d H:i:s');
-        $model->ut_year = $nowDT->format('Y');
-        $model->ut_month = $nowDT->format('m');
         return $model;
     }
 
@@ -174,5 +185,11 @@ class UserTask extends \yii\db\ActiveRecord
     public static function getPriorityName(?int $priorityId): string
     {
         return self::PRIORITY_LIST[$priorityId] ?? '-';
+    }
+
+    public function setStatusComplete(): UserTask
+    {
+        $this->ut_status_id = self::STATUS_COMPLETE;
+        return $this;
     }
 }

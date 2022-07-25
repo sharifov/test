@@ -13,6 +13,7 @@ use frontend\helpers\RedisHelper;
 use frontend\helpers\JsonHelper;
 use frontend\widgets\notification\NotificationMessage;
 use kivork\search\core\urlsig\UrlSignature;
+use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\objectSegment\src\contracts\ObjectSegmentListContract;
@@ -4407,12 +4408,19 @@ Reason: {reason}',
      */
     public static function getProcessingStatuses(): array
     {
-        return [
+        $list = [
             self::STATUS_SNOOZE => self::STATUS_LIST[self::STATUS_SNOOZE],
             self::STATUS_PROCESSING => self::STATUS_LIST[self::STATUS_PROCESSING],
             self::STATUS_ON_HOLD => self::STATUS_LIST[self::STATUS_ON_HOLD],
             self::STATUS_EXTRA_QUEUE => self::STATUS_LIST[self::STATUS_EXTRA_QUEUE],
         ];
+
+        /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) === true) {
+            $list[self::STATUS_BUSINESS_EXTRA_QUEUE] = self::STATUS_LIST[self::STATUS_BUSINESS_EXTRA_QUEUE];
+        }
+
+        return $list;
     }
 
     /**
@@ -5180,6 +5188,16 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $this->setStatus(self::STATUS_EXTRA_QUEUE);
     }
 
+    public function toBusinessExtraQueue(?int $newOwnerId = null): void
+    {
+        if ($this->isExtraQueue()) {
+            return;
+        }
+        $this->changeOwner($newOwnerId);
+
+        $this->setStatus(self::STATUS_BUSINESS_EXTRA_QUEUE);
+    }
+
     public function hasTakenFromExtraToProcessing(): bool
     {
         if ($this->isProcessing()) {
@@ -5219,6 +5237,11 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     public function isExtraQueue(): bool
     {
         return $this->status === self::STATUS_EXTRA_QUEUE;
+    }
+
+    public function isBusinessExtraQueue(): bool
+    {
+        return $this->status === self::STATUS_BUSINESS_EXTRA_QUEUE;
     }
 
     public function isClosed(): bool
@@ -5313,7 +5336,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         return (bool) $this
             ->getLeadData()
-            ->where(['ld_filed_key' => LeadDataKeyDictionary::KEY_LEAD_OBJECT_SEGMENT])
+            ->where(['ld_field_key' => LeadDataKeyDictionary::KEY_LEAD_OBJECT_SEGMENT])
             ->andWhere(['ld_field_value' => ObjectSegmentListContract::OBJECT_SEGMENT_LIST_KEY_LEAD_TYPE_BUSINESS])
             ->count();
     }

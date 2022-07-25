@@ -3,9 +3,14 @@
 namespace src\model\leadBusinessExtraQueue\entity;
 
 use common\models\Lead;
+use src\behaviors\StringToJsonBehavior;
 use src\model\leadBusinessExtraQueueRule\entity\LeadBusinessExtraQueueRule;
 use src\traits\FieldsTrait;
 use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
+use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "lead_business_extra_queue".
@@ -60,6 +65,20 @@ class LeadBusinessExtraQueue extends \yii\db\ActiveRecord
         ];
     }
 
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    ActiveRecord::EVENT_BEFORE_INSERT => ['lbeq_created_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s')
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
     public static function find(): LeadBusinessExtraQueueScopes
     {
         return new LeadBusinessExtraQueueScopes(static::class);
@@ -77,7 +96,7 @@ class LeadBusinessExtraQueue extends \yii\db\ActiveRecord
     ): LeadBusinessExtraQueue {
         $model = new self();
         $model->lbeq_lead_id = $leadId;
-        $model->lbeq_lppd_id = $dataId;
+        $model->lbeq_lbeqr_id = $dataId;
         $model->lbeq_expiration_dt = $expirationDt;
         return $model;
     }

@@ -6,7 +6,6 @@ use common\models\Lead;
 use modules\featureFlag\FFlag;
 use src\helpers\app\AppHelper;
 use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
-use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use yii\helpers\ArrayHelper;
 use yii\queue\JobInterface;
 
