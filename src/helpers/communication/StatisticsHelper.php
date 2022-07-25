@@ -6,7 +6,6 @@ use common\models\Call;
 use common\models\Email;
 use common\models\Lead;
 use common\models\Sms;
-use modules\featureFlag\FFlag;
 use src\entities\cases\CasesStatus;
 use src\model\callLog\entity\callLog\CallLog;
 use src\model\callLog\entity\callLog\CallLogType;
@@ -14,11 +13,10 @@ use src\model\callLog\entity\callLogCase\CallLogCase;
 use src\model\callLog\entity\callLogLead\CallLogLead;
 use src\model\clientChatCase\entity\ClientChatCase;
 use src\model\clientChatLead\entity\ClientChatLead;
-use src\repositories\email\EmailRepository;
-use Yii;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
+use src\repositories\email\EmailRepositoryFactory;
 
 /**
  * Class StatisticsHelper
@@ -61,18 +59,10 @@ class StatisticsHelper
      */
     public function setEmailCount(): StatisticsHelper
     {
-        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_EMAIL_NORMALIZED_FORM_ENABLE)) {
-            if ($this->type === self::TYPE_LEAD) {
-                $this->emailCount = EmailRepository::getEmailCountByLead($this->id);
-            } else {
-                $this->emailCount = EmailRepository::getEmailCountByCase($this->id);
-            }
+        if ($this->type === self::TYPE_LEAD) {
+            $this->emailCount = EmailRepositoryFactory::getRepository()->getEmailCountByLead($this->id, $this->cacheDuration);
         } else {
-            $column = $this->type === self::TYPE_LEAD ? 'e_lead_id' : 'e_case_id';
-            $this->emailCount = (int) Email::find()
-                ->where([$column => $this->id])
-                ->cache($this->cacheDuration)
-                ->count();
+            $this->emailCount = EmailRepositoryFactory::getRepository()->getEmailCountByCase($this->id, $this->cacheDuration);
         }
 
         return $this;
