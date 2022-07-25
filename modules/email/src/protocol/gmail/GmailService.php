@@ -22,6 +22,7 @@ use src\services\email\EmailMainService;
 use src\dto\email\EmailDTO;
 use src\exception\CreateModelException;
 use src\services\email\EmailServiceHelper;
+use src\repositories\email\EmailRepositoryFactory;
 
 /**
  * Class Gmail
@@ -277,7 +278,7 @@ class GmailService
 
     private function emailExist(string $messageId, string $emailTo): bool
     {
-        return Email::find()->where(['e_message_id' => $messageId, 'e_email_to' => $emailTo])->exists();
+        return EmailRepositoryFactory::getRepository()->findReceived($messageId, $emailTo)->exists();
     }
 
     private function addProcessedEmail(string $id): void
