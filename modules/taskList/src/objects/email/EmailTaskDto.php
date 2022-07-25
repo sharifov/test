@@ -2,15 +2,14 @@
 
 namespace modules\taskList\src\objects\email;
 
-use common\models\Email;
-use yii\helpers\ArrayHelper;
+use src\entities\email\EmailInterface;
 
 class EmailTaskDto extends \stdClass
 {
     public ?string $project_key = null;
 
-    public function __construct(Email $email)
+    public function __construct(EmailInterface $email)
     {
-        $this->project_key = $email->eProject->project_key ?? null;
+        $this->project_key = $email->project->project_key ?? null;
     }
 }
