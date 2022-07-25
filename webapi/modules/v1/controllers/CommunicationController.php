@@ -91,6 +91,7 @@ use yii\web\NotFoundHttpException;
 use yii\web\UnprocessableEntityHttpException;
 use common\components\ReceiveEmailsJob;
 use yii\queue\Queue;
+use src\repositories\email\EmailRepositoryFactory;
 
 /**
  * Class CommunicationController
@@ -2654,14 +2655,7 @@ class CommunicationController extends ApiBaseController
             $filter = [];
             $dateTime = null;
             if (null === $last_id) {
-                $lastEmail = Email::find()->where(['>', 'e_inbox_email_id', 0])->orderBy(['e_inbox_email_id' => SORT_DESC])->limit(1)->one();
-
-                if ($lastEmail) {
-                    //$filter['last_dt'] = $lastEmail->e_inbox_created_dt;
-                    $filter['last_id'] = $lastEmail->e_inbox_email_id;
-                } else {
-                    $filter['last_id'] = 1;
-                }
+                $filter['last_id'] = EmailRepositoryFactory::getRepository()->getLastInboxId() ?? 1;
             } else {
                 $filter['last_id'] = (int)$last_id;
 
@@ -2671,14 +2665,7 @@ class CommunicationController extends ApiBaseController
                     return $response;
                 }
 
-                $lastEmail = Email::find()->where(['>', 'e_inbox_email_id', 0])->orderBy(['e_inbox_email_id' => SORT_DESC])->limit(1)->one();
-
-                if ($lastEmail) {
-                    //$filter['last_dt'] = $lastEmail->e_inbox_created_dt;
-                    $filter['last_id'] = $lastEmail->e_inbox_email_id;
-                } else {
-                    $filter['last_id'] = 1;
-                }
+                $filter['last_id'] = EmailRepositoryFactory::getRepository()->getLastInboxId() ?? 1;
             }
 
             Yii::$app->redis->set('new_email_message_received', true);
