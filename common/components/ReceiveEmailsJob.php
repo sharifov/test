@@ -174,14 +174,6 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
         return true;
     }
 
-    private function filter($str)
-    {
-        if (!$str) {
-            return $str;
-        }
-        return filter_var($str, FILTER_UNSAFE_RAW, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
-    }
-
     private function getEmailsForReceivedMessages(): array
     {
 //        $mailsUpp = UserProjectParams::find()->select(['DISTINCT(upp_email)'])->andWhere(['!=', 'upp_email', ''])->column();
