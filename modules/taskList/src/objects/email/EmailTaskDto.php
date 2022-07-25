@@ -13,9 +13,4 @@ class EmailTaskDto extends \stdClass
     {
         $this->project_key = $email->eProject->project_key ?? null;
     }
-
-    public function toArray(): array
-    {
-        return ArrayHelper::toArray($this);
-    }
 }
