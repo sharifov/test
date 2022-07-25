@@ -77,6 +77,15 @@ class EmailOldRepository implements EmailRepositoryInterface
         return Email::find()->createdToday()->cache($cache)->count();
     }
 
+    public function getEmailCountForLead(int $leadId, int $type = 0): int
+    {
+        $query = Email::find()->lead($leadId)->notDeleted();
+        if($type > 0) {
+            $query = $query->byType($type);
+        }
+        return $query->count();
+    }
+
     public function getEmailCountByLead(int $leadId, $cache = 0): int
     {
         return Email::find()->lead($leadId)->cache($cache)->count();

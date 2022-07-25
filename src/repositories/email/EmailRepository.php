@@ -198,6 +198,19 @@ class EmailRepository implements EmailRepositoryInterface
         return Email::find()->createdToday()->cache($cache)->count();
     }
 
+    public function getEmailCountForLead(int $leadId, int $type = 0): int
+    {
+        $connection = \Yii::$app->getDb();
+        $command = $connection->createCommand(
+            "SELECT COUNT(*) as cnt
+            FROM email_lead el
+            LEFT JOIN " . Email::tableName() . " AS e ON e.e_id = el.el_email_id
+            WHERE el_lead_id = $leadId AND e_is_deleted = 0".
+            (($type != 0) ? " AND e_type_id = ".$type : "" )
+            );
+        return $command->queryScalar();
+    }
+
     public function getEmailCountByLead(int $leadId, $cache = 0): int
     {
         $connection = \Yii::$app->getDb();

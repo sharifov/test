@@ -33,4 +33,6 @@ interface EmailRepositoryInterface
     public function getEmailCountByLead(int $leadId, $cache = 0): int;
 
     public function getEmailCountByCase(int $caseId, $cache = 0): int;
+
+    public function getEmailCountForLead(int $leadId, int $type = 0): int;
 }
