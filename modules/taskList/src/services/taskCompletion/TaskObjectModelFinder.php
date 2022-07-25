@@ -2,9 +2,9 @@
 
 namespace modules\taskList\src\services\taskCompletion;
 
-use common\models\Email;
 use common\models\Sms;
 use modules\taskList\src\entities\TaskObject;
+use src\repositories\email\EmailRepositoryFactory;
 
 class TaskObjectModelFinder
 {
@@ -23,8 +23,10 @@ class TaskObjectModelFinder
     {
         switch ($this->taskObject) {
             case TaskObject::OBJ_EMAIL:
-                if (!$model = Email::find()->where(['e_id' => $this->taskModelId])->limit(1)->one()) {
-                    throw new \RuntimeException('Email not found by ID(' . $this->taskModelId . ')');
+                try {
+                    $model = EmailRepositoryFactory::getRepository()->find($this->taskModelId);
+                } catch (\Throwable $e) {
+                    throw new \RuntimeException($e->getMessage());
                 }
                 return $model;
             case TaskObject::OBJ_SMS:
