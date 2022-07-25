@@ -50,7 +50,8 @@ class FieldAccess
             || $this->canEdit('up_call_expert_limit')
             || $this->canEdit('up_auto_redial')
             || $this->canEdit('up_kpi_enable')
-            || $this->canEdit('up_leaderboard_enabled');
+            || $this->canEdit('up_leaderboard_enabled')
+            || $this->canEdit('up_business_inbox_show_limit_leads');
     }
 
     public function canShowProfileWithParameters(): bool
@@ -75,6 +76,7 @@ class FieldAccess
             || $this->canShow('up_bonus_active')
             || $this->canShow('up_leaderboard_enabled')
             || $this->canShow('up_inbox_show_limit_leads')
+            || $this->canShow('up_business_inbox_show_limit_leads')
             || $this->canShow('up_default_take_limit_leads')
             || $this->canShow('up_min_percent_for_take_leads')
             || $this->canShow('up_frequency_minutes')

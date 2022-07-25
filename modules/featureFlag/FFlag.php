@@ -35,7 +35,7 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_SHIFT_SCHEDULE_REQUEST_SAVE_SEND_NOTIFICATION_BY_JOB_ENABLE = 'shiftScheduleRequestSaveSendNotificationByJobEnable';
     public const FF_KEY_FILTER_CONVERSION_DATE_AND_USER_IN_LEAD_SEARCH = 'filterConversionDateAndUserInLeadSearch';
     public const FF_KEY_VALIDATE_ABAC_POLICY_IN_MIGRATION = 'validateAbacPolicyInMigration';
-
+    public const FF_KEY_BUSINESS_QUEUE_LIMIT = 'businessQueueLimit';
 
 
     public const FF_KEY_LIST = [
@@ -63,6 +63,7 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_SHIFT_SCHEDULE_REQUEST_SAVE_SEND_NOTIFICATION_BY_JOB_ENABLE,
         self::FF_KEY_FILTER_CONVERSION_DATE_AND_USER_IN_LEAD_SEARCH,
         self::FF_KEY_VALIDATE_ABAC_POLICY_IN_MIGRATION,
+        self::FF_KEY_BUSINESS_QUEUE_LIMIT,
     ];
 
 

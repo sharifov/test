@@ -507,6 +507,15 @@ class EmployeeController extends FController
                             }
                         }
 
+                        if ($multipleForm->up_business_inbox_show_limit_leads !== null) {
+                            if ($fieldAccess->canEdit('up_business_inbox_show_limit_leads')) {
+                                $uParams->up_business_inbox_show_limit_leads = $multipleForm->up_business_inbox_show_limit_leads;
+                                $uParamsNeedSave = true;
+                            } else {
+                                $multipleErrors[$user_id][] = 'Update property Business Inbox show limit leads: access denied';
+                            }
+                        }
+
                         if ($multipleForm->up_default_take_limit_leads !== null) {
                             if ($fieldAccess->canEdit('up_default_take_limit_leads')) {
                                 $uParams->up_default_take_limit_leads = $multipleForm->up_default_take_limit_leads;
