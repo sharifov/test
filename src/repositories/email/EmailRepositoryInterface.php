@@ -18,4 +18,6 @@ interface EmailRepositoryInterface
     public function deleteByIds($id): array;
 
     public function getCommunicationLogQueryForLead(int $leadId);
+
+    public function getCommunicationLogQueryForCase(int $caseId);
 }

@@ -11,6 +11,9 @@ use src\entities\cases\Cases;
 use src\repositories\NotFoundException;
 use src\entities\email\Email;
 use yii\db\Expression;
+use common\models\EmailTemplateType;
+use src\entities\email\helpers\EmailType;
+use src\entities\email\EmailParams;
 
 class EmailRepository implements EmailRepositoryInterface
 {
@@ -220,5 +223,37 @@ class EmailRepository implements EmailRepositoryInterface
         return Email::find()
             ->lead($leadId)
             ->select(['e_id AS id', new Expression('"email" AS type'), 'el_lead_id AS lead_id', 'e_created_dt AS created_dt']);
+    }
+
+    public function getCommunicationLogQueryForCase(int $caseId)
+    {
+        $emailTemplate = EmailTemplateType::find()
+            ->select('etp_id')
+            ->where(['etp_key' => 'feedback_appr_supp'])
+            ->asArray()
+            ->limit(1)
+            ->one();
+
+        $condition = $emailTemplate
+            ? ['<>', 'ep_template_type_id', $emailTemplate['etp_id']]
+            : ['IS NOT', 'ep_template_type_id', null];
+
+        return Email::find()
+            ->case($caseId)
+            ->select(['e_id AS id', new Expression('"email" AS type'), 'ec_case_id AS case_id', 'e_created_dt AS created_dt'])
+            ->leftJoin(EmailParams::tableName(), 'ep_email_id = e_id')
+            ->andWhere(['OR',
+                ['IS NOT', 'e_created_user_id', null],
+                ['AND',
+                    ['IS', 'e_created_user_id', null],
+                    ['e_type_id' => EmailType::INBOX],
+                    ['IS', 'ep_template_type_id', null]
+                ],
+                ['AND',
+                    ['IS', 'e_created_user_id', null],
+                    ['e_type_id' => EmailType::OUTBOX],
+                    $condition
+                ]
+            ]);
     }
 }
