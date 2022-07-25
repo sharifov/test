@@ -9,11 +9,11 @@ use common\models\UserProjectParams;
 use frontend\widgets\notification\NotificationMessage;
 use src\dto\email\EmailDTO;
 use src\services\email\EmailMainService;
-use src\services\email\EmailService;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
+use src\repositories\email\EmailRepositoryFactory;
 
 /**
  * Class DownloadMessages
@@ -42,10 +42,7 @@ class DownloadEmails
         $cycleCount = 1;
         $countTotal = 0;
 
-        $lastEmailId = (int)Email::find()->select(['e_inbox_email_id'])->where(['>', 'e_inbox_email_id', 0])->orderBy(['e_inbox_email_id' => SORT_DESC])->scalar();
-        if ($lastEmailId === 0) {
-            $lastEmailId = 1;
-        }
+        $lastEmailId = EmailRepositoryFactory::getRepository()->getLastInboxId() ?? 1;
 
         $filter = [
             'last_id' => $lastEmailId,
@@ -82,15 +79,10 @@ class DownloadEmails
 
                         $filter['last_id'] = $mail['ei_id'] + 1;
 
-                        $find = Email::find()->where(
-                            [
-                                "e_message_id" => $mail['ei_message_id'],
-                                "e_email_to" => $mail['ei_email_to']]
-                        )->one();
-
+                        $emailRepository = EmailRepositoryFactory::getRepository();
+                        $find = $emailRepository->findReceived($mail['ei_message_id'], $mail['ei_email_to'])->one();
                         if ($find) {
-                            $find->e_inbox_email_id = $mail['ei_id'];
-                            $find->save();
+                            $emailRepository->saveInboxId($find, $mail['ei_id']);
                             continue;
                         }
 
