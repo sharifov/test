@@ -29,4 +29,8 @@ interface EmailRepositoryInterface
     public function saveInboxId(EmailInterface $email, int $inboxId): void;
 
     public function getLastInboxId(): ?int;
+
+    public function getEmailCountByLead(int $leadId, $cache = 0): int;
+
+    public function getEmailCountByCase(int $caseId, $cache = 0): int;
 }
