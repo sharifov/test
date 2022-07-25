@@ -73,12 +73,10 @@ use src\helpers\setting\SettingHelper;
 use src\model\call\useCase\createCall\fromCase\AbacCallFromNumberList;
 use src\model\callLog\entity\callLog\CallLogType;
 use src\model\caseOrder\entity\CaseOrder;
-use src\model\cases\useCases\cases\addBookingId\AddBookingIdForm;
 use src\model\cases\useCases\cases\updateInfo\FieldAccess;
 use src\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
 use src\guards\cases\CaseManageSaleInfoGuard;
 use src\model\cases\useCases\cases\updateInfo\Handler;
-use src\model\cases\useCases\cases\addBookingId\AddBookingIdHandler;
 use src\model\clientChat\entity\ClientChat;
 use src\model\clientChat\permissions\ClientChatActionPermission;
 use src\model\clientChat\services\ClientChatAssignService;
@@ -141,7 +139,6 @@ use src\repositories\project\ProjectRepository;
  * @property CasesSaleService $casesSaleService
  * @property ClientUpdateFromEntityService $clientUpdateFromEntityService
  * @property Handler $updateHandler
- * @property AddBookingIdHandler $addBookingIdHandler
  * @property SaleTicketService $saleTicketService
  * @property QuoteRepository $quoteRepository
  * @property TransactionManager $transaction
@@ -165,7 +162,6 @@ class CasesController extends FController
     private $casesSaleService;
     private $clientUpdateFromEntityService;
     private $updateHandler;
-    private $addBookingIdHandler;
     private $saleTicketService;
     private $quoteRepository;
     private $transaction;
@@ -192,7 +188,6 @@ class CasesController extends FController
         CasesSaleService $casesSaleService,
         ClientUpdateFromEntityService $clientUpdateFromEntityService,
         Handler $updateHandler,
-        AddBookingIdHandler $addBookingIdHandler,
         SaleTicketService $saleTicketService,
         QuoteRepository $quoteRepository,
         TransactionManager $transaction,
@@ -217,7 +212,6 @@ class CasesController extends FController
         $this->clientUpdateFromEntityService = $clientUpdateFromEntityService;
         $this->saleTicketService = $saleTicketService;
         $this->updateHandler = $updateHandler;
-        $this->addBookingIdHandler = $addBookingIdHandler;
         $this->quoteRepository = $quoteRepository;
         $this->transaction = $transaction;
         $this->chatActionPermission = $chatActionPermission;
@@ -516,6 +510,7 @@ class CasesController extends FController
 
         if ($comForm->load(Yii::$app->request->post())) {
             $comForm->c_case_id = $model->cs_id;
+            $comForm->cs_order_uid = $model->cs_order_uid;
 
             if ($comForm->validate()) {
                 $project = $model->project;
@@ -1830,36 +1825,6 @@ class CasesController extends FController
         }
 
         return $this->renderAjax('partial/_case_update', [
-            'model' => $form,
-        ]);
-    }
-
-    /**
-     * @return string|Response
-     * @throws ForbiddenHttpException
-     * @throws NotFoundHttpException
-     */
-    public function actionAjaxAddBookingId()
-    {
-        $case = $this->findModelByGid((string)Yii::$app->request->get('gid'));
-
-        if (!Auth::can('cases/update', ['case' => $case])) {
-            throw new ForbiddenHttpException('Access denied.');
-        }
-
-        $form = new AddBookingIdForm($case, Auth::id());
-
-        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
-            try {
-                $this->addBookingIdHandler->handle($form->getDto());
-                Yii::$app->session->setFlash('success', 'Booking ID has been added successfully.');
-            } catch (\Throwable $exception) {
-                Yii::$app->session->setFlash('error', VarDumper::dumpAsString($exception));
-            }
-            return $this->redirect(['cases/view', 'gid' => $case->cs_gid]);
-        }
-
-        return $this->renderAjax('partial/_add_booking_id', [
             'model' => $form,
         ]);
     }
