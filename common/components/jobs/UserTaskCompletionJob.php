@@ -69,7 +69,7 @@ class UserTaskCompletionJob extends BaseJob implements JobInterface
             'targetObjectId' => $this->targetObjectId,
             'taskObject' => $this->taskObject,
             'taskModelId' => $this->taskModelId,
-            'userId' => $this->userId
+            'userId' => $this->userId,
         ];
     }
 }
