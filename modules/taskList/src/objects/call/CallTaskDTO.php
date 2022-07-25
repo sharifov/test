@@ -17,9 +17,4 @@ class CallTaskDTO
         $this->project_key = $call->cProject->project_key ?? null;
         $this->duration = $call->c_call_duration;
     }
-
-    public function toArray(): array
-    {
-        return ArrayHelper::toArray($this);
-    }
 }
