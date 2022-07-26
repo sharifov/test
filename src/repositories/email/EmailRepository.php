@@ -232,17 +232,6 @@ class EmailRepository implements EmailRepositoryInterface
         return $command->cache($cache)->queryScalar();
     }
 
-    public function getEmailCountBLead(int $leadId, $cache = 0): int
-    {
-        $connection = \Yii::$app->getDb();
-        $command = $connection->createCommand(
-            "SELECT COUNT(*) as cnt
-            FROM email_lead
-            WHERE el_lead_id = $leadId"
-            );
-        return $command->cache($cache)->queryScalar();
-    }
-
     public function getEmailCountByCase(int $caseId, $cache = 0): int
     {
         $connection = \Yii::$app->getDb();
@@ -333,5 +322,19 @@ class EmailRepository implements EmailRepositoryInterface
                 GROUP BY el_lead_id"
             )
             ->rawSql;
+    }
+
+    public function getQueryLastEmailByCase(int $caseId, int $type): ActiveQuery
+    {
+        $direction = EmailType::isInbox($type) ? 'In' : 'Out';
+        return Email::find()
+            ->select([
+                new Expression('"email" AS type'),
+                new Expression('"' . $direction . '" AS direction'),
+                'ec_case_id AS case_id',
+                'MAX(e_created_dt) AS created_dt'
+            ])
+            ->case($caseId)
+            ->byType($type);
     }
 }

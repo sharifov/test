@@ -177,4 +177,18 @@ class EmailOldRepository implements EmailRepositoryInterface
             ->createCommand()
             ->rawSql;
     }
+
+    public function getQueryLastEmailByCase(int $caseId, int $type): ActiveQuery
+    {
+        $direction = EmailType::isInbox($type) ? 'In' : 'Out';
+        return Email::find()
+            ->select([
+                new Expression('"email" AS type'),
+                new Expression('"' . $direction . '" AS direction'),
+                'e_case_id AS case_id',
+                'MAX(e_created_dt) AS created_dt'
+            ])
+            ->case($caseId)
+            ->byType($type);
+    }
 }

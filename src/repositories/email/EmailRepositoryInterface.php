@@ -43,4 +43,6 @@ interface EmailRepositoryInterface
     public function changeStatus(Email $email, int $statusId): void;
 
     public function getRawSqlCountGroupedByLead(): string;
+
+    public function getQueryLastEmailByCase(int $caseId, int $type): ActiveQuery;
 }
