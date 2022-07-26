@@ -67,6 +67,8 @@ class LeadTaskListService
                             $dtNow->format('Y-m-d H:i:s')
                         );
 
+                        $userTask->setStatusProcessing();
+
                         if (!$userTask->validate()) {
                             throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($userTask, ' '));
                         }
