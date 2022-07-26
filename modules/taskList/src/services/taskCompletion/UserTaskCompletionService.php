@@ -68,6 +68,7 @@ class UserTaskCompletionService
                     $this->targetObjectId,
                     TaskCompletionDictionary::getUserTaskProcessingStatuses(),
                     UserShiftSchedule::getProcessingStatuses(),
+                    (new \DateTimeImmutable('now', new \DateTimeZone('UTC'))),
                     $this->userTasksProcessed
                 );
 

@@ -14,8 +14,8 @@ class UserTaskQuery
         int $targetObjectId,
         array $utStatusIds,
         array $userShiftScheduleStatuses,
-        ?array $excludeIds = null,
-        \DateTimeImmutable $dtNow = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))
+        \DateTimeImmutable $dtNow,
+        ?array $excludeIds = null
     ): UserTaskScopes {
         $userTasksQuery = UserTask::find()
             ->innerJoin([
@@ -26,10 +26,10 @@ class UserTaskQuery
                         'sset_event_id = uss_id 
                             AND uss_start_utc_dt <= :dtNow AND uss_end_utc_dt >= :dtNow
                             AND uss_status_id IN (:statuses)',
-                            [
-                                'dtNow' => $dtNow->format('Y-m-d H:i:s'),
-                                'statuses' => $userShiftScheduleStatuses
-                            ]
+                        [
+                            'dtNow' => $dtNow->format('Y-m-d H:i:s'),
+                            'statuses' => $userShiftScheduleStatuses
+                        ]
                     )
                     ->groupBy(['sset_user_task_id'])
             ], 'ut_id = shift_schedule_event_task_query.sset_user_task_id')
