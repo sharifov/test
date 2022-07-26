@@ -96,6 +96,16 @@ class EmailQuery extends ActiveQuery
         return $this->leftJoin(['el' => EmailLog::tableName()], 'el.el_email_id = e_id')->andWhere(['el.el_message_id' => $messageId]);
     }
 
+    public function byCommunicationId(int $communicationId)
+    {
+        return $this->leftJoin(['el' => EmailLog::tableName()], 'el.el_email_id = e_id')->andWhere(['el.el_communication_id' => $communicationId]);
+    }
+
+    public function byInboxId(int $inboxId)
+    {
+        return $this->leftJoin(['el' => EmailLog::tableName()], 'el.el_email_id = e_id')->andWhere(['el.el_inbox_email_id' => $inboxId]);
+    }
+
     public function byEmailToList(array $mailList)
     {
         return $this->withContact($mailList)->andWhere(['ec.ec_type_id' => EmailContactType::TO]);

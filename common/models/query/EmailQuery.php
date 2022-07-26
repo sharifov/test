@@ -52,6 +52,16 @@ class EmailQuery extends ActiveQuery
         return $this->andWhere(['e_message_id' => $messageId]);
     }
 
+    public function byCommunicationId(int $communicationId)
+    {
+        return $this->andWhere(['e_communication_id' => $communicationId]);
+    }
+
+    public function byInboxId(int $inboxId)
+    {
+        return $this->andWhere(['e_inbox_email_id' => $inboxId]);
+    }
+
     public function notDeleted()
     {
         return $this->andWhere(['e_is_deleted' => false]);
