@@ -393,6 +393,6 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
 
     public static function getProcessingStatuses(): array
     {
-        return [self::STATUS_PENDING, self::STATUS_APPROVED];
+        return [self::STATUS_APPROVED, self::STATUS_DONE];
     }
 }

@@ -17,6 +17,9 @@ class UserTaskQuery
         \DateTimeImmutable $dtNow,
         ?array $excludeIds = null
     ): UserTaskScopes {
+
+        $dtNowFormatted = $dtNow->format('Y-m-d H:i:s');
+
         $userTasksQuery = UserTask::find()
             ->innerJoin([
                 'shift_schedule_event_task_query' => ShiftScheduleEventTask::find()
@@ -27,7 +30,7 @@ class UserTaskQuery
                             AND uss_start_utc_dt <= :dtNow AND uss_end_utc_dt >= :dtNow
                             AND uss_status_id IN (:statuses)',
                         [
-                            'dtNow' => $dtNow->format('Y-m-d H:i:s'),
+                            'dtNow' => $dtNowFormatted,
                             'statuses' => $userShiftScheduleStatuses
                         ]
                     )
@@ -37,7 +40,10 @@ class UserTaskQuery
             ->andWhere(['ut_user_id' => $userId])
             ->andWhere(['ut_target_object' => $targetObject])
             ->andWhere(['ut_target_object_id' => $targetObjectId])
-            ->andWhere(['IN', 'ut_status_id', $utStatusIds]);
+            ->andWhere(['IN', 'ut_status_id', $utStatusIds])
+            ->andWhere(['<=', 'ut_start_dt', $dtNowFormatted])
+            ->andWhere(['>=', 'ut_end_dt', $dtNowFormatted])
+        ;
 
         if (!empty($excludeIds)) {
             $userTasksQuery->andWhere(['NOT IN', 'ut_id', $excludeIds]);
