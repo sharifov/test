@@ -2,6 +2,7 @@
 
 namespace modules\taskList\src\services\taskCompletion;
 
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\taskList\src\entities\taskList\TaskListQuery;
 use modules\taskList\src\entities\userTask\repository\UserTaskRepository;
 use modules\taskList\src\entities\userTask\UserTaskQuery;
@@ -66,6 +67,7 @@ class UserTaskCompletionService
                     $this->targetObject,
                     $this->targetObjectId,
                     TaskCompletionDictionary::getUserTaskProcessingStatuses(),
+                    UserShiftSchedule::getProcessingStatuses(),
                     $this->userTasksProcessed
                 );
 

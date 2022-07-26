@@ -390,4 +390,9 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
     {
         $this->recordEvent(new ShiftScheduleEventChangedEvent($this, $oldEvent, $changedAttributes, $userId));
     }
+
+    public static function getProcessingStatuses(): array
+    {
+        return [self::STATUS_PENDING, self::STATUS_APPROVED];
+    }
 }
