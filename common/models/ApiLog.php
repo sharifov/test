@@ -284,7 +284,7 @@ class ApiLog extends \yii\db\ActiveRecord
             if ($timeRange) {
                 $data = self::find()->select(["COUNT(*) AS cnt", "al_action"])
                     ->where('al_action IS NOT NULL')
-                    ->andWhere(['BETWEEN', 'al_request_dt', $timeStart, $timeEnd])
+                    ->andWhere(['BETWEEN', 'al_created_dt', $timeStart, $timeEnd])
                     ->groupBy(["al_action"])
                     ->orderBy('cnt DESC')
                     ->cache(60)
@@ -306,7 +306,7 @@ class ApiLog extends \yii\db\ActiveRecord
         } else {
             if ($timeRange) {
                 $data = self::find()->select("DISTINCT(al_action) AS al_action")
-                    ->where(['BETWEEN', 'al_request_dt', $timeStart, $timeEnd])
+                    ->where(['BETWEEN', 'al_created_dt', $timeStart, $timeEnd])
                     ->cache(60)
                     ->orderBy('al_action')
                     ->asArray()->all();
@@ -339,7 +339,7 @@ class ApiLog extends \yii\db\ActiveRecord
             $timeEnd = $date[1];
             $data = self::find()->select(["COUNT(*) AS cnt", "al_action"])
                 ->where('al_action IS NOT NULL')
-                ->andWhere(['BETWEEN', 'al_request_dt', $timeStart, $timeEnd])
+                ->andWhere(['BETWEEN', 'al_created_dt', $timeStart, $timeEnd])
                 ->groupBy(["al_action"])
                 ->orderBy('cnt DESC')
                 ->cache(60)
