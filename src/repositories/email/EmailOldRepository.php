@@ -165,4 +165,16 @@ class EmailOldRepository implements EmailRepositoryInterface
     {
         return Email::tableName();
     }
+
+    public function getRawSqlCountGroupedByLead(): string
+    {
+        return Email::find()
+            ->select([
+                'e_lead_id',
+                new Expression('COUNT(e_lead_id) AS cnt')
+            ])
+            ->groupBy(['e_lead_id'])
+            ->createCommand()
+            ->rawSql;
+    }
 }

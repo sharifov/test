@@ -232,6 +232,17 @@ class EmailRepository implements EmailRepositoryInterface
         return $command->cache($cache)->queryScalar();
     }
 
+    public function getEmailCountBLead(int $leadId, $cache = 0): int
+    {
+        $connection = \Yii::$app->getDb();
+        $command = $connection->createCommand(
+            "SELECT COUNT(*) as cnt
+            FROM email_lead
+            WHERE el_lead_id = $leadId"
+            );
+        return $command->cache($cache)->queryScalar();
+    }
+
     public function getEmailCountByCase(int $caseId, $cache = 0): int
     {
         $connection = \Yii::$app->getDb();
@@ -312,5 +323,15 @@ class EmailRepository implements EmailRepositoryInterface
     public function getTableName(): string
     {
         return Email::tableName();
+    }
+
+    public function getRawSqlCountGroupedByLead(): string
+    {
+        return \Yii::$app->getDb()->createCommand(
+                "SELECT el_lead_id AS e_lead_id, COUNT(*) as cnt
+                FROM email_lead el
+                GROUP BY el_lead_id"
+            )
+            ->rawSql;
     }
 }
