@@ -272,17 +272,31 @@ class ApiLog extends \yii\db\ActiveRecord
      * @param bool $countGroup
      * @return array
      */
-    public static function getActionFilter(bool $countGroup = false): array
+    public static function getActionFilter(bool $countGroup = false, $timeRange = false): array
     {
         $arr = [];
-
+        if ($timeRange) {
+            $date = explode(' - ', $timeRange);
+            $timeStart = $date[0];
+            $timeEnd = $date[1];
+        }
         if ($countGroup) {
-            $data = self::find()->select(["COUNT(*) AS cnt", "al_action"])
-                ->where('al_action IS NOT NULL')
-                ->groupBy(["al_action"])
-                ->orderBy('cnt DESC')
-                ->cache(60)
-                ->asArray()->all();
+            if ($timeRange) {
+                $data = self::find()->select(["COUNT(*) AS cnt", "al_action"])
+                    ->where('al_action IS NOT NULL')
+                    ->andWhere(['BETWEEN', 'al_request_dt', $timeStart, $timeEnd])
+                    ->groupBy(["al_action"])
+                    ->orderBy('cnt DESC')
+                    ->cache(60)
+                    ->asArray()->all();
+            } else {
+                $data = self::find()->select(["COUNT(*) AS cnt", "al_action"])
+                    ->where('al_action IS NOT NULL')
+                    ->groupBy(["al_action"])
+                    ->orderBy('cnt DESC')
+                    ->cache(60)
+                    ->asArray()->all();
+            }
 
             if ($data) {
                 foreach ($data as $v) {
@@ -290,10 +304,18 @@ class ApiLog extends \yii\db\ActiveRecord
                 }
             }
         } else {
-            $data = self::find()->select("DISTINCT(al_action) AS al_action")
-                ->cache(60)
-                ->orderBy('al_action')
-                ->asArray()->all();
+            if ($timeRange) {
+                $data = self::find()->select("DISTINCT(al_action) AS al_action")
+                    ->where(['BETWEEN', 'al_request_dt', $timeStart, $timeEnd])
+                    ->cache(60)
+                    ->orderBy('al_action')
+                    ->asArray()->all();
+            } else {
+                $data = self::find()->select("DISTINCT(al_action) AS al_action")
+                    ->cache(60)
+                    ->orderBy('al_action')
+                    ->asArray()->all();
+            }
 
             if ($data) {
                 foreach ($data as $v) {
@@ -308,15 +330,28 @@ class ApiLog extends \yii\db\ActiveRecord
     /**
      * @return array
      */
-    public static function getActionFilterByCnt(): array
+    public static function getActionFilterByCnt($timeRange = null): array
     {
         $arr = [];
-        $data = self::find()->select(["COUNT(*) AS cnt", "al_action"])
-            ->where('al_action IS NOT NULL')
-            ->groupBy(["al_action"])
-            ->orderBy('cnt DESC')
-            ->cache(60)
-            ->asArray()->all();
+        if ($timeRange) {
+            $date = explode(' - ', $timeRange);
+            $timeStart = $date[0];
+            $timeEnd = $date[1];
+            $data = self::find()->select(["COUNT(*) AS cnt", "al_action"])
+                ->where('al_action IS NOT NULL')
+                ->andWhere(['BETWEEN', 'al_request_dt', $timeStart, $timeEnd])
+                ->groupBy(["al_action"])
+                ->orderBy('cnt DESC')
+                ->cache(60)
+                ->asArray()->all();
+        } else {
+            $data = self::find()->select(["COUNT(*) AS cnt", "al_action"])
+                ->where('al_action IS NOT NULL')
+                ->groupBy(["al_action"])
+                ->orderBy('cnt DESC')
+                ->cache(60)
+                ->asArray()->all();
+        }
 
         if ($data) {
             foreach ($data as $v) {
