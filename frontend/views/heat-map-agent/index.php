@@ -1,8 +1,12 @@
 <?php
 
+use common\models\Employee;
+use common\models\UserGroup;
 use modules\featureFlag\FFlag;
+use modules\shiftSchedule\src\entities\shift\ShiftQuery;
 use modules\shiftSchedule\src\reports\HeatMapAgentSearch;
 use modules\shiftSchedule\src\reports\HeatMapAgentService;
+use src\auth\Auth;
 use src\services\infoBlock\InfoBlockDictionary;
 use yii\helpers\Html;
 
@@ -22,7 +26,10 @@ $this->title = 'Heat Map Agent Report';
 $this->params['breadcrumbs'][] = $this->title;
 $rgbaTitle = '151, 149, 149, 0.1';
 /** @fflag FFlag::FF_KEY_INFO_BLOCK_ENABLE, Info Block Enable */
-$enableFFInfoBlock = \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_INFO_BLOCK_ENABLE)
+$enableFFInfoBlock = \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_INFO_BLOCK_ENABLE);
+$shifts = ShiftQuery::getList();
+$userGroups = UserGroup::getList();
+$roles =  Employee::getAllRoles(Auth::user());
 ?>
 
 <div class="heat-map-agent-index">
@@ -62,10 +69,21 @@ $enableFFInfoBlock = \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_INFO_BLOCK_
             <?php
             echo $this->render('_search', [
                 'model' => $searchModel,
+                'shifts' => $shifts,
+                'userGroups' => $userGroups,
+                'roles' => $roles,
             ]);
             ?>
         </div>
     </div>
+    <?php
+    echo $this->render('_filter_title', [
+        'searchModel' => $searchModel,
+        'shifts' => $shifts,
+        'userGroups' => $userGroups,
+        'roles' => $roles,
+    ]);
+    ?>
 
     <div class="row" style="margin-left: 2px; margin-top: 18px;">
         <?php if ($maxCnt) : ?>
@@ -158,7 +176,9 @@ $enableFFInfoBlock = \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_INFO_BLOCK_
                     </div>
                 <?php endforeach ?>
             </div>
-        <?php endif ?>
+        <?php else : ?>
+            <p style="font-size: 20px; font-weight: bold">No results found.</p>
+        <?php endif; ?>
     </div>
 </div>
 <?php if ($enableFFInfoBlock) : ?>
