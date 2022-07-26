@@ -1,7 +1,9 @@
 <?php
 
+use modules\featureFlag\FFlag;
 use modules\shiftSchedule\src\reports\HeatMapAgentSearch;
 use modules\shiftSchedule\src\reports\HeatMapAgentService;
+use src\services\infoBlock\InfoBlockDictionary;
 use yii\helpers\Html;
 
 /* @var yii\web\View $this */
@@ -16,10 +18,11 @@ use yii\helpers\Html;
 /* @var int $maxCntByMonthDay */
 
 
-
 $this->title = 'Heat Map Agent Report';
 $this->params['breadcrumbs'][] = $this->title;
 $rgbaTitle = '151, 149, 149, 0.1';
+/** @fflag FFlag::FF_KEY_INFO_BLOCK_ENABLE, Info Block Enable */
+$enableFFInfoBlock = \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_INFO_BLOCK_ENABLE)
 ?>
 
 <div class="heat-map-agent-index">
@@ -37,7 +40,17 @@ $rgbaTitle = '151, 149, 149, 0.1';
 
     <div class="x_panel">
         <div class="x_title">
-            <h2><i class="fa fa-search"></i> Heat Map Agent Search</h2>
+            <h2><i class="fa fa-search"></i> Heat Map Agent Search
+                <?php if ($enableFFInfoBlock) : ?>
+                <sup>
+                    <?php echo Html::a(
+                        Html::tag('i', '', ['class' => 'fa fa-info-circle', 'style' => 'color: #53a265;']),
+                        null,
+                        ['id' => 'js-info_block_btn']
+                    ) ?>
+                </sup>
+                <?php endif; ?>
+            </h2>
             <ul class="nav navbar-right panel_toolbox" style="min-width: 0;">
                 <li>
                     <a class="collapse-link"><i class="fa fa-chevron-down"></i></a>
@@ -148,7 +161,9 @@ $rgbaTitle = '151, 149, 149, 0.1';
         <?php endif ?>
     </div>
 </div>
-
+<?php if ($enableFFInfoBlock) : ?>
+    <?= \frontend\widgets\infoBlock\InfoBlockWidget::widget(['key' => InfoBlockDictionary::KEY_HEAT_MAP_AGENT_REPORT]) ?>
+<?php endif; ?>
 <?php
 $css = <<<CSS
     .map_box {
