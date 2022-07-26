@@ -23,6 +23,8 @@ class CommunicationListItemWidget extends Widget
 
     public $disableMasking = false;
 
+    public $checkUnsubscribed = false;
+
     public function init()
     {
         parent::init();
@@ -89,8 +91,10 @@ class CommunicationListItemWidget extends Widget
                 $mail = EmailRepositoryFactory::getRepository()->find($id);
                 if (EmailType::isDraftOrOutbox($mail->e_type_id)) {
                     $createdUser = Html::encode(($mail->createdUser->username ?? '-')) . ', ';
-                    $unsubscribedEmails = array_column($mail->project ? $mail->project->emailUnsubscribes : [], 'eu_email');
-                    $unsubscribed = in_array($mail->getEmailTo(false), $unsubscribedEmails);
+                    if ($this->checkUnsubscribed) {
+                        $unsubscribedEmails = array_column($mail->project ? $mail->project->emailUnsubscribes : [], 'eu_email');
+                        $unsubscribed = in_array($mail->getEmailTo(false), $unsubscribedEmails);
+                    }
                 }
 
                 $data = [
