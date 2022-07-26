@@ -39,4 +39,6 @@ interface EmailRepositoryInterface
     public function getModelQuery(): ActiveQuery;
 
     public function getTableName(): string;
+
+    public function changeStatus(Email $email, int $statusId): void;
 }

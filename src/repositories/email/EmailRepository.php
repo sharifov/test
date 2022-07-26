@@ -15,6 +15,7 @@ use common\models\EmailTemplateType;
 use src\entities\email\helpers\EmailType;
 use src\entities\email\EmailParams;
 use yii\db\ActiveQuery;
+use src\entities\email\helpers\EmailStatus;
 
 class EmailRepository implements EmailRepositoryInterface
 {
@@ -69,6 +70,14 @@ class EmailRepository implements EmailRepositoryInterface
             $removedIds[] = $this->delete($model);
         }
         return $removedIds;
+    }
+
+    public function changeStatus($email, int $statusId): void
+    {
+        if (EmailStatus::isDone($statusId)) {
+            $email->saveEmailLog(['el_status_done_dt' => date('Y-m-d H:i:s')]);
+        }
+        $email->updateAttributes(['e_status_id' => $statusId]);
     }
 
     public function saveInboxId($email, int $inboxId): void

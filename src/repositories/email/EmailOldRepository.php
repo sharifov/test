@@ -9,6 +9,7 @@ use yii\db\Expression;
 use common\models\EmailTemplateType;
 use src\entities\email\helpers\EmailType;
 use yii\db\ActiveQuery;
+use src\entities\email\helpers\EmailStatus;
 
 class EmailOldRepository implements EmailRepositoryInterface
 {
@@ -34,6 +35,15 @@ class EmailOldRepository implements EmailRepositoryInterface
         }
         $this->eventDispatcher->dispatchAll($email->releaseEvents());
         return $email->e_id;
+    }
+
+    public function changeStatus($email, int $statusId): void
+    {
+        $attributes = ['e_status_id' => $statusId];
+        if (EmailStatus::isDone($statusId)) {
+            $attributes['e_status_done_dt'] = date('Y-m-d H:i:s');
+        }
+        $email->updateAttributes($attributes);
     }
 
     public function saveInboxId($email, int $inboxId): void
