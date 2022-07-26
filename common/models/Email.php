@@ -18,6 +18,9 @@ use src\behaviors\metric\MetricEmailCounterBehavior;
 use src\entities\cases\Cases;
 use src\helpers\app\AppHelper;
 use src\helpers\email\TextConvertingHelper;
+use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
+use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogQuery;
+use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogStatus;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
@@ -486,6 +489,26 @@ class Email extends \yii\db\ActiveRecord
                     ],
                     LeadPoorProcessingLogStatus::REASON_EMAIL
                 );
+
+                if (
+                    \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE)
+                    && isset($lead)
+                    && $lead->isBusinessType()
+                    && LeadBusinessExtraQueueLogQuery::isLeadWasInBusinessExtraQueue($lead->id)
+                ) {
+                    try {
+                        LeadBusinessExtraQueueService::addLeadBusinessExtraQueueRemoverJob(
+                            $this->e_lead_id,
+                            LeadBusinessExtraQueueLogStatus::REASON_SENT_EMAIL
+                        );
+                    } catch (\RuntimeException | \DomainException $throwable) {
+                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['callId' => $this->callId]);
+                        \Yii::warning($message, 'Email:addLeadBusinessExtraQueueRemoverJob:Exception');
+                    } catch (\Throwable $throwable) {
+                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['callId' => $this->callId]);
+                        \Yii::error($message, 'Email:addLeadBusinessExtraQueueRemoverJob:Throwable');
+                    }
+                }
 
                 if (($lead = $this->eLead) && $lead->employee_id && $lead->isProcessing()) {
                     try {

@@ -4,6 +4,7 @@ namespace src\model\leadBusinessExtraQueue\service;
 
 use common\components\jobs\LeadBusinessExtraQueueJob;
 use common\components\jobs\LeadBusinessExtraQueueRemoverJob;
+use common\models\EmailTemplateType;
 use common\models\Lead;
 use frontend\helpers\RedisHelper;
 use modules\featureFlag\FFlag;
@@ -16,6 +17,8 @@ use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogQuery;
 use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogStatus;
 use src\model\leadBusinessExtraQueueLog\repository\LeadBusinessExtraQueueLogRepository;
 use src\model\leadBusinessExtraQueueRule\entity\LeadBusinessExtraQueueRule;
+use src\model\leadBusinessExtraQueueRule\entity\LeadBusinessExtraQueueRuleQuery;
+use src\model\leadPoorProcessing\entity\LeadPoorProcessingDictionary;
 use yii\helpers\ArrayHelper;
 use Yii;
 
@@ -59,10 +62,11 @@ class LeadBusinessExtraQueueService
             } else {
                 $clientTime = gmdate("H:i");
             }
-            $lbeqr = LeadBusinessExtraQueueRule::find()
-                ->where(['<=','lbeqr_start_time', $clientTime])
-                ->andWhere(['>=','lbeqr_end_time', $clientTime])
-                ->one();
+            if (LeadBusinessExtraQueueLogQuery::isLeadWasInBusinessExtraQueue($lead->id)) {
+                $lbeqr = LeadBusinessExtraQueueRuleQuery::getRepeatedRule();
+            } else {
+                $lbeqr = LeadBusinessExtraQueueRuleQuery::getRuleByClientTime($clientTime);
+            }
             if (isset($lbeqr)) {
                 $leadBusinessExtraQueue = LeadBusinessExtraQueue::create(
                     $lead->id,
@@ -82,7 +86,7 @@ class LeadBusinessExtraQueueService
                 $leadPoorProcessingLogRepository = new LeadBusinessExtraQueueLogRepository($leadBusinessExtraQueueLog);
                 $leadPoorProcessingLogRepository->save(true);
             } else {
-                throw new \DomainException('Lead Business Extra Queue Rule not found for current time');
+                throw new \DomainException('Lead Business Extra Queue Rule not found');
             }
         } catch (\RuntimeException | \DomainException $throwable) {
             /** @fflag FFlag::FF_KEY_DEBUG, Info log enable */
@@ -189,5 +193,18 @@ class LeadBusinessExtraQueueService
     {
         /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
         return Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE);
+    }
+
+    public static function checkSmsTemplate(?string $template): bool
+    {
+        return in_array($template, LeadPoorProcessingDictionary::SMS_TPL_OFFER_LIST, true);
+    }
+
+    public static function checkEmailTemplate(?string $templateKey): bool
+    {
+        if (!$tpl = EmailTemplateType::find()->where(['etp_key' => $templateKey])->limit(1)->one()) {
+            throw new \RuntimeException('EmailTemplateType not found by(' . $templateKey . ')');
+        }
+        return (bool) ArrayHelper::getValue($tpl->etp_params_json, 'quotes.selectRequired', false);
     }
 }

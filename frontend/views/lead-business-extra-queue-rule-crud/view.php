@@ -17,13 +17,15 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <p>
         <?= Html::a('Update', ['update', 'lbeqr_id' => $model->lbeqr_id], ['class' => 'btn btn-primary']) ?>
-        <?= Html::a('Delete', ['delete', 'lbeqr_id' => $model->lbeqr_id], [
-            'class' => 'btn btn-danger',
-            'data' => [
-                'confirm' => 'Are you sure you want to delete this item?',
-                'method' => 'post',
-            ],
-        ]) ?>
+        <?php if ($model->lbeqr_type_id !== \src\model\leadBusinessExtraQueueRule\entity\LeadBusinessExtraQueueRule::TYPE_ID_REPEATED_PROCESS_RULE) : ?>
+            <?= Html::a('Delete', ['delete', 'lbeqr_id' => $model->lbeqr_id], [
+                'class' => 'btn btn-danger',
+                'data'  => [
+                    'confirm' => 'Are you sure you want to delete this item?',
+                    'method'  => 'post',
+                ],
+            ]) ?>
+        <?php endif ?>
     </p>
 
     <?= DetailView::widget([
