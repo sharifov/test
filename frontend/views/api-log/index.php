@@ -63,7 +63,7 @@ $pjaxListId = 'pjax-api-log';
                     return '<b>' . Html::encode($model->al_action) . '</b>';
                 },
                 'format' => 'raw',
-                'filter' => \common\models\ApiLog::getActionFilter(Yii::$app->request->isPjax)
+                'filter' => \common\models\ApiLog::getActionFilter(),
             ],
             [
                 'label' => 'Relative Time',
@@ -183,32 +183,7 @@ yii\bootstrap4\Modal::begin([
 ]);
 yii\bootstrap4\Modal::end();
 
-$ajaxUrl = \yii\helpers\Url::to(['/api-log/ajax-action-list']);
-$actionValue = $searchModel->al_action ? md5($searchModel->al_action) : '';
-
 $jsCode = <<<JS
-    let ajaxUrlCategoryList = '$ajaxUrl';
-    let actionValue = '$actionValue';
-
-    function updateActionList() {
-        $.getJSON(ajaxUrlCategoryList, function(response) {
-            let obj = $( "select[name='ApiLogSearch[al_action]']" );
-        
-            obj.html('').append('<option value=""></option>');
-            $.each(response.data, function(){
-                let selected = '';
-                
-                if (actionValue === this.hash) {
-                    selected = 'selected';
-                }
-                obj.append('<option value="'+ this.name +'" ' + selected + '>'+ this.name +' - ['+ this.cnt +']</option>')
-            });
-
-        });
-    }
-
-    setTimeout(updateActionList, 2000);
-
     $(document).on('click', '.showDetail', function(){
         
         let logId = $(this).data('idt');
