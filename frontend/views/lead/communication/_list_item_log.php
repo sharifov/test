@@ -97,7 +97,7 @@ $fromType = 'client';
 <?php endif;?>
 
 <?php if ($model['type'] === 'email') :?>
-    <?= CommunicationListItemWidget::widget(['type' => $model['type'], 'id' => $model['id'], 'disableMasking' => $disableMasking]);?>
+    <?= CommunicationListItemWidget::widget(['type' => $model['type'], 'id' => $model['id'], 'disableMasking' => $disableMasking, 'checkUnsubscribed' => true]);?>
 <?php endif;?>
 
 <?php if ($model['type'] === 'sms') :
