@@ -1,19 +1,13 @@
 <?php
 
-use frontend\helpers\EmailHelper;
-use src\auth\Auth;
-use src\helpers\call\CallHelper;
-use src\model\clientChat\entity\ClientChat;
-use yii\helpers\Html;
-use yii\widgets\ActiveForm;
+use common\models\Call;
 use common\models\Email;
 use common\models\Sms;
-use common\models\Call;
-use src\helpers\email\MaskEmailHelper;
-use src\helpers\phone\MaskPhoneHelper;
-use modules\email\src\abac\dto\EmailAbacDto;
-use modules\email\src\abac\EmailAbacObject;
 use frontend\widgets\communication\CommunicationListItemWidget;
+use src\helpers\call\CallHelper;
+use src\helpers\phone\MaskPhoneHelper;
+use src\model\clientChat\entity\ClientChat;
+use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */

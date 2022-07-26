@@ -1,22 +1,14 @@
 <?php
 
-use common\models\Employee;
-use frontend\helpers\EmailHelper;
-use modules\email\src\abac\dto\EmailAbacDto;
-use modules\email\src\abac\EmailAbacObject;
-use src\auth\Auth;
-use src\helpers\call\CallHelper;
-use src\model\clientChat\entity\ClientChat;
-use src\model\clientChatLastMessage\entity\ClientChatLastMessage;
-use src\model\clientChatMessage\entity\ClientChatMessage;
-use yii\helpers\Html;
-use common\models\Email;
-use common\models\Sms;
 use common\models\Call;
-use yii\helpers\VarDumper;
-use src\helpers\phone\MaskPhoneHelper;
-use src\helpers\email\MaskEmailHelper;
+use common\models\Email;
+use common\models\Employee;
+use common\models\Sms;
 use frontend\widgets\communication\CommunicationListItemWidget;
+use src\helpers\call\CallHelper;
+use src\helpers\phone\MaskPhoneHelper;
+use src\model\clientChat\entity\ClientChat;
+use yii\helpers\Html;
 
 /**
  * @var $this yii\web\View
