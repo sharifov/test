@@ -506,7 +506,7 @@ class Email extends \yii\db\ActiveRecord
                         \Yii::warning($message, 'Email:addLeadBusinessExtraQueueRemoverJob:Exception');
                     } catch (\Throwable $throwable) {
                         $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['callId' => $this->callId]);
-                        \Yii::warning($message, 'Email:addLeadBusinessExtraQueueRemoverJob:Throwable');
+                        \Yii::error($message, 'Email:addLeadBusinessExtraQueueRemoverJob:Throwable');
                     }
                 }
 

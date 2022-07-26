@@ -118,7 +118,7 @@ class SmsOutEndedJob extends BaseJob implements JobInterface
                     \Yii::warning($message, 'SmsOutEndedJob:addLeadBusinessExtraQueueRemoverJob:Exception');
                 } catch (\Throwable $throwable) {
                     $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['callId' => $this->callId]);
-                    \Yii::warning($message, 'SmsOutEndedJob:addLeadBusinessExtraQueueRemoverJob:Throwable');
+                    \Yii::error($message, 'SmsOutEndedJob:addLeadBusinessExtraQueueRemoverJob:Throwable');
                 }
             }
         }
