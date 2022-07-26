@@ -3,7 +3,6 @@
 namespace src\helpers\communication;
 
 use common\models\Call;
-use common\models\Email;
 use common\models\Lead;
 use common\models\Sms;
 use src\entities\cases\CasesStatus;
@@ -17,6 +16,7 @@ use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use src\repositories\email\EmailRepositoryFactory;
+use src\entities\email\helpers\EmailType;
 
 /**
  * Class StatisticsHelper
@@ -232,27 +232,11 @@ class StatisticsHelper
 
     public static function getLastCommunicationByCaseId(int $caseId): array
     {
-        $queryEmailIn = (new Query())
-            ->select([
-                new Expression('"email" AS type'),
-                new Expression('"In" AS direction'),
-                'e_case_id AS case_id',
-                'MAX(e_created_dt) AS created_dt'
-            ])
-            ->from(Email::tableName())
-            ->where(['e_case_id' => $caseId])
-            ->andWhere(['e_type_id' => Email::TYPE_INBOX]);
+        $emailRepository = EmailRepositoryFactory::getRepository();
 
-        $queryEmailOut = (new Query())
-            ->select([
-                new Expression('"email" AS type'),
-                new Expression('"Out" AS direction'),
-                'e_case_id AS case_id',
-                'MAX(e_created_dt) AS created_dt'
-            ])
-            ->from(Email::tableName())
-            ->where(['e_case_id' => $caseId])
-            ->andWhere(['e_type_id' => Email::TYPE_OUTBOX]);
+        $queryEmailIn = $emailRepository->getQueryLastEmailByCase($caseId, EmailType::INBOX);
+
+        $queryEmailOut = $emailRepository->getQueryLastEmailByCase($caseId, EmailType::OUTBOX);
 
         $querySmsIn = (new Query())
             ->select([
