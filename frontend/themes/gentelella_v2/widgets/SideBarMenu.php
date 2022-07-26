@@ -1196,8 +1196,8 @@ class SideBarMenu extends \yii\bootstrap\Widget
         ];
 
         $menuInfoBlock = [];
-        /** @fflag FFlag::FF_KEY_HEAT_MAP_AGENT_REPORT_ENABLE, Heat Map Agent Report enable\disable */
-        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_HEAT_MAP_AGENT_REPORT_ENABLE)) {
+        /** @fflag FFlag::FF_KEY_INFO_BLOCK_ENABLE, Info Block Enable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_INFO_BLOCK_ENABLE)) {
             $menuInfoBlock = ['label' => 'Info Block', 'url' => ['/info-block-crud/index'], 'icon' => 'list', 'visible' => \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_INFO_BLOCK_ENABLE)];
         }
 
