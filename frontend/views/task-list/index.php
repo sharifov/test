@@ -31,7 +31,9 @@ use yii\widgets\Pjax;
 $this->title = 'My Task List' . ' (' . $user->username . ')';
 $this->params['breadcrumbs'][] = $this->title;
 
-$bundle = \frontend\assets\FullCalendarAsset::register($this);
+\frontend\assets\FullCalendarAsset::register($this);
+\frontend\assets\TimerAsset::register($this);
+
 $scheduleTotalData = [];
 $subtypeTotalData = [];
 ?>
@@ -71,6 +73,20 @@ $subtypeTotalData = [];
                         'dataProvider' => $dataProvider,
                         'filterModel' => $searchModel,
                         'layout' => "{errors}\n{summary}\n{items}\n{pager}",
+                        'tableOptions' => ['class' => 'table table-bordered table-condensed table-hover'],
+                        'rowOptions' => static function (UserTask $model) {
+                            if ($model->isDelay()) {
+                                return [
+                                    'class' => 'bg-info'
+                                ];
+                            }
+                            if ($model->isDeadline()) {
+                                return [
+                                    'class' => 'danger'
+                                ];
+                            }
+                            return [];
+                        },
                         'columns' => [
                             [
                                 'attribute' => 'ut_id',
@@ -87,48 +103,6 @@ $subtypeTotalData = [];
                                 'format' => 'raw',
                                 'filter' => UserTask::PRIORITY_LIST,
                             ],
-                            [
-                                'attribute' => 'ut_task_list_id',
-                                'value' => static function (UserTask $model) {
-                                    if (!$model->ut_task_list_id) {
-                                        return Yii::$app->formatter->nullDisplay;
-                                    }
-                                    return Html::a(
-                                        $model->taskList->tl_title . ' (' . $model->ut_task_list_id . ')' ?? '-',
-                                        [
-                                            'task-list/view',
-                                            'tl_id' => $model->ut_task_list_id
-                                        ],
-                                        ['target' => '_blank', 'data-pjax' => 0]
-                                    );
-                                },
-                                'format' => 'raw',
-                            ],
-                            [
-                                'attribute' => 'ut_target_object',
-                                'value' => static function (UserTask $model) {
-                                    if (!$model->ut_target_object) {
-                                        return Yii::$app->formatter->nullDisplay;
-                                    }
-                                    return $model->ut_target_object;
-                                },
-                                'filter' => TargetObject::TARGET_OBJ_LIST,
-                                'format' => 'raw',
-                            ],
-                            'ut_target_object_id',
-
-                            [
-                                'class' => DateTimeColumn::class,
-                                'limitEndDay' => false,
-                                'attribute' => 'ut_start_dt',
-                                'format' => 'byUserDateTimeAndUTC',
-                            ],
-                            [
-                                'class' => DateTimeColumn::class,
-                                'limitEndDay' => false,
-                                'attribute' => 'ut_end_dt',
-                                'format' => 'byUserDateTimeAndUTC',
-                            ],
 
                             [
                                 'attribute' => 'ut_status_id',
@@ -139,11 +113,127 @@ $subtypeTotalData = [];
                                 'filter' => UserTask::STATUS_LIST,
                             ],
                             [
+                                'label' => 'Shift Events',
+                                'value' => static function (UserTask $model) {
+                                    if ($model->shiftScheduleEventTasks) {
+                                        $data = [];
+                                        foreach ($model->userShiftEvents as $event) {
+                                            //$data[] = $event->uss_id . ' ('. $event->getShiftName().')';
+
+                                            $data[] =  Html::a(
+                                                '[' . $event->uss_id . '] ' . $event->getScheduleTypeTitle(),
+                                                null,
+                                                ['class' => 'btn-open-timeline', 'data-tl_id' => $event->uss_id]
+                                            );
+                                        }
+                                        return implode(', ', $data); //\yii\helpers\VarDumper::dumpAsString($model->userShiftEvents);
+                                    }
+                                    return '-';
+                                },
+                                //'filter' => TargetObject::TARGET_OBJ_LIST,
+                                'format' => 'raw',
+                            ],
+                            [
+                                'attribute' => 'ut_task_list_id',
+                                'label' => 'Task Name',
+                                'value' => static function (UserTask $model) {
+                                    if (!$model->ut_task_list_id) {
+                                        return '-'; //Yii::$app->formatter->nullDisplay;
+                                    }
+                                    return Html::tag(
+                                        'span',
+                                        $model->taskList->tl_title ?: '-',
+                                        ['title' => 'Task List ID: ' . $model->ut_task_list_id]
+                                    );
+//                                    return Html::a(
+//                                        $model->taskList->tl_title ?? '-',
+//                                        [
+//                                            'task-list/view',
+//                                            'tl_id' => $model->ut_task_list_id
+//                                        ],
+//                                        ['target' => '_blank', 'data-pjax' => 0, 'title' => 'Task List ID: ' . $model->ut_task_list_id]
+//                                    );
+                                },
+                                'format' => 'raw',
+                            ],
+
+                            [
+                                'attribute' => 'ut_target_object',
+                                'label' => 'Object',
+                                'value' => static function (UserTask $model) {
+                                    if (!$model->ut_target_object) {
+                                        return Yii::$app->formatter->nullDisplay;
+                                    }
+                                    return $model->ut_target_object;
+                                },
+                                'filter' => TargetObject::TARGET_OBJ_LIST,
+                                'format' => 'raw',
+                            ],
+
+                            [
+                                'attribute' => 'ut_target_object_id',
+                                'label' => 'Target',
+                                'value' => static function (UserTask $model) {
+                                    return TargetObject::getTargetLink(
+                                        $model->ut_target_object,
+                                        $model->ut_target_object_id
+                                    );
+                                },
+                                // 'filter' => TargetObject::TARGET_OBJ_LIST,
+                                'format' => 'raw',
+                            ],
+                            //'ut_target_object_id',
+
+                            [
+                                'label' => 'Duration',
+                                'value' => static function (UserTask $model) {
+                                    return UserTaskHelper::getDuration($model->ut_start_dt, $model->ut_end_dt);
+                                },
+                                'format' => 'raw',
+                            ],
+                            [
+                                'label' => 'Delay',
+                                'value' => static function (UserTask $model) {
+                                    return $model->isDelay() ?
+                                        UserTaskHelper::getDelayTimer($model->ut_start_dt, $model->ut_end_dt) :
+                                        '-';
+                                },
+                                'format' => 'raw',
+                            ],
+
+                            [
                                 'class' => DateTimeColumn::class,
                                 'limitEndDay' => false,
-                                'attribute' => 'ut_created_dt',
+                                'attribute' => 'ut_start_dt',
                                 'format' => 'byUserDateTimeAndUTC',
                             ],
+                            [
+                                'label' => 'Deadline',
+                                'value' => static function (UserTask $model) {
+                                    return $model->isDeadline() ? Html::tag(
+                                        'span',
+                                        'Deadline',
+                                        ['title' => \Yii::$app->formatter->asRelativeTime(strtotime($model->ut_end_dt)),
+                                            'class' => 'badge badge-danger']
+                                    ) :
+                                        UserTaskHelper::getDeadlineTimer($model->ut_start_dt, $model->ut_end_dt);
+                                },
+                                'format' => 'raw',
+                            ],
+                            [
+                                'class' => DateTimeColumn::class,
+                                'limitEndDay' => false,
+                                'attribute' => 'ut_end_dt',
+                                'format' => 'byUserDateTimeAndUTC',
+                            ],
+
+
+//                            [
+//                                'class' => DateTimeColumn::class,
+//                                'limitEndDay' => false,
+//                                'attribute' => 'ut_created_dt',
+//                                'format' => 'byUserDateTimeAndUTC',
+//                            ],
                             //'ut_year',
                             //'ut_month',
 //                            [
@@ -463,6 +553,29 @@ $js = <<<JS
      $(document).on('pjax:end', function() {
          $('[data-toggle="tooltip"]').tooltip();
     });
+
+    function startTimers() {
+    
+        $(".timer").each(function( index ) {
+            var sec = $( this ).data('sec');
+            var control = $( this ).data('control');
+            var format = $( this ).data('format');
+            $(this).timer({countdown: true, format: format, duration: sec}).timer(control);
+        });
+    
+        //$('.timer').timer('remove');
+        //$('.timer').timer({format: '%M:%S', seconds: 0}).timer('start');
+    }
+
+    $(document).on('pjax:start', function() {
+        //$("#modalUpdate .close").click();
+    });
+
+    $(document).on('pjax:end', function() {
+        startTimers();
+    });
+    
+    startTimers();
 JS;
 
 $this->registerJs($js);
