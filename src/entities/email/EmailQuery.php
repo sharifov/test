@@ -45,6 +45,16 @@ class EmailQuery extends ActiveQuery
         return $this->andWhere(['DATE(e_created_dt)' => new Expression('DATE(NOW())')]);
     }
 
+    public function createdBetween(string $dateFrom, string $dateTo)
+    {
+        return $this->andWhere(['BETWEEN','e_created_dt', $dateFrom, $dateTo]);
+    }
+
+    public function createdBy(int $userId)
+    {
+        return $this->andWhere(['e_created_user_id' => $userId]);
+    }
+
     public function unread()
     {
         return $this
