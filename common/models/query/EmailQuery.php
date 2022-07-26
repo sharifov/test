@@ -130,4 +130,9 @@ class EmailQuery extends ActiveQuery
     {
         return $this->andWhere(['>', 'e_inbox_email_id', 0])->orderBy(['e_inbox_email_id' => SORT_DESC]);
     }
+
+    public function byTemplateTypeId(int $templateTypeId)
+    {
+        return $this->andWhere(['e_template_type_id' => $templateTypeId]);
+    }
 }

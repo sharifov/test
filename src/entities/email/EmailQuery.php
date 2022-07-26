@@ -120,4 +120,9 @@ class EmailQuery extends ActiveQuery
     {
         return $this->leftJoin(['el' => EmailLog::tableName()], 'el.el_email_id = e_id')->andWhere(['>', 'el_inbox_email_id', 0])->orderBy(['el_inbox_email_id' => SORT_DESC]);
     }
+
+    public function byTemplateTypeId(int $templateTypeId)
+    {
+        return $this->leftJoin(['ep' => EmailParams::tableName()], 'ep.ep_email_id = e_id')->andWhere(['ep_template_type_id' => $templateTypeId]);
+    }
 }
