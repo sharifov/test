@@ -293,4 +293,14 @@ class EmailRepository implements EmailRepositoryInterface
         $lastInbox = Email::find()->select(['el_inbox_email_id'])->orderByLastInbox()->limit(1)->one();
         return $lastInbox['el_inbox_email_id'] ?? null;
     }
+
+    public function getModelQuery(): ActiveQuery
+    {
+        return Email::find();
+    }
+
+    public function getTableName(): string
+    {
+        return Email::tableName();
+    }
 }

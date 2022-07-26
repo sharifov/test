@@ -35,4 +35,8 @@ interface EmailRepositoryInterface
     public function getEmailCountByCase(int $caseId, $cache = 0): int;
 
     public function getEmailCountForLead(int $leadId, int $type = 0): int;
+
+    public function getModelQuery(): ActiveQuery;
+
+    public function getTableName(): string;
 }
