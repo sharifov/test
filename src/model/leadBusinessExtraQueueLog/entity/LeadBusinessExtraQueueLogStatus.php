@@ -19,6 +19,8 @@ class LeadBusinessExtraQueueLogStatus
     public const REASON_CALL = 'Call';
     public const REASON_RECEIVED_EMAIL = 'Received Email';
     public const REASON_RECEIVED_SMS = 'Received SMS';
+    public const REASON_SENT_SMS = 'Sent SMS';
+    public const REASON_SENT_EMAIL = 'Sent Email';
     public const REASON_RECEIVED_MESSAGE_FROM_CHAT = 'Received Message from chat';
     public const REASON_CHANGE_STATUS = 'Lead changes status from %s to %s';
     public const REASON_ADDED_TO_BUSINESS_EXTRA_QUEUE_DUE_EXPIRATION_TIME = 'Time expired';

@@ -10,6 +10,7 @@ use src\auth\Auth;
 use src\dispatchers\EventDispatcher;
 use src\entities\cases\Cases;
 use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
+use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogQuery;
 use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogStatus;
 use src\model\phoneList\entity\PhoneList;
 use src\services\cases\CasesCommunicationService;
@@ -172,7 +173,12 @@ class SmsIncomingService
         }
         $sms = Sms::createIncomingByLeadType($form, $clientId ?: null, $ownerId, $leadId);
         /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
-        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) && isset($lead) && $lead->isBusinessType()) {
+        if (
+            \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE)
+            && isset($lead)
+            && $lead->isBusinessType()
+            && !LeadBusinessExtraQueueLogQuery::isLeadWasInBusinessExtraQueue($lead->id)
+        ) {
             LeadBusinessExtraQueueService::addLeadBusinessExtraQueueRemoverJob($lead->id, LeadBusinessExtraQueueLogStatus::REASON_RECEIVED_SMS);
         }
         $this->smsRepository->save($sms);

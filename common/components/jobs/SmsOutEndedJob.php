@@ -5,6 +5,7 @@ namespace common\components\jobs;
 use common\models\Call;
 use common\models\Client;
 use common\models\Sms;
+use modules\featureFlag\FFlag;
 use modules\webEngage\form\WebEngageEventForm;
 use modules\webEngage\settings\WebEngageDictionary;
 use modules\webEngage\src\service\webEngageEventData\call\CallEventService;
@@ -19,6 +20,9 @@ use src\model\clientData\entity\ClientData;
 use src\model\clientData\entity\ClientDataQuery;
 use src\model\clientDataKey\entity\ClientDataKeyDictionary;
 use src\model\clientDataKey\service\ClientDataKeyService;
+use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
+use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogQuery;
+use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogStatus;
 use src\model\leadData\services\LeadDataCreateService;
 use src\model\leadDataKey\services\LeadDataKeyDictionary;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
@@ -94,6 +98,28 @@ class SmsOutEndedJob extends BaseJob implements JobInterface
             } catch (\Throwable $throwable) {
                 $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['callId' => $this->callId]);
                 \Yii::warning($message, 'SmsOutEndedJob:addLeadUserData:Throwable');
+            }
+            $lead = $sms->sLead;
+            if (
+                \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE)
+                && isset($lead)
+                && $lead->isBusinessType()
+                && LeadBusinessExtraQueueLogQuery::isLeadWasInBusinessExtraQueue($lead->id)
+            ) {
+                try {
+                    if ($sms->s_lead_id && LeadBusinessExtraQueueService::checkSmsTemplate($tplType)) {
+                        LeadBusinessExtraQueueService::addLeadBusinessExtraQueueRemoverJob(
+                            $sms->s_lead_id,
+                            LeadBusinessExtraQueueLogStatus::REASON_SENT_SMS
+                        );
+                    }
+                } catch (\RuntimeException | \DomainException $throwable) {
+                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['callId' => $this->callId]);
+                    \Yii::warning($message, 'SmsOutEndedJob:addLeadBusinessExtraQueueRemoverJob:Exception');
+                } catch (\Throwable $throwable) {
+                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['callId' => $this->callId]);
+                    \Yii::warning($message, 'SmsOutEndedJob:addLeadBusinessExtraQueueRemoverJob:Throwable');
+                }
             }
         }
     }

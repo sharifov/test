@@ -68,6 +68,7 @@ use src\model\client\helpers\ClientFormatter;
 use src\model\clientChatLead\entity\ClientChatLead;
 use src\model\lead\useCases\lead\api\create\LeadCreateForm;
 use src\model\lead\useCases\lead\import\LeadImportForm;
+use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
 use src\model\leadData\entity\LeadData;
 use src\model\leadDataKey\services\LeadDataKeyDictionary;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
@@ -1472,6 +1473,10 @@ class Lead extends ActiveRecord implements Objectable
                 $description
             )
         );
+        /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) && $this->isBusinessType()) {
+            LeadBusinessExtraQueueService::addLeadBusinessExtraQueueJob($this, 'Added new Business Extra Queue');
+        }
     }
 
     /**
