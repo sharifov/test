@@ -7,7 +7,9 @@ use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTask;
 use modules\taskList\src\entities\TargetObject;
 use modules\taskList\src\entities\taskList\TaskList;
 use modules\taskList\src\entities\userTask\behaviors\UserTaskStatusLogDeleteBehavior;
+use modules\taskList\src\events\UserTaskStatusChangedEvent;
 use src\behaviors\dateTime\CreatedYearMonthBehavior;
+use src\entities\EventTrait;
 use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 
@@ -33,6 +35,8 @@ use yii\helpers\ArrayHelper;
  */
 class UserTask extends \yii\db\ActiveRecord
 {
+    use EventTrait;
+
     public const STATUS_PROCESSING = 1;
     public const STATUS_COMPLETE = 2;
     public const STATUS_CANCEL = 3;
@@ -190,6 +194,33 @@ class UserTask extends \yii\db\ActiveRecord
     public function setStatusComplete(): UserTask
     {
         $this->ut_status_id = self::STATUS_COMPLETE;
+        $this->recordStatusChangeEvent();
+
         return $this;
+    }
+
+    public function setStatusProcessing(): self
+    {
+        $this->ut_status_id = self::STATUS_PROCESSING;
+        $this->recordStatusChangeEvent();
+
+        return $this;
+    }
+
+    public function setStatusCancel(): self
+    {
+        $this->ut_status_id = self::STATUS_CANCEL;
+        $this->recordStatusChangeEvent();
+
+        return $this;
+    }
+
+    public function recordStatusChangeEvent(): void
+    {
+        $attributes = $this->getOldAttributes();
+
+        $this->recordEvent(
+            new UserTaskStatusChangedEvent($this, $this->ut_status_id, ($attributes['ut_status_id'] ?? null))
+        );
     }
 }

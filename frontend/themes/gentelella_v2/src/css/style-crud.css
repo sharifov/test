@@ -6040,3 +6040,10 @@ ul.bar_tabs>li.active {
     overflow-y: scroll;
 }
 /************* END BUG REPORT FORM ****************/
+li.select2-selection__choice:first-of-type {
+  max-width: 85%;
+}
+
+li.select2-selection__choice {
+  white-space: pre-line;
+}

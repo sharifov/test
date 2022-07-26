@@ -35,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
             'utsl_id',
             'utsl_ut_id',
-            'utsl_description',
+            'utsl_description:html',
             [
                 'attribute' => 'utsl_old_status',
                 'value' => static function (UserTaskStatusLog $model) {

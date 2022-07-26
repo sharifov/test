@@ -250,7 +250,16 @@ class TaskListController extends FController
      */
     public function actionDelete($tl_id)
     {
-        $this->findModel($tl_id)->delete();
+        try {
+            $this->findModel($tl_id)->delete();
+        } catch (\Exception $e) {
+            Yii::$app->session->setFlash('error', $e->getMessage());
+
+            Yii::warning(
+                $e,
+                'TaskListController:actionDelete'
+            );
+        }
 
         return $this->redirect(['index']);
     }

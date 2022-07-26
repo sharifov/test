@@ -13,6 +13,7 @@ use modules\featureFlag\FFlag;
 use modules\lead\src\services\LeadTaskListService;
 use modules\taskList\src\entities\TargetObject;
 use modules\taskList\src\entities\TaskObject;
+use src\auth\Auth;
 use src\behaviors\metric\MetricEmailCounterBehavior;
 use src\entities\cases\Cases;
 use src\helpers\app\AppHelper;
@@ -534,7 +535,7 @@ class Email extends \yii\db\ActiveRecord
                     $lead->id,
                     TaskObject::OBJ_EMAIL,
                     $this->e_id,
-                    $lead->employee_id
+                    Auth::id()
                 );
                 Yii::$app->queue_job->push($job);
             }

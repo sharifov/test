@@ -53,7 +53,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'sset_user_task_id',
                 'value' => static function (ShiftScheduleEventTask $model) {
-                    if (!$model->sset_user_task_id) {
+                    if ($model->ssetUserTask === null) {
                         return Yii::$app->formatter->nullDisplay;
                     }
                     return Html::a(

@@ -68,9 +68,8 @@ class UserTaskCompletionService
                     TaskCompletionDictionary::getUserTaskProcessingStatuses(),
                     $this->userTasksProcessed
                 );
-                $userTasks = $userTaskQuery->all();
 
-                foreach ($userTasks as $userTask) {
+                if ($userTask = $userTaskQuery->limit(1)->one()) {
                     $userTask->setStatusComplete();
                     (new UserTaskRepository($userTask))->save();
                     $this->userTasksProcessed[] = $userTask->ut_id;

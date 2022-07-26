@@ -9,6 +9,7 @@ use frontend\helpers\PasswordHelper;
 use frontend\models\UserFailedLogin;
 use kartik\password\PasswordInput;
 use kartik\select2\Select2;
+use modules\featureFlag\FFlag;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shift\Shift;
 use modules\user\src\abac\dto\UserAbacDto;
@@ -551,6 +552,13 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                             <div class="col-md-3">
                                 <?= $form->field($modelUserParams, 'up_frequency_minutes')->input('number', ['step' => 1, 'max' => 1000, 'min' => 0]) ?>
                             </div>
+
+                            <?php  /** @fflag FFlag::FF_KEY_BUSINESS_QUEUE_LIMIT, Business Queue Limit Enable */
+                            if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BUSINESS_QUEUE_LIMIT)) : ?>
+                                 <div class="col-md-3">
+                                     <?= $form->field($modelUserParams, 'up_business_inbox_show_limit_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 500]) ?>
+                                 </div>
+                            <?php endif; ?>
                         </div>
                     <?php endif; ?>
 

@@ -13,9 +13,4 @@ class SmsTaskDto extends \stdClass
     {
         $this->project_key = $sms->sProject->project_key ?? null;
     }
-
-    public function toArray(): array
-    {
-        return ArrayHelper::toArray($this);
-    }
 }

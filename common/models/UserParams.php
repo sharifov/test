@@ -20,6 +20,7 @@ use yii\db\ActiveRecord;
  * @property int $up_work_minutes
  * @property bool $up_bonus_active
  * @property int $up_inbox_show_limit_leads
+ * @property int $up_business_inbox_show_limit_leads
  * @property int $up_default_take_limit_leads
  * @property int $up_min_percent_for_take_leads
  * @property int $up_frequency_minutes
@@ -47,7 +48,7 @@ class UserParams extends \yii\db\ActiveRecord
     {
         return [
             [['up_user_id', 'up_work_minutes', 'up_work_start_tm', 'up_timezone'], 'required'],
-            [['up_user_id', 'up_commission_percent', 'up_updated_user_id', 'up_bonus_active', 'up_work_minutes', 'up_inbox_show_limit_leads', 'up_default_take_limit_leads', 'up_min_percent_for_take_leads', 'up_frequency_minutes', 'up_call_expert_limit', 'up_leaderboard_enabled'], 'integer'],
+            [['up_user_id', 'up_commission_percent', 'up_updated_user_id', 'up_bonus_active', 'up_work_minutes', 'up_inbox_show_limit_leads', 'up_business_inbox_show_limit_leads', 'up_default_take_limit_leads', 'up_min_percent_for_take_leads', 'up_frequency_minutes', 'up_call_expert_limit', 'up_leaderboard_enabled'], 'integer'],
             [['up_base_amount'], 'number'],
             [['up_updated_dt'], 'safe'],
             [['up_timezone'], 'string', 'max' => 40],
@@ -76,6 +77,7 @@ class UserParams extends \yii\db\ActiveRecord
             'up_work_minutes' => 'Work Minutes',
             'up_timezone' => 'Timezone',
             'up_inbox_show_limit_leads' => 'Inbox show limit leads',
+            'up_business_inbox_show_limit_leads' => 'Business Inbox show limit leads',
             'up_default_take_limit_leads' => 'Default take limit leads',
             'up_min_percent_for_take_leads' => 'Min percent for take leads',
             'up_frequency_minutes' => 'Take Frequency Minutes',
