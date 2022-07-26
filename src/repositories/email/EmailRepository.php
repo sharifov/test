@@ -77,7 +77,8 @@ class EmailRepository implements EmailRepositoryInterface
         if (EmailStatus::isDone($statusId)) {
             $email->saveEmailLog(['el_status_done_dt' => date('Y-m-d H:i:s')]);
         }
-        $email->updateAttributes(['e_status_id' => $statusId]);
+        $email->e_status_id = $statusId;
+        $this->save($email);
     }
 
     public function saveInboxId($email, int $inboxId): void

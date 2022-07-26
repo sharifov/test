@@ -43,7 +43,8 @@ class EmailOldRepository implements EmailRepositoryInterface
         if (EmailStatus::isDone($statusId)) {
             $attributes['e_status_done_dt'] = date('Y-m-d H:i:s');
         }
-        $email->updateAttributes($attributes);
+        $email->e_status_id = $statusId;
+        $this->save($email);
     }
 
     public function saveInboxId($email, int $inboxId): void
