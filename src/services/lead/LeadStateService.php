@@ -206,6 +206,14 @@ class LeadStateService
         $this->leadRepository->save($lead);
     }
 
+    public function businessExtraQueue($lead, $newOwner, ?int $creatorId = null, ?string $reason = null): void
+    {
+        $lead = $this->serviceFinder->leadFind($lead);
+        $newOwnerId = $this->newOwnerFind($newOwner, $lead);
+        $lead->toBusinessExtraQueue($newOwnerId, $creatorId, $reason);
+        $this->leadRepository->save($lead);
+    }
+
     public function close($lead, ?string $leadStatusReasonKey = null, ?int $creatorId = null, ?string $reasonComment = ''): void
     {
         $lead = $this->serviceFinder->leadFind($lead);

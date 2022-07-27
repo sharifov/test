@@ -279,6 +279,13 @@ class MultipleUpdateService
             } catch (\DomainException $e) {
                 $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
             }
+        } elseif ($form->isBusinessExtraQueue()) {
+            try {
+                $this->leadStateService->businessExtraQueue($lead, $newOwner->id, $creatorId, $form->message);
+                $this->addMessage($this->movedStateMessage($lead, 'Extra Queue', $oldOwnerId, $newOwner->id, $newOwner->userName));
+            } catch (\DomainException $e) {
+                $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
+            }
         } elseif ($form->isClosed()) {
             try {
                 $this->leadStateService->close($lead, $form->reason, Auth::id(), $form->message);
