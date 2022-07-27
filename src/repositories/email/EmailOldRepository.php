@@ -227,10 +227,20 @@ class EmailOldRepository implements EmailRepositoryInterface
     public function getCasesCreatorByEmailsToAndCreated($emailsTo, string $createdDate): ActiveQuery
     {
         return Email::find()
-        ->select(['e_case_id', 'e_created_user_id'])
-        ->andWhere('e_case_id IS NOT NULL')
-        ->byEmailToList($emailsTo)
-        ->created($createdDate)
-        ->groupBy(['e_case_id', 'e_created_user_id']);
+            ->select(['e_case_id', 'e_created_user_id'])
+            ->andWhere('e_case_id IS NOT NULL')
+            ->byEmailToList($emailsTo)
+            ->created($createdDate)
+            ->groupBy(['e_case_id', 'e_created_user_id']);
+    }
+
+    public function getStatsData(string $startDate, string $endDate, int $type)
+    {
+        return Email::find()
+            ->select(['e_status_id', 'e_created_dt'])
+            ->byStatus([EmailStatus::DONE, EmailStatus::ERROR])
+            ->createdBetween($startDate, $endDate)
+            ->byType($type, true)
+            ->all();
     }
 }

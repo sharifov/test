@@ -53,4 +53,6 @@ interface EmailRepositoryInterface
     public function getCasesByEmailsToAndCreated($emailsTo, string $createdDate): ActiveQuery;
 
     public function getCasesCreatorByEmailsToAndCreated($emailsTo, string $createdDate): ActiveQuery;
+
+    public function getStatsData(string $startDate, string $endDate, int $type);
 }

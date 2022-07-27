@@ -376,4 +376,14 @@ class EmailRepository implements EmailRepositoryInterface
             ->created($createdDate)
             ->groupBy(['e_case_id', 'e_created_user_id']);
     }
+
+    public function getStatsData(string $startDate, string $endDate, int $type)
+    {
+        return Email::find()
+            ->select(['e_status_id', 'e_created_dt'])
+            ->byStatus([EmailStatus::DONE, EmailStatus::ERROR])
+            ->createdBetween($startDate, $endDate)
+            ->byType($type, true)
+            ->all();
+    }
 }
