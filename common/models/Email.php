@@ -83,19 +83,19 @@ use src\entities\email\EmailInterface;
  *
  * @property string $body_html
  *
- * @property Employee $eCreatedUser
- * @property Cases $eCase
- * @property Language $eLanguage
- * @property Lead $eLead
- * @property Project $eProject
- * @property EmailTemplateType $eTemplateType
+ * @property Employee $createdUser
+ * @property Cases $case
+ * @property Language $language
+ * @property Lead $lead
+ * @property Project $project
+ * @property EmailTemplateType $templateType
  * @property mixed $emailData
  * @property string|mixed $statusName
  * @property array $usersIdByEmail
  * @property string|mixed $typeName
  * @property string $emailBodyHtml
  * @property string|mixed $priorityName
- * @property Employee $eUpdatedUser
+ * @property Employee $updatedUser
  */
 class Email extends \yii\db\ActiveRecord implements EmailInterface
 {
@@ -297,25 +297,9 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getECase()
-    {
-        return $this->hasOne(Cases::class, ['cs_id' => 'e_case_id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
     public function getCase(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Cases::class, ['cs_id' => 'e_case_id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getECreatedUser()
-    {
-        return $this->hasOne(Employee::class, ['id' => 'e_created_user_id']);
     }
 
     public function getCreatedUser(): \yii\db\ActiveQuery
@@ -326,7 +310,7 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getELanguage()
+    public function getLanguage()
     {
         return $this->hasOne(Language::class, ['language_id' => 'e_language_id']);
     }
@@ -334,25 +318,9 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getELead()
+    public function getLead()
     {
         return $this->hasOne(Lead::class, ['id' => 'e_lead_id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getLead(): \yii\db\ActiveQuery
-    {
-        return $this->hasOne(Lead::class, ['id' => 'e_lead_id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getEProject()
-    {
-        return $this->hasOne(Project::class, ['id' => 'e_project_id']);
     }
 
     public function getProject(): \yii\db\ActiveQuery
@@ -363,7 +331,7 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getETemplateType()
+    public function getTemplateType()
     {
         return $this->hasOne(EmailTemplateType::class, ['etp_id' => 'e_template_type_id']);
     }
@@ -371,7 +339,7 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getEUpdatedUser()
+    public function getUpdatedUser()
     {
         return $this->hasOne(Employee::class, ['id' => 'e_updated_user_id']);
     }
@@ -391,7 +359,7 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
 
     public function getTemplateTypeName(): ?string
     {
-        return $this->eTemplateType->etp_name ?? null;
+        return $this->templateType->etp_name ?? null;
     }
 
     /**
@@ -430,48 +398,6 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
     }
 
     /**
-     * @deprecated use \src\helpers\text\StringHelper instead
-     * @param $text
-     * @return mixed
-     */
-    public static function stripHtmlTags($text)
-    {
-        $text = preg_replace(
-            [
-                // Remove invisible content
-                '@<head[^>]*?>.*?</head>@siu',
-                '@<style[^>]*?>.*?</style>@siu',
-                '@<script[^>]*?.*?</script>@siu',
-                '@<object[^>]*?.*?</object>@siu',
-                '@<embed[^>]*?.*?</embed>@siu',
-                '@<applet[^>]*?.*?</applet>@siu',
-                '@<noframes[^>]*?.*?</noframes>@siu',
-                '@<noscript[^>]*?.*?</noscript>@siu',
-                '@<noembed[^>]*?.*?</noembed>@siu',
-                // Add line breaks before and after blocks
-                '@</?((address)|(blockquote)|(center)|(del))@iu',
-                '@</?((div)|(h[1-9])|(ins)|(isindex)|(p)|(pre))@iu',
-                '@</?((dir)|(dl)|(dt)|(dd)|(li)|(menu)|(ol)|(ul))@iu',
-                '@</?((table)|(th)|(td)|(caption))@iu',
-                '@</?((form)|(button)|(fieldset)|(legend)|(input))@iu',
-                '@</?((label)|(select)|(optgroup)|(option)|(textarea))@iu',
-                '@</?((frameset)|(frame)|(iframe))@iu',
-            ],
-            [
-                ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-                "\n\$0", "\n\$0", "\n\$0", "\n\$0", "\n\$0", "\n\$0",
-                "\n\$0", "\n\$0",
-            ],
-            $text
-        );
-
-        $text = strip_tags($text);
-        $text = preg_replace('!\s+!', ' ', $text);
-
-        return $text;
-    }
-
-    /**
      * @deprecated. use through EmailMainService
      */
     public function sendMail(array $data = []): array
@@ -501,7 +427,7 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
             $content_data['email_message_id'] = $this->e_message_id;
         }
 
-        $tplType = $this->eTemplateType ? $this->eTemplateType->etp_key : null;
+        $tplType = $this->templateType ? $this->templateType->etp_key : null;
 
         try {
             $request = $communication->mailSend($this->e_project_id, $tplType, $this->e_email_from, $this->e_email_to, $content_data, $data, ($this->e_language_id ?: 'en-US'), 0);
@@ -524,11 +450,11 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
             }
             /** @fflag FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES, A/B testing for email offer templates enable/disable */
             if ($this->e_status_id !== self::STATUS_ERROR && Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES)) {
-                if ($this->e_template_type_id && $this->e_project_id && isset($this->eLead)) {
+                if ($this->e_template_type_id && $this->e_project_id && isset($this->lead)) {
                     EmailTemplateOfferABTestingService::incrementCounterByTemplateAndProjectIds(
                         $this->e_template_type_id,
                         $this->e_project_id,
-                        $this->eLead->l_dep_id
+                        $this->lead->l_dep_id
                     );
                 }
             }
@@ -542,7 +468,7 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
                     ],
                     LeadPoorProcessingLogStatus::REASON_EMAIL
                 );
-                $lead = $this->eLead;
+                $lead = $this->lead;
                 if (
                     \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE)
                     && isset($lead)
@@ -563,7 +489,7 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
                     }
                 }
 
-                if (($lead = $this->eLead) && $lead->employee_id && $lead->isProcessing()) {
+                if (($lead = $this->lead) && $lead->employee_id && $lead->isProcessing()) {
                     try {
                         $leadUserData = LeadUserData::create(
                             LeadUserDataDictionary::TYPE_EMAIL_OFFER,
@@ -582,7 +508,7 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
                 }
             }
 
-            if ($this->e_id && ($lead = $this->eLead) && (new LeadTaskListService($lead))->isProcessAllowed()) {
+            if ($this->e_id && ($lead = $this->lead) && (new LeadTaskListService($lead))->isProcessAllowed()) {
                 $job = new UserTaskCompletionJob(
                     TargetObject::TARGET_OBJ_LEAD,
                     $lead->id,
@@ -960,11 +886,11 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
     {
         parent::afterSave($insert, $changedAttributes);
 
-        if ($this->e_lead_id && $this->eLead) {
-            $this->eLead->updateLastAction(LeadPoorProcessingLogStatus::REASON_EMAIL);
+        if ($this->e_lead_id && $this->lead) {
+            $this->lead->updateLastAction(LeadPoorProcessingLogStatus::REASON_EMAIL);
         }
-        if ($this->e_case_id && $this->eCase) {
-            $this->eCase->updateLastAction();
+        if ($this->e_case_id && $this->case) {
+            $this->case->updateLastAction();
         }
     }
 
@@ -1102,7 +1028,7 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
 
     public function getDepartmentId(): ?int
     {
-        return $this->eLead->l_dep_id ?? null;
+        return $this->lead->l_dep_id ?? null;
     }
 
     public function getTemplateTypeId(): ?int
@@ -1123,11 +1049,6 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
     public function getClientId(): ?int
     {
         return $this->e_client_id;
-    }
-
-    public function getTemplateType()
-    {
-        return $this->eTemplateType;
     }
 
     public function getLanguageId(): ?string
