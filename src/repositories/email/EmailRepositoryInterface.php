@@ -47,4 +47,8 @@ interface EmailRepositoryInterface
     public function getQueryLastEmailByCase(int $caseId, int $type): ActiveQuery;
 
     public function getSubQueryLeadEmailOffer(): ActiveQuery;
+
+    public function getCasesByEmailsToAndCreated($emailsTo, string $createdDate): ActiveQuery;
+
+    public function getCasesCreatorByEmailsToAndCreated($emailsTo, string $createdDate): ActiveQuery;
 }

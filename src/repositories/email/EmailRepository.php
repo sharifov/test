@@ -338,12 +338,32 @@ class EmailRepository implements EmailRepositoryInterface
             ->byType($type);
     }
 
-    public function getSubQueryLeadEmailOffer()
+    public function getSubQueryLeadEmailOffer(): ActiveQuery
     {
         return Email::find()
             ->select(['count(*)'])
             ->byTemplateTypeId(1)
             ->leftJoin('email_lead', 'email_lead.el_email_id = '. Email::tableName() . '.e_id')
             ->andWhere('email_lead.el_lead_id = ' . Lead::tableName() . '.id');
+    }
+
+    public function getCasesByEmailsToAndCreated($emailsTo, string $createdDate): ActiveQuery
+    {
+        return Email::find()
+            ->leftJoin('email_case', 'email_case.ec_email_id = e_id')
+            ->select(['ec_case_id as e_case_id'])
+            ->byEmailToList($emailsTo)
+            ->created($createdDate)
+            ->groupBy(['e_case_id']);
+    }
+
+    public function getCasesCreatorByEmailsToAndCreated($emailsTo, string $createdDate): ActiveQuery
+    {
+        return Email::find()
+            ->leftJoin('email_case', 'email_case.ec_email_id = e_id')
+            ->select(['ec_case_id as e_case_id', 'e_created_user_id'])
+            ->byEmailToList($emailsTo)
+            ->created($createdDate)
+            ->groupBy(['e_case_id', 'e_created_user_id']);
     }
 }
