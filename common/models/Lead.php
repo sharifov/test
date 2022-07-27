@@ -2697,6 +2697,9 @@ class Lead extends ActiveRecord implements Objectable
             case self::STATUS_EXTRA_QUEUE:
                 $label = '<span class="label label-default">' . self::getStatus($status) . '</span>';
                 break;
+            case self::STATUS_BUSINESS_EXTRA_QUEUE:
+                $label = '<span class="label label-default">' . self::getStatus($status) . '</span>';
+                break;
         }
         return $label;
     }
