@@ -217,7 +217,7 @@ class GmailService
 
     private function processEmail(Email $email): void
     {
-        if ($email->e_lead_id === null && $email->e_case_id === null && $this->emailService->isNotInternalEmail($email->e_email_from)) {
+        if ($email->e_lead_id === null && $email->e_case_id === null && EmailServiceHelper::isNotInternalEmail($email->e_email_from)) {
             try {
                 $process = (Yii::createObject(EmailIncomingService::class))->create(
                     $email->e_id,

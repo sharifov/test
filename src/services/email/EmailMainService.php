@@ -238,7 +238,7 @@ class EmailMainService implements EmailServiceInterface
         $email->refresh();
         $this->setEmailObj($email);
 
-        if (!$email->hasLead() && !$email->hasCase() && $this->helper->isNotInternalEmail($emailDTO->emailFrom)) {
+        if (!$email->hasLead() && !$email->hasCase() && EmailServiceHelper::isNotInternalEmail($emailDTO->emailFrom)) {
             $process = $this->processIncoming($email);
             $this->linkLeadCase($email, $process->leadId, $process->caseId);
         }
