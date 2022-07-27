@@ -24,6 +24,7 @@ use src\auth\Auth;
 use src\behaviors\metric\MetricLeadCounterBehavior;
 use src\entities\EventTrait;
 use src\events\lead\LeadBookedEvent;
+use src\events\lead\LeadBusinessExtraQueueEvent;
 use src\events\lead\LeadCallExpertChangedEvent;
 use src\events\lead\LeadCallExpertRequestEvent;
 use src\events\lead\LeadCallStatusChangeEvent;
@@ -5196,12 +5197,23 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $this->setStatus(self::STATUS_EXTRA_QUEUE);
     }
 
-    public function toBusinessExtraQueue(?int $newOwnerId = null): void
+    public function toBusinessExtraQueue(?int $newOwnerId = null, ?int $creatorId = null, ?string $reason = ''): void
     {
         if ($this->isExtraQueue()) {
             return;
         }
         $this->changeOwner($newOwnerId);
+
+        $this->recordEvent(
+            new LeadBusinessExtraQueueEvent(
+                $this,
+                $this->status,
+                $this->employee_id,
+                $newOwnerId,
+                $creatorId,
+                $reason
+            )
+        );
 
         $this->setStatus(self::STATUS_BUSINESS_EXTRA_QUEUE);
     }
