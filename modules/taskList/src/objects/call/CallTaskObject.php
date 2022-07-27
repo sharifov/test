@@ -29,7 +29,6 @@ class CallTaskObject extends BaseTaskObject implements TaskObjectInterface
 
     public const TARGET_OBJECT_LIST = [
         TargetObjectList::TARGET_OBJ_LEAD,
-        TargetObjectList::TARGET_OBJ_CASE,
     ];
 
 

@@ -16,6 +16,7 @@ use src\helpers\DateHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\leadBusinessExtraQueue\entity\LeadBusinessExtraQueue;
 use src\model\leadBusinessExtraQueue\service\LeadToBusinessExtraQueueService;
+use src\model\leadBusinessExtraQueue\service\LeadToClosedFromBusinessExtraQueueService;
 use src\model\leadBusinessExtraQueueRule\entity\LeadBusinessExtraQueueRule;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
 use src\model\leadPoorProcessing\service\LeadFromExtraQueueToClosedService;
@@ -892,6 +893,52 @@ class LeadController extends Controller
 
         $time_end = microtime(true);
         $time = number_format(round($time_end - $time_start, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- Processed: %w[' . $processed . '/' . $count . '] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+                                          self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+    }
+
+    public function actionToClosedFromBusinessExtra()
+    {
+        /** @fflag FFlag::FF_KEY_BEQ_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT, Business Extra Queue to Closing transferring enable/Disable */
+        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT)) {
+            echo Console::renderColoredString('%y --- Feature Flag (' . FFlag::FF_KEY_BEQ_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT . ') not enabled %n'), PHP_EOL;
+            exit();
+        }
+        $time_start     = microtime(true);
+
+        $maxDaysInExtraQueue =  Yii::$app->featureFlag->getValue(FFlag::FF_KEY_BEQ_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT);
+        $thresholdDate = new \DateTimeImmutable(date('Y-m-d H:i:s'));
+        $thresholdDate = $thresholdDate->modify('-' . $maxDaysInExtraQueue . ' days');
+        $leads = Lead
+            ::find()
+            ->where(['status' => Lead::STATUS_BUSINESS_EXTRA_QUEUE])
+            ->andWhere(['<=', 'l_status_dt', $thresholdDate->format('Y-m-d H:i:s')])
+            ->all();
+        $processed = 0;
+        $count     = count($leads);
+        $service = \Yii::createObject(LeadToClosedFromBusinessExtraQueueService::class);
+        foreach ($leads as $lead) {
+            $logData = ['leadId' => $lead->id];
+            try {
+                $service->transferLeadFromBusinessExtraToClosed($lead);
+                $processed++;
+                Console::updateProgress($processed, $count);
+            } catch (\RuntimeException | \DomainException $throwable) {
+                /** @fflag FFlag::FF_KEY_DEBUG, Info log enable */
+                if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG)) {
+                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+                    \Yii::info($message, 'LeadController:actionToClosedFromBusinessExtra:Exception');
+                }
+            } catch (\Throwable $throwable) {
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+                \Yii::error($message, 'LeadController:actionToClosedFromBusinessExtra:Throwable');
+            }
+        }
+        Console::endProgress(false);
+        $time_end = microtime(true);
+        $time     = number_format(round($time_end - $time_start, 2), 2);
         echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %g %n'), PHP_EOL;
         echo Console::renderColoredString('%g --- Processed: %w[' . $processed . '/' . $count . '] %g %n'), PHP_EOL;
         echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .

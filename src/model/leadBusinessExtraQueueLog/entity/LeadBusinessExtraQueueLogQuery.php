@@ -12,4 +12,13 @@ class LeadBusinessExtraQueueLogQuery
             ->orderBy(['lbeql_id' => SORT_DESC])
             ->one();
     }
+
+    public static function isLeadWasInBusinessExtraQueue(int $leadId): bool
+    {
+        return LeadBusinessExtraQueueLog
+            ::find()
+            ->where(['lbeql_lead_id' => $leadId])
+            ->andWhere(['lbeql_status' => LeadBusinessExtraQueueLogStatus::STATUS_ADDED_TO_BUSINESS_EXTRA_QUEUE])
+            ->exists();
+    }
 }

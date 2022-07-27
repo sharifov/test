@@ -43,10 +43,6 @@ class LeadObjectSegmentAssignService implements ObjectSegmentAssigmentServiceInt
                     'ld_field_value' => $value,
                     'ld_created_dt' => $currentDateTime
                 ];
-                /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
-                if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) && $value === ObjectSegmentListContract::OBJECT_SEGMENT_LIST_KEY_LEAD_TYPE_BUSINESS) {
-                    LeadBusinessExtraQueueService::addLeadBusinessExtraQueueJob($lead, 'Added new Business Extra Queue');
-                }
             }
             if (count($inserts)) {
                 \Yii::$app

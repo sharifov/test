@@ -25,6 +25,8 @@ class UserTaskQuery
             $userTasksQuery->andWhere(['NOT IN', 'ut_id', $excludeIds]);
         }
 
+        $userTasksQuery->orderBy(['ut_created_dt' => SORT_ASC]);
+
         return $userTasksQuery;
     }
 

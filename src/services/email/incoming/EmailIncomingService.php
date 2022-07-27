@@ -8,6 +8,7 @@ use common\models\Project;
 use common\models\Sources;
 use modules\featureFlag\FFlag;
 use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
+use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogQuery;
 use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogStatus;
 use src\services\cases\CasesSaleService;
 use src\services\client\ClientCreateForm;
@@ -99,8 +100,15 @@ class EmailIncomingService
                         $createLeadOnEmail
                     );
                     /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
-                    if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) && isset($lead) && $lead->isBusinessType()) {
-                        LeadBusinessExtraQueueService::addLeadBusinessExtraQueueRemoverJob($lead->id, LeadBusinessExtraQueueLogStatus::REASON_RECEIVED_EMAIL);
+                    if (
+                        \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE)
+                        && isset($lead) && $lead->isBusinessType()
+                        && !LeadBusinessExtraQueueLogQuery::isLeadWasInBusinessExtraQueue($lead->id)
+                    ) {
+                        LeadBusinessExtraQueueService::addLeadBusinessExtraQueueRemoverJob(
+                            $lead->id,
+                            LeadBusinessExtraQueueLogStatus::REASON_RECEIVED_EMAIL
+                        );
                     }
                     $contact->releaseLog('Incoming email. Internal Email: ' . $internalEmail . '. Created Email Id: ' . $emailId . ' | ', 'EmailIncomingService');
                     return new Process(isset($lead) ? $lead->id : null, null);
