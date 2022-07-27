@@ -32,6 +32,11 @@ use src\model\leadUserData\entity\LeadUserData;
 use src\model\leadUserData\entity\LeadUserDataDictionary;
 use src\model\leadUserData\repository\LeadUserDataRepository;
 use yii\helpers\VarDumper;
+use modules\lead\src\services\LeadTaskListService;
+use common\components\jobs\UserTaskCompletionJob;
+use modules\taskList\src\entities\TargetObject;
+use src\auth\Auth;
+use modules\taskList\src\entities\TaskObject;
 
 /**
  *
@@ -106,6 +111,7 @@ class EmailMainService implements EmailServiceInterface
             $this->addToABTesting($email);
             $tplType = $email->templateType ? $email->templateType->etp_key : null;
             $this->leadProcessAfterEmailSending($email->e_id, $tplType, $email->lead);
+            $this->leadTaskJob($email->e_id, $email->lead);
         } catch (\Throwable $exception) {
             $error = VarDumper::dumpAsString($exception->getMessage());
             \Yii::error($error, 'EmailMainService:sendMail:exception');
@@ -117,6 +123,20 @@ class EmailMainService implements EmailServiceInterface
                 $this->getEmailNormObj()->statusToError('Communication error: ' . $error);
             }
             throw new \RuntimeException($error);
+        }
+    }
+
+    private function leadTaskJob(int $emailId, ?Lead $lead)
+    {
+        if ($emailId && $lead && (new LeadTaskListService($lead))->isProcessAllowed()) {
+            $job = new UserTaskCompletionJob(
+                TargetObject::TARGET_OBJ_LEAD,
+                $lead->id,
+                TaskObject::OBJ_EMAIL,
+                $emailId,
+                Auth::id()
+                );
+            \Yii::$app->queue_job->push($job);
         }
     }
 
