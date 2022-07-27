@@ -6,9 +6,7 @@ use common\models\Employee;
 use kartik\daterange\DateRangeBehavior;
 use src\helpers\app\AppHelper;
 use src\helpers\app\DBHelper;
-use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use modules\taskList\src\entities\userTask\UserTask;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -16,9 +14,14 @@ use yii\helpers\ArrayHelper;
  */
 class UserTaskSearch extends UserTask
 {
-    public $createTimeRange;
-    public $createTimeStart;
-    public $createTimeEnd;
+    public string $createTimeRange = '';
+    public string $createTimeStart = '';
+    public string $createTimeEnd = '';
+
+    public string $clientStartDate = '';
+    public string $clientEndDate = '';
+//    public string $startedDateRange = '';
+//    public string $endedDateRange = '';
 
     private string $defaultDTStart;
     private string $defaultDTEnd;
@@ -128,16 +131,139 @@ class UserTaskSearch extends UserTask
         ]);
 
         if ($this->ut_start_dt) {
-            $query->andFilterWhere(['>=', 'ut_start_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_start_dt))])
-                ->andFilterWhere(['<=', 'ut_start_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_start_dt) + 3600 * 24)]);
+            $query->andFilterWhere(['>=', 'ut_start_dt',
+                Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_start_dt))])
+                ->andFilterWhere(['<=', 'ut_start_dt',
+                    Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_start_dt) + 3600 * 24)]);
         }
         if ($this->ut_end_dt) {
-            $query->andFilterWhere(['>=', 'ut_end_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_end_dt))])
-                ->andFilterWhere(['<=', 'ut_end_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_end_dt) + 3600 * 24)]);
+            $query->andFilterWhere(['>=', 'ut_end_dt',
+                Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_end_dt))])
+                ->andFilterWhere(['<=', 'ut_end_dt',
+                    Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_end_dt) + 3600 * 24)]);
         }
         if ($this->ut_created_dt) {
-            $query->andFilterWhere(['>=', 'ut_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_created_dt))])
-                ->andFilterWhere(['<=', 'ut_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_created_dt) + 3600 * 24)]);
+            $query->andFilterWhere(['>=', 'ut_created_dt',
+                Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_created_dt))])
+                ->andFilterWhere(['<=', 'ut_created_dt',
+                    Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_created_dt) + 3600 * 24)]);
+        }
+
+        $query->andFilterWhere(['like', 'ut_target_object', $this->ut_target_object]);
+
+        return $dataProvider;
+    }
+
+
+    /**
+     * Creates data provider instance with search query applied
+     *
+     * @param array $params
+     * @param int $userId
+     * @param string|null $startDate
+     * @param string|null $endDate
+     * @return ActiveDataProvider
+     */
+    public function searchByUserId(
+        array $params,
+        int $userId,
+        ?string $startDate = null,
+        ?string $endDate = null
+    ): ActiveDataProvider {
+        $query = UserTask::find();
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['ut_priority' => SORT_DESC]],
+            'pagination' => ['pageSize' => 30],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            $query->where('0=1');
+            return $dataProvider;
+        }
+
+
+        $query->andWhere(['ut_user_id' => $userId]);
+
+        if (!empty($startDate) && !empty($endDate)) {
+            $this->clientStartDate = $startDate;
+            $this->clientEndDate = $endDate;
+
+            $startDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($startDate));
+            $endDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
+
+            $query->andWhere([
+                'OR',
+                ['between', 'ut_start_dt', $startDateTime, $endDateTime],
+                ['between', 'ut_end_dt', $startDateTime, $endDateTime],
+                [
+                    'AND',
+                    ['>=', 'ut_start_dt', $startDateTime],
+                    ['<=', 'ut_end_dt', $endDateTime]
+                ],
+                [
+                    'AND',
+                    ['<=', 'ut_start_dt', $startDateTime],
+                    ['>=', 'ut_end_dt', $endDateTime]
+                ]
+            ]);
+        }
+
+
+        if ($startDateTime && $endDateTime) {
+            try {
+                $dTStart = new \DateTimeImmutable(date('Y-m-d 00:00:00', $startDateTime));
+                $dTEnd = new \DateTime(date('Y-m-d 23:59:59', $endDateTime));
+                $sqlDTRestriction = DBHelper::yearMonthRestrictionQuery(
+                    $dTStart,
+                    $dTEnd,
+                    'ut_year',
+                    'ut_month'
+                );
+                $query->where($sqlDTRestriction);
+            } catch (\RuntimeException | \DomainException $throwable) {
+                $message = AppHelper::throwableLog($throwable);
+                $message['model'] = ArrayHelper::toArray($this);
+                \Yii::warning($message, 'UserTaskSearch:search:Exception');
+            } catch (\Throwable $throwable) {
+                $message = AppHelper::throwableLog($throwable);
+                $message['model'] = ArrayHelper::toArray($this);
+                \Yii::error($message, 'UserTaskSearch:search:Throwable');
+            }
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'ut_id' => $this->ut_id,
+            'ut_user_id' => $this->ut_user_id,
+            'ut_target_object_id' => $this->ut_target_object_id,
+            'ut_task_list_id' => $this->ut_task_list_id,
+            'ut_priority' => $this->ut_priority,
+            'ut_status_id' => $this->ut_status_id,
+            'ut_year' => $this->ut_year,
+            'ut_month' => $this->ut_month,
+        ]);
+
+        if ($this->ut_start_dt) {
+            $query->andFilterWhere(['>=', 'ut_start_dt',
+                Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_start_dt))])
+                ->andFilterWhere(['<=', 'ut_start_dt',
+                    Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_start_dt) + 3600 * 24)]);
+        }
+        if ($this->ut_end_dt) {
+            $query->andFilterWhere(['>=', 'ut_end_dt',
+                Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_end_dt))])
+                ->andFilterWhere(['<=', 'ut_end_dt',
+                    Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_end_dt) + 3600 * 24)]);
+        }
+        if ($this->ut_created_dt) {
+            $query->andFilterWhere(['>=', 'ut_created_dt',
+                Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_created_dt))])
+                ->andFilterWhere(['<=', 'ut_created_dt',
+                    Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_created_dt) + 3600 * 24)]);
         }
 
         $query->andFilterWhere(['like', 'ut_target_object', $this->ut_target_object]);

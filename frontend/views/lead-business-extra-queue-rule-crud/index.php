@@ -53,7 +53,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => ActionColumn::class,
                 'urlCreator' => function ($action, LeadBusinessExtraQueueRule $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'lbeqr_id' => $model->lbeqr_id]);
-                }
+                },
+                'visibleButtons' => [
+                    'delete' => static function (LeadBusinessExtraQueueRule $model) {
+                        return $model->lbeqr_type_id !== LeadBusinessExtraQueueRule::TYPE_ID_REPEATED_PROCESS_RULE;
+                    },
+                ]
             ],
         ],
     ]); ?>

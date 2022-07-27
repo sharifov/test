@@ -46,9 +46,12 @@ class UserTaskStatusLog extends \yii\db\ActiveRecord
             [['utsl_ut_id'], 'integer'],
             [['utsl_ut_id'], 'exist', 'skipOnError' => false, 'targetClass' => UserTask::class, 'targetAttribute' => ['utsl_ut_id' => 'ut_id']],
 
-            [['utsl_old_status', 'utsl_new_status'], 'required'],
-            [['utsl_old_status', 'utsl_new_status'], 'in', 'range' => array_keys(UserTask::STATUS_LIST)],
-            ['utsl_old_status', 'compare', 'operator' => '!=', 'compareAttribute' => 'utsl_new_status'],
+            ['utsl_old_status', 'integer'],
+            ['utsl_old_status', 'in', 'range' => array_keys(UserTask::STATUS_LIST), 'skipOnEmpty' => true],
+            ['utsl_old_status', 'compare', 'operator' => '!=', 'compareAttribute' => 'utsl_new_status', 'skipOnEmpty' => true],
+
+            ['utsl_new_status', 'required'],
+            ['utsl_new_status', 'in', 'range' => array_keys(UserTask::STATUS_LIST)],
 
             [['utsl_created_dt'], 'safe'],
 
@@ -108,5 +111,20 @@ class UserTaskStatusLog extends \yii\db\ActiveRecord
     public static function find(): UserTaskStatusLogScopes
     {
         return new UserTaskStatusLogScopes(static::class);
+    }
+
+    public static function create(
+        int $userTaskId,
+        int $newStatusId,
+        ?int $oldStatusId = null,
+        ?string $description = null
+    ): self {
+        $model = new self();
+        $model->utsl_ut_id = $userTaskId;
+        $model->utsl_new_status = $newStatusId;
+        $model->utsl_old_status = $oldStatusId;
+        $model->utsl_description = $description;
+
+        return $model;
     }
 }

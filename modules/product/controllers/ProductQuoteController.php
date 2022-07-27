@@ -8,6 +8,7 @@ use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Notifications;
 use common\models\UserProjectParams;
+use modules\featureFlag\FFlag;
 use modules\flight\models\FlightQuoteFlight;
 use modules\flight\src\useCases\reprotectionDecision;
 use modules\order\src\entities\order\Order;
@@ -93,6 +94,11 @@ class ProductQuoteController extends FController
     private EmailMainService $emailService;
 
     /**
+     * @var UnUsedSegmentService
+     */
+    private UnUsedSegmentService $unUsedSegmentService;
+
+    /**
      * ProductQuoteController constructor.
      * @param $id
      * @param $module
@@ -101,7 +107,9 @@ class ProductQuoteController extends FController
      * @param ProductQuoteRepository $productQuoteRepository
      * @param CasesRepository $casesRepository
      * @param CasesCommunicationService $casesCommunicationService
+     * @param UnUsedSegmentService $unUsedSegmentService
      * @param ProductQuoteDataManageService $productQuoteDataManageService
+     * @param ProductQuoteChangeRepository $productQuoteChangeRepository
      * @param array $config
      */
     public function __construct(
@@ -112,6 +120,7 @@ class ProductQuoteController extends FController
         ProductQuoteRepository $productQuoteRepository,
         CasesRepository $casesRepository,
         CasesCommunicationService $casesCommunicationService,
+        UnUsedSegmentService $unUsedSegmentService,
         ProductQuoteDataManageService $productQuoteDataManageService,
         ProductQuoteChangeRepository $productQuoteChangeRepository,
         EmailMainService $emailService,
@@ -123,6 +132,7 @@ class ProductQuoteController extends FController
         $this->productQuoteRepository = $productQuoteRepository;
         $this->casesRepository = $casesRepository;
         $this->casesCommunicationService = $casesCommunicationService;
+        $this->unUsedSegmentService = $unUsedSegmentService;
         $this->productQuoteDataManageService = $productQuoteDataManageService;
         $this->productQuoteChangeRepository = $productQuoteChangeRepository;
         $this->emailService = $emailService;
@@ -357,7 +367,7 @@ class ProductQuoteController extends FController
                         throw new BadRequestHttpException('Error: Booking ID missing.');
                     }
 
-                    try{
+                    try {
                         $mail = $this->emailService->createFromCase($previewEmailForm, $case);
                         $previewEmailForm->is_send = true;
                         $this->emailService->sendMail($mail);
@@ -379,7 +389,7 @@ class ProductQuoteController extends FController
                         Yii::warning(
                             'ProductQuoteChange saving failed: ' . $productQuoteChange->getErrorSummary(true)[0],
                             'ProductQuoteController::actionVoluntaryQuoteSendEmail::ProductQuoteChange::save'
-                            );
+                        );
                     }
 
                     try {
@@ -391,24 +401,24 @@ class ProductQuoteController extends FController
                                 'exchange_gid' => $productQuoteChange->pqc_gid,
                                 'exchange_status' => ProductQuoteChangeStatus::getClientKeyStatusById($productQuoteChange->pqc_status_id),
                             ]
-                            )->getCollectedData();
+                        )->getCollectedData();
 
-                            \Yii::info([
-                                'type' => HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
-                                'requestData' => $whData,
-                                'ProductQuoteChangeStatus' => ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id),
-                            ], 'info\Webhook::OTA::ProductQuoteController:Request');
+                        \Yii::info([
+                            'type' => HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
+                            'requestData' => $whData,
+                            'ProductQuoteChangeStatus' => ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id),
+                        ], 'info\Webhook::OTA::ProductQuoteController:Request');
 
-                            $responseData = \Yii::$app->hybrid->wh(
-                                $case->cs_project_id,
-                                HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
-                                ['data' => $whData]
-                                );
+                        $responseData = \Yii::$app->hybrid->wh(
+                            $case->cs_project_id,
+                            HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
+                            ['data' => $whData]
+                        );
 
-                            \Yii::info([
-                                'type' => HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
-                                'responseData' => $responseData,
-                            ], 'info\Webhook::OTA::ProductQuoteController:Response');
+                        \Yii::info([
+                            'type' => HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
+                            'responseData' => $responseData,
+                        ], 'info\Webhook::OTA::ProductQuoteController:Response');
                     } catch (\Throwable $throwable) {
                         $errorData = AppHelper::throwableLog($throwable);
                         $errorData['text'] = 'OTA site is not informed (VoluntaryQuoteSendEmail)';
@@ -603,7 +613,7 @@ class ProductQuoteController extends FController
                         throw new \RuntimeException('Voluntary Refund - processing is not complete');
                     }
 
-                    try{
+                    try {
                         $mail = $this->emailService->createFromCase($previewEmailForm, $case);
                         $previewEmailForm->is_send = true;
                         $this->emailService->sendMail($mail);
@@ -638,6 +648,24 @@ class ProductQuoteController extends FController
                             $hybridService = Yii::createObject(HybridService::class);
                             $hybridService->whReprotection($case->cs_project_id, $data);
                             $case->addEventLog(null, 'Request HybridService sent successfully');
+
+                            /** @fflag FFlag::FF_KEY_SCHEDULE_CHANGE_CLIENT_REMAINDER_NOTIFICATION, Create remainder notification enable/disable */
+                            if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SCHEDULE_CHANGE_CLIENT_REMAINDER_NOTIFICATION)) {
+                                //TODO: Check if quote is already in queue
+                                $unUsedSegment = $this->unUsedSegmentService->getUnUsedSegmentData($reprotectionQuote, $productQuoteChange, $case);
+                                if (!empty($unUsedSegment)) {
+                                    try {
+                                        $this->unUsedSegmentService->addToQueueJob($unUsedSegment);
+                                    } catch (\Throwable $throwable) {
+                                        $errorData = AppHelper::throwableLog($throwable);
+                                        $errorData['submessage'] = 'Create client remainder notification job failed.';
+                                        $errorData['project_id'] = $case->cs_project_id;
+                                        $errorData['case_id'] = $case->cs_id;
+
+                                        Yii::warning($errorData, 'ProductQuoteController:actionReprotectionQuoteSendEmail:Throwable');
+                                    }
+                                }
+                            }
                         } catch (\Throwable $throwable) {
                             $errorData = AppHelper::throwableLog($throwable);
                             $errorData['submessage'] = 'OTA site is not informed (hybridService->whReprotection)';

@@ -3,11 +3,14 @@
 namespace modules\taskList\src\entities\userTask;
 
 use common\models\Employee;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTask;
 use modules\taskList\src\entities\TargetObject;
 use modules\taskList\src\entities\taskList\TaskList;
 use modules\taskList\src\entities\userTask\behaviors\UserTaskStatusLogDeleteBehavior;
+use modules\taskList\src\events\UserTaskStatusChangedEvent;
 use src\behaviors\dateTime\CreatedYearMonthBehavior;
+use src\entities\EventTrait;
 use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 
@@ -28,11 +31,14 @@ use yii\helpers\ArrayHelper;
  * @property int $ut_month
  *
  * @property ShiftScheduleEventTask[] $shiftScheduleEventTasks
+ * @property UserShiftSchedule[] $userShiftEvents
  * @property Employee $user
  * @property TaskList $taskList
  */
 class UserTask extends \yii\db\ActiveRecord
 {
+    use EventTrait;
+
     public const STATUS_PROCESSING = 1;
     public const STATUS_COMPLETE = 2;
     public const STATUS_CANCEL = 3;
@@ -126,6 +132,16 @@ class UserTask extends \yii\db\ActiveRecord
         return $this->hasOne(TaskList::class, ['tl_id' => 'ut_task_list_id']);
     }
 
+    /**
+     * @return ActiveQuery
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function getUserShiftEvents()
+    {
+        return $this->hasMany(UserShiftSchedule::class, ['uss_id' => 'sset_event_id'])
+            ->viaTable('shift_schedule_event_task', ['sset_user_task_id' => 'ut_id']);
+    }
+
     public function attributeLabels(): array
     {
         return [
@@ -190,6 +206,61 @@ class UserTask extends \yii\db\ActiveRecord
     public function setStatusComplete(): UserTask
     {
         $this->ut_status_id = self::STATUS_COMPLETE;
+        $this->recordStatusChangeEvent();
+
         return $this;
+    }
+
+    public function setStatusProcessing(): self
+    {
+        $this->ut_status_id = self::STATUS_PROCESSING;
+        $this->recordStatusChangeEvent();
+
+        return $this;
+    }
+
+    public function setStatusCancel(): self
+    {
+        $this->ut_status_id = self::STATUS_CANCEL;
+        $this->recordStatusChangeEvent();
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDeadline(): bool
+    {
+        $deadline = false;
+        if ($this->ut_end_dt) {
+            if (time() > strtotime($this->ut_end_dt)) {
+                $deadline = true;
+            }
+        }
+        return $deadline;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDelay(): bool
+    {
+        $delay = false;
+        if ($this->ut_start_dt) {
+            if (time() < strtotime($this->ut_start_dt)) {
+                $delay = true;
+            }
+        }
+        return $delay;
+    }
+
+    public function recordStatusChangeEvent(): void
+    {
+        $attributes = $this->getOldAttributes();
+
+        $this->recordEvent(
+            new UserTaskStatusChangedEvent($this, $this->ut_status_id, ($attributes['ut_status_id'] ?? null))
+        );
     }
 }

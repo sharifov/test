@@ -6,6 +6,7 @@ use common\components\validators\CheckJsonValidator;
 use common\components\validators\IsArrayValidator;
 use common\models\Employee;
 use common\models\Lead;
+use modules\objectSegment\src\contracts\ObjectSegmentListContract;
 use src\behaviors\StringToJsonBehavior;
 use src\model\leadBusinessExtraQueue\entity\LeadBusinessExtraQueue;
 use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLog;
@@ -15,6 +16,7 @@ use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Inflector;
 
@@ -32,6 +34,7 @@ use yii\helpers\Inflector;
  * @property string $lbeqr_start_time
  * @property string $lbeqr_end_time
  * @property int $lbeqr_duration
+ * @property int $lbeqr_type_id
  *
  * @property LeadBusinessExtraQueueLog[] $leadBusinessExtraQueueLogs
  * @property LeadBusinessExtraQueue[] $leadBusinessExtraQueues
@@ -39,6 +42,9 @@ use yii\helpers\Inflector;
  */
 class LeadBusinessExtraQueueRule extends \yii\db\ActiveRecord
 {
+    public const TYPE_ID_DEFAULT_RULE = 0;
+    public const TYPE_ID_REPEATED_PROCESS_RULE = 1;
+
     public function rules(): array
     {
         return [
@@ -49,6 +55,7 @@ class LeadBusinessExtraQueueRule extends \yii\db\ActiveRecord
             [['lbeqr_key', 'lbeqr_params_json', 'lbeqr_start_time', 'lbeqr_end_time', 'lbeqr_duration'], 'required'],
             ['lbeqr_duration', 'integer'],
             [['lbeqr_start_time', 'lbeqr_end_time'], 'datetime', 'format' => 'H:m'],
+            ['lbeqr_start_time', 'validateStartAndEndTime'],
             ['lbeqr_key', 'string', 'max' => 50],
             ['lbeqr_key', 'unique'],
             ['lbeqr_key', 'filter', 'filter' => static function ($value) {
@@ -65,6 +72,14 @@ class LeadBusinessExtraQueueRule extends \yii\db\ActiveRecord
             ['lbeqr_updated_user_id', 'integer'],
             ['lbeqr_updated_user_id', 'exist', 'skipOnError' => true, 'skipOnEmpty' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['lbeqr_updated_user_id' => 'id']],
         ];
+    }
+
+    public function validateStartAndEndTime($attribute, $param)
+    {
+        $check = LeadBusinessExtraQueueRuleQuery::timeIntersectionCheck($this->lbeqr_start_time, $this->lbeqr_end_time, $this->lbeqr_type_id, $this->lbeqr_id);
+        if ($check) {
+            $this->addError($attribute, 'We have Intersection in Time!');
+        }
     }
 
     public function behaviors(): array
@@ -124,6 +139,14 @@ class LeadBusinessExtraQueueRule extends \yii\db\ActiveRecord
             'lbeqr_end_time' => 'End Time',
             'lbeqr_duration' => 'Duration (minutes)',
         ];
+    }
+
+    public function beforeDelete()
+    {
+        if ($this->lbeqr_type_id == self::TYPE_ID_REPEATED_PROCESS_RULE) {
+            throw new \DomainException('This Lead Business Extra Queue Rule is restricted from delete model id' . $this->lbeqr_id);
+        }
+        return parent::beforeDelete();
     }
 
     public static function find(): LeadBusinessExtraQueueRuleScopes
