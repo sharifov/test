@@ -69,7 +69,7 @@ class UnUsedSegmentService
             $daysToFlight = $departureDate->diff($now)->days;
 
             foreach ($notificationIntervals['notification_intervals'] as $setting) {
-                if ($this->isBetween($daysToFlight, $setting)) {
+                if ($daysToFlight > 0 && $this->isBetween($daysToFlight, $setting)) {
                     $nextNotification = $now->add(new DateInterval('P' . $setting['frequency'] . 'D'))->format('Y-m-d H:i:s');
                 }
             }
