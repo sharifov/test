@@ -3,7 +3,6 @@
 namespace src\entities\cases;
 
 use common\models\Airports;
-use common\models\Call;
 use common\models\CaseSale;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
@@ -17,22 +16,19 @@ use frontend\helpers\JsonHelper;
 use modules\fileStorage\src\entity\fileCase\FileCase;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
-use src\access\EmployeeDepartmentAccess;
 use src\access\EmployeeProjectAccess;
 use src\helpers\setting\SettingHelper;
 use src\model\callLog\entity\callLog\CallLog;
 use src\model\callLog\entity\callLog\CallLogType;
 use src\model\callLog\entity\callLogCase\CallLogCase;
-use src\model\clientChat\entity\ClientChat;
 use src\model\clientChatCase\entity\ClientChatCase;
 use src\model\saleTicket\entity\SaleTicket;
-use Yii;
+use src\repositories\email\EmailRepositoryFactory;
 use yii\data\ActiveDataProvider;
 use yii\data\SqlDataProvider;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
-use src\repositories\email\EmailRepositoryFactory;
 
 /**
  * Class CasesSearch
