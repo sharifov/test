@@ -18,6 +18,8 @@ use src\repositories\lead\LeadRepository;
 use src\repositories\NotFoundException;
 use Yii;
 use src\entities\email\EmailInterface;
+use src\entities\email\helpers\EmailType;
+use src\entities\email\helpers\EmailStatus;
 
 /**
  * Class EmailService
@@ -55,6 +57,7 @@ class EmailService extends SendMail implements EmailServiceInterface
     }
 
     /**
+     * @deprecated use EmailServiceHelper method instead
      * @param Email $email
      * @return int|null
      */
@@ -78,6 +81,7 @@ class EmailService extends SendMail implements EmailServiceInterface
     }
 
     /**
+     * @deprecated use EmailServiceHelper method instead
      * @param Email $email
      * @return int|null
      */
@@ -101,6 +105,7 @@ class EmailService extends SendMail implements EmailServiceInterface
     }
 
     /**
+     * @deprecated use EmailServiceHelper instead
      * @param string $email
      * @return bool
      */
@@ -119,6 +124,7 @@ class EmailService extends SendMail implements EmailServiceInterface
     }
 
     /**
+     * @deprecated
      * @param string|null $subject
      * @return Cases
      */
@@ -147,6 +153,7 @@ class EmailService extends SendMail implements EmailServiceInterface
     }
 
     /**
+     * @deprecated
      * @param string|null $refMessageId
      * @return Cases|null
      */
@@ -175,6 +182,7 @@ class EmailService extends SendMail implements EmailServiceInterface
     }
 
     /**
+     * @deprecated
      * @param string $emailFrom
      * @return Cases|null
      */
@@ -193,6 +201,7 @@ class EmailService extends SendMail implements EmailServiceInterface
     }
 
     /**
+     * @deprecated
      * @param string|null $subject
      * @return Lead|null
      */
@@ -221,6 +230,7 @@ class EmailService extends SendMail implements EmailServiceInterface
     }
 
     /**
+     * @deprecated
      * @param string|null $refMessageId
      * @return Lead|null
      */
@@ -249,6 +259,7 @@ class EmailService extends SendMail implements EmailServiceInterface
     }
 
     /**
+     * @deprecated
      * @param string $emailFrom
      * @return Lead|null
      */
@@ -266,6 +277,9 @@ class EmailService extends SendMail implements EmailServiceInterface
         return $lead ?? null;
     }
 
+    /**
+     * @deprecated
+     */
     public function detectClientId(string $email)
     {
         $clientEmail = ClientEmail::find()->byEmail($email)->one();
@@ -274,6 +288,7 @@ class EmailService extends SendMail implements EmailServiceInterface
     }
 
     /**
+     * @deprecated
      * @param string $body
      * @return string
      */
@@ -339,8 +354,8 @@ class EmailService extends SendMail implements EmailServiceInterface
     {
         $mail = new Email();
         $mail->e_template_type_id = $previewEmailForm->getEmailTemplateId() ?? null;
-        $mail->e_type_id = Email::TYPE_OUTBOX;
-        $mail->e_status_id = Email::STATUS_PENDING;
+        $mail->e_type_id = EmailType::OUTBOX;
+        $mail->e_status_id = EmailStatus::PENDING;
         $mail->e_email_subject = $previewEmailForm->getEmailSubject();
         $mail->body_html = $previewEmailForm->getEmailMessage();
         $mail->e_email_from = $previewEmailForm->getEmailFrom();
@@ -403,7 +418,7 @@ class EmailService extends SendMail implements EmailServiceInterface
             $email->e_email_to = $form->emailTo;
             $email->e_email_to_name = $form->emailToName;
             $email->e_email_subject = $form->emailSubject;
-            $email->e_status_id = Email::STATUS_PENDING;
+            $email->e_status_id = EmailStatus::PENDING;
             $email->body_html = $form->emailMessage;
 
             if (!$email->save()) {
