@@ -2,16 +2,9 @@
 
 namespace common\components\jobs;
 
-use common\models\Email;
-use common\models\EmailTemplateType;
-use common\models\Project;
-use src\dto\email\EmailConfigsDTO;
-use src\entities\cases\CaseCategory;
 use src\helpers\app\AppHelper;
-use src\repositories\cases\CasesRepository;
 use src\repositories\NotFoundException;
 use src\services\email\SendEmailByCase;
-use yii\helpers\VarDumper;
 use yii\queue\JobInterface;
 
 /**

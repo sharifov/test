@@ -4,12 +4,12 @@ namespace common\components;
 
 use common\components\CommunicationService;
 use common\models\DepartmentEmailProject;
-use common\models\Email;
 use common\models\Notifications;
 use common\models\UserProjectParams;
 use frontend\widgets\notification\NotificationMessage;
 use src\dto\email\EmailDTO;
 use src\exception\CreateModelException;
+use src\repositories\email\EmailRepositoryFactory;
 use src\services\email\EmailMainService;
 use src\services\email\EmailService;
 use Yii;
@@ -17,7 +17,6 @@ use yii\base\BaseObject;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
-use src\repositories\email\EmailRepositoryFactory;
 
 /**
  * Class ReceiveEmailsJob

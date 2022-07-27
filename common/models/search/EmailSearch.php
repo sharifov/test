@@ -2,16 +2,14 @@
 
 namespace common\models\search;
 
+use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\UserGroupAssign;
-use common\models\UserProjectParams;
 use src\auth\Auth;
 use src\helpers\query\QueryHelper;
-use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use common\models\Email;
 use yii\db\Query;
 
 /**
@@ -303,7 +301,7 @@ class EmailSearch extends Email
         $query = new Query();
         $query->addSelect(['DATE(e_created_dt) as createdDate,
                SUM(IF(e_status_id= ' . Email::STATUS_DONE . ', 1, 0)) AS emailsDone,
-               SUM(IF(e_status_id= ' . Email::STATUS_ERROR . ', 1, 0)) AS emailsError               
+               SUM(IF(e_status_id= ' . Email::STATUS_ERROR . ', 1, 0)) AS emailsError
         ']);
 
         $query->from(static::tableName());

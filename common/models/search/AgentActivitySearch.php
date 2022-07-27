@@ -2,22 +2,18 @@
 
 namespace common\models\search;
 
+use common\models\Call;
+use common\models\Employee;
+use common\models\Lead;
+use common\models\LeadFlow;
+use common\models\Quote;
+use common\models\Sms;
+use common\models\UserGroupAssign;
+use src\repositories\email\EmailRepositoryFactory;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use common\models\Employee;
-use Yii;
-use common\models\Call;
 use yii\data\SqlDataProvider;
-use yii\db\Expression;
 use yii\db\Query;
-use common\models\Lead;
-use common\models\Quote;
-use common\models\UserGroupAssign;
-use yii\helpers\VarDumper;
-use common\models\Sms;
-use common\models\Email;
-use common\models\LeadFlow;
-use src\repositories\email\EmailRepositoryFactory;
 
 /**
  * AgentActivitySearch

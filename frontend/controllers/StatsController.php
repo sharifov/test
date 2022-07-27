@@ -3,25 +3,23 @@
 namespace frontend\controllers;
 
 use common\models\ApiLog;
+use common\models\Email;
 use common\models\Employee;
 use common\models\search\ApiLogSearch;
 use common\models\search\CallSearch;
-use kartik\export\ExportMenu;
-use modules\user\userFeedback\entity\search\UserFeedbackSearch;
-use src\entities\call\CallGraphsSearch;
 use common\models\search\CommunicationSearch;
 use common\models\search\EmployeeSearch;
 use common\models\search\LeadSearch;
 use common\models\Setting;
 use common\models\Sms;
-use common\models\Email;
+use modules\user\userFeedback\entity\search\UserFeedbackSearch;
+use src\entities\call\CallGraphsSearch;
 use src\viewModel\call\ViewModelTotalCallGraph;
 use src\viewModel\userFeedback\ViewModelUserFeedbackGraph;
 use Yii;
 use yii\base\Model;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
-use yii\widgets\ActiveForm;
 
 /**
  * Stats controller
