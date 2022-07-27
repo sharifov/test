@@ -337,4 +337,13 @@ class EmailRepository implements EmailRepositoryInterface
             ->case($caseId)
             ->byType($type);
     }
+
+    public function getSubQueryLeadEmailOffer()
+    {
+        return Email::find()
+            ->select(['count(*)'])
+            ->byTemplateTypeId(1)
+            ->leftJoin('email_lead', 'email_lead.el_email_id = '. Email::tableName() . '.e_id')
+            ->andWhere('email_lead.el_lead_id = ' . Lead::tableName() . '.id');
+    }
 }

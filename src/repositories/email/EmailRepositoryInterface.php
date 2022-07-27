@@ -45,4 +45,6 @@ interface EmailRepositoryInterface
     public function getRawSqlCountGroupedByLead(): string;
 
     public function getQueryLastEmailByCase(int $caseId, int $type): ActiveQuery;
+
+    public function getSubQueryLeadEmailOffer(): ActiveQuery;
 }

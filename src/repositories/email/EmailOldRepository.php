@@ -10,6 +10,8 @@ use common\models\EmailTemplateType;
 use src\entities\email\helpers\EmailType;
 use yii\db\ActiveQuery;
 use src\entities\email\helpers\EmailStatus;
+use common\models\Lead;
+use yii\db\Query;
 
 class EmailOldRepository implements EmailRepositoryInterface
 {
@@ -190,5 +192,13 @@ class EmailOldRepository implements EmailRepositoryInterface
             ])
             ->case($caseId)
             ->byType($type);
+    }
+
+    public function getSubQueryLeadEmailOffer(): ActiveQuery
+    {
+        return Email::find()
+            ->select(['count(*)'])
+            ->byTemplateTypeId(1)
+            ->andWhere(Email::tableName() . '.e_lead_id = ' . Lead::tableName() . '.id');
     }
 }
