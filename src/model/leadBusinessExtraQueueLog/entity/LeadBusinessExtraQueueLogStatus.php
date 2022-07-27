@@ -17,6 +17,7 @@ class LeadBusinessExtraQueueLogStatus
     ];
 
     public const REASON_CALL = 'Received Call';
+    public const REASON_FAILED_CALL = 'Failed Call';
     public const REASON_RECEIVED_EMAIL = 'Received Email';
     public const REASON_RECEIVED_SMS = 'Received SMS';
     public const REASON_SENT_SMS = 'Sent SMS';
