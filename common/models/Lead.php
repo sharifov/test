@@ -1476,7 +1476,7 @@ class Lead extends ActiveRecord implements Objectable
         );
         /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
         if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) && $this->isBusinessType()) {
-            LeadBusinessExtraQueueService::addLeadBusinessExtraQueueJob($this, 'Added new Business Extra Queue');
+            LeadBusinessExtraQueueService::addLeadBusinessExtraQueueJob($this, 'Added new Business Extra Queue Countdown');
         }
     }
 
@@ -1836,6 +1836,7 @@ class Lead extends ActiveRecord implements Objectable
                 self::STATUS_BOOK_FAILED,
                 self::STATUS_ALTERNATIVE,
                 self::STATUS_EXTRA_QUEUE,
+                self::STATUS_BUSINESS_EXTRA_QUEUE,
             ],
             true
         );
@@ -2733,6 +2734,7 @@ class Lead extends ActiveRecord implements Objectable
             case self::STATUS_BOOK_FAILED:
             case self::STATUS_ALTERNATIVE:
             case self::STATUS_EXTRA_QUEUE:
+            case self::STATUS_BUSINESS_EXTRA_QUEUE:
                 $label = '<span class="label label-default">' . self::getStatus($status) . '</span>';
                 break;
         }
