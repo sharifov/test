@@ -222,6 +222,15 @@ class EmailServiceHelper
     }
 
     /**
+     * @param string $body
+     * @return string
+     */
+    public static function prepareEmailBody(string $body): string
+    {
+        return str_replace('class="editable"', 'class="editable" contenteditable="true" ', $body);
+    }
+
+    /**
      * @param string $email
      * @return bool
      */

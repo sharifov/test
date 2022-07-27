@@ -117,6 +117,7 @@ use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
 use src\repositories\email\EmailRepositoryFactory;
+use src\services\email\EmailServiceHelper;
 
 /**
  * Class CasesController
@@ -547,7 +548,7 @@ class CasesController extends FController
                                 Yii::error($mailPreview['error'], 'CaseController:view:mailPreview');
                                 $comForm->c_preview_email = 0;
                             } else {
-                                $emailBodyHtml = EmailService::prepareEmailBody($mailPreview['data']['email_body_html']);
+                                $emailBodyHtml = EmailServiceHelper::prepareEmailBody($mailPreview['data']['email_body_html']);
                                 $keyCache = md5($emailBodyHtml);
                                 Yii::$app->cacheFile->set($keyCache, $emailBodyHtml, 60 * 60);
                                 $previewEmailForm->keyCache = $keyCache;

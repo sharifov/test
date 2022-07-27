@@ -744,7 +744,7 @@ class LeadController extends FController
                                 Yii::info('Allowed quantity of selected quotes is from ' . $tplConfigQuotes['minSelectedCount'] . ' to ' . $tplConfigQuotes['maxSelectedCount'] . ' inclusive. You selected ' . $selectedQuotes . '.', 'info\LeadController:view:mailPreview');
                                 $comForm->c_preview_email = 0;
                             } else {
-                                $emailBodyHtml = EmailService::prepareEmailBody($mailPreview['data']['email_body_html']);
+                                $emailBodyHtml = EmailServiceHelper::prepareEmailBody($mailPreview['data']['email_body_html']);
 
                                 $keyCache = md5($emailBodyHtml);
                                 Yii::$app->cacheFile->set($keyCache, $emailBodyHtml, 60 * 60);
