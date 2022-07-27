@@ -489,7 +489,7 @@ class Email extends \yii\db\ActiveRecord
                     ],
                     LeadPoorProcessingLogStatus::REASON_EMAIL
                 );
-
+                $lead = $this->eLead;
                 if (
                     \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE)
                     && isset($lead)
