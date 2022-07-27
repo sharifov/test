@@ -36,9 +36,9 @@ class LeadToBusinessExtraQueueService
             if (!$lead = Lead::find()->where(['id' => $this->leadId])->limit(1)->one()) {
                 throw new \RuntimeException('Lead not found by ID(' . $this->leadId . ')');
             }
-
+            $reason = LeadBusinessExtraQueueLogStatus::REASON_ADDED_TO_BUSINESS_EXTRA_QUEUE_DUE_EXPIRATION_TIME;
             $ownerId = $lead->employee_id;
-            $lead->toBusinessExtraQueue($ownerId);
+            $lead->toBusinessExtraQueue($ownerId, null, $reason);
             $this->leadRepository->save($lead);
             LeadBusinessExtraQueue::deleteAll(['lbeq_lead_id' => $lead->id]);
             $transaction->commit();
@@ -46,7 +46,6 @@ class LeadToBusinessExtraQueueService
             $transaction->rollBack();
             throw $throwable;
         }
-        $reason = LeadBusinessExtraQueueLogStatus::REASON_ADDED_TO_BUSINESS_EXTRA_QUEUE_DUE_EXPIRATION_TIME;
         $leadBusinessExtraQueueLog = LeadBusinessExtraQueueLog::create(
             $lead->id,
             $this->ruleId,
