@@ -180,6 +180,18 @@ class EmailOldRepository implements EmailRepositoryInterface
             ->rawSql;
     }
 
+    public function getRawSqlCountGroupedByCase(): string
+    {
+        return Email::find()
+            ->select([
+                'e_case_id',
+                new Expression('COUNT(e_case_id) AS cnt')
+            ])
+            ->groupBy(['e_case_id'])
+            ->createCommand()
+            ->rawSql;
+    }
+
     public function getQueryLastEmailByCase(int $caseId, int $type): ActiveQuery
     {
         $direction = EmailType::isInbox($type) ? 'In' : 'Out';

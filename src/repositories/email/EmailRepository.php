@@ -324,6 +324,16 @@ class EmailRepository implements EmailRepositoryInterface
             ->rawSql;
     }
 
+    public function getRawSqlCountGroupedByCase(): string
+    {
+        return \Yii::$app->getDb()->createCommand(
+            "SELECT ec_case_id AS e_case_id, COUNT(*) as cnt
+                FROM email_case ec
+                GROUP BY ec_case_id"
+            )
+            ->rawSql;
+    }
+
     public function getQueryLastEmailByCase(int $caseId, int $type): ActiveQuery
     {
         $direction = EmailType::isInbox($type) ? 'In' : 'Out';
