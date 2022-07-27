@@ -79,8 +79,7 @@ class LeadStatusReasonService
     private function clientNeedsNoSales(HandleReasonDto $dto): void
     {
         $this->leadToConversion($dto)
-            ->createQaTaskLead($dto)
-            ->toBonusQueue($dto);
+            ->createQaTaskLead($dto);
     }
 
     private function competitorHasABetterContract(HandleReasonDto $dto): void
@@ -93,11 +92,17 @@ class LeadStatusReasonService
     private function invalid(HandleReasonDto $dto): void
     {
         $this->leadToConversion($dto)
+            ->createQaTaskLead($dto);
+    }
+
+    private function properFollowUpDone(HandleReasonDto $dto): void
+    {
+        $this->leadToConversion($dto)
             ->createQaTaskLead($dto)
             ->toBonusQueue($dto);
     }
 
-    private function properFollowUpDone(HandleReasonDto $dto): void
+    private function properFollowUpDoneNeverAnswered(HandleReasonDto $dto): void
     {
         $this->leadToConversion($dto)
             ->createQaTaskLead($dto)
