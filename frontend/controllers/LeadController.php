@@ -261,7 +261,6 @@ class LeadController extends FController
     {
         $gid = mb_substr($gid, 0, 32);
         $lead = Lead::find()->where(['gid' => $gid])->limit(1)->one();
-        \src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService::addLeadBusinessExtraQueueJob($lead, 'Added new Business Extra Queue');
         if (!$lead) {
             throw new NotFoundHttpException('Not found lead ID: ' . $gid);
         }
