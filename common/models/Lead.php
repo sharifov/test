@@ -5198,7 +5198,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
 
     public function toBusinessExtraQueue(?int $newOwnerId = null): void
     {
-        if ($this->isExtraQueue()) {
+        if ($this->isBusinessExtraQueue()) {
             return;
         }
         $this->changeOwner($newOwnerId);

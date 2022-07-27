@@ -18,7 +18,7 @@ class LeadBusinessExtraQueueRemoveOnStatusChangeListener
         try {
             $lead = $event->getLead();
             /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
-            if (!$lead->isBusinessType() || \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) === false) {
+            if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) === false || !$lead->isBusinessType()) {
                 return;
             }
             $description = null;
