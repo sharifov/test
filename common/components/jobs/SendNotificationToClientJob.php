@@ -8,6 +8,7 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use src\dispatchers\EventDispatcher;
 use src\dto\flightQuote\UnUsedSegmentDTO;
 use src\entities\cases\Cases;
+use src\entities\cases\CasesStatus;
 use src\helpers\app\AppHelper;
 use src\repositories\NotFoundException;
 use src\services\flightQuote\segment\UnUsedSegmentService;
@@ -23,7 +24,6 @@ use yii\queue\JobInterface;
 class SendNotificationToClientJob extends BaseJob implements JobInterface
 {
     public UnUsedSegmentDTO $unUsedSegment;
-    public UnUsedSegmentService $unUsedSegmentService;
 
     /**
      * @param $queue
@@ -34,6 +34,7 @@ class SendNotificationToClientJob extends BaseJob implements JobInterface
         $this->waitingTimeRegister();
 
         $eventDispatcher = Yii::createObject(EventDispatcher::class);
+        $unUsedSegmentService = Yii::createObject(UnUsedSegmentService::class);
 
         try {
             $productQuote = ProductQuote::findOne($this->unUsedSegment->productQuoteId);
@@ -52,14 +53,19 @@ class SendNotificationToClientJob extends BaseJob implements JobInterface
             }
 
             if ($case->isError() || $case->isTrash() || $case->isAwaiting() || $case->isSolved()) {
-//                event log
+                $caseStatus = '';
+                if (array_key_exists($case->cs_status, CasesStatus::STATUS_LIST)) {
+                    $caseStatus = CasesStatus::STATUS_LIST[$case->cs_status];
+                }
+
+                $case->addEventLog(null, 'Remainder notification not sent. Case status (' . $caseStatus . ')');
                 return;
             }
 
             if ($productQuoteChange->isPending() && $productQuote->isNew()) {
 //                TODO: send notification using existing notification tool
 
-                $nextDateOfNotification = $this->unUsedSegmentService->calculateNextDateOfNotification($this->unUsedSegment);
+                $nextDateOfNotification = $unUsedSegmentService->calculateNextDateOfNotification($this->unUsedSegment);
 
                 if (!empty($nextDateOfNotification)) {
                     $nextDateOfNotification = new DateTime($nextDateOfNotification);

@@ -707,7 +707,7 @@ class ProductQuoteController extends FController
                                             $this->unUsedSegmentService->addToQueueJob($unUsedSegment);
                                         } catch (\Throwable $throwable) {
                                             $errorData = AppHelper::throwableLog($throwable);
-                                            $errorData['submessage'] = 'Create client remainder notification failed.';
+                                            $errorData['submessage'] = 'Create client remainder notification job failed.';
                                             $errorData['project_id'] = $case->cs_project_id;
                                             $errorData['case_id'] = $case->cs_id;
 

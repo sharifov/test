@@ -35,17 +35,17 @@ class UnUsedSegmentService
                 ->limit(1)
                 ->one();
 
-            $data = [
-                'caseId' => $case->cs_id ?? null,
-                'projectId' => $case->project->id ?? null,
-                'projectKey' => $case->project->api_key ?? null,
-                'productQuoteChangeId' => $productQuoteChange->pqc_id ?? null,
-                'productQuoteId' => $productQuote->pq_id,
-                'flightQuoteSegmentId' => $firstSegment['fqs_id'],
-                'departureDt' => $firstSegment['fqs_departure_dt'],
-            ];
-
             if ($firstSegment) {
+                $data = [
+                    'caseId' => $case->cs_id ?? null,
+                    'projectId' => $case->project->id ?? null,
+                    'projectKey' => $case->project->api_key ?? null,
+                    'productQuoteChangeId' => $productQuoteChange->pqc_id ?? null,
+                    'productQuoteId' => $productQuote->pq_id,
+                    'flightQuoteSegmentId' => $firstSegment['fqs_id'],
+                    'departureDt' => $firstSegment['fqs_departure_dt'],
+                ];
+
                 $segmentData = new UnUsedSegmentDTO($data);
             }
         }
