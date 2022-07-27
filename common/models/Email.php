@@ -427,6 +427,7 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
     }
 
     /**
+     * @deprecated use \src\helpers\text\StringHelper instead
      * @param $text
      * @return mixed
      */
@@ -782,6 +783,7 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
     }
 
     /**
+     * @deprecated
      * @param string $startDate
      * @param string $endDate
      * @param string|null $groupingBy

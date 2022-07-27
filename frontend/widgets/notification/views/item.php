@@ -2,9 +2,8 @@
 
 use common\components\purifier\Purifier;
 use common\components\purifier\PurifierFilter;
-use common\models\Email;
 use yii\helpers\Html;
-use yii\helpers\StringHelper;
+use src\helpers\text\StringHelper;
 
 /** @var int $id */
 /** @var string $title */
@@ -22,6 +21,6 @@ $time = strtotime($createdDt);
             <span><?= Html::encode($title) ?></span>
             <span class="time" data-time="<?= $time ?>"><?= Yii::$app->formatter->asRelativeTime($time) ?></span>
         </span>
-        <span class="message"><?= StringHelper::truncate(Email::stripHtmlTags(Purifier::purify($message, PurifierFilter::shortCodeToId())), 80, '...') ?><br></span>
+        <span class="message"><?= StringHelper::truncate(StringHelper::stripHtmlTags(Purifier::purify($message, PurifierFilter::shortCodeToId())), 80, '...') ?><br></span>
     </a>
 </li>

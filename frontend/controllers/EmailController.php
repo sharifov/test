@@ -25,6 +25,7 @@ use src\dto\email\EmailDTO;
 use src\exception\CreateModelException;
 use yii\helpers\VarDumper;
 use src\exception\EmailNotSentException;
+use src\helpers\text\StringHelper;
 
 /**
  * EmailController implements the CRUD actions for Email model.
@@ -271,7 +272,7 @@ class EmailController extends FController
 
                 //$modelNewEmail->e_message_id = $modelNewEmail->generateMessageId();
 
-                $modelNewEmail->body_html = '<!DOCTYPE html><html><head><title>Redactor</title><meta charset="UTF-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" /></head><body><p>Hi ' . Html::encode($modelNewEmail->e_email_to) . '!</p><blockquote>' . nl2br(Email::stripHtmlTags($mail->getEmailBodyHtml())) . '</blockquote><p>The best regards, <br>' . Html::encode(Yii::$app->user->identity->username) . '</p></body></html>';
+                $modelNewEmail->body_html = '<!DOCTYPE html><html><head><title>Redactor</title><meta charset="UTF-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" /></head><body><p>Hi ' . Html::encode($modelNewEmail->e_email_to) . '!</p><blockquote>' . nl2br(StringHelper::stripHtmlTags($mail->getEmailBodyHtml())) . '</blockquote><p>The best regards, <br>' . Html::encode(Yii::$app->user->identity->username) . '</p></body></html>';
 
                 $modelNewEmail->e_type_id = Email::TYPE_DRAFT;
                 /*if($modelNewEmail->save()) {

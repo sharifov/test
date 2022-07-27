@@ -6,6 +6,7 @@ use Yii;
 use src\helpers\email\TextConvertingHelper;
 use yii\helpers\Html;
 use src\model\BaseActiveRecord;
+use src\helpers\text\StringHelper;
 
 /**
  * This is the model class for table "email_body".
@@ -111,48 +112,6 @@ class EmailBody extends BaseActiveRecord
 
     public static function getReBodyHtml($emailTo, $userName, $bodyHtml): string
     {
-        return '<!DOCTYPE html><html><head><title>Redactor</title><meta charset="UTF-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" /></head><body><p>Hi ' . Html::encode($emailTo) . '!</p><blockquote>' . nl2br(self::stripHtmlTags($bodyHtml)) . '</blockquote><p>The best regards, <br>' . Html::encode($userName) . '</p></body></html>';
+        return '<!DOCTYPE html><html><head><title>Redactor</title><meta charset="UTF-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" /></head><body><p>Hi ' . Html::encode($emailTo) . '!</p><blockquote>' . nl2br(StringHelper::stripHtmlTags($bodyHtml)) . '</blockquote><p>The best regards, <br>' . Html::encode($userName) . '</p></body></html>';
     }
-
-    /**
-     * @param $text
-     * @return mixed
-     */
-    public static function stripHtmlTags($text)
-    {
-        $text = preg_replace(
-            [
-                // Remove invisible content
-                '@<head[^>]*?>.*?</head>@siu',
-                '@<style[^>]*?>.*?</style>@siu',
-                '@<script[^>]*?.*?</script>@siu',
-                '@<object[^>]*?.*?</object>@siu',
-                '@<embed[^>]*?.*?</embed>@siu',
-                '@<applet[^>]*?.*?</applet>@siu',
-                '@<noframes[^>]*?.*?</noframes>@siu',
-                '@<noscript[^>]*?.*?</noscript>@siu',
-                '@<noembed[^>]*?.*?</noembed>@siu',
-                // Add line breaks before and after blocks
-                '@</?((address)|(blockquote)|(center)|(del))@iu',
-                '@</?((div)|(h[1-9])|(ins)|(isindex)|(p)|(pre))@iu',
-                '@</?((dir)|(dl)|(dt)|(dd)|(li)|(menu)|(ol)|(ul))@iu',
-                '@</?((table)|(th)|(td)|(caption))@iu',
-                '@</?((form)|(button)|(fieldset)|(legend)|(input))@iu',
-                '@</?((label)|(select)|(optgroup)|(option)|(textarea))@iu',
-                '@</?((frameset)|(frame)|(iframe))@iu',
-            ],
-            [
-                ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-                "\n\$0", "\n\$0", "\n\$0", "\n\$0", "\n\$0", "\n\$0",
-                "\n\$0", "\n\$0",
-            ],
-            $text
-            );
-
-        $text = strip_tags($text);
-        $text = preg_replace('!\s+!', ' ', $text);
-
-        return $text;
-    }
-
 }

@@ -9,8 +9,7 @@ use src\entities\email\helpers\EmailStatus;
 use src\entities\email\EmailInterface;
 use Yii;
 use yii\helpers\Html;
-use yii\helpers\StringHelper;
-use src\entities\email\EmailBody;
+use src\helpers\text\StringHelper;
 use modules\fileStorage\src\widgets\FileStorageEmailSentListWidget;
 use modules\email\src\abac\dto\EmailAbacDto;
 use modules\email\src\abac\EmailAbacObject;
@@ -109,7 +108,7 @@ class CommunicationListItemWidget extends Widget
                     'createdUser' => $createdUser ?? '',
                     'shortSubject' => wordwrap(Html::encode($mail->emailSubject), 60, '<br />', true),
                     'subject' => Html::encode($mail->emailSubject),
-                    'body' => StringHelper::truncate(EmailBody::stripHtmlTags($mail->getEmailBodyHtml()), 300, '...', null, true),
+                    'body' => StringHelper::truncate(StringHelper::stripHtmlTags($mail->getEmailBodyHtml()), 300, '...', null, true),
                     'id' => $mail->e_id,
                     'emailData' => $mail->emailData,
                     'unsubscribed' => $unsubscribed ?? false,
