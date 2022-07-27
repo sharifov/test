@@ -141,7 +141,16 @@ class UserOnline extends ActiveRecord
                                         },
                                         'status' => function (UserOnline $uo) {
                                             return $uo->uoUser->userStatus->attributes ?? [];
-                                        }
+                                        },
+                                        'userDep' => function (UserOnline $uo) {
+                                            $deps = [];
+                                            foreach ($uo->uoUser->udDeps as $dep) {
+                                                if (isset($dep->dep_id)) {
+                                                    $deps[] = $dep->dep_id;
+                                                }
+                                            }
+                                            return $deps;
+                                        },
                                     ],
                                 ]),
                             ]
