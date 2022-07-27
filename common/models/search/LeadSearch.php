@@ -1289,11 +1289,7 @@ class LeadSearch extends Lead
         ]);
 
         $query->addSelect([
-            'emailOffers' => (new Query())
-                ->select(['count(*)'])
-                ->from(Email::tableName())
-                ->andWhere([Email::tableName() . '.e_template_type_id' => 1])
-                ->andWhere(Email::tableName() . '.e_lead_id = ' . Lead::tableName() . '.id')
+            'emailOffers' => EmailRepositoryFactory::getRepository()->getSubQueryLeadEmailOffer()
         ]);
 
         $query->addSelect([
@@ -1706,11 +1702,7 @@ class LeadSearch extends Lead
         ]);
 
         $query->addSelect([
-            'emailOffers' => (new Query())
-                ->select(['count(*)'])
-                ->from(Email::tableName())
-                ->andWhere([Email::tableName() . '.e_template_type_id' => 1])
-                ->andWhere(Email::tableName() . '.e_lead_id = ' . Lead::tableName() . '.id')
+            'emailOffers' => EmailRepositoryFactory::getRepository()->getSubQueryLeadEmailOffer()
         ]);
 
         $query->addSelect([
