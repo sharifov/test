@@ -225,7 +225,7 @@ class EmailServiceHelper
      * @param string $email
      * @return bool
      */
-    public function isNotInternalEmail(string $email): bool
+    public static function isNotInternalEmail(string $email): bool
     {
         if (UserProjectParams::find()->byEmail($email)->one()) {
             return false;
