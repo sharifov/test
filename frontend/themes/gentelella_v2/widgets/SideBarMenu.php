@@ -1195,6 +1195,12 @@ class SideBarMenu extends \yii\bootstrap\Widget
             ]
         ];
 
+        $menuInfoBlock = [];
+        /** @fflag FFlag::FF_KEY_INFO_BLOCK_ENABLE, Info Block Enable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_INFO_BLOCK_ENABLE)) {
+            $menuInfoBlock = ['label' => 'Info Block', 'url' => ['/info-block-crud/index'], 'icon' => 'list', 'visible' => \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_INFO_BLOCK_ENABLE)];
+        }
+
         $menuItems[] = [
             'label' => 'Logs & Tools',
             'url' => 'javascript:',
@@ -1260,6 +1266,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Virtual cron', 'url' => ['/virtual-cron/cron-scheduler/index'], 'icon' => 'cogs'],
                 ['label' => 'Site ENV', 'url' => ['/setting/env'], 'icon' => 'info-circle'],
                 ['label' => 'Call Terminate Log', 'url' => ['/call-terminate-log-crud/index'], 'icon' => 'list'],
+                $menuInfoBlock,
             ]
         ];
 
