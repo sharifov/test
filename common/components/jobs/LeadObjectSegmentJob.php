@@ -3,9 +3,11 @@
 namespace common\components\jobs;
 
 use common\models\Lead;
+use modules\featureFlag\FFlag;
 use modules\objectSegment\src\contracts\ObjectSegmentKeyContract;
 use modules\objectSegment\src\object\dto\LeadObjectSegmentDto;
 use src\helpers\app\AppHelper;
+use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
 use yii\helpers\ArrayHelper;
 use yii\queue\JobInterface;
 
@@ -31,6 +33,12 @@ class LeadObjectSegmentJob extends BaseJob implements JobInterface
         try {
             $leadObjectDto = new LeadObjectSegmentDto($this->lead);
             \Yii::$app->objectSegment->segment($leadObjectDto, ObjectSegmentKeyContract::TYPE_KEY_LEAD);
+            if ($this->lead->isProcessing()) {
+                /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+                if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) && $this->lead->isBusinessType()) {
+                    LeadBusinessExtraQueueService::addLeadBusinessExtraQueueJob($this->lead, 'Added new Business Extra Queue');
+                }
+            }
         } catch (\RuntimeException | \DomainException $throwable) {
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
             \Yii::warning($message, 'LeadObjectSegmentJob:execute:Exception');
