@@ -8,6 +8,10 @@ use src\helpers\email\MaskEmailHelper;
 use Yii;
 use yii\helpers\Html;
 
+/**
+ * @deprecated
+ * use widget instead CommunicationListItemWidget
+ */
 class EmailHelper
 {
     public static function renderDetailButton(Email $mail): string
