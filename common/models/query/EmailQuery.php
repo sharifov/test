@@ -72,13 +72,21 @@ class EmailQuery extends ActiveQuery
         return $this->andWhere(['e_is_deleted' => true]);
     }
 
-    public function byStatus(int $status)
+    /**
+     *
+     * @param int|arrat $status
+     * @return EmailQuery
+     */
+    public function byStatus($status)
     {
-        return $this->andWhere(['e_status' => $status]);
+        return $this->andWhere(['e_status_id' => $status]);
     }
 
-    public function byType(int $type)
+    public function byType(int $type, $ignoreEmpty = false)
     {
+        if ($ignoreEmpty && $type == 0) {
+            return $this;
+        }
         return $this->andWhere(['e_type_id' => $type]);
     }
 
