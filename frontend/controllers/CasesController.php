@@ -762,33 +762,7 @@ class CasesController extends FController
      */
     private function getCommunicationDataProvider(Cases $model): ActiveDataProvider
     {
-        $emailTemplate = EmailTemplateType::find()
-            ->where(['etp_key' => 'feedback_appr_supp'])
-            ->limit(1)
-            ->one();
-
-        $condition = $emailTemplate
-            ? ['<>', 'e_template_type_id', $emailTemplate->etp_id]
-            : ['IS NOT', 'e_template_type_id', null];
-
-        $query1 = (new \yii\db\Query())
-            ->select(['e_id AS id', new Expression('"email" AS type'), 'e_case_id AS case_id', 'e_created_dt AS created_dt'])
-            ->from('email')
-            ->where(['e_case_id' => $model->cs_id])
-            ->andWhere(['OR',
-                ['IS NOT', 'e_created_user_id', null],
-                ['AND',
-                    ['IS', 'e_created_user_id', null],
-                    ['e_type_id' => Email::TYPE_INBOX],
-                    ['IS', 'e_template_type_id', null]
-                ],
-                ['AND',
-                    ['IS', 'e_created_user_id', null],
-                    ['e_type_id' => Email::TYPE_OUTBOX],
-                    $condition
-                ]
-            ])
-        ;
+        $query1 = EmailRepositoryFactory::getRepository()->getCommunicationLogQueryForCase($model->cs_id);;
 
         $query2 = (new \yii\db\Query())
             ->select(['s_id AS id', new Expression('"sms" AS type'), 's_case_id AS case_id', 's_created_dt AS created_dt'])
