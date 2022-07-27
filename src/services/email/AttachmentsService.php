@@ -44,11 +44,11 @@ class AttachmentsService
      */
     public function __construct($email)
     {
-        $lead = $email->lead ?? $email->eLead;
+        $lead = $email->lead;
         $this->leadId = $lead->id ?? null;
-        $case = $email->case ?? $email->eCase;
+        $case = $email->case;
         $this->caseId = $case->cs_id ?? null;
-        $client = $email->client ?? $email->eClient;
+        $client = $email->client;
         $this->clientId = $client->id ?? null;
 
         $this->fileStorageRepository = Yii::createObject(FileStorageRepository::class);

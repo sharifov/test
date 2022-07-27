@@ -144,7 +144,7 @@ class EmailReviewQueue extends \yii\db\ActiveRecord
 
     public function getEmailTemplateName(): string
     {
-        return ($this->erq_email_is_norm) ? $this->email->templateTypeName : $this->email->eTemplateType->etp_name ?? '--';
+        return ($this->erq_email_is_norm) ? $this->email->templateTypeName : $this->email->templateType->etp_name ?? '--';
     }
 
     public function getEmailStatusName(): string
@@ -154,12 +154,12 @@ class EmailReviewQueue extends \yii\db\ActiveRecord
 
     public function getEmailLead(): ?Lead
     {
-        return ($this->erq_email_is_norm) ? $this->email->lead : $this->email->eLead;
+        return $this->email->lead;
     }
 
     public function getEmailCase(): ?Cases
     {
-        return ($this->erq_email_is_norm) ? $this->email->case : $this->email->eCase;
+        return $this->email->case;
     }
 
     /**

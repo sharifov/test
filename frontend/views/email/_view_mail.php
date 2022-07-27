@@ -68,8 +68,8 @@ use src\helpers\email\MaskEmailHelper;
                 <span><?=Html::encode($model->e_email_from)?></span> To:
                 <i class="fa fa-user"></i> <strong><?=Html::encode(MaskEmailHelper::masking($model->e_email_to))?></strong>
                 <a class="sender-dropdown"><i class="fa fa-chevron-down"></i></a>
-                <?php if ($model->eProject) :?>
-                    <span class="label label-info"><?=Html::encode($model->eProject->name)?></span>
+                <?php if ($model->project) :?>
+                    <span class="label label-info"><?=Html::encode($model->project->name)?></span>
                 <?php endif;?>
                 <?php if ($model->e_status_id) :?>
                     <span class="badge badge-warning"><?=Html::encode($model->getStatusName())?></span>

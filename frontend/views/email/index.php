@@ -139,7 +139,7 @@ $user = Yii::$app->user->identity;
 //            [
 //                'attribute' => 'e_project_id',
 //                'value' => static function (\common\models\Email $model) {
-//                    return $model->eProject ? '<span class="badge badge-info">' . Html::encode($model->eProject->name) . '</span>' : '-';
+//                    return $model->project ? '<span class="badge badge-info">' . Html::encode($model->project->name) . '</span>' : '-';
 //                },
 //                'format' => 'raw',
 //                'filter' => $projectList
@@ -184,7 +184,7 @@ $user = Yii::$app->user->identity;
             [
                 'attribute' => 'e_template_type_name',
                 'value' => static function (\common\models\Email $model) {
-                    return $model->eTemplateType ? $model->eTemplateType->etp_name : '-';
+                return $model->templateType ? $model->templateType->etp_name : '-';
                 },
                 'label' => 'Template Name'
                 //'filter' =>
@@ -217,7 +217,7 @@ $user = Yii::$app->user->identity;
             /*[
                 'attribute' => 'e_updated_user_id',
                 'value' => static function (\common\models\Email $model) {
-                    return ($model->eUpdatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->eUpdatedUser->username) : $model->e_updated_user_id);
+                    return ($model->updatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->updatedUser->username) : $model->e_updated_user_id);
                 },
                 'filter' => $userList,
                 'format' => 'raw'
@@ -226,14 +226,14 @@ $user = Yii::$app->user->identity;
             [
                 'class' => UserSelect2Column::class,
                 'attribute' => 'e_created_user_id',
-                'relation' => 'eCreatedUser',
+                'relation' => 'createdUser',
                 'placeholder' => ''
             ],
 
 //            [
 //                'attribute' => 'e_created_user_id',
 //                'value' => static function (\common\models\Email $model) {
-//                    return ($model->eCreatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->eCreatedUser->username) : $model->e_created_user_id);
+//                    return ($model->createdUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->createdUser->username) : $model->e_created_user_id);
 //                },
 //                'filter' => $userList,
 //                'format' => 'raw'
@@ -249,7 +249,7 @@ $user = Yii::$app->user->identity;
             /*[
                 'attribute' => 'e_created_user_id',
                 'value' => static function (\common\models\Email $model) {
-                    return  ($model->eCreatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->eCreatedUser->username) : $model->e_created_user_id);
+                    return  ($model->createdUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->createdUser->username) : $model->e_created_user_id);
                 'format' => 'raw'
                 },
             ],*/

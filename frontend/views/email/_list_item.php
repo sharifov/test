@@ -55,8 +55,8 @@ use src\helpers\email\MaskEmailHelper;
 
                 </small>
             </h3>
-            <p><?php if ($model->eProject) :?>
-                <span class="label label-info"><?=Html::encode($model->eProject->name)?></span>
+            <p><?php if ($model->project) :?>
+                <span class="label label-info"><?=Html::encode($model->project->name)?></span>
                <?php endif;?><?=Html::encode($model->e_email_subject)?></p>
         </div>
     </div>

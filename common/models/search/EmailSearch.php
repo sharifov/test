@@ -69,7 +69,7 @@ class EmailSearch extends Email
      */
     public function search($params)
     {
-        $query = self::find()->with('eCreatedUser', 'eProject', 'eTemplateType');
+        $query = self::find()->with('createdUser', 'project', 'templateType');
 
         $query->addSelect([
             'e_id',

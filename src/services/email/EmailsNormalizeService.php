@@ -64,7 +64,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             'status'        =>  $emailOld->e_status_id,
             'isDeleted'     =>  $emailOld->e_is_deleted,
             'projectId'     =>  $emailOld->e_project_id,
-            'depId'         =>  $emailOld->eLead ? $emailOld->eLead->l_dep_id : null,
+            'depId'         =>  $emailOld->departmentId,
             'createdDt'     =>  $emailOld->e_created_dt,
             'updatedDt'     =>  $emailOld->e_updated_dt,
             'clientsIds'    =>  $emailOld->e_client_id ? [$emailOld->e_client_id] : null,
