@@ -66,6 +66,7 @@ class ProductQuoteChangeAbacDto extends \stdClass
     public ?int $orTypeId = null;
     public ?int $maxConfirmableQuotesCnt = null;
     public ?bool $refundAllowed = true;
+    public bool $hasPqNew;
 
     public function __construct(?ProductQuoteChange $productQuoteChange)
     {
@@ -92,6 +93,7 @@ class ProductQuoteChangeAbacDto extends \stdClass
             $this->isOwner = $productQuoteChange->pqcPq->isOwner($userId);
             $this->hasPqrActive = (bool)$productQuoteChange->pqcPq->productQuoteRefundsActive;
             $this->hasPqcActive = (bool)$productQuoteChange->pqcPq->productQuoteChangesActive;
+            $this->hasPqNew = $productQuoteChange->isNewProductQuote;
             $this->hasPqrAccepted = $productQuoteChange->pqcPq->isProductQuoteRefundAccepted();
             $this->hasPqcInvoluntaryActive = (bool)$productQuoteChange->pqcPq->productQuoteInvoluntaryChangesActive;
 
