@@ -37,7 +37,7 @@ class m220728_144342_add_ff_user_skill_in_abac_enable extends Migration
 
             Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableLog($throwable), 'm220728_075031_add_ff_smart_lead_distribution_enable:safeUp:Throwable');
+            Yii::error(AppHelper::throwableLog($throwable), 'm220728_144342_add_ff_user_skill_in_abac_enable:safeUp:Throwable');
         }
     }
 
@@ -56,7 +56,7 @@ class m220728_144342_add_ff_user_skill_in_abac_enable extends Migration
 
             Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableLog($throwable), 'm220728_075031_add_ff_smart_lead_distribution_enable:safeDown:Throwable');
+            Yii::error(AppHelper::throwableLog($throwable), 'm220728_144342_add_ff_user_skill_in_abac_enable:safeDown:Throwable');
         }
     }
 }
