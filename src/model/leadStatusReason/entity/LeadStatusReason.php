@@ -30,6 +30,7 @@ use yii\helpers\ArrayHelper;
  */
 class LeadStatusReason extends \yii\db\ActiveRecord
 {
+    public const REASON_KEY_DUPLICATED = 'duplicated';
     /**
      * {@inheritdoc}
      */

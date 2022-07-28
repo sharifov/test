@@ -1,7 +1,9 @@
 <?php
 
 use kartik\select2\Select2;
+use modules\featureFlag\FFlag;
 use src\forms\leadflow\TrashReasonForm;
+use src\model\leadStatusReason\entity\LeadStatusReason;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
 use yii\bootstrap\Html;
@@ -36,22 +38,29 @@ $url = Url::to(['/lead-change-state/ajax-changed-close-reason', 'gid' => $reason
                     $('#lead-close-reason-description-div').show();
                 }
 
-                let objComment = $('#' + formId + '-other-wrapper');
-                if (data.commentRequired) {
-                    objComment.show();
-                } else {
-                    objComment.hide();
+                    let objComment = $('#' + formId + '-other-wrapper-comment');
+                    let objOriginId = $('#' + formId + '-other-wrapper-originId');
+                    if (data.commentRequired) {
+                        objComment.show();
+                    } else {
+                        objComment.hide();
+                    }
+
+                    if (data.originRequired) {
+                        objOriginId.show();
+                    } else {
+                        objOriginId.hide();
+                    }
+                },
+                complete: function () {
+                    $('#close-reason-submit').removeClass('disabled').prop('disabled', false);
+                },
+                error: function (xhr) {
+                    createNotify('Error', xhr.responseText, 'error');
                 }
-            },
-            complete: function () {
-                $('#close-reason-submit').removeClass('disabled').prop('disabled', false);
-            },
-            error: function (xhr) {
-                createNotify('Error', xhr.responseText, 'error');
-            }
-        });
-    }
-</script>
+            });
+        }
+    </script>
 
 <?php
 Pjax::begin(['enableReplaceState' => false, 'enablePushState' => false, 'id' => 'close-reason-pjax']);
@@ -97,9 +106,15 @@ $form = ActiveForm::begin([
         </div>
     </div>
 
-    <div class="form-group collapse <?= $commentRequired ? 'show' : '' ?>" id="<?= $form->id ?>-other-wrapper">
+    <div class="form-group collapse <?= $commentRequired ? 'show' : '' ?>" id="<?= $form->id ?>-other-wrapper-comment">
         <?= $form->field($reasonForm, 'reason')->textarea(['rows' => 3]) ?>
     </div>
+<?php if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_VALIDATE_CLOSING_REASON_DUPLICATED)) : ?>
+    <div class="form-group collapse <?= $reasonForm->reasonKey == LeadStatusReason::REASON_KEY_DUPLICATED ? 'show' : '' ?>"
+         id="<?= $form->id ?>-other-wrapper-originId">
+        <?= $form->field($reasonForm, 'originLeadId')->textInput() ?>
+    </div>
+<?php endif; ?>
 
     <div class="actions-btn-wrapper text-center">
         <?= Html::submitButton('<i class="fa fa-close"></i> Close Lead', ['class' => 'btn btn-primary popover-close-btn', 'id' => 'close-reason-submit']) ?>
