@@ -13,6 +13,7 @@ use src\entities\email\helpers\EmailType;
 use src\exception\CreateModelException;
 use src\forms\emailReviewQueue\EmailReviewQueueForm;
 use Yii;
+use src\entities\email\form\EmailForm;
 
 /**
  * Class EmailService
@@ -83,6 +84,48 @@ class EmailService extends SendMail implements EmailServiceInterface
             ]);
         }
     }
+
+    public function create(EmailForm $form)
+    {
+        try {
+            $email = new Email();
+            $email->e_type_id = $form->type;
+            $email->e_status_id = $form->status;
+            $email->e_is_new = $form->log->isNew;
+            $email->e_email_to = $form->contacts['to']->email;
+            $email->e_email_to_name = $form->contacts['to']->name;
+            $email->e_email_from = $form->contacts['from']->email;
+            $email->e_email_from_name = $form->contacts['from']->name;
+            //$email->e_email_cc = TODO: CC, BCC
+            $email->e_email_subject = $form->body->subject;
+            $email->e_project_id = $form->projectId;
+            $email->body_html = $form->body->bodyHtml;
+            $email->e_created_dt = $form->createdDt;
+            $email->e_inbox_email_id = $form->log->inboxEmailId;
+            $email->e_inbox_created_dt = $form->log->inboxCreatedDt;
+            $email->e_ref_message_id = $form->log->refMessageId;
+            $email->e_message_id = $form->log->messageId;
+            $email->e_language_id = $form->params->language;
+            $email->e_template_type_id = $form->params->templateType;
+            $email->e_client_id = $form->clients ?? null;
+            $email->e_lead_id = $form->leads ?? null;
+            $email->e_case_id = $form->cases ?? null;
+            $email->e_created_user_id = $form->getUserId() ?? null;
+            $email->e_email_data = !empty($form->body->data) ? json_encode($form->body->data) : null;
+
+            if (!$email->save()) {
+                throw new CreateModelException(get_class($email), $email->getErrors());
+            } elseif ($email->e_message_id == null) {
+                $mail->e_message_id = $mail->generateMessageId();
+                $mail->update();
+            }
+        } catch (\Throwable $e) {
+            throw $e;
+        }
+
+        return $email;
+    }
+
     /**
      *
      * @param EmailPreviewFromInterface $previewEmailForm
