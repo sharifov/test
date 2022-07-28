@@ -152,7 +152,6 @@ class EmailController extends FController
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
         $searchModel = new EmailSearch();
-        $modelNewEmail = new Email();
         $modelEmailView = null;
         $emailForm = null;
         $action = Yii::$app->request->get('action');
@@ -160,44 +159,24 @@ class EmailController extends FController
         $emailFrom = Yii::$app->request->get('email_email');
 
         if (Yii::$app->request->isPost) {
-            if ($modelNewEmail->load(Yii::$app->request->post())) {
-
-                $modelNewEmail->e_status_id = Email::STATUS_NEW;
-                $modelNewEmail->e_type_id = Email::TYPE_OUTBOX;
-
-                if ($modelNewEmail->e_id && !Yii::$app->request->post('e_send')) {
-                    $modelNewEmail->e_type_id = Email::TYPE_DRAFT;
-                }
-
-                if (!$modelNewEmail->e_project_id) {
-                    $upp = UserProjectParams::find()->byEmail(strtolower($modelNewEmail->e_email_from))->one();
-                    if ($upp && $upp->upp_project_id) {
-                        $modelNewEmail->e_project_id = $upp->upp_project_id;
+            $emailForm = new EmailForm($user->id);
+            if ($emailForm->load(Yii::$app->request->post()) && $emailForm->validate()) {
+                try {
+                    if (in_array($action, ['create', 'reply'])) {
+                        $email = $this->emailService->create($emailForm);
+                        $this->emailService->sendMail($email);
+                        Yii::$app->session->setFlash('success', 'New Email was created.');
+                    } elseif (in_array($action, ['update'])) {
+                        $email = $this->findModel($selectedId);
+                        $this->emailService->update($email, $emailForm);
+                        Yii::$app->session->setFlash('success', 'Email was updated.');
                     }
+                    return $this->redirect(['inbox', 'id' => $email->e_id]);
+                } catch (\Throwable $e) {
+                    Yii::$app->session->setFlash('error', $e->getMessage() . '<br/>' . $e->getTraceAsString());
                 }
-
-                if (!$modelNewEmail->e_project_id) {
-                    $modelNewEmail->addError('e_subject', 'Error! Project ID not detected');
-                }
-
-                if (!$modelNewEmail->hasErrors() && $modelNewEmail->save()) {
-                    $error = '';
-
-                    if (Yii::$app->request->post('e_send')) {
-                        $out = $modelNewEmail->sendMail();
-
-                        if (isset($out['error']) && $out['error']) {
-                            $error = $out['error'];
-                        }
-                    }
-
-                    if ($error) {
-                        $modelNewEmail->addError('c_email_preview', 'Communication Server response: ' . $error);
-                        Yii::error($error, 'EmailController:inbox:sendMail');
-                    } else {
-                        return $this->redirect(['email/inbox', 'id' => $modelNewEmail->e_id]);
-                    }
-                }
+            } else {
+                Yii::$app->session->setFlash('error', $emailForm->getErrorSummary(true));
             }
         } else {
             if ($action == 'create') {
