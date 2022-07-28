@@ -12,7 +12,7 @@ $jsCode = <<<JS
         let url = $(this).data('url');
         $('#preloader').removeClass('d-none');
         let modal = $('#modal-md');
-        modal.find('.modal-title').html('Sale Details');
+        modal.find('.modal-title').html('Sale Details.   Sale ID: ' + {$saleId});
         $.ajax({
             type: 'get',
             url: url,
