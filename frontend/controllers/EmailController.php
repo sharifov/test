@@ -26,6 +26,7 @@ use src\exception\CreateModelException;
 use yii\helpers\VarDumper;
 use src\exception\EmailNotSentException;
 use src\helpers\text\StringHelper;
+use common\models\Project;
 
 /**
  * EmailController implements the CRUD actions for Email model.
@@ -89,6 +90,8 @@ class EmailController extends FController
      */
     public function actionInbox()
     {
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
         $searchModel = new EmailSearch();
         $modelNewEmail = new Email();
 
@@ -304,14 +307,11 @@ class EmailController extends FController
             ->indexBy('el_email')
             ->column();
 
-        /** @var Employee $user */
-        $user = Yii::$app->user->identity;
-
         if ($user && $user->email) {
             $mailList[$user->email] = $user->email;
         }
 
-        $projectList = \common\models\Project::getListByUser(Yii::$app->user->id);
+        $projectList = Project::getListByUser($user->id);
 
 
         return $this->render('inbox', [
