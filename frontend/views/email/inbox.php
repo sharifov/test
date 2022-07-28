@@ -14,6 +14,7 @@ use src\entities\email\helpers\EmailFilterType;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $mailList [] */
 /* @var $projectList [] */
+/* @var $selectedId int */
 
 $this->title = 'Emails';
 $this->params['breadcrumbs'][] = $this->title;
@@ -75,17 +76,15 @@ $is_admin = $user->isAdmin();
 
                             <?= ListView::widget([
                                 'dataProvider' => $dataProvider,
-
                                 'options' => [
                                     'tag' => 'div',
                                     'class' => 'list-wrapper',
                                     'id' => 'list-wrapper',
                                 ],
                                 'layout' => "{summary}\n{pager}\n{items}\n{summary}",
-                                'itemView' => function ($model, $key, $index, $widget) use ($modelEmailView, $dataProvider) {
-                                    return $this->render('_list_item', ['model' => $model, 'modelEmailView' => $modelEmailView, 'dataProvider' => $dataProvider]);
+                                'itemView' => function ($model, $key, $index, $widget) use ($selectedId) {
+                                    return $this->render('_list_item', ['model' => $model, 'selectedId' => $selectedId]);
                                 },
-
                                 'itemOptions' => [
                                     'tag' => false,
                                 ],

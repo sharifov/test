@@ -1075,4 +1075,14 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
     {
         return $this->e_email_subject;
     }
+
+    public function isDeleted()
+    {
+        return $this->e_is_deleted;
+    }
+
+    public function isNew()
+    {
+        return $this->e_is_new ?? false;
+    }
 }

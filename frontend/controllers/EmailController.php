@@ -313,7 +313,6 @@ class EmailController extends FController
 
         $projectList = Project::getListByUser($user->id);
 
-
         return $this->render('inbox', [
             //'searchModel'     => $searchModel,
             'dataProvider'      => $dataProvider,
@@ -321,6 +320,7 @@ class EmailController extends FController
             'modelNewEmail'     => $modelNewEmail,
             'mailList'          => $mailList,
             'projectList'       => $projectList,
+            'selectedId'        => Yii::$app->request->get('id'),
         ]);
     }
 
