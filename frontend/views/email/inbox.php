@@ -17,6 +17,7 @@ use src\entities\email\helpers\EmailFilterType;
 /* @var $selectedId int */
 /* @var $stats [] */
 /* @var $action string|null */
+/* @var $emailForm src\entities\email\form\EmailCreateForm */
 
 $this->title = 'Emails';
 $this->params['breadcrumbs'][] = $this->title;
@@ -99,7 +100,7 @@ $is_admin = $user->isAdmin();
                             <?php if ($modelEmailView) : ?>
                                 <?=$this->render('_view_mail', ['model' => $modelEmailView])?>
                              <?php elseif ($action) : ?>
-                                <?=$this->render('_new_mail', ['model' => $modelNewEmail, 'mailList' => $mailList, 'action' => $action])?>
+                                <?=$this->render('_new_mail', ['emailForm' => $emailForm , 'mailList' => $mailList, 'action' => $action])?>
                             <?php else : ?>
                                 <?=$this->render('_stats', ['stats' => $stats, 'mailList' => $mailList])?>
                             <?php endif; ?>
