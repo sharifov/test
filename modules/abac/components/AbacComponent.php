@@ -12,6 +12,7 @@ namespace modules\abac\components;
 use Casbin\CoreEnforcer;
 use common\models\Employee;
 use modules\abac\src\entities\AbacPolicy;
+use modules\featureFlag\FFlag;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use stdClass;
@@ -103,6 +104,11 @@ class AbacComponent extends Component
         $user->projects = $me->access->getAllProjects('key'); //getProjects();
         $user->groups = $me->access->getAllGroups();
         $user->departments = $me->access->getAllDepartments();
+
+        /** @fflag FFlag::FF_KEY_USER_SKILL_IN_ABAC_ENABLE, User Skill in abac parameters enable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_USER_SKILL_IN_ABAC_ENABLE)) {
+            $user->skill = $me->access->getSkill();
+        }
 
         $request = new \stdClass();
         $request->controller = Yii::$app->controller->uniqueId;
