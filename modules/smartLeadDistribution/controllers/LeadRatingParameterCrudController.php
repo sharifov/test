@@ -2,16 +2,16 @@
 
 namespace modules\smartLeadDistribution\controllers;
 
+use frontend\controllers\FController;
 use modules\smartLeadDistribution\src\entities\LeadRatingParameter;
 use modules\smartLeadDistribution\src\entities\LeadRatingParameterSearch;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
  * LeadRatingParameterCrudController implements the CRUD actions for LeadRatingParameter model.
  */
-class LeadRatingParameterCrudController extends Controller
+class LeadRatingParameterCrudController extends FController
 {
     /**
      * @inheritDoc
