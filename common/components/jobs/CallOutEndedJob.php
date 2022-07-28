@@ -203,14 +203,14 @@ class CallOutEndedJob extends BaseJob implements JobInterface
                 if (!$lead->isBusinessType()) {
                     return;
                 }
-                \Yii::info($call->c_call_status . ' Call Status ' . $lead->id . ' Lead Id', 'BEQCal');
+                \Yii::info($call->c_call_status . ' Call Status ' . $lead->id . ' Lead Id', 'info\BEQCal');
                 if ($call->c_call_duration >= SettingHelper::getUserPrickedCallDuration() && $call->isStatusCompleted()) {
                     LeadBusinessExtraQueueService::addLeadBusinessExtraQueueRemoverJob($lead->id, LeadBusinessExtraQueueLogStatus::REASON_CALL);
                 } elseif (($call->isDeclined() || $call->isStatusNoAnswer() || $call->isStatusBusy()) && LeadBusinessExtraQueueLogQuery::isLeadWasInBusinessExtraQueue($lead->id)) {
-                    \Yii::info('All Correct', 'BEQCal');
+                    \Yii::info('All Correct', 'info\BEQCal');
                     LeadBusinessExtraQueueService::addLeadBusinessExtraQueueRemoverJob($lead->id, LeadBusinessExtraQueueLogStatus::REASON_FAILED_CALL);
                 } else {
-                    \Yii::info(LeadBusinessExtraQueueLogQuery::isLeadWasInBusinessExtraQueue($lead->id) . ' Incorrect', 'BEQCal');
+                    \Yii::info(LeadBusinessExtraQueueLogQuery::isLeadWasInBusinessExtraQueue($lead->id) . ' Incorrect', 'info\BEQCal');
                 }
                 return;
             }
