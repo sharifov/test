@@ -10,6 +10,10 @@ use yii\widgets\Pjax;
 use src\helpers\email\MaskEmailHelper;
 use modules\featureFlag\FFlag;
 use src\services\email\EmailsNormalizeService;
+use src\entities\email\EmailInterface;
+use src\entities\email\helpers\EmailType;
+use common\models\Language;
+use src\entities\email\helpers\EmailStatus;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\EmailSearch */
@@ -134,7 +138,7 @@ $user = Yii::$app->user->identity;
             [
                 'class' => \common\components\grid\project\ProjectColumn::class,
                 'attribute' => 'e_project_id',
-                'relation' => 'eProject',
+                'relation' => 'project',
             ],
 //            [
 //                'attribute' => 'e_project_id',
@@ -147,22 +151,12 @@ $user = Yii::$app->user->identity;
             //'e_email_from',
             [
                 'attribute' => 'e_email_from',
-                'value' => static function (\common\models\Email $model) {
-                    if ($model->e_type_id == $model::TYPE_INBOX) {
-                        return MaskEmailHelper::masking($model->e_email_from);
-                    }
-                    return $model->e_email_from;
-                },
+                'value' => 'emailFrom'
             ],
             //'e_email_to',
             [
                 'attribute' => 'e_email_to',
-                'value' => static function (\common\models\Email $model) {
-                    if ($model->e_type_id == $model::TYPE_OUTBOX) {
-                        return MaskEmailHelper::masking($model->e_email_to);
-                    }
-                    return $model->e_email_to;
-                },
+                'value' => 'emailTo'
             ],
             'e_lead_id',
             'e_case_id',
@@ -175,29 +169,28 @@ $user = Yii::$app->user->identity;
             //'e_type_id',
             [
                 'attribute' => 'e_type_id',
-                'value' => static function (\common\models\Email $model) {
-                    return $model->getTypeName();
+                'value' => static function (EmailInterface $model) {
+                    return EmailType::getName($model->e_type_id);
                 },
-                'filter' => \common\models\Email::TYPE_LIST
+                'filter' => EmailType::getList()
             ],
             //'e_template_type_id',
             [
                 'attribute' => 'e_template_type_name',
-                'value' => static function (\common\models\Email $model) {
-                return $model->templateType ? $model->templateType->etp_name : '-';
-                },
+                'value' => 'templateType.etp_name',
                 'label' => 'Template Name'
                 //'filter' =>
             ],
             //'e_language_id',
             [
                 'attribute' => 'e_language_id',
-                'value' => static function (\common\models\Email $model) {
-                    return $model->e_language_id;
-                },
-                'filter' => \common\models\Language::getLanguages(true)
+                'value' => 'languageId',
+                'filter' => Language::getLanguages(true)
             ],
-            'e_communication_id',
+            [
+                'attribute' => 'e_communication_id',
+                'value' => 'communicationId',
+            ],
             //'e_is_deleted',
             //'e_is_new:boolean',
             //'e_delay',
@@ -205,10 +198,10 @@ $user = Yii::$app->user->identity;
             //'e_status_id',
             [
                 'attribute' => 'e_status_id',
-                'value' => static function (\common\models\Email $model) {
-                    return $model->getStatusName();
+                'value' => static function (EmailInterface $model) {
+                    return EmailStatus::getName($model->e_status_id);
                 },
-                'filter' => \common\models\Email::STATUS_LIST
+                'filter' => EmailStatus::getList()
             ],
             'attribute' => 'e_client_id:client',
             //'e_status_done_dt',
