@@ -97,11 +97,10 @@ class LeadTaskListService
 
                                 if ($calculatedDuration <= 0) {
                                     $userTaskListEndDate = DateHelper::getDateTimeWithAddedMinutesUTC($userShiftSchedule->uss_end_utc_dt, $duration);
-
                                     break;
-                                } else {
-                                    $duration = $calculatedDuration;
                                 }
+
+                                $duration = $calculatedDuration;
                             }
                         }
 
