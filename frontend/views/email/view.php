@@ -2,6 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\Email */
@@ -32,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
             <h4>Subject: <?= Html::encode($model->emailSubject)?></h4>
             <hr>
             <h4>Email preview:</h4>
-            <object width="100%" height="1000" data="<?=\yii\helpers\Url::to(['email/view', 'id' => $model->e_id, 'preview' => 1])?>"></object>
+            <object width="100%" height="1000" data="<?= Url::to(['view', 'id' => $model->e_id, 'preview' => 1])?>"></object>
 
     </div>
 

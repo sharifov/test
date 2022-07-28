@@ -54,7 +54,7 @@ $is_admin = $user->isAdmin();
                                         <ul class="dropdown-menu">
                                             <?php foreach ($mailList as $mailName) : ?>
                                                 <li>
-                                                    <?=Html::a('<i class="fa fa-envelope"></i> ' . $mailName, Url::current(['email_email' => $mailName, 'id' => null, 'reply_id' => null, 'edit_id' => null, 'action' => 'new']))?>
+                                                    <?=Html::a('<i class="fa fa-envelope"></i> ' . $mailName, Url::current(['email_email' => $mailName, 'id' => null, 'action' => 'create']))?>
                                                 </li>
                                             <?php endforeach; ?>
                                         </ul>
@@ -98,19 +98,7 @@ $is_admin = $user->isAdmin();
                         <div class="col-sm-9 mail_view">
                             <?php if ($modelEmailView) : ?>
                                 <?=$this->render('_view_mail', ['model' => $modelEmailView])?>
-                            <?php elseif (Yii::$app->request->get('action') === 'new' || Yii::$app->request->get('edit_id') || Yii::$app->request->get('reply_id')) : ?>
-                                <?php
-                                if (Yii::$app->request->get('action') === 'new') {
-                                    $action = 'create';
-                                } elseif (Yii::$app->request->get('edit_id')) {
-                                    $action = 'update';
-                                } elseif (Yii::$app->request->get('reply_id')) {
-                                    $action = 'reply';
-                                } else {
-                                    $action = '';
-                                }
-                                ?>
-
+                             <?php elseif ($action) : ?>
                                 <?=$this->render('_new_mail', ['model' => $modelNewEmail, 'mailList' => $mailList, 'action' => $action])?>
                             <?php else : ?>
                                 <?=$this->render('_stats', ['stats' => $stats, 'mailList' => $mailList])?>

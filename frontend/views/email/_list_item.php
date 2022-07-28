@@ -12,7 +12,7 @@ use src\entities\email\helpers\EmailType;
 <?php if ($selectedId == $model->e_id) :?>
 <div style="padding: 8px; background-color: rgba(175,255,236,0.5); color: darkgreen">
 <?php else : ?>
-<a style="color: <?=($model->e_is_deleted ? 'darkred' : ($model->e_is_new ? 'blue' : 'black'))?>" href="<?=Url::current(['id' => $model->e_id, 'action' => null])?>" class="view_email" data-email-id="<?=$model->e_id?>">
+<a style="color: <?=($model->isDeleted() ? 'darkred' : ($model->isNew() ? 'blue' : 'black'))?>" href="<?=Url::current(['id' => $model->e_id, 'action' => null])?>" class="view_email" data-email-id="<?=$model->e_id?>">
 <?php endif; ?>
 
     <div class="mail_list">
