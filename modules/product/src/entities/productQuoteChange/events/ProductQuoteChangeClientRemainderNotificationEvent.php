@@ -3,11 +3,11 @@
 namespace modules\product\src\entities\productQuoteChange\events;
 
 /**
- * Class ProductQuoteChangeAutoDecisionPendingEvent
+ * Class ProductQuoteChangeClientRemainderNotificationEvent
  *
  * @property int $productQuoteChangeId
  */
-class ProductQuoteChangeAutoDecisionPendingEvent implements ProductQuoteChangeInterface
+class ProductQuoteChangeClientRemainderNotificationEvent implements ProductQuoteChangeInterface
 {
     public int $productQuoteChangeId;
 
