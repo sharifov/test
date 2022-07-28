@@ -9,6 +9,7 @@ use common\components\jobs\LeadPoorProcessingRemoverJob;
 use common\components\jobs\UserTaskCompletionJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
+use modules\featureFlag\FFlag;
 use modules\lead\src\services\LeadTaskListService;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\taskList\src\entities\TargetObject;
@@ -42,6 +43,8 @@ use src\model\callLog\services\CallLogTransferService;
 use src\model\client\notifications\ClientNotificationCanceler;
 use src\model\callLogFilterGuard\entity\CallLogFilterGuard;
 use src\model\conference\service\ConferenceDataService;
+use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
+use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogStatus;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataQuery;
@@ -1207,6 +1210,13 @@ class Call extends \yii\db\ActiveRecord
                                 'Call:afterSave:Lead:Answered:Processing'
                             );
                         }
+                    }
+                    /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+                    if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) && $lead && $lead->employee_id && $lead->isProcessing() && $lead->isBusinessType()) {
+                        LeadBusinessExtraQueueService::addLeadBusinessExtraQueueRemoverJob(
+                            $lead->id,
+                            LeadBusinessExtraQueueLogStatus::REASON_INCOMING_CALL
+                        );
                     }
                 }
 
