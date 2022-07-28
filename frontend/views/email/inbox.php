@@ -15,6 +15,8 @@ use src\entities\email\helpers\EmailFilterType;
 /* @var $mailList [] */
 /* @var $projectList [] */
 /* @var $selectedId int */
+/* @var $stats [] */
+/* @var $action string|null */
 
 $this->title = 'Emails';
 $this->params['breadcrumbs'][] = $this->title;
@@ -111,7 +113,7 @@ $is_admin = $user->isAdmin();
 
                                 <?=$this->render('_new_mail', ['model' => $modelNewEmail, 'mailList' => $mailList, 'action' => $action])?>
                             <?php else : ?>
-                                <?=$this->render('_stats', ['model' => $modelNewEmail, 'mailList' => $mailList])?>
+                                <?=$this->render('_stats', ['stats' => $stats, 'mailList' => $mailList])?>
                             <?php endif; ?>
 
                         </div>

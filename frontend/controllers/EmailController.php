@@ -27,20 +27,24 @@ use yii\helpers\VarDumper;
 use src\exception\EmailNotSentException;
 use src\helpers\text\StringHelper;
 use common\models\Project;
+use src\repositories\email\EmailOldRepository;
 
 /**
  * EmailController implements the CRUD actions for Email model.
  *
  * @property EmailMainService $emailService
+ * @property EmailRepositoryInterface $emailRepository
  */
 class EmailController extends FController
 {
     private $emailService;
+    private $emailRepository;
 
-    public function __construct($id, $module, EmailMainService $emailService, $config = [])
+    public function __construct($id, $module, EmailMainService $emailService, EmailOldRepository $emailRepository, $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->emailService = $emailService;
+        $this->emailRepository = $emailRepository;
     }
 
     public function behaviors()
@@ -313,6 +317,14 @@ class EmailController extends FController
 
         $projectList = Project::getListByUser($user->id);
 
+        $stats = [
+            'unread' => $this->emailRepository->getUnreadCount($mailList),
+            'inboxToday' => $this->emailRepository->getInboxTodayCount($mailList),
+            'outboxToday' => $this->emailRepository->getOutboxTodayCount($mailList),
+            'draft' => $this->emailRepository->getDraftCount($mailList),
+            'trash' => $this->emailRepository->getTrashCount($mailList),
+        ];
+
         return $this->render('inbox', [
             //'searchModel'     => $searchModel,
             'dataProvider'      => $dataProvider,
@@ -321,6 +333,7 @@ class EmailController extends FController
             'mailList'          => $mailList,
             'projectList'       => $projectList,
             'selectedId'        => Yii::$app->request->get('id'),
+            'stats'             => $stats,
         ]);
     }
 
