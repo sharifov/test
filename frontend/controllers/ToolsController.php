@@ -6,8 +6,10 @@ use borales\extensions\phoneInput\PhoneInputValidator;
 use common\components\AppService;
 use common\components\CheckPhoneByNeutrinoJob;
 use common\components\CheckPhoneNumberJob;
+use common\models\Lead;
 use common\models\Quote;
 use frontend\models\search\ComposerLockSearch;
+use modules\smartLeadDistribution\src\services\SmartLeadDistributionService;
 use src\forms\file\CsvUploadForm;
 use src\model\contactPhoneList\service\ContactPhoneListService;
 use src\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
@@ -484,5 +486,27 @@ class ToolsController extends FController
             'crm-export-composer-lock-' . $date . '.json',
             ['mimeType' => 'application/json']
         );
+    }
+
+    public function actionLeadRating(?int $leadId = null)
+    {
+        $dataRating = [];
+        $errors = [];
+
+        if ($leadId !== null) {
+            $lead = Lead::findOne($leadId);
+
+            if ($lead !== null) {
+                $dataRating = SmartLeadDistributionService::countPointsWithExtraData($lead);
+            } else {
+                $errors[] = 'Lead not exists!';
+            }
+        }
+
+        return $this->render('lead-rating', [
+            'leadId' => $leadId,
+            'dataRating' => $dataRating,
+            'errors' => $errors
+        ]);
     }
 }
