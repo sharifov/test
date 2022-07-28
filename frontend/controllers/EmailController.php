@@ -28,6 +28,7 @@ use src\exception\EmailNotSentException;
 use src\helpers\text\StringHelper;
 use common\models\Project;
 use src\repositories\email\EmailOldRepository;
+use src\entities\email\EmailBody;
 
 /**
  * EmailController implements the CRUD actions for Email model.
@@ -88,6 +89,57 @@ class EmailController extends FController
     }
 
     /**
+     *
+     * @param Employee $user
+     * @param string $emailFrom
+     * @param Project $project
+     * @param UserProjectParams $upp
+     * @throws \Exception
+     * @return array
+     */
+    private function getEmailPreview(Employee $user, $emailFrom, Project $project, UserProjectParams $upp): array
+    {
+        /** @var CommunicationService $communication */
+        $communication = Yii::$app->comms;
+
+        $content_data['email_body_html'] = '';
+        $content_data['email_subject'] = '';
+        $content_data['content'] = '<br>';
+
+        $projectContactInfo = @json_decode($project->contact_info, true);
+
+        $content_data['project'] = [
+            'name'      => $project ? $project->name : '',
+            'url'       => $project ? $project->link : 'https://',
+            'address'   => $projectContactInfo['address'] ?? '',
+            'phone'     => $projectContactInfo['phone'] ?? '',
+            'email'     => $projectContactInfo['email'] ?? '',
+        ];
+
+        $content_data['contacts'] = $content_data['project'];
+
+        $content_data['agent'] = [
+            'name'  => $user->full_name,
+            'username'  => $user->username,
+            'phone' => $upp && $upp->getPhone() ? $upp->getPhone() : '',
+            'email' => $upp && $upp->getEmail() ? $upp->getEmail() : '',
+        ];
+
+
+        $mailPreview = $communication->mailPreview($project->id, 'cl_agent_blank', $emailFrom, '', $content_data);
+
+        if ($mailPreview && isset($mailPreview['data'])) {
+            if (isset($mailPreview['error']) && $mailPreview['error']) {
+                $errorJson = @json_decode($mailPreview['error'], true);
+
+                throw new \Exception('Communication Server response: ' . ($errorJson['message'] ?? $mailPreview['error']));
+            }
+        }
+
+        return $mailPreview;
+    }
+
+    /**
      * @return string
      * @throws \yii\httpclient\Exception
      */
@@ -100,6 +152,7 @@ class EmailController extends FController
         $modelEmailView = null;
         $action = Yii::$app->request->get('action');
         $selectedId = Yii::$app->request->get('id');
+        $emailFrom = Yii::$app->request->get('email_email');
 
         if (Yii::$app->request->isPost) {
             if ($modelNewEmail->load(Yii::$app->request->post())) {
@@ -142,64 +195,24 @@ class EmailController extends FController
                 }
             }
         } else {
-            if (Yii::$app->request->get('email_email')) {
-                $modelNewEmail->e_email_from = Yii::$app->request->get('email_email');
+            if ($emailFrom) {
+                $modelNewEmail->e_email_from = $emailFrom;
             }
 
             if ($action == 'create') {
                 $upp = UserProjectParams::find()->byEmail(strtolower($modelNewEmail->e_email_from))->one();
-                if ($upp && $upp->upp_project_id) {
-                    $modelNewEmail->e_project_id = $upp->upp_project_id;
-                }
+                $project = $upp->uppProject ?? null;
 
-                if ($modelNewEmail->e_project_id) {
-
-                    /** @var CommunicationService $communication */
-                    $communication = Yii::$app->comms;
-                    $data['origin'] = '';
-
-                    $content_data['email_body_html'] = '';
-                    $content_data['email_subject'] = '';
-                    $content_data['content'] = '<br>';
-                    $projectContactInfo = [];
-
-                    $project = null;
-
-                    if ($upp && $project = $upp->uppProject) {
-                        $projectContactInfo = @json_decode($project->contact_info, true);
-                    }
-                    $language = 'en-US';
-                    $tpl = 'cl_agent_blank';
-                    $content_data['project'] = [
-                        'name'      => $project ? $project->name : '',
-                        'url'       => $project ? $project->link : 'https://',
-                        'address'   => $projectContactInfo['address'] ?? '',
-                        'phone'     => $projectContactInfo['phone'] ?? '',
-                        'email'     => $projectContactInfo['email'] ?? '',
-                    ];
-
-                    $content_data['contacts'] = $content_data['project'];
-
-                    $content_data['agent'] = [
-                        'name'  => Yii::$app->user->identity->full_name,
-                        'username'  => Yii::$app->user->identity->username,
-                        'phone' => $upp && $upp->getPhone() ? $upp->getPhone() : '',
-                        'email' => $upp && $upp->getEmail() ? $upp->getEmail() : '',
-                    ];
-
-                    $mailPreview = $communication->mailPreview($modelNewEmail->e_project_id, $tpl, $modelNewEmail->e_email_from, '', $content_data, $language);
-
-                    if ($mailPreview && isset($mailPreview['data'])) {
-                        if (isset($mailPreview['error']) && $mailPreview['error']) {
-                            $errorJson = @json_decode($mailPreview['error'], true);
-                            $modelNewEmail->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $mailPreview['error']));
-                            Yii::error($mailPreview['error'], 'EmailController:inbox:mailPreview');
-                        } else {
-                            $modelNewEmail->body_html = $mailPreview['data']['email_body_html'];
-                        }
+                if ($project) {
+                    $modelNewEmail->e_project_id = $project->id;
+                    try {
+                        $mailPreview = $this->getEmailPreview($user, $emailFrom, $project, $upp);
+                        $modelNewEmail->body_html = $mailPreview['data']['email_body_html'] ?? null;
+                    } catch (\Exception $e) {
+                        Yii::error($e->getMessage(), 'EmailController:inbox:getEmailPreview');
                     }
 
-                    $modelNewEmail->e_email_subject = '✈️ ' . ($project ? $project->name : '') . ' - ' . Yii::$app->user->identity->username; //$mailPreview['data']['email_subject'];
+                    $modelNewEmail->e_email_subject = EmailBody::getDraftSubject($project->name ?? '', $user->username);
                 }
             } elseif ($action == 'update') {
                 $modelNewEmail = $this->findModel($selectedId);
