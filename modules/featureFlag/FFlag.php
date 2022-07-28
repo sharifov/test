@@ -38,6 +38,7 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_VALIDATE_ABAC_POLICY_IN_MIGRATION = 'validateAbacPolicyInMigration';
     public const FF_KEY_BUSINESS_QUEUE_LIMIT = 'businessQueueLimit';
     public const FF_KEY_INFO_BLOCK_ENABLE = 'infoBlockEnable';
+    public const FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE = 'smartLeadDistributionEnable';
 
 
     public const FF_KEY_LIST = [
@@ -68,6 +69,7 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_BUSINESS_QUEUE_LIMIT,
         self::FF_KEY_BEQ_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT,
         self::FF_KEY_INFO_BLOCK_ENABLE,
+        self::FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE,
     ];
 
 
