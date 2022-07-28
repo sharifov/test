@@ -21,18 +21,21 @@ class HandleReasonDto
     public ?int $newLeadOwnerId = null;
     public ?int $creatorId = null;
     public ?string $reason = '';
+    public ?int $originId = null;
 
     public function __construct(
         Lead $lead,
         string $leadStatusReasonKey,
         ?int $newLeadOwnerId,
         ?int $creatorId,
-        ?string $reason
+        ?string $reason,
+        ?int $originId = null
     ) {
         $this->lead = $lead;
         $this->leadStatusReasonKey = $leadStatusReasonKey;
         $this->newLeadOwnerId = $newLeadOwnerId;
         $this->creatorId = $creatorId;
         $this->reason = $reason;
+        $this->originId = $originId;
     }
 }

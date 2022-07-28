@@ -136,7 +136,7 @@ class LeadStatusReasonService
     private function duplicated(HandleReasonDto $dto): void
     {
         $stateService = \Yii::createObject(LeadStateService::class);
-        $stateService->duplicate($dto->lead, $dto->lead->employee_id, null, $dto->creatorId);
+        $stateService->duplicate($dto->lead, $dto->lead->employee_id, $dto->originId, $dto->creatorId);
         $this->leadToConversion($dto)->createQaTaskLead($dto);
     }
 
