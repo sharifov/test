@@ -2,6 +2,7 @@
 
 namespace modules\taskList\src\entities\userTask;
 
+use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTask;
 use Yii;
@@ -18,23 +19,26 @@ class UserTaskQuery
         \DateTimeImmutable $dtNow,
         ?array $excludeIds = null
     ): UserTaskScopes {
-
         $dtNowFormatted = $dtNow->format('Y-m-d H:i:s');
 
         $userTasksQuery = UserTask::find()
+            ->select(UserTask::tableName() . '.*')
             ->innerJoin([
                 'shift_schedule_event_task_query' => ShiftScheduleEventTask::find()
                     ->select(['sset_user_task_id'])
-                    ->innerJoin(
-                        UserShiftSchedule::tableName(),
-                        'sset_event_id = uss_id 
-                            AND uss_start_utc_dt <= :dtNow AND uss_end_utc_dt >= :dtNow
-                            AND uss_status_id IN (:statuses)',
-                        [
-                            'dtNow' => $dtNowFormatted,
-                            'statuses' => $userShiftScheduleStatuses
-                        ]
-                    )
+                    ->innerJoin([
+                        'join_user_shift_schedule_query' => UserShiftSchedule::find()
+                            ->select(['uss_id'])
+                            ->innerJoin(
+                                ShiftScheduleType::tableName(),
+                                'uss_sst_id = sst_id',
+                                ['sst_subtype_id' => ShiftScheduleType::SUBTYPE_WORK_TIME]
+                            )
+                            ->where(['IN', 'uss_status_id', $userShiftScheduleStatuses])
+                            ->andWhere(['<=', 'uss_start_utc_dt', $dtNowFormatted])
+                            ->andWhere(['>=', 'uss_end_utc_dt', $dtNowFormatted])
+                            ->groupBy(['uss_id'])
+                    ], 'sset_event_id = uss_id')
                     ->groupBy(['sset_user_task_id'])
             ], 'ut_id = shift_schedule_event_task_query.sset_user_task_id')
             ->where(['ut_task_list_id' => $taskListId])
@@ -43,14 +47,14 @@ class UserTaskQuery
             ->andWhere(['ut_target_object_id' => $targetObjectId])
             ->andWhere(['IN', 'ut_status_id', $utStatusIds])
             ->andWhere(['<=', 'ut_start_dt', $dtNowFormatted])
-            ->andWhere(['>=', 'ut_end_dt', $dtNowFormatted])
+            ->andWhere(['OR', ['ut_end_dt' => null], ['>=', 'ut_end_dt', $dtNowFormatted]])
         ;
 
         if (!empty($excludeIds)) {
             $userTasksQuery->andWhere(['NOT IN', 'ut_id', $excludeIds]);
         }
 
-        $userTasksQuery->orderBy(['ut_created_dt' => SORT_ASC]);
+        $userTasksQuery->orderBy(['ut_created_dt' => SORT_ASC])->distinct();
 
         return $userTasksQuery;
     }
