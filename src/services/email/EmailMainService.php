@@ -37,6 +37,7 @@ use common\components\jobs\UserTaskCompletionJob;
 use modules\taskList\src\entities\TargetObject;
 use src\auth\Auth;
 use modules\taskList\src\entities\TaskObject;
+use src\entities\email\form\EmailForm;
 
 /**
  *
@@ -188,6 +189,36 @@ class EmailMainService implements EmailServiceInterface
                 }
             }
         }
+    }
+
+    public function update($email, EmailForm $form)
+    {
+        $email = $this->oldService->update($email, $form);
+        $email->refresh();
+        $this->setEmailObj($email);
+
+        if ($this->normalizedService !== null) {
+            $email = $this->normalizedService->update($email, $form);
+            $email->refresh();
+            $this->setEmailNormObj($email);
+        }
+
+        return $email;
+    }
+
+    public function create(EmailForm $form)
+    {
+        $email = $this->oldService->create($form);
+        $email->refresh();
+        $this->setEmailObj($email);
+
+        if ($this->normalizedService !== null) {
+            $email = $this->normalizedService->create($form);
+            $email->refresh();
+            $this->setEmailNormObj($email);
+        }
+
+        return $email;
     }
 
     public function createFromLead(EmailPreviewFromInterface $previewEmailForm, Lead $lead, array $attachments = [])
