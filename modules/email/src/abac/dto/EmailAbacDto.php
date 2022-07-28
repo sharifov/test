@@ -21,11 +21,11 @@ class EmailAbacDto extends \stdClass
         if ($email) {
             $this->is_email_owner = $email->isCreatedUser(Auth::id());
             $this->has_creator = $email->hasCreatedUser();
-            if ($email->hasCase()) {
+            if ($email->case !== null) {
                 $this->is_case_owner = $email->case->isOwner(Auth::id());
             }
 
-            if ($email->hasLead()) {
+            if ($email->lead !== null) {
                 $this->is_lead_owner = $email->lead->isOwner(Auth::id());
             }
 
