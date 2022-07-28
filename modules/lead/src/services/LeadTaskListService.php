@@ -175,10 +175,10 @@ class LeadTaskListService
             throw new \RuntimeException('Lead owner is empty');
         }
 
-        /** @abac $leadTaskListAbacDto, LeadTaskListAbacObject::ASSIGN_TASK, LeadTaskListAbacObject::ACTION_ACCESS, Lead to task List assign checker */
+        /** @abac $leadTaskListAbacDto, LeadTaskListAbacObject::PROCESSING_TASK, LeadTaskListAbacObject::ACTION_ACCESS, Lead to task List processing checker */
         $can = Yii::$app->abac->can(
             new LeadTaskListAbacDto($this->lead, $this->lead->employee_id),
-            LeadTaskListAbacObject::ASSIGN_TASK,
+            LeadTaskListAbacObject::PROCESSING_TASK,
             LeadTaskListAbacObject::ACTION_ACCESS,
             $employee
         );
