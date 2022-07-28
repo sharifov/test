@@ -3,6 +3,7 @@
 namespace modules\taskList\src\objects\email;
 
 use common\models\Department;
+use common\models\EmailTemplateType;
 use common\models\Project;
 use modules\taskList\src\objects\BaseTaskObject;
 use modules\taskList\src\objects\TargetObjectList;
@@ -13,12 +14,13 @@ class EmailTaskObject extends BaseTaskObject implements TaskObjectInterface
     /** NAMESPACE */
     private const NS = 'email/';
 
-    public const OPTGROUP_CALL = 'Email';
+    public const OPTGROUP_EMAIL = 'Email';
 
     public const OBJ_EMAIL = 'email';
 
-    public const FIELD_PROJECT_KEY       = self::OBJ_EMAIL . '.' . 'project_key';
-    public const FIELD_DEPARTMENT_ID    = self::OBJ_EMAIL . '.' . 'department_id';
+    public const FIELD_PROJECT_KEY = self::OBJ_EMAIL . '.' . 'project_key';
+    public const FIELD_DEPARTMENT_ID = self::OBJ_EMAIL . '.' . 'department_id';
+    public const FIELD_TEMPLATE_TYPE_KEY = self::OBJ_EMAIL . '.' . 'template_type_key';
 
 
     public const OBJECT_OPTION_LIST = [
@@ -30,31 +32,43 @@ class EmailTaskObject extends BaseTaskObject implements TaskObjectInterface
     ];
 
     protected const ATTR_PROJECT_KEY = [
-        'optgroup' => self::OPTGROUP_CALL,
+        'optgroup' => self::OPTGROUP_EMAIL,
         'id' => self::NS . self::FIELD_PROJECT_KEY,
         'field' => self::FIELD_PROJECT_KEY,
         'label' => 'Email Project',
         'type' => self::ATTR_TYPE_STRING,
         'input' => self::ATTR_INPUT_SELECT,
-        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN],
+        'operators' => [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN],
+        'icon' => 'fa fa-list',
+    ];
+
+    protected const ATTR_TEMPLATE_TYPE_KEY = [
+        'optgroup' => self::OPTGROUP_EMAIL,
+        'id' => self::NS . self::FIELD_TEMPLATE_TYPE_KEY,
+        'field' => self::FIELD_TEMPLATE_TYPE_KEY,
+        'label' => 'Email Template Type',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'operators' => [self::OP_IN, self::OP_NOT_IN],
         'icon' => 'fa fa-list',
     ];
 
     protected const ATTR_DEPARTMENT_ID = [
-        'optgroup' => self::OPTGROUP_CALL,
+        'optgroup' => self::OPTGROUP_EMAIL,
         'id' => self::NS . self::FIELD_DEPARTMENT_ID,
         'field' => self::FIELD_DEPARTMENT_ID,
         'label' => 'Call Department(wrong - TODO)',
         'type' => self::ATTR_TYPE_INTEGER,
         'input' => self::ATTR_INPUT_SELECT,
-        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN],
+        'operators' => [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN],
         'icon' => 'fa fa-list',
     ];
 
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
         0 => self::ATTR_PROJECT_KEY,
-        1 => self::ATTR_DEPARTMENT_ID
+        1 => self::ATTR_DEPARTMENT_ID,
+        2 => self::ATTR_TEMPLATE_TYPE_KEY
     ];
 
     /**
@@ -72,10 +86,14 @@ class EmailTaskObject extends BaseTaskObject implements TaskObjectInterface
         $department = self::ATTR_DEPARTMENT_ID;
         $department['values'] = Department::getList();
 
+        $templateType = self::ATTR_TEMPLATE_TYPE_KEY;
+        $templateType['values'] = EmailTemplateType::getKeyList(false, null);
+
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
 
         $attributeList[0] = $project;
         $attributeList[1] = $department;
+        $attributeList[2] = $templateType;
         return $attributeList;
     }
 
