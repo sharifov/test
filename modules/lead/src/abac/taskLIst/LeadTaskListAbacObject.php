@@ -19,7 +19,7 @@ class LeadTaskListAbacObject extends AbacBaseModel implements AbacInterface
     public const ALL = self::NS . '*';
 
     /** PERMISSIONS */
-    public const ASSIGN_TASK  = self::NS . 'assign_task';
+    public const PROCESSING_TASK  = self::NS . 'processing_task';
 
     /** ACTIONS */
     public const ACTION_ACCESS  = 'access';
@@ -61,14 +61,14 @@ class LeadTaskListAbacObject extends AbacBaseModel implements AbacInterface
     public static function getObjectList(): array
     {
         return [
-            self::ASSIGN_TASK => self::ASSIGN_TASK,
+            self::PROCESSING_TASK => self::PROCESSING_TASK,
         ];
     }
 
     public static function getObjectActionList(): array
     {
         return [
-            self::ASSIGN_TASK => [self::ACTION_ACCESS],
+            self::PROCESSING_TASK => [self::ACTION_ACCESS],
         ];
     }
 
@@ -80,7 +80,7 @@ class LeadTaskListAbacObject extends AbacBaseModel implements AbacInterface
         $attrStatus['values'] = Lead::getAllStatuses();
 
         $attributeList = [
-            self::ASSIGN_TASK => [
+            self::PROCESSING_TASK => [
                 LeadAbacObject::ATTR_LEAD_IS_OWNER,
                 LeadAbacObject::ATTR_LEAD_HAS_OWNER,
                 LeadAbacObject::ATTR_IS_IN_PROJECT,
@@ -89,8 +89,8 @@ class LeadTaskListAbacObject extends AbacBaseModel implements AbacInterface
             ],
         ];
 
-        $attributeList[self::ASSIGN_TASK][] = $attrLeadProject;
-        $attributeList[self::ASSIGN_TASK][] = $attrStatus;
+        $attributeList[self::PROCESSING_TASK][] = $attrLeadProject;
+        $attributeList[self::PROCESSING_TASK][] = $attrStatus;
 
         return $attributeList;
     }
