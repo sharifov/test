@@ -32,6 +32,7 @@ use modules\shiftSchedule\src\forms\ScheduleRequestForm;
 use modules\shiftSchedule\src\reports\AgentShiftSummaryReport;
 use modules\shiftSchedule\src\services\ShiftScheduleRequestService;
 use modules\shiftSchedule\src\services\UserShiftScheduleService;
+use modules\taskList\src\entities\userTask\UserTaskSearch;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
@@ -503,9 +504,18 @@ class ShiftScheduleController extends FController
 
         try {
             $userTimeZone = Auth::user()->timezone ?: 'UTC';
+
+            $tsSearchModel = new UserTaskSearch();
+            $tsDataProvider = $tsSearchModel->searchByShiftScheduleEventId(
+                $this->request->queryParams,
+                (int) $event->uss_id
+            );
+
             return $this->renderAjax('partial/_get_event', [
                 'event' => $event,
                 'userTimeZone' => $userTimeZone,
+                'searchModel' => $tsSearchModel,
+                'dataProvider' => $tsDataProvider,
                 //'user' => Auth::user(),
             ]);
         } catch (\DomainException $e) {
