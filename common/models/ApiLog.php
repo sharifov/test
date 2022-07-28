@@ -272,7 +272,7 @@ class ApiLog extends \yii\db\ActiveRecord
      * @param bool $countGroup
      * @return array
      */
-    public static function getActionFilter(bool $countGroup = false, $timeRange = false): array
+    public static function getActionFilter(bool $countGroup = false, $timeRange = null): array
     {
         $arr = [];
         if ($timeRange) {
@@ -333,25 +333,21 @@ class ApiLog extends \yii\db\ActiveRecord
     public static function getActionFilterByCnt($timeRange = null): array
     {
         $arr = [];
+        $query = self::find()->select(["COUNT(*) AS cnt", "al_action"])
+            ->where('al_action IS NOT NULL');
+
         if ($timeRange) {
             $date = explode(' - ', $timeRange);
             $timeStart = $date[0];
             $timeEnd = $date[1];
-            $data = self::find()->select(["COUNT(*) AS cnt", "al_action"])
-                ->where('al_action IS NOT NULL')
-                ->andWhere(['BETWEEN', 'al_created_dt', $timeStart, $timeEnd])
-                ->groupBy(["al_action"])
-                ->orderBy('cnt DESC')
-                ->cache(60)
-                ->asArray()->all();
-        } else {
-            $data = self::find()->select(["COUNT(*) AS cnt", "al_action"])
-                ->where('al_action IS NOT NULL')
-                ->groupBy(["al_action"])
-                ->orderBy('cnt DESC')
-                ->cache(60)
-                ->asArray()->all();
+            $query->andWhere(['BETWEEN', 'al_created_dt', $timeStart, $timeEnd]);
         }
+        $data = $query
+            ->groupBy(["al_action"])
+            ->orderBy('cnt DESC')
+            ->cache(60)
+            ->asArray()
+            ->all();
 
         if ($data) {
             foreach ($data as $v) {
