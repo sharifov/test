@@ -265,6 +265,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
         try {
             //=update Email
             $email->attributes = $form->getAttributesForModel(true); //->toArray();
+            $email->e_updated_user_id = $form->getUserId() ?? $this->userId;
             unset($email->e_created_user_id);
             $email->save();
             //=!update Email
