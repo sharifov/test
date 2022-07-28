@@ -4,6 +4,8 @@ namespace modules\taskList\src\entities\userTask;
 
 use common\models\Employee;
 use kartik\daterange\DateRangeBehavior;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTask;
 use src\helpers\app\AppHelper;
 use src\helpers\app\DBHelper;
 use yii\data\ActiveDataProvider;
@@ -234,6 +236,72 @@ class UserTaskSearch extends UserTask
                 \Yii::error($message, 'UserTaskSearch:search:Throwable');
             }
         }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'ut_id' => $this->ut_id,
+            'ut_user_id' => $this->ut_user_id,
+            'ut_target_object_id' => $this->ut_target_object_id,
+            'ut_task_list_id' => $this->ut_task_list_id,
+            'ut_priority' => $this->ut_priority,
+            'ut_status_id' => $this->ut_status_id,
+            'ut_year' => $this->ut_year,
+            'ut_month' => $this->ut_month,
+        ]);
+
+        if ($this->ut_start_dt) {
+            $query->andFilterWhere(['>=', 'ut_start_dt',
+                Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_start_dt))])
+                ->andFilterWhere(['<=', 'ut_start_dt',
+                    Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_start_dt) + 3600 * 24)]);
+        }
+        if ($this->ut_end_dt) {
+            $query->andFilterWhere(['>=', 'ut_end_dt',
+                Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_end_dt))])
+                ->andFilterWhere(['<=', 'ut_end_dt',
+                    Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_end_dt) + 3600 * 24)]);
+        }
+        if ($this->ut_created_dt) {
+            $query->andFilterWhere(['>=', 'ut_created_dt',
+                Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_created_dt))])
+                ->andFilterWhere(['<=', 'ut_created_dt',
+                    Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_created_dt) + 3600 * 24)]);
+        }
+
+        $query->andFilterWhere(['like', 'ut_target_object', $this->ut_target_object]);
+
+        return $dataProvider;
+    }
+
+    /**
+     * Creates data provider instance with search query applied
+     *
+     * @param array $params
+     * @param int $scheduleEventId
+     * @return ActiveDataProvider
+     */
+    public function searchByShiftScheduleEventId(
+        array $params,
+        int $scheduleEventId
+    ): ActiveDataProvider {
+        $query = UserTask::find();
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['ut_priority' => SORT_DESC]],
+            'pagination' => ['pageSize' => 10],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            $query->where('0=1');
+            return $dataProvider;
+        }
+
+        $query->innerJoinWith(['shiftScheduleEventTasks']);
+        $query->andWhere(['sset_event_id' => $scheduleEventId]);
+
 
         // grid filtering conditions
         $query->andFilterWhere([
