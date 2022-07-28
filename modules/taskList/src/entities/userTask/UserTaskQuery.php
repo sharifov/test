@@ -22,6 +22,7 @@ class UserTaskQuery
         $dtNowFormatted = $dtNow->format('Y-m-d H:i:s');
 
         $userTasksQuery = UserTask::find()
+            ->select(UserTask::tableName() . '.*')
             ->innerJoin([
                 'shift_schedule_event_task_query' => ShiftScheduleEventTask::find()
                     ->select(['sset_user_task_id'])
