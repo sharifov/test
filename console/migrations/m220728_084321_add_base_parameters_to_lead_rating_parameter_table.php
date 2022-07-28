@@ -111,10 +111,8 @@ class m220728_084321_add_base_parameters_to_lead_rating_parameter_table extends 
     public function safeUp()
     {
         try {
-            $smartLeadDistributionService = new SmartLeadDistributionService();
-
             foreach (self::BASE_PARAMETERS as $parameter) {
-                $smartLeadDistributionService::addParameter(
+                SmartLeadDistributionService::addParameter(
                     $parameter['object'],
                     $parameter['attribute'],
                     $parameter['points'],
@@ -132,10 +130,8 @@ class m220728_084321_add_base_parameters_to_lead_rating_parameter_table extends 
     public function safeDown()
     {
         try {
-            $smartLeadDistributionService = new SmartLeadDistributionService();
-
             foreach (self::BASE_PARAMETERS as $parameter) {
-                $smartLeadDistributionService::deleteParameter(
+                SmartLeadDistributionService::deleteParameter(
                     $parameter['object'],
                     $parameter['attribute'],
                     $parameter['points']
