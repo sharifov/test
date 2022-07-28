@@ -29,6 +29,10 @@ use src\helpers\text\StringHelper;
 use common\models\Project;
 use src\repositories\email\EmailOldRepository;
 use src\entities\email\EmailBody;
+use src\entities\email\form\EmailForm;
+use src\entities\email\helpers\EmailContactType;
+use src\services\email\EmailsNormalizeService;
+use src\entities\email\helpers\EmailType;
 
 /**
  * EmailController implements the CRUD actions for Email model.
@@ -150,6 +154,7 @@ class EmailController extends FController
         $searchModel = new EmailSearch();
         $modelNewEmail = new Email();
         $modelEmailView = null;
+        $emailForm = null;
         $action = Yii::$app->request->get('action');
         $selectedId = Yii::$app->request->get('id');
         $emailFrom = Yii::$app->request->get('email_email');
@@ -195,40 +200,45 @@ class EmailController extends FController
                 }
             }
         } else {
-            if ($emailFrom) {
-                $modelNewEmail->e_email_from = $emailFrom;
-            }
-
             if ($action == 'create') {
-                $upp = UserProjectParams::find()->byEmail(strtolower($modelNewEmail->e_email_from))->one();
+                $formData = [];
+                $formData['contacts']['from'] = [
+                    'type' => EmailContactType::FROM,
+                    'email' => $emailFrom
+                ];
+
+                $upp = UserProjectParams::find()->byEmail(strtolower($emailFrom))->one();
                 $project = $upp->uppProject ?? null;
 
                 if ($project) {
-                    $modelNewEmail->e_project_id = $project->id;
+                    $formData['projectId'] = $upp->upp_project_id ?? null;
                     try {
                         $mailPreview = $this->getEmailPreview($user, $emailFrom, $project, $upp);
-                        $modelNewEmail->body_html = $mailPreview['data']['email_body_html'] ?? null;
+                        $formData['body']['bodyHtml'] = $mailPreview['data']['email_body_html'] ?? null;
                     } catch (\Exception $e) {
                         Yii::error($e->getMessage(), 'EmailController:inbox:getEmailPreview');
                     }
 
-                    $modelNewEmail->e_email_subject = EmailBody::getDraftSubject($project->name ?? '', $user->username);
+                    $formData['body']['subject'] = EmailBody::getDraftSubject($project->name ?? '', $user->username);
                 }
+                $emailForm = EmailForm::fromArray($formData);
             } elseif ($action == 'update') {
-                $modelNewEmail = $this->findModel($selectedId);
-                $modelNewEmail->body_html = $modelNewEmail->emailBodyHtml;
+                $email = $this->findModel($selectedId);
+                $emailForm = EmailForm::fromArray(EmailsNormalizeService::getDataArrayFromOld($email));
             } elseif ($action == 'reply') {
-                $mail = $this->findModel($selectedId);
-
-                if ($mail) {
+                $formData = [];
+                if ($email = $this->findModel($selectedId)) {
                     $modelNewEmail = new Email();
-                    $modelNewEmail->e_project_id = $mail->e_project_id;
-                    $modelNewEmail->e_email_from = $mail->e_type_id == Email::TYPE_INBOX ? $mail->e_email_to : $mail->e_email_from;
-                    $modelNewEmail->e_email_to = $mail->e_type_id == Email::TYPE_INBOX ? $mail->e_email_from : $mail->e_email_to;
-                    $modelNewEmail->e_email_subject = Email::reSubject($mail->e_email_subject);
-                    $modelNewEmail->body_html = '<!DOCTYPE html><html><head><title>Redactor</title><meta charset="UTF-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" /></head><body><p>Hi ' . Html::encode($modelNewEmail->e_email_to) . '!</p><blockquote>' . nl2br(StringHelper::stripHtmlTags($mail->getEmailBodyHtml())) . '</blockquote><p>The best regards, <br>' . Html::encode(Yii::$app->user->identity->username) . '</p></body></html>';
-                    $modelNewEmail->e_type_id = Email::TYPE_DRAFT;
+                    $modelNewEmail->e_project_id = $email->e_project_id;
+                    $modelNewEmail->e_email_from = EmailType::isInbox($email->e_type_id) ? $email->e_email_to : $email->e_email_from;
+                    $modelNewEmail->e_email_to = EmailType::isInbox($email->e_type_id)? $email->e_email_from : $email->e_email_to;
+                    $modelNewEmail->e_email_subject = EmailBody::getReSubject($email->emailSubject);
+                    $modelNewEmail->body_html = EmailBody::getReBodyHtml($email->getEmailFrom(false), $user->username, $email->getEmailBodyHtml());
+                    $modelNewEmail->e_type_id = EmailType::DRAFT;
+
+                    $formData = EmailsNormalizeService::getDataArrayFromOld($modelNewEmail);
                 }
+                $emailForm = EmailForm::fromArray($formData);
             } elseif ($selectedId) {
                 $modelEmailView = $this->findModel($selectedId);
                 $this->emailRepository->read($modelEmailView);
@@ -268,12 +278,12 @@ class EmailController extends FController
             //'searchModel'     => $searchModel,
             'dataProvider'      => $dataProvider,
             'modelEmailView'    => $modelEmailView,
-            'modelNewEmail'     => $modelNewEmail,
             'mailList'          => $mailList,
             'projectList'       => $projectList,
             'selectedId'        => $selectedId,
             'action'            => $action,
             'stats'             => $stats,
+            'emailForm'         => $emailForm,
         ]);
     }
 
