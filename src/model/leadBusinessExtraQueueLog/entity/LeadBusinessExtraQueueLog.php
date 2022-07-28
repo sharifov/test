@@ -37,10 +37,10 @@ class LeadBusinessExtraQueueLog extends \yii\db\ActiveRecord
 
             ['lbeql_lbeqr_id', 'required'],
             ['lbeql_lbeqr_id', 'integer'],
-            ['lbeql_lbeqr_id', 'exist', 'skipOnError' => true, 'targetClass' => LeadBusinessExtraQueueRule::class, 'targetAttribute' => ['lbeql_lbeqr_id' => 'lbeql_id']],
+            ['lbeql_lbeqr_id', 'exist', 'skipOnError' => true, 'targetClass' => LeadBusinessExtraQueueRule::class, 'targetAttribute' => ['lbeql_lbeqr_id' => 'lbeqr_id']],
 
             ['lbeql_lead_owner_id', 'integer'],
-            ['lbeql_lead_owner_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['lbeql_owner_id' => 'id']],
+            ['lbeql_lead_owner_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['lbeql_lead_owner_id' => 'id']],
 
             ['lbeql_status', 'required'],
             ['lbeql_status', 'integer'],

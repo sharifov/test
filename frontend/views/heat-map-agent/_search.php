@@ -58,7 +58,7 @@ use kartik\select2\Select2;
             <?= $form->field($model, 'shifts', [
                 'options' => ['class' => 'form-group']
             ])->widget(Select2::class, [
-                'data' => ShiftQuery::getList(),
+                'data' => $shifts,
                 'size' => Select2::SMALL,
                 'options' => ['placeholder' => 'Select Shift', 'multiple' => true],
                 'pluginOptions' => ['allowClear' => true],
@@ -68,7 +68,7 @@ use kartik\select2\Select2;
             <?= $form->field($model, 'userGroup', [
                 'options' => ['class' => 'form-group']
             ])->widget(Select2::class, [
-                'data' => UserGroup::getList(),
+                'data' => $userGroups,
                 'size' => Select2::SMALL,
                 'options' => ['placeholder' => 'Select User Group', 'multiple' => true],
                 'pluginOptions' => ['allowClear' => true],
@@ -78,7 +78,7 @@ use kartik\select2\Select2;
         <div class="col-md-2">
             <?php echo $form->field($model, 'roles')
                 ->widget(Select2::class, [
-                    'data' => Employee::getAllRoles(Auth::user()),
+                    'data' => $roles,
                     'size' => Select2::SMALL,
                     'options' => ['placeholder' => 'Select Role'],
                     'pluginOptions' => ['allowClear' => true, 'multiple' => true],

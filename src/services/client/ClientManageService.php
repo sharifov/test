@@ -173,11 +173,12 @@ class ClientManageService
     /**
      * @param Client $client
      * @param EmailCreateForm $emailForm
+     * @return ClientEmail|null
      */
-    public function addEmail(Client $client, EmailCreateForm $emailForm): void
+    public function addEmail(Client $client, EmailCreateForm $emailForm): ?ClientEmail
     {
         if (!$emailForm->email) {
-            return;
+            return null;
         }
         if (!$this->clientEmailRepository->exists($client->id, $emailForm->email)) {
             $email = ClientEmail::create(
@@ -187,7 +188,9 @@ class ClientManageService
                 $emailForm->ce_title
             );
             $this->clientEmailRepository->save($email);
+            return $email;
         }
+        return null;
     }
 
     /**

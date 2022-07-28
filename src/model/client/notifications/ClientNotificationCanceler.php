@@ -5,6 +5,7 @@ namespace src\model\client\notifications;
 use src\helpers\app\AppHelper;
 use src\model\client\notifications\client\entity\ClientNotification;
 use src\model\client\notifications\client\entity\CommunicationType;
+use src\model\client\notifications\email\entity\ClientNotificationEmailListRepository;
 use src\model\client\notifications\phone\entity\ClientNotificationPhoneListRepository;
 use src\model\client\notifications\sms\entity\ClientNotificationSmsListRepository;
 
@@ -13,16 +14,22 @@ use src\model\client\notifications\sms\entity\ClientNotificationSmsListRepositor
  *
  * @property ClientNotificationPhoneListRepository $phoneRepository
  * @property ClientNotificationSmsListRepository $smsRepository
+ * @property ClientNotificationEmailListRepository $emailRepository
  */
 class ClientNotificationCanceler
 {
     private ClientNotificationPhoneListRepository $phoneRepository;
     private ClientNotificationSmsListRepository $smsRepository;
+    private ClientNotificationEmailListRepository $emailRepository;
 
-    public function __construct(ClientNotificationPhoneListRepository $phoneRepository, ClientNotificationSmsListRepository $smsRepository)
-    {
+    public function __construct(
+        ClientNotificationPhoneListRepository $phoneRepository,
+        ClientNotificationSmsListRepository $smsRepository,
+        ClientNotificationEmailListRepository $emailRepository
+    ) {
         $this->phoneRepository = $phoneRepository;
         $this->smsRepository = $smsRepository;
+        $this->emailRepository = $emailRepository;
     }
 
     public function cancel(int $typeId, int $objectId): void
@@ -48,6 +55,10 @@ class ClientNotificationCanceler
 
             if ((int)$notification['type'] === CommunicationType::SMS) {
                 $this->cancelSmsNotification($notification['id']);
+            }
+
+            if ((int)$notification['type'] === CommunicationType::EMAIL) {
+                $this->cancelEmailNotification($notification['id']);
             }
         }
     }
@@ -85,6 +96,24 @@ class ClientNotificationCanceler
                 'notificationId' => $notificationId,
                 'exception' => AppHelper::throwableLog($e),
             ], 'ClientNotificationCanceler:cancelSmsNotification');
+        }
+    }
+
+    private function cancelEmailNotification(int $notificationId): void
+    {
+        try {
+            $notification = $this->emailRepository->find($notificationId);
+            if (!$notification->isNew()) {
+                return;
+            }
+            $notification->cancel(new \DateTimeImmutable());
+            $this->emailRepository->save($notification);
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'Client email notification cancel error',
+                'notificationId' => $notificationId,
+                'exception' => AppHelper::throwableLog($e),
+            ], 'ClientNotificationCanceler:cancelEmailNotification');
         }
     }
 }

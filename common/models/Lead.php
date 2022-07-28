@@ -24,6 +24,7 @@ use src\auth\Auth;
 use src\behaviors\metric\MetricLeadCounterBehavior;
 use src\entities\EventTrait;
 use src\events\lead\LeadBookedEvent;
+use src\events\lead\LeadBusinessExtraQueueEvent;
 use src\events\lead\LeadCallExpertChangedEvent;
 use src\events\lead\LeadCallExpertRequestEvent;
 use src\events\lead\LeadCallStatusChangeEvent;
@@ -68,6 +69,7 @@ use src\model\client\helpers\ClientFormatter;
 use src\model\clientChatLead\entity\ClientChatLead;
 use src\model\lead\useCases\lead\api\create\LeadCreateForm;
 use src\model\lead\useCases\lead\import\LeadImportForm;
+use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
 use src\model\leadData\entity\LeadData;
 use src\model\leadDataKey\services\LeadDataKeyDictionary;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
@@ -1472,6 +1474,10 @@ class Lead extends ActiveRecord implements Objectable
                 $description
             )
         );
+        /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) && $this->isBusinessType()) {
+            LeadBusinessExtraQueueService::addLeadBusinessExtraQueueJob($this, 'Added new Business Extra Queue Countdown');
+        }
     }
 
     /**
@@ -1830,6 +1836,7 @@ class Lead extends ActiveRecord implements Objectable
                 self::STATUS_BOOK_FAILED,
                 self::STATUS_ALTERNATIVE,
                 self::STATUS_EXTRA_QUEUE,
+                self::STATUS_BUSINESS_EXTRA_QUEUE,
             ],
             true
         );
@@ -2692,6 +2699,9 @@ class Lead extends ActiveRecord implements Objectable
             case self::STATUS_EXTRA_QUEUE:
                 $label = '<span class="label label-default">' . self::getStatus($status) . '</span>';
                 break;
+            case self::STATUS_BUSINESS_EXTRA_QUEUE:
+                $label = '<span class="label label-default">' . self::getStatus($status) . '</span>';
+                break;
         }
         return $label;
     }
@@ -2724,6 +2734,7 @@ class Lead extends ActiveRecord implements Objectable
             case self::STATUS_BOOK_FAILED:
             case self::STATUS_ALTERNATIVE:
             case self::STATUS_EXTRA_QUEUE:
+            case self::STATUS_BUSINESS_EXTRA_QUEUE:
                 $label = '<span class="label label-default">' . self::getStatus($status) . '</span>';
                 break;
         }
@@ -5188,12 +5199,23 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $this->setStatus(self::STATUS_EXTRA_QUEUE);
     }
 
-    public function toBusinessExtraQueue(?int $newOwnerId = null): void
+    public function toBusinessExtraQueue(?int $newOwnerId = null, ?int $creatorId = null, ?string $reason = ''): void
     {
-        if ($this->isExtraQueue()) {
+        if ($this->isBusinessExtraQueue()) {
             return;
         }
         $this->changeOwner($newOwnerId);
+
+        $this->recordEvent(
+            new LeadBusinessExtraQueueEvent(
+                $this,
+                $this->status,
+                $this->employee_id,
+                $newOwnerId,
+                $creatorId,
+                $reason
+            )
+        );
 
         $this->setStatus(self::STATUS_BUSINESS_EXTRA_QUEUE);
     }

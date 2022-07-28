@@ -18,6 +18,7 @@ use src\model\voip\phoneDevice\device\ReadyVoipDevice;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "call_user_access".
@@ -432,7 +433,26 @@ class CallUserAccess extends \yii\db\ActiveRecord
                         'object' => 'callUserAccess',
                         'action' => $action,
                         'data' => [
-                            'callUserAccess' => $this->attributes
+                            'callUserAccess' => ArrayHelper::toArray($this, [
+                                CallUserAccess::class => [
+                                    'user_id' => 'cua_user_id',
+                                    'cua_call_id',
+                                    'cua_user_id',
+                                    'cua_status_id',
+                                    'cua_created_dt',
+                                    'cua_updated_dt',
+                                    'cua_priority',
+                                    'userDep' => function (CallUserAccess $cua) {
+                                        $deps = [];
+                                        foreach ($cua->cuaUser->udDeps as $dep) {
+                                            if (isset($dep->dep_id)) {
+                                                $deps[] = $dep->dep_id;
+                                            }
+                                        }
+                                        return $deps;
+                                    }
+                                ],
+                            ]),
                         ]
                     ]
                 );
