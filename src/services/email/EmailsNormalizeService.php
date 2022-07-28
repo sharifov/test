@@ -55,7 +55,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
         return $instance;
     }
 
-    public function getDataArrayFromOld(EmailOld $emailOld)
+    public static function getDataArrayFromOld(EmailOld $emailOld)
     {
         $data = [
             'userId'        =>  $emailOld->e_created_user_id,
@@ -124,7 +124,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
 
     public function createEmailFromOld(EmailOld $emailOld)
     {
-        $form = EmailForm::fromArray($this->getDataArrayFromOld($emailOld));
+        $form = EmailForm::fromArray(self::getDataArrayFromOld($emailOld));
 
         return $this->create($form);
     }
