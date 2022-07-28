@@ -85,7 +85,52 @@ class EmailOldRepository implements EmailRepositoryInterface
         return $removedIds;
     }
 
-    public function getTodayCount($cache = 0)
+    /**
+     * @param array $mailList
+     * @return int
+     */
+    public function getUnreadCount(array $mailList): int
+    {
+        return Email::find()->withContact($mailList)->notDeleted()->unread()->count();
+    }
+
+    /**
+     * @param array $mailList
+     * @return int
+     */
+    public function getInboxTodayCount(array $mailList): int
+    {
+        return Email::find()->withContact($mailList)->notDeleted()->inbox()->createdToday()->count();
+    }
+
+    /**
+     * @param array $mailList
+     * @return int
+     */
+    public function getOutboxTodayCount(array $mailList): int
+    {
+        return Email::find()->withContact($mailList)->notDeleted()->outbox()->createdToday()->count();
+    }
+
+    /**
+     * @param array $mailList
+     * @return int
+     */
+    public function getDraftCount(array $mailList): int
+    {
+        return Email::find()->withContact($mailList)->notDeleted()->draft()->count();
+    }
+
+    /**
+     * @param array $mailList
+     * @return int
+     */
+    public function getTrashCount(array $mailList): int
+    {
+        return Email::find()->withContact($mailList)->deleted()->count();
+    }
+
+    public function getTodayCount($cache = 0): int
     {
         return Email::find()->createdToday()->cache($cache)->count();
     }

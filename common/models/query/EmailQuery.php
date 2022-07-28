@@ -148,4 +148,12 @@ class EmailQuery extends ActiveQuery
     {
         return $this->andWhere(['e_template_type_id' => $templateTypeId]);
     }
+
+    public function withContact(array $mailList)
+    {
+        return $this->andWhere(['OR',
+            ['e_email_to' => $mailList],
+            ['e_email_from' => $mailList],
+        ]);
+    }
 }
