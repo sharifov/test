@@ -5,6 +5,7 @@ use modules\abac\components\AbacComponent;
 return [
     'class' => AbacComponent::class,
     'cacheEnable' => true,
+    'cacheEnforceEnable' => true,
     'modules' => [
         'app' => \modules\abac\src\object\AppAbac::class,
         'order' => \modules\order\src\abac\OrderAbacObject::class,

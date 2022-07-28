@@ -20,6 +20,7 @@ use src\model\clientData\entity\ClientDataQuery;
 use src\model\clientDataKey\entity\ClientDataKeyDictionary;
 use src\model\clientDataKey\service\ClientDataKeyService;
 use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
+use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogQuery;
 use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogStatus;
 use src\model\leadData\services\LeadDataCreateService;
 use src\model\leadDataKey\services\LeadDataKeyDictionary;
@@ -204,6 +205,8 @@ class CallOutEndedJob extends BaseJob implements JobInterface
                 }
                 if ($call->c_call_duration >= SettingHelper::getUserPrickedCallDuration() && $call->isStatusCompleted()) {
                     LeadBusinessExtraQueueService::addLeadBusinessExtraQueueRemoverJob($lead->id, LeadBusinessExtraQueueLogStatus::REASON_CALL);
+                } elseif (($call->isDeclined() || $call->isStatusNoAnswer() || $call->isStatusBusy() || $call->isStatusFailed() ) && LeadBusinessExtraQueueLogQuery::isLeadWasInBusinessExtraQueue($lead->id)) {
+                    LeadBusinessExtraQueueService::addLeadBusinessExtraQueueRemoverJob($lead->id, LeadBusinessExtraQueueLogStatus::REASON_FAILED_CALL);
                 }
                 return;
             }

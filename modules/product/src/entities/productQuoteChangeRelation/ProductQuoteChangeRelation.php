@@ -4,6 +4,7 @@ namespace modules\product\src\entities\productQuoteChangeRelation;
 
 use frontend\assets\Select2Asset;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use Yii;
 
@@ -15,6 +16,7 @@ use Yii;
  *
  * @property ProductQuote $pqcrPq
  * @property ProductQuoteChange $pqcrPqc
+ * @property-read  ProductQuote|null $newProductQuote
  */
 class ProductQuoteChangeRelation extends \yii\db\ActiveRecord
 {
@@ -36,6 +38,16 @@ class ProductQuoteChangeRelation extends \yii\db\ActiveRecord
     public function getPqcrPq(): \yii\db\ActiveQuery
     {
         return $this->hasOne(ProductQuote::class, ['pq_id' => 'pqcr_pq_id']);
+    }
+
+    /**
+     * Returns product quote in status NEW
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getNewProductQuote(): \yii\db\ActiveQuery
+    {
+        return $this->getPqcrPq()->where(['pq_status_id' => ProductQuoteStatus::NEW]);
     }
 
     public function getPqcrPqc(): \yii\db\ActiveQuery

@@ -87,6 +87,7 @@ use src\listeners\lead\leadWebEngage\LeadBookedWebEngageListener;
 use src\listeners\lead\leadWebEngage\LeadSoldWebEngageListener;
 use src\listeners\lead\leadWebEngage\LeadTrashedWebEngageListener;
 use src\listeners\lead\leadBusinessExtraQueue\LeadBusinessExtraQueueRemoveOnStatusChangeListener;
+use src\listeners\lead\leadBusinessExtraQueue\LeadBusinessExtraQueueEventLogListener;
 
 return [
     LeadCreatedEvent::class => [
@@ -191,6 +192,7 @@ return [
     LeadBusinessExtraQueueEvent::class => [
         LeadBusinessExtraQueueNotificationsListener::class,
         LeadInfoReloadListener::class,
+        LeadBusinessExtraQueueEventLogListener::class,
     ],
     LeadPoorProcessingEvent::class => [
         LeadPoorProcessingAdderListener::class,

@@ -322,7 +322,7 @@ class ClientNotificationListener
             $clientPhoneId = $this->addClientPhone($contact['oc_client_id'], $contact['oc_phone_number']);
         }
 
-        $clientEmailId = ClientEmail::find()->select(['id'])->andWhere(['client_id' => $contact['oc_client_id'], 'phone' => $contact['oc_email']])->scalar();
+        $clientEmailId = ClientEmail::find()->select(['id'])->andWhere(['client_id' => $contact['oc_client_id'], 'email' => $contact['oc_email']])->scalar();
         if (!$clientEmailId) {
             \Yii::error([
                 'message' => 'Not found Contact Client Email',

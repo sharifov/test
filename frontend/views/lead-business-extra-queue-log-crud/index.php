@@ -34,6 +34,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'lbeql_lead_id',
             'lbeql_status',
             'lbeql_lead_owner_id',
+            'lbeql_description',
             'lbeql_created_dt',
             'lbeql_updated_dt',
             [
