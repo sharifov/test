@@ -53,7 +53,7 @@ class UserTaskQuery
             $userTasksQuery->andWhere(['NOT IN', 'ut_id', $excludeIds]);
         }
 
-        $userTasksQuery->orderBy(['ut_created_dt' => SORT_ASC]);
+        $userTasksQuery->orderBy(['ut_created_dt' => SORT_ASC])->distinct();
 
         return $userTasksQuery;
     }
