@@ -3,6 +3,7 @@
 namespace modules\taskList\src\entities\userTask;
 
 use common\models\Employee;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTask;
 use modules\taskList\src\entities\TargetObject;
 use modules\taskList\src\entities\taskList\TaskList;
@@ -30,6 +31,7 @@ use yii\helpers\ArrayHelper;
  * @property int $ut_month
  *
  * @property ShiftScheduleEventTask[] $shiftScheduleEventTasks
+ * @property UserShiftSchedule[] $userShiftEvents
  * @property Employee $user
  * @property TaskList $taskList
  */
@@ -130,6 +132,16 @@ class UserTask extends \yii\db\ActiveRecord
         return $this->hasOne(TaskList::class, ['tl_id' => 'ut_task_list_id']);
     }
 
+    /**
+     * @return ActiveQuery
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function getUserShiftEvents()
+    {
+        return $this->hasMany(UserShiftSchedule::class, ['uss_id' => 'sset_event_id'])
+            ->viaTable('shift_schedule_event_task', ['sset_user_task_id' => 'ut_id']);
+    }
+
     public function attributeLabels(): array
     {
         return [
@@ -213,6 +225,34 @@ class UserTask extends \yii\db\ActiveRecord
         $this->recordStatusChangeEvent();
 
         return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDeadline(): bool
+    {
+        $deadline = false;
+        if ($this->ut_end_dt) {
+            if (time() > strtotime($this->ut_end_dt)) {
+                $deadline = true;
+            }
+        }
+        return $deadline;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDelay(): bool
+    {
+        $delay = false;
+        if ($this->ut_start_dt) {
+            if (time() < strtotime($this->ut_start_dt)) {
+                $delay = true;
+            }
+        }
+        return $delay;
     }
 
     public function recordStatusChangeEvent(): void

@@ -302,6 +302,11 @@ class MultipleUpdateForm extends Model
         return $this->statusId === Lead::STATUS_EXTRA_QUEUE;
     }
 
+    public function isBusinessExtraQueue(): bool
+    {
+        return $this->statusId === Lead::STATUS_BUSINESS_EXTRA_QUEUE;
+    }
+
     public function isClosed(): bool
     {
         return $this->statusId === Lead::STATUS_CLOSED;

@@ -14,6 +14,7 @@ use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\services\UserShiftScheduleService;
+use modules\taskList\abac\TaskListAbacObject;
 use src\auth\Auth;
 use modules\user\userFeedback\abac\dto\UserFeedbackAbacDto;
 use modules\user\userFeedback\abac\UserFeedbackAbacObject;
@@ -253,6 +254,19 @@ class SideBarMenu extends \yii\bootstrap\Widget
         if ($isAdmin || $user->isKpiEnable()) {
             $menuItems[] = ['label' => 'KPI <span id="kpi" class="label-info label pull-right"></span> ', 'url' => ['/kpi/index'], 'icon' => 'money'];
         }
+
+
+        /** @abac TaskListAbacObject::ACT_MY_TASK_LIST, TaskListAbacObject::ACTION_ACCESS, Access menu My Task List */
+        $menuItems[] = [
+            'label' => 'My Task List <sup style="color: red">NEW</sup>',
+            'url' => ['/task-list/index'],
+            'icon' => 'check-square-o',
+            'abac'  => [
+                'dto'    => null,
+                'object' => TaskListAbacObject::ACT_MY_TASK_LIST,
+                'action' => TaskListAbacObject::ACTION_ACCESS,
+            ],
+        ];
 
         /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access menu My Shift Schedule */
         $shiftMenuItems[] = [
