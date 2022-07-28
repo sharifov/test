@@ -87,7 +87,6 @@ class EmailController extends FController
         ]);
     }
 
-
     /**
      * @return string
      * @throws \yii\httpclient\Exception
@@ -103,57 +102,43 @@ class EmailController extends FController
         $selectedId = Yii::$app->request->get('id');
 
         if (Yii::$app->request->isPost) {
+            if ($modelNewEmail->load(Yii::$app->request->post())) {
 
-        } else {
-            if ($action == 'create') {
+                $modelNewEmail->e_status_id = Email::STATUS_NEW;
+                $modelNewEmail->e_type_id = Email::TYPE_OUTBOX;
 
-            } elseif ($action == 'update') {
-
-            } elseif ($action == 'reply') {
-
-            } elseif ($selectedId) {
-                $modelEmailView = $this->findModel($selectedId);
-                $this->emailRepository->read($modelEmailView);
-            }
-        }
-
-    //old
-        if ($modelNewEmail->load(Yii::$app->request->post())) {
-
-            $modelNewEmail->e_status_id = Email::STATUS_NEW;
-            $modelNewEmail->e_type_id = Email::TYPE_OUTBOX;
-
-            if ($modelNewEmail->e_id && !Yii::$app->request->post('e_send')) {
-                $modelNewEmail->e_type_id = Email::TYPE_DRAFT;
-            }
-
-            if (!$modelNewEmail->e_project_id) {
-                $upp = UserProjectParams::find()->byEmail(strtolower($modelNewEmail->e_email_from))->one();
-                if ($upp && $upp->upp_project_id) {
-                    $modelNewEmail->e_project_id = $upp->upp_project_id;
+                if ($modelNewEmail->e_id && !Yii::$app->request->post('e_send')) {
+                    $modelNewEmail->e_type_id = Email::TYPE_DRAFT;
                 }
-            }
 
-            if (!$modelNewEmail->e_project_id) {
-                $modelNewEmail->addError('e_subject', 'Error! Project ID not detected');
-            }
-
-            if (!$modelNewEmail->hasErrors() && $modelNewEmail->save()) {
-                $error = '';
-
-                if (Yii::$app->request->post('e_send')) {
-                    $out = $modelNewEmail->sendMail();
-
-                    if (isset($out['error']) && $out['error']) {
-                        $error = $out['error'];
+                if (!$modelNewEmail->e_project_id) {
+                    $upp = UserProjectParams::find()->byEmail(strtolower($modelNewEmail->e_email_from))->one();
+                    if ($upp && $upp->upp_project_id) {
+                        $modelNewEmail->e_project_id = $upp->upp_project_id;
                     }
                 }
 
-                if ($error) {
-                    $modelNewEmail->addError('c_email_preview', 'Communication Server response: ' . $error);
-                    Yii::error($error, 'EmailController:inbox:sendMail');
-                } else {
-                    return $this->redirect(['email/inbox', 'id' => $modelNewEmail->e_id]);
+                if (!$modelNewEmail->e_project_id) {
+                    $modelNewEmail->addError('e_subject', 'Error! Project ID not detected');
+                }
+
+                if (!$modelNewEmail->hasErrors() && $modelNewEmail->save()) {
+                    $error = '';
+
+                    if (Yii::$app->request->post('e_send')) {
+                        $out = $modelNewEmail->sendMail();
+
+                        if (isset($out['error']) && $out['error']) {
+                            $error = $out['error'];
+                        }
+                    }
+
+                    if ($error) {
+                        $modelNewEmail->addError('c_email_preview', 'Communication Server response: ' . $error);
+                        Yii::error($error, 'EmailController:inbox:sendMail');
+                    } else {
+                        return $this->redirect(['email/inbox', 'id' => $modelNewEmail->e_id]);
+                    }
                 }
             }
         } else {
@@ -161,7 +146,7 @@ class EmailController extends FController
                 $modelNewEmail->e_email_from = Yii::$app->request->get('email_email');
             }
 
-            if (Yii::$app->request->get('action') === 'new') {
+            if ($action == 'create') {
                 $upp = UserProjectParams::find()->byEmail(strtolower($modelNewEmail->e_email_from))->one();
                 if ($upp && $upp->upp_project_id) {
                     $modelNewEmail->e_project_id = $upp->upp_project_id;
@@ -198,12 +183,9 @@ class EmailController extends FController
                     $content_data['agent'] = [
                         'name'  => Yii::$app->user->identity->full_name,
                         'username'  => Yii::$app->user->identity->username,
-//                        'phone' => $upp && $upp->upp_tw_phone_number ? $upp->upp_tw_phone_number : '',
                         'phone' => $upp && $upp->getPhone() ? $upp->getPhone() : '',
-//                        'email' => $upp && $upp->upp_email ? $upp->upp_email : '',
                         'email' => $upp && $upp->getEmail() ? $upp->getEmail() : '',
                     ];
-
 
                     $mailPreview = $communication->mailPreview($modelNewEmail->e_project_id, $tpl, $modelNewEmail->e_email_from, '', $content_data, $language);
 
@@ -219,25 +201,24 @@ class EmailController extends FController
 
                     $modelNewEmail->e_email_subject = '✈️ ' . ($project ? $project->name : '') . ' - ' . Yii::$app->user->identity->username; //$mailPreview['data']['email_subject'];
                 }
-            }
-        }
+            } elseif ($action == 'update') {
+                $modelNewEmail = $this->findModel($selectedId);
+                $modelNewEmail->body_html = $modelNewEmail->emailBodyHtml;
+            } elseif ($action == 'reply') {
+                $mail = $this->findModel($selectedId);
 
-        if ($e_id = Yii::$app->request->get('edit_id')) {
-            $modelNewEmail = Email::findOne($e_id);
-            $modelNewEmail->body_html = $modelNewEmail->emailBodyHtml;
-        }
-
-        if ($e_id = Yii::$app->request->get('reply_id')) {
-            $mail = Email::findOne($e_id);
-
-            if ($mail) {
-                $modelNewEmail = new Email();
-                $modelNewEmail->e_project_id = $mail->e_project_id;
-                $modelNewEmail->e_email_from = $mail->e_type_id == Email::TYPE_INBOX ? $mail->e_email_to : $mail->e_email_from;
-                $modelNewEmail->e_email_to = $mail->e_type_id == Email::TYPE_INBOX ? $mail->e_email_from : $mail->e_email_to;
-                $modelNewEmail->e_email_subject = Email::reSubject($mail->e_email_subject);
-                $modelNewEmail->body_html = '<!DOCTYPE html><html><head><title>Redactor</title><meta charset="UTF-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" /></head><body><p>Hi ' . Html::encode($modelNewEmail->e_email_to) . '!</p><blockquote>' . nl2br(StringHelper::stripHtmlTags($mail->getEmailBodyHtml())) . '</blockquote><p>The best regards, <br>' . Html::encode(Yii::$app->user->identity->username) . '</p></body></html>';
-                $modelNewEmail->e_type_id = Email::TYPE_DRAFT;
+                if ($mail) {
+                    $modelNewEmail = new Email();
+                    $modelNewEmail->e_project_id = $mail->e_project_id;
+                    $modelNewEmail->e_email_from = $mail->e_type_id == Email::TYPE_INBOX ? $mail->e_email_to : $mail->e_email_from;
+                    $modelNewEmail->e_email_to = $mail->e_type_id == Email::TYPE_INBOX ? $mail->e_email_from : $mail->e_email_to;
+                    $modelNewEmail->e_email_subject = Email::reSubject($mail->e_email_subject);
+                    $modelNewEmail->body_html = '<!DOCTYPE html><html><head><title>Redactor</title><meta charset="UTF-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" /></head><body><p>Hi ' . Html::encode($modelNewEmail->e_email_to) . '!</p><blockquote>' . nl2br(StringHelper::stripHtmlTags($mail->getEmailBodyHtml())) . '</blockquote><p>The best regards, <br>' . Html::encode(Yii::$app->user->identity->username) . '</p></body></html>';
+                    $modelNewEmail->e_type_id = Email::TYPE_DRAFT;
+                }
+            } elseif ($selectedId) {
+                $modelEmailView = $this->findModel($selectedId);
+                $this->emailRepository->read($modelEmailView);
             }
         }
 
