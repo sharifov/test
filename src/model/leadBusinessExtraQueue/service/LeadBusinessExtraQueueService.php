@@ -52,16 +52,19 @@ class LeadBusinessExtraQueueService
 
     public static function addToLead(Lead $lead, string $description): void
     {
-        $logData = [
-            'leadId' => $lead->id,
-            'description' => $description,
-        ];
         try {
             if (isset($lead->offset_gmt)) {
-                $clientTime = gmdate("H:i", strtotime($lead->offset_gmt));
+                $offset =   $lead->offset_gmt;
+                $offset = $offset[0] === '+' ? substr_replace($offset, '-', 0, 1) : substr_replace($offset, '+', 0, 1);
+                $clientTime = gmdate("H:i", strtotime($offset));
             } else {
                 $clientTime = gmdate("H:i");
             }
+            $logData = [
+                'leadId' => $lead->id,
+                'description' => $description,
+                'clientTime' => $clientTime,
+            ];
             if (LeadBusinessExtraQueueLogQuery::isLeadWasInBusinessExtraQueue($lead->id)) {
                 $lbeqr = LeadBusinessExtraQueueRuleQuery::getRepeatedRule();
             } else {
