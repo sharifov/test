@@ -40,6 +40,7 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_INFO_BLOCK_ENABLE = 'infoBlockEnable';
     public const FF_KEY_SCHEDULE_CHANGE_CLIENT_REMAINDER_NOTIFICATION = 'scheduleChangeClientRemainderNotification';
     public const FF_KEY_VALIDATE_CLOSING_REASON_DUPLICATED = 'validateClosingReasonDuplicated';
+    public const FF_KEY_BOOKED_QUEUE_CONDITION_AGENT_IS_OWNER = 'bookedQueueConditionAgentIsAgent';
 
 
     public const FF_KEY_LIST = [
@@ -72,6 +73,7 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_INFO_BLOCK_ENABLE,
         self::FF_KEY_SCHEDULE_CHANGE_CLIENT_REMAINDER_NOTIFICATION,
         self::FF_KEY_VALIDATE_CLOSING_REASON_DUPLICATED,
+        self::FF_KEY_BOOKED_QUEUE_CONDITION_AGENT_IS_OWNER,
     ];
 
 
