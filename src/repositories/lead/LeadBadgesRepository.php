@@ -79,11 +79,7 @@ class LeadBadgesRepository
         return $this->getBusinessInboxQuery($user)->count();
     }
 
-    /**
-     * @param Employee $user
-     * @return ActiveQuery
-     */
-    public function getBusinessInboxQuery(Employee $user): ActiveQuery
+    public function getBusinessInboxQuery(?Employee $user = null): ActiveQuery
     {
         $query = Lead::find()
             ->orWhere([
