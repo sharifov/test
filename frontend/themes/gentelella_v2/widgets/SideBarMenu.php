@@ -14,6 +14,7 @@ use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\services\UserShiftScheduleService;
+use modules\smartLeadDistribution\src\services\SmartLeadDistributionService;
 use src\auth\Auth;
 use modules\user\userFeedback\abac\dto\UserFeedbackAbacDto;
 use modules\user\userFeedback\abac\UserFeedbackAbacObject;
@@ -540,6 +541,16 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Lead User Ratings', 'url' => ['/lead-user-rating-crud/index']],
                         ['label' => 'Lead Status Reason', 'url' => ['/lead-status-reason-crud/index']],
                         ['label' => 'Lead Status Reason Log', 'url' => ['/lead-status-reason-log-crud/index']],
+                        ['label' => 'Lead Status Reason Log', 'url' => ['/lead-status-reason-log-crud/index']],
+                        [
+                            'label' => 'Smart Lead Distribution',
+                            'url' => 'javascript:',
+                            'icon' => 'list',
+                            'items' => [
+                                ['label' => 'Lead Rating Parameters', 'url' => ['/smart-lead-distribution/lead-rating-parameter-crud/index']],
+                            ],
+                            'visible' => SmartLeadDistributionService::ffIsEnable()
+                        ]
                     ]
                 ],
                 [
@@ -1256,6 +1267,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => Yii::t('menu', 'Composer Info'), 'url' => ['/tools/composer-info']],
                         ['label' => 'Check phone', 'url' => ['/tools/check-phone'], 'icon' => 'volume-control-phone'],
                         ['label' => 'Import phones', 'url' => ['/tools/import-phone'], 'icon' => 'caret-square-o-up'],
+                        ['label' => 'Lead rating', 'url' => ['/tools/lead-rating'], 'visible' => SmartLeadDistributionService::ffIsEnable()],
                     ]
                 ],
 
