@@ -258,7 +258,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
         return $email;
     }
 
-    public function update(Email $email, EmailForm $form)
+    public function update($email, EmailForm $form)
     {
         $transaction = \Yii::$app->db->beginTransaction();
 
