@@ -43,7 +43,8 @@ return [
         'task-list' => \modules\taskList\abac\TaskListAbacObject::class,
         'two-factor' => \src\useCase\login\twoFactorAuth\abac\TwoFactorAuthAbacObject::class,
         'lead-sale' => modules\lead\src\abac\sale\LeadSaleAbacObject::class,
-        'business-extra-queue' => \modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject::class
+        'business-extra-queue' => \modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject::class,
+        'smart-lead-distribution' => \modules\smartLeadDistribution\abac\SmartLeadDistributionAbacObject::class,
     ],
     'scanDirs' => [
         '/modules/',
