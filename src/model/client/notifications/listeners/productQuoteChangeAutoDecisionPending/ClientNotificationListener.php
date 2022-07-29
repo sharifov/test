@@ -98,7 +98,7 @@ class ClientNotificationListener
                 'message' => $e->getMessage(),
                 'event' => [
                     'name' => $event->getClass(),
-                    'productQuoteChangeId' => $event->productQuoteChangeId,
+                    'productQuoteChangeId' => $event->getProductQuoteChangeId(),
                 ],
                 'exception' => AppHelper::throwableLog($e, true),
             ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:OverdueException');
@@ -107,7 +107,7 @@ class ClientNotificationListener
                 'message' => $e->getMessage(),
                 'event' => [
                     'name' => $event->getClass(),
-                    'productQuoteChangeId' => $event->productQuoteChangeId,
+                    'productQuoteChangeId' => $event->getProductQuoteChangeId(),
                 ],
                 'exception' => AppHelper::throwableLog($e, true),
             ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:handle');
