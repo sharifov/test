@@ -2,6 +2,7 @@
 
 use common\models\Quote;
 use kartik\select2\Select2;
+use modules\featureFlag\FFlag;
 use src\access\ListsAccess;
 use src\model\flightQuoteLabelList\service\FlightQuoteLabelListService;
 use src\model\leadDataKey\entity\LeadDataKey;
@@ -280,10 +281,6 @@ use frontend\extensions\DatePicker;
                             ?>
                         </div>
 
-                        <div class="col-md-1">
-                            <?= $form->field($model, 'is_conversion')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '-']) ?>
-                        </div>
-
                         <div class="row" style="padding-left: 10px;">
                             <div class="col-md-6">
                                 <?= $form->field($model, 'lead_data_key')->dropDownList(LeadDataKey::getListCache(), ['prompt' => '-']) ?>
@@ -305,6 +302,53 @@ use frontend\extensions\DatePicker;
                                     ?>
                             </div>
                         </div>
+                    </div>
+                </div>
+                <div class=" profile-bottom text-center">
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-12 col-sm-12  profile_details">
+            <div class="well profile_view" style="width: 100%">
+                <div class="col-sm-12">
+                    <h4 class="brief"><i>Conversion</i></h4>
+
+                    <div class="row">
+                        <div class="col-md-2">
+                            <?= $form->field($model, 'is_conversion')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '-']) ?>
+                        </div>
+
+                        <?php
+                        /** @fflag FFlag::FF_KEY_HIDE_LANGUAGE_FIELD_COMMUNICATION_BLOCK, Filter Conversion Date and User In LeadSearch Enable */
+                        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_FILTER_CONVERSION_DATE_AND_USER_IN_LEAD_SEARCH)) : ?>
+                            <div class="col-md-2">
+                                <?= $form->field($model, 'conversionRangeTime', [
+                                    'options' => ['class' => 'form-group']
+                                ])->widget(\src\widgets\DateRangePicker::class, [
+                                    'presetDropdown' => false,
+                                    'hideInput' => true,
+                                    'convertFormat' => true,
+                                    'pluginOptions' => [
+                                        'timePicker' => false,
+                                        'locale' => [
+                                            'format' => 'd-M-Y',
+                                            'separator' => ' - '
+                                        ]
+                                    ]
+                                ])->label('Conversion Date From / To');
+                                ?>
+                            </div>
+                            <div class="col-md-2">
+                                <?php echo $form->field($model, 'luc_user_id')->widget(Select2::class, [
+                                    'data' => $lists->getEmployees(true),
+                                    'size' => Select2::SMALL,
+                                    'options' => ['placeholder' => 'Select user', 'multiple' => false],
+                                    'pluginOptions' => ['allowClear' => true],
+                                ])->label('Conversion - Employee'); ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <div class=" profile-bottom text-center">

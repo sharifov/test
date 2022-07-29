@@ -27,6 +27,7 @@ use yii\base\Model;
  * @property $up_commission_percent
  * @property $up_leaderboard_enabled
  * @property $up_inbox_show_limit_leads
+ * @property $up_business_inbox_show_limit_leads
  * @property $up_default_take_limit_leads
  * @property $up_min_percent_for_take_leads
  * @property $up_frequency_minutes
@@ -58,6 +59,7 @@ class MultipleUpdateForm extends Model
     public $up_commission_percent;
     public $up_leaderboard_enabled;
     public $up_inbox_show_limit_leads;
+    public $up_business_inbox_show_limit_leads;
     public $up_default_take_limit_leads;
     public $up_min_percent_for_take_leads;
     public $up_frequency_minutes;
@@ -194,6 +196,10 @@ class MultipleUpdateForm extends Model
             ['up_inbox_show_limit_leads', 'integer'],
             ['up_inbox_show_limit_leads', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
 
+            ['up_business_inbox_show_limit_leads', 'default', 'value' => null],
+            ['up_business_inbox_show_limit_leads', 'integer'],
+            ['up_business_inbox_show_limit_leads', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
+
             ['up_default_take_limit_leads', 'default', 'value' => null],
             ['up_default_take_limit_leads', 'integer'],
             ['up_default_take_limit_leads', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
@@ -239,6 +245,7 @@ class MultipleUpdateForm extends Model
             'up_commission_percent' => 'Commission percent',
             'up_leaderboard_enabled' => 'Leader Board Enabled',
             'up_inbox_show_limit_leads' => 'Inbox show limit leads',
+            'up_business_inbox_show_limit_leads' => 'Business Inbox show limit leads',
             'up_default_take_limit_leads' => 'Default take limit leads',
             'up_min_percent_for_take_leads' => 'Min percent for take leads',
             'up_frequency_minutes' => 'Take Frequency Minutes',

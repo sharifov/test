@@ -7,8 +7,12 @@ use common\components\CommunicationService;
 use common\components\jobs\LeadPoorProcessingRemoverJob;
 use common\components\jobs\SmsOutEndedJob;
 use common\components\jobs\SmsPriceJob;
+use common\components\jobs\UserTaskCompletionJob;
 use common\models\query\SmsQuery;
 use DateTime;
+use modules\lead\src\services\LeadTaskListService;
+use modules\taskList\src\entities\TargetObject;
+use modules\taskList\src\entities\TaskObject;
 use modules\twilio\components\TwilioCommunicationService;
 use src\behaviors\metric\MetricSmsCounterBehavior;
 use src\entities\cases\Cases;
@@ -507,6 +511,17 @@ class Sms extends \yii\db\ActiveRecord
             if ($this->s_id) {
                 $smsOutEndedJob = new SmsOutEndedJob($this->s_id);
                 Yii::$app->queue_job->priority(10)->push($smsOutEndedJob);
+
+                if (($lead = $this->sLead) && (new LeadTaskListService($lead))->isProcessAllowed()) {
+                    $job = new UserTaskCompletionJob(
+                        TargetObject::TARGET_OBJ_LEAD,
+                        $lead->id,
+                        TaskObject::OBJ_SMS,
+                        $this->s_id,
+                        $lead->employee_id
+                    );
+                    Yii::$app->queue_job->push($job);
+                }
             }
         } catch (\Throwable $exception) {
             $error = VarDumper::dumpAsString($exception->getMessage());

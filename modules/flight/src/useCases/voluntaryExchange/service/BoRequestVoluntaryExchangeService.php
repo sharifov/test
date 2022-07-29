@@ -49,7 +49,8 @@ class BoRequestVoluntaryExchangeService
             'START: Request getSaleFrom BackOffice, BookingID: ' . $bookingId,
             ['fr_booking_id' => $bookingId]
         );
-        $saleSearch = $this->casesSaleService->getSaleFromBo($bookingId);
+        $projectKey = $case->project->api_key ?? null;
+        $saleSearch = $this->casesSaleService->getSaleFromBo($bookingId, null, null, $projectKey);
 
         if (empty($saleSearch['saleId'])) {
             throw new BoResponseException('Sale not found by Booking ID(' . $bookingId . ') from "cs/search"');

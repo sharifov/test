@@ -2,12 +2,13 @@
 
 namespace modules\featureFlag;
 
+use kivork\FeatureFlag\Models\FeatureFlagObjectModelInterface;
 use kivork\FeatureFlag\Models\flags\dateTime\DateTimeFeatureFlag;
 use modules\featureFlag\models\debug\DebugFeatureFlag;
 use modules\featureFlag\models\user\UserFeatureFlag;
 use yii\base\InvalidConfigException;
 
-class FFlag
+class FFlag implements FeatureFlagObjectModelInterface
 {
     public const FF_KEY_LPP_ENABLE = 'lppEnable';
     public const FF_KEY_DEBUG = 'debug';
@@ -21,6 +22,7 @@ class FFlag
     public const FF_KEY_LEAD_TASK_ASSIGN = 'leadTaskAssign';
     public const FF_KEY_SALE_VIEW_IN_LEAD_ENABLE = 'saleViewInLeadEnable';
     public const FF_KEY_BEQ_ENABLE = 'beqEnable';
+    public const FF_KEY_BEQ_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT = 'beqToClosedQueueTransferringDaysCount';
     public const FF_KEY_COMPARE_QUOTE_AND_LEAD_FLIGHT_REQUEST = 'compareQuoteAndLeadFlightRequest';
     public const FF_KEY_HEAT_MAP_AGENT_REPORT_ENABLE = 'heatMapAgentReportEnable';
     public const FF_KEY_EXCLUDE_TAKE_CREATE_FROM_LEAD_USER_CONVERSION_BY_SOURCE_ENABLED = 'excludeTakeCreateFromLeadUserConversionBySourceEnabled';
@@ -29,28 +31,41 @@ class FFlag
     public const FF_KEY_RETURN_FLIGHT_SEGMENT_AUTOCOMPLETE_ENABLE = 'returnFlightSegmentAutocompleteEnable';
     public const FF_KET_SHIFT_SUMMARY_REPORT_ENABLE = 'shiftSummaryReportEnable';
     public const FF_KEY_BOOKED_QUEUE_CONDITION_BY_DEPARTMENT = 'bookedQueueConditionByDepartment';
+    public const FF_KEY_FILTER_USERNAME_ROLES_IN_TRANSFER_TAB = 'filterUsernameAndRolesInTransferTabEnable';
+    public const FF_KEY_TELEGRAM_MESSAGE_DELAY_ENABLE = 'telegramMessageDelayEnable';
+    public const FF_KEY_SHIFT_SCHEDULE_REQUEST_SAVE_SEND_NOTIFICATION_BY_JOB_ENABLE = 'shiftScheduleRequestSaveSendNotificationByJobEnable';
+    public const FF_KEY_FILTER_CONVERSION_DATE_AND_USER_IN_LEAD_SEARCH = 'filterConversionDateAndUserInLeadSearch';
+    public const FF_KEY_VALIDATE_ABAC_POLICY_IN_MIGRATION = 'validateAbacPolicyInMigration';
+    public const FF_KEY_BUSINESS_QUEUE_LIMIT = 'businessQueueLimit';
 
 
     public const FF_KEY_LIST = [
-        self::FF_KEY_LPP_ENABLE => self::FF_KEY_LPP_ENABLE,
-        self::FF_KEY_DEBUG => self::FF_KEY_DEBUG,
-        self::FF_KEY_LPP_LEAD_CREATED => self::FF_KEY_LPP_LEAD_CREATED,
-        self::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT => self::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT,
-        self::FF_KEY_ADD_AUTO_QUOTES => self::FF_KEY_ADD_AUTO_QUOTES,
-        self::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES => self::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES,
-        self::FF_KEY_BADGE_COUNT_ENABLE => self::FF_KEY_BADGE_COUNT_ENABLE,
-        self::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE => self::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE,
-        self::FF_KEY_PHONE_WIDGET_ACCEPTED_PANEL_ENABLED => self::FF_KEY_PHONE_WIDGET_ACCEPTED_PANEL_ENABLED,
-        self::FF_KEY_LEAD_TASK_ASSIGN => self::FF_KEY_LEAD_TASK_ASSIGN,
-        self::FF_KEY_SALE_VIEW_IN_LEAD_ENABLE => self::FF_KEY_SALE_VIEW_IN_LEAD_ENABLE,
-        self::FF_KEY_COMPARE_QUOTE_AND_LEAD_FLIGHT_REQUEST => self::FF_KEY_COMPARE_QUOTE_AND_LEAD_FLIGHT_REQUEST,
-        self::FF_KEY_EXCLUDE_TAKE_CREATE_FROM_LEAD_USER_CONVERSION_BY_SOURCE_ENABLED => self::FF_KEY_EXCLUDE_TAKE_CREATE_FROM_LEAD_USER_CONVERSION_BY_SOURCE_ENABLED,
-        self::FF_KEY_UPDATE_PRODUCT_QUOTE_STATUS_BY_BO_SALE_STATUS => self::FF_KEY_UPDATE_PRODUCT_QUOTE_STATUS_BY_BO_SALE_STATUS,
-        self::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS => self::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS,
-        self::FF_KEY_HEAT_MAP_AGENT_REPORT_ENABLE => self::FF_KEY_HEAT_MAP_AGENT_REPORT_ENABLE,
-        self::FF_KEY_RETURN_FLIGHT_SEGMENT_AUTOCOMPLETE_ENABLE => self::FF_KEY_RETURN_FLIGHT_SEGMENT_AUTOCOMPLETE_ENABLE,
-        self::FF_KET_SHIFT_SUMMARY_REPORT_ENABLE => self::FF_KET_SHIFT_SUMMARY_REPORT_ENABLE,
-        self::FF_KEY_BOOKED_QUEUE_CONDITION_BY_DEPARTMENT => self::FF_KEY_BOOKED_QUEUE_CONDITION_BY_DEPARTMENT,
+        self::FF_KEY_LPP_ENABLE,
+        self::FF_KEY_DEBUG,
+        self::FF_KEY_LPP_LEAD_CREATED,
+        self::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT,
+        self::FF_KEY_ADD_AUTO_QUOTES,
+        self::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES,
+        self::FF_KEY_BADGE_COUNT_ENABLE,
+        self::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE,
+        self::FF_KEY_PHONE_WIDGET_ACCEPTED_PANEL_ENABLED,
+        self::FF_KEY_LEAD_TASK_ASSIGN,
+        self::FF_KEY_SALE_VIEW_IN_LEAD_ENABLE,
+        self::FF_KEY_COMPARE_QUOTE_AND_LEAD_FLIGHT_REQUEST,
+        self::FF_KEY_EXCLUDE_TAKE_CREATE_FROM_LEAD_USER_CONVERSION_BY_SOURCE_ENABLED,
+        self::FF_KEY_UPDATE_PRODUCT_QUOTE_STATUS_BY_BO_SALE_STATUS,
+        self::FF_KEY_SEND_ADDITIONAL_INFO_TO_BO_ENDPOINTS,
+        self::FF_KEY_HEAT_MAP_AGENT_REPORT_ENABLE,
+        self::FF_KEY_RETURN_FLIGHT_SEGMENT_AUTOCOMPLETE_ENABLE,
+        self::FF_KET_SHIFT_SUMMARY_REPORT_ENABLE,
+        self::FF_KEY_BOOKED_QUEUE_CONDITION_BY_DEPARTMENT,
+        self::FF_KEY_FILTER_USERNAME_ROLES_IN_TRANSFER_TAB,
+        self::FF_KEY_TELEGRAM_MESSAGE_DELAY_ENABLE,
+        self::FF_KEY_SHIFT_SCHEDULE_REQUEST_SAVE_SEND_NOTIFICATION_BY_JOB_ENABLE,
+        self::FF_KEY_FILTER_CONVERSION_DATE_AND_USER_IN_LEAD_SEARCH,
+        self::FF_KEY_VALIDATE_ABAC_POLICY_IN_MIGRATION,
+        self::FF_KEY_BUSINESS_QUEUE_LIMIT,
+        self::FF_KEY_BEQ_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT,
     ];
 
 

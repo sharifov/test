@@ -261,7 +261,6 @@ class LeadController extends FController
     {
         $gid = mb_substr($gid, 0, 32);
         $lead = Lead::find()->where(['gid' => $gid])->limit(1)->one();
-
         if (!$lead) {
             throw new NotFoundHttpException('Not found lead ID: ' . $gid);
         }
@@ -1677,11 +1676,26 @@ class LeadController extends FController
     public function actionBusinessInbox(): string
     {
         $searchModel = new LeadSearch();
+        $params = Yii::$app->request->queryParams;
 
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
 
-        $dataProvider = $searchModel->searchBusinessInbox(Yii::$app->request->queryParams, $user);
+        /** @fflag FFlag::FF_KEY_BUSINESS_QUEUE_LIMIT, Business Queue Limit Enable */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BUSINESS_QUEUE_LIMIT)) {
+            if ($user->isAgent()) {
+                $userParams = $user->userParams;
+                if ($userParams) {
+                    if ($userParams->up_business_inbox_show_limit_leads > 0) {
+                        $params['LeadSearch']['limit'] = $userParams->up_business_inbox_show_limit_leads;
+                    }
+                } else {
+                    throw new NotFoundHttpException('Not set user params for agent! Please ask supervisor to set shift time and other.');
+                }
+            }
+        }
+
+        $dataProvider = $searchModel->searchBusinessInbox($params, $user);
 
         return $this->render('business-inbox', [
             'searchModel' => $searchModel,

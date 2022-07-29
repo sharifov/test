@@ -80,6 +80,9 @@ use yii\widgets\ActiveForm;
             <div class="row">
                     <div class="col-md-12">
                     <?= $form->field($model, 'phone')->textInput(['maxlength' => true]) ?>
+
+                        <!--TODO: need this input to search sale exact in project-->
+<!--                    --><?php //$form->field($model, 'project_key')->hiddenInput(['value' => $caseModel->project->api_key ?? null])->label(false); ?>
                     </div>
 <!--                        <div class="col-md-4">-->
 <!--                            --><?php ////= $form->field($model, 'card')->textInput(['maxlength' => true]) ?>

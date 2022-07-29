@@ -3,8 +3,10 @@
 use common\components\grid\project\ProjectColumn;
 use common\models\Lead;
 use dosamigos\datepicker\DatePicker;
+use modules\featureFlag\FFlag;
 use src\access\ListsAccess;
 use src\helpers\lead\LeadHelper;
+use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
 use src\model\leadUserRating\abac\dto\LeadUserRatingAbacDto;
 use src\model\leadUserRating\abac\LeadUserRatingAbacObject;
 use src\model\leadUserRating\entity\LeadUserRating;
@@ -228,10 +230,19 @@ $this->registerJs($js);
         ],
         [
             'value' => static function (Lead $lead): ?string {
-                if ($lead->minLpp && $lead->minLpp->lpp_expiration_dt) {
-                    return LeadHelper::displayLeadPoorProcessingTimer($lead->minLpp->lpp_expiration_dt, $lead->minLpp->lppLppd->lppd_name);
+                $html = '';
+
+                if (LeadBusinessExtraQueueService::ffIsEnabled() === true) {
+                    $html = LeadHelper::displayBusinessExtraQueueTimerIfExists($lead);
                 }
-                return '-';
+
+                if ($lead->minLpp && $lead->minLpp->lpp_expiration_dt) {
+                    $html .= LeadHelper::displayLeadPoorProcessingTimer($lead->minLpp->lpp_expiration_dt, $lead->minLpp->lppLppd->lppd_name);
+                } else {
+                    $html .= (empty($html)) ? '-' : '';
+                }
+
+                return $html;
             },
             'format' => 'raw',
             'attribute' => 'extra_timer',

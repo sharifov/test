@@ -5612,6 +5612,7 @@ input[disabled] + .radio-tab__text {
 }
 .navbar-nav .dropdown-menu {
     margin: 0;
+    z-index: 100041;
 }
 .navbar-nav .show .dropdown-menu.msg_list {
     width: 400px !important;
@@ -6163,3 +6164,15 @@ td.selected-cell {
     overflow-y: scroll;
 }
 /************* END BUG REPORT FORM ****************/
+
+.top-custom {
+    top: 75px !important;
+}
+
+li.select2-selection__choice:first-of-type {
+  max-width: 85%;
+}
+
+li.select2-selection__choice {
+  white-space: pre-line;
+}

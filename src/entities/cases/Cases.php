@@ -591,7 +591,8 @@ class Cases extends ActiveRecord implements Objectable
     }
 
     /**
-     * @param int $orderId
+     * @param string $orderId
+     * @param int|null $userId
      */
     public function updateBookingId(string $orderId, ?int $userId): void
     {

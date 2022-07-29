@@ -436,12 +436,12 @@ class UserShiftScheduleQuery
             ->all();
     }
 
-    public static function getNextTimeLineByUser(
+    private static function getQueryForNextShiftsByUserId(
         int $userId,
         \DateTimeImmutable $startDt,
-        array $status = [UserShiftSchedule::STATUS_APPROVED],
+        array $status = [UserShiftSchedule::STATUS_APPROVED, UserShiftSchedule::STATUS_DONE],
         array $shiftScheduleType = [ShiftScheduleType::SUBTYPE_WORK_TIME]
-    ): ?UserShiftSchedule {
+    ): Scopes {
         return UserShiftSchedule::find()
             ->alias('user_shift_schedule')
             ->select('user_shift_schedule.*')
@@ -452,12 +452,25 @@ class UserShiftScheduleQuery
             ->where(['uss_user_id' => $userId])
             ->andWhere(['uss_year_start' => $startDt->format('Y')])
             ->andWhere(['uss_month_start' => $startDt->format('m')])
-            ->andWhere(['>=', 'uss_start_utc_dt', $startDt->format('Y-m-d H:i:s')])
+            ->andWhere(['>', 'uss_end_utc_dt', $startDt->format('Y-m-d H:i:s')])
             ->andWhere(['IN', 'uss_status_id', $status])
             ->andWhere(['IN', 'shift_schedule_type.sst_subtype_id', $shiftScheduleType])
-            ->orderBy(['uss_end_utc_dt' => SORT_ASC])
-            ->limit(1)
-            ->one()
-        ;
+            ->orderBy(['uss_end_utc_dt' => SORT_ASC]);
+    }
+
+    /**
+     * @param int $userId
+     * @param \DateTimeImmutable $startDt
+     * @param array $status
+     * @param array $shiftScheduleType
+     * @return UserShiftSchedule[]|null
+     */
+    public static function getAllFromStartDateByUserId(
+        int $userId,
+        \DateTimeImmutable $startDt,
+        array $status = [UserShiftSchedule::STATUS_APPROVED, UserShiftSchedule::STATUS_DONE],
+        array $shiftScheduleType = [ShiftScheduleType::SUBTYPE_WORK_TIME]
+    ): ?array {
+        return self::getQueryForNextShiftsByUserId($userId, $startDt, $status, $shiftScheduleType)->all();
     }
 }

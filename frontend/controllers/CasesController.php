@@ -510,6 +510,7 @@ class CasesController extends FController
 
         if ($comForm->load(Yii::$app->request->post())) {
             $comForm->c_case_id = $model->cs_id;
+            $comForm->cs_order_uid = $model->cs_order_uid;
 
             if ($comForm->validate()) {
                 $project = $model->project;
@@ -997,7 +998,7 @@ class CasesController extends FController
 
             $cs = $this->casesSaleService->prepareAdditionalData($cs, $saleData);
 
-            if (empty($model->cs_order_uid) && !$bookingId) {
+            if (empty($model->cs_order_uid) && $bookingId) {
                 $model->updateBookingId($bookingId, Auth::id());
                 $out['caseBookingId'] = $model->cs_order_uid;
             } elseif ($model->cs_order_uid !== $bookingId) {

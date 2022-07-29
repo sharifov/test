@@ -6,9 +6,14 @@ use common\components\jobs\CallOutEndedJob;
 use common\components\jobs\CallPriceJob;
 use common\components\jobs\CheckClientCallJoinToConferenceJob;
 use common\components\jobs\LeadPoorProcessingRemoverJob;
+use common\components\jobs\UserTaskCompletionJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
+use modules\featureFlag\FFlag;
+use modules\lead\src\services\LeadTaskListService;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\taskList\src\entities\TargetObject;
+use modules\taskList\src\entities\TaskObject;
 use src\behaviors\metric\MetricCallCounterBehavior;
 use src\helpers\app\AppHelper;
 use src\helpers\DuplicateExceptionChecker;
@@ -38,6 +43,8 @@ use src\model\callLog\services\CallLogTransferService;
 use src\model\client\notifications\ClientNotificationCanceler;
 use src\model\callLogFilterGuard\entity\CallLogFilterGuard;
 use src\model\conference\service\ConferenceDataService;
+use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
+use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogStatus;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataQuery;
@@ -1204,6 +1211,13 @@ class Call extends \yii\db\ActiveRecord
                             );
                         }
                     }
+                    /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+                    if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) && $lead && $lead->employee_id && $lead->isProcessing() && $lead->isBusinessType()) {
+                        LeadBusinessExtraQueueService::addLeadBusinessExtraQueueRemoverJob(
+                            $lead->id,
+                            LeadBusinessExtraQueueLogStatus::REASON_INCOMING_CALL
+                        );
+                    }
                 }
 
 
@@ -1507,6 +1521,17 @@ class Call extends \yii\db\ActiveRecord
                 if ($this->c_client_id && $this->isOut() && $this->getDataCreatorType()->isClient()) {
                     $callOutEndedJob = new CallOutEndedJob($this->c_client_id, $this->c_id);
                     Yii::$app->queue_job->priority(10)->push($callOutEndedJob);
+
+                    if (($lead = $this->cLead) && (new LeadTaskListService($lead))->isProcessAllowed()) {
+                        $job = new UserTaskCompletionJob(
+                            TargetObject::TARGET_OBJ_LEAD,
+                            $lead->id,
+                            TaskObject::OBJ_CALL,
+                            $this->c_id,
+                            $lead->employee_id
+                        );
+                        Yii::$app->queue_job->push($job);
+                    }
                 }
             }
 //            if (($insert || $isChangedTwStatus) && $this->isTwFinishStatus()) {

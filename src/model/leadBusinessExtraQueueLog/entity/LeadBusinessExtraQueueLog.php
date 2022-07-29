@@ -17,7 +17,7 @@ use yii\helpers\ArrayHelper;
  * @property int $lbeql_lead_id
  * @property int $lbeql_lbeqr_id
  * @property int $lbeql_status
- * @property int|null $lbeql_owner_id
+ * @property int|null $lbeql_lead_owner_id
  * @property string|null $lbeql_description
  * @property string|null $lbeql_created_dt
  * @property string|null $lbeql_updated_dt
@@ -37,14 +37,13 @@ class LeadBusinessExtraQueueLog extends \yii\db\ActiveRecord
 
             ['lbeql_lbeqr_id', 'required'],
             ['lbeql_lbeqr_id', 'integer'],
-            ['lbeql_lbeqr_id', 'exist', 'skipOnError' => true, 'targetClass' => LeadBusinessExtraQueueRule::class, 'targetAttribute' => ['lbeql_lbeqr_id' => 'lbeql_id']],
+            ['lbeql_lbeqr_id', 'exist', 'skipOnError' => true, 'targetClass' => LeadBusinessExtraQueueRule::class, 'targetAttribute' => ['lbeql_lbeqr_id' => 'lbeqr_id']],
 
-            ['lbeql_owner_id', 'integer'],
-            ['lbeql_owner_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['lbeql_owner_id' => 'id']],
+            ['lbeql_lead_owner_id', 'integer'],
+            ['lbeql_lead_owner_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['lbeql_lead_owner_id' => 'id']],
 
             ['lbeql_status', 'required'],
             ['lbeql_status', 'integer'],
-           // [['lbeql_status'], 'in', 'range' => array_keys(LeadPoorProcessingLogStatus::STATUS_LIST)],
 
             [['lbeql_created_dt', 'lbeql_updated_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s', 'skipOnEmpty' => true],
 
@@ -88,7 +87,7 @@ class LeadBusinessExtraQueueLog extends \yii\db\ActiveRecord
             'lbeql_lead_id' => 'Lead',
             'lbeql_lbeqr_id' => 'LeadBusinessExtraQueueRule',
             'lbeql_status' => 'Status',
-            'lbeql_owner_id' => 'Owner',
+            'lbeql_lead_owner_id' => 'Owner',
             'lbeql_created_dt' => 'Created',
             'lbeql_updated_dt' => 'Updated',
             'lbeql_updated_user_id' => 'Updated User',
@@ -106,11 +105,6 @@ class LeadBusinessExtraQueueLog extends \yii\db\ActiveRecord
         return 'lead_business_extra_queue_log';
     }
 
-//    public function getStatusName(): string
-//    {
-//        return LeadPoorProcessingLogStatus::STATUS_LIST[$this->lppl_status] ?? '---';
-//    }
-
     public static function create(
         int $leadId,
         int $dataId,
@@ -121,7 +115,7 @@ class LeadBusinessExtraQueueLog extends \yii\db\ActiveRecord
         $model = new self();
         $model->lbeql_lead_id = $leadId;
         $model->lbeql_lbeqr_id = $dataId;
-        $model->lbeql_owner_id = $ownerId;
+        $model->lbeql_lead_owner_id = $ownerId;
         $model->lbeql_status = $status;
         $model->lbeql_description = $description;
         return $model;

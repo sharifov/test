@@ -35,6 +35,8 @@ use src\events\lead\LeadTaskEvent;
 use src\events\lead\LeadTrashEvent;
 use src\listeners\lead\LeadBookedEventLogListener;
 use src\listeners\lead\LeadBookedNotificationsListener;
+use src\events\lead\LeadBusinessExtraQueueEvent;
+use src\listeners\lead\leadBusinessExtraQueue\LeadBusinessExtraQueueNotificationsListener;
 use src\listeners\lead\LeadCallExpertChangedListener;
 use src\listeners\lead\LeadCallExpertRequestEventListener;
 use src\listeners\lead\LeadCloseListener;
@@ -84,6 +86,7 @@ use src\listeners\lead\leadWebEngage\LeadBookedWebEngageListener;
 use src\listeners\lead\leadWebEngage\LeadSoldWebEngageListener;
 use src\listeners\lead\leadWebEngage\LeadTrashedWebEngageListener;
 use src\listeners\lead\leadBusinessExtraQueue\LeadBusinessExtraQueueRemoveOnStatusChangeListener;
+use src\listeners\lead\leadBusinessExtraQueue\LeadBusinessExtraQueueEventLogListener;
 
 return [
     LeadCreatedEvent::class => [LeadCreatedEventListener::class],
@@ -181,6 +184,11 @@ return [
         LeadExtraQueueEventLogListener::class,
         LeadExtraQueueNotificationsListener::class,
         LeadInfoReloadListener::class,
+    ],
+    LeadBusinessExtraQueueEvent::class => [
+        LeadBusinessExtraQueueNotificationsListener::class,
+        LeadInfoReloadListener::class,
+        LeadBusinessExtraQueueEventLogListener::class,
     ],
     LeadPoorProcessingEvent::class => [
         LeadPoorProcessingAdderListener::class,

@@ -28,7 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="lead-extra-queue">
 
         <?php Pjax::begin(['timeout' => 5000, 'clientOptions' => ['method' => 'GET'], 'scrollTo' => 0]); ?>
-        <?= $this->render('_search_extra_queue', ['model' => $searchModel]); ?>
+        <?= $this->render('_search_business_extra_queue', ['model' => $searchModel]); ?>
 
         <?php
         $gridColumns = [

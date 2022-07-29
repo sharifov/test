@@ -2,8 +2,12 @@
 
 namespace modules\taskList\src\entities;
 
+use common\models\Call;
+use common\models\Email;
+use common\models\Sms;
 use modules\taskList\src\objects\call\CallTaskObject;
 use modules\taskList\src\objects\email\EmailTaskObject;
+use modules\taskList\src\objects\sms\SmsTaskObject;
 use yii\helpers\VarDumper;
 
 class TaskObject
@@ -14,14 +18,20 @@ class TaskObject
 
     public const OBJ_LIST = [
         self::OBJ_CALL => 'Call',
-        //self::OBJ_SMS => 'SMS',
+        self::OBJ_SMS => 'SMS',
         self::OBJ_EMAIL => 'Email',
     ];
 
     public const OBJ_CLASS_LIST = [
         self::OBJ_CALL => CallTaskObject::class,
-        //self::OBJ_SMS => CallTaskObject::class,
+        self::OBJ_SMS => SmsTaskObject::class,
         self::OBJ_EMAIL => EmailTaskObject::class,
+    ];
+
+    public const OBJ_TASK_LIST = [
+        self::OBJ_CALL => Call::class,
+        self::OBJ_SMS => Sms::class,
+        self::OBJ_EMAIL => Email::class,
     ];
 
     /**
@@ -54,9 +64,8 @@ class TaskObject
      */
     public static function getAttributeListByObject(string $objectName): array
     {
-
         $object = self::getByName($objectName);
-        $list = $object::getObjectAttributeList();
+        $list = $object ? $object::getObjectAttributeList() : [];
         /*
         $defaultList = $this->getDefaultAttributeList();
         $objList = [];

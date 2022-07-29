@@ -61,24 +61,10 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
         }
 
         $this->form = $form;
-        if (!$this->originProductQuote = VoluntaryExchangeCreateService::getOriginProductQuote($this->form->booking_id)) {
-            throw new \RuntimeException('OriginProductQuote not found by booking_id(' . $this->form->booking_id . ')');
-        }
-
-        $this->productQuoteChange = VoluntaryExchangeCreateService::getLastProductQuoteChangeByPqId(
-            (int) $this->originProductQuote->pq_id,
-            [ProductQuoteChangeStatus::IN_PROGRESS]
-        );
-        if (!$this->productQuoteChange) {
-            throw new \RuntimeException('ProductQuoteChange not found by pqID(' . $this->originProductQuote->pq_id . ') bookingId(' . $this->form->booking_id . ')');
-        }
-
-        $this->voluntaryQuote = VoluntaryExchangeCreateService::getProductQuoteByProductQuoteChange(
-            (int) $this->productQuoteChange->pqc_id,
-            [ProductQuoteStatus::IN_PROGRESS]
-        );
-        if (!$this->voluntaryQuote) {
-            throw new \RuntimeException('voluntaryQuote not found by pqcID(' . $this->productQuoteChange->pqc_id . ') bookingId(' . $this->form->booking_id . ')');
+        if (empty($this->form->quote_gid)) {
+            $this->getProductQuoteChByBookId($this->form->booking_id);
+        } else {
+            $this->getProductQuoteChByGID($this->form->quote_gid);
         }
 
         if (!$this->project = Project::findOne(['project_key' => $this->form->project_key])) {
@@ -151,6 +137,47 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
             'type' => HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
             'responseData' => $responseData,
         ], 'info\Webhook::OTA::VoluntaryExchange:Response');
+    }
+
+    private function getProductQuoteChByGID($quoteGid): void
+    {
+        if (!$this->voluntaryQuote = VoluntaryExchangeCreateService::getVoluntaryProductQuote($quoteGid)) {
+            throw new \RuntimeException('voluntaryQuote not found by quoteGID(' . $quoteGid . ')');
+        }
+
+        $this->productQuoteChange = VoluntaryExchangeCreateService::getProductQuoteChangeByProductQuote(
+            (int) $this->voluntaryQuote->pq_id
+        );
+        if (!$this->productQuoteChange) {
+            throw new \RuntimeException('ProductQuoteChange not found by pqID(' . $this->voluntaryQuote->pq_id . ') quoteGID(' . $quoteGid . ')');
+        }
+
+        if (!$this->originProductQuote = VoluntaryExchangeCreateService::getOriginProductQuoteById($this->productQuoteChange->pqc_pq_id)) {
+            throw new \RuntimeException('OriginProductQuote not found by QuoteID(' . $this->productQuoteChange->pqc_pq_id . ')');
+        }
+    }
+
+    private function getProductQuoteChByBookId($bookingId): void
+    {
+        if (!$this->originProductQuote = VoluntaryExchangeCreateService::getOriginProductQuote($bookingId)) {
+            throw new \RuntimeException('OriginProductQuote not found by booking_id(' . $bookingId . ')');
+        }
+
+        $this->productQuoteChange = VoluntaryExchangeCreateService::getLastProductQuoteChangeByPqId(
+            (int) $this->originProductQuote->pq_id,
+            [ProductQuoteChangeStatus::IN_PROGRESS]
+        );
+        if (!$this->productQuoteChange) {
+            throw new \RuntimeException('ProductQuoteChange not found by pqID(' . $this->originProductQuote->pq_id . ') bookingId(' . $this->form->booking_id . ')');
+        }
+
+        $this->voluntaryQuote = VoluntaryExchangeCreateService::getProductQuoteByProductQuoteChange(
+            (int) $this->productQuoteChange->pqc_id,
+            [ProductQuoteStatus::IN_PROGRESS]
+        );
+        if (!$this->voluntaryQuote) {
+            throw new \RuntimeException('voluntaryQuote not found by pqcID(' . $this->productQuoteChange->pqc_id . ') bookingId(' . $this->form->booking_id . ')');
+        }
     }
 
     private function handleExchanged(): void
