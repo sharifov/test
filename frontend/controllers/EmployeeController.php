@@ -588,6 +588,15 @@ class EmployeeController extends FController
                             }
                         }
 
+                        if ($multipleForm->up_skill !== null) {
+                            if ($fieldAccess->canEdit('up_skill')) {
+                                $uProfile->up_skill = $multipleForm->up_skill;
+                                $uProfileNeedSave = true;
+                            } else {
+                                $multipleErrors[$user_id][] = 'Update property Skill: access denied';
+                            }
+                        }
+
                         if ($multipleForm->user_departments) {
                             if ($fieldAccess->canEdit('user_departments')) {
                                 $oldDepartmentsIds = array_keys($user->getUserDepartmentList());

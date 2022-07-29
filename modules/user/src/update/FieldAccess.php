@@ -51,7 +51,8 @@ class FieldAccess
             || $this->canEdit('up_auto_redial')
             || $this->canEdit('up_kpi_enable')
             || $this->canEdit('up_leaderboard_enabled')
-            || $this->canEdit('up_business_inbox_show_limit_leads');
+            || $this->canEdit('up_business_inbox_show_limit_leads')
+            || $this->canEdit('up_skill');
     }
 
     public function canShowProfileWithParameters(): bool

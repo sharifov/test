@@ -4,6 +4,7 @@ namespace modules\user\src\update;
 
 use common\components\validators\IsArrayValidator;
 use common\models\Employee;
+use common\models\UserProfile;
 use src\model\clientChatChannel\entity\ClientChatChannel;
 use yii\base\Model;
 
@@ -67,6 +68,7 @@ class MultipleUpdateForm extends Model
 
     public $up_auto_redial;
     public $up_kpi_enable;
+    public $up_skill;
 
     public AvailableList $availableList;
 
@@ -223,6 +225,8 @@ class MultipleUpdateForm extends Model
             ['up_kpi_enable', 'default', 'value' => null],
             ['up_kpi_enable', 'boolean'],
             ['up_kpi_enable', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
+
+            ['up_skill', 'in', 'range' => array_keys(UserProfile::SKILL_TYPE_LIST), 'skipOnError' => true, 'skipOnEmpty' => true],
         ];
     }
 
@@ -252,6 +256,7 @@ class MultipleUpdateForm extends Model
             'up_call_expert_limit'  => 'Call Expert Limit',
             'up_auto_redial' => 'Auto redial',
             'up_kpi_enable' => 'KPI enable',
+            'up_skill' => 'Skill',
         ];
     }
 
