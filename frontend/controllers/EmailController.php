@@ -160,16 +160,19 @@ class EmailController extends FController
             $emailForm = new EmailForm($user->id);
             if ($emailForm->load(Yii::$app->request->post()) && $emailForm->validate()) {
                 try {
+                    $flashMessage = '';
                     if (in_array($action, ['create', 'reply'])) {
                         $email = $this->emailService->create($emailForm);
-                        $this->emailService->sendMail($email);
-                        Yii::$app->session->setFlash('success', 'New Email was created.');
+                        $flashMessage = 'New Email was created.<br/>';
                     } elseif (in_array($action, ['update'])) {
                         $email = $this->findModel($selectedId);
                         $email = $this->emailService->update($email, $emailForm);
-                        $this->emailService->sendMail($email);
-                        Yii::$app->session->setFlash('success', 'Email was updated.');
+                        $flashMessage = 'Email was updated.<br/>';
                     }
+
+                    $this->emailService->sendMail($email);
+                    Yii::$app->session->setFlash('success', $flashMessage. '<strong>Email Message</strong> was successfully sent to <strong>' . $email->getEmailTo() . '</strong>');
+
                     return $this->redirect(['inbox', 'id' => $email->e_id]);
                 } catch (CreateModelException $e) {
                     $errorsMessage = VarDumper::dumpAsString($e->getErrors());
