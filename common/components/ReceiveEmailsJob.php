@@ -299,7 +299,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                                     continue;
                                 }
 
-                                $createByApiDto = new CreateByApiDto($path, $fileSystem);
+                                $createByApiDto = CreateByApiDto::createWithFile($path, $fileSystem);
                                 $fileStorage = FileStorage::createByEmail($createByApiDto);
                                 $fileStorageRepository->save($fileStorage);
 
