@@ -171,6 +171,11 @@ class EmailController extends FController
                         Yii::$app->session->setFlash('success', 'Email was updated.');
                     }
                     return $this->redirect(['inbox', 'id' => $email->e_id]);
+                } catch (CreateModelException $e) {
+                    $errorsMessage = VarDumper::dumpAsString($e->getErrors());
+                    Yii::$app->session->setFlash('error', $e->getMessage() . '<br/>'. $errorsMessage);
+                } catch (EmailNotSentException $e) {
+                    Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>' . $e->getEmailTo() . '</strong>\r\n ' . $e->getMessage());
                 } catch (\Throwable $e) {
                     Yii::$app->session->setFlash('error', $e->getMessage() . '<br/>' . $e->getTraceAsString());
                 }
@@ -213,6 +218,7 @@ class EmailController extends FController
                     $modelNewEmail->e_email_subject = EmailBody::getReSubject($email->emailSubject);
                     $modelNewEmail->body_html = EmailBody::getReBodyHtml($email->getEmailFrom(false), $user->username, $email->getEmailBodyHtml());
                     $modelNewEmail->e_type_id = EmailType::DRAFT;
+                    $modelNewEmail->e_reply_id = $email->e_id;
 
                     $formData = EmailsNormalizeService::getDataArrayFromOld($modelNewEmail);
                 }
