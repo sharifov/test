@@ -93,6 +93,8 @@ class EmailService extends SendMail implements EmailServiceInterface
             $email->e_type_id = $form->type;
             $email->e_status_id = $form->status;
             $email->e_is_new = $form->log->isNew;
+            $email->e_is_deleted = $form->isDeleted ?? 0;
+            $email->e_reply_id = $form->replyId ?? null;
             $email->e_email_to = $form->contacts['to']->email;
             $email->e_email_to_name = $form->contacts['to']->name;
             $email->e_email_from = $form->contacts['from']->email;
@@ -133,6 +135,12 @@ class EmailService extends SendMail implements EmailServiceInterface
             $email->e_type_id = $form->type;
             $email->e_status_id = $form->status;
             $email->e_is_new = $form->log->isNew;
+            if ($form->isDeleted !== null) {
+                $email->e_is_deleted = $form->isDeleted;
+            }
+            if ($form->replyId !== null) {
+                $email->e_reply_id = $form->replyId;
+            }
             $email->e_email_to = $form->contacts['to']->email;
             $email->e_email_to_name = $form->contacts['to']->name;
             $email->e_email_from = $form->contacts['from']->email;
@@ -148,11 +156,19 @@ class EmailService extends SendMail implements EmailServiceInterface
             $email->e_message_id = $form->log->messageId;
             $email->e_language_id = $form->params->language;
             $email->e_template_type_id = $form->params->templateType;
-            $email->e_client_id = $form->clients ?? null;
-            $email->e_lead_id = $form->leads ?? null;
-            $email->e_case_id = $form->cases ?? null;
+            if ($form->clients !== null) {
+                $email->e_client_id = $form->clients;
+            }
+            if ($form->leads !== null) {
+                $email->e_lead_id = $form->leads;
+            }
+            if ($form->cases !== null) {
+                $email->e_case_id = $form->cases;
+            }
             $email->e_updated_user_id = $form->getUserId() ?? null;
-            $email->e_email_data = !empty($form->body->data) ? json_encode($form->body->data) : null;
+            if (!empty($form->body->data)) {
+                $email->e_email_data = json_encode($form->body->data);
+            }
 
             if (!$email->save()) {
                 throw new \RuntimeException('Email save failed: ' . $email->getErrorSummary(true)[0]);
