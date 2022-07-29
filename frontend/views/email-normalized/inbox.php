@@ -78,7 +78,6 @@ $is_admin = $user->isAdmin();
 
                             <?= ListView::widget([
                                 'dataProvider' => $dataProvider,
-
                                 'options' => [
                                     'tag' => 'div',
                                     'class' => 'list-wrapper',
@@ -88,7 +87,6 @@ $is_admin = $user->isAdmin();
                                 'itemView' => function ($model, $key, $index, $widget) use ($selectedId) {
                                     return $this->render('_list_item', ['model' => $model, 'selectedId' => $selectedId]);
                                 },
-
                                 'itemOptions' => [
                                     'tag' => false,
                                 ],

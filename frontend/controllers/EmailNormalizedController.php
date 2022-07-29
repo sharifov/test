@@ -3,8 +3,8 @@
 namespace frontend\controllers;
 
 use common\components\CommunicationService;
-use common\models\EmailTemplateType;
 use common\models\Employee;
+use common\models\Lead;
 use common\models\Project;
 use common\models\search\EmailSearch;
 use common\models\UserProjectParams;
@@ -17,6 +17,7 @@ use src\entities\email\EmailSearch as EmailNormalizedSearch;
 use src\entities\email\form\EmailForm;
 use src\entities\email\helpers\EmailContactType;
 use src\entities\email\helpers\EmailFilterType;
+use src\repositories\email\EmailRepository;
 use src\services\email\EmailsNormalizeService;
 use Yii;
 use yii\bootstrap\Html;
@@ -25,22 +26,23 @@ use yii\helpers\ArrayHelper;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
-use src\repositories\email\EmailRepository;
+use src\services\email\EmailMainService;
 
 /**
  * EmailNormalizedController implements the CRUD actions for Email model.
  *
+ * @property EmailMainService $emailService
  * @property EmailRepository $emailRepository
  */
 class EmailNormalizedController extends FController
 {
-    private $emailSender;
-
+    private $emailService;
     private $emailRepository;
 
-    public function __construct($id, $module, EmailRepository $emailRepository, $config = [])
+    public function __construct($id, $module, EmailMainService $emailService, EmailRepository $emailRepository, $config = [])
     {
         parent::__construct($id, $module, $config);
+        $this->emailService = $emailService;
         $this->emailRepository = $emailRepository;
     }
 
@@ -82,15 +84,6 @@ class EmailNormalizedController extends FController
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
-    }
-
-    private function getParamsArray(array $names): array
-    {
-        $params = [];
-        foreach ($names as $name) {
-            $params[$name] = Yii::$app->request->get($name);
-        }
-        return $params;
     }
 
     /**
@@ -156,29 +149,27 @@ class EmailNormalizedController extends FController
         $modelEmailView = null;
         $emailForm = null;
 
-        $getParams = $this->getParamsArray([
-            'action',
-            'email_email',
-            'email_type_id',
-            'email_project_id',
-            'id'
-        ]);
-
-        $action = $getParams['action'];
+        $action = Yii::$app->request->get('action');
+        $selectedId = Yii::$app->request->get('id');
+        $emailFrom = Yii::$app->request->get('email_email');
 
         if (Yii::$app->request->isPost) {
             $emailForm = new EmailForm($user->id);
             if ($emailForm->load(Yii::$app->request->post()) && $emailForm->validate()) {
                 try {
+                    $flashMessage = '';
                     if (in_array($action, ['create', 'reply'])) {
-                        $email = EmailsNormalizeService::newInstance()->create($emailForm);
-                        EmailsNormalizeService::newInstance()->sendMail($email);
-                        Yii::$app->session->setFlash('success', 'New Email was created.');
+                        $email = $this->emailService->create($emailForm);
+                        $flashMessage = 'New Email was created.<br/>';
                     } elseif (in_array($action, ['update'])) {
-                        $email = $this->findModel($getParams['id']);
-                        EmailsNormalizeService::newInstance()->update($email, $emailForm);
-                        Yii::$app->session->setFlash('success', 'Email was updated.');
+                        $email = $this->findModel($selectedId);
+                        $email = $this->emailService->update($email, $emailForm);
+                        $flashMessage = 'Email was updated.<br/>';
                     }
+
+                    $this->emailService->sendMail($email);
+                    Yii::$app->session->setFlash('success', $flashMessage. '<strong>Email Message</strong> was successfully sent to <strong>' . $email->getEmailTo() . '</strong>');
+
                     return $this->redirect(['inbox', 'id' => $email->e_id]);
                 } catch (\Throwable $e) {
                     Yii::$app->session->setFlash('error', $e->getMessage() . '<br/>' . $e->getTraceAsString());
@@ -191,17 +182,17 @@ class EmailNormalizedController extends FController
                 $formData = [];
                 $formData['contacts']['from'] = [
                     'type' => EmailContactType::FROM,
-                    'email' => $getParams['email_email']
+                    'email' => $emailFrom
                 ];
 
-                $upp = UserProjectParams::find()->byEmail(strtolower($getParams['email_email']))->one();
+                $upp = UserProjectParams::find()->byEmail(strtolower($emailFrom))->one();
                 $project = $upp->uppProject ?? null;
                 $formData['projectId'] = $upp->upp_project_id ?? null;
 
                 $formData['body']['subject'] = EmailBody::getDraftSubject($project->name ?? '', $user->username);
 
                 try {
-                    $mailPreview = $this->getEmailPreview($user, $getParams['email_email'], $project, $upp);
+                    $mailPreview = $this->getEmailPreview($user, $emailFrom, $project, $upp);
                     $formData['body']['bodyHtml'] = $mailPreview['data']['email_body_html'] ?? null;
                 } catch (\Exception $e) {
                     Yii::error($e->getMessage(), 'EmailNormalizedController:inbox:getEmailPreview');
@@ -209,23 +200,23 @@ class EmailNormalizedController extends FController
 
                 $emailForm = EmailForm::fromArray($formData);
             } elseif ($action == 'update') {
-                $email = $this->findModel($getParams['id']);
+                $email = $this->findModel($selectedId);
                 $emailForm = EmailForm::fromModel($email, $user->id);
             } elseif ($action == 'reply') {
-                $email = $this->findModel($getParams['id']);
+                $email = $this->findModel($selectedId);
                 $emailForm = EmailForm::replyFromModel($email, $user);
-            } elseif ($getParams['id']) {
-                $modelEmailView = $this->findModel($getParams['id']);
+            } elseif ($selectedId) {
+                $modelEmailView = $this->findModel($selectedId);
                 $this->emailRepository->read($modelEmailView);
             }
         }
 
         //search provider
         $params = Yii::$app->request->queryParams;
-        $params['email_type_id'] = $getParams['email_type_id'] ?? EmailFilterType::ALL;
-        $params['EmailSearch']['e_project_id'] = empty($getParams['email_project_id']) ?? null;
+        $params['email_type_id'] = Yii::$app->request->get('email_type_id', EmailFilterType::ALL);
+        $params['EmailSearch']['e_project_id'] = Yii::$app->request->get('email_project_id');
         $params['EmailSearch']['user_id'] = $user->id;
-        $params['EmailSearch']['email'] = empty($getParams['email_email']) ? null : $getParams['email_email'];
+        $params['EmailSearch']['email'] = empty($emailFrom) ? null : $emailFrom;
 
         $dataProvider = $searchModel->searchEmails($params);
         //==
@@ -261,7 +252,7 @@ class EmailNormalizedController extends FController
             'projectList'       => $projectList,
             'dataProvider'      => $dataProvider,
             'modelEmailView'    => $modelEmailView,
-            'selectedId'        => $getParams['id'],
+            'selectedId'        => $selectedId,
             'action'            => $action,
             'stats'             => $stats,
         ]);
