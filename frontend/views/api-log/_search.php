@@ -57,7 +57,7 @@ use yii\widgets\ActiveForm;
                     <?= $form->field($model, 'al_action', [
                         'options' => ['class' => 'form-group']
                     ])->widget(Select2::class, [
-                        'data' =>  \common\models\ApiLog::getActionFilter(),
+                        'data' =>  \common\models\ApiLog::getActionFilter(Yii::$app->request->isPjax, $model->createTimeRange),
                         'size' => Select2::SMALL,
                         'options' => ['placeholder' => 'Select Action', 'multiple' => false],
                         'pluginOptions' => ['allowClear' => true],

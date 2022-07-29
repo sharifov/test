@@ -63,11 +63,11 @@ class ApiLogController extends FController
      * Lists of ApiLog Action.
      * @return array
      */
-    public function actionAjaxActionList(): array
+    public function actionAjaxActionList($timeRange = null): array
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         $result = ['error' => '', 'data' => []];
-        $result['data'] = ApiLog::getActionFilterByCnt();
+        $result['data'] = ApiLog::getActionFilterByCnt($timeRange ?: null);
         return $result;
     }
 
