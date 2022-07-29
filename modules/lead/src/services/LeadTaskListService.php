@@ -35,12 +35,14 @@ use yii\helpers\ArrayHelper;
 class LeadTaskListService
 {
     private Lead $lead;
-    private bool $isNewOwner;
+    public ?int $oldOwnerId;
+    public ?int $newOwnerId;
 
-    public function __construct(Lead $lead, bool $isNewOwner = true)
+    public function __construct(Lead $lead, ?int $oldOwnerId = null, int $newOwnerId = null)
     {
         $this->lead = $lead;
-        $this->isNewOwner = $isNewOwner;
+        $this->oldOwnerId = $oldOwnerId;
+        $this->newOwnerId = $newOwnerId;
     }
 
     public function assign(): void
@@ -204,8 +206,8 @@ class LeadTaskListService
         return $this->lead;
     }
 
-    public function isNewOwner(): bool
+    public function isChangedOwner(): bool
     {
-        return $this->isNewOwner;
+        return $this->newOwnerId !== $this->oldOwnerId;
     }
 }

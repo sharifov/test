@@ -14,12 +14,14 @@ use yii\queue\JobInterface;
 class LeadTaskListJob extends BaseJob implements JobInterface
 {
     private int $leadId;
-    private bool $isNewOwner;
+    public ?int $oldOwnerId;
+    public ?int $newOwnerId;
 
-    public function __construct(int $leadId, bool $isNewOwner = true, ?float $timeStart = null, array $config = [])
+    public function __construct(int $leadId, ?int $newOwnerId, ?int $oldOwnerId, ?float $timeStart = null, array $config = [])
     {
         $this->leadId = $leadId;
-        $this->isNewOwner = $isNewOwner;
+        $this->newOwnerId = $newOwnerId;
+        $this->oldOwnerId = $oldOwnerId;
 
         parent::__construct($timeStart, $config);
     }
@@ -36,7 +38,7 @@ class LeadTaskListJob extends BaseJob implements JobInterface
                 throw new \RuntimeException('Lead not found');
             }
 
-            $leadTaskListService = new LeadTaskListService($lead, $this->isNewOwner);
+            $leadTaskListService = new LeadTaskListService($lead, $this->newOwnerId, $this->oldOwnerId);
             if (!$leadTaskListService->isProcessAllowed()) {
                 return;
             }
