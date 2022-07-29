@@ -12,6 +12,7 @@ use common\models\ProjectEmployeeAccess;
 use common\models\search\CallSearch;
 use common\models\search\UserOnlineSearch;
 use common\models\UserDepartment;
+use modules\featureFlag\FFlag;
 use src\auth\Auth;
 use src\helpers\app\AppParamsHelper;
 use src\model\user\entity\userStatus\UserStatus;
@@ -34,7 +35,14 @@ class MonitorController extends FController
             throw new InvalidConfigException('The "wsConnectionUrl" property must be set in config params.');
         }
 
-        return $this->render('call-incoming', [
+        /** @fflag FFlag::FF_KEY_REFACTORING_INCOMING_CALL_ENABLE, Switch incoming monitor page to new version */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_REFACTORING_INCOMING_CALL_ENABLE)) {
+            $view = 'vue-call-incoming';
+        } else {
+            $view = 'call-incoming';
+        }
+
+        return $this->render($view, [
             'cfChannelName' => Call::CHANNEL_REALTIME_MAP,
             'cfUserOnlineChannel' => Call::CHANNEL_USER_ONLINE,
             'cfConnectionUrl' => $centrifugoWsConnectionUrl,
@@ -141,8 +149,20 @@ class MonitorController extends FController
         $response['accessCallSourceType'] = [Call::SOURCE_GENERAL_LINE, Call::SOURCE_REDIRECT_CALL];
         $response['accessCallType'] = [Call::CALL_TYPE_IN];
 
+        $userDepartmentList = UserDepartment::find()
+            ->select(['ud_user_id', 'ud_dep_id'])
+            ->where(['IN', 'ud_dep_id', $response['userDepartments']])
+            ->asArray()
+            ->all();
+
         $response['userData'] = [];
         foreach ($response['onlineUserList'] as $user) {
+            $userDep = [];
+            foreach ($userDepartmentList as $department) {
+                if ((int)$department['ud_user_id'] === (int)$user['uo_user_id']) {
+                    $userDep[] = (int)$department['ud_dep_id'];
+                }
+            }
             $item = [
                 'user_id' => $user['uo_user_id'],
                 'userName' => $response['userList'][$user['uo_user_id']] ?? '',
@@ -150,6 +170,7 @@ class MonitorController extends FController
                 'status' => array_values(array_filter($response['userStatusList'], function ($userStatus) use ($user) {
                     return $userStatus['us_user_id'] === $user['uo_user_id'];
                 }))[0] ?? [],
+                'userDep' => $userDep,
             ];
             $response['userData'][] = $item;
         }
@@ -206,6 +227,10 @@ class MonitorController extends FController
             }
         }
         $response['callList'] = $callList;
+        foreach ($response['callList'] as $index => $call) {
+            $response['callList'][$index]['userDep'] = $call['c_dep_id'];
+        }
+
         return $response;
     }
 }
