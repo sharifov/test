@@ -186,7 +186,7 @@ class LeadTaskListService
             if ($isResultBool) {
                 return false;
             }
-            throw new \RuntimeException('ABAC(' . LeadTaskListAbacObject::ASSIGN_TASK . ') is failed');
+            throw new \RuntimeException('ABAC(' . LeadTaskListAbacObject::PROCESSING_TASK . ') is failed');
         }
 
         if (!$this->hasActiveLeadObjectSegment()) {
