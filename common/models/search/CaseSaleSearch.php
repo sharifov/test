@@ -230,7 +230,7 @@ class CaseSaleSearch extends CaseSale
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['css_created_dt' => SORT_DESC]],
+            //'sort' => ['defaultOrder' => ['css_created_dt' => SORT_DESC]],
             'pagination' => [
                 'pageSize' => 10,
             ],

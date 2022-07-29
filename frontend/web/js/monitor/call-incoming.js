@@ -615,6 +615,9 @@ var callMapApp = Vue.createApp({
                 }
             }
         },
+        getUserName: function (userId) {
+            return userId > 0 ? this.userList[userId] : userId;
+        },
 
         userDataList() {
             let data;
