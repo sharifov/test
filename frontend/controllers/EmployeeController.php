@@ -588,12 +588,15 @@ class EmployeeController extends FController
                             }
                         }
 
-                        if ($multipleForm->up_skill !== null) {
-                            if ($fieldAccess->canEdit('up_skill')) {
-                                $uProfile->up_skill = $multipleForm->up_skill;
-                                $uProfileNeedSave = true;
-                            } else {
-                                $multipleErrors[$user_id][] = 'Update property Skill: access denied';
+                        /** @fflag FFlag::FF_KEY_DISPLAY_SKILL_FIELD_ON_MULTIPLE_UPDATE_USERS, Display skill field on multiple update users */
+                        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_DISPLAY_SKILL_FIELD_ON_MULTIPLE_UPDATE_USERS)) {
+                            if ($multipleForm->up_skill !== null) {
+                                if ($fieldAccess->canEdit('up_skill')) {
+                                    $uProfile->up_skill = $multipleForm->up_skill;
+                                    $uProfileNeedSave = true;
+                                } else {
+                                    $multipleErrors[$user_id][] = 'Update property Skill: access denied';
+                                }
                             }
                         }
 
