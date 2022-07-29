@@ -19,6 +19,7 @@ class SmsTaskObject extends BaseTaskObject implements TaskObjectInterface
 
     public const FIELD_PROJECT_KEY = self::OBJ_SMS . '.' . 'project_key';
     public const FIELD_TEMPLATE_TYPE_KEY = self::OBJ_SMS . '.' . 'template_type_key';
+    public const FIELD_SMS_HAS_CLIENT = self::OBJ_SMS . '.' . 'sms_has_client';
 
     public const OBJECT_OPTION_LIST = [
     ];
@@ -49,10 +50,23 @@ class SmsTaskObject extends BaseTaskObject implements TaskObjectInterface
         'icon' => 'fa fa-list',
     ];
 
+    protected const ATTR_SMS_HAS_CLIENT = [
+        'optgroup' => self::OPTGROUP_SMS,
+        'id' => self::NS . self::FIELD_SMS_HAS_CLIENT,
+        'field' => self::FIELD_SMS_HAS_CLIENT,
+        'label' => 'SMS Has Client',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2],
+    ];
+
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
         0 => self::ATTR_PROJECT_KEY,
-        1 => self::ATTR_TEMPLATE_TYPE_KEY
+        1 => self::ATTR_TEMPLATE_TYPE_KEY,
+        2 => self::ATTR_SMS_HAS_CLIENT,
     ];
 
     /**

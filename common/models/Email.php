@@ -92,6 +92,7 @@ use yii\helpers\VarDumper;
  * @property string $emailBodyHtml
  * @property string|mixed $priorityName
  * @property Employee $eUpdatedUser
+ * @property Client $client
  */
 class Email extends \yii\db\ActiveRecord
 {

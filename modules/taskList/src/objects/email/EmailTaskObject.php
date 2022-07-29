@@ -19,9 +19,8 @@ class EmailTaskObject extends BaseTaskObject implements TaskObjectInterface
     public const OBJ_EMAIL = 'email';
 
     public const FIELD_PROJECT_KEY = self::OBJ_EMAIL . '.' . 'project_key';
-    public const FIELD_DEPARTMENT_ID = self::OBJ_EMAIL . '.' . 'department_id';
     public const FIELD_TEMPLATE_TYPE_KEY = self::OBJ_EMAIL . '.' . 'template_type_key';
-
+    public const FIELD_EMAIL_HAS_CLIENT = self::OBJ_EMAIL . '.' . 'email_has_client';
 
     public const OBJECT_OPTION_LIST = [
         'testParams' => ['label' => 'Test', 'type' => self::ATTR_TYPE_INTEGER, 'value' => 123],
@@ -53,22 +52,23 @@ class EmailTaskObject extends BaseTaskObject implements TaskObjectInterface
         'icon' => 'fa fa-list',
     ];
 
-    protected const ATTR_DEPARTMENT_ID = [
+    protected const ATTR_EMAIL_HAS_CLIENT = [
         'optgroup' => self::OPTGROUP_EMAIL,
-        'id' => self::NS . self::FIELD_DEPARTMENT_ID,
-        'field' => self::FIELD_DEPARTMENT_ID,
-        'label' => 'Call Department(wrong - TODO)',
-        'type' => self::ATTR_TYPE_INTEGER,
-        'input' => self::ATTR_INPUT_SELECT,
-        'operators' => [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN],
-        'icon' => 'fa fa-list',
+        'id' => self::NS . self::FIELD_EMAIL_HAS_CLIENT,
+        'field' => self::FIELD_EMAIL_HAS_CLIENT,
+        'label' => 'Email Has Client',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2],
     ];
 
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
         0 => self::ATTR_PROJECT_KEY,
-        1 => self::ATTR_DEPARTMENT_ID,
-        2 => self::ATTR_TEMPLATE_TYPE_KEY
+        1 => self::ATTR_TEMPLATE_TYPE_KEY,
+        2 => self::ATTR_EMAIL_HAS_CLIENT,
     ];
 
     /**
@@ -76,15 +76,8 @@ class EmailTaskObject extends BaseTaskObject implements TaskObjectInterface
      */
     public static function getObjectAttributeList(): array
     {
-        /*$templateKey = self::ATTR_TEMPLATE_KEY;
-        $templateKey['values'] = EmailTemplateType::getList(false, null);
-        */
-
         $project = self::ATTR_PROJECT_KEY;
         $project['values'] = Project::getKeyList();
-
-        $department = self::ATTR_DEPARTMENT_ID;
-        $department['values'] = Department::getList();
 
         $templateType = self::ATTR_TEMPLATE_TYPE_KEY;
         $templateType['values'] = EmailTemplateType::getKeyList(false, null);
@@ -92,8 +85,7 @@ class EmailTaskObject extends BaseTaskObject implements TaskObjectInterface
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
 
         $attributeList[0] = $project;
-        $attributeList[1] = $department;
-        $attributeList[2] = $templateType;
+        $attributeList[1] = $templateType;
         return $attributeList;
     }
 
