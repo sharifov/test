@@ -2,7 +2,10 @@
 
 namespace frontend\controllers;
 
+use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
+use modules\shiftSchedule\src\services\UserShiftScheduleService;
 use modules\taskList\abac\TaskListAbacObject;
 use modules\taskList\src\entities\userTask\UserTaskQuery;
 use modules\taskList\src\entities\userTask\UserTaskSearch;
@@ -61,6 +64,17 @@ class TaskListController extends FController
         $endDate = Yii::$app->request->get('endDate', date('Y-m-d', strtotime('+1 day')));
         $dataProvider = $searchModel->searchByUserId(Yii::$app->request->queryParams, $user->id, $startDate, $endDate);
 
+        $startDateTime = date('Y-m-d H:i', strtotime('-10 hours'));
+        $endDateTime = date('Y-m-d H:i', strtotime('+34 hours'));
+
+        $scheduleEventList = UserShiftScheduleQuery::getExistEventList(
+            $user->id,
+            $startDateTime,
+            $endDateTime,
+            null,
+            [ShiftScheduleType::SUBTYPE_WORK_TIME]
+        );
+
         return $this->render(
             'index',
             [
@@ -68,6 +82,9 @@ class TaskListController extends FController
                 'dataProvider' => $dataProvider,
                 'userTimeZone' => $userTimeZone,
                 'user' => $user,
+                'startDateTime' => $startDateTime,
+                'endDateTime' => $endDateTime,
+                'scheduleEventList' => $scheduleEventList,
             ]
         );
     }
