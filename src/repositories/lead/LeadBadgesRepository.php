@@ -12,9 +12,11 @@ use common\models\UserGroup;
 use common\models\UserGroupAssign;
 use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\smartLeadDistribution\src\SmartLeadDistribution;
 use src\access\EmployeeDepartmentAccess;
 use src\access\EmployeeGroupAccess;
 use src\access\EmployeeProjectAccess;
+use src\model\leadDataKey\services\LeadDataKeyDictionary;
 use Yii;
 use yii\db\ActiveQuery;
 use modules\lead\src\abac\LeadAbacObject;
@@ -688,7 +690,7 @@ class LeadBadgesRepository
             ->leftJoin(
                 'lead_data',
                 'leads.id = lead_data.ld_lead_id AND lead_data.ld_field_key = :key',
-                ['key' => 'lead_rating_category']
+                ['key' => LeadDataKeyDictionary::KEY_LEAD_RATING_CATEGORY]
             )
             ->groupBy([
                 'lead_data.ld_field_value'
@@ -699,7 +701,7 @@ class LeadBadgesRepository
 
         foreach ($leads as $lead) {
             if ($lead['category'] === null) {
-                $lead['category'] = 3;
+                $lead['category'] = SmartLeadDistribution::CATEGORY_THIRD;
             }
 
             $data[$lead['category']] = $lead['amount'] + ($data[$lead['category']]['amount'] ?? 0);

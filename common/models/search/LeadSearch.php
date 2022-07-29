@@ -28,6 +28,7 @@ use modules\featureFlag\FFlag;
 use modules\fileStorage\src\entity\fileLead\FileLead;
 use modules\smartLeadDistribution\abac\dto\SmartLeadDistributionAbacDto;
 use modules\smartLeadDistribution\abac\SmartLeadDistributionAbacObject;
+use modules\smartLeadDistribution\src\SmartLeadDistribution;
 use src\access\EmployeeGroupAccess;
 use src\access\EmployeeProjectAccess;
 use src\auth\Auth;
@@ -36,6 +37,7 @@ use src\model\callLog\entity\callLog\CallLogType;
 use src\model\callLog\entity\callLogLead\CallLogLead;
 use src\model\clientChatLead\entity\ClientChatLead;
 use src\model\leadData\entity\LeadData;
+use src\model\leadDataKey\services\LeadDataKeyDictionary;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
 use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\model\leadUserRating\entity\LeadUserRating;
@@ -3025,30 +3027,29 @@ class LeadSearch extends Lead
 
         /** @fflag FFlag::FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE, Smart Lead Distribution Enable */
         if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE) === true) {
-            $allowedCategory = [];
-            $allowedCategory[] = null;
+            $allowedCategory = [null];
             $dto = new SmartLeadDistributionAbacDto();
 
             /** @abac SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_FIRST_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, Access to first category business lead */
             if (Yii::$app->abac->can($dto, SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_FIRST_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS)) {
-                $allowedCategory[] = 1;
+                $allowedCategory[] = SmartLeadDistribution::CATEGORY_FIRST;
             }
 
             /** @abac SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_FIRST_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, Access to second category business lead */
             if (Yii::$app->abac->can($dto, SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_SECOND_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS)) {
-                $allowedCategory[] = 2;
+                $allowedCategory[] = SmartLeadDistribution::CATEGORY_SECOND;
             }
 
             /** @abac SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_FIRST_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, Access to third category business lead */
             if (Yii::$app->abac->can($dto, SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_THIRD_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS)) {
-                $allowedCategory[] = 3;
+                $allowedCategory[] = SmartLeadDistribution::CATEGORY_THIRD;
             }
 
             $query->leftJoin(
                 'lead_data',
                 'leads.id = lead_data.ld_lead_id AND lead_data.ld_field_key = :key',
                 [
-                    'key' => 'lead_rating_category',
+                    'key' => LeadDataKeyDictionary::KEY_LEAD_RATING_CATEGORY,
                 ]
             );
 
