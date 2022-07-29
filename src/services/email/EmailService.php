@@ -116,8 +116,8 @@ class EmailService extends SendMail implements EmailServiceInterface
             if (!$email->save()) {
                 throw new CreateModelException(get_class($email), $email->getErrors());
             } elseif ($email->e_message_id == null) {
-                $mail->e_message_id = $mail->generateMessageId();
-                $mail->update();
+                $email->e_message_id = $email->generateMessageId();
+                $email->update();
             }
         } catch (\Throwable $e) {
             throw $e;
@@ -286,8 +286,8 @@ class EmailService extends SendMail implements EmailServiceInterface
             if (!$email->save()) {
                 throw new CreateModelException(get_class($email), $email->getErrors());
             } elseif ($email->e_message_id == null) {
-                $mail->e_message_id = $mail->generateMessageId();
-                $mail->update();
+                $email->e_message_id = $email->generateMessageId();
+                $email->update();
             }
         } catch (\Throwable $e) {
             throw $e;
