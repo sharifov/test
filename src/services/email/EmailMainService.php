@@ -38,6 +38,7 @@ use modules\taskList\src\entities\TargetObject;
 use src\auth\Auth;
 use modules\taskList\src\entities\TaskObject;
 use src\entities\email\form\EmailForm;
+use src\repositories\email\EmailOldRepository;
 
 /**
  *
@@ -46,22 +47,34 @@ use src\entities\email\form\EmailForm;
  * @property EmailService $oldService
  * @property EmailsNormalizeService $normalizedService
  * @property EmailServiceHelper $helper
+ * @property EmailOldRepository $emailOldRepository
+ * @property EmailRepository $emailRepository
+ *
+ * @property Email $emailObj
+ * @property EmailNorm $emailNormObj
  *
  */
 class EmailMainService implements EmailServiceInterface
 {
+    public const FROM_OLD = 1; //CALLED FROM OLD EMAIL MODEL
+    public const FROM_NORM = 2; //CALLED FROM NORM EMAIL MODEL
+
+    private $helper;
     private $oldService;
     private $normalizedService;
-    private $helper;
     private $emailRepository;
+    private $emailOldRepository;
 
     private $emailObj;
     private $emailNormObj;
 
+    private $calledFrom;
+
     public function __construct()
     {
-        $this->emailRepository = Yii::createObject(EmailRepository::class);
         $this->helper = Yii::createObject(EmailServiceHelper::class);
+        $this->emailRepository = Yii::createObject(EmailRepository::class);
+        $this->emailOldRepository = Yii::createObject(EmailOldRepository::class);
         $this->oldService = Yii::createObject(EmailService::class);
         $this->normalizedService = Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_EMAIL_NORMALIZED_FORM_ENABLE) ?
             EmailsNormalizeService::newInstance() :
@@ -74,9 +87,16 @@ class EmailMainService implements EmailServiceInterface
         return new static();
     }
 
+    private function setEmailObjById(int $emailId)
+    {
+        $this->emailObj = $this->emailOldRepository->find($emailId);
+        return $this->emailObj;
+    }
+
     private function setEmailObj(Email $email)
     {
         $this->emailObj = $email;
+        return $this->emailObj;
     }
 
     private function getEmailObj()
@@ -84,9 +104,19 @@ class EmailMainService implements EmailServiceInterface
         return $this->emailObj;
     }
 
+    private function setEmailNormObjById(int $emailId)
+    {
+        try {
+            $this->emailNormObj = $this->emailRepository->find($emailId);
+        } catch (\Throwable $e) {}
+
+        return $this->emailNormObj;
+    }
+
     private function setEmailNormObj(EmailNorm $email)
     {
         $this->emailNormObj = $email;
+        return $this->emailNormObj;
     }
 
     private function getEmailNormObj()
@@ -94,10 +124,39 @@ class EmailMainService implements EmailServiceInterface
         return $this->emailNormObj;
     }
 
+    private function setCalledFrom(int $calledFrom)
+    {
+        $this->calledFrom = $calledFrom;
+        return $this->calledFrom;
+    }
+
+    private function getCalledFrom(EmailInterface $email = null)
+    {
+        if ($this->calledFrom === null && $email !== null) {
+            $this->calledFrom = ($email instanceof Email) ? self::FROM_OLD : self::FROM_NORM;
+        }
+        return $this->calledFrom;
+    }
+
     public function sendMail(EmailInterface $email, array $data = [])
     {
         try {
-            if ($this->normalizedService !== null) {
+            $calledFrom = $this->getCalledFrom($email);
+            if ($calledFrom == self::FROM_NORM) {
+                if ($this->getEmailNormObj() == null) {
+                    $this->setEmailNormObj($email);
+                } elseif ($this->getEmailObj() == null) {
+                    $this->setEmailObjById($email->e_id);
+                }
+            } else {
+                if ($this->getEmailNormObj() == null) {
+                    $this->setEmailNormObjById($email->e_id);
+                } elseif ($this->getEmailObj() == null) {
+                    $this->setEmailObj($email);
+                }
+            }
+
+            if ($this->normalizedService !== null && $this->getEmailNormObj() !== null) {
                 $requestData = $this->normalizedService->sendMail($this->getEmailNormObj(), $data);
                 $this->normalizedService->updataAfterSendMail($this->getEmailNormObj(), $requestData);
             } else {
@@ -193,17 +252,25 @@ class EmailMainService implements EmailServiceInterface
 
     public function update($email, EmailForm $form)
     {
-        $email = $this->oldService->update($email, $form);
-        $email->refresh();
-        $this->setEmailObj($email);
+        $calledFrom = $this->getCalledFrom($email);
+        $emailOld = ($calledFrom == self::FROM_NORM) ? $this->setEmailObjById($email->e_id) : $email;
+
+        $emailOld = $this->oldService->update($emailOld, $form);
+        $emailOld->refresh();
+        $this->setEmailObj($emailOld);
 
         if ($this->normalizedService !== null) {
-            $email = $this->normalizedService->update($email, $form);
-            $email->refresh();
-            $this->setEmailNormObj($email);
+            if ($calledFrom == self::FROM_OLD) {
+                $emailNorm = $this->setEmailNormObjById($email->e_id);
+            }
+            if ($emailNorm) {
+                $emailNorm = $this->normalizedService->update($emailNorm, $form);
+                $emailNorm->refresh();
+                $this->setEmailNormObj($emailNorm);
+            }
         }
 
-        return $email;
+        return ($calledFrom == self::FROM_OLD) ? $emailOld : $emailNorm ?? $email;
     }
 
     public function create(EmailForm $form)
