@@ -24,28 +24,41 @@ use modules\fileStorage\src\FileSystem;
  */
 class CreateByApiDto
 {
-    public ?string $name;
+    public ?string $name = null;
     public ?string $title = null;
-    public ?string $path;
-    public ?int $size;
-    public ?string $uid;
-    public ?string $mimeType;
-    public ?string $md5Hash;
+    public ?string $path = null;
+    public ?int $size = null;
+    public ?string $uid = null;
+    public ?string $mimeType = null;
+    public ?string $md5Hash = null;
     public bool $private = false;
     public ?string $createdDt;
     public int $status = FileStorageStatus::UPLOADED;
 
     private FileSystem $fileSystem;
 
-    /**
-     * @param string $path
-     * @param FileSystem $fileSystem
-     */
-    public function __construct(string $path, FileSystem $fileSystem)
+    private function __construct()
     {
-        $this->fileSystem = $fileSystem;
-        $this->path = $path;
-        $this->setAll();
+    }
+
+    public static function createWithFile(string $path, FileSystem $fileSystem): self
+    {
+        $dto = new self();
+        $dto->fileSystem = $fileSystem;
+        $dto->path = $path;
+        $dto->setAll();
+        return $dto;
+    }
+
+    public static function createWithoutFile(string $path): self
+    {
+        $dto = new self();
+        $dto->path = $path;
+        $dto->setName()
+            ->setUid()
+            ->setCreatedDt();
+        $dto->private = true;
+        return $dto;
     }
 
     private function setAll(): void

@@ -286,7 +286,7 @@ class DownloadEmails
                                     continue;
                                 }
 
-                                $createByApiDto = new CreateByApiDto($path, $this->fileSystem);
+                                $createByApiDto = CreateByApiDto::createWithFile($path, $this->fileSystem);
                                 $fileStorage = FileStorage::createByEmail($createByApiDto);
                                 $this->fileStorageRepository->save($fileStorage);
 
