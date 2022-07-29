@@ -37,6 +37,7 @@ use common\components\widgets\BaseForm;
         <?= $form->field($emailForm, 'emailId')->simpleHidden(); ?>
         <?= $form->field($emailForm, 'projectId')->simpleHidden(); ?>
         <?= $form->field($emailForm, 'depId')->simpleHidden(); ?>
+        <?= $form->field($emailForm, 'replyId')->simpleHidden(); ?>
         <?= $form->field($emailForm, 'type')->simpleHidden(); ?>
         <?= $form->field($emailForm, 'status')->simpleHidden(); ?>
 
