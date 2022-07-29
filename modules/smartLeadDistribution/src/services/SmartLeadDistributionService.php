@@ -2,12 +2,16 @@
 
 namespace modules\smartLeadDistribution\src\services;
 
+use common\models\Employee;
 use common\models\Lead;
 use modules\featureFlag\FFlag;
+use modules\smartLeadDistribution\abac\dto\SmartLeadDistributionAbacDto;
+use modules\smartLeadDistribution\abac\SmartLeadDistributionAbacObject;
 use modules\smartLeadDistribution\src\entities\LeadRatingParameter;
 use modules\smartLeadDistribution\src\objects\LeadRatingObjectInterface;
 use modules\smartLeadDistribution\src\SmartLeadDistribution;
 use src\access\ConditionExpressionService;
+use src\auth\Auth;
 use src\helpers\ErrorsToStringHelper;
 use Yii;
 
@@ -40,6 +44,30 @@ class SmartLeadDistributionService
             'lrp_attribute' => $attribute,
             'lrp_point' => $points
         ]);
+    }
+
+    public static function getAllowedCategories(?Employee $employee = null): array
+    {
+        $employee = $employee ?? Auth::user();
+        $allowedCategory = [];
+        $dto = new SmartLeadDistributionAbacDto();
+
+        /** @abac SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_FIRST_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, Access to first category business lead */
+        if (Yii::$app->abac->can($dto, SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_FIRST_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, $employee)) {
+            $allowedCategory[] = SmartLeadDistribution::CATEGORY_FIRST;
+        }
+
+        /** @abac SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_FIRST_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, Access to second category business lead */
+        if (Yii::$app->abac->can($dto, SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_SECOND_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, $employee)) {
+            $allowedCategory[] = SmartLeadDistribution::CATEGORY_SECOND;
+        }
+
+        /** @abac SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_FIRST_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, Access to third category business lead */
+        if (Yii::$app->abac->can($dto, SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_THIRD_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, $employee)) {
+            $allowedCategory[] = SmartLeadDistribution::CATEGORY_THIRD;
+        }
+
+        return $allowedCategory;
     }
 
     /**
