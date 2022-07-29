@@ -80,6 +80,7 @@ class EmailService extends SendMail implements EmailServiceInterface
         if ($requestData && isset($requestData['eq_status_id'])) {
             $email->updateAttributes([
                 'e_status_id' => $requestData['eq_status_id'],
+                'e_type_id' =>  EmailType::isDraft($email->e_type_id) ? EmailType::OUTBOX : $email->e_type_id,
                 'e_communication_id' =>  $requestData['eq_id']
             ]);
         }
@@ -126,7 +127,7 @@ class EmailService extends SendMail implements EmailServiceInterface
         return $email;
     }
 
-    public function update(EmailForm $form, $email)
+    public function update($email, EmailForm $form)
     {
         try {
             $email->e_type_id = $form->type;
