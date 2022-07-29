@@ -76,7 +76,7 @@ class LeadBusinessExtraQueueRule extends \yii\db\ActiveRecord
 
     public function validateStartAndEndTime($attribute, $param)
     {
-        $check = LeadBusinessExtraQueueRuleQuery::timeIntersectionCheck($this->lbeqr_start_time, $this->lbeqr_end_time);
+        $check = LeadBusinessExtraQueueRuleQuery::timeIntersectionCheck($this->lbeqr_start_time, $this->lbeqr_end_time, $this->lbeqr_type_id, $this->lbeqr_id);
         if ($check) {
             $this->addError($attribute, 'We have Intersection in Time!');
         }

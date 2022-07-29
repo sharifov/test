@@ -2,6 +2,7 @@
 
 use modules\shiftSchedule\src\events\ShiftScheduleEventChangedEvent;
 use modules\shiftSchedule\src\listeners\ShiftScheduleEventChangedListener;
+use modules\smartLeadDistribution\src\listeners\LeadRatingCalculationListener;
 use src\events\lead\LeadBookedEvent;
 use src\events\lead\LeadCallExpertChangedEvent;
 use src\events\lead\LeadCallExpertRequestEvent;
@@ -86,9 +87,13 @@ use src\listeners\lead\leadWebEngage\LeadBookedWebEngageListener;
 use src\listeners\lead\leadWebEngage\LeadSoldWebEngageListener;
 use src\listeners\lead\leadWebEngage\LeadTrashedWebEngageListener;
 use src\listeners\lead\leadBusinessExtraQueue\LeadBusinessExtraQueueRemoveOnStatusChangeListener;
+use src\listeners\lead\leadBusinessExtraQueue\LeadBusinessExtraQueueEventLogListener;
 
 return [
-    LeadCreatedEvent::class => [LeadCreatedEventListener::class],
+    LeadCreatedEvent::class => [
+        LeadCreatedEventListener::class,
+        LeadRatingCalculationListener::class,
+    ],
     LeadCreatedManuallyEvent::class => [LeadSendToGaListener::class],
     LeadCreatedByIncomingCallEvent::class => [
         LeadCreatedByIncomingCallLogListener::class,
@@ -187,6 +192,7 @@ return [
     LeadBusinessExtraQueueEvent::class => [
         LeadBusinessExtraQueueNotificationsListener::class,
         LeadInfoReloadListener::class,
+        LeadBusinessExtraQueueEventLogListener::class,
     ],
     LeadPoorProcessingEvent::class => [
         LeadPoorProcessingAdderListener::class,

@@ -38,10 +38,12 @@ use yii\widgets\ActiveForm;
     ?>
 
     <?= $form->field($model, 'lbeqr_duration')->textInput() ?>
+    <?php if ($model->lbeqr_type_id !== \src\model\leadBusinessExtraQueueRule\entity\LeadBusinessExtraQueueRule::TYPE_ID_REPEATED_PROCESS_RULE) : ?>
+        <?= $form->field($model, 'lbeqr_start_time')->textInput() ?>
 
-    <?= $form->field($model, 'lbeqr_start_time')->textInput() ?>
+        <?= $form->field($model, 'lbeqr_end_time')->textInput() ?>
 
-    <?= $form->field($model, 'lbeqr_end_time')->textInput() ?>
+    <?php endif ?>
 
 
     <div class="form-group">

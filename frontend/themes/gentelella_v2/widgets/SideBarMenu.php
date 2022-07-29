@@ -14,6 +14,8 @@ use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\services\UserShiftScheduleService;
+use modules\taskList\abac\TaskListAbacObject;
+use modules\smartLeadDistribution\src\services\SmartLeadDistributionService;
 use src\auth\Auth;
 use modules\user\userFeedback\abac\dto\UserFeedbackAbacDto;
 use modules\user\userFeedback\abac\UserFeedbackAbacObject;
@@ -253,6 +255,19 @@ class SideBarMenu extends \yii\bootstrap\Widget
         if ($isAdmin || $user->isKpiEnable()) {
             $menuItems[] = ['label' => 'KPI <span id="kpi" class="label-info label pull-right"></span> ', 'url' => ['/kpi/index'], 'icon' => 'money'];
         }
+
+
+        /** @abac TaskListAbacObject::ACT_MY_TASK_LIST, TaskListAbacObject::ACTION_ACCESS, Access menu My Task List */
+        $menuItems[] = [
+            'label' => 'My Task List <sup style="color: red">NEW</sup>',
+            'url' => ['/task-list/index'],
+            'icon' => 'check-square-o',
+            'abac'  => [
+                'dto'    => null,
+                'object' => TaskListAbacObject::ACT_MY_TASK_LIST,
+                'action' => TaskListAbacObject::ACTION_ACCESS,
+            ],
+        ];
 
         /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access menu My Shift Schedule */
         $shiftMenuItems[] = [
@@ -540,6 +555,16 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Lead User Ratings', 'url' => ['/lead-user-rating-crud/index']],
                         ['label' => 'Lead Status Reason', 'url' => ['/lead-status-reason-crud/index']],
                         ['label' => 'Lead Status Reason Log', 'url' => ['/lead-status-reason-log-crud/index']],
+                        ['label' => 'Lead Status Reason Log', 'url' => ['/lead-status-reason-log-crud/index']],
+                        [
+                            'label' => 'Smart Lead Distribution',
+                            'url' => 'javascript:',
+                            'icon' => 'list',
+                            'items' => [
+                                ['label' => 'Lead Rating Parameters', 'url' => ['/smart-lead-distribution/lead-rating-parameter-crud/index']],
+                            ],
+                            'visible' => SmartLeadDistributionService::ffIsEnable()
+                        ]
                     ]
                 ],
                 [
@@ -1195,6 +1220,12 @@ class SideBarMenu extends \yii\bootstrap\Widget
             ]
         ];
 
+        $menuInfoBlock = [];
+        /** @fflag FFlag::FF_KEY_INFO_BLOCK_ENABLE, Info Block Enable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_INFO_BLOCK_ENABLE)) {
+            $menuInfoBlock = ['label' => 'Info Block', 'url' => ['/info-block-crud/index'], 'icon' => 'list', 'visible' => \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_INFO_BLOCK_ENABLE)];
+        }
+
         $menuItems[] = [
             'label' => 'Logs & Tools',
             'url' => 'javascript:',
@@ -1250,6 +1281,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => Yii::t('menu', 'Composer Info'), 'url' => ['/tools/composer-info']],
                         ['label' => 'Check phone', 'url' => ['/tools/check-phone'], 'icon' => 'volume-control-phone'],
                         ['label' => 'Import phones', 'url' => ['/tools/import-phone'], 'icon' => 'caret-square-o-up'],
+                        ['label' => 'Lead rating', 'url' => ['/tools/lead-rating'], 'visible' => SmartLeadDistributionService::ffIsEnable()],
                     ]
                 ],
 
@@ -1260,6 +1292,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Virtual cron', 'url' => ['/virtual-cron/cron-scheduler/index'], 'icon' => 'cogs'],
                 ['label' => 'Site ENV', 'url' => ['/setting/env'], 'icon' => 'info-circle'],
                 ['label' => 'Call Terminate Log', 'url' => ['/call-terminate-log-crud/index'], 'icon' => 'list'],
+                $menuInfoBlock,
             ]
         ];
 
