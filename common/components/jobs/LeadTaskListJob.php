@@ -15,12 +15,10 @@ class LeadTaskListJob extends BaseJob implements JobInterface
 {
     private int $leadId;
     public ?int $oldOwnerId;
-    public ?int $newOwnerId;
 
-    public function __construct(int $leadId, ?int $newOwnerId, ?int $oldOwnerId, ?float $timeStart = null, array $config = [])
+    public function __construct(int $leadId, ?int $oldOwnerId, ?float $timeStart = null, array $config = [])
     {
         $this->leadId = $leadId;
-        $this->newOwnerId = $newOwnerId;
         $this->oldOwnerId = $oldOwnerId;
 
         parent::__construct($timeStart, $config);
@@ -38,7 +36,7 @@ class LeadTaskListJob extends BaseJob implements JobInterface
                 throw new \RuntimeException('Lead not found');
             }
 
-            $leadTaskListService = new LeadTaskListService($lead, $this->newOwnerId, $this->oldOwnerId);
+            $leadTaskListService = new LeadTaskListService($lead, $this->oldOwnerId);
             if (!$leadTaskListService->isProcessAllowed()) {
                 return;
             }
