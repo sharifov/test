@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use common\components\CommunicationService;
 use common\models\Email;
 use common\models\Employee;
+use common\models\Project;
 use common\models\search\EmailSearch;
 use common\models\UserProjectParams;
 use frontend\widgets\newWebPhone\email\form\EmailSendForm;
@@ -12,27 +13,24 @@ use http\Url;
 use modules\email\src\abac\dto\EmailAbacDto;
 use modules\email\src\abac\EmailAbacObject;
 use src\auth\Auth;
-use src\model\emailList\entity\EmailList;
-use Yii;
-use yii\filters\VerbFilter;
-use yii\helpers\ArrayHelper;
-use yii\helpers\Html;
-use yii\web\ForbiddenHttpException;
-use yii\web\NotFoundHttpException;
-use yii\web\Response;
-use src\services\email\EmailMainService;
 use src\dto\email\EmailDTO;
-use src\exception\CreateModelException;
-use yii\helpers\VarDumper;
-use src\exception\EmailNotSentException;
-use src\helpers\text\StringHelper;
-use common\models\Project;
-use src\repositories\email\EmailOldRepository;
 use src\entities\email\EmailBody;
 use src\entities\email\form\EmailForm;
 use src\entities\email\helpers\EmailContactType;
-use src\services\email\EmailsNormalizeService;
 use src\entities\email\helpers\EmailType;
+use src\exception\CreateModelException;
+use src\exception\EmailNotSentException;
+use src\model\emailList\entity\EmailList;
+use src\repositories\email\EmailOldRepository;
+use src\services\email\EmailMainService;
+use src\services\email\EmailsNormalizeService;
+use Yii;
+use yii\filters\VerbFilter;
+use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
+use yii\web\ForbiddenHttpException;
+use yii\web\NotFoundHttpException;
+use yii\web\Response;
 
 /**
  * EmailController implements the CRUD actions for Email model.
@@ -168,7 +166,8 @@ class EmailController extends FController
                         Yii::$app->session->setFlash('success', 'New Email was created.');
                     } elseif (in_array($action, ['update'])) {
                         $email = $this->findModel($selectedId);
-                        $this->emailService->update($email, $emailForm);
+                        $email = $this->emailService->update($email, $emailForm);
+                        $this->emailService->sendMail($email);
                         Yii::$app->session->setFlash('success', 'Email was updated.');
                     }
                     return $this->redirect(['inbox', 'id' => $email->e_id]);
