@@ -61,6 +61,14 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'lrp_condition',
                 'enableSorting' => false,
+                'contentOptions' => [
+                    'style' => [
+                        'max-width' => '600px',
+                        'white-space' => 'nowrap',
+                        'overflow' => 'hidden',
+                        'text-overflow' => 'ellipsis'
+                    ],
+                ],
             ],
             [
                 'attribute' => 'lrp_point',

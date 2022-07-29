@@ -44,7 +44,8 @@ class LeadRatingParameter extends \yii\db\ActiveRecord
         return [
             [['lrp_point', 'lrp_created_user_id', 'lrp_updated_user_id'], 'integer'],
             [['lrp_condition_json', 'lrp_created_dt', 'lrp_updated_dt'], 'safe'],
-            [['lrp_object', 'lrp_attribute', 'lrp_condition'], 'string', 'max' => 255],
+            ['lrp_condition', 'string', 'max' => 3000],
+            [['lrp_object', 'lrp_attribute'], 'string', 'max' => 255],
             [['lrp_created_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['lrp_created_user_id' => 'id']],
             [['lrp_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['lrp_updated_user_id' => 'id']],
         ];
