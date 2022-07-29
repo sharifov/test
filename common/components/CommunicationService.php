@@ -1573,4 +1573,29 @@ class CommunicationService extends Component implements CommunicationServiceInte
         }
         return null;
     }
+
+    public function getEmailAttachments(int $emailId): array
+    {
+        $response = $this->sendRequest('email/get-email-incoming-attachments', ['emailId' => $emailId]);
+
+        if ($response->isOk) {
+            if (isset($response->data['data']['attachments'])) {
+                if (is_array($response->data['data']['attachments'])) {
+                    return $response->data['data']['attachments'];
+                }
+                \Yii::error([
+                    'error' => 'Attachments object is not array',
+                    'emailId' => $emailId,
+                ], 'Component:CommunicationService::getEmailAttachments');
+            } else {
+                \Yii::error([
+                    'error' => 'Not found attachments object',
+                    'emailId' => $emailId,
+                ], 'Component:CommunicationService::getEmailAttachments');
+            }
+        } else {
+            \Yii::error(VarDumper::dumpAsString($response->content, 10), 'Component:CommunicationService::getEmailAttachments');
+        }
+        return [];
+    }
 }
