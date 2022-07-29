@@ -29,8 +29,10 @@ use common\models\Employee;
  * @property array $cases
  * @property array $clients
  * @property array $leads
- * @property string $createdDt
+ * @property string|null $createdDt
  * @property string $updatedDt
+ * @property int|null $replyId
+ * @property bool|null $isDeleted
  * @property int|null $userId
  *
  */
@@ -78,6 +80,7 @@ class EmailForm extends CompositeForm
         $instance->projectId = $data['projectId'] ?? null;
         $instance->depId = $data['depId'] ?? null;
         $instance->emailId = $data['emailId'] ?? null;
+        $instance->replyId = $data['replyId'] ?? null;
         $instance->isDeleted = $data['isDeleted'] ?? null;
         $instance->clients = $data['clientsIds'] ?? null;
         $instance->cases = $data['casesIds'] ?? null;
@@ -95,6 +98,11 @@ class EmailForm extends CompositeForm
             'from' => $from,
             'to' => $to,
         ];
+       /*  if (isset($data['contacts']['cc'])) {
+            foreach ($data['contacts']['cc'] as $key => $ccData) {
+                $contactsForm['cc' . ($key+1) ] = EmailContactForm::fromArray($ccData);
+            }
+        } */
         $instance->contacts = $contactsForm;
 
         return $instance;
@@ -107,6 +115,7 @@ class EmailForm extends CompositeForm
         $instance->type = $email->e_type_id;
         $instance->projectId = $email->e_project_id;
         $instance->depId = $email->e_departament_id;
+        $instance->replyId = $email->reply ? $email->reply->e_id : null;
         $instance->emailId = $email->e_id ?? null;
         $instance->clients = $email->clientsIds ?? null;
         $instance->cases = $email->casesIds ?? null;
