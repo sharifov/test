@@ -314,6 +314,57 @@ class UserShiftScheduleQuery
         return $query->column();
     }
 
+
+    /**
+     * @param int $userId
+     * @param string $startDateTime
+     * @param string $endDateTime
+     * @param array|null $statusListId
+     * @param array|null $subTypeListId
+     * @return array|UserShiftSchedule[]
+     */
+    public static function getExistEventList(
+        int $userId,
+        string $startDateTime,
+        string $endDateTime,
+        ?array $statusListId = [],
+        ?array $subTypeListId = []
+    ): array {
+        $query = UserShiftSchedule::find();
+        $query->alias('uss');
+        // $query->select(['uss.uss_id']);
+        $query->where(['uss.uss_user_id' => $userId]);
+
+        if (!empty($statusListId)) {
+            $query->andWhere(['uss.uss_status_id' => $statusListId]);
+        }
+
+        if (!empty($subTypeListId)) {
+            $query->innerJoin(ShiftScheduleType::tableName() . ' AS sst', 'sst.sst_id = uss.uss_sst_id');
+            $query->andWhere(['sst.sst_subtype_id' => $subTypeListId]);
+        }
+
+        if (!empty($startDateTime) && !empty($endDateTime)) {
+            $query->andWhere([
+                'OR',
+                ['between', 'uss.uss_start_utc_dt', $startDateTime, $endDateTime],
+                ['between', 'uss.uss_end_utc_dt', $startDateTime, $endDateTime],
+                [
+                    'AND',
+                    ['>=', 'uss.uss_start_utc_dt', $startDateTime],
+                    ['<=', 'uss.uss_end_utc_dt', $endDateTime]
+                ],
+                [
+                    'AND',
+                    ['<=', 'uss.uss_start_utc_dt', $startDateTime],
+                    ['>=', 'uss.uss_end_utc_dt', $endDateTime]
+                ]
+            ]);
+        }
+        $query->orderBy(['uss.uss_id' => SORT_ASC]);
+        return $query->all();
+    }
+
     /**
      * @param UserShiftSchedule[] $timelineList
      * @param string $userTimeZone

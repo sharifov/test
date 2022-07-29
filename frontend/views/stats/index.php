@@ -11,7 +11,7 @@ use yii\widgets\ActiveForm;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $form yii\widgets\ActiveForm */
 
-$bundle = \frontend\assets\TimelineAsset::register($this);
+$bundle = \frontend\assets\TimelineAsset2::register($this);
 $this->title = 'Stats Employees';
 
 /*$js = <<<JS
