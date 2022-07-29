@@ -3,6 +3,7 @@
 namespace src\model\client\notifications\listeners\productQuoteChangeAutoDecisionPending;
 
 use common\models\Airports;
+use common\models\ClientEmail;
 use common\models\ClientPhone;
 use modules\flight\models\FlightQuote;
 use modules\order\src\entities\orderContact\OrderContact;
@@ -11,17 +12,21 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
 use src\forms\lead\PhoneCreateForm;
+use src\forms\lead\EmailCreateForm;
 use src\helpers\app\AppHelper;
 use src\helpers\DayTimeHours;
 use src\helpers\setting\SettingHelper;
 use src\model\client\notifications\client\entity\NotificationType;
 use src\model\client\notifications\ClientNotificationCreator;
+use src\model\client\notifications\email\entity\Data as EmailData;
 use src\model\client\notifications\phone\entity\Data as PhoneData;
 use src\model\client\notifications\sms\entity\Data as SmsData;
 use src\model\client\notifications\settings\ClientNotificationProjectSettings;
+use src\model\emailList\entity\EmailList;
 use src\model\phoneList\entity\PhoneList;
 use src\model\project\entity\params\SendPhoneNotification;
 use src\model\project\entity\params\SendSmsNotification;
+use src\model\project\entity\params\SendEmailNotification;
 use src\services\client\ClientManageService;
 use src\services\TransactionManager;
 
@@ -83,6 +88,10 @@ class ClientNotificationListener
 
             if ($client->phoneId && $notificationSettings->sendSmsNotification->enabled) {
                 $this->smsNotificationProcessing($project, $notificationType, $client, $notificationSettings->sendSmsNotification, $productQuoteChange);
+            }
+
+            if ($client->emailId && $notificationSettings->sendEmailNotification->enabled) {
+                $this->emailNotificationProcessing($project, $notificationType, $client, $notificationSettings->sendEmailNotification, $productQuoteChange);
             }
         } catch (OverdueException $e) {
             \Yii::warning([
@@ -217,6 +226,73 @@ class ClientNotificationListener
         });
     }
 
+    private function emailNotificationProcessing(
+        Project $project,
+        NotificationType $notificationType,
+        Client $client,
+        SendEmailNotification $settings,
+        ProductQuoteChange $productQuoteChange
+    ): void {
+        if (!$settings->messageTemplateKey) {
+            \Yii::error([
+                'message' => 'Email template Key is empty',
+                'projectId' => $project->id,
+                'notificationType' => $notificationType->getType(),
+                'productQuoteChangeId' => $productQuoteChange->pqc_id,
+                'productQuoteId' => $productQuoteChange->pqc_pq_id,
+                'caseId' => $productQuoteChange->pqc_case_id,
+                'email' => $settings->emailFrom,
+            ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:emailNotificationProcessing');
+            return;
+        }
+        $templateKey = $settings->messageTemplateKey;
+
+        $emailFromId = EmailList::find()->select(['el_id'])->andWhere(['el_email' => $settings->emailFrom])->scalar();
+        if (!$emailFromId) {
+            \Yii::error([
+                'message' => 'Not found Email List',
+                'productQuoteChangeId' => $productQuoteChange->pqc_id,
+                'productQuoteId' => $productQuoteChange->pqc_pq_id,
+                'caseId' => $productQuoteChange->pqc_case_id,
+                'email' => $settings->emailFrom,
+            ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:emailNotificationProcessing');
+            return;
+        }
+
+        $time = $this->getTime($productQuoteChange->pqc_pq_id);
+
+        $this->transactionManager->wrap(function () use (
+            $emailFromId,
+            $client,
+            $time,
+            $settings,
+            $notificationType,
+            $project,
+            $templateKey,
+            $productQuoteChange
+        ) {
+            $this->clientNotificationCreator->createEmailNotification(
+                $emailFromId,
+                $settings->emailFromName,
+                $client->emailId,
+                $time->start,
+                $time->end,
+                EmailData::createFromArray([
+                    'clientId' => $client->id,
+                    'caseId' => $productQuoteChange->pqc_case_id,
+                    'projectId' => $project->id,
+                    'projectKey' => $project->key,
+                    'templateKey' => $templateKey,
+                    'productQuoteId' => (int)$productQuoteChange->pqc_pq_id,
+                ]),
+                new \DateTimeImmutable(),
+                $client->id,
+                $notificationType,
+                $productQuoteChange->pqc_id
+            );
+        });
+    }
+
     private function getClient(ProductQuoteChange $productQuoteChange): Client
     {
         $orderId = $productQuoteChange->pqcPq->pq_order_id ?? null;
@@ -224,7 +300,7 @@ class ClientNotificationListener
             throw new \DomainException('Not found Order.');
         }
 
-        $contact = OrderContact::find()->select(['oc_id', 'oc_client_id', 'oc_phone_number'])->andWhere(['oc_order_id' => $orderId])->orderBy(['oc_id' => SORT_DESC])->asArray()->one();
+        $contact = OrderContact::find()->select(['oc_id', 'oc_client_id', 'oc_phone_number', 'oc_email'])->andWhere(['oc_order_id' => $orderId])->orderBy(['oc_id' => SORT_DESC])->asArray()->one();
         if (!$contact) {
             throw new \DomainException('Not found Contact.');
         }
@@ -246,9 +322,16 @@ class ClientNotificationListener
             $clientPhoneId = $this->addClientPhone($contact['oc_client_id'], $contact['oc_phone_number']);
         }
 
-        // todo contact email processing
+        $clientEmailId = ClientEmail::find()->select(['id'])->andWhere(['client_id' => $contact['oc_client_id'], 'email' => $contact['oc_email']])->scalar();
+        if (!$clientEmailId) {
+            \Yii::error([
+                'message' => 'Not found Contact Client Email',
+                'productQuoteChangeId' => $productQuoteChange->pqc_id,
+            ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:getClient');
+            $clientEmailId = $this->addClientEmail($contact['oc_client_id'], $contact['oc_email']);
+        }
 
-        return new Client((int)$contact['oc_client_id'], (int)$clientPhoneId, null);
+        return new Client((int)$contact['oc_client_id'], (int)$clientPhoneId, (int)$clientEmailId);
     }
 
     private function addClientPhone(int $clientId, string $phone): ?int
@@ -274,6 +357,33 @@ class ClientNotificationListener
                 'clientId' => $clientId,
                 'exception' => AppHelper::throwableLog($e, true),
             ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:addClientPhone');
+        }
+        return null;
+    }
+
+    private function addClientEmail(int $clientId, string $email): ?int
+    {
+        try {
+            $client = \common\models\Client::find()->byId($clientId)->limit(1)->one();
+            $clientEmail = $this->clientManageService->addEmail($client, new EmailCreateForm([
+                'client_id' => $clientId,
+                'email' => $email,
+                'type' => ClientEmail::EMAIL_NOT_SET,
+                'comments' => 'Created on product quote change client notification action',
+            ]));
+            if ($clientEmail) {
+                return $clientEmail->id;
+            }
+            \Yii::error([
+                'message' => 'Client email not created. Undefined reason.',
+                'clientId' => $clientId,
+            ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:addClientEmail');
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'message' => 'Client email not created',
+                'clientId' => $clientId,
+                'exception' => AppHelper::throwableLog($e, true),
+            ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:addClientEmail');
         }
         return null;
     }

@@ -8,9 +8,11 @@ use yii\helpers\ArrayHelper;
 class SmsTaskDto extends \stdClass
 {
     public ?string $project_key = null;
+    public ?string $template_type_key = null;
 
     public function __construct(Sms $sms)
     {
         $this->project_key = $sms->sProject->project_key ?? null;
+        $this->template_type_key = $sms->sTemplateType->stp_key ?? null;
     }
 }

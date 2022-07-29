@@ -79,34 +79,30 @@ class LeadBadgesRepository
         return $this->getBusinessInboxQuery($user)->count();
     }
 
-    /**
-     * @param Employee $user
-     * @return ActiveQuery
-     */
-    public function getBusinessInboxQuery(Employee $user): ActiveQuery
+    public function getBusinessInboxQuery(?Employee $user = null): ActiveQuery
     {
         $query = Lead::find()
-        ->orWhere([
-            'and',
-            ['project_id' => 7],
-            ['l_is_test' => false],
-            ['status' => Lead::STATUS_PENDING],
-            ['<>', 'l_call_status_id', 5]
-        ])
-        ->orWhere([
-            'and',
-            ['cabin' => Lead::CABIN_BUSINESS],
-            ['l_is_test' => false],
-            ['status' => Lead::STATUS_PENDING],
-            ['<>', 'l_call_status_id', 5]
-        ])
-        ->orWhere([
-            'and',
-            ['cabin' => Lead::CABIN_FIRST],
-            ['l_is_test' => false],
-            ['status' => Lead::STATUS_PENDING],
-            ['<>', 'l_call_status_id', 5]
-        ]);
+            ->orWhere([
+                'and',
+                ['project_id' => 7],
+                ['l_is_test' => false],
+                ['status' => Lead::STATUS_PENDING],
+                ['<>', 'l_call_status_id', 5]
+            ])
+            ->orWhere([
+                'and',
+                ['cabin' => Lead::CABIN_BUSINESS],
+                ['l_is_test' => false],
+                ['status' => Lead::STATUS_PENDING],
+                ['<>', 'l_call_status_id', 5]
+            ])
+            ->orWhere([
+                'and',
+                ['cabin' => Lead::CABIN_FIRST],
+                ['l_is_test' => false],
+                ['status' => Lead::STATUS_PENDING],
+                ['<>', 'l_call_status_id', 5]
+            ]);
 
         return $query;
     }
@@ -367,7 +363,16 @@ class LeadBadgesRepository
             $conditions = ['IN', Lead::tableName() . '.l_dep_id', ArrayHelper::map($user->userDepartments, 'ud_dep_id', 'ud_dep_id')];
         }
 
-        $query->andWhere($this->createSubQuery($user->id, $conditions));
+        /** @fflag FFlag::FF_KEY_BOOKED_QUEUE_CONDITION_BY_DEPARTMENT, Booked Queue condition for agent only owner */
+        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BOOKED_QUEUE_CONDITION_AGENT_IS_OWNER)) {
+            if ($user->isAgent()) {
+                $query->andWhere($this->isOwner($user->id));
+            } else {
+                $query->andWhere($this->createSubQuery($user->id, $conditions));
+            }
+        } else {
+            $query->andWhere($this->createSubQuery($user->id, $conditions));
+        }
 
         return $query;
     }
@@ -389,7 +394,7 @@ class LeadBadgesRepository
     {
         $query = Lead::find()->where([Lead::tableName() . '.status' => Lead::STATUS_SOLD]);
 
-        /** @abac null, LeadAbacObject::QUERY_SOLD_ALL, LeadAbacObject::ACTION_ACCESS, Access to all sold leads*/
+        /** @abac null, LeadAbacObject::QUERY_SOLD_ALL, LeadAbacObject::ACTION_ACCESS, Access to all sold leads */
         if (\Yii::$app->abac->can(null, LeadAbacObject::QUERY_SOLD_ALL, LeadAbacObject::ACTION_ACCESS)) {
             return $query;
         }
@@ -397,25 +402,25 @@ class LeadBadgesRepository
         $conditions = [];
         $displayFlag = false;
 
-        /** @abac null, LeadAbacObject::QUERY_SOLD_ON_COMMON_PROJECTS, LeadAbacObject::ACTION_ACCESS, Access sold leads in common projects*/
+        /** @abac null, LeadAbacObject::QUERY_SOLD_ON_COMMON_PROJECTS, LeadAbacObject::ACTION_ACCESS, Access sold leads in common projects */
         if (\Yii::$app->abac->can(null, LeadAbacObject::QUERY_SOLD_PROJECTS, LeadAbacObject::ACTION_ACCESS)) {
             $query->andWhere($this->createInProjectSubQuery($user->id, $conditions));
             $displayFlag = true;
         }
 
-        /** @abac null, LeadAbacObject::QUERY_SOLD_ON_COMMON_DEPARTMENTS, LeadAbacObject::ACTION_ACCESS, Access sold leads in common departments*/
+        /** @abac null, LeadAbacObject::QUERY_SOLD_ON_COMMON_DEPARTMENTS, LeadAbacObject::ACTION_ACCESS, Access sold leads in common departments */
         if (\Yii::$app->abac->can(null, LeadAbacObject::QUERY_SOLD_DEPARTMENTS, LeadAbacObject::ACTION_ACCESS)) {
             $query->andWhere($this->createInDepartmentsSubQuery($user->id, $conditions));
             $displayFlag = true;
         }
 
-        /** @abac null, LeadAbacObject::QUERY_SOLD_ON_COMMON_GROUPS, LeadAbacObject::ACTION_ACCESS, Access sold leads in common groups*/
+        /** @abac null, LeadAbacObject::QUERY_SOLD_ON_COMMON_GROUPS, LeadAbacObject::ACTION_ACCESS, Access sold leads in common groups */
         if (\Yii::$app->abac->can(null, LeadAbacObject::QUERY_SOLD_GROUPS, LeadAbacObject::ACTION_ACCESS)) {
             $query->andWhere($this->createInGroupsSubQuery($user->id, $conditions));
             $displayFlag = true;
         }
 
-        /** @abac null, LeadAbacObject::QUERY_SOLD_IS_OWNER, LeadAbacObject::ACTION_ACCESS, Access sold leads where user id owner*/
+        /** @abac null, LeadAbacObject::QUERY_SOLD_IS_OWNER, LeadAbacObject::ACTION_ACCESS, Access sold leads where user id owner */
         if (\Yii::$app->abac->can(null, LeadAbacObject::QUERY_SOLD_IS_OWNER, LeadAbacObject::ACTION_ACCESS)) {
             $query->andWhere([Lead::tableName() . '.employee_id' => $user->id]);
             $query->orWhere([ProfitSplit::tableName() . '.ps_user_id' => $user->id]);
@@ -427,13 +432,13 @@ class LeadBadgesRepository
         }
         $lead = new Lead();
         $lead->employee_id = null;
-        /** @abac null, LeadAbacObject::QUERY_SOLD_IS_EMPTY_OWNER, LeadAbacObject::ACTION_ACCESS, Access sold leads where lead have empty owner*/
+        /** @abac null, LeadAbacObject::QUERY_SOLD_IS_EMPTY_OWNER, LeadAbacObject::ACTION_ACCESS, Access sold leads where lead have empty owner */
         if (\Yii::$app->abac->can(new LeadAbacDto($lead, 0), LeadAbacObject::QUERY_SOLD_IS_EMPTY_OWNER, LeadAbacObject::ACTION_QUERY_AND)) {
             $query->andWhere([Lead::tableName() . '.employee_id' => null]);
             $displayFlag = true;
         }
 
-        /** @abac null, LeadAbacObject::QUERY_SOLD_IS_EMPTY_OWNER, LeadAbacObject::ACTION_ACCESS, Access sold leads where lead have empty owner*/
+        /** @abac null, LeadAbacObject::QUERY_SOLD_IS_EMPTY_OWNER, LeadAbacObject::ACTION_ACCESS, Access sold leads where lead have empty owner */
         if (\Yii::$app->abac->can(new LeadAbacDto($lead, 0), LeadAbacObject::QUERY_SOLD_IS_EMPTY_OWNER, LeadAbacObject::ACTION_QUERY_OR)) {
             $query->orWhere([Lead::tableName() . '.employee_id' => null])->andWhere([Lead::tableName() . '.status' => Lead::STATUS_SOLD]);
             $displayFlag = true;
@@ -580,6 +585,7 @@ class LeadBadgesRepository
     {
         return [Lead::tableName() . '.employee_id' => EmployeeDepartmentAccess::usersIdsInCommonDepartmentsSubQuery($userId)];
     }
+
     /**
      * @param $userId
      * @return array
@@ -641,9 +647,9 @@ class LeadBadgesRepository
     private function createInProjectSubQuery($userId, $conditions): array
     {
         return [
-                'and',
-                $this->inProject($userId),
-                $conditions
+            'and',
+            $this->inProject($userId),
+            $conditions
         ];
     }
 
@@ -655,9 +661,9 @@ class LeadBadgesRepository
     private function createInDepartmentsSubQuery($userId, $conditions): array
     {
         return [
-                'and',
-                $this->inDepartment($userId),
-                $conditions
+            'and',
+            $this->inDepartment($userId),
+            $conditions
         ];
     }
 
@@ -669,9 +675,9 @@ class LeadBadgesRepository
     private function createInGroupsSubQuery($userId, $conditions): array
     {
         return [
-                'and',
-                $this->inGroups($userId),
-                $conditions
+            'and',
+            $this->inGroups($userId),
+            $conditions
         ];
     }
 }

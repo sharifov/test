@@ -45,6 +45,7 @@ class TaskListQuery
                     ->groupBy(['ostl_tl_id'])
             ], 'object_segment_task_query.ostl_tl_id = task_list.tl_id')
             ->where(['tl_enable_type' => $enableType])
+            ->orderBy(['tl_sort_order' => SORT_DESC])
             ->distinct()
             ->all();
     }

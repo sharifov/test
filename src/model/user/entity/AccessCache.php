@@ -30,4 +30,9 @@ class AccessCache
     {
         return $this->cache['groups'] ?? null;
     }
+
+    public function getSkill(): ?string
+    {
+        return $this->cache['skill'] ?? null;
+    }
 }

@@ -135,6 +135,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public const ROLE_SUP_SUPER = 'sup_super';
     public const ROLE_EX_AGENT = 'ex_agent';
     public const ROLE_EX_SUPER = 'ex_super';
+    public const ROLE_QA_DEV = 'qa_developer';
+    public const ROLE_DEV = 'developer';
 
     /** admin child role  */
     public const ROLE_SALES_SENIOR = 'sales_senior';
