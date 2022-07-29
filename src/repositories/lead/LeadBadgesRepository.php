@@ -680,4 +680,31 @@ class LeadBadgesRepository
             $conditions
         ];
     }
+
+    public function countBusinessLeadsByRatingCategory(): array
+    {
+        $query = $this->getBusinessInboxQuery();
+        $query->select('COUNT(*) AS amount, lead_data.ld_field_value AS category')
+            ->leftJoin(
+                'lead_data',
+                'leads.id = lead_data.ld_lead_id AND lead_data.ld_field_key = :key',
+                ['key' => 'lead_rating_category']
+            )
+            ->groupBy([
+                'lead_data.ld_field_value'
+            ]);
+
+        $leads = $query->asArray()->all();
+        $data = [];
+
+        foreach ($leads as $lead) {
+            if ($lead['category'] === null) {
+                $lead['category'] = 3;
+            }
+
+            $data[$lead['category']] = $lead['amount'] + ($data[$lead['category']]['amount'] ?? 0);
+        }
+
+        return $data;
+    }
 }

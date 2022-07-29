@@ -26,6 +26,8 @@ use common\models\UserGroupAssign;
 use common\models\UserProfile;
 use modules\featureFlag\FFlag;
 use modules\fileStorage\src\entity\fileLead\FileLead;
+use modules\smartLeadDistribution\abac\dto\SmartLeadDistributionAbacDto;
+use modules\smartLeadDistribution\abac\SmartLeadDistributionAbacObject;
 use src\access\EmployeeGroupAccess;
 use src\access\EmployeeProjectAccess;
 use src\auth\Auth;
@@ -3020,6 +3022,39 @@ class LeadSearch extends Lead
     public function searchBusinessInbox($params, Employee $user): ActiveDataProvider
     {
         $query = $this->leadBadgesRepository->getBusinessInboxQuery($user);
+
+        /** @fflag FFlag::FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE, Smart Lead Distribution Enable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE) === true) {
+            $allowedCategory = [];
+            $allowedCategory[] = null;
+            $dto = new SmartLeadDistributionAbacDto();
+
+            /** @abac SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_FIRST_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, Access to first category business lead */
+            if (Yii::$app->abac->can($dto, SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_FIRST_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS)) {
+                $allowedCategory[] = 1;
+            }
+
+            /** @abac SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_FIRST_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, Access to second category business lead */
+            if (Yii::$app->abac->can($dto, SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_SECOND_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS)) {
+                $allowedCategory[] = 2;
+            }
+
+            /** @abac SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_FIRST_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, Access to third category business lead */
+            if (Yii::$app->abac->can($dto, SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_THIRD_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS)) {
+                $allowedCategory[] = 3;
+            }
+
+            $query->leftJoin(
+                'lead_data',
+                'leads.id = lead_data.ld_lead_id AND lead_data.ld_field_key = :key',
+                [
+                    'key' => 'lead_rating_category',
+                ]
+            );
+
+            $query->andWhere(['IN', 'lead_data.ld_field_value', $allowedCategory]);
+        }
+
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
         $leadTable = Lead::tableName();
 
