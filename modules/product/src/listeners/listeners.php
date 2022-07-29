@@ -98,7 +98,7 @@ return [
     ],
 
     ProductQuoteChangeClientRemainderNotificationEvent::class => [
-        \src\model\client\notifications\listeners\productQuoteChangeAutoDecisionPending\ClientNotificationListener::class,
+        \src\model\client\notifications\listeners\productQuoteChangeAutoDecisionPending\ClientNotificationRemainderListener::class,
     ],
 
     ProductQuoteChangeDecisionConfirmEvent::class => [

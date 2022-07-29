@@ -7,22 +7,12 @@ namespace modules\product\src\entities\productQuoteChange\events;
  *
  * @property int $productQuoteChangeId
  */
-class ProductQuoteChangeAutoDecisionPendingEvent implements ProductQuoteChangeInterface
+class ProductQuoteChangeAutoDecisionPendingEvent
 {
     public int $productQuoteChangeId;
 
     public function __construct(int $productQuoteChangeId)
     {
         $this->productQuoteChangeId = $productQuoteChangeId;
-    }
-
-    public function getId(): int
-    {
-        return $this->productQuoteChangeId;
-    }
-
-    public function getClass(): string
-    {
-        return self::class;
     }
 }
