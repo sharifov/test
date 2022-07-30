@@ -12,7 +12,7 @@ use src\entities\email\form\EmailForm;
     <?php $form = BaseForm::begin(); ?>
 
     <?= $form->field($emailForm, 'replyId')->textInput() ?>
-    <?= $form->field($emailForm, 'leads')->textInput() ?>
+    <?= $form->field($emailForm, 'leads[0]')->textInput() ?>
     <?= $form->field($emailForm, 'projectId')->dropDownList($emailForm->listProjects()) ?>
     <?= $form->field($emailForm->contacts['from'], '[from]id')->simpleHidden(); ?>
     <?= $form->field($emailForm->contacts['to'], '[to]id')->simpleHidden(); ?>
