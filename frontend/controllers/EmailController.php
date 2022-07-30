@@ -325,6 +325,8 @@ class EmailController extends FController
             } catch (\Throwable $e) {
                 Yii::$app->session->setFlash('error', $e->getMessage() . '<br/>' . $e->getTraceAsString());
             }
+        } else {
+            Yii::$app->session->setFlash('error', $emailForm->getErrorSummary(true));
         }
 
         return $this->render('create', [
@@ -341,18 +343,34 @@ class EmailController extends FController
      */
     public function actionUpdate($id)
     {
-        $model = $this->findModel($id);
+        $user = Yii::$app->user->identity;
+        $email = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post())) {
-            if ($model->save()) {
-                return $this->redirect(['view', 'id' => $model->e_id]);
+        if (Yii::$app->request->isPost) {
+            $emailForm = new EmailForm($user->id);
+            if ($emailForm->load(Yii::$app->request->post()) && $emailForm->validate()) {
+                try {
+
+                    $email = $this->emailService->update($email, $emailForm);
+                    Yii::$app->session->setFlash('success', 'Email was updated');
+
+                    return $this->redirect(['view', 'id' => $id]);
+                } catch (CreateModelException $e) {
+                    $errorsMessage = VarDumper::dumpAsString($e->getErrors());
+                    Yii::$app->session->setFlash('error', $e->getMessage() . '<br/>'. $errorsMessage);
+                } catch (\Throwable $e) {
+                    Yii::$app->session->setFlash('error', $e->getMessage() . '<br/>' . $e->getTraceAsString());
+                }
+            } else {
+                Yii::$app->session->setFlash('error', $emailForm->getErrorSummary(true));
             }
         } else {
-            $model->body_html = $model->emailBodyHtml;
+            $emailForm = EmailForm::fromArray(EmailsNormalizeService::getDataArrayFromOld($email));
         }
 
         return $this->render('update', [
-            'model' => $model,
+            'emailForm' => $emailForm,
+            'id' => $id,
         ]);
     }
 
