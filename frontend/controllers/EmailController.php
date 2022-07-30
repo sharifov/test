@@ -311,14 +311,24 @@ class EmailController extends FController
      */
     public function actionCreate()
     {
-        $model = new Email();
+        $user = Yii::$app->user->identity;
+        $emailForm = new EmailForm($user->id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->e_id]);
+        if ($emailForm->load(Yii::$app->request->post()) && $emailForm->validate()) {
+            try {
+                $email = $this->emailService->create($emailForm);
+                Yii::$app->session->setFlash('success', 'New Email was created');
+                return $this->redirect(['view', 'id' => $email->e_id]);
+            } catch (CreateModelException $e) {
+                $errorsMessage = VarDumper::dumpAsString($e->getErrors());
+                Yii::$app->session->setFlash('error', $e->getMessage() . '<br/>'. $errorsMessage);
+            } catch (\Throwable $e) {
+                Yii::$app->session->setFlash('error', $e->getMessage() . '<br/>' . $e->getTraceAsString());
+            }
         }
 
         return $this->render('create', [
-            'model' => $model,
+            'emailForm' => $emailForm
         ]);
     }
 
