@@ -187,6 +187,16 @@ class EmailForm extends CompositeForm
         return Project::getListByUser($this->userId);
     }
 
+    public function listTypes(): array
+    {
+        return EmailType::getList();
+    }
+
+    public function listStatuses(): array
+    {
+        return EmailStatus::getList();
+    }
+
     public function getUserId(): ?int
     {
         return $this->userId;

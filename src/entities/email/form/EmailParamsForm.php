@@ -4,6 +4,8 @@ namespace src\entities\email\form;
 
 use yii\base\Model;
 use src\entities\email\EmailParams;
+use src\entities\email\helpers\EmailPriority;
+use common\models\Language;
 
 class EmailParamsForm extends Model
 {
@@ -89,5 +91,15 @@ class EmailParamsForm extends Model
             ['language', 'string', 'max' => 5],
             [['priority', 'templateType', 'id'], 'integer'],
         ];
+    }
+
+    public function listPriorities(): array
+    {
+        return EmailPriority::getList();
+    }
+
+    public function listLanguages(): array
+    {
+        return Language::getLanguages(true);
     }
 }
