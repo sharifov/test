@@ -17,7 +17,7 @@ use src\entities\email\helpers\EmailFilterType;
 /* @var $selectedId int */
 /* @var $stats [] */
 /* @var $action string|null */
-/* @var $emailForm src\entities\email\form\EmailCreateForm */
+/* @var $emailForm src\entities\email\form\EmailForm */
 
 $this->title = 'Emails';
 $this->params['breadcrumbs'][] = $this->title;

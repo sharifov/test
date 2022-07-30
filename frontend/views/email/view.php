@@ -46,16 +46,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 'e_lead_id',
                 'e_case_id',
                 'e_project_id',
-                //'e_email_from:email',
                 'emailFrom',
                 'emailFromName',
-                //'e_email_to:email',
                 'emailTo',
                 'emailToName',
                 'e_email_cc:email',
                 'e_email_bc:email',
                 'e_email_subject',
-                //'e_email_body_text:ntext',
                 'e_attach',
                 'e_email_data:ntext',
                 'e_type_id',
@@ -81,7 +78,4 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]) ?>
     </div>
-
-
-
 </div>
