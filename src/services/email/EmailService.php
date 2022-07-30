@@ -95,6 +95,8 @@ class EmailService extends SendMail implements EmailServiceInterface
             $email->e_is_new = $form->log->isNew;
             $email->e_is_deleted = $form->isDeleted ?? 0;
             $email->e_reply_id = $form->replyId ?? null;
+            $email->e_priority = $form->params->priority ?? null;
+            $email->e_communication_id = $form->log->communicationId ?? null;
             $email->e_email_to = $form->contacts['to']->email;
             $email->e_email_to_name = $form->contacts['to']->name;
             $email->e_email_from = $form->contacts['from']->email;
@@ -110,6 +112,7 @@ class EmailService extends SendMail implements EmailServiceInterface
             $email->e_message_id = $form->log->messageId;
             $email->e_language_id = $form->params->language;
             $email->e_template_type_id = $form->params->templateType;
+            $email->e_error_message = $form->log->errorMessage;
             $email->e_client_id = $form->clients ?? null;
             $email->e_lead_id = $form->leads ?? null;
             $email->e_case_id = $form->cases ?? null;
@@ -129,6 +132,14 @@ class EmailService extends SendMail implements EmailServiceInterface
         return $email;
     }
 
+    /**
+     *
+     * @param Email $email
+     * @param EmailForm $form
+     * @throws \RuntimeException
+     * @throws Throwable
+     * @return Email
+     */
     public function update($email, EmailForm $form)
     {
         try {
@@ -141,6 +152,21 @@ class EmailService extends SendMail implements EmailServiceInterface
             if ($form->replyId !== null) {
                 $email->e_reply_id = $form->replyId;
             }
+            if ($form->log->errorMessage !== null) {
+                $email->e_error_message = $form->log->errorMessage;
+            }
+            if ($form->params->priority !== null) {
+                $email->e_priority = $form->params->priority;
+            }
+            if ($form->log->communicationId !== null) {
+                $email->e_communication_id = $form->log->communicationId;
+            }
+            if ($form->log->statusDoneDt !== null) {
+                $email->e_status_done_dt = $form->log->statusDoneDt;
+            }
+            if ($form->log->readDt !== null) {
+                $email->e_read_dt = $form->log->readDt;
+            }
             $email->e_email_to = $form->contacts['to']->email;
             $email->e_email_to_name = $form->contacts['to']->name;
             $email->e_email_from = $form->contacts['from']->email;
@@ -150,17 +176,20 @@ class EmailService extends SendMail implements EmailServiceInterface
             $email->e_project_id = $form->projectId;
             $email->body_html = $form->body->bodyHtml;
             $email->e_updated_dt = $form->createdDt;
+            $email->e_updated_user_id = $form->getUserId() ?? null;
             $email->e_inbox_email_id = $form->log->inboxEmailId;
             $email->e_inbox_created_dt = $form->log->inboxCreatedDt;
             $email->e_ref_message_id = $form->log->refMessageId;
-            $email->e_message_id = $form->log->messageId;
+            if ($form->log->messageId !== null) {
+                $email->e_message_id = $form->log->messageId;
+            }
             $email->e_language_id = $form->params->language;
             $email->e_template_type_id = $form->params->templateType;
             if ($form->clients !== null) {
                 $email->e_client_id = $form->clients;
             }
             if ($form->leads !== null) {
-                $email->e_lead_id = $form->leads;
+                $email->e_lead_id = is_array($form->leads) ? $form->leads[0] : $form->leads;
             }
             if ($form->cases !== null) {
                 $email->e_case_id = $form->cases;
