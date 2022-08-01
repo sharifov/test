@@ -216,7 +216,7 @@ class Email extends BaseActiveRecord implements EmailInterface
             ->viaTable(
                 'email_contact',
                 ['ec_email_id' => 'e_id'],
-                function($query) {
+                function ($query) {
                     $query->onCondition(['ec_type_id' => EmailContactType::FROM]);
                 }
             );
@@ -228,10 +228,10 @@ class Email extends BaseActiveRecord implements EmailInterface
         ->viaTable(
             'email_contact',
             ['ec_email_id' => 'e_id'],
-            function($query) {
+            function ($query) {
                 $query->onCondition(['ec_type_id' => EmailContactType::TO]);
             }
-            );
+        );
     }
 
     public function getEmailFrom($masking = true): string
@@ -463,6 +463,11 @@ class Email extends BaseActiveRecord implements EmailInterface
     public function hasCase(): bool
     {
         return $this->case !== null;
+    }
+
+    public function hasClient(): bool
+    {
+        return $this->client !== null;
     }
 
     public function getProjectId(): ?int

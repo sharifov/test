@@ -661,8 +661,6 @@ class ProductQuoteController extends FController
                                         $errorData['submessage'] = 'Create client remainder notification job failed.';
                                         $errorData['project_id'] = $case->cs_project_id;
                                         $errorData['case_id'] = $case->cs_id;
-
-                                        Yii::warning($errorData, 'ProductQuoteController:actionReprotectionQuoteSendEmail:Throwable');
                                     }
                                 }
                             }

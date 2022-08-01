@@ -10,8 +10,10 @@ use Exception;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use src\dto\flightQuote\UnUsedSegmentDTO;
+use src\entities\cases\CaseEventLog;
 use src\entities\cases\Cases;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class UnUsedSegmentService
@@ -69,7 +71,7 @@ class UnUsedSegmentService
             $daysToFlight = $departureDate->diff($now)->days;
 
             foreach ($notificationIntervals['notification_intervals'] as $setting) {
-                if ($this->isBetween($daysToFlight, $setting)) {
+                if ($daysToFlight > 0 && $this->isBetween($daysToFlight, $setting)) {
                     $nextNotification = $now->add(new DateInterval('P' . $setting['frequency'] . 'D'))->format('Y-m-d H:i:s');
                 }
             }
@@ -137,7 +139,38 @@ class UnUsedSegmentService
 
             $job = new SendNotificationToClientJob();
             $job->unUsedSegment = $unUsedSegment;
-            Yii::$app->queue_email_job->delay($delayJob)->priority(150)->push($job);
+            $jobId = Yii::$app->queue_email_job->delay($delayJob)->priority(150)->push($job);
+
+            $case = Cases::findOne($unUsedSegment->caseId);
+            if ($case && $jobId) {
+                $case->addEventLog(
+                    CaseEventLog::RE_PROTECTION_ADDED_TO_REMAINDER_QUEUE,
+                    'Change Product Quote List added to queue email remainder notification',
+                    ['productQuoteChangeId' => $unUsedSegment->productQuoteChangeId, 'jobId' => $jobId],
+                    CaseEventLog::CATEGORY_INFO
+                );
+            }
         }
+    }
+
+    /**
+     * @param int $caseId
+     * @param int $productQuoteChangeId
+     * @return void
+     * @throws Exception
+     */
+    public function checkIfChangeListIsAddedToQueue(int $caseId, int $productQuoteChangeId): bool
+    {
+        $eventLog = CaseEventLog::find()
+            ->where(['cel_case_id' => $caseId, 'cel_type_id' => CaseEventLog::RE_PROTECTION_ADDED_TO_REMAINDER_QUEUE])
+            ->one();
+        if ($eventLog) {
+            $existingProductQuoteChangeId = ArrayHelper::getValue($eventLog->cel_data_json, 'productQuoteChangeId', '');
+            if (!empty($existingProductQuoteChangeId) && $existingProductQuoteChangeId == $productQuoteChangeId) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

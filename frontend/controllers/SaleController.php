@@ -249,9 +249,11 @@ class SaleController extends FController
             if (!$project->api_key) {
                 throw new \DomainException('Not found API KEY. Project. Id ' . $projectId);
             }
+
+            $confNumber = ArrayHelper::getValue($caseSale->getSaleDataDecoded(), 'bookingId');
             $data = [
                 'apiKey' => $project->api_key,
-                'bookingId' => $caseSale->css_sale_book_id,
+                'bookingId' => $confNumber !== $caseSale->css_sale_book_id ? $confNumber : $caseSale->css_sale_book_id,
                 'emails' => $emails,
                 'visibilityType' => 'all',
             ];

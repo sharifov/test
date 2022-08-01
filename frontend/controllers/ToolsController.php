@@ -6,8 +6,10 @@ use borales\extensions\phoneInput\PhoneInputValidator;
 use common\components\AppService;
 use common\components\CheckPhoneByNeutrinoJob;
 use common\components\CheckPhoneNumberJob;
+use common\models\Lead;
 use common\models\Quote;
 use frontend\models\search\ComposerLockSearch;
+use modules\smartLeadDistribution\src\services\SmartLeadDistributionService;
 use src\forms\file\CsvUploadForm;
 use src\model\contactPhoneList\service\ContactPhoneListService;
 use src\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
@@ -26,6 +28,7 @@ use common\models\search\ApiLogSearch;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
+use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\queue\Queue;
 use yii\web\Controller;
@@ -484,5 +487,41 @@ class ToolsController extends FController
             'crm-export-composer-lock-' . $date . '.json',
             ['mimeType' => 'application/json']
         );
+    }
+
+    public function actionLeadRating($id = null): string
+    {
+        $dataRating = [];
+        $errors = [];
+
+
+        if ($id !== null) {
+            $lead = Lead::find()
+                ->limit(1);
+
+            if (is_numeric($id)) {
+                $lead->where([
+                    'id' => $id
+                ]);
+            } else {
+                $lead->where([
+                    'uid' => $id
+                ]);
+            }
+
+            $lead = $lead->one();
+
+            if ($lead !== null) {
+                $dataRating = SmartLeadDistributionService::countPointsWithExtraData($lead);
+            } else {
+                $errors[] = 'Lead not exists!';
+            }
+        }
+
+        return $this->render('lead-rating', [
+            'id' => Html::encode($id),
+            'dataRating' => $dataRating,
+            'errors' => $errors
+        ]);
     }
 }

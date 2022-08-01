@@ -13,13 +13,19 @@ class CallCompletionChecker implements CompletionCheckerInterface
 {
     private Call $taskModel;
     private TaskList $taskList;
+    private ?string $userTaskStartDT;
+    private ?string $userTaskEndDT;
 
     public function __construct(
         Call $taskModel,
-        TaskList $taskList
+        TaskList $taskList,
+        ?string $userTaskStartDT = null,
+        ?string $userTaskEndDT = null
     ) {
         $this->taskModel = $taskModel;
         $this->taskList = $taskList;
+        $this->userTaskStartDT = $userTaskStartDT;
+        $this->userTaskEndDT = $userTaskEndDT;
     }
 
     public function check(): bool
@@ -27,7 +33,8 @@ class CallCompletionChecker implements CompletionCheckerInterface
         if (!CronExpressionService::isDueCronExpression($this->taskList->tl_cron_expression)) {
             return false;
         }
-        $callTaskDto = new CallTaskDTO($this->taskModel);
+
+        $callTaskDto = new CallTaskDTO($this->taskModel, $this->userTaskStartDT, $this->userTaskEndDT);
         return ConditionExpressionService::isValidCondition(
             $this->taskList->tl_condition,
             [CallTaskObject::OBJ_CALL => $callTaskDto]

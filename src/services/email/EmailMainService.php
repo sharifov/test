@@ -39,6 +39,7 @@ use src\auth\Auth;
 use modules\taskList\src\entities\TaskObject;
 use src\entities\email\form\EmailForm;
 use src\repositories\email\EmailOldRepository;
+use src\services\cases\CasesCommunicationService;
 
 /**
  *
@@ -108,7 +109,8 @@ class EmailMainService implements EmailServiceInterface
     {
         try {
             $this->emailNormObj = $this->emailRepository->find($emailId);
-        } catch (\Throwable $e) {}
+        } catch (\Throwable $e) {
+        }
 
         return $this->emailNormObj;
     }
@@ -195,7 +197,7 @@ class EmailMainService implements EmailServiceInterface
                 TaskObject::OBJ_EMAIL,
                 $emailId,
                 Auth::id()
-                );
+            );
             \Yii::$app->queue_job->push($job);
         }
     }
@@ -364,6 +366,8 @@ class EmailMainService implements EmailServiceInterface
         $userID = $email->e_created_user_id;
         $case = $email->case ?? null;
         if ($case) {
+            (Yii::createObject(CasesCommunicationService::class))->processIncoming($case, CasesCommunicationService::TYPE_PROCESSING_EMAIL);
+
             (Yii::createObject(CasesManageService::class))->needAction($case->cs_id);
             $this->addCreateSaleJob($case, $emailDTO->emailFrom);
 

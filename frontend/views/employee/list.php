@@ -684,6 +684,16 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
                                         <?= $form->field($multipleForm, 'status')->dropDownList($multipleForm->availableList->getStatuses(), ['prompt' => '']) ?>
                                     </div>
                                 </div>
+
+                                <?php /** @fflag FFlag::FF_KEY_DISPLAY_SKILL_FIELD_ON_MULTIPLE_UPDATE_USERS, Display skill field on multiple update users */
+                                if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_DISPLAY_SKILL_FIELD_ON_MULTIPLE_UPDATE_USERS)) : ?>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <?= $form->field($multipleForm, 'up_skill')->dropDownList(\common\models\UserProfile::SKILL_TYPE_LIST, ['prompt' => '']) ?>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+
                                 <?= $form->field($multipleForm, 'user_list_json')->hiddenInput(['id' => 'user_list_json'])->label(false) ?>
                             </div>
                             <div class="col-md-12">

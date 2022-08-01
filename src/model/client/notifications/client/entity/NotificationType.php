@@ -13,16 +13,19 @@ use yii\bootstrap4\Html;
 class NotificationType
 {
     public const PRODUCT_QUOTE_CHANGE_AUTO_DECISION_PENDING_EVENT = 1;
+    public const PRODUCT_QUOTE_CHANGE_CLIENT_REMAINDER_NOTIFICATION_EVENT = 2;
 
     /**
      * @see \src\model\project\entity\params\ClientNotification property name must equal of this list
      */
     private const LIST = [
         self::PRODUCT_QUOTE_CHANGE_AUTO_DECISION_PENDING_EVENT => 'productQuoteChangeAutoDecisionPendingEvent',
+        self::PRODUCT_QUOTE_CHANGE_CLIENT_REMAINDER_NOTIFICATION_EVENT => 'productQuoteChangeClientRemainderNotificationEvent',
     ];
 
     private const CSS_CLASS_LIST = [
         self::PRODUCT_QUOTE_CHANGE_AUTO_DECISION_PENDING_EVENT => 'info',
+        self::PRODUCT_QUOTE_CHANGE_CLIENT_REMAINDER_NOTIFICATION_EVENT => 'info',
     ];
 
     private int $value;

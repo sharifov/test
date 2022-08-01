@@ -13,7 +13,7 @@ use yii\web\View;
 
 ?>
 
-<div class="phone-widget" style="margin-bottom: 30px">
+<div class="phone-widget" style="margin-bottom: 30px;z-index: 1050;">
 
   <div class="phone-widget__header">
     <div class="phone-widget__heading">

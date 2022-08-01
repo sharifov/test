@@ -224,7 +224,7 @@ $leadAbacDto = new LeadAbacDto($leadModel, $userId);
         $leadSaleAbacDto = new LeadSaleAbacDto($leadModel, Auth::id());
         /** @abac new $leadSaleAbacDto, LeadSaleAbacObject::LOGIC_CLIENT_DATA, LeadSaleAbacObject::ACTION_VIEW, Access to view sale in lead view */
         if (!empty($leadModel->bo_flight_id) && Yii::$app->abac->can($leadSaleAbacDto, LeadSaleAbacObject::NS, LeadSaleAbacObject::ACTION_VIEW)) {
-            $buttonsSubAction[] = SaleWidget::widget(['leadId' => $leadModel->id]);
+            $buttonsSubAction[] = SaleWidget::widget(['leadId' => $leadModel->id, 'saleId' => $leadModel->bo_flight_id]);
         }
     }
 

@@ -205,7 +205,7 @@ class CallOutEndedJob extends BaseJob implements JobInterface
                 }
                 if ($call->c_call_duration >= SettingHelper::getUserPrickedCallDuration() && $call->isStatusCompleted()) {
                     LeadBusinessExtraQueueService::addLeadBusinessExtraQueueRemoverJob($lead->id, LeadBusinessExtraQueueLogStatus::REASON_CALL);
-                } elseif (($call->isDeclined() || $call->isStatusNoAnswer()) && LeadBusinessExtraQueueLogQuery::isLeadWasInBusinessExtraQueue($lead->id)) {
+                } elseif (($call->isDeclined() || $call->isStatusNoAnswer() || $call->isStatusBusy() || $call->isStatusFailed() ) && LeadBusinessExtraQueueLogQuery::isLeadWasInBusinessExtraQueue($lead->id)) {
                     LeadBusinessExtraQueueService::addLeadBusinessExtraQueueRemoverJob($lead->id, LeadBusinessExtraQueueLogStatus::REASON_FAILED_CALL);
                 }
                 return;

@@ -12,6 +12,7 @@ use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateChil
 use modules\product\src\entities\productQuote\events\ProductQuoteRecalculateProfitAmountEvent;
 use modules\product\src\entities\productQuote\events\ProductQuoteReplaceEvent;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeAutoDecisionPendingEvent;
+use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeClientRemainderNotificationEvent;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionConfirmEvent;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionModifyEvent;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeDecisionRefundEvent;
@@ -93,6 +94,10 @@ return [
     ProductClientBudgetChangedEvent::class => [],
 
     ProductQuoteChangeAutoDecisionPendingEvent::class => [
+        \src\model\client\notifications\listeners\productQuoteChangeAutoDecisionPending\ClientNotificationListener::class,
+    ],
+
+    ProductQuoteChangeClientRemainderNotificationEvent::class => [
         \src\model\client\notifications\listeners\productQuoteChangeAutoDecisionPending\ClientNotificationListener::class,
     ],
 

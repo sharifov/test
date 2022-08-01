@@ -3,6 +3,8 @@
 namespace console\controllers;
 
 use src\helpers\app\AppHelper;
+use src\model\client\notifications\email\ClientNotificationEmailExecutor;
+use src\model\client\notifications\email\entity\ClientNotificationEmailList;
 use src\model\client\notifications\phone\ClientNotificationPhoneExecutor;
 use src\model\client\notifications\phone\entity\ClientNotificationPhoneList;
 use src\model\client\notifications\sms\ClientNotificationSmsExecutor;
@@ -18,12 +20,14 @@ use yii\helpers\Console;
  *
  * @property ClientNotificationPhoneExecutor $clientNotificationPhoneExecutor
  * @property ClientNotificationSmsExecutor $clientNotificationSmsExecutor
+ * @property ClientNotificationEmailExecutor $clientNotificationEmailExecutor
  * @property TransactionManager $transactionManager
  */
 class ClientNotificationsController extends Controller
 {
     private ClientNotificationPhoneExecutor $clientNotificationPhoneExecutor;
     private ClientNotificationSmsExecutor $clientNotificationSmsExecutor;
+    private ClientNotificationEmailExecutor $clientNotificationEmailExecutor;
     private TransactionManager $transactionManager;
 
     public function __construct(
@@ -31,12 +35,14 @@ class ClientNotificationsController extends Controller
         $module,
         ClientNotificationPhoneExecutor $clientNotificationPhoneExecutor,
         ClientNotificationSmsExecutor $clientNotificationSmsExecutor,
+        ClientNotificationEmailExecutor $clientNotificationEmailExecutor,
         TransactionManager $transactionManager,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
         $this->clientNotificationPhoneExecutor = $clientNotificationPhoneExecutor;
         $this->clientNotificationSmsExecutor = $clientNotificationSmsExecutor;
+        $this->clientNotificationEmailExecutor = $clientNotificationEmailExecutor;
         $this->transactionManager = $transactionManager;
     }
 
@@ -44,6 +50,7 @@ class ClientNotificationsController extends Controller
     {
         $this->callNotify();
         $this->smsNotify();
+        $this->emailNotify();
         return ExitCode::OK;
     }
 
@@ -171,6 +178,72 @@ class ClientNotificationsController extends Controller
                 ], 'ClientNotificationsController:smsNotify');
                 $rows[] = [
                     $notification->cnsl_id,
+                    sprintf("%s", $this->ansiFormat("error", Console::BG_RED)),
+                    $e->getMessage(),
+                ];
+            }
+            $n++;
+            Console::clearLineBeforeCursor();
+            Console::updateProgress($n, $count);
+        }
+
+        Console::endProgress("done." . PHP_EOL);
+
+        echo Table::widget([
+            'headers' => [
+                'Id',
+                'Result',
+                'Message',
+            ],
+            'rows' => $rows,
+        ]);
+    }
+
+    private function emailNotify(): void
+    {
+        print("Email Notify\n");
+
+        $now = date('Y-m-d H:i:s');
+        $notifications = ClientNotificationEmailList::find()
+            ->new()
+            ->andWhere([
+                'OR',
+                ['IS', 'cnel_start', null],
+                ['<=', 'cnel_start', $now]
+            ])
+            ->andWhere([
+                'OR',
+                ['IS', 'cnel_end', null],
+                ['>=', 'cnel_end', $now]
+            ])
+            ->limit(100)
+            ->all();
+
+        $count = count($notifications);
+
+        print("Found notifications " . $count . "\n");
+
+        $n = 0;
+
+        Console::startProgress(0, $count, 'Process: ', false);
+
+        $rows = [];
+        foreach ($notifications as $notification) {
+            try {
+                $this->clientNotificationEmailExecutor->execute($notification);
+                $rows[] = [
+                    $notification->cnel_id,
+                    'done',
+                    'success'
+                ];
+            } catch (\Throwable $e) {
+                \Yii::error([
+                    'message' => 'Client Email Notification processing error',
+                    'emailNotificationId' => $notification->cnel_id,
+                    'exception' => AppHelper::throwableLog($e),
+                ], 'ClientNotificationsController:emailNotify');
+                $rows[] = [
+                    $notification->cnel_id,
                     sprintf("%s", $this->ansiFormat("error", Console::BG_RED)),
                     $e->getMessage(),
                 ];

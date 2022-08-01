@@ -454,6 +454,10 @@ return [
         'smart-search' => [
             'class' => \kivork\search\SearchModule::class,
         ],
+        'smart-lead-distribution' => [
+            'class' => \modules\smartLeadDistribution\SmartLeadDistributionModule::class,
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
+        ],
     ],
     'as beforeRequest' => [
         'class' => \frontend\components\UserSiteActivityLog::class,

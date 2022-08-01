@@ -2,6 +2,7 @@
 
 namespace modules\taskList\src\services\taskCompletion;
 
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\taskList\src\entities\taskList\TaskListQuery;
 use modules\taskList\src\entities\userTask\repository\UserTaskRepository;
 use modules\taskList\src\entities\userTask\UserTaskQuery;
@@ -50,30 +51,35 @@ class UserTaskCompletionService
 
         if ($taskLists) {
             foreach ($taskLists as $taskList) {
-                $completionChecker = (new TaskListCompletionFactory(
-                    $this->taskObject,
-                    $taskModel,
-                    $taskList
-                ))->create();
-
-                if (!$completionChecker->check()) {
-                    continue;
-                }
-
                 $userTaskQuery = UserTaskQuery::getUserTaskCompletion(
                     $taskList->tl_id,
                     $this->userId,
                     $this->targetObject,
                     $this->targetObjectId,
                     TaskCompletionDictionary::getUserTaskProcessingStatuses(),
+                    UserShiftSchedule::getProcessingStatuses(),
+                    (new \DateTimeImmutable('now', new \DateTimeZone('UTC'))),
                     $this->userTasksProcessed
                 );
 
-                if ($userTask = $userTaskQuery->limit(1)->one()) {
-                    $userTask->setStatusComplete();
-                    (new UserTaskRepository($userTask))->save();
-                    $this->userTasksProcessed[] = $userTask->ut_id;
+                if (!$userTask = $userTaskQuery->limit(1)->one()) {
+                    continue;
                 }
+
+                $completionChecker = (new TaskListCompletionFactory(
+                    $this->taskObject,
+                    $taskModel,
+                    $taskList,
+                    $userTask
+                ))->create();
+
+                if (!$completionChecker->check()) {
+                    continue;
+                }
+
+                $userTask->setStatusComplete();
+                (new UserTaskRepository($userTask))->save();
+                $this->userTasksProcessed[] = $userTask->ut_id;
             }
         }
         return $this;

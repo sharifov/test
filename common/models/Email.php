@@ -96,6 +96,7 @@ use src\entities\email\EmailInterface;
  * @property string $emailBodyHtml
  * @property string|mixed $priorityName
  * @property Employee $updatedUser
+ * @property Client $client
  */
 class Email extends \yii\db\ActiveRecord implements EmailInterface
 {
@@ -1019,6 +1020,11 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
     public function hasCase(): bool
     {
         return $this->e_case_id !== null;
+    }
+
+    public function hasClient(): bool
+    {
+        return $this->e_client_id !== null;
     }
 
     public function getProjectId(): ?int

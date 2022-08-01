@@ -16,7 +16,8 @@ class LeadBusinessExtraQueueLogStatus
         self::STATUS_ADDED_TO_BUSINESS_EXTRA_QUEUE => 'Added to Business Extra queue',
     ];
 
-    public const REASON_CALL = 'Received Call';
+    public const REASON_CALL = 'Outgoing Call';
+    public const REASON_INCOMING_CALL = 'Received Call';
     public const REASON_FAILED_CALL = 'Failed Call';
     public const REASON_RECEIVED_EMAIL = 'Received Email';
     public const REASON_RECEIVED_SMS = 'Received SMS';

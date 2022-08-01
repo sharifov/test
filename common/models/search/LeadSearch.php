@@ -26,6 +26,10 @@ use common\models\UserGroupAssign;
 use common\models\UserProfile;
 use modules\featureFlag\FFlag;
 use modules\fileStorage\src\entity\fileLead\FileLead;
+use modules\smartLeadDistribution\abac\dto\SmartLeadDistributionAbacDto;
+use modules\smartLeadDistribution\abac\SmartLeadDistributionAbacObject;
+use modules\smartLeadDistribution\src\services\SmartLeadDistributionService;
+use modules\smartLeadDistribution\src\SmartLeadDistribution;
 use src\access\EmployeeGroupAccess;
 use src\access\EmployeeProjectAccess;
 use src\auth\Auth;
@@ -34,6 +38,7 @@ use src\model\callLog\entity\callLog\CallLogType;
 use src\model\callLog\entity\callLogLead\CallLogLead;
 use src\model\clientChatLead\entity\ClientChatLead;
 use src\model\leadData\entity\LeadData;
+use src\model\leadDataKey\services\LeadDataKeyDictionary;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
 use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\model\leadUserRating\entity\LeadUserRating;
@@ -755,9 +760,9 @@ class LeadSearch extends Lead
 
         if (!empty($this->emailsQtyFrom) || !empty($this->emailsQtyTo)) {
             $query->leftJoin(
-                '(' . EmailRepositoryFactory::getRepository()->getRawSqlCountGroupedByLead(). ') AS emails',
+                '(' . EmailRepositoryFactory::getRepository()->getRawSqlCountGroupedByLead() . ') AS emails',
                 'leads.id = emails.e_lead_id'
-                );
+            );
 
             if (!empty($this->emailsQtyFrom)) {
                 if ((int) $this->emailsQtyFrom === 0) {
@@ -3009,6 +3014,24 @@ class LeadSearch extends Lead
     public function searchBusinessInbox($params, Employee $user): ActiveDataProvider
     {
         $query = $this->leadBadgesRepository->getBusinessInboxQuery($user);
+
+        /** @fflag FFlag::FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE, Smart Lead Distribution Enable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE) === true) {
+            $allowedCategory = SmartLeadDistributionService::getAllowedCategories();
+            //null required for load leads that were created before implementation Smart Lead Distribution
+            $allowedCategory[] = null;
+
+            $query->leftJoin(
+                'lead_data',
+                'leads.id = lead_data.ld_lead_id AND lead_data.ld_field_key = :key',
+                [
+                    'key' => LeadDataKeyDictionary::KEY_LEAD_RATING_CATEGORY,
+                ]
+            );
+
+            $query->andWhere(['IN', 'lead_data.ld_field_value', $allowedCategory]);
+        }
+
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
         $leadTable = Lead::tableName();
 

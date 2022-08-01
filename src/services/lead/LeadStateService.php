@@ -214,7 +214,7 @@ class LeadStateService
         $this->leadRepository->save($lead);
     }
 
-    public function close($lead, ?string $leadStatusReasonKey = null, ?int $creatorId = null, ?string $reasonComment = ''): void
+    public function close($lead, ?string $leadStatusReasonKey = null, ?int $creatorId = null, ?string $reasonComment = '', ?int $originId = null): void
     {
         $lead = $this->serviceFinder->leadFind($lead);
         $lead->close($leadStatusReasonKey, $creatorId, $reasonComment);
@@ -223,7 +223,8 @@ class LeadStateService
             $leadStatusReasonKey,
             null,
             $creatorId,
-            $reasonComment
+            $reasonComment,
+            $originId
         );
         Event::on(
             LeadEvents::class,

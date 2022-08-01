@@ -32,9 +32,13 @@ interface EmailInterface
 
     public function hasCase(): bool;
 
+    public function hasClient(): bool;
+
     public function getLead();
 
     public function getCase();
+
+    public function getClient();
 
     public function getProject();
 
