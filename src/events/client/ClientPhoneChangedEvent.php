@@ -4,9 +4,9 @@ namespace src\events\client;
 
 use common\models\ClientPhone;
 
-class ClientPhoneCreatedEvent implements ClientPhoneEventInterface
+class ClientPhoneChangedEvent implements ClientPhoneEventInterface
 {
-    public ClientPhone $clientPhone;
+    private ClientPhone $clientPhone;
 
     /**
      * @param ClientPhone $clientPhone

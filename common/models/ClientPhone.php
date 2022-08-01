@@ -9,6 +9,7 @@ use src\behaviors\clientPhone\ContactPhoneListBehavior;
 use src\behaviors\PhoneCleanerBehavior;
 use src\behaviors\UidPhoneGeneratorBehavior;
 use src\entities\EventTrait;
+use src\events\client\ClientPhoneChangedEvent;
 use src\events\client\ClientPhoneCreatedEvent;
 use src\model\contactPhoneList\entity\ContactPhoneList;
 use Yii;
@@ -331,5 +332,13 @@ class ClientPhone extends \yii\db\ActiveRecord
             return $result['phone'];
         }
         return null;
+    }
+
+    public function setType(?int $type)
+    {
+        if ($this->type != $type) {
+            $this->type = $type;
+            $this->recordEvent(new ClientPhoneChangedEvent($this));
+        }
     }
 }

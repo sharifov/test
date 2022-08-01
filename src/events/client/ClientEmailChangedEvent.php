@@ -4,7 +4,7 @@ namespace src\events\client;
 
 use common\models\ClientEmail;
 
-class ClientEmailCreatedEvent implements ClientEmailEventInterface
+class ClientEmailChangedEvent implements ClientEmailEventInterface
 {
     private ClientEmail $clientEmail;
 
