@@ -125,19 +125,8 @@ class LeadTaskListService
 
     public function isProcessAllowed(bool $isResultBool = true): bool
     {
-        /** @fflag FFlag::FF_KEY_LEAD_TASK_ASSIGN, Lead to task List assign checker */
-        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_LEAD_TASK_ASSIGN)) {
-            if ($isResultBool) {
-                return false;
-            }
-            throw new \RuntimeException('Feature Flag(' . FFlag::FF_KEY_LEAD_TASK_ASSIGN . ') is disabled');
-        }
-
-        if (!$employee = $this->lead->employee ?? null) {
-            if ($isResultBool) {
-                return false;
-            }
-            throw new \RuntimeException('Lead owner is empty');
+        if (!$this->isEnableFFAndNotEmptyOwner($isResultBool)) {
+            return false;
         }
 
         /** @abac $leadTaskListAbacDto, LeadTaskListAbacObject::PROCESSING_TASK, LeadTaskListAbacObject::ACTION_ACCESS, Lead to task List processing checker */
@@ -145,7 +134,7 @@ class LeadTaskListService
             new LeadTaskListAbacDto($this->lead, $this->lead->employee_id),
             LeadTaskListAbacObject::PROCESSING_TASK,
             LeadTaskListAbacObject::ACTION_ACCESS,
-            $employee
+            $this->lead->employee
         );
         if (!$can) {
             if ($isResultBool) {
@@ -161,6 +150,25 @@ class LeadTaskListService
             throw new \RuntimeException('Has ActiveLeadObjectSegment is false');
         }
 
+        return true;
+    }
+
+    public function isEnableFFAndNotEmptyOwner(bool $isResultBool = true): bool
+    {
+        /** @fflag FFlag::FF_KEY_LEAD_TASK_ASSIGN, Lead to task List assign checker */
+        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_LEAD_TASK_ASSIGN)) {
+            if ($isResultBool) {
+                return false;
+            }
+            throw new \RuntimeException('Feature Flag(' . FFlag::FF_KEY_LEAD_TASK_ASSIGN . ') is disabled');
+        }
+
+        if (!$this->lead->employee ?? null) {
+            if ($isResultBool) {
+                return false;
+            }
+            throw new \RuntimeException('Lead owner is empty');
+        }
         return true;
     }
 

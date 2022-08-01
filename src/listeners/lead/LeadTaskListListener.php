@@ -18,9 +18,9 @@ class LeadTaskListListener
             if ($event->getNewOwnerId() === $event->getOldOwnerId()) {
                 return;
             }
-//            if (!(new LeadTaskListService($event->getLead()))->isProcessAllowed(false)) {
-//                return;
-//            }
+            if (!(new LeadTaskListService($event->getLead()))->isEnableFFAndNotEmptyOwner(false)) {
+                return;
+            }
 
             $job = new LeadTaskListJob($event->lead->id, $event->getOldOwnerId());
             \Yii::$app->queue_job->priority(100)->delay(5)->push($job);
