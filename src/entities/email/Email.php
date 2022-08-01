@@ -543,4 +543,13 @@ class Email extends BaseActiveRecord implements EmailInterface
     {
         return $this->e_created_user_id ? true : false;
     }
+
+    public function load($data, $formName = null)
+    {
+        parent::load($data, $formName);
+
+        if (isset($data['e_id'])) {
+            $this->e_id = $data['e_id'];
+        }
+    }
 }
