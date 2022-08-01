@@ -13,6 +13,7 @@ use src\dto\flightQuote\UnUsedSegmentDTO;
 use src\entities\cases\CaseEventLog;
 use src\entities\cases\Cases;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class UnUsedSegmentService
@@ -150,5 +151,26 @@ class UnUsedSegmentService
                 );
             }
         }
+    }
+
+    /**
+     * @param int $caseId
+     * @param int $productQuoteChangeId
+     * @return void
+     * @throws Exception
+     */
+    public function checkIfChangeListIsAddedToQueue(int $caseId, int $productQuoteChangeId): bool
+    {
+        $eventLog = CaseEventLog::find()
+            ->where(['cel_case_id' => $caseId, 'cel_type_id' => CaseEventLog::RE_PROTECTION_ADDED_TO_REMAINDER_QUEUE])
+            ->one();
+        if ($eventLog) {
+            $existingProductQuoteChangeId = ArrayHelper::getValue($eventLog->cel_data_json, 'productQuoteChangeId', '');
+            if (!empty($existingProductQuoteChangeId) && $existingProductQuoteChangeId == $productQuoteChangeId) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
