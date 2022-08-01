@@ -2,12 +2,13 @@
 
 namespace modules\featureFlag;
 
+use kivork\FeatureFlag\Models\FeatureFlagObjectModelInterface;
 use kivork\FeatureFlag\Models\flags\dateTime\DateTimeFeatureFlag;
 use modules\featureFlag\models\debug\DebugFeatureFlag;
 use modules\featureFlag\models\user\UserFeatureFlag;
 use yii\base\InvalidConfigException;
 
-class FFlag
+class FFlag implements FeatureFlagObjectModelInterface
 {
     public const FF_KEY_LPP_ENABLE = 'lppEnable';
     public const FF_KEY_DEBUG = 'debug';
