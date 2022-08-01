@@ -172,6 +172,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
                 'e_project_id' => $form->projectId,
                 'e_departament_id' => $form->depId,
                 'e_created_user_id' => $form->getUserId() ?? $this->userId,
+                'e_id' => $form->emailId ?? null,
             ];
             $email = Email::create($emailData);
             //=!Email
@@ -240,7 +241,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             //=!link Leads
 
             //=link Reply
-            if ($form->replyId !== null) {
+            if (!empty($form->replyId)) {
                 $this->emailRepository->linkReply($email, $form->replyId);
             }
             //=!link Reply
@@ -430,22 +431,24 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
         return $data;
     }
 
-    public function createFromLead(EmailPreviewFromInterface $previewEmailForm, Lead $lead, array $attachments = []): Email
+    public function createFromLead(EmailPreviewFromInterface $previewEmailForm, Lead $lead, array $attachments = [], $emailId = null): Email
     {
         $data = $this->getDataArrayFromPreviewForm($previewEmailForm, $attachments);
         $data['projectId'] = $lead->project_id;
         $data['depId'] = $lead->l_dep_id;
         $data['leadsIds'] = [$lead->id];
+        $data['emailId'] = $emailId;
 
         return $this->create(EmailForm::fromArray($data));
     }
 
-    public function createFromCase(EmailPreviewFromInterface $previewEmailForm, Cases $case, array $attachments = []): Email
+    public function createFromCase(EmailPreviewFromInterface $previewEmailForm, Cases $case, array $attachments = [], $emailId = null): Email
     {
         $data = $this->getDataArrayFromPreviewForm($previewEmailForm, $attachments);
         $data['projectId'] = $case->cs_project_id;
         $data['depId'] = $case->cs_dep_id;
         $data['casesIds'] = [$case->cs_id];
+        $data['emailId'] = $emailId;
 
         return $this->create(EmailForm::fromArray($data));
     }
@@ -491,6 +494,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
         }
 
         $data = [
+            'emailId'       =>  $emailDTO->emailId ?? null,
             'userId'        =>  $this->userId,
             'status'        =>  $emailDTO->statusId,
             'type'          =>  $emailDTO->typeId,
