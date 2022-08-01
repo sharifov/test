@@ -700,9 +700,19 @@ class ProductQuoteController extends FController
 
                                 /** @fflag FFlag::FF_KEY_SCHEDULE_CHANGE_CLIENT_REMAINDER_NOTIFICATION, Create remainder notification enable/disable */
                                 if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SCHEDULE_CHANGE_CLIENT_REMAINDER_NOTIFICATION)) {
-                                    //TODO: Check if quote is already in queue
+                                    $addedToQueue = false;
+                                    $eventLog = CaseEventLog::find()
+                                        ->where(['cel_case_id' => $case->cs_id, 'cel_type_id' => CaseEventLog::RE_PROTECTION_ADDED_TO_REMAINDER_QUEUE])
+                                        ->one();
+                                    if ($eventLog) {
+                                        $existingProductQuoteChangeId = ArrayHelper::getValue($eventLog->cel_data_json, 'productQuoteChangeId', '');
+                                        if (!empty($existingProductQuoteChangeId) && $existingProductQuoteChangeId == $productQuoteChange->pqc_id) {
+                                            $addedToQueue = true;
+                                        }
+                                    }
+
                                     $unUsedSegment = $this->unUsedSegmentService->getUnUsedSegmentData($reprotectionQuote, $productQuoteChange, $case);
-                                    if (!empty($unUsedSegment)) {
+                                    if (!empty($unUsedSegment) && !$addedToQueue) {
                                         try {
                                             $this->unUsedSegmentService->addToQueueJob($unUsedSegment);
                                         } catch (\Throwable $throwable) {

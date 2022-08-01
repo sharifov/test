@@ -10,6 +10,7 @@ use Exception;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use src\dto\flightQuote\UnUsedSegmentDTO;
+use src\entities\cases\CaseEventLog;
 use src\entities\cases\Cases;
 use Yii;
 
@@ -137,7 +138,17 @@ class UnUsedSegmentService
 
             $job = new SendNotificationToClientJob();
             $job->unUsedSegment = $unUsedSegment;
-            Yii::$app->queue_email_job->delay($delayJob)->priority(150)->push($job);
+            $jobId = Yii::$app->queue_email_job->delay($delayJob)->priority(150)->push($job);
+
+            $case = Cases::findOne($unUsedSegment->caseId);
+            if ($case && $jobId) {
+                $case->addEventLog(
+                    CaseEventLog::RE_PROTECTION_ADDED_TO_REMAINDER_QUEUE,
+                    'Change Product Quote List added to queue email remainder notification',
+                    ['productQuoteChangeId' => $unUsedSegment->productQuoteChangeId, 'jobId' => $jobId],
+                    CaseEventLog::CATEGORY_INFO
+                );
+            }
         }
     }
 }
