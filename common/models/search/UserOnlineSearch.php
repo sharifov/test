@@ -108,7 +108,7 @@ class UserOnlineSearch extends UserOnline
             return [];
         }
 
-        $query->select(['uo_user_id', 'uo_idle_state']); //'cnt' => 'COUNT(*)',
+        $query->select(['uo_user_id', 'uo_idle_state', 'GROUP_CONCAT(ud_dep_id) as userDep']); //'cnt' => 'COUNT(*)',
         $query->groupBy(['uo_user_id', 'uo_idle_state']);
 
         if (!empty($this->dep_ids)) {
@@ -120,6 +120,8 @@ class UserOnlineSearch extends UserOnline
                 $query->orWhere(['NOT IN', 'uo_user_id', $subQuery]);
             }
         }
+
+        $query->leftJoin(UserDepartment::tableName(), 'ud_user_id=uo_user_id');
 
         if ($this->ug_ids) {
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['ugs_group_id' => $this->ug_ids]);
@@ -136,6 +138,6 @@ class UserOnlineSearch extends UserOnline
         $query->cache(5);
         //$query->with(['ucUser']);
 
-        return $query->all();
+        return $query->asArray()->all();
     }
 }

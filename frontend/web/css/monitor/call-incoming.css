@@ -76,3 +76,4 @@
     background-color: #596b7d;
     color: #fff;
 }
+[v-cloak] {display: none}
