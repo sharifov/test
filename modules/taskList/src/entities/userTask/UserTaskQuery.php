@@ -152,4 +152,18 @@ class UserTaskQuery
         }
         return $data;
     }
+
+    public static function getQueryUserTaskByUserTaskList(int $userId, int $taskListId, string $targetObject, int $targetObjectId): UserTaskScopes
+    {
+        return UserTask::find()
+            ->where(['ut_user_id' => $userId])
+            ->andWhere(['ut_target_object' => $targetObject])
+            ->andWhere(['ut_target_object_id' => $targetObjectId])
+            ->andWhere(['ut_task_list_id' => $taskListId]);
+    }
+
+    public static function getQueryUserTaskByUserTaskListAndStatuses(int $userId, int $taskListId, string $targetObject, int $targetObjectId, array $statuses): UserTaskScopes
+    {
+        return self::getQueryUserTaskByUserTaskList($userId, $taskListId, $targetObject, $targetObjectId)->andWhere(['IN', 'ut_status_id', $statuses]);
+    }
 }

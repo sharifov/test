@@ -263,4 +263,25 @@ class UserTask extends \yii\db\ActiveRecord
             new UserTaskStatusChangedEvent($this, $this->ut_status_id, ($attributes['ut_status_id'] ?? null))
         );
     }
+
+    public function isComplete(): bool
+    {
+        return $this->ut_status_id === self::STATUS_COMPLETE;
+    }
+
+    public function isProcessing(): bool
+    {
+        return $this->ut_status_id === self::STATUS_PROCESSING;
+    }
+
+    public function isCanceled(): bool
+    {
+        return $this->ut_status_id === self::STATUS_CANCEL;
+    }
+
+    public function setOwner(int $newOwnerId): UserTask
+    {
+        $this->ut_user_id = $newOwnerId;
+        return $this;
+    }
 }
