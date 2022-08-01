@@ -700,18 +700,20 @@ class ProductQuoteController extends FController
 
                                 /** @fflag FFlag::FF_KEY_SCHEDULE_CHANGE_CLIENT_REMAINDER_NOTIFICATION, Create remainder notification enable/disable */
                                 if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SCHEDULE_CHANGE_CLIENT_REMAINDER_NOTIFICATION)) {
-                                    //TODO: Check if quote is already in queue
-                                    $unUsedSegment = $this->unUsedSegmentService->getUnUsedSegmentData($reprotectionQuote, $productQuoteChange, $case);
-                                    if (!empty($unUsedSegment)) {
-                                        try {
-                                            $this->unUsedSegmentService->addToQueueJob($unUsedSegment);
-                                        } catch (\Throwable $throwable) {
-                                            $errorData = AppHelper::throwableLog($throwable);
-                                            $errorData['submessage'] = 'Create client remainder notification job failed.';
-                                            $errorData['project_id'] = $case->cs_project_id;
-                                            $errorData['case_id'] = $case->cs_id;
+                                    $addedToQueue = $this->unUsedSegmentService->checkIfChangeListIsAddedToQueue($case->cs_id, $productQuoteChange->pqc_id);
+                                    if (!$addedToQueue) {
+                                        $unUsedSegment = $this->unUsedSegmentService->getUnUsedSegmentData($reprotectionQuote, $productQuoteChange, $case);
+                                        if (!empty($unUsedSegment)) {
+                                            try {
+                                                $this->unUsedSegmentService->addToQueueJob($unUsedSegment);
+                                            } catch (\Throwable $throwable) {
+                                                $errorData = AppHelper::throwableLog($throwable);
+                                                $errorData['submessage'] = 'Create client remainder notification job failed.';
+                                                $errorData['project_id'] = $case->cs_project_id;
+                                                $errorData['case_id'] = $case->cs_id;
 
-                                            Yii::warning($errorData, 'ProductQuoteController:actionReprotectionQuoteSendEmail:Throwable');
+                                                Yii::warning($errorData, 'ProductQuoteController:actionReprotectionQuoteSendEmail:Throwable');
+                                            }
                                         }
                                     }
                                 }
