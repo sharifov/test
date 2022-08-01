@@ -1137,12 +1137,7 @@ class LeadController extends ApiBaseController
             if ($modelLead->emails && $client) {
                 ClientEmail::deleteAll(['client_id' => $client->id]);
                 foreach ($modelLead->emails as $email) {
-                    $emailModel = new ClientEmail();
-
-                    $emailModel->client_id = $client->id;
-                    $emailModel->email = $email;
-                    $emailModel->created = date('Y-m-d H:i:s');
-
+                    $emailModel = ClientEmail::create($email, $client->id);
                     if (!$emailModel->save()) {
                         Yii::error(print_r($emailModel->errors, true), 'API:Lead:update:ClientEmail:save');
                         $transaction->rollBack();
@@ -1153,12 +1148,7 @@ class LeadController extends ApiBaseController
             if ($modelLead->phones && $client) {
                 ClientPhone::deleteAll(['client_id' => $client->id]);
                 foreach ($modelLead->phones as $phone) {
-                    $phoneModel = new ClientPhone();
-
-                    $phoneModel->client_id = $client->id;
-                    $phoneModel->phone = $phone;
-                    $phoneModel->created = date('Y-m-d H:i:s');
-
+                    $phoneModel = ClientPhone::create($phone, $client->id);
                     if (!$phoneModel->save()) {
                         Yii::error(print_r($phoneModel->errors, true), 'API:Lead:update:ClientPhone:save');
                         $transaction->rollBack();

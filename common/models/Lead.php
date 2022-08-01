@@ -3099,10 +3099,7 @@ Reason: {reason}',
             $client->created = date('Y-m-d H:i:s');
 
             if ($client->save()) {
-                $clientPhone = new ClientPhone();
-                $clientPhone->phone = $phoneNumber;
-                $clientPhone->client_id = $client->id;
-                $clientPhone->comments = 'incoming';
+                $clientPhone = ClientPhone::create($phoneNumber, $client->id, null, 'incoming');
                 if (!$clientPhone->save()) {
                     Yii::error(VarDumper::dumpAsString($clientPhone->errors), 'Model:Lead:createNewLeadByPhone:ClientPhone:save');
                 }

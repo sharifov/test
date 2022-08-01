@@ -66,4 +66,15 @@ class ClientPhoneQuery extends ActiveQuery
 
         return $query->asArray()->all();
     }
+
+    public static function getQueryClientPhoneByClientId(int $clientId): ClientPhoneQuery
+    {
+        return ClientPhone::find()
+            ->andWhere(['client_id' => $clientId])
+            ->andWhere([
+                'OR',
+                ['IS', 'type', null],
+                ['<>', 'type', ClientPhone::PHONE_INVALID],
+            ]);
+    }
 }
