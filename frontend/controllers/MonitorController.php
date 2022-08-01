@@ -149,20 +149,8 @@ class MonitorController extends FController
         $response['accessCallSourceType'] = [Call::SOURCE_GENERAL_LINE, Call::SOURCE_REDIRECT_CALL];
         $response['accessCallType'] = [Call::CALL_TYPE_IN];
 
-        $userDepartmentList = UserDepartment::find()
-            ->select(['ud_user_id', 'ud_dep_id'])
-            ->where(['IN', 'ud_dep_id', $response['userDepartments']])
-            ->asArray()
-            ->all();
-
         $response['userData'] = [];
         foreach ($response['onlineUserList'] as $user) {
-            $userDep = [];
-            foreach ($userDepartmentList as $department) {
-                if ((int)$department['ud_user_id'] === (int)$user['uo_user_id']) {
-                    $userDep[] = (int)$department['ud_dep_id'];
-                }
-            }
             $item = [
                 'user_id' => $user['uo_user_id'],
                 'userName' => $response['userList'][$user['uo_user_id']] ?? '',
@@ -170,7 +158,7 @@ class MonitorController extends FController
                 'status' => array_values(array_filter($response['userStatusList'], function ($userStatus) use ($user) {
                     return $userStatus['us_user_id'] === $user['uo_user_id'];
                 }))[0] ?? [],
-                'userDep' => $userDep,
+                'userDep' => $user['userDep'] ?? '',
             ];
             $response['userData'][] = $item;
         }
