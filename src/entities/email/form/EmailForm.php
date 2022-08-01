@@ -25,7 +25,7 @@ use common\models\Employee;
  * @property int $status
  * @property int $projectId
  * @property int $depId
- * @property int $emailId
+ * @property int|null $emailId
  * @property array $cases
  * @property array $clients
  * @property array $leads

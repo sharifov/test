@@ -280,6 +280,7 @@ class EmailMainService implements EmailServiceInterface
         $email = $this->oldService->create($form);
         $email->refresh();
         $this->setEmailObj($email);
+        $form->emailId = $email->e_id;
 
         if ($this->normalizedService !== null) {
             $email = $this->normalizedService->create($form);
@@ -297,7 +298,7 @@ class EmailMainService implements EmailServiceInterface
         $this->setEmailObj($email);
 
         if ($this->normalizedService !== null) {
-            $email = $this->normalizedService->createFromLead($previewEmailForm, $lead, $attachments);
+            $email = $this->normalizedService->createFromLead($previewEmailForm, $lead, $attachments, $email->e_id);
             $email->refresh();
             $this->setEmailNormObj($email);
         }
@@ -312,7 +313,7 @@ class EmailMainService implements EmailServiceInterface
         $this->setEmailObj($email);
 
         if ($this->normalizedService !== null) {
-            $email = $this->normalizedService->createFromCase($previewEmailForm, $case, $attachments);
+            $email = $this->normalizedService->createFromCase($previewEmailForm, $case, $attachments, $email->e_id);
             $email->refresh();
             $this->setEmailNormObj($email);
         }
@@ -341,6 +342,7 @@ class EmailMainService implements EmailServiceInterface
         $email = $this->oldService->createFromDTO($emailDTO, $autoDetectEmpty);
         $email->refresh();
         $this->setEmailObj($email);
+        $emailDTO->emailId = $email->e_id;
 
         if ($this->normalizedService !== null) {
             $email = $this->normalizedService->createFromDTO($emailDTO, $autoDetectEmpty);
