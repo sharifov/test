@@ -90,6 +90,9 @@ class EmailService extends SendMail implements EmailServiceInterface
     {
         try {
             $email = new Email();
+            if ($form->emailId) {
+                $email->e_id = $form->emailId;
+            }
             $email->e_type_id = $form->type;
             $email->e_status_id = $form->status;
             $email->e_is_new = $form->log->isNew;
