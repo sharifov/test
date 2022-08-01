@@ -97,6 +97,31 @@ use src\entities\email\EmailInterface;
  * @property string|mixed $priorityName
  * @property Employee $updatedUser
  * @property Client $client
+ *
+ * @property int|null $leadId
+ * @property int|null $caseId
+ * @property int|null $clientId
+ * @property int|null $projectId
+ * @property int|null $templateTypeId
+ * @property string|null $templateTypeName
+ * @property string $emailFrom
+ * @property string|null $emailFromName
+ * @property string|null $emailTo
+ * @property string|null $emailToName
+ * @property string|null $templateTypeName
+ * @property string|null $statusName
+ * @property string|null $emailSubject
+ * @property int|null $communicationId
+ * @property string|null $languageId
+ * @property int|null $departmentId
+ * @property string|null $emailBodyHtml
+ * @property array|null $emailData
+ * @property string|null $errorMessage
+ * @property string|null $hash
+ * @property string|null $messageId
+ * @property string|null $statusDoneDt
+ * @property string|null $statusName
+ *
  */
 class Email extends \yii\db\ActiveRecord implements EmailInterface
 {
