@@ -8,6 +8,7 @@ use modules\featureFlag\FFlag;
 use modules\smartLeadDistribution\abac\dto\SmartLeadDistributionAbacDto;
 use modules\smartLeadDistribution\abac\SmartLeadDistributionAbacObject;
 use modules\smartLeadDistribution\src\entities\LeadRatingParameter;
+use modules\smartLeadDistribution\src\entities\LeadRatingProcessingLog;
 use modules\smartLeadDistribution\src\objects\LeadRatingObjectInterface;
 use modules\smartLeadDistribution\src\SmartLeadDistribution;
 use src\access\ConditionExpressionService;
@@ -72,7 +73,8 @@ class SmartLeadDistributionService
 
     /**
      * @param string $objectName
-     * @return object|LeadRatingObjectInterface|null
+     * @return LeadRatingObjectInterface|null
+     * @throws \yii\base\InvalidConfigException
      */
     public static function getByName(string $objectName): ?LeadRatingObjectInterface
     {
@@ -165,7 +167,7 @@ class SmartLeadDistributionService
 
         $result['points'] = self::leadRatingProcessing($lead, function (LeadRatingParameter $leadRatingParameter, $dto, $bool) use (&$result) {
             if ($bool === true) {
-                $result['log'][] = "+ {$leadRatingParameter->lrp_point} points. Object: {$leadRatingParameter->lrp_object}, attribute: {$leadRatingParameter->lrp_attribute}";
+                $result['log'][] = new LeadRatingProcessingLog($leadRatingParameter, $dto);
             }
         });
 

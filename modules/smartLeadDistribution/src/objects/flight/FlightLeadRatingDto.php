@@ -17,6 +17,8 @@ class FlightLeadRatingDto
 
         /** @var LeadFlightSegment $fs */
         $fs = $lead->firstFlightSegment;
-        $this->date_proximity = DateHelper::getDifferentInDaysByDatesUTC($fs->departure, date('Y-m-d H:i:s'));
+        if ($fs !== null && !empty($fs->departure)) {
+            $this->date_proximity = DateHelper::getDifferentInDaysByDatesUTC($fs->departure, date('Y-m-d H:i:s'));
+        }
     }
 }
