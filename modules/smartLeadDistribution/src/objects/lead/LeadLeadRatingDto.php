@@ -12,6 +12,6 @@ class LeadLeadRatingDto
     public function __construct(Lead $lead)
     {
         $this->source_cid = $lead->source->cid;
-        $this->trip_type = $lead->trip_type;
+        $this->trip_type = $lead->trip_type ?? '';
     }
 }

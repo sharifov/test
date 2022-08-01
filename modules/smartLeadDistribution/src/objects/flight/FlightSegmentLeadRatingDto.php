@@ -15,15 +15,23 @@ class FlightSegmentLeadRatingDto
     {
         /** @var LeadFlightSegment $ffs */
         $ffs = $lead->firstFlightSegment;
-        $airportOrigin = Airports::findByIata($ffs->origin);
-        $airportDestination = Airports::findByIata($ffs->origin);
 
-        if ($airportOrigin !== null) {
-            $this->origin_country = $airportOrigin->country;
-        }
+        if ($ffs !== null) {
+            if (!empty($ffs->origin)) {
+                $airportOrigin = Airports::findByIata($ffs->origin);
 
-        if ($airportDestination !== null) {
-            $this->destination_country = $airportDestination->country;
+                if ($airportOrigin !== null) {
+                    $this->origin_country = $airportOrigin->country;
+                }
+            }
+
+            if (!empty($ffs->destination)) {
+                $airportDestination = Airports::findByIata($ffs->destination);
+
+                if ($airportDestination !== null) {
+                    $this->destination_country = $airportDestination->country;
+                }
+            }
         }
     }
 }
