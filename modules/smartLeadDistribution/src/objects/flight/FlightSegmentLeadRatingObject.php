@@ -53,8 +53,8 @@ class FlightSegmentLeadRatingObject extends BaseLeadRatingObject implements Lead
         $flo = self::ATTR_FLIGHT_SEGMENT_ORIGIN;
         $fld = self::ATTR_FLIGHT_SEGMENT_DESTINATION;
 
-        $flo['values'] = Airports::getCountryList();
-        $fld['values'] = Airports::getCountryList();
+        $flo['values'] = Airports::getCountryList(key: 'a_country_code');
+        $fld['values'] = Airports::getCountryList(key: 'a_country_code');
 
         $attributeList[] = $flo;
         $attributeList[] = $fld;

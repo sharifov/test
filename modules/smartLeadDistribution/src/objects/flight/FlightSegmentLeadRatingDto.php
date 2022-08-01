@@ -21,7 +21,7 @@ class FlightSegmentLeadRatingDto
                 $airportOrigin = Airports::findByIata($ffs->origin);
 
                 if ($airportOrigin !== null) {
-                    $this->origin_country = $airportOrigin->country;
+                    $this->origin_country = $airportOrigin->a_country_code;
                 }
             }
 
@@ -29,7 +29,7 @@ class FlightSegmentLeadRatingDto
                 $airportDestination = Airports::findByIata($ffs->destination);
 
                 if ($airportDestination !== null) {
-                    $this->destination_country = $airportDestination->country;
+                    $this->destination_country = $airportDestination->a_country_code;
                 }
             }
         }
