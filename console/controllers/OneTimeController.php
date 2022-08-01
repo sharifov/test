@@ -50,6 +50,8 @@ use src\model\contactPhoneServiceInfo\repository\ContactPhoneServiceInfoReposito
 use src\model\emailList\entity\EmailList;
 use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\model\phoneList\entity\PhoneList;
+use src\repositories\client\ClientEmailRepository;
+use src\repositories\client\ClientPhoneRepository;
 use src\repositories\client\ClientsQuery;
 use src\services\cases\CasesSaleService;
 use src\services\client\ClientCreateForm;
@@ -914,7 +916,10 @@ class OneTimeController extends Controller
             $phone->type = $oldPhone['type'] ?: ClientPhone::PHONE_NOT_SET;
             $phone->cp_title = $oldPhone['cp_title'];
             $phone->detachBehavior('timestamp');
-            if (!$phone->save()) {
+            try {
+                $clientPhoneRepository = Yii::createObject(ClientPhoneRepository::class);
+                $clientPhoneRepository->save($phone);
+            } catch (\RuntimeException $e) {
                 Yii::error(VarDumper::dumpAsString([
                     'fromId' => $fromId,
                     'toId' => $toId,
@@ -934,7 +939,11 @@ class OneTimeController extends Controller
             $email->type = $oldEmail['type'] ?: ClientEmail::EMAIL_NOT_SET;
             $email->ce_title = $oldEmail['ce_title'];
             $email->detachBehavior('timestamp');
-            if (!$email->save()) {
+
+            try {
+                $clientPhoneRepository = Yii::createObject(ClientEmailRepository::class);
+                $clientPhoneRepository->save($email);
+            } catch (\RuntimeException $e) {
                 Yii::error(VarDumper::dumpAsString([
                     'fromId' => $fromId,
                     'toId' => $toId,

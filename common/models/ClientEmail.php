@@ -3,6 +3,7 @@
 namespace common\models;
 
 use src\entities\EventTrait;
+use src\events\client\ClientEmailCreatedEvent;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
@@ -98,6 +99,7 @@ class ClientEmail extends \yii\db\ActiveRecord
         $clientEmail->client_id = $clientId;
         $clientEmail->type = $emailType;
         $clientEmail->ce_title = $ceTitle;
+        $clientEmail->recordEvent(new ClientEmailCreatedEvent($clientEmail));
         return $clientEmail;
     }
 

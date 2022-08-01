@@ -29,6 +29,8 @@ use src\model\clientData\service\ClientDataService;
 use src\model\leadData\entity\LeadData;
 use src\model\leadData\services\LeadDataCreateService;
 use src\model\leadData\services\LeadDataService;
+use src\repositories\client\ClientEmailRepository;
+use src\repositories\client\ClientPhoneRepository;
 use src\repositories\lead\LeadRepository;
 use src\services\lead\calculator\LeadTripTypeCalculator;
 use src\services\lead\calculator\SegmentDTO;
@@ -1138,7 +1140,10 @@ class LeadController extends ApiBaseController
                 ClientEmail::deleteAll(['client_id' => $client->id]);
                 foreach ($modelLead->emails as $email) {
                     $emailModel = ClientEmail::create($email, $client->id);
-                    if (!$emailModel->save()) {
+                    try {
+                        $clientEmailRepository = Yii::createObject(ClientEmailRepository::class);
+                        $clientEmailRepository->save($emailModel);
+                    } catch (\RuntimeException $e) {
                         Yii::error(print_r($emailModel->errors, true), 'API:Lead:update:ClientEmail:save');
                         $transaction->rollBack();
                     }
@@ -1149,7 +1154,10 @@ class LeadController extends ApiBaseController
                 ClientPhone::deleteAll(['client_id' => $client->id]);
                 foreach ($modelLead->phones as $phone) {
                     $phoneModel = ClientPhone::create($phone, $client->id);
-                    if (!$phoneModel->save()) {
+                    try {
+                        $clientPhoneRepository = Yii::createObject(ClientPhoneRepository::class);
+                        $clientPhoneRepository->save($phoneModel);
+                    } catch (\RuntimeException $e) {
                         Yii::error(print_r($phoneModel->errors, true), 'API:Lead:update:ClientPhone:save');
                         $transaction->rollBack();
                     }

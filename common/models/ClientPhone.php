@@ -9,6 +9,7 @@ use src\behaviors\clientPhone\ContactPhoneListBehavior;
 use src\behaviors\PhoneCleanerBehavior;
 use src\behaviors\UidPhoneGeneratorBehavior;
 use src\entities\EventTrait;
+use src\events\client\ClientPhoneCreatedEvent;
 use src\model\contactPhoneList\entity\ContactPhoneList;
 use Yii;
 use yii\behaviors\AttributeBehavior;
@@ -107,6 +108,7 @@ class ClientPhone extends \yii\db\ActiveRecord
         $clientPhone->type = $phoneType;
         $clientPhone->comments = $comments;
         $clientPhone->cp_title = $cpTitle;
+        $clientPhone->recordEvent(new ClientPhoneCreatedEvent($clientPhone));
         return $clientPhone;
     }
 
