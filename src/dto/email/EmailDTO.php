@@ -39,6 +39,7 @@ use common\models\EmailTemplateType;
  * @property int $createdUserId
  * @property array|null $attachPaths
  * @property array|null $attachments
+ * @property int|null $emailId
  */
 class EmailDTO
 {
@@ -68,6 +69,7 @@ class EmailDTO
     public $createdUserId;
     public $attachPaths;
     public $attachments;
+    public $emailId;
 
     public static function newInstance()
     {
@@ -185,6 +187,7 @@ class EmailDTO
         $instance->inboxCreatedDt = $data['inboxCreatedDt'] ?? null;
         $instance->refMessageId = $data['refMessageId'] ?? null;
         $instance->messageId = $data['messageId'] ?? null;
+        $instance->emailId = $data['emailId'] ?? null;
 
         return $instance;
     }
