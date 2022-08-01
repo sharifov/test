@@ -8,6 +8,7 @@ use src\forms\emailReviewQueue\EmailReviewQueueForm;
 use frontend\models\EmailPreviewFromInterface;
 use src\dto\email\EmailDTO;
 use src\entities\email\EmailInterface;
+use src\entities\email\form\EmailForm;
 
 interface EmailServiceInterface
 {
@@ -20,4 +21,8 @@ interface EmailServiceInterface
     public function updateAfterReview(EmailReviewQueueForm $form, $email);
 
     public function createFromDTO(EmailDTO $emailDTO, $autoDetectEmpty = true);
+
+    public function create(EmailForm $form);
+
+    public function update($email, EmailForm $form);
 }
