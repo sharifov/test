@@ -7,7 +7,7 @@ use common\models\ClientEmail;
 use common\models\ClientPhone;
 use modules\flight\models\FlightQuote;
 use modules\order\src\entities\orderContact\OrderContact;
-use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeAutoDecisionPendingEvent;
+use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeInterface;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteRelation\ProductQuoteRelation;
@@ -61,10 +61,10 @@ class ClientNotificationListener
         $this->productQuoteChangeRepository = $productQuoteChangeRepository;
     }
 
-    public function handle(ProductQuoteChangeAutoDecisionPendingEvent $event): void
+    public function handle(ProductQuoteChangeInterface $event): void
     {
         try {
-            $productQuoteChange = $this->productQuoteChangeRepository->find($event->productQuoteChangeId);
+            $productQuoteChange = $this->productQuoteChangeRepository->find($event->getProductQuoteChangeId());
 
             $project = new Project(
                 $productQuoteChange->pqcPq->pqProduct->project->id,
@@ -97,8 +97,8 @@ class ClientNotificationListener
             \Yii::warning([
                 'message' => $e->getMessage(),
                 'event' => [
-                    'name' => ProductQuoteChangeAutoDecisionPendingEvent::class,
-                    'productQuoteChangeId' => $event->productQuoteChangeId,
+                    'name' => $event->getClass(),
+                    'productQuoteChangeId' => $event->getProductQuoteChangeId(),
                 ],
                 'exception' => AppHelper::throwableLog($e, true),
             ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:OverdueException');
@@ -106,8 +106,8 @@ class ClientNotificationListener
             \Yii::error([
                 'message' => $e->getMessage(),
                 'event' => [
-                    'name' => ProductQuoteChangeAutoDecisionPendingEvent::class,
-                    'productQuoteChangeId' => $event->productQuoteChangeId,
+                    'name' => $event->getClass(),
+                    'productQuoteChangeId' => $event->getProductQuoteChangeId(),
                 ],
                 'exception' => AppHelper::throwableLog($e, true),
             ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:handle');

@@ -4,8 +4,8 @@ namespace src\model\client\notifications\email;
 
 use common\models\ClientEmail;
 use common\models\Email;
+use common\models\EmailTemplateType;
 use modules\product\src\entities\productQuote\ProductQuote;
-use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use src\entities\cases\Cases;
 use src\helpers\ErrorsToStringHelper;
 use src\helpers\ProjectHashGenerator;
@@ -45,7 +45,7 @@ class ClientNotificationEmailExecutor
             throw new \DomainException('Notification status invalid. Wait: "new", current: "' . Status::getName($notification->cnel_status_id) . '" . ID: ' . $notification->cnel_id);
         }
 
-        $fromEmail = EmailList::find()->select(['el_email'])->andWhere(['pl_id' => $notification->cnel_from_email_id])->scalar();
+        $fromEmail = EmailList::find()->select(['el_email'])->andWhere(['el_id' => $notification->cnel_from_email_id])->scalar();
         if (!$fromEmail) {
             throw new \DomainException('Not found Email From. EmailListId: ' . $notification->cnel_from_email_id . ' EmailNotificationId: ' . $notification->cnel_id);
         }
@@ -64,32 +64,34 @@ class ClientNotificationEmailExecutor
             throw new \DomainException('Not found Product Quote. Product Quote Id: ' . $notification->getData()->productQuoteId . ' EmailNotificationId: ' . $notification->cnel_id);
         }
 
-        $originalQuote = ProductQuoteQuery::getOriginProductQuoteByReprotection($quote->pq_id);
-        if (!$originalQuote) {
-            throw new \DomainException('Not found Original Product Quote. Product Quote Id: ' . $notification->getData()->productQuoteId . ' EmailNotificationId: ' . $notification->cnel_id);
-        }
-
         $bookingId = $quote->getLastBookingId();
         if (!$bookingId) {
             throw new \DomainException('Not found BookingId. Product Quote Id: ' . $notification->getData()->productQuoteId . ' EmailNotificationId: ' . $notification->cnel_id);
         }
 
         $bookingHashCode = ProjectHashGenerator::getHashByProjectId($notification->getData()->projectId, $bookingId);
-
-        // todo
         $languageId = 'en-US';
 
         try {
             $case = Cases::findOne($notification->getData()->caseId);
             $emailData = $this->casesCommunicationService->getEmailDataWithoutAgentData($case);
             $emailData['reprotection_quote'] = $quote->serialize();
-            $emailData['original_quote'] = $originalQuote->serialize();
+            $emailData['original_quote'] = $quote->serialize();
             $emailData['booking_hash_code'] = $bookingHashCode;
             if (!empty($emailData['reprotection_quote']['data'])) {
                 ArrayHelper::remove($emailData['reprotection_quote']['data'], 'fq_origin_search_data');
             }
             if (!empty($emailData['original_quote']['data'])) {
                 ArrayHelper::remove($emailData['original_quote']['data'], 'fq_origin_search_data');
+            }
+
+            $emailTemplateTypeId = EmailTemplateType::find()
+                ->select(['etp_id'])
+                ->andWhere(['etp_key' => $notification->getData()->templateKey])
+                ->scalar();
+
+            if (!$emailTemplateTypeId) {
+                throw new \DomainException('Not found Email Template Type. Email Template Type Key: ' . $notification->getData()->templateKey . ' EmailNotificationId: ' . $notification->cnel_id);
             }
 
             $previewEmail = $this->getEmailPreview(
@@ -105,7 +107,7 @@ class ClientNotificationEmailExecutor
             $mail = new Email();
             $mail->e_project_id = $notification->getData()->projectId;
             $mail->e_case_id = $notification->getData()->caseId;
-            $mail->e_template_type_id = $notification->getData()->templateKey;
+            $mail->e_template_type_id = $emailTemplateTypeId;
             $mail->e_type_id = Email::TYPE_OUTBOX;
             $mail->e_status_id = Email::STATUS_PENDING;
             $mail->e_email_subject = $previewEmail['email_subject'] ?? null;

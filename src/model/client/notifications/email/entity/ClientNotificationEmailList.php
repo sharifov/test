@@ -132,7 +132,7 @@ class ClientNotificationEmailList extends \yii\db\ActiveRecord
 
     public function getFromEmail(): \yii\db\ActiveQuery
     {
-        return $this->hasOne(EmailList::class, ['pl_id' => 'cnel_from_email_id']);
+        return $this->hasOne(EmailList::class, ['el_id' => 'cnel_from_email_id']);
     }
 
     public function getClientEmail(): \yii\db\ActiveQuery

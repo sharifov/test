@@ -4,6 +4,7 @@ namespace common\components\jobs;
 
 use DateTime;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeClientRemainderNotificationEvent;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use src\dispatchers\EventDispatcher;
 use src\dto\flightQuote\UnUsedSegmentDTO;
@@ -63,10 +64,9 @@ class SendNotificationToClientJob extends BaseJob implements JobInterface
             }
 
             if ($productQuoteChange->isPending() && $productQuote->isNew()) {
-//                TODO: send notification using existing notification tool
+                $eventDispatcher->dispatch(new ProductQuoteChangeClientRemainderNotificationEvent($productQuoteChange->pqc_id));
 
                 $nextDateOfNotification = $unUsedSegmentService->calculateNextDateOfNotification($this->unUsedSegment);
-
                 if (!empty($nextDateOfNotification)) {
                     $nextDateOfNotification = new DateTime($nextDateOfNotification);
                     $now = new DateTime();
