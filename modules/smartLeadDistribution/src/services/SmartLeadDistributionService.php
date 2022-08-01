@@ -2,12 +2,17 @@
 
 namespace modules\smartLeadDistribution\src\services;
 
+use common\models\Employee;
 use common\models\Lead;
 use modules\featureFlag\FFlag;
+use modules\smartLeadDistribution\abac\dto\SmartLeadDistributionAbacDto;
+use modules\smartLeadDistribution\abac\SmartLeadDistributionAbacObject;
 use modules\smartLeadDistribution\src\entities\LeadRatingParameter;
+use modules\smartLeadDistribution\src\entities\LeadRatingProcessingLog;
 use modules\smartLeadDistribution\src\objects\LeadRatingObjectInterface;
 use modules\smartLeadDistribution\src\SmartLeadDistribution;
 use src\access\ConditionExpressionService;
+use src\auth\Auth;
 use src\helpers\ErrorsToStringHelper;
 use Yii;
 
@@ -42,9 +47,34 @@ class SmartLeadDistributionService
         ]);
     }
 
+    public static function getAllowedCategories(?Employee $employee = null): array
+    {
+        $employee = $employee ?? Auth::user();
+        $allowedCategory = [];
+        $dto = new SmartLeadDistributionAbacDto();
+
+        /** @abac SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_FIRST_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, Access to first category business lead */
+        if (Yii::$app->abac->can($dto, SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_FIRST_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, $employee)) {
+            $allowedCategory[] = SmartLeadDistribution::CATEGORY_FIRST;
+        }
+
+        /** @abac SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_FIRST_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, Access to second category business lead */
+        if (Yii::$app->abac->can($dto, SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_SECOND_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, $employee)) {
+            $allowedCategory[] = SmartLeadDistribution::CATEGORY_SECOND;
+        }
+
+        /** @abac SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_FIRST_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, Access to third category business lead */
+        if (Yii::$app->abac->can($dto, SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_THIRD_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, $employee)) {
+            $allowedCategory[] = SmartLeadDistribution::CATEGORY_THIRD;
+        }
+
+        return $allowedCategory;
+    }
+
     /**
      * @param string $objectName
-     * @return object|LeadRatingObjectInterface|null
+     * @return LeadRatingObjectInterface|null
+     * @throws \yii\base\InvalidConfigException
      */
     public static function getByName(string $objectName): ?LeadRatingObjectInterface
     {
@@ -137,7 +167,7 @@ class SmartLeadDistributionService
 
         $result['points'] = self::leadRatingProcessing($lead, function (LeadRatingParameter $leadRatingParameter, $dto, $bool) use (&$result) {
             if ($bool === true) {
-                $result['log'][] = "+ {$leadRatingParameter->lrp_point} points. Object: {$leadRatingParameter->lrp_object}, attribute: {$leadRatingParameter->lrp_attribute}";
+                $result['log'][] = new LeadRatingProcessingLog($leadRatingParameter, $dto);
             }
         });
 

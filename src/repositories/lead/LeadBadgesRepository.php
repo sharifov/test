@@ -12,6 +12,7 @@ use common\models\UserGroup;
 use common\models\UserGroupAssign;
 use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\smartLeadDistribution\src\services\SmartLeadDistributionService;
 use modules\smartLeadDistribution\src\SmartLeadDistribution;
 use src\access\EmployeeDepartmentAccess;
 use src\access\EmployeeGroupAccess;
@@ -78,6 +79,23 @@ class LeadBadgesRepository
      */
     public function getBusinessInboxCount(Employee $user): int
     {
+        /** @fflag FFlag::FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE, Smart Lead Distribution Enable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE) === true) {
+            $leadsByCategories = $this->countBusinessLeadsByRatingCategory();
+            $allowedCategories = SmartLeadDistributionService::getAllowedCategories();
+            $result = 0;
+
+            if (!empty($leadsByCategories)) {
+                foreach ($leadsByCategories as $category => $amount) {
+                    if (in_array($category, $allowedCategories)) {
+                        $result += $amount;
+                    }
+                }
+            }
+
+            return $result;
+        }
+
         return $this->getBusinessInboxQuery($user)->count();
     }
 

@@ -246,6 +246,10 @@ class UserAbacObject extends AbacBaseModel implements AbacInterface
             'up_show_in_contact_list' => 'Show in contact list',
             'up_call_recording_disabled' => 'Call recording disabled',
         ];
+        /** @fflag FFlag::FF_KEY_DISPLAY_SKILL_FIELD_ON_MULTIPLE_UPDATE_USERS, Display skill field on multiple update users */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_DISPLAY_SKILL_FIELD_ON_MULTIPLE_UPDATE_USERS)) {
+            $formFields['up_skill'] = 'Skill';
+        }
 
         $attrFieldsList['values'] = $formFields;
         $attrMultiFieldsList['values'] = $formFields;

@@ -28,6 +28,7 @@ use common\models\search\ApiLogSearch;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
+use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\queue\Queue;
 use yii\web\Controller;
@@ -488,13 +489,27 @@ class ToolsController extends FController
         );
     }
 
-    public function actionLeadRating(?int $leadId = null)
+    public function actionLeadRating($id = null): string
     {
         $dataRating = [];
         $errors = [];
 
-        if ($leadId !== null) {
-            $lead = Lead::findOne($leadId);
+
+        if ($id !== null) {
+            $lead = Lead::find()
+                ->limit(1);
+
+            if (is_numeric($id)) {
+                $lead->where([
+                    'id' => $id
+                ]);
+            } else {
+                $lead->where([
+                    'uid' => $id
+                ]);
+            }
+
+            $lead = $lead->one();
 
             if ($lead !== null) {
                 $dataRating = SmartLeadDistributionService::countPointsWithExtraData($lead);
@@ -504,7 +519,7 @@ class ToolsController extends FController
         }
 
         return $this->render('lead-rating', [
-            'leadId' => $leadId,
+            'id' => Html::encode($id),
             'dataRating' => $dataRating,
             'errors' => $errors
         ]);

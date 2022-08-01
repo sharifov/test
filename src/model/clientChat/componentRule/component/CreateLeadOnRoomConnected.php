@@ -3,8 +3,10 @@
 namespace src\model\clientChat\componentRule\component;
 
 use common\components\jobs\clientChat\SearchAndAutoAddTopFlightQuotes;
+use common\components\jobs\LeadObjectSegmentJob;
 use common\models\Lead;
 use frontend\helpers\JsonHelper;
+use modules\featureFlag\FFlag;
 use src\forms\lead\ItineraryEditForm;
 use src\helpers\app\AppHelper;
 use src\model\clientChat\componentEvent\component\ComponentDTOInterface;
@@ -82,7 +84,11 @@ class CreateLeadOnRoomConnected implements RunnableComponentInterface
 
                         $leadManageService = Yii::createObject(\src\services\lead\LeadManageService::class);
                         $leadManageService->editItinerary($lead, $itineraryForm);
-
+                        /** @fflag FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE, Object Segment module enable/disable */
+                        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE)) {
+                            $job = new LeadObjectSegmentJob($lead);
+                            \Yii::$app->queue_job->priority(100)->push($job);
+                        }
                         $job = new SearchAndAutoAddTopFlightQuotes($form, $chat->cch_rid, $chat->cch_project_id, $lead->id, $addTopQuotesCount);
                         \Yii::$app->queue_client_chat_job->priority(10)->push($job);
                     } catch (\RuntimeException | \DomainException $e) {

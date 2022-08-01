@@ -28,6 +28,7 @@ use modules\featureFlag\FFlag;
 use modules\fileStorage\src\entity\fileLead\FileLead;
 use modules\smartLeadDistribution\abac\dto\SmartLeadDistributionAbacDto;
 use modules\smartLeadDistribution\abac\SmartLeadDistributionAbacObject;
+use modules\smartLeadDistribution\src\services\SmartLeadDistributionService;
 use modules\smartLeadDistribution\src\SmartLeadDistribution;
 use src\access\EmployeeGroupAccess;
 use src\access\EmployeeProjectAccess;
@@ -3027,23 +3028,9 @@ class LeadSearch extends Lead
 
         /** @fflag FFlag::FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE, Smart Lead Distribution Enable */
         if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE) === true) {
-            $allowedCategory = [null];
-            $dto = new SmartLeadDistributionAbacDto();
-
-            /** @abac SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_FIRST_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, Access to first category business lead */
-            if (Yii::$app->abac->can($dto, SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_FIRST_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS)) {
-                $allowedCategory[] = SmartLeadDistribution::CATEGORY_FIRST;
-            }
-
-            /** @abac SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_FIRST_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, Access to second category business lead */
-            if (Yii::$app->abac->can($dto, SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_SECOND_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS)) {
-                $allowedCategory[] = SmartLeadDistribution::CATEGORY_SECOND;
-            }
-
-            /** @abac SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_FIRST_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, Access to third category business lead */
-            if (Yii::$app->abac->can($dto, SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_THIRD_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS)) {
-                $allowedCategory[] = SmartLeadDistribution::CATEGORY_THIRD;
-            }
+            $allowedCategory = SmartLeadDistributionService::getAllowedCategories();
+            //null required for load leads that were created before implementation Smart Lead Distribution
+            $allowedCategory[] = null;
 
             $query->leftJoin(
                 'lead_data',
