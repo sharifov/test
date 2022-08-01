@@ -48,7 +48,7 @@ use src\entities\email\helpers\EmailStatus;
             <p class="date"><i class="fa fa-calendar"></i> <?=Yii::$app->formatter->asDatetime(strtotime($model->e_created_dt))?></p>
         </div>
         <div class="col-md-12">
-            <h4> <span class="badge badge-info"><?= EmailType::getName($model->e_type_id)?></span> <?= Html::encode($model->emailBody->embd_email_subject)?></h4>
+            <h4> <span class="badge badge-info"><?= EmailType::getName($model->e_type_id)?></span> <?= Html::encode($model->emailSubject)?></h4>
         </div>
     </div>
     <div class="sender-info">

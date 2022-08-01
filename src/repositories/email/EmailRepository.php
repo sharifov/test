@@ -203,7 +203,7 @@ class EmailRepository implements EmailRepositoryInterface
         return Email::find()->withContact($mailList)->deleted()->count();
     }
 
-    public function getTodayCount($cache = 0)
+    public function getTodayCount($cache = 0): int
     {
         return Email::find()->createdToday()->cache($cache)->count();
     }

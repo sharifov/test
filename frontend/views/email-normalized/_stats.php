@@ -1,10 +1,8 @@
 <?php
 
 use yii\helpers\Html;
-use src\entities\email\Email;
 
 /* @var $this yii\web\View */
-/* @var $model src\entities\email\Email */
 /* @var $mailList [] */
 /* @var $stats [] */
 

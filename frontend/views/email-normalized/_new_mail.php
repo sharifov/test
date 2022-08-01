@@ -8,7 +8,7 @@ use common\components\widgets\BaseForm;
 /* @var $form yii\widgets\ActiveForm */
 /* @var $mailList [] */
 /* @var $action string */
-/* @var $emailForm src\entities\email\form\EmailCreateForm */
+/* @var $emailForm src\entities\email\form\EmailForm */
 
 
 ?>

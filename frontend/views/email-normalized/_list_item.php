@@ -50,7 +50,7 @@ use yii\helpers\Url;
             </h3>
             <p><?php if ($model->project) :?>
                 <span class="label label-info"><?= Html::encode($model->project->name)?></span>
-               <?php endif;?><?= Html::encode($model->emailBody->embd_email_subject)?></p>
+               <?php endif;?><?= Html::encode($model->emailSubject)?></p>
         </div>
     </div>
 <?php if ($selectedId == $model->e_id) :?>

@@ -15,7 +15,7 @@ use src\entities\email\helpers\EmailFilterType;
 /* @var $projectList [] */
 /* @var $action string|null */
 /* @var $stats [] */
-/* @var $emailForm src\entities\email\form\EmailCreateForm */
+/* @var $emailForm src\entities\email\form\EmailForm */
 
 $this->title = 'Emails';
 $this->params['breadcrumbs'][] = $this->title;
