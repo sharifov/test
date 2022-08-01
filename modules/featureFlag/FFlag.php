@@ -43,6 +43,7 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_BOOKED_QUEUE_CONDITION_AGENT_IS_OWNER = 'bookedQueueConditionAgentIsAgent';
     public const FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE = 'smartLeadDistributionEnable';
     public const FF_KEY_USER_SKILL_IN_ABAC_ENABLE = 'userSkillInAbacEnable';
+    public const FF_KEY_DISPLAY_SKILL_FIELD_ON_MULTIPLE_UPDATE_USERS = 'displaySkillFieldOnMultipleUpdateUsers';
 
 
     public const FF_KEY_LIST = [
@@ -78,6 +79,7 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_BOOKED_QUEUE_CONDITION_AGENT_IS_OWNER,
         self::FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE,
         self::FF_KEY_USER_SKILL_IN_ABAC_ENABLE,
+        self::FF_KEY_DISPLAY_SKILL_FIELD_ON_MULTIPLE_UPDATE_USERS,
     ];
 
 
