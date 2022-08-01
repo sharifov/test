@@ -271,6 +271,12 @@ export default {
 
         this.usersData = response.data.userData || [];
 
+        this.usersData.forEach(function (item) {
+          item.userDep = item.userDep.split(',').filter(Boolean).map(function(item) {
+            return parseInt(item, 10);
+          });
+        });
+
         let callList = this.callList;
         if (callList && callList.length) {
           callList.forEach((call) => {
