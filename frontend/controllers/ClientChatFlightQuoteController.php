@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use common\components\jobs\LeadObjectSegmentJob;
 use common\components\SearchService;
 use common\models\Currency;
 use common\models\Employee;
@@ -15,6 +16,7 @@ use common\models\QuoteSegmentBaggageCharge;
 use common\models\QuoteSegmentStop;
 use common\models\QuoteTrip;
 use frontend\helpers\QuoteHelper;
+use modules\featureFlag\FFlag;
 use src\auth\Auth;
 use src\dto\searchService\SearchServiceQuoteDTO;
 use src\forms\api\searchQuote\FlightQuoteSearchForm;
@@ -151,6 +153,11 @@ class ClientChatFlightQuoteController extends FController
 
                         if ($itineraryForm->validate()) {
                             $this->leadManageService->editItinerary($lead, $itineraryForm);
+                            /** @fflag FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE, Object Segment module enable/disable */
+                            if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE)) {
+                                $job = new LeadObjectSegmentJob($lead);
+                                \Yii::$app->queue_job->priority(100)->push($job);
+                            }
                         } else {
                             Yii::$app->getSession()->addFlash(
                                 'warning',
