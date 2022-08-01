@@ -8,7 +8,6 @@
 /* @var $cfUserStatusChannel string */
 
 use frontend\assets\MonitorCallIncomingAsset;
-use yii\web\View;
 
 $this->title = 'Realtime Call Map';
 
@@ -21,11 +20,3 @@ MonitorCallIncomingAsset::register($this);
      data-cftoken="<?= $cfToken ?>"
      data-cfconnectionurl="<?= $cfConnectionUrl ?>"
      data-cfuserstatuschannel="<?= $cfUserStatusChannel ?>"></div>
-
-<?php
-$css = <<<CSS
-[v-cloak] {display: none}
-CSS;
-
-$this->registerCss($css, ['position' => View::POS_HEAD]);
-
