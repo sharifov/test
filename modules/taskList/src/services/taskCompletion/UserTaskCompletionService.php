@@ -51,16 +51,6 @@ class UserTaskCompletionService
 
         if ($taskLists) {
             foreach ($taskLists as $taskList) {
-                $completionChecker = (new TaskListCompletionFactory(
-                    $this->taskObject,
-                    $taskModel,
-                    $taskList
-                ))->create();
-
-                if (!$completionChecker->check()) {
-                    continue;
-                }
-
                 $userTaskQuery = UserTaskQuery::getUserTaskCompletion(
                     $taskList->tl_id,
                     $this->userId,
@@ -72,11 +62,24 @@ class UserTaskCompletionService
                     $this->userTasksProcessed
                 );
 
-                if ($userTask = $userTaskQuery->limit(1)->one()) {
-                    $userTask->setStatusComplete();
-                    (new UserTaskRepository($userTask))->save();
-                    $this->userTasksProcessed[] = $userTask->ut_id;
+                if (!$userTask = $userTaskQuery->limit(1)->one()) {
+                    continue;
                 }
+
+                $completionChecker = (new TaskListCompletionFactory(
+                    $this->taskObject,
+                    $taskModel,
+                    $taskList,
+                    $userTask
+                ))->create();
+
+                if (!$completionChecker->check()) {
+                    continue;
+                }
+
+                $userTask->setStatusComplete();
+                (new UserTaskRepository($userTask))->save();
+                $this->userTasksProcessed[] = $userTask->ut_id;
             }
         }
         return $this;
