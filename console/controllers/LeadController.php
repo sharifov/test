@@ -184,7 +184,7 @@ class LeadController extends Controller
                     }
                 }
                 /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
-                if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) && $this->lead->isBusinessType()) {
+                if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) && $lead->isBusinessType()) {
                     LeadBusinessExtraQueueService::addLeadBusinessExtraQueueJob($lead, 'Added new Business Extra Queue Countdown', true);
                 }
                 echo "\r\n";
