@@ -50,7 +50,7 @@ class LeadTaskListJob extends BaseJob implements JobInterface
         } catch (\Throwable $throwable) {
             $message = AppHelper::throwableLog($throwable);
             $message['leadId'] = $this->leadId;
-            $message['isNewOwner'] = $this->oldOwnerId;
+            $message['oldOwnerId'] = $this->oldOwnerId;
             \Yii::error($message, 'LeadTaskListJob:execute:Throwable');
         }
     }
