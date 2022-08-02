@@ -15,6 +15,7 @@ use src\helpers\app\AppHelper;
 use src\helpers\DateHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\leadBusinessExtraQueue\entity\LeadBusinessExtraQueue;
+use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
 use src\model\leadBusinessExtraQueue\service\LeadToBusinessExtraQueueService;
 use src\model\leadBusinessExtraQueue\service\LeadToClosedFromBusinessExtraQueueService;
 use src\model\leadBusinessExtraQueueRule\entity\LeadBusinessExtraQueueRule;
@@ -181,6 +182,10 @@ class LeadController extends Controller
                     if (isset($out['data']['timeZone'])) {
                         VarDumper::dump($out['data']['timeZone']);
                     }
+                }
+                /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+                if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) && $this->lead->isBusinessType()) {
+                    LeadBusinessExtraQueueService::addLeadBusinessExtraQueueJob($this->lead, 'Added new Business Extra Queue Countdown', true);
                 }
                 echo "\r\n";
             }
