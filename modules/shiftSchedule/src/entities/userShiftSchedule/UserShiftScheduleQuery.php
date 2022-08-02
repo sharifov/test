@@ -501,8 +501,8 @@ class UserShiftScheduleQuery
                 'shift_schedule_type.sst_id = user_shift_schedule.uss_sst_id',
             )
             ->where(['uss_user_id' => $userId])
-            ->andWhere(['uss_year_start' => $startDt->format('Y')])
-            ->andWhere(['uss_month_start' => $startDt->format('m')])
+            ->andWhere(['>=', 'uss_year_start', $startDt->format('Y')])
+            ->andWhere(['>=', 'uss_month_start', $startDt->format('m')])
             ->andWhere(['>', 'uss_end_utc_dt', $startDt->format('Y-m-d H:i:s')])
             ->andWhere(['IN', 'uss_status_id', $status])
             ->andWhere(['IN', 'shift_schedule_type.sst_subtype_id', $shiftScheduleType])
