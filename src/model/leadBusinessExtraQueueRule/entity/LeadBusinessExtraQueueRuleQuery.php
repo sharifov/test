@@ -6,8 +6,11 @@ use yii\db\Expression;
 
 class LeadBusinessExtraQueueRuleQuery
 {
-    public static function timeIntersectionCheck(string $startTime, string $endTime, int $lbeqrTypeId, ?int $lbeqrId): bool
+    public static function timeIntersectionCheck(string $startTime, string $endTime, ?int $lbeqrTypeId, ?int $lbeqrId): bool
     {
+        if (!$lbeqrTypeId) {
+            $lbeqrTypeId = LeadBusinessExtraQueueRule::TYPE_ID_DEFAULT_RULE;
+        }
         return (new \yii\db\Query())
             ->from('{{%lead_business_extra_queue_rules}}')
             ->where(['lbeqr_type_id' => $lbeqrTypeId])
