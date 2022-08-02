@@ -53,6 +53,8 @@ use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
 use frontend\models\SendEmailForm;
 use modules\order\src\entities\order\search\OrderSearch;
+use modules\taskList\src\entities\TargetObject;
+use modules\taskList\src\entities\userTask\UserTaskSearch;
 use modules\twilio\components\TwilioCommunicationService;
 use PHPUnit\Framework\Warning;
 use src\access\EmployeeAccess;
@@ -2878,6 +2880,23 @@ class LeadController extends FController
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'isAgent' => $isAgent,
+        ]);
+    }
+
+    public function actionAjaxGetUserTask(int $leadID): string
+    {
+        $searchModel = new UserTaskSearch();
+        $dataProvider = $searchModel->searchByTargetObjectAndTargetObjectId(
+            TargetObject::TARGET_OBJ_LEAD,
+            $leadID,
+            $this->request->queryParams
+        );
+
+
+        return $this->renderAjax('user-task/user-task-list', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'leadID' => $leadID,
         ]);
     }
 
