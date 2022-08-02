@@ -33,9 +33,11 @@ class LeadObjectSegmentJob extends BaseJob implements JobInterface
     public function execute($queue): void
     {
         $this->waitingTimeRegister();
+
         $logData = [
             'leadId' => $this->lead->id,
         ];
+
         try {
             $leadObjectDto = new LeadObjectSegmentDto($this->lead);
             \Yii::$app->objectSegment->segment($leadObjectDto, ObjectSegmentKeyContract::TYPE_KEY_LEAD);
@@ -46,7 +48,12 @@ class LeadObjectSegmentJob extends BaseJob implements JobInterface
                 }
             }
 
-            if (!LeadDataQuery::getByLeadAndKey($this->lead->id, LeadDataKeyDictionary::KEY_LEAD_OBJECT_SEGMENT)->exists()) {
+            /** @fflag FFlag::FF_KEY_SEGMENT_SIMPLE_LEAD_ENABLE, Simple Lead Segmentation enable */
+            if (
+                \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SEGMENT_SIMPLE_LEAD_ENABLE)
+                &&
+                !LeadDataQuery::getByLeadAndKey($this->lead->id, LeadDataKeyDictionary::KEY_LEAD_OBJECT_SEGMENT)->exists()
+            ) {
                 $leadData = LeadData::create(
                     $this->lead->id,
                     LeadDataKeyDictionary::KEY_LEAD_OBJECT_SEGMENT,
