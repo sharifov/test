@@ -6,6 +6,7 @@
  * @var $model src\forms\lead\ItineraryEditForm
  */
 
+use modules\featureFlag\FFlag;
 use yii\widgets\ActiveForm;
 use dosamigos\datepicker\DatePicker;
 use yii\web\JsExpression;
@@ -41,6 +42,7 @@ $select2Properties = [
 <?= $form->field($model, 'segments')->widget(MultipleInput::class, [
 //  'rendererClass' => \unclead\multipleinput\renderers\ListRenderer::class,
 ////    'addButtonPosition' => MultipleInput::,
+    'id' => 'default-flight-multiple-input',
     'layoutConfig' => [
         'labelClass' => 'col-md-2',
         'wrapperClass' => 'col-md-8',
@@ -160,3 +162,44 @@ function formatRepo( repo ) {
 			}
 JS;
 $this->registerJs($js, View::POS_HEAD);
+
+
+
+$returnFlightAutocomplete = <<<JS_RFA
+function setLastDataToNewElement(lastElement, curElement) {
+    lastElement.select2('data').forEach((e) => {
+        let title = '';
+        
+        if ('selection' in e) {
+            title = e.selection;
+        } else {
+            title = e.text;
+        }
+        
+        let newOption = new Option(title, e.id, false, false);
+        curElement.append(newOption).trigger('change');
+    });
+    
+    curElement.val(lastElement.val()).trigger('change');
+}
+$('#default-flight-multiple-input').on('afterAddRow', function(e, row, currentIndex) {
+    let block = $(e.currentTarget),
+        items = block.find('.multiple-input-list__item');
+    
+    if (items.length === 2) {
+        let lastElemNum = items.length - 2,
+            lastDestination = items.eq(lastElemNum).find('[name $= "[destination]"]'),
+            curDestination = items.last().find('[name $= "[destination]"]'),
+            lastOrigin = items.eq(lastElemNum).find('[name $= "[origin]"]'),
+            curOrigin = items.last().find('[name $= "[origin]"]');
+        
+        setLastDataToNewElement(lastDestination, curOrigin);
+        setLastDataToNewElement(lastOrigin, curDestination);
+    }
+});
+JS_RFA;
+
+/** @fflag FFlag::FF_KEY_RETURN_FLIGHT_SEGMENT_AUTOCOMPLETE_ENABLE, Return flight segment autocomplete enable */
+if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_RETURN_FLIGHT_SEGMENT_AUTOCOMPLETE_ENABLE)) {
+    $this->registerJs($returnFlightAutocomplete, View::POS_READY);
+}
