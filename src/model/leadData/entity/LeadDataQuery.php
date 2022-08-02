@@ -15,4 +15,12 @@ class LeadDataQuery
             ->andWhere(['ld_field_value' => $value])
             ->one();
     }
+
+    public static function getByLeadAndKey(int $leadId, string $key): LeadDataScopes
+    {
+        return LeadData::find()
+            ->where(['ld_lead_id' => $leadId])
+            ->andWhere(['ld_field_key' => $key])
+        ;
+    }
 }
