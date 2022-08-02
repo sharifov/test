@@ -1479,7 +1479,10 @@ class Lead extends ActiveRecord implements Objectable
         );
         /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
         if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) && $this->isBusinessType()) {
-            LeadBusinessExtraQueueService::addLeadBusinessExtraQueueJob($this, 'Added new Business Extra Queue Countdown');
+            LeadBusinessExtraQueueService::addLeadBusinessExtraQueueJob(
+                $this,
+                'Added new Business Extra Queue Countdown'
+            );
         }
     }
 

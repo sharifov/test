@@ -51,6 +51,8 @@ use modules\offer\src\entities\offerSendLog\CreateDto;
 use modules\offer\src\entities\offerSendLog\OfferSendLogType;
 use modules\offer\src\services\OfferSendLogService;
 use modules\order\src\entities\order\search\OrderSearch;
+use modules\taskList\src\entities\TargetObject;
+use modules\taskList\src\entities\userTask\UserTaskSearch;
 use PHPUnit\Framework\Warning;
 use src\auth\Auth;
 use src\entities\cases\Cases;
@@ -125,6 +127,7 @@ use yii\web\UnauthorizedHttpException;
 use yii\web\UploadedFile;
 use yii\widgets\ActiveForm;
 use src\repositories\email\EmailRepositoryFactory;
+use src\services\email\EmailServiceHelper;
 
 /**
  * Class LeadController
@@ -2839,6 +2842,23 @@ class LeadController extends FController
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'isAgent' => $isAgent,
+        ]);
+    }
+
+    public function actionAjaxGetUserTask(int $leadID): string
+    {
+        $searchModel = new UserTaskSearch();
+        $dataProvider = $searchModel->searchByTargetObjectAndTargetObjectId(
+            TargetObject::TARGET_OBJ_LEAD,
+            $leadID,
+            $this->request->queryParams
+        );
+
+
+        return $this->renderAjax('user-task/user-task-list', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'leadID' => $leadID,
         ]);
     }
 

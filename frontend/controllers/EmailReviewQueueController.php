@@ -24,6 +24,7 @@ use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
+use src\services\email\EmailMainService;
 
 /**
  * Class EmailReviewQueueController
@@ -143,7 +144,7 @@ class EmailReviewQueueController extends FController
             $emailQueue = $this->findModel($form->emailQueueId);
             $email = $emailQueue->email;
             if ($email) {
-                try{
+                try {
                     $email = $this->emailService->updateAfterReview($form, $email);
                     $this->emailService->sendMail($email);
 

@@ -338,4 +338,37 @@ class UserTaskSearch extends UserTask
 
         return $dataProvider;
     }
+
+    public function searchByTargetObjectAndTargetObjectId(string $targetObject, int $targetObjectId, array $params): ActiveDataProvider
+    {
+        $query = UserTask::find()
+            ->where([
+                'AND',
+                ['ut_target_object' => $targetObject],
+                ['ut_target_object_id' => $targetObjectId],
+            ]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['ut_created_dt' => SORT_DESC]],
+            'pagination' => ['pageSize' => 10],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            $query->where('0=1');
+
+            return $dataProvider;
+        }
+
+        if ($this->ut_start_dt) {
+            $query->andFilterWhere(['>=', 'ut_start_dt',
+                Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_start_dt))])
+                ->andFilterWhere(['<=', 'ut_start_dt',
+                    Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_start_dt) + 3600 * 24)]);
+        }
+
+        return $dataProvider;
+    }
 }

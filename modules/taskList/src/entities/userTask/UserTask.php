@@ -94,19 +94,17 @@ class UserTask extends \yii\db\ActiveRecord
             [['ut_created_dt'], 'datetime', 'format' => 'php:Y-m-d H:i:s'],
 
             [['ut_year'], 'integer'],
-            [['ut_year'], 'default', 'value' => date('Y')],
 
             [['ut_month'], 'integer'],
-            [['ut_month'], 'default', 'value' => date('m')],
         ];
     }
 
     public function behaviors(): array
     {
         $behaviors = [
-            'createdDt' => [
+            'startDt' => [
                 'class' => CreatedYearMonthBehavior::class,
-                'createdColumn' => 'ut_created_dt',
+                'createdColumn' => 'ut_start_dt',
                 'yearColumn' => 'ut_year',
                 'monthColumn' => 'ut_month',
             ],
@@ -283,5 +281,16 @@ class UserTask extends \yii\db\ActiveRecord
     {
         $this->ut_user_id = $newOwnerId;
         return $this;
+    }
+
+    public function getLastStatusLogByStatusId(int $statusId): ?UserTaskStatusLog
+    {
+        return UserTaskStatusLog::find()
+            ->where([
+                'utsl_ut_id' => $this->ut_id,
+                'utsl_new_status' => $statusId,
+            ])
+            ->limit(1)
+            ->one();
     }
 }

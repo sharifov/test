@@ -265,7 +265,7 @@ class EmailMainService implements EmailServiceInterface
             if ($calledFrom == self::FROM_OLD) {
                 $emailNorm = $this->setEmailNormObjById($email->e_id);
             }
-            if ($emailNorm) {
+            if (isset($emailNorm)) {
                 $emailNorm = $this->normalizedService->update($emailNorm, $form);
                 $emailNorm->refresh();
                 $this->setEmailNormObj($emailNorm);
