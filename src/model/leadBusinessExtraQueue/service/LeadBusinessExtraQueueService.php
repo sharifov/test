@@ -27,7 +27,8 @@ class LeadBusinessExtraQueueService
     public static function addLeadBusinessExtraQueueJob(
         Lead $lead,
         ?string $description = null,
-        int $priority = 100
+        bool $isStrictFirstTime = false,
+        int $priority = 100,
     ): void {
         $idKey = 'business_extra_queue_adder_' . $lead->id;
         if (RedisHelper::checkDuplicate($idKey)) {
@@ -39,7 +40,7 @@ class LeadBusinessExtraQueueService
         ];
 
         try {
-            $job = new LeadBusinessExtraQueueJob($lead, $description);
+            $job = new LeadBusinessExtraQueueJob($lead, $description, $isStrictFirstTime);
             \Yii::$app->queue_job->priority($priority)->push($job);
         } catch (\RuntimeException | \DomainException $throwable) {
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
@@ -50,7 +51,7 @@ class LeadBusinessExtraQueueService
         }
     }
 
-    public static function addToLead(Lead $lead, string $description): void
+    public static function addToLead(Lead $lead, string $description, bool $isStrictFirstTime = false): void
     {
         try {
             if (isset($lead->offset_gmt)) {
@@ -65,10 +66,16 @@ class LeadBusinessExtraQueueService
                 'description' => $description,
                 'clientTime' => $clientTime,
             ];
-            if (LeadBusinessExtraQueueLogQuery::isLeadWasInBusinessExtraQueue($lead->id)) {
-                $lbeqr = LeadBusinessExtraQueueRuleQuery::getRepeatedRule();
-            } else {
+            if (!LeadBusinessExtraQueueLogQuery::isLeadWasInBusinessExtraQueue($lead->id) || $isStrictFirstTime) {
                 $lbeqr = LeadBusinessExtraQueueRuleQuery::getRuleByClientTime($clientTime);
+            } else {
+                $lbeqr = LeadBusinessExtraQueueRuleQuery::getRepeatedRule();
+            }
+            if ($isStrictFirstTime) {
+                self::removeFromLead(
+                    $lead,
+                    LeadBusinessExtraQueueLogStatus::REASON_REMOVE_FROM_LEAD_DUE_TO_SYNCING_OFFSET_GMT
+                );
             }
             if (isset($lbeqr)) {
                 $leadBusinessExtraQueue = LeadBusinessExtraQueue::create(
