@@ -562,6 +562,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                             'icon' => 'list',
                             'items' => [
                                 ['label' => 'Lead Rating Parameters', 'url' => ['/smart-lead-distribution/lead-rating-parameter-crud/index']],
+                                ['label' => 'Summary Report', 'url' => ['/smart-lead-distribution/lead-rating-report/index']],
                             ],
                             'visible' => SmartLeadDistributionService::ffIsEnable()
                         ]
