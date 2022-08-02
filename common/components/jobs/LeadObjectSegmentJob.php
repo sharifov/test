@@ -37,6 +37,9 @@ class LeadObjectSegmentJob extends BaseJob implements JobInterface
                 /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
                 if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) && $this->lead->isBusinessType()) {
                     LeadBusinessExtraQueueService::addLeadBusinessExtraQueueJob($this->lead, 'Added new Business Extra Queue Countdown');
+                    \Yii::info('info\beq', 'Everything is fine');
+                } elseif ($this->lead->isBusinessType() && !\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE)) {
+                    \Yii::info('info\beq', 'BEQ Flag is disabled');
                 }
             }
         } catch (\RuntimeException | \DomainException $throwable) {
