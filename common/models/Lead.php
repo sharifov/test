@@ -1480,9 +1480,6 @@ class Lead extends ActiveRecord implements Objectable
                 $this,
                 'Added new Business Extra Queue Countdown'
             );
-            \Yii::info('Everything is fine', 'info\beq');
-        } elseif ($this->isBusinessType() && !\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE)) {
-            \Yii::info('Lead is business type and BEQ is disabled', 'info\beq');
         }
     }
 

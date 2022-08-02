@@ -88,6 +88,7 @@ class LeadBusinessExtraQueueService
 
                 $leadPoorProcessingLogRepository = new LeadBusinessExtraQueueLogRepository($leadBusinessExtraQueueLog);
                 $leadPoorProcessingLogRepository->save(true);
+                \Yii::info($logData, 'info/beq-adder');
             } else {
                 throw new \DomainException('Lead Business Extra Queue Rule not found');
             }
