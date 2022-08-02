@@ -7,6 +7,7 @@ use modules\taskList\src\entities\TargetObject;
 use modules\taskList\src\entities\taskList\TaskList;
 use modules\taskList\src\entities\userTask\repository\UserTaskRepository;
 use modules\taskList\src\entities\userTask\UserTask;
+use modules\taskList\src\entities\userTask\UserTaskQuery;
 use src\helpers\ErrorsToStringHelper;
 
 class LeadTaskFirstAssignService extends LeadTaskAssignService
@@ -28,6 +29,18 @@ class LeadTaskFirstAssignService extends LeadTaskAssignService
 
     public function assign(): void
     {
+        $existNewUserTaskComplete = UserTaskQuery::getQueryUserTaskByUserTaskListAndStatuses(
+            $this->lead->employee_id,
+            $this->taskList->tl_id,
+            TargetObject::TARGET_OBJ_LEAD,
+            $this->lead->id,
+            [UserTask::STATUS_PROCESSING, UserTask::STATUS_COMPLETE]
+        )->exists();
+
+        if ($existNewUserTaskComplete) {
+            return;
+        }
+
         $userTask = UserTask::create(
             $this->lead->employee_id,
             TargetObject::TARGET_OBJ_LEAD,
