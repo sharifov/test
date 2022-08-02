@@ -150,7 +150,7 @@ class ClientManageService
             $phone->phone = $form->phone;
         }
         if ($form->type !== null) {
-            $phone->type = $form->type;
+            $phone->setType($form->type);
         }
         if ($form->cp_title !== null) {
             $phone->cp_title = $form->cp_title;
@@ -204,7 +204,7 @@ class ClientManageService
             $email->email = $form->email;
         }
         if ($form->type !== null) {
-            $email->type = $form->type;
+            $email->setType($form->type);
         }
         if ($form->ce_title !== null) {
             $email->ce_title = $form->ce_title;

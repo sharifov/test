@@ -555,13 +555,13 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Lead User Ratings', 'url' => ['/lead-user-rating-crud/index']],
                         ['label' => 'Lead Status Reason', 'url' => ['/lead-status-reason-crud/index']],
                         ['label' => 'Lead Status Reason Log', 'url' => ['/lead-status-reason-log-crud/index']],
-                        ['label' => 'Lead Status Reason Log', 'url' => ['/lead-status-reason-log-crud/index']],
                         [
                             'label' => 'Smart Lead Distribution',
                             'url' => 'javascript:',
                             'icon' => 'list',
                             'items' => [
                                 ['label' => 'Lead Rating Parameters', 'url' => ['/smart-lead-distribution/lead-rating-parameter-crud/index']],
+                                ['label' => 'Summary Report', 'url' => ['/smart-lead-distribution/lead-rating-report/index']],
                             ],
                             'visible' => SmartLeadDistributionService::ffIsEnable()
                         ]

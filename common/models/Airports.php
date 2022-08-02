@@ -240,12 +240,20 @@ class Airports extends \yii\db\ActiveRecord
      * @param int $duration
      * @return array
      */
-    public static function getCountryList(int $duration = 5 * 60): array
+    public static function getCountryList(int $duration = 5 * 60, string $key = 'country'): array
     {
-        return Yii::$app->cacheFile->getOrSet(__FUNCTION__, static function () {
+        $cacheKey = __FUNCTION__ . $key;
+
+        return Yii::$app->cacheFile->getOrSet($cacheKey, static function () use ($key) {
+            $selectParams = ['country'];
+
+            if ($key !== $selectParams[0]) {
+                $selectParams[] = $key;
+            }
+
             return ArrayHelper::map(
-                self::find()->select(['country'])->distinct()->orderBy(['country' => SORT_ASC])->all(),
-                'country',
+                self::find()->select($selectParams)->distinct()->orderBy(['country' => SORT_ASC])->all(),
+                $key,
                 'country'
             );
         }, $duration);

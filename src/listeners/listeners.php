@@ -1,6 +1,12 @@
 <?php
 
+use src\events\client\ClientEmailChangedEvent;
+use src\events\client\ClientEmailCreatedEvent;
+use src\events\client\ClientPhoneChangedEvent;
+use src\events\client\ClientPhoneCreatedEvent;
 use src\events\quote\QuoteSendEvent;
+use src\listeners\client\ClientEmailAssignTaskListListener;
+use src\listeners\client\ClientPhoneAssignTaskListListener;
 use src\listeners\quote\QuoteSendEventListener;
 use src\model\client\entity\events\ClientChangeIpEvent;
 use src\model\client\entity\events\ClientCreatedEvent;
@@ -116,4 +122,19 @@ return [
         RemoveRedialCallUserNotificationListener::class,
     ],
 
+    ClientEmailCreatedEvent::class => [
+        ClientEmailAssignTaskListListener::class,
+    ],
+
+    ClientEmailChangedEvent::class => [
+        ClientEmailAssignTaskListListener::class,
+    ],
+
+    ClientPhoneCreatedEvent::class => [
+        ClientPhoneAssignTaskListListener::class,
+    ],
+
+    ClientPhoneChangedEvent::class => [
+        ClientPhoneAssignTaskListListener::class,
+    ],
 ];

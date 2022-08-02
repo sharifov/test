@@ -50,6 +50,8 @@ use src\model\contactPhoneServiceInfo\repository\ContactPhoneServiceInfoReposito
 use src\model\emailList\entity\EmailList;
 use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\model\phoneList\entity\PhoneList;
+use src\repositories\client\ClientEmailRepository;
+use src\repositories\client\ClientPhoneRepository;
 use src\repositories\client\ClientsQuery;
 use src\services\cases\CasesSaleService;
 use src\services\client\ClientCreateForm;
@@ -906,17 +908,18 @@ class OneTimeController extends Controller
     {
         $oldPhones = ClientPhone::find()->andWhere(['client_id' => $fromId])->asArray()->all();
         foreach ($oldPhones as $oldPhone) {
-            $phone = new ClientPhone();
+            $phone = ClientPhone::create($oldPhone['phone'], $toId);
             $phone->enablelAferSave = false;
-            $phone->client_id = $toId;
-            $phone->phone = $oldPhone['phone'];
             $phone->created = $oldPhone['created'];
             $phone->is_sms = $oldPhone['is_sms'];
             $phone->validate_dt = $oldPhone['validate_dt'];
             $phone->type = $oldPhone['type'] ?: ClientPhone::PHONE_NOT_SET;
             $phone->cp_title = $oldPhone['cp_title'];
             $phone->detachBehavior('timestamp');
-            if (!$phone->save()) {
+            try {
+                $clientPhoneRepository = Yii::createObject(ClientPhoneRepository::class);
+                $clientPhoneRepository->save($phone);
+            } catch (\RuntimeException $e) {
                 Yii::error(VarDumper::dumpAsString([
                     'fromId' => $fromId,
                     'toId' => $toId,
@@ -931,14 +934,16 @@ class OneTimeController extends Controller
     {
         $oldEmails = ClientEmail::find()->andWhere(['client_id' => $fromId])->asArray()->all();
         foreach ($oldEmails as $oldEmail) {
-            $email = new ClientEmail();
-            $email->client_id = $toId;
-            $email->email = $oldEmail['email'];
+            $email = ClientEmail::create($oldEmail['email'], $toId);
             $email->created = $oldEmail['created'];
             $email->type = $oldEmail['type'] ?: ClientEmail::EMAIL_NOT_SET;
             $email->ce_title = $oldEmail['ce_title'];
             $email->detachBehavior('timestamp');
-            if (!$email->save()) {
+
+            try {
+                $clientPhoneRepository = Yii::createObject(ClientEmailRepository::class);
+                $clientPhoneRepository->save($email);
+            } catch (\RuntimeException $e) {
                 Yii::error(VarDumper::dumpAsString([
                     'fromId' => $fromId,
                     'toId' => $toId,

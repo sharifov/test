@@ -21,6 +21,7 @@ use modules\taskList\src\entities\userTask\repository\UserTaskRepository;
 use modules\taskList\src\entities\userTask\UserTask;
 use modules\taskList\src\entities\userTask\UserTaskQuery;
 use modules\taskList\src\exceptions\TaskListAssignException;
+use modules\taskList\src\services\taskAssign\checker\TaskListAssignCheckerFactory;
 use src\helpers\app\AppHelper;
 use src\helpers\DateHelper;
 use src\helpers\ErrorsToStringHelper;
@@ -52,6 +53,15 @@ class LeadTaskListService
             if ($taskLists = TaskListQuery::getTaskListByLeadId($this->lead->id)) {
                 foreach ($taskLists as $taskList) {
                     try {
+                        $assignChecker = (new TaskListAssignCheckerFactory(
+                            $taskList->tl_object,
+                            $this->lead
+                        ))->create();
+
+                        if (!$assignChecker->check()) {
+                            continue;
+                        }
+
                         $dtNowWithDelay = $dtNow->modify(sprintf('+%d hour', $taskList->getDelayHoursParam()));
                         $userShiftSchedules = UserShiftScheduleQuery::getAllFromStartDateByUserId($this->lead->employee_id, $dtNowWithDelay);
 
