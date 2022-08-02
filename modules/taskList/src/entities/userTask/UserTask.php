@@ -284,4 +284,15 @@ class UserTask extends \yii\db\ActiveRecord
         $this->ut_user_id = $newOwnerId;
         return $this;
     }
+
+    public function getLastStatusLogByStatusId(int $statusId): ?UserTaskStatusLog
+    {
+        return UserTaskStatusLog::find()
+            ->where([
+                'utsl_ut_id' => $this->ut_id,
+                'utsl_new_status' => $statusId,
+            ])
+            ->limit(1)
+            ->one();
+    }
 }
