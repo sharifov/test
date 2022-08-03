@@ -28,6 +28,7 @@ class ItineraryDumpDTO
     public $baggageAllowanceNumber;
     public $statusCode;
     public $arrivalAirportCode;
+    public ?int $tripKey = null;
 
     /**
      * ItineraryDumpDTO constructor.
@@ -42,6 +43,7 @@ class ItineraryDumpDTO
         $this->bookingClass = $segment['bookingClass'] ?? null;
         $this->departureAirportCode = $segment['departureAirportCode'] ?? null;
         $this->destinationAirportCode = $segment['arrivalAirportCode'] ?? null;
+        $this->tripKey = $segment['segment_trip_key'] ?? null;
         if (isset($segment['operatingAirline'], $segment['marketingAirline'])) {
             $this->operationAirlineCode = $segment['operatingAirline'] !== $segment['marketingAirline'] ? ($segment['operatingAirline']  ?? null) : null;
         }
@@ -63,6 +65,7 @@ class ItineraryDumpDTO
         $this->operationAirline = $segment['operatingAirlineName'] ?? null;
         $this->marketingAirline = $segment['carrier'] ?? null;
         $this->duration = $segment['flightDuration'] ?? null;
+        $this->tripKey = $segment['segment_trip_key'] ?? null;
         return $this;
     }
 }
