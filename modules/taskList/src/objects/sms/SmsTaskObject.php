@@ -20,6 +20,7 @@ class SmsTaskObject extends BaseTaskObject implements TaskObjectInterface
     public const FIELD_PROJECT_KEY = self::OBJ_SMS . '.' . 'project_key';
     public const FIELD_TEMPLATE_TYPE_KEY = self::OBJ_SMS . '.' . 'template_type_key';
     public const FIELD_SMS_HAS_CLIENT = self::OBJ_SMS . '.' . 'sms_has_client';
+    public const FIELD_IS_OFFER_TEMPLATE = self::OBJ_SMS . '.' . 'is_offer_template';
 
     public const OBJECT_OPTION_LIST = [
     ];
@@ -62,11 +63,24 @@ class SmsTaskObject extends BaseTaskObject implements TaskObjectInterface
         'operators' =>  [self::OP_EQUAL2],
     ];
 
+    protected const ATTR_SMS_IS_OFFER_TEMPLATE = [
+        'optgroup' => self::OPTGROUP_SMS,
+        'id' => self::NS . self::FIELD_IS_OFFER_TEMPLATE,
+        'field' => self::FIELD_IS_OFFER_TEMPLATE,
+        'label' => 'Is Offer Template',
+        'type' => self::ATTR_TYPE_BOOLEAN,
+        'input' => self::ATTR_INPUT_RADIO,
+        'values' => ['true' => 'True', 'false' => 'False'],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2],
+    ];
+
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
         0 => self::ATTR_PROJECT_KEY,
         1 => self::ATTR_TEMPLATE_TYPE_KEY,
         2 => self::ATTR_SMS_HAS_CLIENT,
+        3 => self::ATTR_SMS_IS_OFFER_TEMPLATE,
     ];
 
     /**
