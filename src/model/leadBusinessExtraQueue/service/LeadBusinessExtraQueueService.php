@@ -59,7 +59,8 @@ class LeadBusinessExtraQueueService
                 $offset = $offset[0] === '+' ? substr_replace($offset, '-', 0, 1) : substr_replace($offset, '+', 0, 1);
                 $clientTime = gmdate("H:i", strtotime($offset));
             } else {
-                $clientTime = gmdate("H:i");
+                $clientTime = $lead->getClientTime2();
+                $clientTime = $clientTime->format('H:i');
             }
             $logData = [
                 'leadId' => $lead->id,
