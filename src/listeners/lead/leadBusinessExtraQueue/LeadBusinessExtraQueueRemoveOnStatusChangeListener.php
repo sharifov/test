@@ -25,7 +25,9 @@ class LeadBusinessExtraQueueRemoveOnStatusChangeListener
             if (($fromStatus = Lead::getStatus($event->oldStatus)) && $toStatus = Lead::getStatus($event->newStatus)) {
                 $description = sprintf(LeadBusinessExtraQueueLogStatus::REASON_CHANGE_STATUS, $fromStatus, $toStatus);
             }
-            LeadBusinessExtraQueueService::removeFromLead($lead, $description);
+            if (isset($event->newStatus) && $event->newStatus !== Lead::STATUS_PROCESSING) {
+                LeadBusinessExtraQueueService::removeFromLead($lead, $description);
+            }
         } catch (\RuntimeException | \DomainException $throwable) {
             \Yii::warning(AppHelper::throwableLog($throwable), 'LeadBusinessExtraQueueRemoveOnStatusChangeListener:Exception');
         } catch (\Throwable $throwable) {

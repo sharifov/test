@@ -32,20 +32,11 @@ $this->params['breadcrumbs'][] = $this->title;
             'lbeqr_name',
             'lbeqr_description:text',
             [
-                'attribute' => 'lbeqr_enabled',
-                'value' => static function (LeadBusinessExtraQueueRule $model) {
-                    return \Yii::$app->formatter->asBooleanByLabel($model->lbeqr_enabled);
-                },
-                'filter' => [1 => 'Yes', 0 => 'No'],
-                'format' => 'raw',
-            ],
-            [
                 'class' => \common\components\grid\UserSelect2Column::class,
                 'attribute' => 'lbeqr_updated_user_id',
                 'relation' => 'lbeqrUpdatedUser',
                 'placeholder' => 'Updated User'
             ],
-            'lbeqr_updated_user_id',
             'lbeqr_duration',
             'lbeqr_start_time',
             'lbeqr_end_time',
