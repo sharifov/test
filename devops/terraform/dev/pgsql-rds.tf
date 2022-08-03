@@ -7,7 +7,7 @@ module "pgsql" {
   engine            = "postgres"
   engine_version    = "12.8"
   instance_class    = var.PGSQL_RDS_INSTANCE_TYPE
-  allocated_storage = 5
+  allocated_storage = var.PGSQL_RDS_VOLUME_SIZE
   storage_encrypted = true
   multi_az          = false
 

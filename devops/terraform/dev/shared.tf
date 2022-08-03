@@ -1,4 +1,4 @@
-# Beanstalkd, Redis, Centrifugo EC2 Instance
+# Beanstalkd, Redis, Centrifugo Instance
 resource "aws_instance" "shared" {
   ami                    = var.SHARED_AMI
   instance_type          = var.SHARED_INSTANCE_TYPE
@@ -7,8 +7,9 @@ resource "aws_instance" "shared" {
   vpc_security_group_ids = [aws_security_group.shared.id]
 
   root_block_device {
-    volume_size = 30
+    volume_size = var.SHARED_VOLUME_SIZE
     volume_type = "gp3"
+    encrypted   = false
   }
 
   tags = {
@@ -17,15 +18,24 @@ resource "aws_instance" "shared" {
     Project     = var.PROJECT
     Ns          = var.NAMESPACE
     Domain      = var.DOMAIN
+    App         = "redis, beanstalkd, centrifugo"
     Kind        = "shared"
   }
 }
 
-# SecurityGroup
+# Security Group
 resource "aws_security_group" "shared" {
   name        = "shared-${var.PROJECT}-${var.ENV}"
   description = "Allows Beanstalk & Redis within ${var.ENV} VPC"
   vpc_id      = var.VPC_ID
+
+  ingress {
+    description = "Self VPC Security Group"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    self        = true
+  }
 
   ingress {
     description = "SSH"

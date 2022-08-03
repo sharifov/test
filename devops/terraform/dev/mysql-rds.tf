@@ -1,3 +1,4 @@
+# MySQL Instance
 module "mysql" {
   source  = "terraform-aws-modules/rds/aws"
   version = "~> 2.0"
@@ -6,7 +7,7 @@ module "mysql" {
   engine            = "mysql"
   engine_version    = "8.0.25"
   instance_class    = var.MYSQL_RDS_INSTANCE_TYPE
-  allocated_storage = 50
+  allocated_storage = var.MYSQL_RDS_VOLUME_SIZE
   storage_encrypted = true
 
   name     = var.MYSQL_RDS_DATABASE
