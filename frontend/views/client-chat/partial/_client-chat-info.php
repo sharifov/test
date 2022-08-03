@@ -44,6 +44,7 @@ $formatter->timeZone = Auth::user()->timezone;
 
 $cases = $clientChat->cases;
 $leads = $clientChat->leads;
+$formResponses = $clientChat->formResponses;
 ?>
 
 <div class="_rc-client-chat-info-wrapper">
@@ -454,6 +455,31 @@ $leads = $clientChat->leads;
         'timeout' => 5000,
         'enablePushState' => false,
     ]); */ ?>
+    <?php if ($actionPermissions->canViewClientChatForm($clientChat)) : ?>
+        <div class="_rc-block-wrapper">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Client Chat Form </h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li>
+                            <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+
+                <div class="x_content">
+                    <?php foreach ($formResponses as $formResponse) : ?>
+                        <div class="_cc-addition-data-item">
+                            <span><?= $formResponse->clientChatForm->ccf_name ?></span>
+                            <span ><?= $formResponse->ccfr_value ?></span>
+                        </div>
+                    <?php endforeach ?>
+
+                </div>
+            </div>
+        </div>
+    <?php endif ?>
 
         <?php if ($clientChat->ccv && $clientChat->ccv->ccvCvd) : ?>
             <div class="_rc-block-wrapper">
