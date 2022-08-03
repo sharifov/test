@@ -9,6 +9,7 @@ use modules\taskList\src\entities\taskList\TaskList;
 use modules\taskList\src\entities\TaskObject;
 use modules\taskList\src\entities\userTask\UserTask;
 use yii\db\ActiveRecordInterface;
+use src\entities\email\EmailInterface;
 
 class TaskListCompletionFactory
 {
@@ -33,14 +34,14 @@ class TaskListCompletionFactory
     {
         switch ($this->taskObject) {
             case TaskObject::OBJ_EMAIL:
-                if (!$this->taskModel instanceof Email) {
+                if (!$this->taskModel instanceof EmailInterface) {
                     throw new \RuntimeException('taskModel must be an instance of Email');
                 }
                 return (new EmailCompletionChecker($this->taskModel, $this->taskList));
 
             case TaskObject::OBJ_SMS:
                 if (!$this->taskModel instanceof Sms) {
-                    throw new \RuntimeException('taskModel must be an instance of Email');
+                    throw new \RuntimeException('taskModel must be an instance of Sms');
                 }
                 return (new SmsCompletionChecker($this->taskModel, $this->taskList));
 

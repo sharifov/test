@@ -410,6 +410,19 @@ class Formatter extends \yii\i18n\Formatter
         return \modules\lead\src\helpers\formatters\lead\Formatter::asLead($lead, $class);
     }
 
+    public function asLeads($leads, ?string $class = null): string
+    {
+        if (empty($leads)) {
+            return $this->nullDisplay;
+        }
+
+        $return = '';
+        foreach ($leads as $lead) {
+            $return .= \modules\lead\src\helpers\formatters\lead\Formatter::asLead($lead, $class);
+        }
+        return $return;
+    }
+
     public function asCase(?Cases $case, ?string $class = null): string
     {
         if ($case === null) {
@@ -417,6 +430,19 @@ class Formatter extends \yii\i18n\Formatter
         }
 
         return \src\model\cases\helpers\formatters\cases\Formatter::asCase($case, $class);
+    }
+
+    public function asCases($cases, ?string $class = null): string
+    {
+        if (empty($cases)) {
+            return $this->nullDisplay;
+        }
+
+        $return = '';
+        foreach ($cases as $case) {
+            $return .= \src\model\cases\helpers\formatters\cases\Formatter::asCase($case, $class);
+        }
+        return $return;
     }
 
     public function asCaseSale(?CaseSale $caseSale): string
@@ -808,6 +834,19 @@ class Formatter extends \yii\i18n\Formatter
             return $this->nullDisplay;
         }
         return Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::a($value, ['/client/view', 'id' => $value], ['data-pjax' => 0, 'target' => '_blank']);
+    }
+
+    public function asClients($clients): string
+    {
+        if (empty($clients)) {
+            return $this->nullDisplay;
+        }
+
+        $return = '';
+        foreach ($clients as $client) {
+            $return .= Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::a($client, ['/client/view', 'id' => $client], ['data-pjax' => 0, 'target' => '_blank']);
+        }
+        return $return;
     }
 
     public function asCouponStatus($value): string

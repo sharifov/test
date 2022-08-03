@@ -7,8 +7,8 @@ use common\models\Employee;
 use yii\bootstrap4\Modal;
 use common\models\Call;
 use common\models\Sms;
-use common\models\Email;
 use common\models\Lead;
+use src\entities\email\helpers\EmailType;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\AgentActivitySearch */
@@ -192,7 +192,7 @@ $this->registerJs("$(function() {
                             return \yii\bootstrap\Html::a(
                                 $data['email_sent'],
                                 ['/agent-report/email',
-                                    $searchModel->formName() . '[e_type_id]' => Email::TYPE_OUTBOX,
+                                    $searchModel->formName() . '[e_type_id]' => EmailType::OUTBOX,
                                     $searchModel->formName() . '[id]' => $data['id'],
                                     $searchModel->formName() . '[date_from]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_from)),
                                     $searchModel->formName() . '[date_to]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_to))],
@@ -213,7 +213,7 @@ $this->registerJs("$(function() {
                             return \yii\bootstrap\Html::a(
                                 $data['email_received'],
                                 ['/agent-report/email',
-                                    $searchModel->formName() . '[e_type_id]' => Email::TYPE_INBOX,
+                                    $searchModel->formName() . '[e_type_id]' => EmailType::INBOX,
                                     $searchModel->formName() . '[id]' => $data['id'],
                                     $searchModel->formName() . '[date_from]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_from)),
                                     $searchModel->formName() . '[date_to]' => Employee::convertTimeFromUserDtToUTC(strtotime($searchModel->date_to))],

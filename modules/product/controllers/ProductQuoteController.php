@@ -38,7 +38,6 @@ use src\helpers\ProjectHashGenerator;
 use src\repositories\cases\CasesRepository;
 use src\repositories\NotFoundException;
 use src\services\cases\CasesCommunicationService;
-use src\services\flightQuote\segment\UnUsedSegmentService;
 use Yii;
 use frontend\controllers\FController;
 use yii\filters\VerbFilter;
@@ -52,6 +51,10 @@ use modules\product\src\abac\dto\RelatedProductQuoteAbacDto;
 use modules\product\src\abac\RelatedProductQuoteAbacObject;
 use modules\product\src\abac\dto\ProductQuoteChangeAbacDto;
 use modules\product\src\abac\ProductQuoteChangeAbacObject;
+use src\services\email\EmailMainService;
+use src\exception\CreateModelException;
+use src\exception\EmailNotSentException;
+use src\services\flightQuote\segment\UnUsedSegmentService;
 
 /**
  * Class ProductQuoteController
@@ -63,6 +66,7 @@ use modules\product\src\abac\ProductQuoteChangeAbacObject;
  * @property CasesCommunicationService $casesCommunicationService
  * @property ProductQuoteDataManageService $productQuoteDataManageService
  * @property ProductQuoteChangeRepository $productQuoteChangeRepository
+ * @property EmailMainService $emailService
  */
 class ProductQuoteController extends FController
 {
@@ -88,6 +92,7 @@ class ProductQuoteController extends FController
      */
     private ProductQuoteDataManageService $productQuoteDataManageService;
     private ProductQuoteChangeRepository $productQuoteChangeRepository;
+    private EmailMainService $emailService;
 
     /**
      * @var UnUsedSegmentService
@@ -119,6 +124,7 @@ class ProductQuoteController extends FController
         UnUsedSegmentService $unUsedSegmentService,
         ProductQuoteDataManageService $productQuoteDataManageService,
         ProductQuoteChangeRepository $productQuoteChangeRepository,
+        EmailMainService $emailService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -130,6 +136,7 @@ class ProductQuoteController extends FController
         $this->unUsedSegmentService = $unUsedSegmentService;
         $this->productQuoteDataManageService = $productQuoteDataManageService;
         $this->productQuoteChangeRepository = $productQuoteChangeRepository;
+        $this->emailService = $emailService;
     }
 
     /**
@@ -361,101 +368,72 @@ class ProductQuoteController extends FController
                         throw new BadRequestHttpException('Error: Booking ID missing.');
                     }
 
-                    $mail = new Email();
-                    $mail->e_project_id = $case->cs_project_id;
-                    $mail->e_case_id = $case->cs_id;
-                    if ($previewEmailForm->email_tpl_id) {
-                        $mail->e_template_type_id = $previewEmailForm->email_tpl_id;
-                    }
-                    $mail->e_type_id = Email::TYPE_OUTBOX;
-                    $mail->e_status_id = Email::STATUS_PENDING;
-                    $mail->e_email_subject = $previewEmailForm->email_subject;
-                    $mail->body_html = $previewEmailForm->email_message;
-                    $mail->e_email_from = $previewEmailForm->email_from;
-
-                    $mail->e_email_from_name = $previewEmailForm->email_from_name;
-                    $mail->e_email_to_name = $previewEmailForm->email_to_name;
-
-                    if ($previewEmailForm->language_id) {
-                        $mail->e_language_id = $previewEmailForm->language_id;
-                    }
-
-                    $mail->e_email_to = $previewEmailForm->email_to;
-                    //$mail->email_data = [];
-                    $mail->e_created_dt = date('Y-m-d H:i:s');
-                    $mail->e_created_user_id = Yii::$app->user->id;
-
-                    if ($mail->save()) {
-                        $mail->e_message_id = $mail->generateMessageId();
-                        $mail->update();
-
+                    try {
+                        $mail = $this->emailService->createFromCase($previewEmailForm, $case);
                         $previewEmailForm->is_send = true;
+                        $this->emailService->sendMail($mail);
+                    } catch (CreateModelException $e) {
+                        throw new \RuntimeException($e->getErrorSummary(false)[0]);
+                    } catch (EmailNotSentException $e) {
+                        throw new \RuntimeException('Error: Email Message has not been sent to ' .  $e->getEmailTo(false));
+                    }
 
-                        $mailResponse = $mail->sendMail();
+                    $case->addEventLog(
+                        null,
+                        ($mail->getTemplateTypeName() ?? '') . ' email sent. By: ' . Auth::user()->username,
+                        ['changeId' => $previewEmailForm->changeId],
+                        CaseEventLog::CATEGORY_INFO
+                    );
 
-                        if (isset($mailResponse['error']) && $mailResponse['error']) {
-                            throw new \RuntimeException('Error: Email Message has not been sent to ' .  $mail->e_email_to);
-                        }
+                    $productQuoteChange->statusToPending();
+                    if (!$productQuoteChange->save()) {
+                        Yii::warning(
+                            'ProductQuoteChange saving failed: ' . $productQuoteChange->getErrorSummary(true)[0],
+                            'ProductQuoteController::actionVoluntaryQuoteSendEmail::ProductQuoteChange::save'
+                        );
+                    }
 
-                        $case->addEventLog(
-                            null,
-                            ($mail->eTemplateType->etp_name ?? '') . ' email sent. By: ' . Auth::user()->username,
-                            ['changeId' => $previewEmailForm->changeId],
-                            CaseEventLog::CATEGORY_INFO
+                    try {
+                        $whData = (new HybridWhData())->fillCollectedData(
+                            HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
+                            [
+                                'booking_id' => $bookingId,
+                                'product_quote_gid' => $originQuote->pq_gid,
+                                'exchange_gid' => $productQuoteChange->pqc_gid,
+                                'exchange_status' => ProductQuoteChangeStatus::getClientKeyStatusById($productQuoteChange->pqc_status_id),
+                            ]
+                        )->getCollectedData();
+
+                        \Yii::info([
+                            'type' => HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
+                            'requestData' => $whData,
+                            'ProductQuoteChangeStatus' => ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id),
+                        ], 'info\Webhook::OTA::ProductQuoteController:Request');
+
+                        $responseData = \Yii::$app->hybrid->wh(
+                            $case->cs_project_id,
+                            HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
+                            ['data' => $whData]
                         );
 
-                        $productQuoteChange->statusToPending();
-                        if (!$productQuoteChange->save()) {
-                            Yii::warning(
-                                'ProductQuoteChange saving failed: ' . $productQuoteChange->getErrorSummary(true)[0],
-                                'ProductQuoteController::actionVoluntaryQuoteSendEmail::ProductQuoteChange::save'
-                            );
-                        }
-
-                        try {
-                            $whData = (new HybridWhData())->fillCollectedData(
-                                HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
-                                [
-                                    'booking_id' => $bookingId,
-                                    'product_quote_gid' => $originQuote->pq_gid,
-                                    'exchange_gid' => $productQuoteChange->pqc_gid,
-                                    'exchange_status' => ProductQuoteChangeStatus::getClientKeyStatusById($productQuoteChange->pqc_status_id),
-                                ]
-                            )->getCollectedData();
-
-                            \Yii::info([
-                                'type' => HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
-                                'requestData' => $whData,
-                                'ProductQuoteChangeStatus' => ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id),
-                            ], 'info\Webhook::OTA::ProductQuoteController:Request');
-
-                            $responseData = \Yii::$app->hybrid->wh(
-                                $case->cs_project_id,
-                                HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
-                                ['data' => $whData]
-                            );
-
-                            \Yii::info([
-                                'type' => HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
-                                'responseData' => $responseData,
-                            ], 'info\Webhook::OTA::ProductQuoteController:Response');
-                        } catch (\Throwable $throwable) {
-                            $errorData = AppHelper::throwableLog($throwable);
-                            $errorData['text'] = 'OTA site is not informed (VoluntaryQuoteSendEmail)';
-                            $errorData['project_id'] = $case->cs_project_id;
-                            $errorData['case_id'] = $case->cs_id;
-                            Yii::warning($errorData, 'ProductQuoteController:actionVoluntaryQuoteSendEmail:Throwable');
-                        }
-
-                        return '<script>$("#modal-md").modal("hide"); 
-                            createNotify("Success", "Success: <strong>Email Message</strong> is sent to <strong>' . $mail->e_email_to . '</strong>", "success");
-                            if ($("#pjax-case-orders").length) {
-                                pjaxReload({container: "#pjax-case-orders"});
-                            }
-                        </script>';
+                        \Yii::info([
+                            'type' => HybridWhData::WH_TYPE_VOLUNTARY_CHANGE_UPDATE,
+                            'responseData' => $responseData,
+                        ], 'info\Webhook::OTA::ProductQuoteController:Response');
+                    } catch (\Throwable $throwable) {
+                        $errorData = AppHelper::throwableLog($throwable);
+                        $errorData['text'] = 'OTA site is not informed (VoluntaryQuoteSendEmail)';
+                        $errorData['project_id'] = $case->cs_project_id;
+                        $errorData['case_id'] = $case->cs_id;
+                        Yii::warning($errorData, 'ProductQuoteController:actionVoluntaryQuoteSendEmail:Throwable');
                     }
 
-                    throw new \RuntimeException($mail->getErrorSummary(false)[0]);
+                    return '<script>$("#modal-md").modal("hide");
+                        createNotify("Success", "Success: <strong>Email Message</strong> is sent to <strong>' . $mail->getEmailTo(false) . '</strong>", "success");
+                        if ($("#pjax-case-orders").length) {
+                            pjaxReload({container: "#pjax-case-orders"});
+                        }
+                    </script>';
                 } catch (\DomainException | \RuntimeException $throwable) {
                     Yii::error(AppHelper::throwableLog($throwable), 'ProductQuoteController::actionVoluntaryQuoteSendEmail::Exception');
                     $previewEmailForm->addError('error', $throwable->getMessage());
@@ -636,105 +614,75 @@ class ProductQuoteController extends FController
                         throw new \RuntimeException('Voluntary Refund - processing is not complete');
                     }
 
-                    $mail = new Email();
-                    $mail->e_project_id = $case->cs_project_id;
-                    $mail->e_case_id = $case->cs_id;
-                    if ($previewEmailForm->email_tpl_id) {
-                        $mail->e_template_type_id = $previewEmailForm->email_tpl_id;
-                    }
-                    $mail->e_type_id = Email::TYPE_OUTBOX;
-                    $mail->e_status_id = Email::STATUS_PENDING;
-                    $mail->e_email_subject = $previewEmailForm->email_subject;
-                    $mail->body_html = $previewEmailForm->email_message;
-                    $mail->e_email_from = $previewEmailForm->email_from;
-
-                    $mail->e_email_from_name = $previewEmailForm->email_from_name;
-                    $mail->e_email_to_name = $previewEmailForm->email_to_name;
-
-                    if ($previewEmailForm->language_id) {
-                        $mail->e_language_id = $previewEmailForm->language_id;
-                    }
-
-                    $mail->e_email_to = $previewEmailForm->email_to;
-                    //$mail->email_data = [];
-                    $mail->e_created_dt = date('Y-m-d H:i:s');
-                    $mail->e_created_user_id = Yii::$app->user->id;
-
-                    if ($mail->save()) {
-                        $mail->e_message_id = $mail->generateMessageId();
-                        $mail->update();
-
+                    try {
+                        $mail = $this->emailService->createFromCase($previewEmailForm, $case);
                         $previewEmailForm->is_send = true;
+                        $this->emailService->sendMail($mail);
+                    } catch (CreateModelException $e) {
+                        throw new \RuntimeException($e->getErrorSummary(false)[0]);
+                    } catch (EmailNotSentException $e) {
+                        throw new \RuntimeException('Error: Email Message has not been sent to ' .  $e->getEmailTo(false));
+                    }
 
-                        $mailResponse = $mail->sendMail();
+                    $case->addEventLog(null, ($mail->getTemplateTypeName() ?? '') . ' email sent. By: ' . Auth::user()->username);
 
-                        if (isset($mailResponse['error']) && $mailResponse['error']) {
-                            throw new \RuntimeException('Error: Email Message has not been sent to ' .  $mail->e_email_to);
+                    if ($productQuoteChange) {
+                        $productQuoteChange->statusToPending();
+                        if (!$productQuoteChange->save()) {
+                            Yii::warning('ProductQuoteChange saving failed: ' . $productQuoteChange->getErrorSummary(true)[0], 'ProductQuoteController::actionReprotectionQuoteSendEmail::ProductQuoteChange::save');
                         }
+                    }
 
-                        $case->addEventLog(null, ($mail->eTemplateType->etp_name ?? '') . ' email sent. By: ' . Auth::user()->username);
+                    $bookingId = $originQuote->getBookingId();
+                    $data = [
+                        'data' => [
+                            'booking_id' => $bookingId,
+                            'reprotection_quote_gid' => $reprotectionQuote->pq_gid,
+                            'case_gid' => $case->cs_gid,
+                            'product_quote_gid' => $originQuote->pq_gid,
+                            'status' => ProductQuoteChangeStatus::getClientKeyStatusById($productQuoteChange->pqc_status_id),
+                        ]
+                    ];
 
-                        if ($productQuoteChange) {
-                            $productQuoteChange->statusToPending();
-                            if (!$productQuoteChange->save()) {
-                                Yii::warning('ProductQuoteChange saving failed: ' . $productQuoteChange->getErrorSummary(true)[0], 'ProductQuoteController::actionReprotectionQuoteSendEmail::ProductQuoteChange::save');
-                            }
-                        }
+                    if ($bookingId) {
+                        try {
+                            $hybridService = Yii::createObject(HybridService::class);
+                            $hybridService->whReprotection($case->cs_project_id, $data);
+                            $case->addEventLog(null, 'Request HybridService sent successfully');
 
-                        $bookingId = $originQuote->getBookingId();
-                        $data = [
-                            'data' => [
-                                'booking_id' => $bookingId,
-                                'reprotection_quote_gid' => $reprotectionQuote->pq_gid,
-                                'case_gid' => $case->cs_gid,
-                                'product_quote_gid' => $originQuote->pq_gid,
-                                'status' => ProductQuoteChangeStatus::getClientKeyStatusById($productQuoteChange->pqc_status_id),
-                            ]
-                        ];
-
-                        if ($bookingId) {
-                            try {
-                                $hybridService = Yii::createObject(HybridService::class);
-                                $hybridService->whReprotection($case->cs_project_id, $data);
-                                $case->addEventLog(null, 'Request HybridService sent successfully');
-
-                                /** @fflag FFlag::FF_KEY_SCHEDULE_CHANGE_CLIENT_REMAINDER_NOTIFICATION, Create remainder notification enable/disable */
-                                if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SCHEDULE_CHANGE_CLIENT_REMAINDER_NOTIFICATION)) {
-                                    $addedToQueue = $this->unUsedSegmentService->checkIfChangeListIsAddedToQueue($case->cs_id, $productQuoteChange->pqc_id);
-                                    if (!$addedToQueue) {
-                                        $unUsedSegment = $this->unUsedSegmentService->getUnUsedSegmentData($reprotectionQuote, $productQuoteChange, $case);
-                                        if (!empty($unUsedSegment)) {
-                                            try {
-                                                $this->unUsedSegmentService->addToQueueJob($unUsedSegment);
-                                            } catch (\Throwable $throwable) {
-                                                $errorData = AppHelper::throwableLog($throwable);
-                                                $errorData['submessage'] = 'Create client remainder notification job failed.';
-                                                $errorData['project_id'] = $case->cs_project_id;
-                                                $errorData['case_id'] = $case->cs_id;
-
-                                                Yii::warning($errorData, 'ProductQuoteController:actionReprotectionQuoteSendEmail:Throwable');
-                                            }
+                            /** @fflag FFlag::FF_KEY_SCHEDULE_CHANGE_CLIENT_REMAINDER_NOTIFICATION, Create remainder notification enable/disable */
+                            if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SCHEDULE_CHANGE_CLIENT_REMAINDER_NOTIFICATION)) {
+                                $addedToQueue = $this->unUsedSegmentService->checkIfChangeListIsAddedToQueue($case->cs_id, $productQuoteChange->pqc_id);
+                                if (!$addedToQueue) {
+                                    $unUsedSegment = $this->unUsedSegmentService->getUnUsedSegmentData($reprotectionQuote, $productQuoteChange, $case);
+                                    if (!empty($unUsedSegment)) {
+                                        try {
+                                            $this->unUsedSegmentService->addToQueueJob($unUsedSegment);
+                                        } catch (\Throwable $throwable) {
+                                            $errorData = AppHelper::throwableLog($throwable);
+                                            $errorData['submessage'] = 'Create client remainder notification job failed.';
+                                            $errorData['project_id'] = $case->cs_project_id;
+                                            $errorData['case_id'] = $case->cs_id;
+                                            Yii::warning($errorData, 'ProductQuoteController:actionReprotectionQuoteSendEmail:Throwable');
                                         }
                                     }
                                 }
-                            } catch (\Throwable $throwable) {
-                                $errorData = AppHelper::throwableLog($throwable);
-                                $errorData['submessage'] = 'OTA site is not informed (hybridService->whReprotection)';
-                                $errorData['project_id'] = $case->cs_project_id;
-                                $errorData['case_id'] = $case->cs_id;
-
-                                Yii::warning($errorData, 'ProductQuoteController:actionReprotectionQuoteSendEmail:Throwable');
                             }
-                        } else {
-                            Yii::warning([
-                                    'message' => 'Error: WebHook hybridService "whReprotection" not sent. Reason: BookingId is empty',
-                                    'data' => $data
-                                ], 'ProductQuoteController:actionReprotectionQuoteSendEmail:HybridService:whReprotection');
-                        }
-                        return '<script>$("#modal-md").modal("hide"); createNotify("Success", "Success: <strong>Email Message</strong> is sent to <strong>' . $mail->e_email_to . '</strong>", "success")</script>';
-                    }
+                        } catch (\Throwable $throwable) {
+                            $errorData = AppHelper::throwableLog($throwable);
+                            $errorData['submessage'] = 'OTA site is not informed (hybridService->whReprotection)';
+                            $errorData['project_id'] = $case->cs_project_id;
+                            $errorData['case_id'] = $case->cs_id;
 
-                    throw new \RuntimeException($mail->getErrorSummary(false)[0]);
+                            Yii::warning($errorData, 'ProductQuoteController:actionReprotectionQuoteSendEmail:Throwable');
+                        }
+                    } else {
+                        Yii::warning([
+                            'message' => 'Error: WebHook hybridService "whReprotection" not sent. Reason: BookingId is empty',
+                            'data' => $data
+                        ], 'ProductQuoteController:actionReprotectionQuoteSendEmail:HybridService:whReprotection');
+                    }
+                    return '<script>$("#modal-md").modal("hide"); createNotify("Success", "Success: <strong>Email Message</strong> is sent to <strong>' . $mail->getEmailTo(false) . '</strong>", "success")</script>';
                 } catch (\DomainException | \RuntimeException $throwable) {
                     Yii::error(AppHelper::throwableLog($throwable), 'ProductQuoteController::actionReprotectionQuoteSendEmail::DomainException|RuntimeException');
                     $previewEmailForm->addError('error', $throwable->getMessage());

@@ -3,7 +3,6 @@
 namespace src\entities\cases;
 
 use common\models\Airports;
-use common\models\Call;
 use common\models\CaseSale;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
@@ -17,16 +16,14 @@ use frontend\helpers\JsonHelper;
 use modules\fileStorage\src\entity\fileCase\FileCase;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
-use src\access\EmployeeDepartmentAccess;
 use src\access\EmployeeProjectAccess;
 use src\helpers\setting\SettingHelper;
 use src\model\callLog\entity\callLog\CallLog;
 use src\model\callLog\entity\callLog\CallLogType;
 use src\model\callLog\entity\callLogCase\CallLogCase;
-use src\model\clientChat\entity\ClientChat;
 use src\model\clientChatCase\entity\ClientChatCase;
 use src\model\saleTicket\entity\SaleTicket;
-use Yii;
+use src\repositories\email\EmailRepositoryFactory;
 use yii\data\ActiveDataProvider;
 use yii\data\SqlDataProvider;
 use yii\db\Expression;
@@ -480,28 +477,22 @@ class CasesSearch extends Cases
         }
 
         if ($this->saleTicketSendEmailDate) {
+            $emailRepository = EmailRepositoryFactory::getRepository();
+
             $emails = SettingHelper::getCaseSaleTicketMainEmailList();
             $this->saleTicketSendEmailDate = date('Y-m-d', strtotime($this->saleTicketSendEmailDate));
 
             $query
                 ->innerJoin(CaseSale::tableName(), new Expression('case_sale.css_cs_id = cs_id and css_send_email_dt is not null'))
                 ->innerJoin([
-                'emailQuery' => Email::find()
-                    ->select(['e_case_id'])
-                    ->andWhere(['e_email_to' => $emails])
-                    ->andWhere(['DATE(e_created_dt)' => $this->saleTicketSendEmailDate])
-                    ->groupBy(['e_case_id'])
-            ], 'emailQuery.e_case_id = cs_id');
+                    'emailQuery' => $emailRepository->getCasesByEmailsToAndCreated($emails, $this->saleTicketSendEmailDate)
+                ], 'emailQuery.e_case_id = cs_id');
 
             if ($params['export_type']) {
                 $query
                     ->select(['cases.*', 'css_sale_id as cssSaleId', 'css_sale_book_id as cssBookId', 'css_sale_pnr as salePNR', 'css_send_email_dt as saleTicketSendEmailDate', 'username as sentEmailBy', 'ug_name as userGroup'])
                     ->leftJoin([
-                        'emailQueryEmployeeId' => Email::find()
-                            ->select(['e_case_id', 'e_created_user_id'])
-                            ->andWhere(['e_email_to' => $emails])
-                            ->andWhere(['DATE(e_created_dt)' => $this->saleTicketSendEmailDate])
-                            ->groupBy(['e_case_id', 'e_created_user_id'])
+                        'emailQueryEmployeeId' => $emailRepository->getCasesCreatorByEmailsToAndCreated($emails, $this->saleTicketSendEmailDate)
                     ], 'emailQueryEmployeeId.e_case_id = cs_id')
                     ->leftJoin(Employee::tableName(), new Expression('employees.id = emailQueryEmployeeId.e_created_user_id'))
                     ->leftJoin(UserGroupAssign::tableName(), new Expression('ugs_user_id =  emailQueryEmployeeId.e_created_user_id'))
@@ -865,28 +856,21 @@ class CasesSearch extends Cases
         }
 
         if ($this->saleTicketSendEmailDate) {
+            $emailRepository = EmailRepositoryFactory::getRepository();
             $emails = SettingHelper::getCaseSaleTicketMainEmailList();
             $this->saleTicketSendEmailDate = date('Y-m-d', strtotime($this->saleTicketSendEmailDate));
 
             $query
                 ->innerJoin(CaseSale::tableName(), new Expression('case_sale.css_cs_id = cs_id and css_send_email_dt is not null'))
                 ->innerJoin([
-                'emailQuery' => Email::find()
-                    ->select(['e_case_id'])
-                    ->andWhere(['e_email_to' => $emails])
-                    ->andWhere(['DATE(e_created_dt)' => $this->saleTicketSendEmailDate])
-                    ->groupBy(['e_case_id'])
+                'emailQuery' => $emailRepository->getCasesByEmailsToAndCreated($emails, $this->saleTicketSendEmailDate)
             ], 'emailQuery.e_case_id = cs_id');
 
             if ($params['export_type']) {
                 $query
                     ->select(['cases.*', 'css_sale_id as cssSaleId', 'css_sale_book_id as cssBookId', 'css_sale_pnr as salePNR', 'css_send_email_dt as saleTicketSendEmailDate', 'username as sentEmailBy', 'ug_name as userGroup'])
                     ->leftJoin([
-                        'emailQueryEmployeeId' => Email::find()
-                            ->select(['e_case_id', 'e_created_user_id'])
-                            ->andWhere(['e_email_to' => $emails])
-                            ->andWhere(['DATE(e_created_dt)' => $this->saleTicketSendEmailDate])
-                            ->groupBy(['e_case_id', 'e_created_user_id'])
+                        'emailQueryEmployeeId' => $emailRepository->getCasesCreatorByEmailsToAndCreated($emails, $this->saleTicketSendEmailDate)
                     ], 'emailQueryEmployeeId.e_case_id = cs_id')
                     ->leftJoin(Employee::tableName(), new Expression('employees.id = emailQueryEmployeeId.e_created_user_id'))
                     ->leftJoin(UserGroupAssign::tableName(), new Expression('ugs_user_id =  emailQueryEmployeeId.e_created_user_id'))
@@ -976,14 +960,10 @@ class CasesSearch extends Cases
     private function prepareCommunicationQuery($query)
     {
         if (!empty($this->emailsQtyFrom) || !empty($this->emailsQtyTo)) {
-            $query->leftJoin([
-                'emails' => Email::find()
-                    ->select([
-                        'e_case_id',
-                        new Expression('COUNT(e_case_id) AS cnt')
-                    ])
-                    ->groupBy(['e_case_id'])
-            ], 'cases.cs_id = emails.e_case_id');
+            $query->leftJoin(
+                '(' . EmailRepositoryFactory::getRepository()->getRawSqlCountGroupedByCase(). ') AS emails',
+                'cases.cs_id = emails.e_case_id'
+                );
 
             if (!empty($this->emailsQtyFrom)) {
                 if ((int) $this->emailsQtyFrom === 0) {

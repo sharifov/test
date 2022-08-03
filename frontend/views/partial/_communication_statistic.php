@@ -10,6 +10,7 @@ use src\helpers\communication\StatisticsHelper;
 use src\model\clientChat\entity\search\ClientChatQaSearch;
 use yii\helpers\Html;
 use yii\helpers\Url;
+use modules\featureFlag\FFlag;
 
 $linkAttributes = ['target' => '_blank', 'data-pjax' => '0'];
 ?>
@@ -55,9 +56,10 @@ $linkAttributes = ['target' => '_blank', 'data-pjax' => '0'];
             $text = $statistics->emailCount;
         if (Auth::can('/email/index')) {
             $paramName = $statistics->isTypeCase() ? 'e_case_id' : 'e_lead_id';
+            $url = (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_EMAIL_NORMALIZED_FORM_ENABLE)) ? '/email-normalized/index': '/email/index';
             echo Html::a(
                 $text,
-                Url::to(['/email/index', 'EmailSearch[' . $paramName . ']'  => $statistics->getId()]),
+                Url::to([$url, 'EmailSearch[' . $paramName . ']'  => $statistics->getId()]),
                 $linkAttributes
             );
         } else {

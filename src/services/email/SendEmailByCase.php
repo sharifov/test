@@ -11,6 +11,9 @@ use src\entities\cases\Cases;
 use src\model\cases\CaseCodeException;
 use src\repositories\NotFoundException;
 use yii\helpers\VarDumper;
+use src\exception\CreateModelException;
+use src\exception\EmailNotSentException;
+use src\dto\email\EmailDTO;
 
 /**
  * Class SendEmailByCase
@@ -64,25 +67,27 @@ class SendEmailByCase
                     throw new \DomainException($mailPreview['error']);
                 }
 
-                $mail = new Email();
-                $mail->e_project_id = $case->cs_project_id;
-                $mail->e_case_id = $case->cs_id;
-                $mail->e_template_type_id = $emailTemplate->etp_id;
-                $mail->e_type_id = Email::TYPE_OUTBOX;
-                $mail->e_status_id = Email::STATUS_PENDING;
-                $mail->e_email_subject = $mailPreview['data']['email_subject'];
-                $mail->body_html = $mailPreview['data']['email_body_html'];
-                $mail->e_email_from = $emailConfigs->emailFrom;
-                $mail->e_email_from_name = $emailConfigs->emailFromName;
-                $mail->e_email_to = $this->contact_email;
-                $mail->e_created_dt = date('Y-m-d H:i:s');
-
-                if ($mail->save()) {
-                    $mailResponse = $mail->sendMail();
-                    if ($mailResponse['error'] !== false) {
-                        throw new \DomainException('Email(Id: ' . $mail->e_id . ') has not been sent.');
-                    }
+                try {
+                    $emailDTO = EmailDTO::fromArray([
+                        'projectId' => $case->cs_project_id,
+                        'caseId' => $case->cs_id,
+                        'depId' => $case->cs_dep_id,
+                        'clientId' => $case->cs_client_id,
+                        'templateTypeId' => $emailTemplate->etp_id,
+                        'emailSubject' => $mailPreview['data']['email_subject'],
+                        'emailFrom' => $emailConfigs->emailFrom,
+                        'emailFromName' => $emailConfigs->emailFromName,
+                        'emailTo' => $this->contact_email,
+                        'bodyHtml' => $mailPreview['data']['email_body_html'],
+                    ]);
+                    $emailService = EmailMainService::newInstance();
+                    $mail = $emailService->createFromDTO($emailDTO, false);
+                    $emailService->sendMail($mail);
                     return self::RESULT_SEND;
+                } catch (CreateModelException $e) {
+                    return self::RESULT_NOT_ENABLE;
+                } catch (EmailNotSentException $e) {
+                    throw new \DomainException('Email(Id: ' . $mail->e_id . ') has not been sent.');
                 }
                 return self::RESULT_NOT_ENABLE;
             }

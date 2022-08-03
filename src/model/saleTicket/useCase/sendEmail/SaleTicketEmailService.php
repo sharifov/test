@@ -6,9 +6,12 @@ use common\models\CaseSale;
 use common\models\Email;
 use common\models\Employee;
 use common\models\UserProjectParams;
-use src\helpers\cases\CaseSaleHelper;
 use src\model\saleTicket\entity\SaleTicket;
 use src\repositories\cases\CasesSaleRepository;
+use src\dto\email\EmailDTO;
+use src\services\email\EmailMainService;
+use src\exception\CreateModelException;
+use src\exception\EmailNotSentException;
 
 /**
  * Class SaleTicketEmailService
@@ -41,43 +44,28 @@ class SaleTicketEmailService
      */
     public function generateAndSendEmail(array $saleTickets, array $emailSettings, string $emailBody, int $caseId, string $bookingId, Employee $user, CaseSale $caseSale): void
     {
-        $mail = new Email();
-        $mail->e_project_id = $this->getProjectIdFromST($saleTickets[0]);
-        $mail->e_case_id = $caseId;
-        $mail->e_type_id = Email::TYPE_OUTBOX;
-        $mail->e_status_id = Email::STATUS_PENDING;
-        $mail->e_email_subject = $this->generateEmailSubject($emailSettings['subject'], $saleTickets[0], $bookingId);
-        $mail->body_html = $emailBody;
-        $mail->e_email_from = $this->getEmailFrom($mail->e_project_id, $user);
+        try{
+            $emailDTO = EmailDTO::fromArray([
+                'projectId' => $this->getProjectIdFromST($saleTickets[0]),
+                'caseId' => $caseId,
+                'emailSubject' => $this->generateEmailSubject($emailSettings['subject'], $saleTickets[0], $bookingId),
+                'bodyHtml' => $emailBody,
+                'emailFrom' => $this->getEmailFrom($mail->e_project_id, $user),
+                'emailTo' => $emailSettings['sendTo'][0],
+                'createdUserId' => $user->id,
+                'emailCc' => $this->getEmailCC($emailSettings, $saleTickets[0], SaleTicketHelper::isRecallCommissionChanged($saleTickets, $caseSale->getSaleDataDecoded()))
+            ]);
 
+            $emailService = EmailMainService::newInstance();
+            $mail = $emailService->createFromDTO($emailDTO, false);
 
-        $mail->e_email_to = $emailSettings['sendTo'][0];
-        $mail->e_email_cc = $this->getEmailCC($emailSettings, $saleTickets[0], SaleTicketHelper::isRecallCommissionChanged($saleTickets, $caseSale->getSaleDataDecoded()));
-        $mail->e_created_dt = date('Y-m-d H:i:s');
-        $mail->e_created_user_id = $user->id;
+            $this->casesSaleRepository->setSendEmailDt(date('Y-m-d H:i:s'), $caseSale);
 
-        if (!$mail->save()) {
-            throw new \RuntimeException($mail->getErrorSummary(false)[0]);
-        }
-
-        $this->casesSaleRepository->setSendEmailDt(date('Y-m-d H:i:s'), $caseSale);
-
-        $this->sendEmail($mail);
-    }
-
-    /**
-     * @param Email $email
-     * @throws \Throwable
-     * @throws \yii\db\StaleObjectException
-     */
-    private function sendEmail(Email $email): void
-    {
-        $email->e_message_id = $email->generateMessageId();
-        $email->update();
-
-        $mailResponse = $email->sendMail();
-        if (isset($mailResponse['error']) && $mailResponse['error']) {
-            throw new \RuntimeException('Error: Email Message has not been sent to ' .  $email->e_email_to);
+            $emailService->sendMail($mail);
+        } catch (CreateModelException $e) {
+            throw new \RuntimeException($e->getErrorSummary(false)[0]);
+        } catch (EmailNotSentException $e) {
+            throw new \RuntimeException('Error: Email Message has not been sent to ' .  $mail->getEmailTo(false));
         }
     }
 

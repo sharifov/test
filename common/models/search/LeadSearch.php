@@ -56,6 +56,7 @@ use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use modules\lead\src\abac\queue\LeadQueueBusinessInboxAbacObject;
+use src\repositories\email\EmailRepositoryFactory;
 
 /**
  * LeadSearch represents the model behind the search form of `common\models\Lead`.
@@ -758,14 +759,10 @@ class LeadSearch extends Lead
         }
 
         if (!empty($this->emailsQtyFrom) || !empty($this->emailsQtyTo)) {
-            $query->leftJoin([
-                'emails' => Email::find()
-                    ->select([
-                        'e_lead_id',
-                        new Expression('COUNT(e_lead_id) AS cnt')
-                    ])
-                    ->groupBy(['e_lead_id'])
-            ], 'leads.id = emails.e_lead_id');
+            $query->leftJoin(
+                '(' . EmailRepositoryFactory::getRepository()->getRawSqlCountGroupedByLead() . ') AS emails',
+                'leads.id = emails.e_lead_id'
+            );
 
             if (!empty($this->emailsQtyFrom)) {
                 if ((int) $this->emailsQtyFrom === 0) {
@@ -1297,11 +1294,7 @@ class LeadSearch extends Lead
         ]);
 
         $query->addSelect([
-            'emailOffers' => (new Query())
-                ->select(['count(*)'])
-                ->from(Email::tableName())
-                ->andWhere([Email::tableName() . '.e_template_type_id' => 1])
-                ->andWhere(Email::tableName() . '.e_lead_id = ' . Lead::tableName() . '.id')
+            'emailOffers' => EmailRepositoryFactory::getRepository()->getSubQueryLeadEmailOffer()
         ]);
 
         $query->addSelect([
@@ -1714,11 +1707,7 @@ class LeadSearch extends Lead
         ]);
 
         $query->addSelect([
-            'emailOffers' => (new Query())
-                ->select(['count(*)'])
-                ->from(Email::tableName())
-                ->andWhere([Email::tableName() . '.e_template_type_id' => 1])
-                ->andWhere(Email::tableName() . '.e_lead_id = ' . Lead::tableName() . '.id')
+            'emailOffers' => EmailRepositoryFactory::getRepository()->getSubQueryLeadEmailOffer()
         ]);
 
         $query->addSelect([
@@ -3787,7 +3776,7 @@ class LeadSearch extends Lead
 
         if ($category == 'finalProfit') {
             $query->select(['e.id', 'e.username']);
-            $query->addSelect(['(SELECT 
+            $query->addSelect(['(SELECT
             SUM(CASE
                     WHEN
                         employee_id = e.id AND lead_origin = 1
@@ -3795,9 +3784,9 @@ class LeadSearch extends Lead
                     final_profit - agents_processing_fee
                     WHEN
                         employee_id = e.id AND lead_origin = 0
-                    THEN                  
-                    -((final_profit - agents_processing_fee) * (lead_ps / 100)) 
-                    WHEN 
+                    THEN
+                    -((final_profit - agents_processing_fee) * (lead_ps / 100))
+                    WHEN
                     user_id = e.id AND lead_origin = 0
                     THEN
                     (final_profit - agents_processing_fee) * (lead_ps / 100)
@@ -3806,17 +3795,17 @@ class LeadSearch extends Lead
         FROM
             leads
                 LEFT JOIN
-            (SELECT 
+            (SELECT
                 employee_id AS user_id,
                     id AS lead_id,
                     100 AS lead_ps,
                     TRUE AS lead_origin
             FROM
                 leads
-            WHERE               
+            WHERE
                 leads.id IN (SELECT id FROM leads WHERE (updated ' . $between_condition . ') AND status=' . Lead::STATUS_SOLD . ')
-                UNION ALL                 
-            SELECT 
+                UNION ALL
+            SELECT
                 ps_user_id AS user_id,
                     ps_lead_id AS lead_id,
                     ps_percent AS lead_ps,
@@ -3836,28 +3825,28 @@ class LeadSearch extends Lead
 
         if ($category == 'profitPerPax') {
             $query->select(['e.id', 'e.username']);
-            $query->addSelect(['(SELECT 
+            $query->addSelect(['(SELECT
             SUM(CASE
                     WHEN
                         employee_id = e.id AND lead_origin = 1
                     THEN
-                    (final_profit - agents_processing_fee) / (adults + children)                    
+                    (final_profit - agents_processing_fee) / (adults + children)
                     ELSE 0
                 END)
         FROM
             leads
                 LEFT JOIN
-            (SELECT 
+            (SELECT
                 employee_id AS user_id,
                     id AS lead_id,
                     100 AS lead_ps,
                     TRUE AS lead_origin
             FROM
                 leads
-            WHERE               
+            WHERE
                 leads.id IN (SELECT id FROM leads WHERE (updated ' . $between_condition . ') AND status=' . Lead::STATUS_SOLD . ')
-                UNION ALL                 
-            SELECT 
+                UNION ALL
+            SELECT
                 ps_user_id AS user_id,
                     ps_lead_id AS lead_id,
                     ps_percent AS lead_ps,
@@ -3872,7 +3861,7 @@ class LeadSearch extends Lead
 
         if ($category == 'tips') {
             $query->select(['e.id', 'e.username']);
-            $query->addSelect(['(SELECT 
+            $query->addSelect(['(SELECT
             SUM(CASE
                     WHEN
                         employee_id = e.id AND lead_origin = 1
@@ -3880,9 +3869,9 @@ class LeadSearch extends Lead
                     tips / 2
                     WHEN
                         employee_id = e.id AND lead_origin = 0
-                    THEN                  
-                    -((tips / 2) * (lead_ps / 100)) 
-                    WHEN 
+                    THEN
+                    -((tips / 2) * (lead_ps / 100))
+                    WHEN
                     user_id = e.id AND lead_origin = 0
                     THEN
                     (tips / 2) * (lead_ps / 100)
@@ -3891,17 +3880,17 @@ class LeadSearch extends Lead
         FROM
             leads
                 LEFT JOIN
-            (SELECT 
+            (SELECT
                 employee_id AS user_id,
                     id AS lead_id,
                     100 AS lead_ps,
                     TRUE AS lead_origin
             FROM
                 leads
-            WHERE               
+            WHERE
                 leads.id IN (SELECT id FROM leads WHERE (updated ' . $between_condition . ') AND status=' . Lead::STATUS_SOLD . ')
-                UNION ALL                 
-            SELECT 
+                UNION ALL
+            SELECT
                 ts_user_id AS user_id,
                     ts_lead_id AS lead_id,
                     ts_percent AS lead_ps,
@@ -3915,7 +3904,7 @@ class LeadSearch extends Lead
         }
 
         if ($category == 'leadConversion') {
-            $query->select(['employee_id, 
+            $query->select(['employee_id,
                              (SUM(CASE WHEN status IN(' . Lead::STATUS_SOLD . ',' . Lead::STATUS_BOOKED . ') AND (updated ' . $between_condition . ') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status=' . Lead::STATUS_PROCESSING . ' AND employee_id=lf_owner_id AND lf_from_status_id=' . Lead::STATUS_SNOOZE . ' OR lf_from_status_id=' . Lead::STATUS_PENDING . ' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END) /
                              SUM(CASE WHEN status NOT IN(' . Lead::STATUS_REJECT . ', ' . Lead::STATUS_TRASH . ', ' . Lead::STATUS_SNOOZE . ') AND (updated ' . $between_condition . ') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status=' . Lead::STATUS_PROCESSING . ' AND employee_id=lf_owner_id AND lf_from_status_id=' . Lead::STATUS_SNOOZE . ' OR lf_from_status_id=' . Lead::STATUS_PENDING . ' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END)) AS leadConversion,
                              SUM(CASE WHEN status IN(' . Lead::STATUS_SOLD . ',' . Lead::STATUS_BOOKED . ') AND (updated ' . $between_condition . ') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status=' . Lead::STATUS_PROCESSING . ' AND employee_id=lf_owner_id AND lf_from_status_id=' . Lead::STATUS_SNOOZE . ' OR lf_from_status_id=' . Lead::STATUS_PENDING . ' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END) AS leadsToProcessing,
@@ -3996,7 +3985,7 @@ class LeadSearch extends Lead
         $query = new Query();
 
         if ($category == 'teamsProfit') {
-            $query->addSelect(['ug_name', 'SUM((SELECT 
+            $query->addSelect(['ug_name', 'SUM((SELECT
             SUM(CASE
                     WHEN
                         employee_id = e.id AND lead_origin = 1
@@ -4004,9 +3993,9 @@ class LeadSearch extends Lead
                     final_profit - agents_processing_fee
                     WHEN
                         employee_id = e.id AND lead_origin = 0
-                    THEN                  
-                    -((final_profit - agents_processing_fee) * (lead_ps / 100)) 
-                    WHEN 
+                    THEN
+                    -((final_profit - agents_processing_fee) * (lead_ps / 100))
+                    WHEN
                     user_id = e.id AND lead_origin = 0
                     THEN
                     (final_profit - agents_processing_fee) * (lead_ps / 100)
@@ -4015,17 +4004,17 @@ class LeadSearch extends Lead
         FROM
             leads
                 LEFT JOIN
-            (SELECT 
+            (SELECT
                 employee_id AS user_id,
                     id AS lead_id,
                     100 AS lead_ps,
                     TRUE AS lead_origin
             FROM
                 leads
-            WHERE               
+            WHERE
                 leads.id IN (select id from leads where (updated ' . $between_condition . ') and status=' . Lead::STATUS_SOLD . ')
-                UNION ALL                 
-            SELECT 
+                UNION ALL
+            SELECT
                 ps_user_id AS user_id,
                     ps_lead_id AS lead_id,
                     ps_percent AS lead_ps,
@@ -4067,28 +4056,28 @@ class LeadSearch extends Lead
         }
 
         if ($category == 'teamsProfitPerPax') {
-            $query->addSelect(['ug_name', 'AVG((SELECT 
+            $query->addSelect(['ug_name', 'AVG((SELECT
             SUM(CASE
                     WHEN
                         employee_id = e.id AND lead_origin = 1
                     THEN
-                    (final_profit - agents_processing_fee) / (adults + children)                    
+                    (final_profit - agents_processing_fee) / (adults + children)
                     ELSE 0
                 END)
         FROM
             leads
                 LEFT JOIN
-            (SELECT 
+            (SELECT
                 employee_id AS user_id,
                     id AS lead_id,
                     100 AS lead_ps,
                     TRUE AS lead_origin
             FROM
                 leads
-            WHERE               
+            WHERE
                 leads.id IN (SELECT id FROM leads WHERE (updated ' . $between_condition . ') AND status=' . Lead::STATUS_SOLD . ')
-                UNION ALL                 
-            SELECT 
+                UNION ALL
+            SELECT
                 ps_user_id AS user_id,
                     ps_lead_id AS lead_id,
                     ps_percent AS lead_ps,
@@ -4115,28 +4104,28 @@ class LeadSearch extends Lead
         }
 
         if ($category == 'teamsProfitPerAgent') {
-            $query->addSelect(['ug_name', 'AVG((SELECT 
+            $query->addSelect(['ug_name', 'AVG((SELECT
             SUM(CASE
                     WHEN
                         employee_id = e.id AND lead_origin = 1
                     THEN
-                    (final_profit - agents_processing_fee)                 
+                    (final_profit - agents_processing_fee)
                     ELSE 0
                 END)
         FROM
             leads
                 LEFT JOIN
-            (SELECT 
+            (SELECT
                 employee_id AS user_id,
                     id AS lead_id,
                     100 AS lead_ps,
                     TRUE AS lead_origin
             FROM
                 leads
-            WHERE               
+            WHERE
                 leads.id IN (SELECT id FROM leads WHERE (updated ' . $between_condition . ') AND status=' . Lead::STATUS_SOLD . ')
-                UNION ALL                 
-            SELECT 
+                UNION ALL
+            SELECT
                 ps_user_id AS user_id,
                     ps_lead_id AS lead_id,
                     ps_percent AS lead_ps,
@@ -4163,7 +4152,7 @@ class LeadSearch extends Lead
         }
 
         if ($category == 'teamsConversion') {
-            $query->addSelect(['ug_name,  
+            $query->addSelect(['ug_name,
                              (SUM(CASE WHEN status IN(' . Lead::STATUS_SOLD . ',' . Lead::STATUS_BOOKED . ') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status=' . Lead::STATUS_PROCESSING . ' AND employee_id=lf_owner_id AND lf_from_status_id=' . Lead::STATUS_SNOOZE . ' OR lf_from_status_id=' . Lead::STATUS_PENDING . ' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END) /
                              SUM(CASE WHEN status NOT IN(' . Lead::STATUS_REJECT . ', ' . Lead::STATUS_TRASH . ', ' . Lead::STATUS_SNOOZE . ') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status=' . Lead::STATUS_PROCESSING . ' AND employee_id=lf_owner_id AND lf_from_status_id=' . Lead::STATUS_SNOOZE . ' OR lf_from_status_id=' . Lead::STATUS_PENDING . ' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END))  as teamsConversion,
                              SUM(CASE WHEN status IN(' . Lead::STATUS_SOLD . ',' . Lead::STATUS_BOOKED . ') AND (updated ' . $between_condition . ') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status=' . Lead::STATUS_PROCESSING . ' AND employee_id=lf_owner_id AND lf_from_status_id=' . Lead::STATUS_SNOOZE . ' OR lf_from_status_id=' . Lead::STATUS_PENDING . ' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END) AS teamLeadsToProcessing,
@@ -4285,23 +4274,23 @@ class LeadSearch extends Lead
 
         $query = new Query();
 
-        $query->select(['lf.lf_owner_id AS user_id, DATE(CONVERT_TZ(DATE_SUB(lf.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) as created_date, COUNT(*) as cnt, 
-                
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND `lf_from_status_id` = ' . Lead::STATUS_PENDING . ' AND lfw.status = ' . Lead::STATUS_PROCESSING . $queryByProject . $queryByCreatedType . ') AS newTotal,    
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND `lf_from_status_id` = ' . Lead::STATUS_PENDING . ' AND lfw.status = ' . Lead::STATUS_PROCESSING . ' AND lf_description = "Take" ' . $queryByProject . $queryByCreatedType . ') AS inboxLeadsTaken,    
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND `lf_from_status_id` = ' . Lead::STATUS_PENDING . ' AND lfw.status = ' . Lead::STATUS_PROCESSING . ' AND lf_description = "Call AutoCreated Lead" ' . $queryByProject . $queryByCreatedType . ') AS callLeadsTaken,    
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND `lf_from_status_id` = ' . Lead::STATUS_PENDING . ' AND lfw.status = ' . Lead::STATUS_PROCESSING . ' AND lf_description = "Lead redial" ' . $queryByProject . $queryByCreatedType . ') AS redialLeadsTaken,    
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND lf_from_status_id IS NULL AND lfw.status = ' . Lead::STATUS_PROCESSING . ' AND ls.clone_id IS NULL ' . $queryByProject . $queryByCreatedType . ') AS leadsCreated,    
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND lf_from_status_id IS NULL AND lfw.status = ' . Lead::STATUS_PROCESSING . '  AND lfw.lf_description <> "Manual create" AND ls.clone_id IS NOT NULL ' . $queryByProject . $queryByCreatedType . ') AS leadsCloned,    
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND `lf_from_status_id` = ' . Lead::STATUS_FOLLOW_UP . ' AND lfw.status =  ' . Lead::STATUS_PROCESSING . $queryByProject . $queryByCreatedType . ') AS followUpTotal,              
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lfw.employee_id AND `lf_from_status_id` = ' . Lead::STATUS_PROCESSING . ' AND lfw.status =  ' . Lead::STATUS_FOLLOW_UP . $queryByProject . $queryByCreatedType . ') AS toFollowUp,                
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND `lf_from_status_id` = ' . Lead::STATUS_FOLLOW_UP . ' AND lfw.status = ' . Lead::STATUS_PROCESSING . $queryByProject . $queryByCreatedType . ') AS followUpLeadsTaken,    
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND `lf_from_status_id` = ' . Lead::STATUS_PROCESSING . ' AND lfw.status = ' . Lead::STATUS_TRASH . $queryByProject . $queryByCreatedType . ') AS trashLeads,    
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND lfw.status = ' . Lead::STATUS_SOLD . $queryByProject . $queryByCreatedType . ') AS soldLeads,    
-            (SELECT SUM(CASE WHEN ls.final_profit IS NOT NULL AND ls.final_profit > 0 THEN ls.final_profit ELSE 0 END) FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND lfw.status = ' . Lead::STATUS_SOLD . $queryByProject . $queryByCreatedType . ') AS profit,    
+        $query->select(['lf.lf_owner_id AS user_id, DATE(CONVERT_TZ(DATE_SUB(lf.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) as created_date, COUNT(*) as cnt,
+
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND `lf_from_status_id` = ' . Lead::STATUS_PENDING . ' AND lfw.status = ' . Lead::STATUS_PROCESSING . $queryByProject . $queryByCreatedType . ') AS newTotal,
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND `lf_from_status_id` = ' . Lead::STATUS_PENDING . ' AND lfw.status = ' . Lead::STATUS_PROCESSING . ' AND lf_description = "Take" ' . $queryByProject . $queryByCreatedType . ') AS inboxLeadsTaken,
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND `lf_from_status_id` = ' . Lead::STATUS_PENDING . ' AND lfw.status = ' . Lead::STATUS_PROCESSING . ' AND lf_description = "Call AutoCreated Lead" ' . $queryByProject . $queryByCreatedType . ') AS callLeadsTaken,
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND `lf_from_status_id` = ' . Lead::STATUS_PENDING . ' AND lfw.status = ' . Lead::STATUS_PROCESSING . ' AND lf_description = "Lead redial" ' . $queryByProject . $queryByCreatedType . ') AS redialLeadsTaken,
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND lf_from_status_id IS NULL AND lfw.status = ' . Lead::STATUS_PROCESSING . ' AND ls.clone_id IS NULL ' . $queryByProject . $queryByCreatedType . ') AS leadsCreated,
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND lf_from_status_id IS NULL AND lfw.status = ' . Lead::STATUS_PROCESSING . '  AND lfw.lf_description <> "Manual create" AND ls.clone_id IS NOT NULL ' . $queryByProject . $queryByCreatedType . ') AS leadsCloned,
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND `lf_from_status_id` = ' . Lead::STATUS_FOLLOW_UP . ' AND lfw.status =  ' . Lead::STATUS_PROCESSING . $queryByProject . $queryByCreatedType . ') AS followUpTotal,
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lfw.employee_id AND `lf_from_status_id` = ' . Lead::STATUS_PROCESSING . ' AND lfw.status =  ' . Lead::STATUS_FOLLOW_UP . $queryByProject . $queryByCreatedType . ') AS toFollowUp,
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND `lf_from_status_id` = ' . Lead::STATUS_FOLLOW_UP . ' AND lfw.status = ' . Lead::STATUS_PROCESSING . $queryByProject . $queryByCreatedType . ') AS followUpLeadsTaken,
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND `lf_from_status_id` = ' . Lead::STATUS_PROCESSING . ' AND lfw.status = ' . Lead::STATUS_TRASH . $queryByProject . $queryByCreatedType . ') AS trashLeads,
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND lfw.status = ' . Lead::STATUS_SOLD . $queryByProject . $queryByCreatedType . ') AS soldLeads,
+            (SELECT SUM(CASE WHEN ls.final_profit IS NOT NULL AND ls.final_profit > 0 THEN ls.final_profit ELSE 0 END) FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND lfw.status = ' . Lead::STATUS_SOLD . $queryByProject . $queryByCreatedType . ') AS profit,
             (SELECT SUM(CASE WHEN ls.tips IS NOT NULL THEN ls.tips ELSE 0 END) FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND lfw.status = ' . Lead::STATUS_SOLD . $queryByProject . $queryByCreatedType . ') AS tips
-                
-            FROM lead_flow AS lf WHERE lf.created ' . $between_condition . ' AND lf.lf_owner_id IS NOT NULL ' . $queryByOwner . $queryByGroup . $queryByDepartment . '        
+
+            FROM lead_flow AS lf WHERE lf.created ' . $between_condition . ' AND lf.lf_owner_id IS NOT NULL ' . $queryByOwner . $queryByGroup . $queryByDepartment . '
         ']);
 
         $query->groupBy(['created_date', 'lf.lf_owner_id']);
@@ -4478,7 +4467,7 @@ class LeadSearch extends Lead
             SUM(IF(lf.lf_from_status_id = ' . Lead::STATUS_PENDING . ' AND lf.status = ' . Lead::STATUS_PROCESSING . ' AND lf.lf_description = "Lead redial", 1, 0)) redialLeadsTaken,
             SUM(IF(lf.lf_from_status_id IS NULL AND lf.status = ' . Lead::STATUS_PROCESSING . ' AND ls.clone_id IS NULL AND lf.lf_owner_id = lf.employee_id, 1, 0)) leadsCreated,
             SUM(IF(lf.lf_from_status_id IS NULL AND lf.status = ' . Lead::STATUS_PROCESSING . ' AND ls.clone_id IS NOT NULL AND lf.lf_owner_id = lf.employee_id AND lf.lf_description <> "Manual create", 1, 0)) leadsCloned,
-            SUM(IF(lf.lf_from_status_id = ' . Lead::STATUS_FOLLOW_UP . ' AND lf.status = ' . Lead::STATUS_PROCESSING . ', 1, 0)) followUpTotal,	
+            SUM(IF(lf.lf_from_status_id = ' . Lead::STATUS_FOLLOW_UP . ' AND lf.status = ' . Lead::STATUS_PROCESSING . ', 1, 0)) followUpTotal,
             (SELECT COUNT(*) FROM lead_flow lfw WHERE lfw.created ' . $between_condition . ' AND lfw.employee_id = lf.lf_owner_id AND lfw.lf_from_status_id = ' . Lead::STATUS_PROCESSING . ' AND lfw.status = ' . Lead::STATUS_FOLLOW_UP . ' ) toFollowUp,
             SUM(IF(lf.lf_from_status_id = ' . Lead::STATUS_FOLLOW_UP . ' AND lf.status = ' . Lead::STATUS_PROCESSING . ' AND lf.lf_owner_id = lf.employee_id, 1, 0)) followUpLeadsTaken,
             SUM(IF(lf.lf_from_status_id = ' . Lead::STATUS_PROCESSING . ' AND lf.status = ' . Lead::STATUS_TRASH . ' AND lf.lf_owner_id = lf.employee_id, 1, 0)) trashLeads,

@@ -5,6 +5,7 @@ use yii\helpers\Html;
 use yii\widgets\Pjax;
 use yii\grid\GridView;
 use yii\bootstrap4\Modal;
+use src\entities\email\EmailInterface;
 
 /* @var $this yii\web\View */
 /* @var $title string */
@@ -35,10 +36,10 @@ $this->registerJs($js);?>
         [
             'attribute' => 'e_lead_id',
             'label' => 'Lead ID',
-            'value' => static function (\common\models\Email $model) {
-                return $model->e_lead_id ? Html::a($model->e_lead_id, [
+            'value' => static function (EmailInterface $model) {
+                return $model->hasLead() ? Html::a($model->lead->id, [
                     'lead/view',
-                    'gid' => $model->eLead->gid
+                    'gid' => $model->lead->gid
                 ]) : '-';
             },
             'contentOptions' => [
@@ -48,16 +49,16 @@ $this->registerJs($js);?>
         ],
         [
             'label' => 'Message',
-            'value' => static function (\common\models\Email $model) {
-                return '<a class="chat__details" href="#" data-id="' . $model->e_id . '"><i class="fa fa-search-plus"></i> ' . $model->e_email_subject . '</a>';
+            'value' => static function (EmailInterface $model) {
+                return '<a class="chat__details" href="#" data-id="' . $model->e_id . '"><i class="fa fa-search-plus"></i> ' . $model->emailSubject . '</a>';
             },
             'format' => 'raw',
         ],
         [
             'attribute' => 'e_project_id',
             'label' => 'Project',
-            'value' => static function (\common\models\Email $model) {
-                return $model->eProject ? $model->eProject->name : '-';
+            'value' => static function (EmailInterface $model) {
+            return $model->project->name ?? '-';
             },
             'filter' => $projectList,
             'format' => 'raw',

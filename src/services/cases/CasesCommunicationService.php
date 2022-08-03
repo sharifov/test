@@ -4,7 +4,6 @@ namespace src\services\cases;
 
 use common\models\Client;
 use common\models\Email;
-use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\Project;
 use common\models\UserProjectParams;
@@ -18,6 +17,10 @@ use src\services\TransactionManager;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
+use src\dto\email\EmailDTO;
+use src\services\email\EmailMainService;
+use src\exception\CreateModelException;
+use src\exception\EmailNotSentException;
 
 /**
  * Class CasesCommunicationService
@@ -25,6 +28,7 @@ use yii\helpers\VarDumper;
  * @property CasesRepository $casesRepository
  * @property ClientManageService $clientManageService
  * @property TransactionManager $transaction
+ * @property EmailMainService $emailService
  */
 class CasesCommunicationService
 {
@@ -35,6 +39,7 @@ class CasesCommunicationService
     private $casesRepository;
     private $clientManageService;
     private $transaction;
+    private $emailService;
 
     /**
      * CasesCommunicationService constructor.
@@ -45,11 +50,13 @@ class CasesCommunicationService
     public function __construct(
         CasesRepository $casesRepository,
         ClientManageService $clientManageService,
-        TransactionManager $transaction
+        TransactionManager $transaction,
+        EmailMainService $emailService
     ) {
         $this->casesRepository = $casesRepository;
         $this->clientManageService = $clientManageService;
         $this->transaction = $transaction;
+        $this->emailService = $emailService;
     }
 
     /**
@@ -277,34 +284,28 @@ class CasesCommunicationService
                 throw new \DomainException($mailPreview['error']);
             }
 
-            $templateTypeId = EmailTemplateType::find()
-                ->select(['etp_id'])
-                ->findByTemplateKey($params->object->case->feedbackTemplateTypeKey)
-                ->asArray()
-                ->one();
-            $mail = new Email([
-                'e_project_id' => $case->cs_project_id,
-                'e_case_id' => $case->cs_id,
-                'e_template_type_id' => $templateTypeId['etp_id'] ?? null,
-                'e_type_id' => Email::TYPE_OUTBOX,
-                'e_status_id' => Email::STATUS_PENDING,
-                'e_email_subject' => $mailPreview['data']['email_subject'],
-                'e_email_from' => $params->object->case->feedbackEmailFrom,
-                'e_email_from_name' => $params->object->case->feedbackNameFrom ?: ($user->nickname ?? ''),
-                'e_email_to' => $form->sendTo,
-                'e_email_to_name' => $case->client ? $case->client->full_name : '',
-                'e_language_id' => $form->language,
-                'e_created_user_id' => $user->id ?? null,
-            ]);
-            $mail->body_html = $mailPreview['data']['email_body_html'];
-            if (!$mail->save()) {
-                throw new \DomainException(VarDumper::dumpAsString($mail->getErrors()));
-            }
-            $mail->e_message_id = $mail->generateMessageId();
-            $mail->update(true, ['e_message_id' => $mail->e_message_id]);
+            try{
+                $emailDTO = EmailDTO::fromArray([
+                    'projectId' => $case->cs_project_id,
+                    'caseId' => $case->cs_id,
+                    'depId' => $case->cs_dep_id,
+                    'clientId' => $case->cs_client_id,
+                    'templateKey' => $templateTypeId['$params->object->case->feedbackTemplateTypeKey'],
+                    'emailSubject' => $mailPreview['data']['email_subject'],
+                    'emailFrom' => $params->object->case->feedbackEmailFrom,
+                    'emailFromName' => $params->object->case->feedbackNameFrom ?: ($user->nickname ?? ''),
+                    'emailTo' => $form->sendTo,
+                    'emailToName' => $case->client ? $case->client->full_name : '',
+                    'languageId' => $form->language,
+                    'createdUserId' => $user->id ?? null,
+                    'bodyHtml' => $mailPreview['data']['email_body_html'],
+                ]);
 
-            $mailResponse = $mail->sendMail();
-            if ($mailResponse['error'] !== false) {
+                $mail = $this->emailService->createFromDTO($emailDTO, false);
+                $this->emailService->sendMail($mail);
+            } catch (CreateModelException $e) {
+                throw new \DomainException(VarDumper::dumpAsString($e->getErrors()));
+            } catch (EmailNotSentException $e) {
                 throw new \DomainException('Email(Id: ' . $mail->e_id . ') has not been sent.');
             }
         } catch (\Throwable $e) {

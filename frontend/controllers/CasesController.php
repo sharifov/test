@@ -8,28 +8,25 @@ use common\components\CommunicationService;
 use common\helpers\LogHelper;
 use common\models\CaseNote;
 use common\models\CaseSale;
-use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Department;
-use common\models\DepartmentEmailProject;
-use common\models\DepartmentPhoneProject;
 use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\Lead;
-use common\models\Payment;
 use common\models\Quote;
 use common\models\search\CaseSaleSearch;
 use common\models\search\LeadSearch;
 use common\models\search\SaleSearch;
 use common\models\Sms;
 use common\models\SmsTemplateType;
-use common\models\UserProjectParams;
 use common\widgets\Alert;
 use frontend\helpers\JsonHelper;
 use frontend\models\CaseCommunicationForm;
 use frontend\models\CasePreviewEmailForm;
 use frontend\models\CasePreviewSmsForm;
+use modules\cases\src\abac\CasesAbacObject;
+use modules\cases\src\abac\dto\CasesAbacDto;
 use modules\cases\src\abac\saleSearch\CaseSaleSearchAbacDto;
 use modules\cases\src\abac\saleSearch\CaseSaleSearchAbacObject;
 use modules\email\src\abac\dto\EmailPreviewDto;
@@ -43,7 +40,6 @@ use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\order\src\entities\order\Order;
 use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\entities\order\search\OrderSearch;
-use modules\order\src\payment\helpers\PaymentHelper;
 use modules\order\src\payment\PaymentRepository;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
@@ -53,11 +49,14 @@ use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use src\auth\Auth;
 use src\entities\cases\CaseEventLog;
 use src\entities\cases\CaseEventLogSearch;
-use src\entities\cases\CasesSourceType;
+use src\entities\cases\Cases;
+use src\entities\cases\CasesSearch;
 use src\entities\cases\CasesStatus;
 use src\entities\cases\CaseStatusLogSearch;
 use src\exception\AccessDeniedException;
 use src\exception\BoResponseException;
+use src\exception\CreateModelException;
+use src\exception\EmailNotSentException;
 use src\forms\cases\CasesAddEmailForm;
 use src\forms\cases\CasesAddPhoneForm;
 use src\forms\cases\CasesChangeStatusForm;
@@ -66,20 +65,17 @@ use src\forms\cases\CasesCreateByChatForm;
 use src\forms\cases\CasesCreateByWebForm;
 use src\forms\cases\CasesLinkChatForm;
 use src\forms\cases\CasesSaleForm;
+use src\guards\cases\CaseManageSaleInfoGuard;
 use src\helpers\app\AppHelper;
-use src\helpers\email\MaskEmailHelper;
 use src\helpers\ErrorsToStringHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\call\useCase\createCall\fromCase\AbacCallFromNumberList;
 use src\model\callLog\entity\callLog\CallLogType;
-use src\model\caseOrder\entity\CaseOrder;
 use src\model\cases\useCases\cases\updateInfo\FieldAccess;
-use src\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
-use src\guards\cases\CaseManageSaleInfoGuard;
 use src\model\cases\useCases\cases\updateInfo\Handler;
+use src\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
 use src\model\clientChat\entity\ClientChat;
 use src\model\clientChat\permissions\ClientChatActionPermission;
-use src\model\clientChat\services\ClientChatAssignService;
 use src\model\clientChatCase\entity\ClientChatCase;
 use src\model\clientChatCase\entity\ClientChatCaseRepository;
 use src\model\coupon\entity\couponCase\CouponCase;
@@ -92,21 +88,20 @@ use src\model\sms\useCase\send\fromCase\AbacSmsFromNumberList;
 use src\repositories\cases\CaseCategoryRepository;
 use src\repositories\cases\CasesRepository;
 use src\repositories\cases\CasesSaleRepository;
-use src\repositories\client\ClientEmailRepository;
 use src\repositories\NotFoundException;
+use src\repositories\project\ProjectRepository;
 use src\repositories\quote\QuoteRepository;
-use src\services\cases\CasesSaleService;
-use src\services\cases\CasesCommunicationService;
 use src\repositories\user\UserRepository;
+use src\services\cases\CasesCommunicationService;
 use src\services\cases\CasesCreateService;
 use src\services\cases\CasesManageService;
+use src\services\cases\CasesSaleService;
 use src\services\client\ClientManageService;
 use src\services\client\ClientUpdateFromEntityService;
+use src\services\email\EmailMainService;
 use src\services\email\EmailService;
 use src\services\TransactionManager;
 use Yii;
-use src\entities\cases\Cases;
-use src\entities\cases\CasesSearch;
 use yii\base\Exception;
 use yii\data\ActiveDataProvider;
 use yii\data\ArrayDataProvider;
@@ -115,16 +110,14 @@ use yii\db\Query;
 use yii\db\Transaction;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
-use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
-use modules\cases\src\abac\CasesAbacObject;
-use modules\cases\src\abac\dto\CasesAbacDto;
-use src\repositories\project\ProjectRepository;
+use src\repositories\email\EmailRepositoryFactory;
+use src\services\email\EmailServiceHelper;
 
 /**
  * Class CasesController
@@ -149,6 +142,7 @@ use src\repositories\project\ProjectRepository;
  * @property OrderCreateFromSaleService $orderCreateFromSaleService
  * @property FlightFromSaleService $flightFromSaleService
  * @property EmailReviewQueueManageService $emailReviewQueueManageService
+ * @property EmailMainService $emailService
  */
 class CasesController extends FController
 {
@@ -172,6 +166,7 @@ class CasesController extends FController
     private OrderCreateFromSaleService $orderCreateFromSaleService;
     private FlightFromSaleService $flightFromSaleService;
     private EmailReviewQueueManageService $emailReviewQueueManageService;
+    private EmailMainService $emailService;
 
     public const DIFFERENT_PROJECT = 'different-project';
 
@@ -198,6 +193,7 @@ class CasesController extends FController
         OrderCreateFromSaleService $orderCreateFromSaleService,
         FlightFromSaleService $flightFromSaleService,
         EmailReviewQueueManageService $emailReviewQueueManageService,
+        EmailMainService $emailService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -221,6 +217,7 @@ class CasesController extends FController
         $this->orderCreateFromSaleService = $orderCreateFromSaleService;
         $this->flightFromSaleService = $flightFromSaleService;
         $this->emailReviewQueueManageService = $emailReviewQueueManageService;
+        $this->emailService = $emailService;
     }
 
     public function behaviors(): array
@@ -343,85 +340,60 @@ class CasesController extends FController
                 /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND, Restrict access to send email in preview email */
                 $canSend = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND);
                 if ($canSend) {
-                    $mail = new Email();
-                    $mail->e_project_id = $model->cs_project_id;
-                    $mail->e_case_id = $model->cs_id;
-                    if ($previewEmailForm->e_email_tpl_id) {
-                        $mail->e_template_type_id = $previewEmailForm->e_email_tpl_id;
-                    }
-                    $mail->e_type_id = Email::TYPE_OUTBOX;
-                    $mail->e_status_id = Email::STATUS_PENDING;
-                    $mail->e_email_subject = $previewEmailForm->e_email_subject;
-                    $mail->body_html = $previewEmailForm->e_email_message;
-                    $mail->e_email_from = $previewEmailForm->e_email_from;
-
-                    $mail->e_email_from_name = $previewEmailForm->e_email_from_name;
-                    $mail->e_email_to_name = $previewEmailForm->e_email_to_name;
-
-                    if ($previewEmailForm->e_language_id) {
-                        $mail->e_language_id = $previewEmailForm->e_language_id;
-                    }
-
-                    $mail->e_email_to = $previewEmailForm->e_email_to;
-                    $mail->e_created_dt = date('Y-m-d H:i:s');
-                    $mail->e_created_user_id = Yii::$app->user->id;
                     $attachments = [];
                     /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_ATTACH_FILES, Restrict access to attach files in lead communication block*/
                     $canAttachFiles = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_ATTACH_FILES);
                     if ($canAttachFiles && FileStorageSettings::canEmailAttach() && $previewEmailForm->files) {
                         $attachments['files'] = $this->fileStorageUrlGenerator->generateForExternal($previewEmailForm->getFilesPath());
                     }
-                    $mail->e_email_data = json_encode($attachments);
-                    if ($mail->save()) {
-                        $mail->e_message_id = $mail->generateMessageId();
-                        $mail->update();
+                    try {
+                        $mail = $this->emailService->createFromCase($previewEmailForm, $model, $attachments);
 
                         /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND_WITHOUT_REVIEW, Restrict access to send without review email */
                         $canSendWithoutReview = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND_WITHOUT_REVIEW);
                         if ($canSendWithoutReview) {
                             $previewEmailForm->is_send = true;
-                            $mailResponse = $mail->sendMail($attachments);
+                            $this->emailService->sendMail($mail, $attachments);
+                            Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>' . $mail->getEmailTo() . '</strong>');
 
-                            if (isset($mailResponse['error']) && $mailResponse['error']) {
-                                //echo $mailResponse['error']; exit; //'Error: <strong>Email Message</strong> has not been sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
-                                Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>' . MaskEmailHelper::masking($mail->e_email_to, $disableMasking) . '</strong>');
-                                Yii::error('Error: Email Message has not been sent to ' . $mail->e_email_to . "\r\n " . $mailResponse['error'], 'CaseController:view:Email:sendMail');
-                            } else {
-                                //echo '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
-                                $model->addEventLog(null, $mail->eTemplateType->etp_name . ' email sent. By: ' . Auth::user()->username);
+                            //echo '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
+                            $model->addEventLog(null, $mail->templateTypeName . ' email sent. By: ' . Auth::user()->username);
 
-
-                                if ($quoteList = @json_decode($previewEmailForm->e_quote_list)) {
-                                    if (is_array($quoteList)) {
-                                        foreach ($quoteList as $quoteId) {
-                                            $quoteId = (int)$quoteId;
-                                            $quote = Quote::findOne($quoteId);
-                                            if ($quote) {
-                                                $quote->setStatusSend();
-                                                $this->quoteRepository->save($quote);
-                                                if (!$this->quoteRepository->save($quote)) {
-                                                    Yii::error($quote->errors, 'CaseController:view:Email:Quote:save');
-                                                }
+                            if ($quoteList = @json_decode($previewEmailForm->e_quote_list)) {
+                                if (is_array($quoteList)) {
+                                    foreach ($quoteList as $quoteId) {
+                                        $quoteId = (int)$quoteId;
+                                        $quote = Quote::findOne($quoteId);
+                                        if ($quote) {
+                                            $quote->setStatusSend();
+                                            $this->quoteRepository->save($quote);
+                                            if (!$this->quoteRepository->save($quote)) {
+                                                Yii::error($quote->errors, 'CaseController:view:Email:Quote:save');
                                             }
                                         }
                                     }
                                 }
-
-                                Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>' . MaskEmailHelper::masking($mail->e_email_to, $disableMasking) . '</strong>');
                             }
+
 
                             $this->refresh(); //'#communication-form'
                         } else {
                             $mail->statusToReview();
                             $this->emailReviewQueueManageService->createByEmail($mail, $model->cs_dep_id);
-                            $mail->update();
 
                             Yii::$app->session->setFlash('send-warning', '<strong>Email Message</strong> has been sent for review');
                             $this->refresh();
                         }
-                    } else {
-                        $previewEmailForm->addError('e_email_subject', VarDumper::dumpAsString($mail->errors));
-                        Yii::error(VarDumper::dumpAsString($mail->errors), 'CaseController:view:Email:save');
+                    } catch (CreateModelException $e) {
+                        $errorsMessage = VarDumper::dumpAsString($e->getErrors());
+                        $previewEmailForm->addError('e_email_subject', $errorsMessage);
+                        Yii::error($errorsMessage, 'CasesController:view:Email:save');
+                    } catch (EmailNotSentException $e) {
+                        Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>' . $e->getEmailTo() . '</strong>');
+                        Yii::error('Error: Email Message has not been sent to ' . $e->getEmailTo(false) . "\r\n " . $e->getMessage(), 'CaseController:view:Email:sendMail');
+                    } catch (\Throwable $e) {
+                        Yii::$app->session->setFlash('send-error', $e->getMessage() . '<br/>' . $e->getTraceAsString());
+                        Yii::error($e->getMessage(), 'CasesController:view:Email:save');
                     }
                 } else {
                     Yii::$app->session->setFlash('send-warning', 'Access denied: you dont have permission to send email');
@@ -576,7 +548,7 @@ class CasesController extends FController
                                 Yii::error($mailPreview['error'], 'CaseController:view:mailPreview');
                                 $comForm->c_preview_email = 0;
                             } else {
-                                $emailBodyHtml = EmailService::prepareEmailBody($mailPreview['data']['email_body_html']);
+                                $emailBodyHtml = EmailServiceHelper::prepareEmailBody($mailPreview['data']['email_body_html']);
                                 $keyCache = md5($emailBodyHtml);
                                 Yii::$app->cacheFile->set($keyCache, $emailBodyHtml, 60 * 60);
                                 $previewEmailForm->keyCache = $keyCache;
@@ -791,33 +763,7 @@ class CasesController extends FController
      */
     private function getCommunicationDataProvider(Cases $model): ActiveDataProvider
     {
-        $emailTemplate = EmailTemplateType::find()
-            ->where(['etp_key' => 'feedback_appr_supp'])
-            ->limit(1)
-            ->one();
-
-        $condition = $emailTemplate
-            ? ['<>', 'e_template_type_id', $emailTemplate->etp_id]
-            : ['IS NOT', 'e_template_type_id', null];
-
-        $query1 = (new \yii\db\Query())
-            ->select(['e_id AS id', new Expression('"email" AS type'), 'e_case_id AS case_id', 'e_created_dt AS created_dt'])
-            ->from('email')
-            ->where(['e_case_id' => $model->cs_id])
-            ->andWhere(['OR',
-                ['IS NOT', 'e_created_user_id', null],
-                ['AND',
-                    ['IS', 'e_created_user_id', null],
-                    ['e_type_id' => Email::TYPE_INBOX],
-                    ['IS', 'e_template_type_id', null]
-                ],
-                ['AND',
-                    ['IS', 'e_created_user_id', null],
-                    ['e_type_id' => Email::TYPE_OUTBOX],
-                    $condition
-                ]
-            ])
-        ;
+        $query1 = EmailRepositoryFactory::getRepository()->getCommunicationLogQueryForCase($model->cs_id);;
 
         $query2 = (new \yii\db\Query())
             ->select(['s_id AS id', new Expression('"sms" AS type'), 's_case_id AS case_id', 's_created_dt AS created_dt'])
@@ -861,33 +807,7 @@ class CasesController extends FController
 
     private function getCommunicationLogDataProvider(Cases $model): ActiveDataProvider
     {
-        $emailTemplate = EmailTemplateType::find()
-            ->where(['etp_key' => 'feedback_appr_supp'])
-            ->limit(1)
-            ->one();
-
-        $condition = $emailTemplate
-            ? ['<>', 'e_template_type_id', $emailTemplate->etp_id]
-            : ['IS NOT', 'e_template_type_id', null];
-
-        $query1 = (new \yii\db\Query())
-            ->select(['e_id AS id', new Expression('"email" AS type'), 'e_case_id AS case_id', 'e_created_dt AS created_dt'])
-            ->from('email')
-            ->where(['e_case_id' => $model->cs_id])
-            ->andWhere(['OR',
-                ['IS NOT', 'e_created_user_id', null],
-                ['AND',
-                    ['IS', 'e_created_user_id', null],
-                    ['e_type_id' => Email::TYPE_INBOX],
-                    ['IS', 'e_template_type_id', null]
-                ],
-                ['AND',
-                    ['IS', 'e_created_user_id', null],
-                    ['e_type_id' => Email::TYPE_OUTBOX],
-                    $condition
-                ]
-            ])
-        ;
+        $query1 =  EmailRepositoryFactory::getRepository()->getCommunicationLogQueryForCase($model->cs_id);
 
         $query2 = (new \yii\db\Query())
             ->select(['s_id AS id', new Expression('"sms" AS type'), 's_case_id AS case_id', 's_created_dt AS created_dt'])
@@ -1457,7 +1377,6 @@ class CasesController extends FController
                         $this->casesManageService->solved($case->cs_id, $user->id, $statusForm->message, $user->username);
                         if ($statusForm->isSendFeedback()) {
                             $this->casesCommunicationService->sendFeedbackEmail($case, $statusForm, Auth::user(), true);
-                            //$this->sendFeedbackEmailProcess($case, $statusForm, Auth::user());
                         }
                         break;
                     case CasesStatus::STATUS_PENDING:
@@ -1499,91 +1418,7 @@ class CasesController extends FController
             'statusForm' => $statusForm,
         ]);
     }
-    //TODO: need remove before merge with master. Unused method
-    private function sendFeedbackEmailProcess(Cases $case, CasesChangeStatusForm $form, Employee $user): void
-    {
-        if (!$project = $case->project) {
-            return;
-        }
-        if (!$params = $project->getParams()) {
-            return;
-        }
 
-        $content = $this->casesCommunicationService->getEmailData($case, $user);
-
-        try {
-            $mailPreview = Yii::$app->comms->mailPreview(
-                $case->cs_project_id,
-                $params->object->case->feedbackTemplateTypeKey,
-                $params->object->case->feedbackEmailFrom,
-                $form->sendTo,
-                $content,
-                $form->language
-            );
-
-            if ($mailPreview['error'] !== false) {
-                throw new \DomainException($mailPreview['error']);
-            }
-
-            $this->sendFeedbackEmail(
-                $params,
-                $case,
-                $form,
-                $user,
-                $mailPreview['data']['email_subject'],
-                $mailPreview['data']['email_body_html']
-            );
-        } catch (\Throwable $e) {
-            Yii::$app->session->addFlash('error', 'Send email error: ' . $e->getMessage());
-            return;
-        }
-
-        Yii::$app->session->addFlash('success', 'Email has been successfully sent.');
-    }
-    //TODO: need remove before merge with master. Unused method
-    private function sendFeedbackEmail(
-        \src\model\project\entity\params\Params $params,
-        Cases $case,
-        CasesChangeStatusForm $form,
-        Employee $user,
-        $subject,
-        $body
-    ): void {
-        $mail = new Email();
-        $mail->e_project_id = $case->cs_project_id;
-        $mail->e_case_id = $case->cs_id;
-        $templateTypeId = EmailTemplateType::find()
-            ->select(['etp_id'])
-            ->andWhere(['etp_key' => $params->object->case->feedbackTemplateTypeKey])
-            ->asArray()
-            ->one();
-        if ($templateTypeId) {
-            $mail->e_template_type_id = $templateTypeId['etp_id'];
-        }
-        $mail->e_type_id = Email::TYPE_OUTBOX;
-        $mail->e_status_id = Email::STATUS_PENDING;
-        $mail->e_email_subject = $subject;
-        $mail->body_html = $body;
-        $mail->e_email_from = $params->object->case->feedbackEmailFrom;
-        $mail->e_email_from_name = $params->object->case->feedbackNameFrom ?: $user->nickname;
-        $mail->e_email_to_name = $case->client ? $case->client->full_name : '';
-        $mail->e_language_id = $form->language;
-        $mail->e_email_to = $form->sendTo;
-        $mail->e_created_dt = date('Y-m-d H:i:s');
-        $mail->e_created_user_id = $user->id;
-
-        if (!$mail->save()) {
-            throw new \DomainException(VarDumper::dumpAsString($mail->getErrors()));
-        }
-
-        $mail->e_message_id = $mail->generateMessageId();
-        $mail->save();
-        $mailResponse = $mail->sendMail();
-
-        if ($mailResponse['error'] !== false) {
-            throw new \DomainException('Email(Id: ' . $mail->e_id . ') has not been sent.');
-        }
-    }
 
     /**
      * @return string

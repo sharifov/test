@@ -18,6 +18,8 @@ use src\model\project\entity\projectLocale\ProjectLocale;
 use yii\base\Model;
 use yii\db\Expression;
 use yii\helpers\Json;
+use src\repositories\email\EmailRepositoryFactory;
+use src\entities\email\helpers\EmailStatus;
 
 /**
  * Class CasesChangeStatusForm
@@ -371,12 +373,11 @@ class CasesChangeStatusForm extends Model
             return false;
         }
 
-        return Email::find()
-            ->andWhere([
-                'e_case_id' => $this->case->cs_id,
-                'e_status_id' => Email::STATUS_DONE,
-                'e_template_type_id' => $templateTypeId['etp_id'],
-            ])
+        return EmailRepositoryFactory::getRepository()
+            ->getModelQuery()
+            ->case($this->case->cs_id)
+            ->byStatus(EmailStatus::DONE)
+            ->byTemplateTypeId($templateTypeId['etp_id'])
             ->exists();
     }
 

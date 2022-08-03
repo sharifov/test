@@ -19,6 +19,7 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_BADGE_COUNT_ENABLE = 'badgeCountEnable';
     public const FF_KEY_PHONE_WIDGET_ACCEPTED_PANEL_ENABLED = 'phoneWidgetAcceptedPanelEnabled';
     public const FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE = 'objectSegmentModuleEnable';
+    public const FF_KEY_EMAIL_NORMALIZED_FORM_ENABLE = 'emailNormalizedFormEnable';
     public const FF_KEY_LEAD_TASK_ASSIGN = 'leadTaskAssign';
     public const FF_KEY_SALE_VIEW_IN_LEAD_ENABLE = 'saleViewInLeadEnable';
     public const FF_KEY_BEQ_ENABLE = 'beqEnable';
@@ -59,6 +60,7 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_BADGE_COUNT_ENABLE,
         self::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE,
         self::FF_KEY_PHONE_WIDGET_ACCEPTED_PANEL_ENABLED,
+        self::FF_KEY_EMAIL_NORMALIZED_FORM_ENABLE,
         self::FF_KEY_LEAD_TASK_ASSIGN,
         self::FF_KEY_SALE_VIEW_IN_LEAD_ENABLE,
         self::FF_KEY_COMPARE_QUOTE_AND_LEAD_FLIGHT_REQUEST,
