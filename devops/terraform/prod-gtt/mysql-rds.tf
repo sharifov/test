@@ -1,3 +1,4 @@
+# MySQL Instance
 module "mysql" {
   source  = "terraform-aws-modules/rds/aws"
   version = "~> 4.4.0"
@@ -7,7 +8,7 @@ module "mysql" {
   engine_version        = "8.0.28"
   instance_class        = var.MYSQL_RDS_INSTANCE_TYPE
   allocated_storage     = var.MYSQL_RDS_VOLUME_SIZE
-  max_allocated_storage = var.MYSQL_RDS_VOLUME_LIMIT
+  max_allocated_storage = var.MYSQL_RDS_VOLUME_MAX
   storage_encrypted     = true
   port                  = "3306"
 
@@ -65,6 +66,7 @@ module "mysql" {
       ]
     },
   ]
+
   tags = {
     Project     = var.PROJECT
     Environment = var.ENV
@@ -78,45 +80,40 @@ module "mysql_replica" {
   source  = "terraform-aws-modules/rds/aws"
   version = "~> 4.4.0"
 
-  identifier = "mysql-replica-${var.PROJECT}-${var.NAMESPACE}"
-
-  # Source database. For cross-region use db_instance_arn
-  replicate_source_db    = module.mysql.db_instance_id
-  create_random_password = false
-
+  identifier            = "mysql-replica-${var.PROJECT}-${var.NAMESPACE}"
   engine                = "mysql"
   engine_version        = "8.0.28"
-  family                = "mysql8.0"
-  major_engine_version  = "8.0"
-  instance_class        = "db.t4g.small"
+  instance_class        = var.MYSQL_RDS_INSTANCE_TYPE
   allocated_storage     = var.MYSQL_RDS_VOLUME_SIZE
-  max_allocated_storage = var.MYSQL_RDS_VOLUME_LIMIT
+  max_allocated_storage = var.MYSQL_RDS_VOLUME_MAX
   storage_encrypted     = true
+  port                  = "3306"
+  replicate_source_db   = module.mysql.db_instance_id
 
-  port = "3306"
+  create_random_password = false
 
   multi_az                            = false
   vpc_security_group_ids              = [aws_security_group.mysql.id]
   iam_database_authentication_enabled = false
 
-  maintenance_window = "Tue:00:00-Tue:03:00"
-  backup_window      = "03:00-06:00"
+  maintenance_window     = "Tue:00:00-Tue:03:00"
+  backup_window          = "03:00-06:00"
+  monitoring_interval    = "30"
+  monitoring_role_name   = "mysql-replica-${var.PROJECT}-${var.NAMESPACE}"
+  create_monitoring_role = true
 
-  backup_retention_period = 0
+  create_db_subnet_group  = false
+  subnet_ids              = var.PRIVATE_SUBNETS
+  family                  = "mysql8.0"
+  major_engine_version    = "8.0"
+  deletion_protection     = var.IS_PRODUCTION ? true : false
   skip_final_snapshot     = true
-  deletion_protection     = false
+  backup_retention_period = var.IS_PRODUCTION ? 14 : 2
 
   enabled_cloudwatch_logs_exports       = ["audit", "error", "general"]
   create_cloudwatch_log_group           = true
   performance_insights_enabled          = true
   performance_insights_retention_period = 7
-
-  tags = {
-    Environment = var.ENV
-    Project     = var.PROJECT
-    Ns          = var.NAMESPACE
-    Role        = "replica"
-  }
 
   parameters = [
     {
@@ -143,6 +140,14 @@ module "mysql_replica" {
       ]
     },
   ]
+
+  tags = {
+    Environment = var.ENV
+    Project     = var.PROJECT
+    Ns          = var.NAMESPACE
+    Role        = "replica"
+  }
+
 }
 
 resource "aws_security_group" "mysql" {
