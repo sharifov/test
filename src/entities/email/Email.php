@@ -16,7 +16,7 @@ use src\entities\email\helpers\EmailContactType;
 use src\entities\email\helpers\EmailStatus;
 use src\entities\email\helpers\EmailType;
 use src\entities\EventTrait;
-use src\exceptions\CreateModelException;
+use src\exception\CreateModelException;
 use src\model\BaseActiveRecord;
 use Yii;
 use yii\behaviors\TimestampBehavior;
