@@ -139,12 +139,12 @@ class EmailReviewQueue extends \yii\db\ActiveRecord
 
     public function getEmailSubject(): string
     {
-        return ($this->erq_email_is_norm) ? $this->email->emailSubject : $this->email->e_email_subject;
+        return $this->email->emailSubject;
     }
 
     public function getEmailTemplateName(): string
     {
-        return ($this->erq_email_is_norm) ? $this->email->templateTypeName : $this->email->templateType->etp_name ?? '--';
+        return $this->email->templateTypeName ?? '--';
     }
 
     public function getEmailStatusName(): string
