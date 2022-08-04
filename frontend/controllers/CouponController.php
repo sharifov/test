@@ -56,8 +56,7 @@ class CouponController extends FController
         CasesRepository $casesRepository,
         EmailMainService $emailService,
         $config = []
-    )
-    {
+    ) {
         parent::__construct($id, $module, $config);
         $this->requestCoupon = $requestCoupon;
         $this->sendCouponsService = $sendCouponsService;

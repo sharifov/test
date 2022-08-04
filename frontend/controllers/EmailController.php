@@ -171,12 +171,12 @@ class EmailController extends FController
                     }
 
                     $this->emailService->sendMail($email);
-                    Yii::$app->session->setFlash('success', $flashMessage. '<strong>Email Message</strong> was successfully sent to <strong>' . $email->getEmailTo() . '</strong>');
+                    Yii::$app->session->setFlash('success', $flashMessage . '<strong>Email Message</strong> was successfully sent to <strong>' . $email->getEmailTo() . '</strong>');
 
                     return $this->redirect(['inbox', 'id' => $email->e_id]);
                 } catch (CreateModelException $e) {
                     $errorsMessage = VarDumper::dumpAsString($e->getErrors());
-                    Yii::$app->session->setFlash('error', $e->getMessage() . '<br/>'. $errorsMessage);
+                    Yii::$app->session->setFlash('error', $e->getMessage() . '<br/>' . $errorsMessage);
                 } catch (EmailNotSentException $e) {
                     Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>' . $e->getEmailTo() . '</strong>\r\n ' . $e->getMessage());
                 } catch (\Throwable $e) {
@@ -217,7 +217,7 @@ class EmailController extends FController
                     $modelNewEmail = new Email();
                     $modelNewEmail->e_project_id = $email->e_project_id;
                     $modelNewEmail->e_email_from = EmailType::isInbox($email->e_type_id) ? $email->e_email_to : $email->e_email_from;
-                    $modelNewEmail->e_email_to = EmailType::isInbox($email->e_type_id)? $email->e_email_from : $email->e_email_to;
+                    $modelNewEmail->e_email_to = EmailType::isInbox($email->e_type_id) ? $email->e_email_from : $email->e_email_to;
                     $modelNewEmail->e_email_subject = EmailBody::getReSubject($email->emailSubject);
                     $modelNewEmail->body_html = EmailBody::getReBodyHtml($email->getEmailFrom(false), $user->username, $email->getEmailBodyHtml());
                     $modelNewEmail->e_type_id = EmailType::DRAFT;
@@ -321,7 +321,7 @@ class EmailController extends FController
                 return $this->redirect(['view', 'id' => $email->e_id]);
             } catch (CreateModelException $e) {
                 $errorsMessage = VarDumper::dumpAsString($e->getErrors());
-                Yii::$app->session->setFlash('error', $e->getMessage() . '<br/>'. $errorsMessage);
+                Yii::$app->session->setFlash('error', $e->getMessage() . '<br/>' . $errorsMessage);
             } catch (\Throwable $e) {
                 Yii::$app->session->setFlash('error', $e->getMessage() . '<br/>' . $e->getTraceAsString());
             }
@@ -350,14 +350,13 @@ class EmailController extends FController
             $emailForm = new EmailForm($user->id);
             if ($emailForm->load(Yii::$app->request->post()) && $emailForm->validate()) {
                 try {
-
                     $email = $this->emailService->update($email, $emailForm);
                     Yii::$app->session->setFlash('success', 'Email was updated');
 
                     return $this->redirect(['view', 'id' => $id]);
                 } catch (CreateModelException $e) {
                     $errorsMessage = VarDumper::dumpAsString($e->getErrors());
-                    Yii::$app->session->setFlash('error', $e->getMessage() . '<br/>'. $errorsMessage);
+                    Yii::$app->session->setFlash('error', $e->getMessage() . '<br/>' . $errorsMessage);
                 } catch (\Throwable $e) {
                     Yii::$app->session->setFlash('error', $e->getMessage() . '<br/>' . $e->getTraceAsString());
                 }
@@ -431,7 +430,7 @@ class EmailController extends FController
 
         if ($form->load(Yii::$app->request->post())) {
             if ($form->validate()) {
-                try{
+                try {
                     $emailDTO = EmailDTO::fromArray([
                         'projectId' => $form->getProjectId(),
                         'emailSubject' => $form->subject,

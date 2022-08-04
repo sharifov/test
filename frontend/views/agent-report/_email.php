@@ -58,7 +58,7 @@ $this->registerJs($js);?>
             'attribute' => 'e_project_id',
             'label' => 'Project',
             'value' => static function (EmailInterface $model) {
-            return $model->project->name ?? '-';
+                return $model->project->name ?? '-';
             },
             'filter' => $projectList,
             'format' => 'raw',

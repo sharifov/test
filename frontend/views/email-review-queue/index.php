@@ -43,7 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'erq_email_id',
                 'value' => static function (EmailReviewQueue $model) {
-                    $url = ($model->erq_email_is_norm) ? '/email-normalized/view': '/email/view';
+                    $url = ($model->erq_email_is_norm) ? '/email-normalized/view' : '/email/view';
                     return Html::a('<i class="fa fa-link"></i> ' . $model->erq_email_id, [$url, 'id' => $model->erq_email_id], ['target' => '_blank', 'data-pjax' => 0]);
                 },
                 'format' => 'raw',

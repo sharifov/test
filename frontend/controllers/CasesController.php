@@ -763,7 +763,8 @@ class CasesController extends FController
      */
     private function getCommunicationDataProvider(Cases $model): ActiveDataProvider
     {
-        $query1 = EmailRepositoryFactory::getRepository()->getCommunicationLogQueryForCase($model->cs_id);;
+        $query1 = EmailRepositoryFactory::getRepository()->getCommunicationLogQueryForCase($model->cs_id);
+        ;
 
         $query2 = (new \yii\db\Query())
             ->select(['s_id AS id', new Expression('"sms" AS type'), 's_case_id AS case_id', 's_created_dt AS created_dt'])

@@ -2305,7 +2305,8 @@ class CommunicationController extends ApiBaseController
                 throw new NotFoundHttpException('Not found eq_status_id', 12);
             }
 
-            $email = $this->emailRepository->getModelQuery()->byCommunicationId($eq_id)->limit(1)->one();;
+            $email = $this->emailRepository->getModelQuery()->byCommunicationId($eq_id)->limit(1)->one();
+            ;
             if ($email) {
                 if ($eq_status_id > 0) {
                     try {

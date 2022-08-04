@@ -131,8 +131,8 @@ class AgentActivitySearch extends Call
         $query->addSelect(['(SELECT COUNT(*) FROM sms WHERE (s_created_dt ' . $between_condition . ') AND s_created_user_id=e.id AND s_type_id = 1) AS sms_sent ']);
         $query->addSelect(['(SELECT COUNT(*) FROM sms WHERE (s_created_dt ' . $between_condition . ') AND s_created_user_id=e.id AND s_type_id = 2) AS sms_received ']);
 
-        $query->addSelect(['(SELECT COUNT(*) FROM '.$emailTableName.' WHERE (e_created_dt ' . $between_condition . ') AND e_created_user_id=e.id AND e_type_id = 1) AS email_sent ']);
-        $query->addSelect(['(SELECT COUNT(*) FROM '.$emailTableName.' WHERE (e_created_dt ' . $between_condition . ') AND e_created_user_id=e.id AND e_type_id = 2) AS email_received ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM ' . $emailTableName . ' WHERE (e_created_dt ' . $between_condition . ') AND e_created_user_id=e.id AND e_type_id = 1) AS email_sent ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM ' . $emailTableName . ' WHERE (e_created_dt ' . $between_condition . ') AND e_created_user_id=e.id AND e_type_id = 2) AS email_received ']);
 
         $query->addSelect(['(SELECT COUNT(*) FROM quote_status_log WHERE (created ' . $between_condition . ') AND employee_id=e.id AND status = ' . Quote::STATUS_SENT . ') AS quotes_sent ']);
 

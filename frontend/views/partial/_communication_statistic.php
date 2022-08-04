@@ -56,7 +56,7 @@ $linkAttributes = ['target' => '_blank', 'data-pjax' => '0'];
             $text = $statistics->emailCount;
         if (Auth::can('/email/index')) {
             $paramName = $statistics->isTypeCase() ? 'e_case_id' : 'e_lead_id';
-            $url = (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_EMAIL_NORMALIZED_FORM_ENABLE)) ? '/email-normalized/index': '/email/index';
+            $url = (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_EMAIL_NORMALIZED_FORM_ENABLE)) ? '/email-normalized/index' : '/email/index';
             echo Html::a(
                 $text,
                 Url::to([$url, 'EmailSearch[' . $paramName . ']'  => $statistics->getId()]),

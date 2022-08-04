@@ -65,7 +65,7 @@ $files = JsonHelper::decode($email->e_email_data ?? $email->emailData);
                   [
                       'attribute' => 'erq_email_id',
                       'value' => static function (EmailReviewQueue $model) {
-                          $url = ($model->erq_email_is_norm) ? '/email-normalized/view': '/email/view';
+                          $url = ($model->erq_email_is_norm) ? '/email-normalized/view' : '/email/view';
                           return Html::a(
                               '<i class="fa fa-link"></i> ' . $model->erq_email_id,
                               [$url, 'id' => $model->erq_email_id],
