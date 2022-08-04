@@ -26,6 +26,7 @@ use frontend\assets\overridden\KartikGridViewAsset;
 use frontend\assets\overridden\KDNJsonEditorAsset;
 use frontend\assets\overridden\LajaxLanguageItemPluginAsset;
 use frontend\assets\PageLoaderAsset;
+use frontend\assets\TaskListAssets;
 use frontend\assets\Timeline2Asset;
 use frontend\assets\TimelineAsset;
 use frontend\assets\UserShiftCalendarAsset;
@@ -191,7 +192,8 @@ return [
         SwitcheryAsset::class,
 
         UserFlowWidgetAsset::class,
-        UserShiftCalendarAsset::class
+        UserShiftCalendarAsset::class,
+        TaskListAssets::class,
 
 //        MomentAsset::class
     ],
@@ -819,6 +821,14 @@ return [
             'js' => 'timeline.min.js',
             'css' => 'timeline.min.css',
             'depends' => [ UserShiftCalendarAsset::class ],
+        ],
+        'TaskListAssets' => [
+            'class' => TaskListAssets::class,
+            'basePath' => '@webroot/all_shared/build',
+            'baseUrl' => '@web/all_shared/build',
+            'js' => 'task-list.min.js',
+            'css' => 'task-list.min.css',
+            'depends' => [ TaskListAssets::class ],
         ],
     ],
 

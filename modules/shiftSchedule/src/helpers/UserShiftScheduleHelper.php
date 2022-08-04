@@ -11,6 +11,7 @@ use common\models\UserGroup;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use src\access\EmployeeGroupAccess;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use src\auth\Auth;
@@ -224,5 +225,32 @@ class UserShiftScheduleHelper
             }
         }
         return $userList;
+    }
+
+    public static function getDataForTaskList(array $event, ?string $timezone = "UTC"): array
+    {
+        $mainTabTitle = '';
+        $subTabTitle = '';
+        $title = '';
+
+        if (ArrayHelper::keyExists('uss_start_utc_dt', $event)) {
+            $startTime = (new \DateTimeImmutable($event['uss_start_utc_dt']))->setTimezone(new \DateTimeZone($timezone));
+            $mainTabTitle .= $startTime->format('d M');
+            $subTabTitle .= '(' . $startTime->format('H:i');
+            $title = $startTime->format('d-M-Y [H:i]');
+        }
+
+        if (ArrayHelper::keyExists('uss_end_utc_dt', $event) && !empty($event['uss_end_utc_dt'])) {
+            $endTime = (new \DateTimeImmutable($event['uss_end_utc_dt']))->setTimezone(new \DateTimeZone($timezone));
+            if ($mainTabTitle != $endTime->format('d M')) {
+                $mainTabTitle .= ' - ' . $endTime->format('d M');
+            }
+
+            $subTabTitle .= ' - ' . $endTime->format('H:i') . ')';
+        } else {
+            $subTabTitle .= ')';
+        }
+
+        return ['mainTabTitle' => $mainTabTitle, 'subTabTitle' => $subTabTitle, 'title' => $title];
     }
 }
