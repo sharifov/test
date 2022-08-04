@@ -10,6 +10,7 @@ class ShiftScheduleEventTaskQuery
     public static function getAllByLeadId(int $lead_id): ShiftScheduleEventTaskScopes
     {
         return ShiftScheduleEventTask::find()
+            ->select(['shift_schedule_event_task.*', 'task_list.tl_title', 'user_task.*'])
             ->joinWith('userShiftSchedule')
             ->innerJoin('user_task', 'user_task.ut_id = shift_schedule_event_task.sset_user_task_id')
             ->leftJoin('task_list', 'task_list.tl_id = user_task.ut_task_list_id ')

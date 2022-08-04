@@ -1047,7 +1047,6 @@ class LeadController extends FController
         /** @fflag FFlag::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE, New User Task List in Lead view Enable */
         if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE)) {
             $shiftScheduleEventTasks = ShiftScheduleEventTaskQuery::getAllByLeadId($lead->id)
-                ->select(['shift_schedule_event_task.*', 'task_list.tl_title', 'user_task.ut_status_id'])
                 ->asArray()
                 ->all();
         }

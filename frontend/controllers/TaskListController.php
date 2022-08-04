@@ -7,12 +7,15 @@ use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
 use modules\shiftSchedule\src\services\UserShiftScheduleService;
 use modules\taskList\abac\TaskListAbacObject;
+use modules\taskList\src\entities\userTask\repository\UserTaskRepository;
 use modules\taskList\src\entities\userTask\UserTaskQuery;
 use modules\taskList\src\entities\userTask\UserTaskSearch;
+use modules\taskList\src\forms\UserTaskNoteForm;
 use src\auth\Auth;
 use Yii;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
+use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
 use yii\web\Response;
 
@@ -44,6 +47,12 @@ class TaskListController extends FController
                             TaskListAbacObject::ACT_MY_TASK_LIST,
                             TaskListAbacObject::ACTION_ACCESS
                         ),
+                        'roles' => ['@'],
+                    ],
+
+                    [
+                        'actions' => ['ajax-add-note'],
+                        'allow' => true,
                         'roles' => ['@'],
                     ],
                 ],
@@ -112,5 +121,23 @@ class TaskListController extends FController
         $data = array_merge($timeLineData, $taskListData);
         unset($timeLineData, $taskListData);
         return $data;
+    }
+
+
+    public function actionAjaxAddNote(int $userTaskId)
+    {
+        $form = new UserTaskNoteForm($userTaskId);
+
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            $userTask = $form->getUserTask();
+            $userTask->ut_description = $form->note;
+            (new UserTaskRepository($userTask))->save(true);
+            \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            return ['note' => $form->note, 'truncateNote' => StringHelper::truncate($form->note, 15), 'userTaskId' => $form->userTaskId];
+        }
+
+        return $this->renderAjax('partial/_add_note', [
+            'addNoteForm' => $form
+        ]);
     }
 }
