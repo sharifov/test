@@ -10,7 +10,7 @@ class TaskListAssets extends AssetBundle
     public $baseUrl = '@web';
 
     public $css = [
-
+        '/css/style-task-list.css',
     ];
     public $js = [
         '/js/task-list/tasklist.js',

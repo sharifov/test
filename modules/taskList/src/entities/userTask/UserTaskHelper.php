@@ -53,6 +53,16 @@ class UserTaskHelper
         );
     }
 
+    public static function renderStatus(string $status): string
+    {
+        switch ($status) {
+            case UserTask::STATUS_COMPLETE:
+                return \yii\helpers\Html::img('/img/task-list/complete.svg');
+            default:
+                return Html::img('/img/task-list/processing.svg');
+        }
+    }
+
     public static function getStatusLabelClass(?int $statusId): string
     {
         return self::STATUS_LIST_LABEL_MAP[$statusId] ?? 'default';

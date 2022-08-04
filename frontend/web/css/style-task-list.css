@@ -1,0 +1,53 @@
+.task-list_wrap .nav-tabs {
+    height: 70px;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    flex-direction: column;
+    width: 80%;
+}
+
+.task-list_wrap .nav-link {
+    color: #596B7D;
+    font-size: 12px;
+    padding: 8px 15px 5px;
+    border-radius: 2px 2px 0 0;
+}
+
+.task-list_wrap .nav-link:hover, .task-list_wrap .nav-link.active {
+    border-bottom: 3px solid #5EAE91;
+    background-color: rgba(94, 174, 145, 0.1) !important;
+}
+
+.task-list_wrap .task-list_nab-subtitle {
+    color: #8895A7;
+    font-size: 10px;
+    line-height: 8px
+}
+
+.task-list_wrap .my-task-list-wrap {
+    padding: 20px 0 12px;
+}
+
+.task-list_wrap .my-task-list-wrap .my-task-list-link {
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 8px;
+    color: #8895A7;
+}
+
+.task-list_wrap .my-task-list-wrap .my-task-list-link:hover {
+    color: #5EAE91;
+}
+
+.task-list_wrap .my-task-list-wrap .my-task-list-link::before {
+    content: "";
+    background: url('/img/task-list/my-task-icon.svg') no-repeat center;
+    padding: 12px;
+}
+
+.task-list_wrap .my-task-list-wrap .my-task-list-start{
+    color: #8895A7;
+    padding-left: 15px;
+}
+
+
