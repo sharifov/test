@@ -260,7 +260,11 @@ class Email extends BaseActiveRecord implements EmailInterface
 
     public function getEmailTo($masking = true): ?string
     {
-        return $this->contactTo->getEmail(EmailType::isOutbox($this->e_type_id) && $masking) ?? null;
+        if ($this->contactTo) {
+            return $this->contactTo->getEmail(EmailType::isOutbox($this->e_type_id) && $masking) ?? null;
+        }
+
+        return null;
     }
 
     public function getEmailFromName(): string
