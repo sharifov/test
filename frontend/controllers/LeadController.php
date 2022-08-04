@@ -57,7 +57,7 @@ use PHPUnit\Framework\Warning;
 use src\auth\Auth;
 use src\entities\cases\Cases;
 use src\exception\EmailNotSentException;
-use src\exceptions\CreateModelException;
+use src\exception\CreateModelException;
 use src\forms\CompositeFormHelper;
 use src\forms\lead\CloneReasonForm;
 use src\forms\lead\ItineraryEditForm;

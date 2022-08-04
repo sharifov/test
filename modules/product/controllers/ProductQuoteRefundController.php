@@ -246,7 +246,7 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
                     $originQuote = $this->productQuoteRepository->find($previewEmailForm->productQuoteId);
                     $productQuoteRefund = $this->productQuoteRefundRepository->find($previewEmailForm->productQuoteRefundId);
 
-                    try{
+                    try {
                         $mail = $this->emailService->createFromCase($previewEmailForm, $case);
                         $previewEmailForm->is_send = true;
                         $this->emailService->sendMail($mail);

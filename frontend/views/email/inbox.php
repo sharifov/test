@@ -51,7 +51,7 @@ $is_admin = $user->isAdmin();
                                     <div class="btn-group">
                                         <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                             <i class="fa fa-envelope"></i> Create NEW <span class="caret"></span>
-										</button>
+                                        </button>
                                         <ul class="dropdown-menu">
                                             <?php foreach ($mailList as $mailName) : ?>
                                                 <li>
@@ -99,10 +99,10 @@ $is_admin = $user->isAdmin();
                         <div class="col-sm-9 mail_view">
                             <?php if ($modelEmailView) : ?>
                                 <?=$this->render('_view_mail', ['model' => $modelEmailView])?>
-                             <?php elseif ($action) : ?>
-                                <?=$this->render('_new_mail', ['emailForm' => $emailForm , 'mailList' => $mailList, 'action' => $action])?>
+                            <?php elseif ($action) : ?>
+                                 <?=$this->render('_new_mail', ['emailForm' => $emailForm , 'mailList' => $mailList, 'action' => $action])?>
                             <?php else : ?>
-                                <?=$this->render('_stats', ['stats' => $stats, 'mailList' => $mailList])?>
+                                 <?=$this->render('_stats', ['stats' => $stats, 'mailList' => $mailList])?>
                             <?php endif; ?>
 
                         </div>

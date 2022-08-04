@@ -107,7 +107,6 @@ class m220606_110027_email_normalization extends Migration
         $this->addPrimaryKey('PK-email_relation', '{{%email_relation}}', ['er_email_id', 'er_reply_id']);
         $this->addForeignKey('FK-email_relation-er_email_id', '{{%email_relation}}', 'er_email_id', '{{%email_norm}}', 'e_id', 'CASCADE', 'CASCADE');
         $this->addForeignKey('FK-email_relation-er_reply_id', '{{%email_relation}}', 'er_reply_id', '{{%email_norm}}', 'e_id', 'CASCADE', 'CASCADE');
-
     }
 
     /**
