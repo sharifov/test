@@ -2306,7 +2306,6 @@ class CommunicationController extends ApiBaseController
             }
 
             $email = $this->emailRepository->getModelQuery()->byCommunicationId($eq_id)->limit(1)->one();
-            ;
             if ($email) {
                 if ($eq_status_id > 0) {
                     try {
