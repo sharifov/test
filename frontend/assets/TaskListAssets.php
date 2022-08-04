@@ -12,6 +12,9 @@ class TaskListAssets extends AssetBundle
     public $css = [
 
     ];
+    public $js = [
+        '/js/task-list/tasklist.js',
+    ];
 
     public $depends = [
         SlickCarouselAssets::class,
