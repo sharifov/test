@@ -30,15 +30,15 @@ class SmartLeadDistribution
 
     public const CATEGORY_TOTAL_SCORE_LIST = [
         self::CATEGORY_FIRST => [
-            'from' => 45,
-            'to' => 50,
+            'from' => 44,
+            'to' => 57,
         ],
         self::CATEGORY_SECOND => [
-            'from' => 35,
-            'to' => 45,
+            'from' => 36,
+            'to' => 43,
         ],
         self::CATEGORY_THIRD => [
-            'from' => 25,
+            'from' => 0,
             'to' => 35,
         ],
     ];
