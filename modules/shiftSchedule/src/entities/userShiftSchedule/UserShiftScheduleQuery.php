@@ -490,10 +490,11 @@ class UserShiftScheduleQuery
     private static function getQueryForNextShiftsByUserId(
         int $userId,
         \DateTimeImmutable $startDt,
+        ?\DateTimeImmutable $userTaskEndDt = null,
         array $status = [UserShiftSchedule::STATUS_APPROVED, UserShiftSchedule::STATUS_DONE],
         array $shiftScheduleType = [ShiftScheduleType::SUBTYPE_WORK_TIME]
     ): Scopes {
-        return UserShiftSchedule::find()
+        $query = UserShiftSchedule::find()
             ->alias('user_shift_schedule')
             ->select('user_shift_schedule.*')
             ->innerJoin(
@@ -501,12 +502,24 @@ class UserShiftScheduleQuery
                 'shift_schedule_type.sst_id = user_shift_schedule.uss_sst_id',
             )
             ->where(['uss_user_id' => $userId])
-            ->andWhere(['>=', 'uss_year_start', $startDt->format('Y')])
-            ->andWhere(['>=', 'uss_month_start', $startDt->format('m')])
-            ->andWhere(['>', 'uss_end_utc_dt', $startDt->format('Y-m-d H:i:s')])
             ->andWhere(['IN', 'uss_status_id', $status])
             ->andWhere(['IN', 'shift_schedule_type.sst_subtype_id', $shiftScheduleType])
-            ->orderBy(['uss_end_utc_dt' => SORT_ASC]);
+        ;
+
+        if ($userTaskEndDt) {
+            $query->andWhere([
+                'BETWEEN',
+                'uss_end_utc_dt',
+                $startDt->format('Y-m-d H:i:s'),
+                $userTaskEndDt->format('Y-m-d H:i:s')
+            ]);
+        } else {
+            $query->andWhere(['>', 'uss_end_utc_dt', $startDt->format('Y-m-d H:i:s')]);
+        }
+
+        $query->orderBy(['uss_end_utc_dt' => SORT_ASC]);
+
+        return $query;
     }
 
     /**
@@ -519,9 +532,10 @@ class UserShiftScheduleQuery
     public static function getAllFromStartDateByUserId(
         int $userId,
         \DateTimeImmutable $startDt,
+        ?\DateTimeImmutable $userTaskEndDt = null,
         array $status = [UserShiftSchedule::STATUS_APPROVED, UserShiftSchedule::STATUS_DONE],
         array $shiftScheduleType = [ShiftScheduleType::SUBTYPE_WORK_TIME]
     ): ?array {
-        return self::getQueryForNextShiftsByUserId($userId, $startDt, $status, $shiftScheduleType)->all();
+        return self::getQueryForNextShiftsByUserId($userId, $startDt, $userTaskEndDt, $status, $shiftScheduleType)->all();
     }
 }
