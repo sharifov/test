@@ -1081,11 +1081,8 @@ class FlightQuoteController extends FController
                     $segments = $reservationService->parseResult;
                 }
 
-                [$pastSegmentsItinerary, $pastSegments, $totalPastTrips] = AddQuoteManualService::getPastSegmentsByProductQuote($gds, $originProductQuote);
-                [$form, $mergedSegments, $totalTrips] = AddQuoteManualService::updateFormAndMergeSegments($form, $totalPastTrips, $pastSegmentsItinerary, $itinerary, $pastSegments, $segments);
-
-                $updatedSegmentTripFormData = AddQuoteManualService::updateSegmentTripFormsData($form, $totalTrips, $pastSegmentsItinerary);
-                $form->setSegmentTripFormsData($updatedSegmentTripFormData);
+                $pastSegments = AddQuoteManualService::getPastSegmentsByProductQuote($gds, $originProductQuote);
+                [$form, $mergedSegments] = AddQuoteManualService::updateFormAndMergeSegments($form, $itinerary, $pastSegments, $segments);
 
                 $userId = Auth::id();
                 $flightQuote = Yii::createObject(TransactionManager::class)
@@ -1268,11 +1265,8 @@ class FlightQuoteController extends FController
                     $segments = $reservationService->parseResult;
                 }
 
-                [$pastSegmentsItinerary, $pastSegments, $totalPastTrips] = AddQuoteManualService::getPastSegmentsByProductQuote($gds, $originProductQuote);
-                [$form, $mergedSegments, $totalTrips] = AddQuoteManualService::updateFormAndMergeSegments($form, $totalPastTrips, $pastSegmentsItinerary, $itinerary, $pastSegments, $segments);
-
-                $updatedSegmentTripFormData = AddQuoteManualService::updateSegmentTripFormsData($form, $totalTrips, $pastSegmentsItinerary);
-                $form->setSegmentTripFormsData($updatedSegmentTripFormData);
+                $pastSegments = AddQuoteManualService::getPastSegmentsByProductQuote($gds, $originProductQuote);
+                [$form, $mergedSegments] = AddQuoteManualService::updateFormAndMergeSegments($form, $itinerary, $pastSegments, $segments);
 
                 $userId = Auth::id();
                 $flightQuote = Yii::createObject(TransactionManager::class)

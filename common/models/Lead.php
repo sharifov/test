@@ -16,6 +16,8 @@ use kivork\search\core\urlsig\UrlSignature;
 use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
+use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacDto;
+use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\objectSegment\src\contracts\ObjectSegmentListContract;
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
@@ -1479,10 +1481,17 @@ class Lead extends ActiveRecord implements Objectable
         );
         /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
         if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) && $this->isBusinessType()) {
-            LeadBusinessExtraQueueService::addLeadBusinessExtraQueueJob(
-                $this,
-                'Added new Business Extra Queue Countdown'
-            );
+            $leadBusinessExtraQueueObjectDto = new LeadBusinessExtraQueueAbacDto($this);
+            if (!$employee = Employee::find()->where(['id' => $this->employee_id])->limit(1)->one()) {
+                throw new \RuntimeException('LeadOwner not found by ID(' . $this->employee_id . ')');
+            }
+            /** @abac LeadBusinessExtraQueueAbacDto, LeadBusinessExtraQueueAbacObject::PROCESS_ACCESS, LeadBusinessExtraQueueAbacObject::ACTION_PROCESS, Access to processing in business Extra Queue */
+            if (Yii::$app->abac->can($leadBusinessExtraQueueObjectDto, LeadBusinessExtraQueueAbacObject::PROCESS_ACCESS, LeadBusinessExtraQueueAbacObject::ACTION_PROCESS, $employee)) {
+                LeadBusinessExtraQueueService::addLeadBusinessExtraQueueJob(
+                    $this,
+                    'Added new Business Extra Queue Countdown'
+                );
+            }
         }
     }
 
