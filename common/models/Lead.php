@@ -1488,8 +1488,6 @@ class Lead extends ActiveRecord implements Objectable
                     $this,
                     'Added new Business Extra Queue Countdown'
                 );
-            } else {
-                Yii::error(123123213213123123);
             }
         }
     }
