@@ -4,12 +4,15 @@ namespace console\controllers;
 
 use common\models\Call;
 use common\models\ClientEmail;
+use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadFlow;
 use common\models\LeadQcall;
 use common\models\Project;
 use common\models\Task;
 use modules\featureFlag\FFlag;
+use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacDto;
+use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use src\exception\BoResponseException;
 use src\helpers\app\AppHelper;
 use src\helpers\DateHelper;
@@ -184,8 +187,15 @@ class LeadController extends Controller
                     }
                 }
                 /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
-                if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) && $lead->isBusinessType()) {
-                    LeadBusinessExtraQueueService::addLeadBusinessExtraQueueJob($lead, 'Added new Business Extra Queue Countdown', true);
+                if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) && $lead->isBusinessType() && $lead->isProcessing()) {
+                    $leadBusinessExtraQueueObjectDto = new LeadBusinessExtraQueueAbacDto($lead);
+                    if (!$employee = Employee::find()->where(['id' => $lead])->limit(1)->one()) {
+                        throw new \RuntimeException('LeadOwner not found by ID(' . $lead->employee_id . ')');
+                    }
+                    /** @abac LeadBusinessExtraQueueAbacDto, LeadBusinessExtraQueueAbacObject::ACTION_PROCESS, LeadBusinessExtraQueueAbacObject::ACTION_PROCESS, Access to processing in business Extra Queue */
+                    if (Yii::$app->abac->can($leadBusinessExtraQueueObjectDto, LeadBusinessExtraQueueAbacObject::ACTION_PROCESS, LeadBusinessExtraQueueAbacObject::ACTION_PROCESS, $employee)) {
+                        LeadBusinessExtraQueueService::addLeadBusinessExtraQueueJob($lead, 'Added new Business Extra Queue Countdown', true);
+                    }
                 }
                 echo "\r\n";
             }

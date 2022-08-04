@@ -48,6 +48,7 @@ use src\model\contactPhoneList\service\PhoneNumberService;
 use src\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
 use src\model\contactPhoneServiceInfo\repository\ContactPhoneServiceInfoRepository;
 use src\model\emailList\entity\EmailList;
+use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
 use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\model\phoneList\entity\PhoneList;
 use src\repositories\client\ClientsQuery;
@@ -1763,5 +1764,23 @@ class OneTimeController extends Controller
                 'OneTimeController:actionFillDefaultCurrencyInLeadPreferences:Throwable'
             );
         }
+    }
+
+    public function actionDeleteBusinessExtraQueueFromPendingLeads()
+    {
+        $leads = Lead
+            ::find()
+            ->alias('l')
+            ->where(['status' => Lead::STATUS_PENDING])
+            ->innerJoin(['lead_business_extra_queue AS lbeq', 'lbeq.lbeq_lead_id = l.id'])
+            ->all();
+        $countLeads = count($leads);
+        foreach ($leads as $lead) {
+            LeadBusinessExtraQueueService::addLeadBusinessExtraQueueRemoverJob($lead, 'Delete due to Pending status');
+        }
+        \Yii::info(
+            $countLeads,
+            'info\OneTimeController::actionDeleteBusinessExtraQueueFromNotProcessingLeads'
+        );
     }
 }
