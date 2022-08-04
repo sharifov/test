@@ -264,7 +264,7 @@ class LeadChangeStateController extends FController
         $form = new CloseReasonForm($lead);
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
-                $this->stateService->close($lead, $form->reasonKey, Auth::id(), $form->reason);
+                $this->stateService->close($lead, $form->reasonKey, Auth::id(), $form->reason, (int) $form->originLeadId);
                 Yii::$app->getSession()->setFlash('success', 'Success');
 
                 return $this->redirect(['lead/view', 'gid' => $lead->gid]);
@@ -310,6 +310,7 @@ class LeadChangeStateController extends FController
         if (empty($reasonKey)) {
             $commentRequired = 0;
             $description = '';
+            $originRequired = false;
         } else {
             $reason = LeadStatusReasonQuery::getLeadStatusReasonByKey($reasonKey);
             if (!$reason) {
@@ -317,12 +318,14 @@ class LeadChangeStateController extends FController
             }
             $commentRequired = $reason->lsr_comment_required;
             $description = nl2br($reason->lsr_description);
+            $originRequired = $reason->lsr_key === LeadStatusReason::REASON_KEY_DUPLICATED;
         }
 
         return $this->asJson([
             'commentRequired' => $commentRequired,
-            'description' => $description
-        ]);
+            'description' => $description,
+            'originRequired' => $originRequired
+         ]);
     }
 
     /**

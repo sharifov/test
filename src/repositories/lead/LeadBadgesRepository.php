@@ -12,9 +12,12 @@ use common\models\UserGroup;
 use common\models\UserGroupAssign;
 use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\smartLeadDistribution\src\services\SmartLeadDistributionService;
+use modules\smartLeadDistribution\src\SmartLeadDistribution;
 use src\access\EmployeeDepartmentAccess;
 use src\access\EmployeeGroupAccess;
 use src\access\EmployeeProjectAccess;
+use src\model\leadDataKey\services\LeadDataKeyDictionary;
 use Yii;
 use yii\db\ActiveQuery;
 use modules\lead\src\abac\LeadAbacObject;
@@ -76,37 +79,50 @@ class LeadBadgesRepository
      */
     public function getBusinessInboxCount(Employee $user): int
     {
+        /** @fflag FFlag::FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE, Smart Lead Distribution Enable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE) === true) {
+            $leadsByCategories = $this->countBusinessLeadsByRatingCategory();
+            $allowedCategories = SmartLeadDistributionService::getAllowedCategories();
+            $result = 0;
+
+            if (!empty($leadsByCategories)) {
+                foreach ($leadsByCategories as $category => $amount) {
+                    if (in_array($category, $allowedCategories)) {
+                        $result += $amount;
+                    }
+                }
+            }
+
+            return $result;
+        }
+
         return $this->getBusinessInboxQuery($user)->count();
     }
 
-    /**
-     * @param Employee $user
-     * @return ActiveQuery
-     */
-    public function getBusinessInboxQuery(Employee $user): ActiveQuery
+    public function getBusinessInboxQuery(?Employee $user = null): ActiveQuery
     {
         $query = Lead::find()
-        ->orWhere([
-            'and',
-            ['project_id' => 7],
-            ['l_is_test' => false],
-            ['status' => Lead::STATUS_PENDING],
-            ['<>', 'l_call_status_id', 5]
-        ])
-        ->orWhere([
-            'and',
-            ['cabin' => Lead::CABIN_BUSINESS],
-            ['l_is_test' => false],
-            ['status' => Lead::STATUS_PENDING],
-            ['<>', 'l_call_status_id', 5]
-        ])
-        ->orWhere([
-            'and',
-            ['cabin' => Lead::CABIN_FIRST],
-            ['l_is_test' => false],
-            ['status' => Lead::STATUS_PENDING],
-            ['<>', 'l_call_status_id', 5]
-        ]);
+            ->orWhere([
+                'and',
+                ['project_id' => 7],
+                ['l_is_test' => false],
+                ['status' => Lead::STATUS_PENDING],
+                ['<>', 'l_call_status_id', 5]
+            ])
+            ->orWhere([
+                'and',
+                ['cabin' => Lead::CABIN_BUSINESS],
+                ['l_is_test' => false],
+                ['status' => Lead::STATUS_PENDING],
+                ['<>', 'l_call_status_id', 5]
+            ])
+            ->orWhere([
+                'and',
+                ['cabin' => Lead::CABIN_FIRST],
+                ['l_is_test' => false],
+                ['status' => Lead::STATUS_PENDING],
+                ['<>', 'l_call_status_id', 5]
+            ]);
 
         return $query;
     }
@@ -367,7 +383,16 @@ class LeadBadgesRepository
             $conditions = ['IN', Lead::tableName() . '.l_dep_id', ArrayHelper::map($user->userDepartments, 'ud_dep_id', 'ud_dep_id')];
         }
 
-        $query->andWhere($this->createSubQuery($user->id, $conditions));
+        /** @fflag FFlag::FF_KEY_BOOKED_QUEUE_CONDITION_BY_DEPARTMENT, Booked Queue condition for agent only owner */
+        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BOOKED_QUEUE_CONDITION_AGENT_IS_OWNER)) {
+            if ($user->isAgent()) {
+                $query->andWhere($this->isOwner($user->id));
+            } else {
+                $query->andWhere($this->createSubQuery($user->id, $conditions));
+            }
+        } else {
+            $query->andWhere($this->createSubQuery($user->id, $conditions));
+        }
 
         return $query;
     }
@@ -389,7 +414,7 @@ class LeadBadgesRepository
     {
         $query = Lead::find()->where([Lead::tableName() . '.status' => Lead::STATUS_SOLD]);
 
-        /** @abac null, LeadAbacObject::QUERY_SOLD_ALL, LeadAbacObject::ACTION_ACCESS, Access to all sold leads*/
+        /** @abac null, LeadAbacObject::QUERY_SOLD_ALL, LeadAbacObject::ACTION_ACCESS, Access to all sold leads */
         if (\Yii::$app->abac->can(null, LeadAbacObject::QUERY_SOLD_ALL, LeadAbacObject::ACTION_ACCESS)) {
             return $query;
         }
@@ -397,25 +422,25 @@ class LeadBadgesRepository
         $conditions = [];
         $displayFlag = false;
 
-        /** @abac null, LeadAbacObject::QUERY_SOLD_ON_COMMON_PROJECTS, LeadAbacObject::ACTION_ACCESS, Access sold leads in common projects*/
+        /** @abac null, LeadAbacObject::QUERY_SOLD_ON_COMMON_PROJECTS, LeadAbacObject::ACTION_ACCESS, Access sold leads in common projects */
         if (\Yii::$app->abac->can(null, LeadAbacObject::QUERY_SOLD_PROJECTS, LeadAbacObject::ACTION_ACCESS)) {
             $query->andWhere($this->createInProjectSubQuery($user->id, $conditions));
             $displayFlag = true;
         }
 
-        /** @abac null, LeadAbacObject::QUERY_SOLD_ON_COMMON_DEPARTMENTS, LeadAbacObject::ACTION_ACCESS, Access sold leads in common departments*/
+        /** @abac null, LeadAbacObject::QUERY_SOLD_ON_COMMON_DEPARTMENTS, LeadAbacObject::ACTION_ACCESS, Access sold leads in common departments */
         if (\Yii::$app->abac->can(null, LeadAbacObject::QUERY_SOLD_DEPARTMENTS, LeadAbacObject::ACTION_ACCESS)) {
             $query->andWhere($this->createInDepartmentsSubQuery($user->id, $conditions));
             $displayFlag = true;
         }
 
-        /** @abac null, LeadAbacObject::QUERY_SOLD_ON_COMMON_GROUPS, LeadAbacObject::ACTION_ACCESS, Access sold leads in common groups*/
+        /** @abac null, LeadAbacObject::QUERY_SOLD_ON_COMMON_GROUPS, LeadAbacObject::ACTION_ACCESS, Access sold leads in common groups */
         if (\Yii::$app->abac->can(null, LeadAbacObject::QUERY_SOLD_GROUPS, LeadAbacObject::ACTION_ACCESS)) {
             $query->andWhere($this->createInGroupsSubQuery($user->id, $conditions));
             $displayFlag = true;
         }
 
-        /** @abac null, LeadAbacObject::QUERY_SOLD_IS_OWNER, LeadAbacObject::ACTION_ACCESS, Access sold leads where user id owner*/
+        /** @abac null, LeadAbacObject::QUERY_SOLD_IS_OWNER, LeadAbacObject::ACTION_ACCESS, Access sold leads where user id owner */
         if (\Yii::$app->abac->can(null, LeadAbacObject::QUERY_SOLD_IS_OWNER, LeadAbacObject::ACTION_ACCESS)) {
             $query->andWhere([Lead::tableName() . '.employee_id' => $user->id]);
             $query->orWhere([ProfitSplit::tableName() . '.ps_user_id' => $user->id]);
@@ -427,13 +452,13 @@ class LeadBadgesRepository
         }
         $lead = new Lead();
         $lead->employee_id = null;
-        /** @abac null, LeadAbacObject::QUERY_SOLD_IS_EMPTY_OWNER, LeadAbacObject::ACTION_ACCESS, Access sold leads where lead have empty owner*/
+        /** @abac null, LeadAbacObject::QUERY_SOLD_IS_EMPTY_OWNER, LeadAbacObject::ACTION_ACCESS, Access sold leads where lead have empty owner */
         if (\Yii::$app->abac->can(new LeadAbacDto($lead, 0), LeadAbacObject::QUERY_SOLD_IS_EMPTY_OWNER, LeadAbacObject::ACTION_QUERY_AND)) {
             $query->andWhere([Lead::tableName() . '.employee_id' => null]);
             $displayFlag = true;
         }
 
-        /** @abac null, LeadAbacObject::QUERY_SOLD_IS_EMPTY_OWNER, LeadAbacObject::ACTION_ACCESS, Access sold leads where lead have empty owner*/
+        /** @abac null, LeadAbacObject::QUERY_SOLD_IS_EMPTY_OWNER, LeadAbacObject::ACTION_ACCESS, Access sold leads where lead have empty owner */
         if (\Yii::$app->abac->can(new LeadAbacDto($lead, 0), LeadAbacObject::QUERY_SOLD_IS_EMPTY_OWNER, LeadAbacObject::ACTION_QUERY_OR)) {
             $query->orWhere([Lead::tableName() . '.employee_id' => null])->andWhere([Lead::tableName() . '.status' => Lead::STATUS_SOLD]);
             $displayFlag = true;
@@ -580,6 +605,7 @@ class LeadBadgesRepository
     {
         return [Lead::tableName() . '.employee_id' => EmployeeDepartmentAccess::usersIdsInCommonDepartmentsSubQuery($userId)];
     }
+
     /**
      * @param $userId
      * @return array
@@ -641,9 +667,9 @@ class LeadBadgesRepository
     private function createInProjectSubQuery($userId, $conditions): array
     {
         return [
-                'and',
-                $this->inProject($userId),
-                $conditions
+            'and',
+            $this->inProject($userId),
+            $conditions
         ];
     }
 
@@ -655,9 +681,9 @@ class LeadBadgesRepository
     private function createInDepartmentsSubQuery($userId, $conditions): array
     {
         return [
-                'and',
-                $this->inDepartment($userId),
-                $conditions
+            'and',
+            $this->inDepartment($userId),
+            $conditions
         ];
     }
 
@@ -669,9 +695,36 @@ class LeadBadgesRepository
     private function createInGroupsSubQuery($userId, $conditions): array
     {
         return [
-                'and',
-                $this->inGroups($userId),
-                $conditions
+            'and',
+            $this->inGroups($userId),
+            $conditions
         ];
+    }
+
+    public function countBusinessLeadsByRatingCategory(): array
+    {
+        $query = $this->getBusinessInboxQuery();
+        $query->select('COUNT(*) AS amount, lead_data.ld_field_value AS category')
+            ->leftJoin(
+                'lead_data',
+                'leads.id = lead_data.ld_lead_id AND lead_data.ld_field_key = :key',
+                ['key' => LeadDataKeyDictionary::KEY_LEAD_RATING_CATEGORY]
+            )
+            ->groupBy([
+                'lead_data.ld_field_value'
+            ]);
+
+        $leads = $query->asArray()->all();
+        $data = [];
+
+        foreach ($leads as $lead) {
+            if ($lead['category'] === null) {
+                $lead['category'] = SmartLeadDistribution::CATEGORY_THIRD;
+            }
+
+            $data[$lead['category']] = $lead['amount'] + ($data[$lead['category']]['amount'] ?? 0);
+        }
+
+        return $data;
     }
 }

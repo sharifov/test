@@ -80,6 +80,7 @@ use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\model\leadUserRating\entity\LeadUserRating;
+use src\repositories\client\ClientPhoneRepository;
 use src\services\lead\calculator\LeadTripTypeCalculator;
 use src\services\lead\calculator\SegmentDTO;
 use src\services\lead\qcall\Config;
@@ -3111,11 +3112,11 @@ Reason: {reason}',
             $client->created = date('Y-m-d H:i:s');
 
             if ($client->save()) {
-                $clientPhone = new ClientPhone();
-                $clientPhone->phone = $phoneNumber;
-                $clientPhone->client_id = $client->id;
-                $clientPhone->comments = 'incoming';
-                if (!$clientPhone->save()) {
+                $clientPhone = ClientPhone::create($phoneNumber, $client->id, null, 'incoming');
+                try {
+                    $clientPhoneRepository = Yii::createObject(ClientPhoneRepository::class);
+                    $clientPhoneRepository->save($clientPhone);
+                } catch (\RuntimeException $e) {
                     Yii::error(VarDumper::dumpAsString($clientPhone->errors), 'Model:Lead:createNewLeadByPhone:ClientPhone:save');
                 }
             }

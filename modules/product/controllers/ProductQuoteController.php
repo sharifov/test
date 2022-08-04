@@ -8,6 +8,7 @@ use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\Notifications;
 use common\models\UserProjectParams;
+use modules\featureFlag\FFlag;
 use modules\flight\models\FlightQuoteFlight;
 use modules\flight\src\useCases\reprotectionDecision;
 use modules\order\src\entities\order\Order;
@@ -37,6 +38,7 @@ use src\helpers\ProjectHashGenerator;
 use src\repositories\cases\CasesRepository;
 use src\repositories\NotFoundException;
 use src\services\cases\CasesCommunicationService;
+use src\services\flightQuote\segment\UnUsedSegmentService;
 use Yii;
 use frontend\controllers\FController;
 use yii\filters\VerbFilter;
@@ -88,6 +90,11 @@ class ProductQuoteController extends FController
     private ProductQuoteChangeRepository $productQuoteChangeRepository;
 
     /**
+     * @var UnUsedSegmentService
+     */
+    private UnUsedSegmentService $unUsedSegmentService;
+
+    /**
      * ProductQuoteController constructor.
      * @param $id
      * @param $module
@@ -96,7 +103,9 @@ class ProductQuoteController extends FController
      * @param ProductQuoteRepository $productQuoteRepository
      * @param CasesRepository $casesRepository
      * @param CasesCommunicationService $casesCommunicationService
+     * @param UnUsedSegmentService $unUsedSegmentService
      * @param ProductQuoteDataManageService $productQuoteDataManageService
+     * @param ProductQuoteChangeRepository $productQuoteChangeRepository
      * @param array $config
      */
     public function __construct(
@@ -107,6 +116,7 @@ class ProductQuoteController extends FController
         ProductQuoteRepository $productQuoteRepository,
         CasesRepository $casesRepository,
         CasesCommunicationService $casesCommunicationService,
+        UnUsedSegmentService $unUsedSegmentService,
         ProductQuoteDataManageService $productQuoteDataManageService,
         ProductQuoteChangeRepository $productQuoteChangeRepository,
         $config = []
@@ -117,6 +127,7 @@ class ProductQuoteController extends FController
         $this->productQuoteRepository = $productQuoteRepository;
         $this->casesRepository = $casesRepository;
         $this->casesCommunicationService = $casesCommunicationService;
+        $this->unUsedSegmentService = $unUsedSegmentService;
         $this->productQuoteDataManageService = $productQuoteDataManageService;
         $this->productQuoteChangeRepository = $productQuoteChangeRepository;
     }
@@ -686,6 +697,26 @@ class ProductQuoteController extends FController
                                 $hybridService = Yii::createObject(HybridService::class);
                                 $hybridService->whReprotection($case->cs_project_id, $data);
                                 $case->addEventLog(null, 'Request HybridService sent successfully');
+
+                                /** @fflag FFlag::FF_KEY_SCHEDULE_CHANGE_CLIENT_REMAINDER_NOTIFICATION, Create remainder notification enable/disable */
+                                if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SCHEDULE_CHANGE_CLIENT_REMAINDER_NOTIFICATION)) {
+                                    $addedToQueue = $this->unUsedSegmentService->checkIfChangeListIsAddedToQueue($case->cs_id, $productQuoteChange->pqc_id);
+                                    if (!$addedToQueue) {
+                                        $unUsedSegment = $this->unUsedSegmentService->getUnUsedSegmentData($reprotectionQuote, $productQuoteChange, $case);
+                                        if (!empty($unUsedSegment)) {
+                                            try {
+                                                $this->unUsedSegmentService->addToQueueJob($unUsedSegment);
+                                            } catch (\Throwable $throwable) {
+                                                $errorData = AppHelper::throwableLog($throwable);
+                                                $errorData['submessage'] = 'Create client remainder notification job failed.';
+                                                $errorData['project_id'] = $case->cs_project_id;
+                                                $errorData['case_id'] = $case->cs_id;
+
+                                                Yii::warning($errorData, 'ProductQuoteController:actionReprotectionQuoteSendEmail:Throwable');
+                                            }
+                                        }
+                                    }
+                                }
                             } catch (\Throwable $throwable) {
                                 $errorData = AppHelper::throwableLog($throwable);
                                 $errorData['submessage'] = 'OTA site is not informed (hybridService->whReprotection)';

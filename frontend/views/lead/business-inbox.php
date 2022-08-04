@@ -157,7 +157,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'width:160px'
             ]
         ],
-        'client_id:client',
+        [
+            'attribute' => 'client_id',
+            'format' => 'client',
+            'enableSorting' => false,
+        ],
         [
             'header' => 'Client time',
             'format' => 'raw',

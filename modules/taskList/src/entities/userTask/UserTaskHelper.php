@@ -62,4 +62,125 @@ class UserTaskHelper
     {
         return self::PRIORITY_LIST_LABEL_MAP[$priorityId] ?? 'default';
     }
+
+    /**
+     * @param string|null $startDt
+     * @param string|null $endDt
+     * @return string
+     */
+    public static function getDeadlineTimer(?string $startDt, ?string $endDt): string
+    {
+        $str = '-';
+
+        $delay = false;
+        if ($startDt) {
+            if (time() < strtotime($startDt)) {
+                $delay = true;
+
+                return '-';
+            }
+        }
+
+        if ($endDt) {
+            $sec = strtotime($endDt) - time();
+
+
+            if ($sec > 0) {
+                $diffHours = (int) ($sec / (60 * 60));
+
+                if ($diffHours > 23) {
+                    $str = Html::tag(
+                        'span',
+                        \Yii::$app->formatter->asRelativeTime(strtotime($endDt)),
+                        ['title' => \Yii::$app->formatter->asRelativeTime(strtotime($endDt)),
+                            'class' => '']
+                    );
+                } else {
+                    if ($diffHours < 2) {
+                        $timerFormat = '%H:%M:%S';
+                        $phpFormat = 'H:i:s';
+                    } else {
+                        $timerFormat = '%H:%M:%S';
+                        $phpFormat = 'H:i:s';
+                    }
+
+                    $str = \yii\helpers\Html::tag(
+                        'span',
+                        gmdate($phpFormat, $sec),
+                        ['class' => 'badge badge-warning timer',
+                            'data-sec' => $sec,
+                            'data-control' => 'start',
+                            'data-format' => $timerFormat]
+                    );
+                }
+            } else {
+                $str = Html::tag(
+                    'span',
+                    'Deadline',
+                    ['title' => \Yii::$app->formatter->asRelativeTime(strtotime($endDt)),
+                        'class' => 'badge badge-danger']
+                );
+            }
+        }
+        return $str;
+    }
+
+    /**
+     * @param string|null $startDt
+     * @param string|null $endDt
+     * @return string
+     */
+    public static function getDelayTimer(?string $startDt, ?string $endDt): string
+    {
+        $str = '-';
+        if ($startDt) {
+            $sec = strtotime($startDt) - time();
+            $diffHours = (int) ($sec / (60 * 60));
+
+            if ($sec > 0) {
+                if ($diffHours > 23) {
+                    $str = Html::tag(
+                        'span',
+                        \Yii::$app->formatter->asRelativeTime(strtotime($startDt)),
+                        ['title' => \Yii::$app->formatter->asRelativeTime(strtotime($startDt)),
+                            'class' => '']
+                    );
+                } else {
+                    if ($diffHours < 2) {
+                        $timerFormat = '%H:%M:%S';
+                        $phpFormat = 'H:i:s';
+                    } else {
+                        $timerFormat = '%H:%M';
+                        $phpFormat = 'H:i';
+                    }
+
+                    $str = \yii\helpers\Html::tag(
+                        'span',
+                        gmdate($phpFormat, $sec),
+                        ['class' => 'badge badge-info timer',
+                            'data-sec' => $sec,
+                            'data-control' => 'start',
+                            'data-format' => $timerFormat]
+                    );
+                }
+            }
+        }
+        return $str;
+    }
+
+    public static function getDuration(?string $startDt, ?string $endDt): string
+    {
+        $str = '-';
+        if ($startDt && $endDt) {
+            $sec = strtotime($endDt) - strtotime($startDt);
+            $diffHours =  round($sec / (60 * 60), 1);
+            $str = Html::tag(
+                'span',
+                $diffHours . 'h',
+                ['title' => \Yii::$app->formatter->asDuration($sec),
+                    'class' => '']
+            );
+        }
+        return $str;
+    }
 }

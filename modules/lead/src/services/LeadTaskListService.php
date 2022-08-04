@@ -3,6 +3,7 @@
 namespace modules\lead\src\services;
 
 use common\models\Lead;
+use common\models\LeadTask;
 use modules\featureFlag\FFlag;
 use modules\lead\src\abac\taskLIst\LeadTaskListAbacDto;
 use modules\lead\src\abac\taskLIst\LeadTaskListAbacObject;
@@ -18,7 +19,9 @@ use modules\taskList\src\entities\taskList\TaskList;
 use modules\taskList\src\entities\taskList\TaskListQuery;
 use modules\taskList\src\entities\userTask\repository\UserTaskRepository;
 use modules\taskList\src\entities\userTask\UserTask;
+use modules\taskList\src\entities\userTask\UserTaskQuery;
 use modules\taskList\src\exceptions\TaskListAssignException;
+use modules\taskList\src\services\taskAssign\checker\TaskListAssignCheckerFactory;
 use src\helpers\app\AppHelper;
 use src\helpers\DateHelper;
 use src\helpers\ErrorsToStringHelper;
@@ -35,12 +38,12 @@ use yii\helpers\ArrayHelper;
 class LeadTaskListService
 {
     private Lead $lead;
-    private bool $isNewOwner;
+    public ?int $oldOwnerId;
 
-    public function __construct(Lead $lead, bool $isNewOwner = true)
+    public function __construct(Lead $lead, ?int $oldOwnerId = null)
     {
         $this->lead = $lead;
-        $this->isNewOwner = $isNewOwner;
+        $this->oldOwnerId = $oldOwnerId;
     }
 
     public function assign(): void
@@ -50,70 +53,41 @@ class LeadTaskListService
             if ($taskLists = TaskListQuery::getTaskListByLeadId($this->lead->id)) {
                 foreach ($taskLists as $taskList) {
                     try {
+                        $assignChecker = (new TaskListAssignCheckerFactory(
+                            $taskList->tl_object,
+                            $this->lead
+                        ))->create();
+
+                        if (!$assignChecker->check()) {
+                            continue;
+                        }
+
                         $dtNowWithDelay = $dtNow->modify(sprintf('+%d hour', $taskList->getDelayHoursParam()));
                         $userShiftSchedules = UserShiftScheduleQuery::getAllFromStartDateByUserId($this->lead->employee_id, $dtNowWithDelay);
-                        $duration = $taskList->tl_duration_min;
-                        $userTaskListEndDate = null;
 
-                        if ($userShiftSchedules === null) {
+                        if (empty($userShiftSchedules)) {
+                            $this->canceledUserTask($taskList->tl_id);
                             throw new TaskListAssignException('UserShiftSchedules not found by EmployeeId (' . $this->lead->employee_id . ') and StartDateTime:' . $dtNowWithDelay->format('Y-m-d H:i:s'));
                         }
 
-                        $userTask = UserTask::create(
-                            $this->lead->employee_id,
-                            TargetObject::TARGET_OBJ_LEAD,
-                            $this->lead->id,
-                            $taskList->tl_id,
-                            $dtNow->format('Y-m-d H:i:s')
-                        );
-
-                        $userTask->setStatusProcessing();
-
-                        if (!$userTask->validate()) {
-                            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($userTask, ' '));
-                        }
-
-                        (new UserTaskRepository($userTask))->save();
-
-                        foreach ($userShiftSchedules as $userShiftSchedule) {
-                            $shiftScheduleEventTask = ShiftScheduleEventTask::create(
-                                $userShiftSchedule->uss_id,
-                                $userTask->ut_id
+                        if ($this->isEmptyOldOwner()) {
+                            $assignService = new LeadTaskFirstAssignService(
+                                $this->lead,
+                                $taskList,
+                                $dtNow,
+                                $userShiftSchedules
                             );
-
-                            if (!$shiftScheduleEventTask->validate()) {
-                                throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($shiftScheduleEventTask, ' '));
-                            }
-
-                            (new ShiftScheduleEventTaskRepository($shiftScheduleEventTask))->save();
-
-                            if ($taskList->tl_duration_min !== null) {
-                                if (DateHelper::toFormatByUTC($userShiftSchedule->uss_start_utc_dt) === $dtNowWithDelay->format('Y-m-d')) {
-                                    $leftMinutes = DateHelper::getDifferentInMinutesByDatesUTC($dtNowWithDelay->format('Y-m-d H:i:s'), $userShiftSchedule->uss_end_utc_dt);
-                                    $calculatedDuration = $duration - $leftMinutes;
-                                } else {
-                                    $calculatedDuration = $duration - $userShiftSchedule->uss_duration;
-                                }
-
-                                if ($calculatedDuration <= 0) {
-                                    $userTaskListEndDate = DateHelper::getDateTimeWithAddedMinutesUTC($userShiftSchedule->uss_end_utc_dt, $duration);
-
-                                    break;
-                                } else {
-                                    $duration = $calculatedDuration;
-                                }
-                            }
+                        } else {
+                            $assignService = new LeadTaskReAssignService(
+                                $this->lead,
+                                $taskList,
+                                $dtNow,
+                                $userShiftSchedules,
+                                $this->oldOwnerId
+                            );
                         }
 
-                        if ($userTaskListEndDate !== null) {
-                            $userTask->ut_end_dt = $userTaskListEndDate;
-
-                            if (!$userTask->validate()) {
-                                throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($userTask, ' '));
-                            }
-
-                            (new UserTaskRepository($userTask))->save();
-                        }
+                        $assignService->assign();
                     } catch (TaskListAssignException $exception) {
                         $message = AppHelper::throwableLog($exception);
                         \Yii::info($message, 'info\LeadTaskListService:assignReAssign:TaskListAssignException');
@@ -161,33 +135,22 @@ class LeadTaskListService
 
     public function isProcessAllowed(bool $isResultBool = true): bool
     {
-        /** @fflag FFlag::FF_KEY_LEAD_TASK_ASSIGN, Lead to task List assign checker */
-        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_LEAD_TASK_ASSIGN)) {
-            if ($isResultBool) {
-                return false;
-            }
-            throw new \RuntimeException('Feature Flag(' . FFlag::FF_KEY_LEAD_TASK_ASSIGN . ') is disabled');
+        if (!$this->isEnableFFAndNotEmptyOwner($isResultBool)) {
+            return false;
         }
 
-        if (!$employee = $this->lead->employee ?? null) {
-            if ($isResultBool) {
-                return false;
-            }
-            throw new \RuntimeException('Lead owner is empty');
-        }
-
-        /** @abac $leadTaskListAbacDto, LeadTaskListAbacObject::ASSIGN_TASK, LeadTaskListAbacObject::ACTION_ACCESS, Lead to task List assign checker */
+        /** @abac $leadTaskListAbacDto, LeadTaskListAbacObject::PROCESSING_TASK, LeadTaskListAbacObject::ACTION_ACCESS, Lead to task List processing checker */
         $can = Yii::$app->abac->can(
             new LeadTaskListAbacDto($this->lead, $this->lead->employee_id),
-            LeadTaskListAbacObject::ASSIGN_TASK,
+            LeadTaskListAbacObject::PROCESSING_TASK,
             LeadTaskListAbacObject::ACTION_ACCESS,
-            $employee
+            $this->lead->employee
         );
         if (!$can) {
             if ($isResultBool) {
                 return false;
             }
-            throw new \RuntimeException('ABAC(' . LeadTaskListAbacObject::ASSIGN_TASK . ') is failed');
+            throw new \RuntimeException('ABAC(' . LeadTaskListAbacObject::PROCESSING_TASK . ') is failed');
         }
 
         if (!$this->hasActiveLeadObjectSegment()) {
@@ -200,13 +163,50 @@ class LeadTaskListService
         return true;
     }
 
+    public function isEnableFFAndNotEmptyOwner(bool $isResultBool = true): bool
+    {
+        /** @fflag FFlag::FF_KEY_LEAD_TASK_ASSIGN, Lead to task List assign checker */
+        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_LEAD_TASK_ASSIGN)) {
+            if ($isResultBool) {
+                return false;
+            }
+            throw new \RuntimeException('Feature Flag(' . FFlag::FF_KEY_LEAD_TASK_ASSIGN . ') is disabled');
+        }
+
+        if (!$this->lead->employee ?? null) {
+            if ($isResultBool) {
+                return false;
+            }
+            throw new \RuntimeException('Lead owner is empty');
+        }
+        return true;
+    }
+
     public function getLead(): Lead
     {
         return $this->lead;
     }
 
-    public function isNewOwner(): bool
+    public function isEmptyOldOwner(): bool
     {
-        return $this->isNewOwner;
+        return empty($this->oldOwnerId);
+    }
+
+    private function canceledUserTask(int $taskListId)
+    {
+        if (!$this->isEmptyOldOwner()) {
+            $userTask = UserTaskQuery::getQueryUserTaskByUserTaskListAndStatuses(
+                $this->oldOwnerId,
+                $taskListId,
+                TargetObject::TARGET_OBJ_LEAD,
+                $this->lead->id,
+                [UserTask::STATUS_PROCESSING]
+            )->limit(1)->one();
+
+            if ($userTask) {
+                $userTask->setStatusCancel();
+                (new UserTaskRepository($userTask))->save();
+            }
+        }
     }
 }

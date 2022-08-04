@@ -296,6 +296,11 @@ class Project extends \yii\db\ActiveRecord
         return ArrayHelper::getValue($this->p_params_json, 'object.case.voluntary_exchange', []);
     }
 
+    public function getScheduleChangeNotificationIntervals(): array
+    {
+        return ArrayHelper::getValue($this->p_params_json, 'object.case.schedule_change', []);
+    }
+
     public static function getListByUserWithProjectKeys(int $user_id = 0): array
     {
         return self::find()->select([

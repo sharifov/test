@@ -7,11 +7,13 @@ namespace src\model\project\entity\params;
  *
  * @property SendPhoneNotification $sendPhoneNotification
  * @property SendSmsNotification $sendSmsNotification
+ * @property SendEmailNotification $sendEmailNotification
  */
 class ClientNotificationObject
 {
     public SendPhoneNotification $sendPhoneNotification;
     public SendSmsNotification $sendSmsNotification;
+    public SendEmailNotification $sendEmailNotification;
 
     public function __construct(array $params)
     {
@@ -26,10 +28,16 @@ class ClientNotificationObject
         } else {
             $this->sendSmsNotification = new SendSmsNotification([]);
         }
+
+        if (array_key_exists('sendEmailNotification', $params) && is_array($params['sendEmailNotification'])) {
+            $this->sendEmailNotification = new SendEmailNotification($params['sendEmailNotification']);
+        } else {
+            $this->sendEmailNotification = new SendEmailNotification([]);
+        }
     }
 
     public function isAnyEnabled(): bool
     {
-        return $this->sendPhoneNotification->enabled || $this->sendSmsNotification->enabled;
+        return $this->sendPhoneNotification->enabled || $this->sendSmsNotification->enabled || $this->sendEmailNotification->enabled;
     }
 }

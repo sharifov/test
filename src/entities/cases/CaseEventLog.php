@@ -45,6 +45,7 @@ class CaseEventLog extends ActiveRecord
     public const CASE_DEPARTMENT_CHANGE    = 20;
     public const CASE_UPDATE_INFO = 21;
     public const CASE_BOOKINGID_CHANGE = 22;
+    public const RE_PROTECTION_ADDED_TO_REMAINDER_QUEUE = 23;
 
     public const CASE_EVENT_LOG_LIST = [
         self::CASE_CREATED         => 'Case created',
@@ -69,6 +70,7 @@ class CaseEventLog extends ActiveRecord
         self::EMAIL_REVIEWED => 'Email Reviewed',
         self::CASE_UPDATE_INFO => 'Case info updated',
         self::CASE_BOOKINGID_CHANGE => 'Case bookingId changed',
+        self::RE_PROTECTION_ADDED_TO_REMAINDER_QUEUE => 'Reprotection added to remainder queue',
     ];
 
     public const CATEGORY_ERROR = 1;

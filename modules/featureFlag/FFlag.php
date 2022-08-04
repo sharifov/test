@@ -37,6 +37,14 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_FILTER_CONVERSION_DATE_AND_USER_IN_LEAD_SEARCH = 'filterConversionDateAndUserInLeadSearch';
     public const FF_KEY_VALIDATE_ABAC_POLICY_IN_MIGRATION = 'validateAbacPolicyInMigration';
     public const FF_KEY_BUSINESS_QUEUE_LIMIT = 'businessQueueLimit';
+    public const FF_KEY_INFO_BLOCK_ENABLE = 'infoBlockEnable';
+    public const FF_KEY_SCHEDULE_CHANGE_CLIENT_REMAINDER_NOTIFICATION = 'scheduleChangeClientRemainderNotification';
+    public const FF_KEY_VALIDATE_CLOSING_REASON_DUPLICATED = 'validateClosingReasonDuplicated';
+    public const FF_KEY_BOOKED_QUEUE_CONDITION_AGENT_IS_OWNER = 'bookedQueueConditionAgentIsAgent';
+    public const FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE = 'smartLeadDistributionEnable';
+    public const FF_KEY_USER_SKILL_IN_ABAC_ENABLE = 'userSkillInAbacEnable';
+    public const FF_KEY_DISPLAY_SKILL_FIELD_ON_MULTIPLE_UPDATE_USERS = 'displaySkillFieldOnMultipleUpdateUsers';
+    public const FF_KEY_REFACTORING_INCOMING_CALL_ENABLE = 'refactoringIncomingCallEnable';
 
 
     public const FF_KEY_LIST = [
@@ -66,6 +74,14 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_VALIDATE_ABAC_POLICY_IN_MIGRATION,
         self::FF_KEY_BUSINESS_QUEUE_LIMIT,
         self::FF_KEY_BEQ_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT,
+        self::FF_KEY_INFO_BLOCK_ENABLE,
+        self::FF_KEY_SCHEDULE_CHANGE_CLIENT_REMAINDER_NOTIFICATION,
+        self::FF_KEY_VALIDATE_CLOSING_REASON_DUPLICATED,
+        self::FF_KEY_BOOKED_QUEUE_CONDITION_AGENT_IS_OWNER,
+        self::FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE,
+        self::FF_KEY_USER_SKILL_IN_ABAC_ENABLE,
+        self::FF_KEY_DISPLAY_SKILL_FIELD_ON_MULTIPLE_UPDATE_USERS,
+        self::FF_KEY_REFACTORING_INCOMING_CALL_ENABLE,
     ];
 
 

@@ -2,6 +2,7 @@
 
 use modules\shiftSchedule\src\events\ShiftScheduleEventChangedEvent;
 use modules\shiftSchedule\src\listeners\ShiftScheduleEventChangedListener;
+use modules\smartLeadDistribution\src\listeners\LeadRatingCalculationListener;
 use src\events\lead\LeadBookedEvent;
 use src\events\lead\LeadCallExpertChangedEvent;
 use src\events\lead\LeadCallExpertRequestEvent;
@@ -89,7 +90,10 @@ use src\listeners\lead\leadBusinessExtraQueue\LeadBusinessExtraQueueRemoveOnStat
 use src\listeners\lead\leadBusinessExtraQueue\LeadBusinessExtraQueueEventLogListener;
 
 return [
-    LeadCreatedEvent::class => [LeadCreatedEventListener::class],
+    LeadCreatedEvent::class => [
+        LeadCreatedEventListener::class,
+        LeadRatingCalculationListener::class,
+    ],
     LeadCreatedManuallyEvent::class => [LeadSendToGaListener::class],
     LeadCreatedByIncomingCallEvent::class => [
         LeadCreatedByIncomingCallLogListener::class,
