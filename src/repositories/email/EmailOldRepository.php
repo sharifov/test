@@ -199,8 +199,8 @@ class EmailOldRepository implements EmailRepositoryInterface
 
     public function getLastInboxId(): ?int
     {
-        $lastInbox = Email::find()->select(['e_inbox_email_id'])->orderByLastInbox()->limit(1)->one();
-        return $lastInbox['e_inbox_email_id'] ?? null;
+        $lastInbox = Email::find()->select(['e_inbox_email_id'])->orderByLastInbox()->limit(1)->scalar();
+        return $lastInbox !== false ? $lastInbox : null;
     }
 
     public function getModelQuery(): ActiveQuery
