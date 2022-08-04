@@ -384,7 +384,7 @@ class LeadBadgesRepository
         }
 
         /** @fflag FFlag::FF_KEY_BOOKED_QUEUE_CONDITION_BY_DEPARTMENT, Booked Queue condition for agent only owner */
-        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BOOKED_QUEUE_CONDITION_AGENT_IS_OWNER)) {
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BOOKED_QUEUE_CONDITION_AGENT_IS_OWNER)) {
             if ($user->isAgent()) {
                 $query->andWhere($this->isOwner($user->id));
             } else {

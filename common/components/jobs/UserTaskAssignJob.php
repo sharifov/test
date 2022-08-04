@@ -28,6 +28,7 @@ class UserTaskAssignJob extends BaseJob implements JobInterface
         try {
             $leads = Lead::find()
                 ->byClient($this->clientId)
+                ->andWhere(['NOT', ['employee_id' => null]])
                 ->andWhere(['l_is_test' => 0])
                 ->all();
 
