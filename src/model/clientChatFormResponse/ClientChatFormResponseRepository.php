@@ -2,8 +2,8 @@
 
 namespace src\model\clientChatFormResponse;
 
-use src\model\clientChat\entity\ClientChat;
-use src\model\clientChatRequest\useCase\api\create\ClientChatFormResponseApiForm;
+use src\helpers\ErrorsToStringHelper;
+use src\model\clientChatFormResponse\entity\ClientChatFormResponse;
 
 /**
  * Class ClientChatFeedbackRepository
@@ -11,12 +11,21 @@ use src\model\clientChatRequest\useCase\api\create\ClientChatFormResponseApiForm
  */
 class ClientChatFormResponseRepository
 {
-    public function save(ClientChatFormResponseApiForm $form, ClientChat $clientChat): ClientChatFormResponseApiForm
+    public function checkDuplicateValue(int $formId, int $clientChatId, string $value): bool
     {
-        if ($form->syncWithDb($clientChat) === false) {
-            throw new \RuntimeException('Client Chat Form saving failed');
-        }
+        return ClientChatFormResponse::find()
+            ->where([
+                'ccfr_form_id' => $formId,
+                'ccfr_client_chat_id' => $clientChatId,
+                'ccfr_value' => $value
+            ])->exists();
+    }
 
-        return $form;
+    public function save(ClientChatFormResponse $model): ClientChatFormResponse
+    {
+        if (!$model->save()) {
+            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($model), -1);
+        }
+        return $model;
     }
 }

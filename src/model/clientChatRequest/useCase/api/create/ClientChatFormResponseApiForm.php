@@ -56,41 +56,4 @@ class ClientChatFormResponseApiForm extends Model
             $this->addError('data', 'formKey not found.');
         }
     }
-
-    /**
-     * @param ClientChat $clientChat
-     * @return bool
-     */
-    public function syncWithDb(ClientChat $clientChat): bool
-    {
-        /** @var ClientChatForm $clientChatForm */
-        $clientChatForm = ClientChatForm::find()->where(['ccf_key' => $this->formKey])->one();
-
-        if (is_null($clientChatForm)) {
-            return false;
-        }
-
-        if (
-            ClientChatFormResponse::find()
-            ->where([
-                'ccfr_form_id' => $clientChatForm->ccf_id,
-                'ccfr_client_chat_id' => $clientChat->cch_id,
-                'ccfr_value' => $this->formValue
-            ])->exists()
-        ) {
-            return true;
-        }
-
-        $model = new ClientChatFormResponse();
-        $model->load([
-            'ccfr_uid' => $this->rid,
-            'ccfr_client_chat_id' => $clientChat->cch_id,
-            'ccfr_form_id' => $clientChatForm->ccf_id,
-            'ccfr_value' => $this->formValue,
-            'ccfr_rc_created_dt' => date('Y-m-d H:i:s', strtotime($this->createdAt)),
-            'ccfr_created_dt' => date('Y-m-d H:i:s')
-        ], '');
-
-        return $model->save();
-    }
 }
