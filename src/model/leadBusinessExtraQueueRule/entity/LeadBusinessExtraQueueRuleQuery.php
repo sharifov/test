@@ -72,4 +72,16 @@ class LeadBusinessExtraQueueRuleQuery
             ])
             ->one();
     }
+
+    public static function getList(int $cacheDuration = -1): array
+    {
+        return LeadBusinessExtraQueueRule
+            ::find()
+            ->select(['lbeqr_key', 'lbeqr_id'])
+            ->orderBy(['lbeqr_key' => SORT_ASC])
+            ->indexBy('lbeqr_id')
+            ->cache($cacheDuration)
+            ->asArray()
+            ->column();
+    }
 }
