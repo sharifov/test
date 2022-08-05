@@ -41,6 +41,10 @@ class LeadTaskReAssignService extends LeadTaskAssignService
         )->exists();
 
         if ($existNewUserTaskComplete) {
+            \modules\taskList\src\helpers\TaskListHelper::debug(
+                'Exist UserTask Complete (Lead ID: ' . $this->lead->id . ', EmployeeID: ' . $this->lead->employee_id . '), TaskLIst ID (' . $this->taskList->tl_id . ')',
+                'info\UserTaskAssign:LeadTaskReAssignService:assign:info'
+            );
             return;
         }
 
@@ -64,6 +68,10 @@ class LeadTaskReAssignService extends LeadTaskAssignService
         }
 
         if ($oldUserTask->isComplete()) {
+            \modules\taskList\src\helpers\TaskListHelper::debug(
+                'Exist OldUserTask Complete (Lead ID: ' . $this->lead->id . ', EmployeeID: ' . $this->oldOwnerId . '), TaskLIst ID (' . $this->taskList->tl_id . ')',
+                'info\UserTaskAssign:LeadTaskReAssignService:assign:info'
+            );
             return;
         }
 
