@@ -38,6 +38,11 @@ class LeadTaskFirstAssignService extends LeadTaskAssignService
         )->exists();
 
         if ($existNewUserTaskComplete) {
+            \modules\taskList\src\helpers\TaskListHelper::debug(
+                'Exist UserTask Complete or Processing (Lead ID: ' . $this->lead->id . ', EmployeeID: ' . $this->lead->employee_id . '), TaskLIst ID (' . $this->taskList->tl_id . ')',
+                'info\UserTaskAssign:LeadTaskReAssignService:assign:info'
+            );
+
             return;
         }
 

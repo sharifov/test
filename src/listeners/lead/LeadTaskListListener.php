@@ -16,6 +16,10 @@ class LeadTaskListListener
     {
         try {
             if ($event->getNewOwnerId() === $event->getOldOwnerId()) {
+                \modules\taskList\src\helpers\TaskListHelper::debug(
+                    'NewOwner(' . $event->getNewOwnerId() . ') === OldOwner (' . $event->getOldOwnerId() . ')',
+                    'info\UserTaskAssign:LeadTaskListListener:handle:info'
+                );
                 return;
             }
             if (!(new LeadTaskListService($event->getLead()))->isEnableFFAndNotEmptyOwner(false)) {
