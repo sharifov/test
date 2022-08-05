@@ -21,6 +21,7 @@ use src\model\clientChatForm\helper\ClientChatFormTranslateHelper;
 use src\model\clientChatRequest\entity\ClientChatRequest;
 use src\model\clientChatRequest\repository\ClientChatRequestRepository;
 use src\model\clientChatRequest\useCase\api\create\ClientChatFormResponseApiForm;
+use src\model\clientChatRequest\useCase\api\create\ClientChatFormResponseService;
 use src\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
 use src\model\clientChatRequest\useCase\api\create\ClientChatRequestFeedbackSubForm;
 use src\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
@@ -63,16 +64,20 @@ class ClientChatRequestController extends ApiBaseController
      */
     private ClientChatRequestRepository $clientChatRequestRepository;
 
+    private ClientChatFormResponseService $clientChatFormResponseService;
+
     public function __construct(
         $id,
         $module,
         ClientChatRequestService $clientChatRequestService,
         ClientChatRequestRepository $clientChatRequestRepository,
+        ClientChatFormResponseService $clientChatFormResponseService,
         $config = []
     ) {
         $this->clientChatRequestService = $clientChatRequestService;
         parent::__construct($id, $module, $config);
         $this->clientChatRequestRepository = $clientChatRequestRepository;
+        $this->clientChatFormResponseService = $clientChatFormResponseService;
     }
 
     /**
@@ -1126,7 +1131,7 @@ class ClientChatRequestController extends ApiBaseController
      *  HTTP/1.1 200 OK
      *  {
      *     "status": 200
-     *     "message": "Client Chat Form added to queue (jobId: 1)"
+     *     "message": "Ok"
      *  }
      *
      * @apiErrorExample {json} Error-Response (400):
@@ -1208,16 +1213,7 @@ class ClientChatRequestController extends ApiBaseController
         }
 
         try {
-            $job = new ClientChatFormResponseJob();
-            $job->form = $form;
-
-            if ($jobId = Yii::$app->queue_client_chat_job->priority(10)->push($job)) {
-                $clientChatRequest->ccr_job_id = $job;
-                $clientChatRequest->save();
-                $resultMessage = "Client Chat Form added to queue (jobId: {$jobId})";
-            } else {
-                throw new \Exception("Client Chat Form not added to queue. ClientChatRequest ID : {$clientChatRequest->ccr_rid}");
-            }
+            $this->clientChatFormResponseService->createFormResponse($form->rid, $form->formKey, $form->formValue, $form->createdAt);
         } catch (\Throwable $e) {
             return $this->endApiLog(
                 new ErrorResponse(

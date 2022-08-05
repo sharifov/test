@@ -93,4 +93,21 @@ class ClientChatFormResponse extends ActiveRecord
     {
         return $this->hasOne(ClientChatForm::class, ['ccf_id' => 'ccfr_form_id']);
     }
+
+    public static function create(
+        string $uid,
+        int $clientChatId,
+        int $formId,
+        string $value,
+        string $rcCreatedAt
+    ): ClientChatFormResponse {
+        $model = new self();
+        $model->ccfr_uid = $uid;
+        $model->ccfr_client_chat_id = $clientChatId;
+        $model->ccfr_form_id = $formId;
+        $model->ccfr_value = $value;
+        $model->ccfr_rc_created_dt = date('Y-m-d H:i:s', strtotime($rcCreatedAt));
+
+        return $model;
+    }
 }

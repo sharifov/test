@@ -9,11 +9,6 @@ use src\helpers\ErrorsToStringHelper;
 use src\model\clientChat\entity\ClientChat;
 use src\model\clientChat\useCase\create\ClientChatRepository;
 use src\model\clientChatFeedback\ClientChatFeedbackRepository;
-use src\model\clientChatForm\ClientChatFormRepository;
-use src\model\clientChatForm\entity\ClientChatFormQuery;
-use src\model\clientChatFormResponse\ClientChatFormResponseRepository;
-use src\model\clientChatFormResponse\entity\ClientChatFormResponse;
-use src\model\clientChatFormResponse\entity\ClientChatFormResponseQuery;
 
 /**
  * Class ClientChatRequestService
@@ -31,22 +26,17 @@ class ClientChatRequestService
 
     private ClientChatFeedbackRepository $clientChatFeedbackRepository;
 
-    private ClientChatFormResponseRepository $clientChatFormResponseRepository;
-
     /**
      * ClientChatRequestService constructor.
      * @param ClientChatRepository $clientChatRepository
      * @param ClientChatFeedbackRepository $clientChatFeedbackRepository
-     * @param ClientChatFormResponseRepository $clientChatFormResponseRepository
      */
     public function __construct(
         ClientChatRepository $clientChatRepository,
-        ClientChatFeedbackRepository $clientChatFeedbackRepository,
-        ClientChatFormResponseRepository $clientChatFormResponseRepository
+        ClientChatFeedbackRepository $clientChatFeedbackRepository
     ) {
         $this->clientChatRepository = $clientChatRepository;
         $this->clientChatFeedbackRepository = $clientChatFeedbackRepository;
-        $this->clientChatFormResponseRepository = $clientChatFormResponseRepository;
     }
 
     /**
@@ -92,43 +82,5 @@ class ClientChatRequestService
                 $dataNotification
             );
         }
-    }
-
-    public function createOrUpdateFormRequest(ClientChatFormResponseApiForm $form)
-    {
-        // Getting client chat by room id
-        $clientChat = $this->clientChatRepository->getLastByRid($form->rid);
-
-        if (is_null($clientChat)) {
-            throw new \RuntimeException("client chat with room id `{$form->rid}` not found");
-        }
-
-        $clientChatForm = ClientChatFormQuery::getByKey($form->formKey);
-
-        if (is_null($clientChatForm)) {
-            throw new \RuntimeException("client chat form with room id `{$form->rid}` not found");
-        }
-
-        if (
-            ClientChatFormResponseQuery::checkDuplicateValue(
-                $clientChatForm->ccf_id,
-                $clientChat->cch_id,
-                $form->formValue
-            )
-        ) {
-            return;
-        }
-
-        $model = new ClientChatFormResponse();
-        $model->load([
-            'ccfr_uid' => $form->rid,
-            'ccfr_client_chat_id' => $clientChat->cch_id,
-            'ccfr_form_id' => $clientChatForm->ccf_id,
-            'ccfr_value' => $form->formValue,
-            'ccfr_rc_created_dt' => date('Y-m-d H:i:s', strtotime($form->createdAt)),
-            'ccfr_created_dt' => date('Y-m-d H:i:s')
-        ], '');
-
-        $this->clientChatFormResponseRepository->save($model);
     }
 }
