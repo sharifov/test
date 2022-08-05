@@ -63,7 +63,17 @@ class LeadTaskListService
                         }
 
                         $dtNowWithDelay = $dtNow->modify(sprintf('+%d hour', $taskList->getDelayHoursParam()));
-                        $userShiftSchedules = UserShiftScheduleQuery::getAllFromStartDateByUserId($this->lead->employee_id, $dtNowWithDelay);
+
+                        $taskListEndDt = null;
+                        if ((int) $taskList->tl_duration_min > 0) {
+                            $taskListEndDt = $dtNowWithDelay->modify(sprintf('+%d minutes', $taskList->tl_duration_min));
+                        }
+
+                        $userShiftSchedules = UserShiftScheduleQuery::getAllFromStartDateByUserId(
+                            $this->lead->employee_id,
+                            $dtNowWithDelay,
+                            $taskListEndDt
+                        );
 
                         if (empty($userShiftSchedules)) {
                             $this->canceledUserTask($taskList->tl_id);
