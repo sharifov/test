@@ -27,8 +27,8 @@ class m220802_174823_create_client_chat_form_response_table extends Migration
             'ccfr_created_dt' => $this->timestamp()
         ], $tableOptions);
 
-        $this->addForeignKey('FK-client_chat_form_response-ccfr_client_chat_id', '{{%client_chat_form_response}}', 'ccfr_client_chat_id', '{{%client_chat}}', 'cch_id');
-        $this->addForeignKey('FK-client_chat_form_response-ccfr_form_id', '{{%client_chat_form_response}}', 'ccfr_form_id', '{{%client_chat_form}}', 'ccf_id');
+        $this->addForeignKey('FK-client_chat_form_response-ccfr_client_chat_id', '{{%client_chat_form_response}}', 'ccfr_client_chat_id', '{{%client_chat}}', 'cch_id', 'CASCADE', 'CASCADE');
+        $this->addForeignKey('FK-client_chat_form_response-ccfr_form_id', '{{%client_chat_form_response}}', 'ccfr_form_id', '{{%client_chat_form}}', 'ccf_id', 'CASCADE', 'CASCADE');
     }
 
     /**

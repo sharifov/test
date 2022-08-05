@@ -1,20 +1,14 @@
 <?php
 
-namespace src\model\clientChatForm;
+namespace src\model\clientChatForm\entity;
 
-use src\model\clientChatForm\entity\ClientChatForm;
-
-/**
- * Class ClientChatFormRepository
- * @package src\model\clientChatForm`
- */
-class ClientChatFormRepository
+class ClientChatFormQuery
 {
     /**
      * @param string $key
      * @return ClientChatForm|null
      */
-    public function getByKey(string $key): ?ClientChatForm
+    public static function getByKey(string $key): ?ClientChatForm
     {
         if ($clientChatForm = ClientChatForm::find()->where(['ccf_key' => $key])->one()) {
             return $clientChatForm;

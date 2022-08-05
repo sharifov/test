@@ -7,20 +7,10 @@ use src\model\clientChatFormResponse\entity\ClientChatFormResponse;
 
 /**
  * Class ClientChatFeedbackRepository
- * @package src\model\clientChatFeedback`
+ * @package src\model\clientChatFormResponse`
  */
 class ClientChatFormResponseRepository
 {
-    public function checkDuplicateValue(int $formId, int $clientChatId, string $value): bool
-    {
-        return ClientChatFormResponse::find()
-            ->where([
-                'ccfr_form_id' => $formId,
-                'ccfr_client_chat_id' => $clientChatId,
-                'ccfr_value' => $value
-            ])->exists();
-    }
-
     public function save(ClientChatFormResponse $model): ClientChatFormResponse
     {
         if (!$model->save()) {

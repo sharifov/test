@@ -10,8 +10,10 @@ use src\model\clientChat\entity\ClientChat;
 use src\model\clientChat\useCase\create\ClientChatRepository;
 use src\model\clientChatFeedback\ClientChatFeedbackRepository;
 use src\model\clientChatForm\ClientChatFormRepository;
+use src\model\clientChatForm\entity\ClientChatFormQuery;
 use src\model\clientChatFormResponse\ClientChatFormResponseRepository;
 use src\model\clientChatFormResponse\entity\ClientChatFormResponse;
+use src\model\clientChatFormResponse\entity\ClientChatFormResponseQuery;
 
 /**
  * Class ClientChatRequestService
@@ -31,8 +33,6 @@ class ClientChatRequestService
 
     private ClientChatFormResponseRepository $clientChatFormResponseRepository;
 
-    private ClientChatFormRepository $clientChatFormRepository;
-
     /**
      * ClientChatRequestService constructor.
      * @param ClientChatRepository $clientChatRepository
@@ -42,13 +42,11 @@ class ClientChatRequestService
     public function __construct(
         ClientChatRepository $clientChatRepository,
         ClientChatFeedbackRepository $clientChatFeedbackRepository,
-        ClientChatFormResponseRepository $clientChatFormResponseRepository,
-        ClientChatFormRepository $clientChatFormRepository
+        ClientChatFormResponseRepository $clientChatFormResponseRepository
     ) {
         $this->clientChatRepository = $clientChatRepository;
         $this->clientChatFeedbackRepository = $clientChatFeedbackRepository;
         $this->clientChatFormResponseRepository = $clientChatFormResponseRepository;
-        $this->clientChatFormRepository = $clientChatFormRepository;
     }
 
     /**
@@ -105,14 +103,14 @@ class ClientChatRequestService
             throw new \RuntimeException("client chat with room id `{$form->rid}` not found");
         }
 
-        $clientChatForm = $this->clientChatFormRepository->getByKey($form->formKey);
+        $clientChatForm = ClientChatFormQuery::getByKey($form->formKey);
 
         if (is_null($clientChatForm)) {
             throw new \RuntimeException("client chat form with room id `{$form->rid}` not found");
         }
 
         if (
-            $this->clientChatFormResponseRepository->checkDuplicateValue(
+            ClientChatFormResponseQuery::checkDuplicateValue(
                 $clientChatForm->ccf_id,
                 $clientChat->cch_id,
                 $form->formValue
