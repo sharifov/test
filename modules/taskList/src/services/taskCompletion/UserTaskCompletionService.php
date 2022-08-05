@@ -38,6 +38,8 @@ class UserTaskCompletionService
      */
     public function handle(): UserTaskCompletionService
     {
+        $this->log('Begin handle', '1');
+
         $taskListsQuery = TaskListQuery::getTaskListUserCompletion(
             $this->userId,
             $this->targetObject,
@@ -47,10 +49,13 @@ class UserTaskCompletionService
         );
         $taskLists = $taskListsQuery->all();
 
+        $this->log('Search taskLists result', '2', ['count' => count($taskLists)]);
+
         $taskModel = (new TaskObjectModelFinder($this->taskObject, $this->taskModelId))->findModel();
 
         if ($taskLists) {
             foreach ($taskLists as $taskList) {
+                $this->log('TaskList begin processing', '3', ['taskListId' => $taskList->tl_id]);
                 $userTaskQuery = UserTaskQuery::getUserTaskCompletion(
                     $taskList->tl_id,
                     $this->userId,
@@ -66,6 +71,8 @@ class UserTaskCompletionService
                     continue;
                 }
 
+                $this->log('UserTask found', '4', ['userTaskId' => $userTask->ut_id]);
+
                 $completionChecker = (new TaskListCompletionFactory(
                     $this->taskObject,
                     $taskModel,
@@ -73,12 +80,19 @@ class UserTaskCompletionService
                     $userTask
                 ))->create();
 
-                if (!$completionChecker->check()) {
+                $isCheck = $completionChecker->check();
+
+                $this->log('CompletionChecker', '5', ['isCheck' => $isCheck]);
+
+                if (!$isCheck) {
                     continue;
                 }
 
                 $userTask->setStatusComplete();
                 (new UserTaskRepository($userTask))->save();
+
+                $this->log('UserTask set to completed', '6', ['userTaskId' => $userTask->ut_id]);
+
                 $this->userTasksProcessed[] = $userTask->ut_id;
             }
         }
@@ -88,5 +102,23 @@ class UserTaskCompletionService
     public function getUserTasksProcessed(): array
     {
         return $this->userTasksProcessed;
+    }
+
+    private function log(string $message, string $point = '', ?array $additionalData = null): void
+    {
+        /** @fflag FFlag::FF_KEY_USER_TASK_COMPLETION_DEBUG, Enable debug/log mode */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_USER_TASK_COMPLETION_DEBUG)) {
+            $logData['message'] = $message;
+            $logData['targetObject'] = $this->targetObject;
+            $logData['targetObjectId'] = $this->targetObjectId;
+            $logData['taskObject'] = $this->taskObject;
+            $logData['taskModelId'] = $this->taskModelId;
+            $logData['userId'] = $this->userId;
+
+            if ($additionalData) {
+                $logData = array_merge($logData, $additionalData);
+            }
+            \Yii::info($logData, 'info\UserTaskCompletionService:point:' . $point);
+        }
     }
 }
