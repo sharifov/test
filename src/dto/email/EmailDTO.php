@@ -116,7 +116,6 @@ class EmailDTO
         $this->emailSubject = $gmail->getSubject();
         $this->bodyHtml = $gmail->getContent();
         $this->createdDt = date('Y-m-d H:i:s');
-        $this->inboxEmailId = $mail['ei_id'];
         $this->inboxCreatedDt = $gmail->getDate();
         $this->refMessageId = $gmail->getReferences();
         $this->messageId = $gmail->getMessageId();
