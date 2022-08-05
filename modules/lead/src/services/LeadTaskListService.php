@@ -48,8 +48,8 @@ class LeadTaskListService
 
     public function assign(): void
     {
-        $dtNow = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')));
         try {
+            $dtNow = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')));
             if ($taskLists = TaskListQuery::getTaskListByLeadId($this->lead->id)) {
                 foreach ($taskLists as $taskList) {
                     try {
@@ -67,7 +67,8 @@ class LeadTaskListService
 
                         if (empty($userShiftSchedules)) {
                             $this->canceledUserTask($taskList->tl_id);
-                            throw new TaskListAssignException('UserShiftSchedules not found by EmployeeId (' . $this->lead->employee_id . ') and StartDateTime:' . $dtNowWithDelay->format('Y-m-d H:i:s'));
+                            throw new TaskListAssignException('UserShiftSchedules not found by EmployeeId (' .
+                                $this->lead->employee_id . ') and StartDateTime:' . $dtNowWithDelay->format('Y-m-d H:i:s'));
                         }
 
                         if ($this->isEmptyOldOwner()) {
@@ -89,19 +90,19 @@ class LeadTaskListService
 
                         $assignService->assign();
                     } catch (TaskListAssignException $exception) {
-                        $message = AppHelper::throwableLog($exception);
-                        \Yii::info($message, 'info\LeadTaskListService:assignReAssign:TaskListAssignException');
+                        \Yii::info(
+                            AppHelper::throwableLog($exception),
+                            'info\LeadTaskListService:assignReAssign:TaskListAssignException'
+                        );
                     } catch (\RuntimeException | \DomainException $throwable) {
                         $message = AppHelper::throwableLog($throwable);
-                        if (isset($userTask)) {
-                            $message['userTask'] = ArrayHelper::toArray($userTask);
-                        }
+                        $message['taskListId'] = $taskList->tl_id ?? null;
+                        $message['leadId'] = $this->lead->id ?? null;
                         \Yii::warning($message, 'LeadTaskListService:assignReAssign:Exception');
                     } catch (\Throwable $throwable) {
                         $message = AppHelper::throwableLog($throwable);
-                        if (isset($userTask)) {
-                            $message['userTask'] = ArrayHelper::toArray($userTask);
-                        }
+                        $message['taskListId'] = $taskList->tl_id ?? null;
+                        $message['leadId'] = $this->lead->id ?? null;
                         \Yii::error($message, 'LeadTaskListService:assignReAssign:Throwable');
                     }
                 }
@@ -109,8 +110,15 @@ class LeadTaskListService
             }
             throw new TaskListAssignException('TaskList not found by LeadId (' . $this->lead->id . ')');
         } catch (TaskListAssignException $exception) {
-            $message = AppHelper::throwableLog($exception);
-            \Yii::info($message, 'info\LeadTaskListService:assignReAssign:TaskListAssignException');
+            \Yii::info(
+                AppHelper::throwableLog($exception),
+                'info\LeadTaskListService:assign:TaskListAssignException'
+            );
+        } catch (\Exception $exception) {
+            \Yii::info(
+                AppHelper::throwableLog($exception),
+                'info\LeadTaskListService:assign:Exception'
+            );
         }
     }
 

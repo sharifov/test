@@ -7,6 +7,12 @@ use frontend\widgets\newWebPhone\email\form\EmailSendForm;
 use Yii;
 use yii\helpers\VarDumper;
 
+/**
+ *
+ * @deprecated
+ * use EmailMainService instead
+ *
+ */
 class EmailSenderService
 {
     public function send(EmailSendForm $form): array

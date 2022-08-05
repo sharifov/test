@@ -4,10 +4,9 @@ namespace frontend\widgets\notification;
 
 use common\components\purifier\Purifier;
 use common\components\purifier\PurifierFilter;
-use common\models\Email;
 use common\models\Notifications;
 use yii\bootstrap4\Html;
-use yii\helpers\StringHelper;
+use src\helpers\text\StringHelper;
 
 /**
  * Class NotificationMessage
@@ -38,7 +37,7 @@ class NotificationMessage
                 'id' => $ntf->n_id,
                 'title' => Html::encode($ntf->n_title),
                 'time' => strtotime($ntf->n_created_dt),
-                'message' => StringHelper::truncate(Email::stripHtmlTags($message), 80, '...'),
+                'message' => StringHelper::truncate(StringHelper::stripHtmlTags($message), 80, '...'),
                 'type' => Notifications::getNotifyType($ntf->n_type_id),
                 'popup' => (int)$ntf->n_popup,
                 'notifyMessage' => (int)$ntf->n_popup ? str_replace(["\r\n", "\n", '"'], ['', '', '\"'], strip_tags($message)) : '',

@@ -26,4 +26,5 @@ class LeadBusinessExtraQueueLogStatus
     public const REASON_RECEIVED_MESSAGE_FROM_CHAT = 'Received Message from chat';
     public const REASON_CHANGE_STATUS = 'Lead changes status from %s to %s';
     public const REASON_ADDED_TO_BUSINESS_EXTRA_QUEUE_DUE_EXPIRATION_TIME = 'Time expired, added to Business Extra Queue';
+    public const REASON_REMOVE_FROM_LEAD_DUE_TO_SYNCING_OFFSET_GMT = 'Remove From Lead Due to Syncing Offset Gmt';
 }

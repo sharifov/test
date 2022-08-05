@@ -3,19 +3,20 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model common\models\Email */
+/* @var $id int */
+/* @var $emailForm src\entities\email\form\EmailCreateForm */
 
-$this->title = 'Update Email: ' . $model->e_id;
+$this->title = 'Update Email: ' . $id;
 $this->params['breadcrumbs'][] = ['label' => 'Emails', 'url' => ['index']];
-$this->params['breadcrumbs'][] = ['label' => $model->e_id, 'url' => ['view', 'id' => $model->e_id]];
+$this->params['breadcrumbs'][] = ['label' => $id, 'url' => ['view', 'id' => $id]];
 $this->params['breadcrumbs'][] = 'Update';
 ?>
 <div class="email-update">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
-    <?= $this->render('_form', [
-        'model' => $model,
+    <?= $this->render('_email_form', [
+        'emailForm' => $emailForm,
     ]) ?>
 
 </div>

@@ -4,10 +4,10 @@ namespace common\models\search;
 
 use common\models\Call;
 use common\models\Email;
+use common\models\Employee;
 use common\models\ProjectEmployeeAccess;
 use common\models\query\EmployeeQuery;
 use common\models\search\employee\SortParameters;
-use common\models\UserConnection;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserOnline;
@@ -15,6 +15,7 @@ use common\models\UserParams;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
 use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
+use src\auth\Auth;
 use src\helpers\DateHelper;
 use src\model\clientChat\entity\ClientChat;
 use src\model\clientChatUserAccess\entity\ClientChatUserAccess;
@@ -23,13 +24,9 @@ use src\model\emailList\entity\EmailList;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use common\models\Employee;
-use kartik\daterange\DateRangeBehavior;
 use yii\data\ArrayDataProvider;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
-use yii\helpers\VarDumper;
-use src\auth\Auth;
 
 /**
  * EmployeeSearch represents the model behind the search form of `common\models\Employee`.

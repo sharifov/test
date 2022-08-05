@@ -179,7 +179,7 @@ class SmartLeadDistributionService
     public static function getCategoryByPoints(int $points): int
     {
         foreach (SmartLeadDistribution::CATEGORY_TOTAL_SCORE_LIST as $index => $category) {
-            if ($points > $category['from'] && $points < $category['to']) {
+            if ($points >= $category['from'] && $points <= $category['to']) {
                 return $index;
             }
         }
