@@ -34,22 +34,30 @@ $shiftScheduleEventTasks = \yii\helpers\ArrayHelper::map($shiftScheduleEventTask
             <div class="clearfix"></div>
         </div>
         <div class="x_content" style="display: block;">
-            <ul class="nav nav-tabs">
-                <?php $i = 0 ?>
-                <?php foreach ($userShiftSchedules as $key => $userShiftSchedule) : ?>
-                    <?php if ($i === 0) {
-                        $i = $key;
-                    } ?>
-                    <li class="nav-item">
-                        <a data-toggle="tab"
-                           href="#tab-<?= $key ?>"
-                           class="nav-link text-center <?= ($i === $key ? 'active' : '') ?>">
-                            <span class="task-list_nab-title"> <?= $userShiftSchedule['mainTabTitle'] ?> </span> <br>
-                            <span class="task-list_nab-subtitle">  <?= $userShiftSchedule['subTabTitle'] ?> </span>
-                        </a>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
+            <div style="display: flex">
+                <ul class="nav nav-tabs">
+                    <?php $i = 0 ?>
+                    <?php foreach ($userShiftSchedules as $key => $userShiftSchedule) : ?>
+                        <?php if ($i === 0) {
+                            $i = $key;
+                        } ?>
+                        <li class="nav-item" style="max-width: 20%;">
+                            <a data-toggle="tab"
+                               href="#tab-<?= $key ?>"
+                               class="nav-link text-center <?= ($i === $key ? 'active' : '') ?>">
+                                <span class="task-list_nab-title"> <?= $userShiftSchedule['mainTabTitle'] ?> </span> <br>
+                                <span class="task-list_nab-subtitle">  <?= $userShiftSchedule['subTabTitle'] ?> </span>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+                <?php /** @fflag FFlag::FF_KEY_LEAD_TASK_LIST_HISTORY_MODAL_ENABLE, Enable modal in lead view with history of task */ ?>
+                <?php if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_LEAD_TASK_LIST_HISTORY_MODAL_ENABLE)) : ?>
+                    <a href="#" class="task-list-history-btn" id="task-list-modal-btn" data-url="<?= Url::to(['lead/ajax-get-user-task', 'leadID' => $lead->id]) ?>">History</a>
+                <?php endif; ?>
+            </div>
+
+
             <div class="tab-content">
                 <?php foreach ($shiftScheduleEventTasks as $key => $shiftScheduleEventTask) : ?>
                     <?php $userShiftSchedule = $userShiftSchedules[$key] ?? [] ?>

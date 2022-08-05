@@ -35,7 +35,7 @@
     color: #8895A7;
 }
 
-.task-list_wrap .my-task-list-wrap .my-task-list-link:hover {
+.task-list_wrap .my-task-list-wrap .my-task-list-link:hover, .task-list_wrap .task-list-history-btn:hover {
     color: #5EAE91;
 }
 
@@ -50,4 +50,18 @@
     padding-left: 15px;
 }
 
+.task-list_wrap .task-list-history-btn{
+    font-size: 12px;
+    line-height: 24px;
+    color: #8895A7;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 15px;
+}
 
+.task-list_wrap .task-list-history-btn::before {
+    content: "";
+    background: url('/img/task-list/history.svg') no-repeat center;
+    padding: 15px 12px;
+}
