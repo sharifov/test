@@ -38,6 +38,7 @@ use src\entities\email\helpers\EmailType;
 use src\helpers\email\MaskEmailHelper;
 use src\services\email\EmailServiceHelper;
 use src\entities\email\EmailInterface;
+use src\entities\EventTrait;
 
 /**
  * This is the model class for table "email".
@@ -125,6 +126,8 @@ use src\entities\email\EmailInterface;
  */
 class Email extends \yii\db\ActiveRecord implements EmailInterface
 {
+    use EventTrait;
+
     public const TYPE_DRAFT     = 0;
     public const TYPE_OUTBOX    = 1;
     public const TYPE_INBOX     = 2;

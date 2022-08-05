@@ -282,4 +282,15 @@ class EmailServiceHelper
         $user = $this->getUsersIdByEmail($email);
         return reset($user);
     }
+
+    public function getProjectIdByDepOrUpp($emailTo): ?int
+    {
+        if ($dep = DepartmentEmailProject::find()->byEmail($emailTo)->one()) {
+            return $dep->dep_project_id;
+        } else if ($upp = UserProjectParams::find()->byEmail($emailTo)->one()) {
+            return $upp->upp_project_id;
+        }
+
+        return null;
+    }
 }
