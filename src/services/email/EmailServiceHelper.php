@@ -262,7 +262,7 @@ class EmailServiceHelper
             }
         }
 
-        $employees = Employee::find()->where(['email' => $this->$email])->all();
+        $employees = Employee::find()->where(['email' => $email])->all();
         if ($employees) {
             foreach ($employees as $employe) {
                 $users[$employe->id] = $employe->id;

@@ -99,6 +99,26 @@ class EmailQuery extends ActiveQuery
             ->andWhere(['ec.ec_address_id' => $address_ids]);
     }
 
+    /**
+     *
+     * @param array $mailList
+     * @return \src\entities\email\EmailQuery
+     */
+    public function withContactByType(array $mailList, int $type)
+    {
+        $addresses = EmailAddress::find()
+        ->select('ea_id')
+        ->where(['ea_email' => $mailList])
+        ->asArray()
+        ->all();
+        $address_ids = ArrayHelper::getColumn($addresses, 'ea_id');
+
+        $synonim = 'ec' . $type;
+        return $this
+            ->join('LEFT JOIN', [$synonim => EmailContact::tableName()], $synonim . '.ec_email_id = e_id')
+            ->andWhere([$synonim . '.ec_address_id' => $address_ids, $synonim . '.ec_type_id' => $type]);
+    }
+
     public function lead(int $leadId)
     {
         return $this->leftJoin('email_lead', 'email_lead.el_email_id = e_id')->andWhere(['el_lead_id' => $leadId]);
@@ -126,12 +146,12 @@ class EmailQuery extends ActiveQuery
 
     public function byEmailToList(array $mailList)
     {
-        return $this->withContact($mailList)->andWhere(['ec.ec_type_id' => EmailContactType::TO]);
+        return $this->withContactByType($mailList, EmailContactType::TO);
     }
 
     public function byEmailFromList(array $mailList)
     {
-        return $this->withContact($mailList)->andWhere(['ec.ec_type_id' => EmailContactType::FROM]);
+        return $this->withContactByType($mailList, EmailContactType::FROM);
     }
 
     public function orderByLastInbox()
