@@ -57,9 +57,9 @@ class UserTaskHelper
     {
         switch ($status) {
             case UserTask::STATUS_COMPLETE:
-                return \yii\helpers\Html::img('/img/task-list/complete.svg');
+                return '<i class="fa fa-check-square-o" aria-hidden="true"></i>';
             default:
-                return Html::img('/img/task-list/processing.svg');
+                return '<i class="fa fa-square-o" aria-hidden="true"></i>';
         }
     }
 

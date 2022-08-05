@@ -21,7 +21,6 @@ foreach ($shiftScheduleEventTasks as $shiftScheduleEvent) {
 $shiftScheduleEventTasks = \yii\helpers\ArrayHelper::map($shiftScheduleEventTasks, 'sset_user_task_id', function ($item) {
     return $item;
 }, 'sset_event_id');
-\frontend\assets\TaskListAssets::register($this);
 ?>
 
 
@@ -46,14 +45,15 @@ $shiftScheduleEventTasks = \yii\helpers\ArrayHelper::map($shiftScheduleEventTask
                                href="#tab-<?= $key ?>"
                                class="nav-link text-center <?= ($i === $key ? 'active' : '') ?>">
                                 <span class="task-list_nab-title"> <?= $userShiftSchedule['mainTabTitle'] ?> </span> <br>
-                                <span class="task-list_nab-subtitle">  <?= $userShiftSchedule['subTabTitle'] ?> </span>
+                                <span class="task-list_nab-subtitle" style="font-size: 10px">  <?= $userShiftSchedule['subTabTitle'] ?> </span>
                             </a>
                         </li>
                     <?php endforeach; ?>
                 </ul>
                 <?php /** @fflag FFlag::FF_KEY_LEAD_TASK_LIST_HISTORY_MODAL_ENABLE, Enable modal in lead view with history of task */ ?>
                 <?php if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_LEAD_TASK_LIST_HISTORY_MODAL_ENABLE)) : ?>
-                    <a href="#" class="task-list-history-btn" id="task-list-modal-btn" data-url="<?= Url::to(['lead/ajax-get-user-task', 'leadID' => $lead->id]) ?>">History</a>
+                    <a href="#" class="task-list-history-btn" id="task-list-modal-btn" data-url="<?= Url::to(['lead/ajax-get-user-task', 'leadID' => $lead->id]) ?>">
+                        <i class="fa fa-history" aria-hidden="true" style="padding-right: 5px"></i>  History</a>
                 <?php endif; ?>
             </div>
 
@@ -64,8 +64,8 @@ $shiftScheduleEventTasks = \yii\helpers\ArrayHelper::map($shiftScheduleEventTask
                     <div id="tab-<?= $key ?>" class="tab-pane fade in <?= ($i === $key ? 'active show' : '') ?>">
                         <div class="my-task-list-wrap">
                             <a target="_blank" href="<?= \yii\helpers\Url::to(['/task-list/index']) ?>"
-                               class="my-task-list-link"> My tasks </a>
-                            <span class="my-task-list-start">Started: <?= $userShiftSchedule['title'] ?? '' ?></span>
+                               class="my-task-list-link"> <i class="fa fa-tasks" aria-hidden="true"></i> My tasks </a>
+                            <span class="my-task-list-start" style="padding-left: 15px">Started: <?= $userShiftSchedule['title'] ?? '' ?></span>
                         </div>
                         <div class="table-responsive">
                             <table class="table table-striped table-bordered">
@@ -133,3 +133,33 @@ $js = <<<JS
 JS;
 
 $this->registerJs($js);
+
+?>
+<style>
+    .task-list_wrap .nav-tabs {
+        height: 70px;
+        overflow-x: scroll;
+        overflow-y: hidden;
+        flex-direction: column;
+        width: 80%;
+    }
+
+    .task-list_wrap .nav-link {
+        color: #596B7D;
+        font-size: 12px;
+        padding: 8px 15px 5px;
+        border-radius: 2px 2px 0 0;
+    }
+
+    .task-list_wrap .my-task-list-wrap {
+        padding: 20px 0 12px;
+    }
+
+    .task-list_wrap .task-list-history-btn{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-left: 15px;
+    }
+
+</style>
