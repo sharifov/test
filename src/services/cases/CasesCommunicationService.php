@@ -284,7 +284,7 @@ class CasesCommunicationService
                 throw new \DomainException($mailPreview['error']);
             }
 
-            try{
+            try {
                 $emailDTO = EmailDTO::fromArray([
                     'projectId' => $case->cs_project_id,
                     'caseId' => $case->cs_id,

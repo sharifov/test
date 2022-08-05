@@ -44,7 +44,7 @@ class SaleTicketEmailService
      */
     public function generateAndSendEmail(array $saleTickets, array $emailSettings, string $emailBody, int $caseId, string $bookingId, Employee $user, CaseSale $caseSale): void
     {
-        try{
+        try {
             $emailDTO = EmailDTO::fromArray([
                 'projectId' => $this->getProjectIdFromST($saleTickets[0]),
                 'caseId' => $caseId,

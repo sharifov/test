@@ -5,7 +5,7 @@ namespace src\model\emailReviewQueue;
 use common\models\Email;
 use src\model\emailReviewQueue\entity\EmailReviewQueue;
 use src\model\emailReviewQueue\entity\EmailReviewQueueRepository;
-use \src\entities\email\Email as EmailNorm;
+use src\entities\email\Email as EmailNorm;
 
 /**
  * @property EmailReviewQueueRepository $repository

@@ -22,6 +22,7 @@ use yii\helpers\ArrayHelper;
  * @property string|null $ut_target_object
  * @property int $ut_target_object_id
  * @property int $ut_task_list_id
+ * @property string|null $ut_description
  * @property string $ut_start_dt
  * @property string $ut_end_dt
  * @property int|null $ut_priority
@@ -96,6 +97,8 @@ class UserTask extends \yii\db\ActiveRecord
             [['ut_year'], 'integer'],
 
             [['ut_month'], 'integer'],
+
+            [['ut_description'], 'string', 'max' => 255]
         ];
     }
 
@@ -151,6 +154,7 @@ class UserTask extends \yii\db\ActiveRecord
             'ut_start_dt' => 'Start Dt',
             'ut_end_dt' => 'End Dt',
             'ut_priority' => 'Priority',
+            'ut_description' => 'Note',
             'ut_status_id' => 'Status',
             'ut_created_dt' => 'Created Dt',
             'ut_year' => 'Year',

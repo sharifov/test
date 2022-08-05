@@ -74,7 +74,8 @@ class EmailSearch extends Email
         return Model::scenarios();
     }
 
-    public function search($params) {
+    public function search($params)
+    {
         $query = self::find()->joinWith(['contactFrom', 'contactTo', 'params']);
 
         $query->addSelect([
@@ -235,5 +236,4 @@ class EmailSearch extends Email
 
         return $dataProvider;
     }
-
 }

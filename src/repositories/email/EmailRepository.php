@@ -215,9 +215,9 @@ class EmailRepository implements EmailRepositoryInterface
             "SELECT COUNT(*) as cnt
             FROM email_lead el
             LEFT JOIN " . Email::tableName() . " AS e ON e.e_id = el.el_email_id
-            WHERE el_lead_id = $leadId AND e_is_deleted = 0".
-            (($type != 0) ? " AND e_type_id = ".$type : "" )
-            );
+            WHERE el_lead_id = $leadId AND e_is_deleted = 0" .
+            (($type != 0) ? " AND e_type_id = " . $type : "")
+        );
         return $command->queryScalar();
     }
 
@@ -317,10 +317,10 @@ class EmailRepository implements EmailRepositoryInterface
     public function getRawSqlCountGroupedByLead(): string
     {
         return \Yii::$app->getDb()->createCommand(
-                "SELECT el_lead_id AS e_lead_id, COUNT(*) as cnt
+            "SELECT el_lead_id AS e_lead_id, COUNT(*) as cnt
                 FROM email_lead el
                 GROUP BY el_lead_id"
-            )
+        )
             ->rawSql;
     }
 
@@ -330,7 +330,7 @@ class EmailRepository implements EmailRepositoryInterface
             "SELECT ec_case_id AS e_case_id, COUNT(*) as cnt
                 FROM email_case ec
                 GROUP BY ec_case_id"
-            )
+        )
             ->rawSql;
     }
 
@@ -353,7 +353,7 @@ class EmailRepository implements EmailRepositoryInterface
         return Email::find()
             ->select(['count(*)'])
             ->byTemplateTypeId(1)
-            ->leftJoin('email_lead', 'email_lead.el_email_id = '. Email::tableName() . '.e_id')
+            ->leftJoin('email_lead', 'email_lead.el_email_id = ' . Email::tableName() . '.e_id')
             ->andWhere('email_lead.el_lead_id = ' . Lead::tableName() . '.id');
     }
 

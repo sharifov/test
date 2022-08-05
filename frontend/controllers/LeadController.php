@@ -53,6 +53,8 @@ use modules\offer\src\services\OfferSendLogService;
 use modules\order\src\entities\order\search\OrderSearch;
 use modules\taskList\src\entities\TargetObject;
 use modules\taskList\src\entities\userTask\UserTaskSearch;
+use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTaskQuery;
+use modules\twilio\components\TwilioCommunicationService;
 use PHPUnit\Framework\Warning;
 use src\auth\Auth;
 use src\entities\cases\Cases;
@@ -1006,6 +1008,14 @@ class LeadController extends FController
 //        $tmpl = $isQA ? 'view_qa' : 'view';
         $tmpl = 'view';
 
+        $shiftScheduleEventTasks = [];
+        /** @fflag FFlag::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE, New User Task List in Lead view Enable */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE)) {
+            $shiftScheduleEventTasks = ShiftScheduleEventTaskQuery::getAllByLeadId($lead->id)
+                ->asArray()
+                ->all();
+        }
+
         return $this->render($tmpl, [
             'leadForm' => $leadForm,
             'previewEmailForm' => $previewEmailForm,
@@ -1020,6 +1030,7 @@ class LeadController extends FController
             'itineraryForm' => $itineraryForm,
             'dataProviderNotes' => $dataProviderNotes,
             'modelNote' => $modelNote,
+            'shiftScheduleEventTasks' => $shiftScheduleEventTasks,
 
             'dataProviderOffers' => $dataProviderOffers,
             'dataProviderOrders' => $dataProviderOrders,

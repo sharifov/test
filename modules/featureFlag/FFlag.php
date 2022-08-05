@@ -46,6 +46,7 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_USER_SKILL_IN_ABAC_ENABLE = 'userSkillInAbacEnable';
     public const FF_KEY_DISPLAY_SKILL_FIELD_ON_MULTIPLE_UPDATE_USERS = 'displaySkillFieldOnMultipleUpdateUsers';
     public const FF_KEY_REFACTORING_INCOMING_CALL_ENABLE = 'refactoringIncomingCallEnable';
+    public const FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE = 'newUserTaskInLeadViewEnable';
     public const FF_KEY_SEGMENT_SIMPLE_LEAD_ENABLE = 'segmentSimpleLead';
     public const FF_KEY_LEAD_TASK_LIST_HISTORY_MODAL_ENABLE = 'leadTaskListHistoryModalEnable';
 
@@ -88,6 +89,7 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_REFACTORING_INCOMING_CALL_ENABLE,
         self::FF_KEY_SEGMENT_SIMPLE_LEAD_ENABLE,
         self::FF_KEY_LEAD_TASK_LIST_HISTORY_MODAL_ENABLE,
+        self::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE,
     ];
 
     public const FF_OBJECT_LIST = [

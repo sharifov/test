@@ -138,7 +138,7 @@ class EmailOldRepository implements EmailRepositoryInterface
     public function getEmailCountForLead(int $leadId, int $type = 0): int
     {
         $query = Email::find()->lead($leadId)->notDeleted();
-        if($type > 0) {
+        if ($type > 0) {
             $query = $query->byType($type);
         }
         return $query->count();
