@@ -40,7 +40,7 @@ class m220805_095543_add_ff_debug_assign_task_list extends Migration
 
             Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableLog($throwable), 'm220804_051023_add_ff_new_task_list_in_lead_view:safeUp:Throwable');
+            Yii::error(AppHelper::throwableLog($throwable), 'm220805_095543_add_ff_debug_assign_task_list:safeUp:Throwable');
         }
     }
 
@@ -59,7 +59,7 @@ class m220805_095543_add_ff_debug_assign_task_list extends Migration
 
             Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
-            Yii::error(AppHelper::throwableLog($throwable), 'm220804_051023_add_ff_new_task_list_in_lead_view:safeDown:Throwable');
+            Yii::error(AppHelper::throwableLog($throwable), 'm220805_095543_add_ff_debug_assign_task_list:safeDown:Throwable');
         }
     }
 }
