@@ -17,6 +17,6 @@ class TaskListAssets extends AssetBundle
     ];
 
     public $depends = [
-        SlickCarouselAssets::class,
+       // SlickCarouselAssets::class,
     ];
 }
