@@ -38,6 +38,8 @@ class UserTaskCompletionService
      */
     public function handle(): UserTaskCompletionService
     {
+        $this->log('Begin handle', '1');
+
         $taskListsQuery = TaskListQuery::getTaskListUserCompletion(
             $this->userId,
             $this->targetObject,
@@ -46,6 +48,8 @@ class UserTaskCompletionService
             TaskCompletionDictionary::getUserTaskProcessingStatuses()
         );
         $taskLists = $taskListsQuery->all();
+
+        $this->log('Search taskLists result', '2', ['count' => count($taskLists)]);
 
         $taskModel = (new TaskObjectModelFinder($this->taskObject, $this->taskModelId))->findModel();
 
@@ -88,5 +92,23 @@ class UserTaskCompletionService
     public function getUserTasksProcessed(): array
     {
         return $this->userTasksProcessed;
+    }
+
+    private function log(string $message, string $point = '', ?array $additionalData = null): void
+    {
+        /** @fflag FFlag::FF_KEY_USER_TASK_COMPLETION_DEBUG, Enable debug/log mode */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_USER_TASK_COMPLETION_DEBUG)) {
+            $logData['message'] = $message;
+            $logData['targetObject'] = $this->targetObject;
+            $logData['targetObjectId'] = $this->targetObjectId;
+            $logData['taskObject'] = $this->taskObject;
+            $logData['taskModelId'] = $this->taskModelId;
+            $logData['userId'] = $this->userId;
+
+            if ($additionalData) {
+                $logData = array_merge($logData, $additionalData);
+            }
+            \Yii::info($logData, 'info\UserTaskCompletionService:point:' . $point);
+        }
     }
 }
