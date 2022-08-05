@@ -220,7 +220,9 @@ class EmailService extends SendMail implements EmailServiceInterface
     public function createFromPreviewForm(EmailPreviewFromInterface $previewEmailForm, array $attachments = [])
     {
         $mail = new Email();
-        $mail->e_template_type_id = $previewEmailForm->getEmailTemplateId() ?? null;
+        if ($previewEmailForm->getEmailTemplateId()) {
+            $mail->e_template_type_id = $previewEmailForm->getEmailTemplateId();
+        }
         $mail->e_type_id = EmailType::OUTBOX;
         $mail->e_status_id = EmailStatus::PENDING;
         $mail->e_email_subject = $previewEmailForm->getEmailSubject();
@@ -228,7 +230,9 @@ class EmailService extends SendMail implements EmailServiceInterface
         $mail->e_email_from = $previewEmailForm->getEmailFrom();
         $mail->e_email_from_name = $previewEmailForm->getEmailFromName();
         $mail->e_email_to_name = $previewEmailForm->getEmailToName();
-        $mail->e_language_id = $previewEmailForm->getLanguageId() ?? null;
+        if ($previewEmailForm->getLanguageId()) {
+            $mail->e_language_id = $previewEmailForm->getLanguageId();
+        }
         $mail->e_email_to = $previewEmailForm->getEmailTo();
         $mail->e_created_dt = date('Y-m-d H:i:s');
         $mail->e_created_user_id = \Yii::$app->user->id;
