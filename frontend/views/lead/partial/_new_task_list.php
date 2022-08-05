@@ -7,6 +7,9 @@
  */
 
 use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
+use modules\taskList\abac\dto\TaskListAbacDto;
+use modules\taskList\abac\TaskListAbacObject;
+use modules\taskList\src\entities\userTask\UserTask;
 use modules\taskList\src\entities\userTask\UserTaskHelper;
 use src\auth\Auth;
 use yii\helpers\Url;
@@ -87,15 +90,25 @@ $shiftScheduleEventTasks = \yii\helpers\ArrayHelper::map($shiftScheduleEventTask
                                         <td></td>
                                         <td>
                                             <?php
+                                            $dto = new TaskListAbacDto();
+                                            $dto->setIsUserTaskOwner((int)$userTask['ut_user_id'] === Auth::id());
                                             $description = $userTask['ut_description'] ?? null;
-                                            ?>
-                                            <a href="javascript:void(0)" class="js-add_note_task_list"
-                                               data-usertaskid="<?= $userTask['ut_id'] ?>"
-                                               data-new-note="<?= empty($description) ?>"
-                                               title="<?= $description ?>"
-                                            >
-                                                <?= empty($description) ? 'Add note' : \yii\helpers\StringHelper::truncate($description, 15) ?>
-                                            </a>
+
+                                            /** @abac TaskListAbacObject::OBJ_USER_TASK, TaskListAbacObject::ACTION_ADD_NOTE, Access to add UserTask Note */
+                                            if (Yii::$app->abac->can($dto, TaskListAbacObject::OBJ_USER_TASK, TaskListAbacObject::ACTION_ADD_NOTE)) :?>
+                                                <a href="javascript:void(0)" class="js-add_note_task_list"
+                                                   data-usertaskid="<?= $userTask['ut_id'] ?>"
+                                                   data-new-note="<?= empty($description) ?>"
+                                                   title="<?= $description ?>"
+                                                >
+                                                    <?= empty($description) ? 'Add note' : \yii\helpers\StringHelper::truncate($description, 15) ?>
+                                                </a>
+                                            <?php else : ?>
+                                                <span
+                                                        title="<?= $description ?>">
+                                                    <?= \yii\helpers\StringHelper::truncate($description, 15) ?>
+                                                </span>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
