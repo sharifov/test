@@ -55,6 +55,7 @@ class UserTaskCompletionService
 
         if ($taskLists) {
             foreach ($taskLists as $taskList) {
+                $this->log('TaskList begin processing', '3', ['taskListId' => $taskList->tl_id]);
                 $userTaskQuery = UserTaskQuery::getUserTaskCompletion(
                     $taskList->tl_id,
                     $this->userId,
@@ -70,6 +71,8 @@ class UserTaskCompletionService
                     continue;
                 }
 
+                $this->log('UserTask found', '4', ['userTaskId' => $userTask->ut_id]);
+
                 $completionChecker = (new TaskListCompletionFactory(
                     $this->taskObject,
                     $taskModel,
@@ -77,12 +80,19 @@ class UserTaskCompletionService
                     $userTask
                 ))->create();
 
-                if (!$completionChecker->check()) {
+                $isCheck = $completionChecker->check();
+
+                $this->log('CompletionChecker', '5', ['isCheck' => $isCheck]);
+
+                if (!$isCheck) {
                     continue;
                 }
 
                 $userTask->setStatusComplete();
                 (new UserTaskRepository($userTask))->save();
+
+                $this->log('UserTask set to completed', '6', ['userTaskId' => $userTask->ut_id]);
+
                 $this->userTasksProcessed[] = $userTask->ut_id;
             }
         }
