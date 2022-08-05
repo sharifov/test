@@ -129,6 +129,11 @@ class EmailQuery extends ActiveQuery
         return $this->withContact($mailList)->andWhere(['ec.ec_type_id' => EmailContactType::TO]);
     }
 
+    public function byEmailFromList(array $mailList)
+    {
+        return $this->withContact($mailList)->andWhere(['ec.ec_type_id' => EmailContactType::FROM]);
+    }
+
     public function orderByLastInbox()
     {
         return $this->leftJoin(['el' => EmailLog::tableName()], 'el.el_email_id = e_id')->andWhere(['>', 'el_inbox_email_id', 0])->orderBy(['el_inbox_email_id' => SORT_DESC]);

@@ -260,7 +260,11 @@ class Email extends BaseActiveRecord implements EmailInterface
 
     public function getEmailTo($masking = true): ?string
     {
-        return $this->contactTo->getEmail(EmailType::isOutbox($this->e_type_id) && $masking) ?? null;
+        if ($this->contactTo) {
+            return $this->contactTo->getEmail(EmailType::isOutbox($this->e_type_id) && $masking) ?? null;
+        }
+
+        return null;
     }
 
     public function getEmailFromName(): string
@@ -290,7 +294,7 @@ class Email extends BaseActiveRecord implements EmailInterface
 
     public function getEmailData()
     {
-        return $this->emailBody->embd_email_data;
+        return $this->emailBody->getEmailData();
     }
 
     public function getEmailBodyHtml(): ?string
@@ -339,6 +343,7 @@ class Email extends BaseActiveRecord implements EmailInterface
             'e_is_deleted' => 'Is Deleted',
             'e_status_id' => 'Status ID',
             'e_created_user_id' => 'Created User ID',
+            'e_updated_user_id' => 'Updated User ID',
             'e_created_dt' => 'Created Dt',
             'e_updated_dt' => 'Updated Dt',
             'e_body_id' => 'Body ID',

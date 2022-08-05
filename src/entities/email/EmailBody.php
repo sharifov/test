@@ -61,6 +61,11 @@ class EmailBody extends BaseActiveRecord
         return $this->hasOne(Email::class, ['e_body_id' => 'embd_id']);
     }
 
+    public function getEmailData()
+    {
+        return !empty($this->embd_email_data) ? $this->embd_email_data : null;
+    }
+
     public function getBodyHtml(): ?string
     {
         return (!empty($this->emailBlob->embb_email_body_blob)) ? TextConvertingHelper::unCompress($this->emailBlob->embb_email_body_blob) : '';
