@@ -522,7 +522,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
                 'refMessageId'      =>  $emailDTO->refMessageId,
                 'inboxCreatedDt'    =>  $emailDTO->inboxCreatedDt,
                 'inboxEmailId'      =>  $emailDTO->inboxEmailId,
-                'isNew'             =>  $emailDTO->isNew,
+                'isNew'             =>  $emailDTO->isNew !== null ? intval($emailDTO->isNew) : null,
             ]
         ];
 
