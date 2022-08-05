@@ -285,6 +285,14 @@ class Email extends BaseActiveRecord implements EmailInterface
         return EmailStatus::getName($this->e_status_id);
     }
 
+    /**
+     * @return string
+     */
+    public function getTypeName()
+    {
+        return EmailType::getName($this->e_type_id) ?? '-';
+    }
+
     public function getEmailSubject(): string
     {
         return $this->emailBody->embd_email_subject;
