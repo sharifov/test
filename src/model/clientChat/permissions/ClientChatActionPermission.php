@@ -63,7 +63,6 @@ class ClientChatActionPermission
 
     private ?bool $canLinkCase = null;
     private ?bool $canLinkLead = null;
-    private ?bool $canViewClientChatForm = null;
 
     private ?bool $canUpdateChatStatus = null;
 
