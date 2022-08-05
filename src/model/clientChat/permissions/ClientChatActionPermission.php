@@ -390,14 +390,4 @@ class ClientChatActionPermission
         $this->canViewChat = Auth::can('/client-chat/dashboard-v2');
         return $this->canViewChat;
     }
-
-    public function canViewClientChatForm(ClientChat $clientChat)
-    {
-        if ($this->canViewClientChatForm !== null) {
-            return $this->canViewClientChatForm;
-        }
-
-        $this->canViewClientChatForm = Auth::can('/client-chat/client-chat-form-response');
-        return $this->canViewClientChatForm;
-    }
 }

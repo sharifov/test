@@ -6,6 +6,7 @@ use frontend\widgets\clientChat\ClientChatClientInfoWidget;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\offer\src\entities\offer\OfferQuery;
+use modules\taskList\abac\TaskListAbacObject;
 use src\auth\Auth;
 use src\entities\cases\CasesStatus;
 use src\helpers\clientChat\ClientChatHelper;
@@ -455,7 +456,7 @@ $formResponses = $clientChat->formResponses;
         'timeout' => 5000,
         'enablePushState' => false,
     ]); */ ?>
-    <?php if ($actionPermissions->canViewClientChatForm($clientChat)) : ?>
+    <?php  if (Yii::$app->abac->can(null, ClientChatAbacObject::CLIENT_CHAT_FORM, ClientChatAbacObject::ACTION_ACCESS)) : ?>
         <div class="_rc-block-wrapper">
             <div class="x_panel">
                 <div class="x_title">
