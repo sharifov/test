@@ -98,7 +98,7 @@ class EmailDTO
         $this->messageId = $mail['ei_message_id'];
         //$this->communicationId = $mail['ei_id'];
 
-        if ($attachPaths = ArrayHelper::getValue($mail, 'attach_paths')){
+        if ($attachPaths = ArrayHelper::getValue($mail, 'attach_paths')) {
             $this->attachPaths = explode(',', $attachPaths);
         }
 
@@ -135,8 +135,7 @@ class EmailDTO
         array $attachments = [],
         $typeId = EmailType::OUTBOX,
         $statusId = EmailStatus::PENDING
-        )
-    {
+    ) {
         $this->projectId = $order->or_project_id;
         $this->leadId = $order->or_lead_id;
         $this->typeId = $typeId;

@@ -350,8 +350,9 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                 </div>
             <?php endif ?>
 
-            <?php if (!empty($caseSaleModel) && $flexibleTicket = ArrayHelper::getValue($caseSaleModel->getSaleDataDecoded(), 'flexibleTicket')) : ?>
+            <?php if (!empty($caseSaleModel)) : ?>
                 <div class="row">
+                    <?php if ($flexibleTicket = ArrayHelper::getValue($caseSaleModel->getSaleDataDecoded(), 'flexibleTicket')) : ?>
                     <div class="col-md-3">
                         <h2>Flexible Ticket</h2>
                         <table class="table table-bordered table-hover table-striped">
@@ -381,6 +382,34 @@ $saleTicketGenerateEmail = Url::toRoute(['/sale-ticket/ajax-send-email', 'case_i
                             </tr>
                         </table>
                     </div>
+                    <?php endif ?>
+                    <?php if ($refundProtect = ArrayHelper::getValue($caseSaleModel->getSaleDataDecoded(), 'refundProtection')) : ?>
+                    <div class="col-md-3">
+                        <h2>Refund Protection</h2>
+                        <table class="table table-bordered table-hover table-striped">
+                            <tr>
+                                <th>Amount</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($refundProtect, 'amount')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Currency</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($refundProtect, 'currency')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Pax Count</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($refundProtect, 'paxCount')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Amount per pax</th>
+                                <td><?php echo Html::encode(ArrayHelper::getValue($refundProtect, 'amountPerPax')) ?></td>
+                            </tr>
+                            <tr>
+                                <th>Is Activated</th>
+                                <td><?php echo ArrayHelper::getValue($refundProtect, 'isActivated') ? '<span class="label label-success">Yes</span>' : '<span class="label label-danger">No</span>' ?></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <?php endif ?>
                 </div>
             <?php endif ?>
 

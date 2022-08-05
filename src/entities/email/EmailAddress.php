@@ -35,7 +35,7 @@ class EmailAddress extends BaseActiveRecord
 
     public function getEmail($masking = false)
     {
-        return $masking ? MaskEmailHelper::masking($this->ea_email): $this->ea_email;
+        return $masking ? MaskEmailHelper::masking($this->ea_email) : $this->ea_email;
     }
 
     public function getName()

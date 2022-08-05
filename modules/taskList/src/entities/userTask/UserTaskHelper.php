@@ -53,6 +53,16 @@ class UserTaskHelper
         );
     }
 
+    public static function renderStatus(string $status): string
+    {
+        switch ($status) {
+            case UserTask::STATUS_COMPLETE:
+                return '<i class="fa fa-check-square-o" aria-hidden="true"></i>';
+            default:
+                return '<i class="fa fa-square-o" aria-hidden="true"></i>';
+        }
+    }
+
     public static function getStatusLabelClass(?int $statusId): string
     {
         return self::STATUS_LIST_LABEL_MAP[$statusId] ?? 'default';

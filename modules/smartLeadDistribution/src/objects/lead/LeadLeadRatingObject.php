@@ -66,6 +66,14 @@ class LeadLeadRatingObject extends BaseLeadRatingObject implements LeadRatingObj
 
     public static function getSources(): array
     {
-        return ArrayHelper::map(Sources::find()->asArray()->all(), 'cid', 'name');
+        $sources = Sources::find()
+            ->where(['hidden' => false])
+            ->orderBy(['cid' => SORT_ASC])
+            ->asArray()
+            ->all();
+
+        return ArrayHelper::map($sources, 'cid', static function ($item) {
+            return "{$item['cid']} - {$item['name']}";
+        });
     }
 }

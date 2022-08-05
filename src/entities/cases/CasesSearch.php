@@ -961,9 +961,9 @@ class CasesSearch extends Cases
     {
         if (!empty($this->emailsQtyFrom) || !empty($this->emailsQtyTo)) {
             $query->leftJoin(
-                '(' . EmailRepositoryFactory::getRepository()->getRawSqlCountGroupedByCase(). ') AS emails',
+                '(' . EmailRepositoryFactory::getRepository()->getRawSqlCountGroupedByCase() . ') AS emails',
                 'cases.cs_id = emails.e_case_id'
-                );
+            );
 
             if (!empty($this->emailsQtyFrom)) {
                 if ((int) $this->emailsQtyFrom === 0) {

@@ -130,7 +130,6 @@ class DownloadEmails
                     }
                 }
             }
-
         } catch (\Throwable $e) {
             if ($debug) {
                 echo "error: " . VarDumper::dumpAsString($e);

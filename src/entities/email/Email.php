@@ -72,7 +72,6 @@ use yii\helpers\ArrayHelper;
  * @property string|null $emailFromName
  * @property string|null $emailTo
  * @property string|null $emailToName
- * @property string|null $templateTypeName
  * @property string|null $statusName
  * @property string|null $emailSubject
  * @property int|null $communicationId
@@ -84,7 +83,6 @@ use yii\helpers\ArrayHelper;
  * @property string|null $hash
  * @property string|null $messageId
  * @property string|null $statusDoneDt
- * @property string|null $statusName
  *
  *
  *
@@ -267,7 +265,7 @@ class Email extends BaseActiveRecord implements EmailInterface
         return null;
     }
 
-    public function getEmailFromName(): string
+    public function getEmailFromName(): ?string
     {
         return $this->contactFrom->ea_name ?? null;
     }
