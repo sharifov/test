@@ -32,10 +32,10 @@ class EmailServiceHelper
 
     /**
      * @param string $subject
-     * @param string $refMessageId
+     * @param string|null $refMessageId
      * @return int|null
      */
-    public function detectLeadId(string $subject, string $refMessageId): ?int
+    public function detectLeadId(string $subject, ?string $refMessageId): ?int
     {
         try {
             $lead = $this->getLeadFromSubjectByIdOrHash($subject);
@@ -51,10 +51,10 @@ class EmailServiceHelper
 
     /**
      * @param string $subject
-     * @param string $refMessageId
+     * @param string|null $refMessageId
      * @return int|null
      */
-    public function detectCaseId(string $subject, string $refMessageId): ?int
+    public function detectCaseId(string $subject, ?string $refMessageId): ?int
     {
         try {
             $case = $this->getCaseFromSubjectByIdOrHash($subject);
