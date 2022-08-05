@@ -275,12 +275,12 @@ class EmailServiceHelper
     /**
      *
      * @param string $email
-     * @return int
+     * @return int|null
      */
-    public function getUserIdByEmail(string $email): int
+    public function getUserIdByEmail(string $email): ?int
     {
-        $user = $this->getUsersIdByEmail($email);
-        return reset($user);
+        $users = $this->getUsersIdByEmail($email);
+        return !empty($user) ? reset($users) : null;
     }
 
     public function getProjectIdByDepOrUpp($emailTo): ?int
