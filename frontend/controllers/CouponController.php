@@ -264,7 +264,7 @@ class CouponController extends FController
 
                     $mail = $this->emailService->createFromCase($previewEmailForm, $case);
                     $previewEmailForm->is_send = true;
-                    $this->emailService->sendMail($mail, $attachments);
+                    $this->emailService->sendMail($mail);
                     Yii::$app->session->setFlash('send-success', 'Success: <strong>Email Message</strong> is sent to <strong>' . $mail->getEmailTo() . '</strong>');
 
                     $selectedCoupons = json_decode($previewEmailForm->coupon_list, true);
