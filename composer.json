@@ -114,7 +114,8 @@
 		"endroid/qr-code": "4.4.9",
 		"jp3cki/totp": "2.0.0",
 		"kartik-v/yii2-password": "1.5.7",
-		"kivork/yii2-feature-flag": "2.0.0"
+		"kivork/yii2-feature-flag": "2.0.0",
+		"kivork/yii2-two-factor-auth": "1.2.1"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",
@@ -208,6 +209,10 @@
 		{
 			"type": "vcs",
 			"url": "git@bitbucket.org:techork/yii2-search-module.git"
+		},
+		{
+			"type": "vcs",
+			"url": "git@bitbucket.org:techork/yii2-two-factor-auth.git"
 		}
 	],
 	"scripts": {

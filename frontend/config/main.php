@@ -458,13 +458,36 @@ return [
             'class' => \modules\smartLeadDistribution\SmartLeadDistributionModule::class,
             'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
         ],
+
+        'two-factor-auth' => [
+            'class' => kivork\TwoFactorAuth\TwoFactorAuthModule::class,
+            'authLifetimeCallback' => function () {
+                return 12000;
+            },
+            'authenticators' => [
+                'email-auth' => [
+                    'class' => common\implementations\twoFactorAuth\EmailAuth::class,
+                    'codeDuration' => 700,
+                    'options' => [
+                        'from' => env('COMMON_CONFIG_MAIN_COMPONENTS_EMAIL_DEFAULTFROMEMAIL')
+                    ]
+                ],
+                'google-auth' => [
+                    'class' => common\implementations\twoFactorAuth\OneTimeCodeAuth::class
+                ]
+            ],
+            'storage' => [
+                'class' => kivork\TwoFactorAuth\Storage\FileStorage::class
+            ],
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/login_2fa.php'
+        ],
     ],
     'as beforeRequest' => [
         'class' => \frontend\components\UserSiteActivityLog::class,
     ],
     'as access' => [
         'class' => 'yii\filters\AccessControl',
-        'except' => ['site/login', 'site/step-two', 'site/captcha', 'site/error', 'site/auth', 'site/auth-step-two', 'application-status/*'],
+        'except' => ['site/login', 'site/step-two', 'site/captcha', 'site/error', 'site/auth', 'site/auth-step-two', 'application-status/*', 'two-factor-auth/*'],
         'rules' => [
             [
                 'allow' => true,

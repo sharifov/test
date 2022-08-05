@@ -144,8 +144,8 @@ class SiteController extends FController
     /**
      * Login action.
      *
-     * @return string
-     * @throws \Da\TwoFA\Exception\InvalidSecretKeyException
+     * @return string|Response
+     * @throws \yii\base\InvalidConfigException
      */
     public function actionLogin()
     {
@@ -157,17 +157,10 @@ class SiteController extends FController
 
         $model = new LoginForm();
 
-        if ($model->load(Yii::$app->request->post()) && $user = $model->checkedUser()) {
-            if (SettingHelper::isTwoFactorAuthEnabled() && $this->get2FAAbacAccess($user) && $user->userProfile /*&& $user->userProfile->is2faEnable()*/) {
-                return $this->redirectToTwoFactorAuth($user, $model);
-            }
-
-            if ($model->login()) {
-                if (UserConnection::isIdleMonitorEnabled()) {
-                    UserMonitor::addEvent(Yii::$app->user->id, UserMonitor::TYPE_LOGIN);
-                }
-
-                return $this->goBack();
+        if ($model->load(Yii::$app->request->post()) && $user = $model->checkedUser() && $model->login()) {
+            if (SettingHelper::isTwoFactorAuthEnabled() && $this->get2FAAbacAccess($user) && $user->userProfile) {
+                $module = \Yii::$app->getModule('two-factor-auth');
+                $module->startAuthProcess($model);
             }
         }
 

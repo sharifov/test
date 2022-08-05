@@ -7,6 +7,7 @@ use src\services\authentication\AntiBruteForceHelper;
 use src\services\authentication\AntiBruteForceService;
 use Yii;
 use yii\base\Model;
+use yii\captcha\CaptchaValidator;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\web\IdentityInterface;
@@ -37,10 +38,27 @@ class LoginForm extends Model
             ['rememberMe', 'boolean'],
             ['username', 'checkIsBlocked'],
             ['password', 'validatePassword'],
-            ['verifyCode', 'captcha', 'captchaAction' => Url::to('/site/captcha'), 'when' => static function () {
-                return (new AntiBruteForceService())->checkCaptchaEnable();
-            }],
+            ['verifyCode', 'validateVerifyCode']
         ];
+    }
+
+    /**
+     * @param $attribute
+     * @param $params
+     * @param $validator
+     * @return bool
+     */
+    public function validateVerifyCode($attribute, $params, $validator)
+    {
+        if ((new AntiBruteForceService())->checkCaptchaEnable()) {
+            $validator = new CaptchaValidator();
+            $validator->captchaAction = Url::to('/site/captcha');
+            if (!$validator->validate($this->$attribute)) {
+                $this->addError($attribute, "the `{$attribute}` is invalid");
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -75,7 +93,8 @@ class LoginForm extends Model
     /**
      * Logs in a user using the provided username and password.
      *
-     * @return bool whether the user is logged in successfully
+     * @return bool
+     * @throws \yii\base\InvalidConfigException
      */
     public function login()
     {
@@ -217,5 +236,35 @@ class LoginForm extends Model
     public function setUserChecked(bool $userChecked): void
     {
         $this->userChecked = $userChecked;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getUserSecret() {
+        $user = $this->getUser();
+        return !is_null($user->userProfile) ? $user->userProfile->up_2fa_secret : null;
+    }
+
+    /**
+     * @param $secret
+     * @return bool
+     */
+    public function setUserSecret($secret)
+    {
+        $user = $this->getUser();
+        if ($user->userProfile !== null) {
+            $user->userProfile->up_2fa_secret = $secret;
+            return $user->userProfile->save();
+        }
+        return false;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUserEmail()
+    {
+        return $this->getUser()->email;
     }
 }
