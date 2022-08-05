@@ -35,6 +35,7 @@ $shiftScheduleEventTasks = \yii\helpers\ArrayHelper::map($shiftScheduleEventTask
             </ul>
             <div class="clearfix"></div>
         </div>
+        <?php if (count($shiftScheduleEventTasks) > 0) : ?>
         <div class="x_content" style="display: block;">
             <div style="display: flex">
                 <ul class="nav nav-tabs">
@@ -43,7 +44,7 @@ $shiftScheduleEventTasks = \yii\helpers\ArrayHelper::map($shiftScheduleEventTask
                         <?php if ($i === 0) {
                             $i = $key;
                         } ?>
-                        <li class="nav-item" style="max-width: 20%;">
+                        <li class="nav-item" style="max-width: 20%; min-width:20%">
                             <a data-toggle="tab"
                                href="#tab-<?= $key ?>"
                                class="nav-link text-center <?= ($i === $key ? 'active' : '') ?>">
@@ -123,6 +124,7 @@ $shiftScheduleEventTasks = \yii\helpers\ArrayHelper::map($shiftScheduleEventTask
                 <?php endforeach; ?>
             </div>
         </div>
+        <?php endif; ?>
     </div>
 <?php
 
@@ -153,7 +155,7 @@ $this->registerJs($js);
         height: 70px;
         overflow-x: scroll;
         overflow-y: hidden;
-        flex-direction: column;
+        flex-wrap: nowrap;
         width: 80%;
     }
 
