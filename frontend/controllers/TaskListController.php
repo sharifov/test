@@ -6,6 +6,7 @@ use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
 use modules\shiftSchedule\src\services\UserShiftScheduleService;
+use modules\taskList\abac\dto\TaskListAbacDto;
 use modules\taskList\abac\TaskListAbacObject;
 use modules\taskList\src\entities\userTask\repository\UserTaskRepository;
 use modules\taskList\src\entities\userTask\UserTaskQuery;
@@ -17,6 +18,7 @@ use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
+use yii\web\ForbiddenHttpException;
 use yii\web\Response;
 
 class TaskListController extends FController
@@ -127,6 +129,14 @@ class TaskListController extends FController
     public function actionAjaxAddNote(int $userTaskId)
     {
         $form = new UserTaskNoteForm($userTaskId);
+
+        $dto = new TaskListAbacDto();
+        $userTask = $form->getUserTask();
+        $dto->setIsUserTaskOwner($userTask && $userTask->isOwner(Auth::id()));
+        /** @abac TaskListAbacObject::OBJ_USER_TASK, TaskListAbacObject::ACTION_ADD_NOTE, Access to add UserTask Note */
+        if (!Yii::$app->abac->can($dto, TaskListAbacObject::OBJ_USER_TASK, TaskListAbacObject::ACTION_ADD_NOTE)) {
+            throw new ForbiddenHttpException('Permission Denied (' . $userTaskId . ')');
+        }
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             $userTask = $form->getUserTask();

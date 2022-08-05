@@ -297,4 +297,9 @@ class UserTask extends \yii\db\ActiveRecord
             ->limit(1)
             ->one();
     }
+
+    public function isOwner(?int $userId): bool
+    {
+        return $this->ut_user_id === $userId;
+    }
 }

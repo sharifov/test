@@ -65,9 +65,9 @@ class LeadBusinessExtraQueueLog extends \yii\db\ActiveRecord
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
-    public function getLpplLead(): \yii\db\ActiveQuery
+    public function getLbeqlLead(): \yii\db\ActiveQuery
     {
-        return $this->hasOne(Lead::class, ['id' => 'lppl_lead_id']);
+        return $this->hasOne(Lead::class, ['id' => 'lbeql_lead_id']);
     }
 
     public function getLbeqlLbeqr(): \yii\db\ActiveQuery
@@ -77,7 +77,7 @@ class LeadBusinessExtraQueueLog extends \yii\db\ActiveRecord
 
     public function getOwner(): \yii\db\ActiveQuery
     {
-        return $this->hasOne(Employee::class, ['id' => 'lbeql_owner_id']);
+        return $this->hasOne(Employee::class, ['id' => 'lbeql_lead_owner_id']);
     }
 
     public function attributeLabels(): array
@@ -85,7 +85,7 @@ class LeadBusinessExtraQueueLog extends \yii\db\ActiveRecord
         return [
             'lbeql_id' => 'ID',
             'lbeql_lead_id' => 'Lead',
-            'lbeql_lbeqr_id' => 'LeadBusinessExtraQueueRule',
+            'lbeql_lbeqr_id' => 'Lead Business Extra QueueRule',
             'lbeql_status' => 'Status',
             'lbeql_lead_owner_id' => 'Owner',
             'lbeql_created_dt' => 'Created',
@@ -103,6 +103,11 @@ class LeadBusinessExtraQueueLog extends \yii\db\ActiveRecord
     public static function tableName(): string
     {
         return 'lead_business_extra_queue_log';
+    }
+
+    public function getStatusName(): string
+    {
+        return LeadBusinessExtraQueueLogStatus::STATUS_LIST[$this->lbeql_status] ?? '---';
     }
 
     public static function create(

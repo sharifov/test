@@ -5,6 +5,8 @@ use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
 use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLog;
+use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogStatus;
+use src\model\leadBusinessExtraQueueRule\entity\LeadBusinessExtraQueueRuleQuery;
 
 /* @var $this yii\web\View */
 /* @var $searchModel src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogSearch */
@@ -28,15 +30,52 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-
-            'lbeql_id',
-            'lbeql_lbeqr_id',
-            'lbeql_lead_id',
-            'lbeql_status',
-            'lbeql_lead_owner_id',
+            [
+                'attribute' => 'lbeql_id',
+                'label' => 'ID',
+                'options' => [
+                    'style' => 'width:80px'
+                ]
+            ],
+            [
+                'attribute' => 'lbeql_lbeqr_id',
+                'value' => static function (LeadBusinessExtraQueueLog $model) {
+                    return '<i class="fa fa-key"></i> ' . $model->lbeqlLbeqr->lbeqr_key;
+                },
+                'filter' => LeadBusinessExtraQueueRuleQuery::getList(60),
+                'format' => 'raw',
+            ],
+            [
+                'attribute' => 'lbeql_lead_id',
+                'value' => static function (LeadBusinessExtraQueueLog $model) {
+                    return Yii::$app->formatter->asLead($model->lbeqlLead, 'fa-cubes');
+                },
+                'format' => 'raw',
+            ],
+            [
+                'attribute' => 'lbeql_status',
+                'filter'  => LeadBusinessExtraQueueLogStatus::STATUS_LIST,
+                'value' => static function (LeadBusinessExtraQueueLog $model) {
+                    return $model->getStatusName();
+                },
+            ],
+            [
+                'class' => \common\components\grid\UserSelect2Column::class,
+                'attribute' => 'lbeql_lead_owner_id',
+                'relation' => 'owner',
+                'placeholder' => 'Lead Owner'
+            ],
             'lbeql_description',
-            'lbeql_created_dt',
-            'lbeql_updated_dt',
+            [
+                'class' => \common\components\grid\DateTimeColumn::class,
+                'attribute' => 'lbeql_created_dt',
+                'limitEndDay' => false,
+            ],
+            [
+                'class' => \common\components\grid\DateTimeColumn::class,
+                'attribute' => 'lbeql_updated_dt',
+                'limitEndDay' => false,
+            ],
             [
                 'class' => ActionColumn::className(),
                 'urlCreator' => function ($action, LeadBusinessExtraQueueLog $model, $key, $index, $column) {
