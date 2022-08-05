@@ -180,7 +180,7 @@ class EmailDTO
         $instance->bodyHtml = $data['bodyHtml'] ?? null;
         $instance->createdDt = $data['createdDt'] ?? date('Y-m-d H:i:s');
         $instance->createdUserId = $data['createdUserId'] ?? null;
-        $instance->templateTypeId = $data['templateTypeId'] ?? ($data['templateKey'] ? self::getTemplateIdByKey($templateKey) : null);
+        $instance->templateTypeId = $data['templateTypeId'] ?? (isset($data['templateKey']) ? self::getTemplateIdByKey($data['templateKey']) : null);
         $instance->inboxEmailId = $data['inboxEmailId'] ?? null;
         $instance->inboxCreatedDt = $data['inboxCreatedDt'] ?? null;
         $instance->refMessageId = $data['refMessageId'] ?? null;
