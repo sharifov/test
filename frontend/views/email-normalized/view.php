@@ -53,7 +53,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'e_email_cc:email',
                 'e_email_bc:email',
                 'emailSubject',
-                'emailData:ntext',
+                'emailData:json',
                 'e_type_id',
                 'templateTypeId',
                 'languageId',

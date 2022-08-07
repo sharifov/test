@@ -26,25 +26,15 @@ use src\entities\email\helpers\EmailStatus;
           'e_email_cc:email', //TODO: fill properly
           'e_email_bc:email', //TODO: fill properly
           'emailSubject',
-          'emailData:ntext',
-          [
-              'attribute' => 'e_type_id',
-              'value' => static function (Email $model) {
-                return EmailType::getName($model->e_type_id);
-              },
-          ],
+          'emailData:json',
+          'typeName',
           'templateTypeId',
           'languageId',
           'communicationId',
           'e_is_deleted',
           'emailLog.el_is_new',
           'params.ep_priority',
-          [
-              'attribute' => 'e_status_id',
-              'value' => static function (Email $model) {
-                return EmailStatus::getName($model->e_status_id);
-              },
-          ],
+          'statusName',
           'statusDoneDt',
           'emailLog.el_read_dt',
           'emailLog.el_error_message',
