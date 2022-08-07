@@ -307,7 +307,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             $contactsByType = ArrayHelper::index($email->emailContacts, 'ec_type_id');
             $contactsById = ArrayHelper::index($email->emailContacts, 'ec_id');
             foreach ($form->contacts as $contactForm) {
-                if (isset($contactForm->id)) {
+                if (isset($contactForm->id) && !empty($contactForm->id)) {
                     $contact = $contactsById[$contactForm->id];
                 } else {
                     $contact = $contactsByType[$contactForm->type];
