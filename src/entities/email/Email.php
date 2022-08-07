@@ -22,6 +22,7 @@ use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 
 /**
  * This is the model class for table "email_norm".
@@ -383,6 +384,23 @@ class Email extends BaseActiveRecord implements EmailInterface
                 'class' => MetricEmailCounterBehavior::class,
             ],
         ];
+    }
+
+    //TODO: maybe move to event
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if (!empty($this->leads)) {
+            foreach ($this->leads as $lead) {
+                $lead->updateLastAction(LeadPoorProcessingLogStatus::REASON_EMAIL);
+            }
+        }
+        if (!empty($this->cases)) {
+            foreach ($this->cases as $case) {
+                $case->updateLastAction();
+            }
+        }
     }
 
     /**
