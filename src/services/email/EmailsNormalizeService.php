@@ -222,7 +222,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             $email->refresh();
 
             //=link Clients
-            $clientsIds = $form->clients ?? [$this->helper->detectClientId($email->emailTo)];
+            $clientsIds = $form->clients ?? [$this->helper->detectClientId($email->getEmailTo(false))];
             if (!empty($clientsIds)) {
                 $this->emailRepository->linkClients($email, $clientsIds);
             }
