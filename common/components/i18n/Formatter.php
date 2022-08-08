@@ -1004,7 +1004,7 @@ class Formatter extends \yii\i18n\Formatter
         return $this->nullDisplay;
     }
 
-    public function asJson($data): string
+    public function asArray($data): string
     {
         if ($data) {
             return VarDumper::dumpAsString($data);
