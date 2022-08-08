@@ -3,6 +3,7 @@
 use common\components\grid\project\ProjectColumn;
 use common\components\grid\Select2Column;
 use common\models\UserGroup;
+use modules\smartLeadDistribution\src\services\SmartLeadDistributionService;
 use modules\smartLeadDistribution\src\SmartLeadDistribution;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
@@ -49,7 +50,7 @@ $total = 0;
             <tbody>
                 <?php foreach ($searchModel->ratingCategoryIds as $category) : ?>
                     <tr>
-                        <td><?= SmartLeadDistribution::CATEGORY_LIST[$category] ?></td>
+                        <td><?= SmartLeadDistributionService::getCategoryById($category)['name'] ?></td>
                         <?php foreach ($searchModel->leadStatusIds as $status) : ?>
                             <td class="text-center">
                                 <?php $leads = 0 ?>
