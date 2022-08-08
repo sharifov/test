@@ -5,6 +5,7 @@ use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
 use src\model\leadBusinessExtraQueue\entity\LeadBusinessExtraQueue;
+use src\model\leadBusinessExtraQueueRule\entity\LeadBusinessExtraQueueRuleQuery;
 
 /* @var $this yii\web\View */
 /* @var $searchModel src\model\leadBusinessExtraQueue\entity\LeadBusinessExtraQueueSearch */
@@ -28,11 +29,25 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-
             'lbeq_lead_id',
-            'lbeq_lbeqr_id',
-            'lbeq_created_dt',
-            'lbeq_expiration_dt',
+            [
+                'attribute' => 'lbeq_lbeqr_id',
+                'value' => static function (LeadBusinessExtraQueue $model) {
+                    return '<i class="fa fa-key"></i> ' . $model->lbeqLbeqr->lbeqr_key;
+                },
+                'filter' => LeadBusinessExtraQueueRuleQuery::getList(60),
+                'format' => 'raw',
+            ],
+            [
+                'class' => \common\components\grid\DateTimeColumn::class,
+                'attribute' => 'lbeq_created_dt',
+                'limitEndDay' => false,
+            ],
+            [
+                'class' => \common\components\grid\DateTimeColumn::class,
+                'attribute' => 'lbeq_expiration_dt',
+                'limitEndDay' => false,
+            ],
             [
                 'class' => ActionColumn::className(),
                 'urlCreator' => function ($action, LeadBusinessExtraQueue $model, $key, $index, $column) {
