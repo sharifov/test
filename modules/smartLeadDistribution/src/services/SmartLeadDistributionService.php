@@ -6,6 +6,7 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\UserProfile;
 use modules\featureFlag\FFlag;
+use modules\smartLeadDistribution\src\entities\LeadRatingAllowedInterval;
 use modules\smartLeadDistribution\src\entities\LeadRatingParameter;
 use modules\smartLeadDistribution\src\entities\LeadRatingProcessingLog;
 use modules\smartLeadDistribution\src\objects\LeadRatingObjectInterface;
@@ -52,14 +53,14 @@ class SmartLeadDistributionService
 
     /**
      * @param Employee|null $employee
-     * @return null|array{from: int, to: int}
+     * @return null|LeadRatingAllowedInterval
      */
-    public static function getAllowedPointIntervalForBusinessInbox(?Employee $employee = null): ?array
+    public static function getAllowedPointIntervalForBusinessInbox(?Employee $employee = null): ?LeadRatingAllowedInterval
     {
         $setting = Yii::$app->params['settings']['smart_lead_distribution_by_agent_skill_and_points'];
         $employee = $employee ?? Auth::user();
         $employeeSkillID = $employee->userProfile->up_skill;
-        $allowedPoints = null;
+        $allowedInterval = null;
 
         if (isset($setting['business']) && !empty($employeeSkillID)) {
             $leadBadgeRepository = new LeadBadgesRepository();
@@ -72,14 +73,14 @@ class SmartLeadDistributionService
             /** @var array{from: int, to: int} $pointInterval */
             foreach ($setting['business'] as $skillID => $pointInterval) {
                 if ((int)$employeeSkillID === (int)$skillID) {
-                    $allowedPoints = $pointInterval;
+                    $allowedInterval = new LeadRatingAllowedInterval($pointInterval);
 
                     break;
                 }
             }
         }
 
-        return $allowedPoints;
+        return $allowedInterval;
     }
 
     /**

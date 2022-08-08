@@ -3015,9 +3015,9 @@ class LeadSearch extends Lead
 
         /** @fflag FFlag::FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE, Smart Lead Distribution Enable */
         if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE) === true) {
-            $allowedPoints = SmartLeadDistributionService::getAllowedPointIntervalForBusinessInbox();
+            $allowedInterval = SmartLeadDistributionService::getAllowedPointIntervalForBusinessInbox();
 
-            if ($allowedPoints !== null) {
+            if ($allowedInterval !== null) {
                 $query->leftJoin(
                     'lead_data',
                     'leads.id = lead_data.ld_lead_id AND lead_data.ld_field_key = :key',
@@ -3031,8 +3031,8 @@ class LeadSearch extends Lead
                     [
                         'BETWEEN',
                         'lead_data.ld_field_value',
-                        intval($allowedPoints['from'] ?? 0),
-                        intval($allowedPoints['to'] ?? 0)
+                        $allowedInterval->from,
+                        $allowedInterval->to
                     ],
                     [
                         'lead_data.ld_field_value' => null,
