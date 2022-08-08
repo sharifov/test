@@ -225,7 +225,7 @@ class UserTaskSearch extends UserTask
                     'ut_year',
                     'ut_month'
                 );
-                $query->where($sqlDTRestriction);
+                $query->andWhere($sqlDTRestriction);
             } catch (\RuntimeException | \DomainException $throwable) {
                 $message = AppHelper::throwableLog($throwable);
                 $message['model'] = ArrayHelper::toArray($this);
