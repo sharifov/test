@@ -100,8 +100,8 @@ class UserTaskSearch extends UserTask
 
         if ($this->createTimeRange) {
             try {
-                $dTStart = new \DateTimeImmutable(date('Y-m-d 00:00:00', $this->createTimeStart));
-                $dTEnd = new \DateTime(date('Y-m-d 23:59:59', $this->createTimeEnd));
+                $dTStart = (new \DateTimeImmutable($this->createTimeStart))->setTime(0, 0);
+                $dTEnd = (new \DateTime($this->createTimeEnd))->setTime(23, 59, 59);
                 $sqlDTRestriction = DBHelper::yearMonthRestrictionQuery(
                     $dTStart,
                     $dTEnd,
@@ -217,8 +217,8 @@ class UserTaskSearch extends UserTask
 
         if ($startDateTime && $endDateTime) {
             try {
-                $dTStart = new \DateTimeImmutable(date('Y-m-d 00:00:00', $startDateTime));
-                $dTEnd = new \DateTime(date('Y-m-d 23:59:59', $endDateTime));
+                $dTStart = (new \DateTimeImmutable($startDateTime))->setTime(0, 0);
+                $dTEnd = (new \DateTime($endDateTime))->setTime(23, 59, 59);
                 $sqlDTRestriction = DBHelper::yearMonthRestrictionQuery(
                     $dTStart,
                     $dTEnd,
