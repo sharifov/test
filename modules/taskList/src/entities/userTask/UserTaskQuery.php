@@ -30,9 +30,10 @@ class UserTaskQuery
                         'join_user_shift_schedule_query' => UserShiftSchedule::find()
                             ->select(['uss_id'])
                             ->innerJoin(
-                                ShiftScheduleType::tableName(),
-                                'uss_sst_id = sst_id',
-                                ['sst_subtype_id' => ShiftScheduleType::SUBTYPE_WORK_TIME]
+                                ['join_shift_schedule_type_query' => ShiftScheduleType::find()
+                                    ->select('sst_id')
+                                    ->where(['sst_subtype_id' => ShiftScheduleType::SUBTYPE_WORK_TIME])],
+                                'uss_sst_id = sst_id'
                             )
                             ->where(['IN', 'uss_status_id', $userShiftScheduleStatuses])
                             ->andWhere(['<=', 'uss_start_utc_dt', $dtNowFormatted])
