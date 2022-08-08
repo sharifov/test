@@ -37,8 +37,8 @@ class TargetObjectCallService
     {
         $query = Call::find()
             ->where(['c_lead_id' => $leadId])
-            ->where(['c_call_type_id' => Call::CALL_TYPE_OUT])
-            ->andWhere(['c_call_status' => Call::STATUS_COMPLETED])
+            ->andWhere(['c_call_type_id' => Call::CALL_TYPE_OUT])
+            ->andWhere(['c_status_id' => Call::STATUS_COMPLETED])
             ->andWhere(['>=', 'c_call_duration', $this->getCallCompletedDuration()])
         ;
 
@@ -56,8 +56,8 @@ class TargetObjectCallService
     {
         $query = Call::find()
             ->where(['c_lead_id' => $leadId])
-            ->where(['c_call_type_id' => Call::CALL_TYPE_OUT])
-            ->andWhere(['c_call_status' => Call::STATUS_NO_ANSWER])
+            ->andWhere(['c_call_type_id' => Call::CALL_TYPE_OUT])
+            ->andWhere(['c_status_id' => Call::STATUS_NO_ANSWER])
         ;
 
         if ($this->userTaskStartDT) {
