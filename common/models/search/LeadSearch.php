@@ -55,7 +55,6 @@ use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use modules\lead\src\abac\queue\LeadQueueBusinessInboxAbacObject;
 use src\repositories\email\EmailRepositoryFactory;
-use yii\helpers\VarDumper;
 
 /**
  * LeadSearch represents the model behind the search form of `common\models\Lead`.
