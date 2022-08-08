@@ -109,7 +109,7 @@
 		"textalk/websocket": "^1.5",
         "ext-fileinfo": "*",
         "ext-pgsql": "*",
-		"kivork/yii2-search-module": "1.11.*",
+		"kivork/yii2-search-module": "1.12.*",
 		"geoip/geoip": "~1.16",
 		"endroid/qr-code": "4.4.9",
 		"jp3cki/totp": "2.0.0",
