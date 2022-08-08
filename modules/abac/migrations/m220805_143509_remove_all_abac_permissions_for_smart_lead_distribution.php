@@ -37,6 +37,6 @@ class m220805_143509_remove_all_abac_permissions_for_smart_lead_distribution ext
     {
         echo "m220805_143509_remove_all_abac_permissions_for_smart_lead_distribution cannot be reverted.\n";
 
-        return false;
+        return true;
     }
 }
