@@ -35,6 +35,17 @@ class CallCompletionChecker implements CompletionCheckerInterface
         }
 
         $callTaskDto = new CallTaskDTO($this->taskModel, $this->userTaskStartDT, $this->userTaskEndDT);
+
+        /** @fflag FFlag::FF_KEY_USER_TASK_COMPLETION_DEBUG, Enable debug/log mode */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_USER_TASK_COMPLETION_DEBUG)) {
+            $logData['target_object_call_attempts'] = $callTaskDto->target_object_call_attempts;
+            $logData['target_object_call_completed'] = $callTaskDto->target_object_call_completed;
+            $logData['c_status_id'] = $this->taskModel->c_status_id;
+            $logData['c_call_status'] = $this->taskModel->c_call_status;
+
+            \Yii::info($logData, 'info\UserTaskCompletionService:point:' . 7);
+        }
+
         return ConditionExpressionService::isValidCondition(
             $this->taskList->tl_condition,
             [CallTaskObject::OBJ_CALL => $callTaskDto]
