@@ -31,6 +31,11 @@ $this->params['breadcrumbs'][] = $this->title;
 $scheduleTotalData = [];
 $subtypeTotalData = [];
 ?>
+<style>
+    .datepicker-dropdown {
+        z-index:21!important
+    }
+</style>
 <div class="task-list-index">
 
     <h1><i class="fa fa-check-square-o"></i> <?= Html::encode($this->title) ?></h1>
@@ -344,11 +349,13 @@ $subtypeTotalData = [];
 
 $ajaxUrl = \yii\helpers\Url::to(['task-list/my-data-ajax']);
 $openModalEventUrl = \yii\helpers\Url::to(['shift-schedule/ajax-event-details']);
+$openModalUserTaskUrl = \yii\helpers\Url::to(['task-list/ajax-user-task-details']);
 // 'https://fullcalendar.io/api/demo-feeds/events.json?overload-day',
 
 $js = <<<JS
     var shiftScheduleDataUrl = '$ajaxUrl';
     var openModalEventUrl = '$openModalEventUrl';
+    var openModalUserTaskUrl = '$openModalUserTaskUrl';
     var calendarEl = document.getElementById('calendar');
     var selectedRange = null;
     var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -513,7 +520,13 @@ $js = <<<JS
           eventClick: function(info) {
             info.jsEvent.preventDefault();
             var eventObj = info.event;
-            openModalEventId(eventObj.id);
+            
+            var typeEvent = 'user-shift-schedule';
+            
+            if(eventObj.extendedProps.typeEvent !== 'undefined'){
+                typeEvent = eventObj.extendedProps.typeEvent
+            }
+            openModalEventId(eventObj.id, typeEvent);
           },
           select: function(info) {
             updateTimeLineList(info.startStr, info.endStr);
@@ -531,12 +544,19 @@ $js = <<<JS
     // });
     calendar.render();
     
-    function openModalEventId(id)
+    function openModalEventId(id, typeEvent)
     {
         let modal = $('#modal-md');
         let eventUrl = openModalEventUrl + '?id=' + id;
+        let title = 'Schedule Event: ';
+       
+        if(typeEvent == "user-task"){
+             eventUrl = openModalUserTaskUrl + '?id=' + id;
+             title = 'User Task: '
+        }
+      
         //modal.find('.modal-title').html('Offer [' + gid + '] status history');
-        $('#modal-md-label').html('Schedule Event: ' + id);
+        $('#modal-md-label').html(title + id);
         modal.find('.modal-body').html('');
         modal.find('.modal-body').load(eventUrl, function( response, status, xhr ) {
             if (status === 'error') {
@@ -609,7 +629,7 @@ $js = <<<JS
     $('body').off('click', '.btn-open-timeline').on('click', '.btn-open-timeline', function (e) {
         e.preventDefault();
         let id = $(this).data('tl_id');
-        openModalEventId(id);
+        openModalEventId(id, 'user-shift-schedule');
     });
           
      $(document).on('pjax:end', function() {

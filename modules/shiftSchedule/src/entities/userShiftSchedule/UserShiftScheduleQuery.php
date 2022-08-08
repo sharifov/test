@@ -394,7 +394,8 @@ class UserShiftScheduleQuery
                     'display' => 'block',
                     'extendedProps' => [
                         'icon' => $item->shiftScheduleType->sst_icon_class ?? '',
-                    ]
+                    ],
+                    'typeEvent' => 'user-shift-schedule'
                 ];
 
                 if (

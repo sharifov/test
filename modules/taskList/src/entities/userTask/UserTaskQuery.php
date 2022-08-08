@@ -133,7 +133,8 @@ class UserTaskQuery
                     'extendedProps' => [
                         'type' => 'task',
                         'icon' => '', //fa fa-building-o',
-                    ]
+                    ],
+                    'typeEvent' => 'user-task'
                 ];
 
 //                if (

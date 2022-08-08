@@ -9,6 +9,7 @@ use modules\shiftSchedule\src\services\UserShiftScheduleService;
 use modules\taskList\abac\dto\TaskListAbacDto;
 use modules\taskList\abac\TaskListAbacObject;
 use modules\taskList\src\entities\userTask\repository\UserTaskRepository;
+use modules\taskList\src\entities\userTask\UserTask;
 use modules\taskList\src\entities\userTask\UserTaskQuery;
 use modules\taskList\src\entities\userTask\UserTaskSearch;
 use modules\taskList\src\forms\UserTaskNoteForm;
@@ -18,7 +19,10 @@ use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\StringHelper;
 use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
+use yii\web\NotAcceptableHttpException;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
 class TaskListController extends FController
@@ -53,7 +57,7 @@ class TaskListController extends FController
                     ],
 
                     [
-                        'actions' => ['ajax-add-note'],
+                        'actions' => ['ajax-add-note', 'ajax-user-task-details'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -148,6 +152,43 @@ class TaskListController extends FController
 
         return $this->renderAjax('partial/_add_note', [
             'addNoteForm' => $form
+        ]);
+    }
+
+    /**
+     * @return string
+     * @throws BadRequestHttpException
+     * @throws NotAcceptableHttpException
+     * @throws NotFoundHttpException
+     */
+    public function actionAjaxUserTaskDetails(): string
+    {
+        $userTaskId = (int)Yii::$app->request->get('id');
+
+        if (!$userTaskId) {
+            throw new BadRequestHttpException('Invalid request param');
+        }
+
+        $userTask = UserTask::find()->where(['ut_id' => $userTaskId])->limit(1)->one();
+
+        if (!$userTask) {
+            throw new NotFoundHttpException('Not exist this UserTask (' . $userTaskId . ')');
+        }
+
+        $userTimeZone = Auth::user()->timezone ?: 'UTC';
+
+        $dto = new TaskListAbacDto();
+        $dto->setIsUserTaskOwner($userTask->isOwner(Auth::id()));
+
+        /** @abac TaskListAbacObject::OBJ_USER_TASK, TaskListAbacObject::ACTION_READ, Access to view UserTask details */
+        if (!Yii::$app->abac->can($dto, TaskListAbacObject::OBJ_USER_TASK, TaskListAbacObject::ACTION_READ)) {
+            throw new NotAcceptableHttpException('Permission Denied (' . $userTaskId . ')');
+        }
+
+        return $this->renderAjax('partial/_get_user_task', [
+            'userTask' => $userTask,
+            'userTimeZone' => $userTimeZone,
+            'user' => Auth::user(),
         ]);
     }
 }
