@@ -10,10 +10,9 @@ use common\models\TipsSplit;
 use common\models\UserDepartment;
 use common\models\UserGroup;
 use common\models\UserGroupAssign;
+use common\models\UserProfile;
 use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
-use modules\smartLeadDistribution\src\services\SmartLeadDistributionService;
-use modules\smartLeadDistribution\src\SmartLeadDistribution;
 use src\access\EmployeeDepartmentAccess;
 use src\access\EmployeeGroupAccess;
 use src\access\EmployeeProjectAccess;
@@ -81,19 +80,16 @@ class LeadBadgesRepository
     {
         /** @fflag FFlag::FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE, Smart Lead Distribution Enable */
         if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE) === true) {
-            $leadsByCategories = $this->countBusinessLeadsByRatingCategory();
-            $allowedCategories = SmartLeadDistributionService::getAllowedCategories();
-            $result = 0;
+            $leadsByAgentSkill = $this->countBusinessLeadsByAgentSkill();
+            $employeeSkill = $user->userProfile->up_skill;
 
-            if (!empty($leadsByCategories)) {
-                foreach ($leadsByCategories as $category => $amount) {
-                    if (in_array($category, $allowedCategories)) {
-                        $result += $amount;
-                    }
-                }
+            if (empty($employeeSkill)) {
+                return $leadsByAgentSkill[UserProfile::SKILL_TYPE_SENIOR];
+            } elseif ($employeeSkill === UserProfile::SKILL_TYPE_JUNIOR && $leadsByAgentSkill[UserProfile::SKILL_TYPE_JUNIOR] <= 0) {
+                $employeeSkill = UserProfile::SKILL_TYPE_MIDDLE;
             }
 
-            return $result;
+            return $leadsByAgentSkill[$employeeSkill] ?? 0;
         }
 
         return $this->getBusinessInboxQuery($user)->count();
@@ -701,28 +697,40 @@ class LeadBadgesRepository
         ];
     }
 
-    public function countBusinessLeadsByRatingCategory(): array
+    public function countBusinessLeadsByAgentSkill(): array
     {
-        $query = $this->getBusinessInboxQuery();
-        $query->select('COUNT(*) AS amount, lead_data.ld_field_value AS category')
-            ->leftJoin(
-                'lead_data',
-                'leads.id = lead_data.ld_lead_id AND lead_data.ld_field_key = :key',
-                ['key' => LeadDataKeyDictionary::KEY_LEAD_RATING_CATEGORY]
-            )
-            ->groupBy([
-                'lead_data.ld_field_value'
-            ]);
-
-        $leads = $query->asArray()->all();
+        $setting = Yii::$app->params['settings']['smart_lead_distribution_by_agent_skill_and_points'];
         $data = [];
 
-        foreach ($leads as $lead) {
-            if ($lead['category'] === null) {
-                $lead['category'] = SmartLeadDistribution::CATEGORY_THIRD;
-            }
+        foreach ($setting['business'] as $skillID => $points) {
+            $query = $this->getBusinessInboxQuery()
+                ->asArray()
+                ->select('COUNT(leads.id) as amount');
 
-            $data[$lead['category']] = $lead['amount'] + ($data[$lead['category']]['amount'] ?? 0);
+            $query->leftJoin(
+                'lead_data',
+                'leads.id = lead_data.ld_lead_id AND lead_data.ld_field_key = :key',
+                [
+                    'key' => LeadDataKeyDictionary::KEY_LEAD_RATING_POINTS_DYNAMIC,
+                ]
+            );
+
+            $query->andWhere([
+                'OR',
+                [
+                    'BETWEEN',
+                    'lead_data.ld_field_value',
+                    $points['from'],
+                    $points['to']
+                ],
+                [
+                    'lead_data.ld_field_value' => null,
+                ],
+            ]);
+
+            $query->column();
+
+            $data[$skillID] = intval($query->one()['amount']);
         }
 
         return $data;
