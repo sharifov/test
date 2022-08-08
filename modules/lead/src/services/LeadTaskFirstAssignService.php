@@ -57,7 +57,7 @@ class LeadTaskFirstAssignService extends LeadTaskAssignService
             $this->lead->id,
             $this->taskList->tl_id,
             $this->dtNow->format('Y-m-d H:i:s'),
-            $taskListEndDt->format('Y-m-d H:i:s')
+            $taskListEndDt ? $taskListEndDt->format('Y-m-d H:i:s') : null
         );
 
         $userTask->setStatusProcessing();
