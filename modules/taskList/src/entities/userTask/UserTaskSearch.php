@@ -217,15 +217,15 @@ class UserTaskSearch extends UserTask
 
         if ($startDateTime && $endDateTime) {
             try {
-                $dTStart = new \DateTimeImmutable(date('Y-m-d 00:00:00', $startDateTime));
-                $dTEnd = new \DateTime(date('Y-m-d 23:59:59', $endDateTime));
+                $dTStart = (new \DateTimeImmutable($startDateTime))->setTime(0, 0);
+                $dTEnd = (new \DateTime($endDateTime))->setTime(23, 59, 59);
                 $sqlDTRestriction = DBHelper::yearMonthRestrictionQuery(
                     $dTStart,
                     $dTEnd,
                     'ut_year',
                     'ut_month'
                 );
-                $query->where($sqlDTRestriction);
+                $query->andWhere($sqlDTRestriction);
             } catch (\RuntimeException | \DomainException $throwable) {
                 $message = AppHelper::throwableLog($throwable);
                 $message['model'] = ArrayHelper::toArray($this);

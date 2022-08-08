@@ -40,10 +40,18 @@ class LeadRatingCalculationListener
         try {
             $leadDataRepository = \Yii::createObject(LeadDataRepository::class);
             $leadDataPoints = LeadData::create($event->lead->id, LeadDataKeyDictionary::KEY_LEAD_RATING_POINTS, $points);
-            $leadDataCategory = LeadData::create($event->lead->id, LeadDataKeyDictionary::KEY_LEAD_RATING_CATEGORY, $category);
+            $leadDataPointsDynamic = LeadData::create($event->lead->id, LeadDataKeyDictionary::KEY_LEAD_RATING_POINTS_DYNAMIC, $points);
 
             $leadDataRepository->save($leadDataPoints);
-            $leadDataRepository->save($leadDataCategory);
+            $leadDataRepository->save($leadDataPointsDynamic);
+
+            if ($category !== null) {
+                $leadDataCategory = LeadData::create($event->lead->id, LeadDataKeyDictionary::KEY_LEAD_RATING_CATEGORY, $category);
+                $leadDataCategoryDynamic = LeadData::create($event->lead->id, LeadDataKeyDictionary::KEY_LEAD_RATING_CATEGORY_DYNAMIC, $category);
+
+                $leadDataRepository->save($leadDataCategory);
+                $leadDataRepository->save($leadDataCategoryDynamic);
+            }
         } catch (\Throwable $e) {
             \Yii::error([
                 'message' => $e->getMessage(),

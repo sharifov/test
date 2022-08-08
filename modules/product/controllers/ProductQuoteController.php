@@ -269,6 +269,7 @@ class ProductQuoteController extends FController
                         ]
                     ], 'ProductQuoteController:actionPreviewVoluntaryOfferEmail:ProjectHashGenerator:getHashByProjectId');
                 }
+                $emailData['case']['order_uid'] = $bookingId;
                 $emailData['booking_hash_code'] = ProjectHashGenerator::getHashByProjectId($case->cs_project_id, $bookingId);
                 if (!empty($emailData['original_quote']['data'])) {
                     ArrayHelper::remove($emailData['original_quote']['data'], 'fq_origin_search_data');
@@ -504,7 +505,8 @@ class ProductQuoteController extends FController
                 $emailData = $this->casesCommunicationService->getEmailData($case, Auth::user(), $locale);
                 $emailData['reprotection_quote'] = $quote->serialize();
                 $emailData['original_quote'] = $originalQuote->serialize();
-                $bookingId = ArrayHelper::getValue($emailData, 'original_quote.data.flights.0.fqf_booking_id', '') ?? '';
+                $bookingId = $originalQuote->getLastBookingId();
+                $emailData['case']['order_uid'] = $bookingId;
                 $emailData['booking_hash_code'] = ProjectHashGenerator::getHashByProjectId($case->cs_project_id, $bookingId);
                 if (!empty($emailData['reprotection_quote']['data'])) {
                     ArrayHelper::remove($emailData['reprotection_quote']['data'], 'fq_origin_search_data');

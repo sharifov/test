@@ -45,7 +45,7 @@ class RbacRoleManagementController extends FController
                     'rules' => [
                         [
                             'allow'   => true,
-                            'actions' => ['index', 'clone', 'merge', 'exclude'],
+                            'actions' => ['index', 'rewrite', 'merge', 'exclude'],
                             'roles'   => [Employee::ROLE_ADMIN, Employee::ROLE_SUPER_ADMIN],
                         ],
                     ],
@@ -66,7 +66,7 @@ class RbacRoleManagementController extends FController
         ]);
     }
 
-    public function actionClone()
+    public function actionRewrite()
     {
         $roleName = (string)\Yii::$app->request->get('name');
         $item     = RbacQueryService::getRoleByName($roleName);
@@ -75,19 +75,18 @@ class RbacRoleManagementController extends FController
         }
         $model       = new RbacRoleManagementForm();
         $model->name = $roleName;
-        $roleList    = RbacQueryService::getRolesList();
-        $roleList    = array_combine($roleList, $roleList);
+        $roleList    = RbacQueryService::getRolesListWithPermissionsCount();
         if (\Yii::$app->request->isPost) {
             try {
                 $model->load(\Yii::$app->request->post());
                 if (!$model->validate()) {
                     throw new \RuntimeException(implode(', ', $model->getErrorSummary(true)));
                 }
-                $result = RbacRoleManagementService::clonePermissions($model->donor_name, $model->name);
+                $result = RbacRoleManagementService::rewritePermissions($model->donor_name, $model->name);
                 if (!$result) {
                     throw new \RuntimeException('Saving Error');
                 }
-                \Yii::$app->session->setFlash('success', 'Form Saved');
+                \Yii::$app->session->setFlash('success', 'Role rewrited! Count affected rows:' . $result);
             } catch (\RuntimeException | \DomainException $e) {
                 \Yii::warning(AppHelper::throwableFormatter($e), 'RbacRoleManagementController::actionClone:exception');
                 \Yii::$app->session->setFlash('error', $e->getMessage());
@@ -96,7 +95,7 @@ class RbacRoleManagementController extends FController
                 \Yii::$app->session->setFlash('error', 'Server Error');
             }
         }
-        return $this->render('clone', [
+        return $this->render('rewrite', [
             'model'    => $model,
             'roleList' => $roleList,
         ]);
@@ -111,8 +110,7 @@ class RbacRoleManagementController extends FController
         }
         $model       = new RbacRoleManagementForm();
         $model->name = $roleName;
-        $roleList    = RbacQueryService::getRolesList();
-        $roleList    = array_combine($roleList, $roleList);
+        $roleList    = RbacQueryService::getRolesListWithPermissionsCount();
         if (\Yii::$app->request->isPost) {
             try {
                 $model->load(\Yii::$app->request->post());
@@ -123,7 +121,7 @@ class RbacRoleManagementController extends FController
                 if (!$result) {
                     throw new \RuntimeException('Saving Error');
                 }
-                \Yii::$app->session->setFlash('success', 'Form Saved');
+                \Yii::$app->session->setFlash('success', 'Roles Merged! Count affected rows:' . $result);
             } catch (\RuntimeException | \DomainException $e) {
                 \Yii::warning(AppHelper::throwableFormatter($e), 'RbacRoleManagementController::actionMerge:exception');
                 \Yii::$app->session->setFlash('error', $e->getMessage());
@@ -147,8 +145,7 @@ class RbacRoleManagementController extends FController
         }
         $model       = new RbacRoleManagementForm();
         $model->name = $roleName;
-        $roleList    = RbacQueryService::getRolesList();
-        $roleList    = array_combine($roleList, $roleList);
+        $roleList    = RbacQueryService::getRolesListWithPermissionsCount();
         if (\Yii::$app->request->isPost) {
             try {
                 $model->load(\Yii::$app->request->post());
@@ -159,7 +156,7 @@ class RbacRoleManagementController extends FController
                 if (!$result) {
                     throw new \RuntimeException('Saving Error');
                 }
-                \Yii::$app->session->setFlash('success', 'Form Saved');
+                \Yii::$app->session->setFlash('success', 'Permissions excluded from role! Count affected rows:' . $result);
             } catch (\RuntimeException | \DomainException $e) {
                 \Yii::warning(AppHelper::throwableFormatter($e), 'RbacRoleManagementController::actionExclude:exception');
                 \Yii::$app->session->setFlash('error', $e->getMessage());

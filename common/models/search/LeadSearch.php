@@ -26,8 +26,6 @@ use common\models\UserGroupAssign;
 use common\models\UserProfile;
 use modules\featureFlag\FFlag;
 use modules\fileStorage\src\entity\fileLead\FileLead;
-use modules\smartLeadDistribution\abac\dto\SmartLeadDistributionAbacDto;
-use modules\smartLeadDistribution\abac\SmartLeadDistributionAbacObject;
 use modules\smartLeadDistribution\src\services\SmartLeadDistributionService;
 use modules\smartLeadDistribution\src\SmartLeadDistribution;
 use src\access\EmployeeGroupAccess;
@@ -3017,19 +3015,30 @@ class LeadSearch extends Lead
 
         /** @fflag FFlag::FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE, Smart Lead Distribution Enable */
         if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE) === true) {
-            $allowedCategory = SmartLeadDistributionService::getAllowedCategories();
-            //null required for load leads that were created before implementation Smart Lead Distribution
-            $allowedCategory[] = null;
+            $allowedInterval = SmartLeadDistributionService::getAllowedPointIntervalForBusinessInbox();
 
-            $query->leftJoin(
-                'lead_data',
-                'leads.id = lead_data.ld_lead_id AND lead_data.ld_field_key = :key',
-                [
-                    'key' => LeadDataKeyDictionary::KEY_LEAD_RATING_CATEGORY,
-                ]
-            );
+            if ($allowedInterval !== null) {
+                $query->leftJoin(
+                    'lead_data',
+                    'leads.id = lead_data.ld_lead_id AND lead_data.ld_field_key = :key',
+                    [
+                        'key' => LeadDataKeyDictionary::KEY_LEAD_RATING_POINTS_DYNAMIC,
+                    ]
+                );
 
-            $query->andWhere(['IN', 'lead_data.ld_field_value', $allowedCategory]);
+                $query->andWhere([
+                    'OR',
+                    [
+                        'BETWEEN',
+                        'lead_data.ld_field_value',
+                        $allowedInterval->from,
+                        $allowedInterval->to
+                    ],
+                    [
+                        'lead_data.ld_field_value' => null,
+                    ],
+                ]);
+            }
         }
 
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);

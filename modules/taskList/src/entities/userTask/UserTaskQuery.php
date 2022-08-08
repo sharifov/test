@@ -32,11 +32,11 @@ class UserTaskQuery
                             ->innerJoin(
                                 ShiftScheduleType::tableName(),
                                 'uss_sst_id = sst_id',
-                                ['sst_subtype_id' => ShiftScheduleType::SUBTYPE_WORK_TIME]
                             )
                             ->where(['IN', 'uss_status_id', $userShiftScheduleStatuses])
                             ->andWhere(['<=', 'uss_start_utc_dt', $dtNowFormatted])
                             ->andWhere(['>=', 'uss_end_utc_dt', $dtNowFormatted])
+                            ->andWhere(['sst_subtype_id' => ShiftScheduleType::SUBTYPE_WORK_TIME])
                             ->groupBy(['uss_id'])
                     ], 'sset_event_id = uss_id')
                     ->groupBy(['sset_user_task_id'])
@@ -133,7 +133,8 @@ class UserTaskQuery
                     'extendedProps' => [
                         'type' => 'task',
                         'icon' => '', //fa fa-building-o',
-                    ]
+                    ],
+                    'typeEvent' => 'user-task'
                 ];
 
 //                if (

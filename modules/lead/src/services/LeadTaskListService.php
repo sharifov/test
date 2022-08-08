@@ -82,7 +82,8 @@ class LeadTaskListService
                         if (empty($userShiftSchedules)) {
                             $this->canceledUserTask($taskList->tl_id);
                             throw new TaskListAssignException('UserShiftSchedules not found by EmployeeId (' .
-                                $this->lead->employee_id . ') and StartDateTime:' . $dtNowWithDelay->format('Y-m-d H:i:s'));
+                                $this->lead->employee_id . ') and StartDateTime:' . $dtNowWithDelay->format('Y-m-d H:i:s')
+                                . ' and EndTime:' . ($taskListEndDt ? $taskListEndDt->format('Y-m-d H:i:s') : 'null'));
                         }
 
                         if ($this->isEmptyOldOwner()) {
@@ -104,8 +105,11 @@ class LeadTaskListService
 
                         $assignService->assign();
                     } catch (TaskListAssignException $exception) {
+                        $message = AppHelper::throwableLog($exception);
+                        $message['taskListId'] = $taskList->tl_id ?? null;
+                        $message['leadId'] = $this->lead->id ?? null;
                         \Yii::info(
-                            AppHelper::throwableLog($exception),
+                            $message,
                             'info\LeadTaskListService:assignReAssign:TaskListAssignException'
                         );
                     } catch (\RuntimeException | \DomainException $throwable) {

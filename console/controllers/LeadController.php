@@ -13,6 +13,7 @@ use common\models\Task;
 use modules\featureFlag\FFlag;
 use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacDto;
 use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
+use modules\smartLeadDistribution\src\services\SmartLeadDistributionService;
 use src\exception\BoResponseException;
 use src\helpers\app\AppHelper;
 use src\helpers\DateHelper;
@@ -35,6 +36,7 @@ use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLog;
 use src\model\leadUserData\entity\LeadUserData;
 use src\model\leadUserData\entity\LeadUserDataDictionary;
 use src\model\leadUserData\repository\LeadUserDataRepository;
+use src\repositories\lead\LeadBadgesRepository;
 use src\repositories\lead\LeadRepository;
 use src\services\cases\CasesSaleService;
 use Yii;
@@ -963,5 +965,18 @@ class LeadController extends Controller
     private function validateDate(\DateTime $dateObject, string $date, string $format = 'Y-m-d H:i:s'): bool
     {
         return $dateObject->format($format) === $date;
+    }
+
+    public function actionRecalculateRatingBusinessLeads()
+    {
+        $leadBadgeRepository = new LeadBadgesRepository();
+        $leads = $leadBadgeRepository->getBusinessInboxQuery()
+            ->all();
+
+        if (count($leads) > 0) {
+            foreach ($leads as $lead) {
+                SmartLeadDistributionService::recalculateRatingForLead($lead);
+            }
+        }
     }
 }

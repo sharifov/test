@@ -15,6 +15,14 @@ class TargetObjectCallService
     private int $targetObjectCallAttempts = 0;
     private int $targetObjectCallCompleted = 0;
 
+    private array $leadCallAttemptsStatuses = [
+        Call::STATUS_NO_ANSWER,
+        Call::STATUS_BUSY,
+        Call::STATUS_FAILED,
+        Call::STATUS_DECLINED,
+        Call::STATUS_CANCELED,
+    ];
+
     public function __construct(Call $call, ?string $userTaskStartDT = null, ?string $userTaskEndDT = null)
     {
         $this->call = $call;
@@ -37,8 +45,8 @@ class TargetObjectCallService
     {
         $query = Call::find()
             ->where(['c_lead_id' => $leadId])
-            ->where(['c_call_type_id' => Call::CALL_TYPE_OUT])
-            ->andWhere(['c_call_status' => Call::STATUS_COMPLETED])
+            ->andWhere(['c_call_type_id' => Call::CALL_TYPE_OUT])
+            ->andWhere(['c_status_id' => Call::STATUS_COMPLETED])
             ->andWhere(['>=', 'c_call_duration', $this->getCallCompletedDuration()])
         ;
 
@@ -56,8 +64,8 @@ class TargetObjectCallService
     {
         $query = Call::find()
             ->where(['c_lead_id' => $leadId])
-            ->where(['c_call_type_id' => Call::CALL_TYPE_OUT])
-            ->andWhere(['c_call_status' => Call::STATUS_NO_ANSWER])
+            ->andWhere(['c_call_type_id' => Call::CALL_TYPE_OUT])
+            ->andWhere(['IN', 'c_status_id', $this->getLeadCallAttemptsStatuses()])
         ;
 
         if ($this->userTaskStartDT) {
@@ -89,5 +97,15 @@ class TargetObjectCallService
     public function getCallCompletedDuration(): int
     {
         return $this->callCompletedDuration;
+    }
+
+    public function getLeadCallAttemptsStatuses(): array
+    {
+        return $this->leadCallAttemptsStatuses;
+    }
+
+    public function setLeadCallAttemptsStatuses(array $leadCallAttemptsStatuses): void
+    {
+        $this->leadCallAttemptsStatuses = $leadCallAttemptsStatuses;
     }
 }

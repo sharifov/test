@@ -394,7 +394,8 @@ class UserShiftScheduleQuery
                     'display' => 'block',
                     'extendedProps' => [
                         'icon' => $item->shiftScheduleType->sst_icon_class ?? '',
-                    ]
+                    ],
+                    'typeEvent' => 'user-shift-schedule'
                 ];
 
                 if (
@@ -507,11 +508,22 @@ class UserShiftScheduleQuery
         ;
 
         if ($userTaskEndDt) {
+            $startDateTime = $startDt->format('Y-m-d H:i:s');
+            $endDateTime = $userTaskEndDt->format('Y-m-d H:i:s');
             $query->andWhere([
-                'BETWEEN',
-                'uss_end_utc_dt',
-                $startDt->format('Y-m-d H:i:s'),
-                $userTaskEndDt->format('Y-m-d H:i:s')
+                'OR',
+                ['BETWEEN', 'uss_start_utc_dt', $startDateTime, $endDateTime],
+                ['BETWEEN', 'uss_end_utc_dt', $startDateTime, $endDateTime],
+                [
+                    'AND',
+                    ['>=', 'uss_start_utc_dt', $startDateTime],
+                    ['<=', 'uss_end_utc_dt', $endDateTime]
+                ],
+                [
+                    'AND',
+                    ['<=', 'uss_start_utc_dt', $startDateTime],
+                    ['>=', 'uss_end_utc_dt', $endDateTime]
+                ]
             ]);
         } else {
             $query->andWhere(['>', 'uss_end_utc_dt', $startDt->format('Y-m-d H:i:s')]);
