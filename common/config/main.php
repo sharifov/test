@@ -50,6 +50,15 @@ return [
             'enableSchemaCache' => true,
             'schemaCacheDuration' => 3600,
         ],
+        'clickhouse' => [
+            'class' => 'yii\db\Connection',
+            'dsn' => '',
+            'username' => '',
+            'password' => '',
+            'charset' => '',
+            'enableSchemaCache' => false,
+            'schemaCacheDuration' => 3600,
+        ],
         'formatter' => [
             'class' => 'yii\i18n\Formatter',
             'timeZone' => 'Europe/Chisinau',

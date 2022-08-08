@@ -64,6 +64,7 @@ abstract class BaseApplication extends yii\base\Application
  * @property \modules\eventManager\components\EventManagerComponent $event Event component
  * @property \common\components\ApplicationStatus $applicationStatus application status component
  * @property \common\components\email\EmailComponent $email application status component
+ * @property \kak\clickhouse\Connection $clickhouse DB Connection component
  */
 class WebApplication extends yii\web\Application
 {

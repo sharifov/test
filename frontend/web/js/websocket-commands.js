@@ -4,7 +4,8 @@ function socketSend(controller, action, params)
     data.c = controller;
     data.a = action;
     data.p = params;
-    //console.log(data);
+    // console.log(data);
+    //alert(JSON.stringify(data));
     socket.send(JSON.stringify(data));
 }
 

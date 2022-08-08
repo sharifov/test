@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6b1975a4917dfaeda0bd7a614c644360",
+    "content-hash": "6e8a7b7e3434e21f68e0a9a23e5170e0",
     "packages": [
         {
             "name": "2amigos/yii2-arrayquery-component",
@@ -2902,6 +2902,56 @@
                 "source": "https://github.com/fetus-hina/totp/tree/v2.0.0"
             },
             "time": "2021-06-24T10:47:39+00:00"
+        },
+        {
+            "name": "kak/clickhouse",
+            "version": "1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sanchezzzhak/kak-clickhouse.git",
+                "reference": "20f71031aebc484a20acd537bb63392df9f1c135"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sanchezzzhak/kak-clickhouse/zipball/20f71031aebc484a20acd537bb63392df9f1c135",
+                "reference": "20f71031aebc484a20acd537bb63392df9f1c135",
+                "shasum": ""
+            },
+            "require": {
+                "yiisoft/yii2": "*",
+                "yiisoft/yii2-httpclient": "~2.0.3"
+            },
+            "require-dev": {
+                "codeception/base": "^2.5",
+                "guzzlehttp/guzzle": "^6.3"
+            },
+            "type": "yii2-extension",
+            "autoload": {
+                "psr-4": {
+                    "kak\\clickhouse\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Tutik Alexsandr",
+                    "email": "sanchezzzhak@ya.ru"
+                }
+            ],
+            "description": "ClickHouse for Yii2",
+            "keywords": [
+                "ClickHouse ActiveRecord Yii2",
+                "clickhouse",
+                "yii2"
+            ],
+            "support": {
+                "issues": "https://github.com/sanchezzzhak/kak-clickhouse/issues?state=open",
+                "source": "https://github.com/sanchezzzhak/kak-clickhouse"
+            },
+            "time": "2021-09-17T18:14:40+00:00"
         },
         {
             "name": "kartik-v/bootstrap-fileinput",
