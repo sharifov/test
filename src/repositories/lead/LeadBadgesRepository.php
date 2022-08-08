@@ -730,7 +730,7 @@ class LeadBadgesRepository
 
             $query->column();
 
-            $data[$skillID] = intval($query->one()['amount']);
+            $data[$skillID] = (int)$query->one()['amount'];
         }
 
         return $data;
