@@ -13,7 +13,7 @@ class RbacRoleManagementService
      * @param string $recipientRoleName
      * @return bool
      */
-    public static function clonePermissions(string $donorRoleName, string $recipientRoleName): bool
+    public static function rewritePermissions(string $donorRoleName, string $recipientRoleName): bool
     {
         try {
             $transaction = \Yii::$app
@@ -44,7 +44,7 @@ class RbacRoleManagementService
             $transaction->commit();
             $authManager = \Yii::$app->getAuthManager();
             $authManager->invalidateCache();
-            return true;
+            return count($donorRows);
         } catch (\Throwable $e) {
             $transaction->rollBack();
             $logMessage = AppHelper::throwableLog($e);
@@ -93,7 +93,7 @@ class RbacRoleManagementService
             $transaction->commit();
             $authManager = \Yii::$app->getAuthManager();
             $authManager->invalidateCache();
-            return true;
+            return count($donorRows);
         } catch (\Throwable $e) {
             $transaction->rollBack();
             $logMessage = AppHelper::throwableLog($e);
@@ -128,7 +128,7 @@ class RbacRoleManagementService
             $transaction->commit();
             $authManager = \Yii::$app->getAuthManager();
             $authManager->invalidateCache();
-            return true;
+            return count($donorRows);
         } catch (\Throwable $e) {
             $transaction->rollBack();
             $logMessage = AppHelper::throwableLog($e);
