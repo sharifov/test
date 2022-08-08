@@ -314,6 +314,14 @@ class EmailRepository implements EmailRepositoryInterface
         return Email::tableName();
     }
 
+    public function findByCommunicationId(int $communicationId): Email
+    {
+        if ($email = Email::find()->byCommunicationId($communicationId)->limit(1)->one()) {
+            return $email;
+        }
+        throw new NotFoundException('Email not found. Communication ID: ' . $communicationId);
+    }
+
     public function getRawSqlCountGroupedByLead(): string
     {
         return \Yii::$app->getDb()->createCommand(
