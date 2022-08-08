@@ -17,9 +17,6 @@ use common\models\UserParams;
 use Endroid\QrCode\Builder\Builder;
 use frontend\models\form\UserProfileForm;
 use frontend\themes\gentelella_v2\widgets\SideBarMenu;
-use modules\taskList\src\entities\TargetObject;
-use modules\taskList\src\entities\TaskObject;
-use modules\taskList\src\services\taskCompletion\UserTaskCompletionService;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
@@ -113,15 +110,6 @@ class SiteController extends FController
      */
     public function actionIndex(): string
     {
-        $userTaskCompletionService = new UserTaskCompletionService(
-            TargetObject::TARGET_OBJ_LEAD,
-            1214048,
-            TaskObject::OBJ_EMAIL,
-            600330,
-            1
-        );
-        $userTaskCompletionService->handle();
-
         $user = Yii::$app->user->identity;
         $sourcesDataProvider = new ActiveDataProvider();
         if (SettingHelper::isEnabledAuthClients()) {
