@@ -43,7 +43,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
         <div class="col-md-5">
             <?php if (!empty($dataRating)) : ?>
-                <h3>Lead category: <?= SmartLeadDistributionService::getCategoryById($dataRating['category'])['name'] ?></h3>
+                <h3>Lead category: <?= SmartLeadDistributionService::getCategoryById($dataRating['category'])['name'] ?? '' ?></h3>
 
                 <?php if (!empty($dataRating['log'])) : ?>
                     <table class="table table-striped table-bordered">

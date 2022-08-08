@@ -50,7 +50,7 @@ $total = 0;
             <tbody>
                 <?php foreach ($searchModel->ratingCategoryIds as $category) : ?>
                     <tr>
-                        <td><?= SmartLeadDistributionService::getCategoryById($category)['name'] ?></td>
+                        <td><?= SmartLeadDistributionService::getCategoryById($category)['name'] ?? '' ?></td>
                         <?php foreach ($searchModel->leadStatusIds as $status) : ?>
                             <td class="text-center">
                                 <?php $leads = 0 ?>
