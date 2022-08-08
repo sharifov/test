@@ -456,7 +456,8 @@ $formResponses = $clientChat->formResponses;
         'timeout' => 5000,
         'enablePushState' => false,
     ]); */ ?>
-    <?php  if (Yii::$app->abac->can(null, ClientChatAbacObject::CLIENT_CHAT_FORM, ClientChatAbacObject::ACTION_ACCESS)) : ?>
+    <?php /** @abac ClientChatAbacObject::UI_CLIENT_CHAT_FORM, ClientChatAbacObject::ACTION_ACCESS, Access To show|add|send Client Chat Form Response */ ?>
+    <?php  if (Yii::$app->abac->can(null, ClientChatAbacObject::UI_CLIENT_CHAT_FORM, ClientChatAbacObject::ACTION_ACCESS)) : ?>
         <div class="_rc-block-wrapper">
             <div class="x_panel">
                 <div class="x_title">

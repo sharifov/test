@@ -15,12 +15,12 @@ class ClientChatAbacObject extends AbacBaseModel implements AbacInterface
 
     /** ACTION PERMISSION */
     public const ACT_CREATE_SEND_QUOTE  = self::NS . 'act/create-send-quote';
-    public const CLIENT_CHAT_FORM  = self::NS . 'client-chat-from';
+    public const UI_CLIENT_CHAT_FORM  = self::NS . 'ui/client-chat-from';
 
 
     public const OBJECT_LIST = [
         self::ACT_CREATE_SEND_QUOTE => self::ACT_CREATE_SEND_QUOTE,
-        self::CLIENT_CHAT_FORM   => self::CLIENT_CHAT_FORM,
+        self::UI_CLIENT_CHAT_FORM   => self::UI_CLIENT_CHAT_FORM,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -31,7 +31,7 @@ class ClientChatAbacObject extends AbacBaseModel implements AbacInterface
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
         self::ACT_CREATE_SEND_QUOTE => [self::ACTION_CREATE],
-        self::CLIENT_CHAT_FORM => [self::ACTION_ACCESS]
+        self::UI_CLIENT_CHAT_FORM => [self::ACTION_ACCESS]
     ];
 
     /** --------------- ATTRIBUTE LIST --------------------------- */

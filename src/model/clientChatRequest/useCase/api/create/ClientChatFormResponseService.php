@@ -29,7 +29,7 @@ class ClientChatFormResponseService
         $this->clientChatFormResponseRepository = $clientChatFormResponseRepository;
     }
 
-    public function createFormResponse(string $rid, string $formKey, string $formValue, string $createdAt): void
+    public function createFormResponse(string $rid, string $formKey, string $formValue, string $createdAt): ?ClientChatFormResponse
     {
         // Getting client chat by room id
         $clientChat = ClientChatQuery::lastSameChat($rid);
@@ -51,7 +51,7 @@ class ClientChatFormResponseService
                 $formValue
             )
         ) {
-            return;
+            return null;
         }
 
         $model = ClientChatFormResponse::create(
@@ -63,5 +63,7 @@ class ClientChatFormResponseService
         );
 
         $this->clientChatFormResponseRepository->save($model);
+
+        return $model;
     }
 }

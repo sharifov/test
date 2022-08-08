@@ -1220,7 +1220,7 @@ class ClientChatRequestController extends ApiBaseController
                     new StatusCodeMessage(400),
                     new MessageMessage('Client Chat Form not saved.'),
                     new ErrorsMessage($e->getMessage()),
-                    new CodeMessage(ApiCodeException::CLIENT_CHAT_FEEDBACK_CREATE_FAILED)
+                    new CodeMessage(ApiCodeException::CLIENT_CHAT_FORM_CREATE_FAILED)
                 )
             );
         }

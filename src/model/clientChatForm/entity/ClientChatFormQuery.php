@@ -10,9 +10,6 @@ class ClientChatFormQuery
      */
     public static function getByKey(string $key): ?ClientChatForm
     {
-        if ($clientChatForm = ClientChatForm::find()->where(['ccf_key' => $key])->one()) {
-            return $clientChatForm;
-        }
-        return null;
+        return ClientChatForm::find()->where(['ccf_key' => $key])->limit(1)->one();
     }
 }
