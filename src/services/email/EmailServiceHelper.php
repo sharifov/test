@@ -32,10 +32,10 @@ class EmailServiceHelper
 
     /**
      * @param string $subject
-     * @param string $refMessageId
+     * @param string|null $refMessageId
      * @return int|null
      */
-    public function detectLeadId(string $subject, string $refMessageId): ?int
+    public function detectLeadId(string $subject, ?string $refMessageId): ?int
     {
         try {
             $lead = $this->getLeadFromSubjectByIdOrHash($subject);
@@ -51,10 +51,10 @@ class EmailServiceHelper
 
     /**
      * @param string $subject
-     * @param string $refMessageId
+     * @param string|null $refMessageId
      * @return int|null
      */
-    public function detectCaseId(string $subject, string $refMessageId): ?int
+    public function detectCaseId(string $subject, ?string $refMessageId): ?int
     {
         try {
             $case = $this->getCaseFromSubjectByIdOrHash($subject);
@@ -275,12 +275,12 @@ class EmailServiceHelper
     /**
      *
      * @param string $email
-     * @return int
+     * @return int|null
      */
-    public function getUserIdByEmail(string $email): int
+    public function getUserIdByEmail(string $email): ?int
     {
-        $user = $this->getUsersIdByEmail($email);
-        return reset($user);
+        $users = $this->getUsersIdByEmail($email);
+        return !empty($user) ? reset($users) : null;
     }
 
     public function getProjectIdByDepOrUpp($emailTo): ?int

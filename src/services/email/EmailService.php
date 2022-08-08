@@ -152,7 +152,7 @@ class EmailService extends SendMail implements EmailServiceInterface
             if ($form->isDeleted !== null) {
                 $email->e_is_deleted = $form->isDeleted;
             }
-            if ($form->replyId !== null) {
+            if (!empty($form->replyId)) {
                 $email->e_reply_id = $form->replyId;
             }
             if ($form->log->errorMessage !== null) {

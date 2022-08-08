@@ -39,6 +39,7 @@ class ClientNotificationEmailExecutor
         $this->casesCommunicationService = $casesCommunicationService;
     }
 
+    //TODO: refactor using EmailMainService
     public function execute(ClientNotificationEmailList $notification): void
     {
         if (!$notification->isNew()) {

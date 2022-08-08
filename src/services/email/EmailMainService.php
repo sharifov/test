@@ -61,7 +61,7 @@ class EmailMainService implements EmailServiceInterface
     public const FROM_NORM = 2; //CALLED FROM NORM EMAIL MODEL
 
     private $helper;
-    private $oldService;
+    private EmailService $oldService;
     private $normalizedService;
     private $emailRepository;
     private $emailOldRepository;
@@ -262,9 +262,7 @@ class EmailMainService implements EmailServiceInterface
         $this->setEmailObj($emailOld);
 
         if ($this->normalizedService !== null) {
-            if ($calledFrom == self::FROM_OLD) {
-                $emailNorm = $this->setEmailNormObjById($email->e_id);
-            }
+            $emailNorm = ($calledFrom == self::FROM_OLD) ? $this->setEmailNormObjById($email->e_id) : $email;
             if (isset($emailNorm)) {
                 $emailNorm = $this->normalizedService->update($emailNorm, $form);
                 $emailNorm->refresh();
@@ -324,17 +322,23 @@ class EmailMainService implements EmailServiceInterface
 
     public function updateAfterReview(EmailReviewQueueForm $form, $email)
     {
-        $email = $this->oldService->updateAfterReview($form, $email);
-        $email->refresh();
-        $this->setEmailObj($email);
+        $calledFrom = $this->getCalledFrom($email);
+        $emailOld = ($calledFrom == self::FROM_NORM) ? $this->setEmailObjById($email->e_id) : $email;
+
+        $emailOld = $this->oldService->updateAfterReview($form, $emailOld);
+        $emailOld->refresh();
+        $this->setEmailObj($emailOld);
 
         if ($this->normalizedService !== null) {
-            $email = $this->normalizedService->updateAfterReview($form, $email);
-            $email->refresh();
-            $this->setEmailNormObj($email);
+            $emailNorm = ($calledFrom == self::FROM_OLD) ? $this->setEmailNormObjById($email->e_id) : $email;
+            if (isset($emailNorm)) {
+                $emailNorm = $this->normalizedService->updateAfterReview($form, $emailNorm);
+                $emailNorm->refresh();
+                $this->setEmailNormObj($emailNorm);
+            }
         }
 
-        return $email;
+        return ($calledFrom == self::FROM_OLD) ? $emailOld : $emailNorm ?? $email;
     }
 
     public function createFromDTO(EmailDTO $emailDTO, $autoDetectEmpty = true)
