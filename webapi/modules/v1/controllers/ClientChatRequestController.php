@@ -1139,7 +1139,7 @@ class ClientChatRequestController extends ApiBaseController
      * HTTP/1.1 400 Bad Request
      * {
      *      "status":400,
-     *      "message":"Client Chat Form validate failed.",
+     *      "message":"Client Chat Form Response validate failed.",
      *      "errors":["Event is invalid."],
      *      "code":"13104"
      * }
@@ -1184,7 +1184,7 @@ class ClientChatRequestController extends ApiBaseController
         if (!$form->validate()) {
             return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(400),
-                new MessageMessage('Client Chat Form validate failed.'),
+                new MessageMessage('Client Chat Form Response validate failed.'),
                 new ErrorsMessage($form->getErrorSummary(true)),
                 new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
             ));
@@ -1196,7 +1196,7 @@ class ClientChatRequestController extends ApiBaseController
         } catch (\Throwable $e) {
             return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(400),
-                new MessageMessage('Client Chat Form not saved.'),
+                new MessageMessage('Client Chat Form Response not saved.'),
                 new ErrorsMessage($e->getMessage()),
                 new CodeMessage(ApiCodeException::CLIENT_CHAT_REQUEST_CREATE_FAILED)
             ));
@@ -1206,7 +1206,7 @@ class ClientChatRequestController extends ApiBaseController
         if (!$form->load($data, "") || !$form->validate()) {
             return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(400),
-                new MessageMessage('Client Chat Form validate failed.'),
+                new MessageMessage('Client Chat Form Response validate failed.'),
                 new ErrorsMessage($form->getErrorSummary(true)),
                 new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
             ));
@@ -1218,7 +1218,7 @@ class ClientChatRequestController extends ApiBaseController
             return $this->endApiLog(
                 new ErrorResponse(
                     new StatusCodeMessage(400),
-                    new MessageMessage('Client Chat Form not saved.'),
+                    new MessageMessage('Client Chat Form Response not saved.'),
                     new ErrorsMessage($e->getMessage()),
                     new CodeMessage(ApiCodeException::CLIENT_CHAT_FORM_CREATE_FAILED)
                 )
