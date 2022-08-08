@@ -65,7 +65,7 @@ class TargetObjectCallService
         $query = Call::find()
             ->where(['c_lead_id' => $leadId])
             ->andWhere(['c_call_type_id' => Call::CALL_TYPE_OUT])
-            ->andWhere(['IN', 'c_call_status', $this->getLeadCallAttemptsStatuses()])
+            ->andWhere(['IN', 'c_status_id', $this->getLeadCallAttemptsStatuses()])
         ;
 
         if ($this->userTaskStartDT) {
