@@ -11,7 +11,7 @@ class ShiftScheduleEventTaskQuery
     {
         return ShiftScheduleEventTask::find()
             ->select(['shift_schedule_event_task.*', 'task_list.tl_title', 'user_task.*'])
-            ->joinWith('userShiftSchedule')
+            ->joinWith('userShiftSchedule', true, 'INNER JOIN')
             ->innerJoin('user_task', 'user_task.ut_id = shift_schedule_event_task.sset_user_task_id')
             ->leftJoin('task_list', 'task_list.tl_id = user_task.ut_task_list_id ')
             ->innerJoin([
