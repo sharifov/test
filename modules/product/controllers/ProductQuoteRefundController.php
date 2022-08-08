@@ -160,7 +160,8 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
                 $emailData['original_quote'] = $originalQuote->serialize();
                 $emailData['refund'] = $productQuoteRefund->serialize();
                 $emailData['refundData'] = $productQuoteRefund->orderRefund->serialize() ?? [];
-                $bookingId = ArrayHelper::getValue($emailData, 'original_quote.data.flights.0.fqf_booking_id', '') ?? '';
+                $bookingId = $originalQuote->getLastBookingId();
+                $emailData['case']['order_uid'] = $bookingId;
                 $emailData['booking_hash_code'] = ProjectHashGenerator::getHashByProjectId($case->cs_project_id, $bookingId);
                 if (!empty($emailData['original_quote']['data'])) {
                     ArrayHelper::remove($emailData['original_quote']['data'], 'fq_origin_search_data');
