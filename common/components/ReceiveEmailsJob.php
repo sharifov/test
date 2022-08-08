@@ -110,10 +110,7 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
 
                         $filter['last_id'] = $mail['ei_id'] + 1;
 
-                        $emailRepository = EmailRepositoryFactory::getRepository();
-                        $find = $emailRepository->findReceived($mail['ei_message_id'], $mail['ei_email_to'])->one();
-                        if ($find) {
-                            $emailRepository->saveInboxId($find, $mail['ei_id']);
+                        if ($this->emailService->saveInboxId($mail['ei_message_id'], $mail['ei_email_to'], $mail['ei_id'])) {
                             continue;
                         }
 
