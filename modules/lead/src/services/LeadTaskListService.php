@@ -105,8 +105,11 @@ class LeadTaskListService
 
                         $assignService->assign();
                     } catch (TaskListAssignException $exception) {
+                        $message = AppHelper::throwableLog($exception);
+                        $message['taskListId'] = $taskList->tl_id ?? null;
+                        $message['leadId'] = $this->lead->id ?? null;
                         \Yii::info(
-                            AppHelper::throwableLog($exception),
+                            $message,
                             'info\LeadTaskListService:assignReAssign:TaskListAssignException'
                         );
                     } catch (\RuntimeException | \DomainException $throwable) {
