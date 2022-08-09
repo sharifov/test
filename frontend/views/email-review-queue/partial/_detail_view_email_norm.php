@@ -26,7 +26,7 @@ use src\entities\email\helpers\EmailStatus;
           'e_email_cc:email', //TODO: fill properly
           'e_email_bc:email', //TODO: fill properly
           'emailSubject',
-          'emailData:json',
+          'emailData:array',
           'typeName',
           'templateTypeId',
           'languageId',

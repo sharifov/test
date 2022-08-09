@@ -60,11 +60,11 @@ class EmailMainService implements EmailServiceInterface
     public const FROM_OLD = 1; //CALLED FROM OLD EMAIL MODEL
     public const FROM_NORM = 2; //CALLED FROM NORM EMAIL MODEL
 
-    private $helper;
+    private EmailServiceHelper $helper;
     private EmailService $oldService;
-    private $normalizedService;
-    private $emailRepository;
-    private $emailOldRepository;
+    private EmailsNormalizeService $normalizedService;
+    private EmailRepository $emailRepository;
+    private EmailOldRepository $emailOldRepository;
 
     private $emailObj;
     private $emailNormObj;
@@ -498,5 +498,45 @@ class EmailMainService implements EmailServiceInterface
             $email->getEmailTo(false),
             $email->e_project_id
         );
+    }
+
+    /**
+     *
+     * @param int $communicationId
+     * @param int $statusId
+     * @return int|null
+     * @throws NotFoundHttpException
+     * @throws \RuntimeException
+     * @throws \Throwable
+     */
+    public function updateEmailStatus(int $communicationId, int $statusId)
+    {
+        if ($statusId <= 0) {
+            throw \RuntimeException('Email status not valid.');
+        }
+        if ($emailOld = $this->emailOldRepository->findByCommunicationId($communicationId)) {
+            $this->emailOldRepository->changeStatus($emailOld, $statusId);
+        }
+        if ($this->normalizedService !== null) {
+            if ($emailNorm = $this->emailRepository->findByCommunicationId($communicationId)) {
+                $this->emailRepository->changeStatus($emailNorm, $statusId);
+            }
+        }
+
+        return $emailOld ? $emailOld->e_id : ($emailNorm ? $emailNorm->e_id : null);
+    }
+
+    public function saveInboxId(string $messageId, string $emailTo, int $inboxId)
+    {
+        if ($emailOld = $this->emailOldRepository->findReceived($messageId, $emailTo)->limit(1)->one()) {
+            $this->emailOldRepository->saveInboxId($emailOld, $inboxId);
+        }
+        if ($this->normalizedService !== null) {
+            if ($emailNorm = $this->emailRepository->findReceived($messageId, $emailTo)->limit(1)->one()) {
+                $this->emailRepository->saveInboxId($emailNorm, $inboxId);
+            }
+        }
+
+        return $emailOld || $emailNorm;
     }
 }
