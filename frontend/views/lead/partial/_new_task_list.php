@@ -27,15 +27,15 @@ $shiftScheduleEventTasks = \yii\helpers\ArrayHelper::map($shiftScheduleEventTask
 ?>
 
 
-    <div class="x_panel task-list_wrap" id="task-list">
-        <div class="x_title">
-            <h2><i class="fa fa-list-ul"></i> Task List</h2>
-            <ul class="nav navbar-right panel_toolbox">
-                <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
-            </ul>
-            <div class="clearfix"></div>
-        </div>
-        <?php if (count($shiftScheduleEventTasks) > 0) : ?>
+<div class="x_panel task-list_wrap" id="task-list">
+    <div class="x_title">
+        <h2><i class="fa fa-list-ul"></i> Task List</h2>
+        <ul class="nav navbar-right panel_toolbox">
+            <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a></li>
+        </ul>
+        <div class="clearfix"></div>
+    </div>
+    <?php if (count($shiftScheduleEventTasks) > 0) : ?>
         <div class="x_content" style="display: block;">
             <div style="display: flex">
                 <ul class="nav nav-tabs">
@@ -48,16 +48,19 @@ $shiftScheduleEventTasks = \yii\helpers\ArrayHelper::map($shiftScheduleEventTask
                             <a data-toggle="tab"
                                href="#tab-<?= $key ?>"
                                class="nav-link text-center <?= ($i === $key ? 'active' : '') ?>">
-                                <span class="task-list_nab-title"> <?= $userShiftSchedule['mainTabTitle'] ?> </span> <br>
-                                <span class="task-list_nab-subtitle" style="font-size: 10px">  <?= $userShiftSchedule['subTabTitle'] ?> </span>
+                                <span class="task-list_nab-title"> <?= $userShiftSchedule['mainTabTitle'] ?> </span>
+                                <br>
+                                <span class="task-list_nab-subtitle"
+                                      style="font-size: 10px">  <?= $userShiftSchedule['subTabTitle'] ?> </span>
                             </a>
                         </li>
                     <?php endforeach; ?>
                 </ul>
                 <?php /** @fflag FFlag::FF_KEY_LEAD_TASK_LIST_HISTORY_MODAL_ENABLE, Enable modal in lead view with history of task */ ?>
                 <?php if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_LEAD_TASK_LIST_HISTORY_MODAL_ENABLE)) : ?>
-                    <a href="#" class="task-list-history-btn" id="task-list-modal-btn" data-url="<?= Url::to(['lead/ajax-get-user-task', 'leadID' => $lead->id]) ?>">
-                        <i class="fa fa-history" aria-hidden="true" style="padding-right: 5px"></i>  History</a>
+                    <a href="#" class="task-list-history-btn" id="task-list-modal-btn"
+                       data-url="<?= Url::to(['lead/ajax-get-user-task', 'leadID' => $lead->id]) ?>">
+                        <i class="fa fa-history" aria-hidden="true" style="padding-right: 5px"></i> History</a>
                 <?php endif; ?>
             </div>
 
@@ -69,7 +72,8 @@ $shiftScheduleEventTasks = \yii\helpers\ArrayHelper::map($shiftScheduleEventTask
                         <div class="my-task-list-wrap">
                             <a target="_blank" href="<?= \yii\helpers\Url::to(['/task-list/index']) ?>"
                                class="my-task-list-link"> <i class="fa fa-tasks" aria-hidden="true"></i> My tasks </a>
-                            <span class="my-task-list-start" style="padding-left: 15px">Started: <?= $userShiftSchedule['title'] ?? '' ?></span>
+                            <span class="my-task-list-start"
+                                  style="padding-left: 15px">Started: <?= $userShiftSchedule['title'] ?? '' ?></span>
                         </div>
                         <div class="table-responsive">
                             <table class="table table-bordered">
@@ -85,13 +89,15 @@ $shiftScheduleEventTasks = \yii\helpers\ArrayHelper::map($shiftScheduleEventTask
                                 </thead>
                                 <tbody>
                                 <?php foreach ($shiftScheduleEventTask as $userTask) : ?>
-                                    <tr style="background-color: <?= UserTaskHelper::getColorByStatus((int)$userTask['ut_status_id'])?>">
+                                    <tr style="background-color: <?= UserTaskHelper::getColorByStatus((int)$userTask['ut_status_id']) ?>">
                                         <td style="width: 50px" class="text-center">
                                             <?= UserTaskHelper::renderStatus((int)$userTask['ut_status_id']) ?>
                                         </td>
                                         <td><?= $userTask['tl_title'] ?? '' ?></td>
                                         <td><?= \src\helpers\DateHelper::getDateTimeImmutableUTC($userTask['ut_start_dt'])->format('d.m.y [H:i]') ?></td>
-                                        <td></td>
+                                        <td>
+                                            <?= !empty($userTask['ut_end_dt']) ? \src\helpers\DateHelper::getDateTimeImmutableUTC($userTask['ut_end_dt'])->format('d.m.y [H:i]') : '' ?>
+                                        </td>
                                         <td><?php if (!empty($userTask['complete_time']) && (int)$userTask['ut_status_id'] === UserTask::STATUS_COMPLETE) {
                                                 echo \src\helpers\DateHelper::getDateTimeImmutableUTC($userTask['complete_time'])->format('d.m.y [H:i]');
                                             }
@@ -133,8 +139,8 @@ $shiftScheduleEventTasks = \yii\helpers\ArrayHelper::map($shiftScheduleEventTask
                 <?php endforeach; ?>
             </div>
         </div>
-        <?php endif; ?>
-    </div>
+    <?php endif; ?>
+</div>
 <?php
 
 $addNoteUrl = Url::to(['/task-list/ajax-add-note']);
@@ -179,7 +185,7 @@ $this->registerJs($js);
         padding: 20px 0 12px;
     }
 
-    .task-list_wrap .task-list-history-btn{
+    .task-list_wrap .task-list-history-btn {
         display: flex;
         justify-content: center;
         align-items: center;
