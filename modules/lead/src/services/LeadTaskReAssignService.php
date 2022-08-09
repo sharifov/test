@@ -76,7 +76,13 @@ class LeadTaskReAssignService extends LeadTaskAssignService
         }
 
         $userTask = $oldUserTask
-            ->setOwner($this->lead->employee_id);
+            ->setOwner($this->lead->employee_id)
+            ->setStartDate($this->dtNowWithDelay->format('Y-m-d H:i:s'));
+
+        if ((int) $this->taskList->tl_duration_min > 0) {
+            $taskListEndDt = $this->dtNowWithDelay->modify(sprintf('+%d minutes', (int) $this->taskList->tl_duration_min));
+            $userTask->setEndDate($taskListEndDt->format('Y-m-d H:i:s'));
+        }
 
         if (!$userTask->validate()) {
             throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($userTask, ' '));

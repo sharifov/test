@@ -48,7 +48,7 @@ class LeadTaskFirstAssignService extends LeadTaskAssignService
 
         $taskListEndDt = null;
         if ((int) $this->taskList->tl_duration_min > 0) {
-            $taskListEndDt = $this->dtNow->modify(sprintf('+%d minutes', (int) $this->taskList->tl_duration_min));
+            $taskListEndDt = $this->dtNowWithDelay->modify(sprintf('+%d minutes', (int) $this->taskList->tl_duration_min));
         }
 
         $userTask = UserTask::create(
@@ -56,7 +56,7 @@ class LeadTaskFirstAssignService extends LeadTaskAssignService
             TargetObject::TARGET_OBJ_LEAD,
             $this->lead->id,
             $this->taskList->tl_id,
-            $this->dtNow->format('Y-m-d H:i:s'),
+            $this->dtNowWithDelay->format('Y-m-d H:i:s'),
             $taskListEndDt ? $taskListEndDt->format('Y-m-d H:i:s') : null
         );
 

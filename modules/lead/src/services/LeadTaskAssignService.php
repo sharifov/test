@@ -13,7 +13,7 @@ abstract class LeadTaskAssignService implements LeadTaskAssignInterface
 {
     public function createShiftScheduleEventTask(array $userShiftSchedules, UserTask $userTask, \DateTimeImmutable $dtNowWithDelay, ?int $duration)
     {
-        $userTaskListEndDate = null;
+       // $userTaskListEndDate = null;
         foreach ($userShiftSchedules as $userShiftSchedule) {
             $shiftScheduleEventTask = ShiftScheduleEventTask::create(
                 $userShiftSchedule->uss_id,
@@ -26,31 +26,31 @@ abstract class LeadTaskAssignService implements LeadTaskAssignInterface
 
             (new ShiftScheduleEventTaskRepository($shiftScheduleEventTask))->save();
 
-            if ($duration !== null) {
-                if (DateHelper::toFormatByUTC($userShiftSchedule->uss_start_utc_dt) === $dtNowWithDelay->format('Y-m-d')) {
-                    $leftMinutes = DateHelper::getDifferentInMinutesByDatesUTC($dtNowWithDelay->format('Y-m-d H:i:s'), $userShiftSchedule->uss_end_utc_dt);
-                    $calculatedDuration = $duration - $leftMinutes;
-                } else {
-                    $calculatedDuration = $duration - $userShiftSchedule->uss_duration;
-                }
-
-                if ($calculatedDuration <= 0) {
-                    $userTaskListEndDate = DateHelper::getDateTimeWithAddedMinutesUTC($userShiftSchedule->uss_end_utc_dt, $duration);
-                    break;
-                }
-
-                $duration = $calculatedDuration;
-            }
+//            if ($duration !== null) {
+//                if (DateHelper::toFormatByUTC($userShiftSchedule->uss_start_utc_dt) === $dtNowWithDelay->format('Y-m-d')) {
+//                    $leftMinutes = DateHelper::getDifferentInMinutesByDatesUTC($dtNowWithDelay->format('Y-m-d H:i:s'), $userShiftSchedule->uss_end_utc_dt);
+//                    $calculatedDuration = $duration - $leftMinutes;
+//                } else {
+//                    $calculatedDuration = $duration - $userShiftSchedule->uss_duration;
+//                }
+//
+//                if ($calculatedDuration <= 0) {
+//                    $userTaskListEndDate = DateHelper::getDateTimeWithAddedMinutesUTC($userShiftSchedule->uss_end_utc_dt, $duration);
+//                    break;
+//                }
+//
+//                $duration = $calculatedDuration;
+//            }
         }
 
-        if ($userTaskListEndDate !== null) {
-            $userTask->ut_end_dt = $userTaskListEndDate;
-
-            if (!$userTask->validate()) {
-                throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($userTask, ' '));
-            }
-
-            (new UserTaskRepository($userTask))->save();
-        }
+//        if ($userTaskListEndDate !== null) {
+//            $userTask->ut_end_dt = $userTaskListEndDate;
+//
+//            if (!$userTask->validate()) {
+//                throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($userTask, ' '));
+//            }
+//
+//            (new UserTaskRepository($userTask))->save();
+//        }
     }
 }
