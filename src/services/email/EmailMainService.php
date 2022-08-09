@@ -40,6 +40,8 @@ use modules\taskList\src\entities\TaskObject;
 use src\entities\email\form\EmailForm;
 use src\repositories\email\EmailOldRepository;
 use src\services\cases\CasesCommunicationService;
+use src\model\emailReviewQueue\EmailReviewQueueManageService;
+use src\model\emailReviewQueue\entity\EmailReviewQueue;
 
 /**
  *
@@ -538,5 +540,36 @@ class EmailMainService implements EmailServiceInterface
         }
 
         return $emailOld || $emailNorm;
+    }
+
+    /**
+     *
+     * @param EmailInterface $email
+     * @param int|null $departmentId
+     *
+     * return EmailReviewQueue
+     */
+    public function moveToReview($email, ?int $departmentId = null)
+    {
+        $calledFrom = $this->getCalledFrom($email);
+        $emailOld = ($calledFrom == self::FROM_NORM) ? $this->setEmailObjById($email->e_id) : $email;
+
+        $emailOld->statusToReview();
+        $emailOld->refresh();
+        $this->setEmailObj($emailOld);
+
+        if ($this->normalizedService !== null) {
+            $emailNorm = ($calledFrom == self::FROM_OLD) ? $this->setEmailNormObjById($email->e_id) : $email;
+            if (isset($emailNorm)) {
+                $emailNorm->statusToReview();
+                $emailNorm->refresh();
+                $this->setEmailNormObj($emailNorm);
+            }
+        }
+
+        $emailToReview = ($calledFrom == self::FROM_OLD) ? $emailOld : $emailNorm ?? $email;
+
+        $emailReviewQueueManageService = Yii::createObject(EmailReviewQueueManageService::class);
+        return $emailReviewQueueManageService->createByEmail($emailToReview, $departmentId);
     }
 }
