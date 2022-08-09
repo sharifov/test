@@ -69,7 +69,7 @@ class LeadTaskListService
                         $dtNowWithDelay = $dtNow->modify(sprintf('+%d hour', $taskList->getDelayHoursParam()));
 
                         $taskListEndDt = null;
-                        if ((int) $taskList->tl_duration_min > 0) {
+                        if ((int)$taskList->tl_duration_min > 0) {
                             $taskListEndDt = $dtNowWithDelay->modify(sprintf('+%d minutes', $taskList->tl_duration_min));
                         }
 
@@ -249,6 +249,20 @@ class LeadTaskListService
                 $userTask->setStatusCancel();
                 (new UserTaskRepository($userTask))->save();
             }
+        }
+    }
+
+    public function canceledAllUserTask()
+    {
+        $userTasks = UserTaskQuery::getQueryUserTaskByTargetIdAndStatuses(
+            TargetObject::TARGET_OBJ_LEAD,
+            $this->lead->id,
+            [UserTask::STATUS_PROCESSING]
+        )->all();
+
+        foreach ($userTasks as $userTask) {
+            $userTask->setStatusCancel();
+            (new UserTaskRepository($userTask))->save();
         }
     }
 }
