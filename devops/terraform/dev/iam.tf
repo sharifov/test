@@ -2,7 +2,12 @@
 resource "aws_iam_user" "attachments" {
   name = "attachments-${var.PROJECT}-${var.ENV}"
   tags = {
-    S3 = "attachments-${var.PROJECT}-${var.ENV}"
+    S3          = "attachments-${var.PROJECT}-${var.ENV}"
+    Environment = var.ENV
+    Project     = var.PROJECT
+    Ns          = var.NAMESPACE
+    Domain      = var.DOMAIN
+    Terraform   = "true"
   }
 }
 
@@ -29,8 +34,8 @@ data "aws_iam_policy_document" "s3_attachments_write_permissions" {
     resources = [
       "arn:aws:s3:::attachments-${var.PROJECT}-${var.ENV}",
       "arn:aws:s3:::attachments-${var.PROJECT}-${var.ENV}/*",
-      "arn:aws:s3:::dev-crm-storage-data",
-      "arn:aws:s3:::dev-crm-storage-data/*"
+      "arn:aws:s3:::attachments-${var.PROJECT}-dev",
+      "arn:aws:s3:::attachments-${var.PROJECT}-dev/*"
     ]
   }
 }

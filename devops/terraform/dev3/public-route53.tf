@@ -22,6 +22,25 @@ resource "aws_route53_record" "public_app" {
   }
 }
 
+# App host with single record
+resource "aws_route53_record" "public_app_host" {
+  zone_id = aws_route53_zone.public.zone_id
+  name    = "app"
+  type    = "A"
+  ttl     = "300"
+  records = aws_instance.app.*.private_ip
+}
+
+# App hosts individual records
+resource "aws_route53_record" "public_app_hosts" {
+  count   = length(aws_instance.app)
+  zone_id = aws_route53_zone.public.zone_id
+  name    = "app${count.index}"
+  type    = "A"
+  ttl     = "300"
+  records = [aws_instance.app[count.index].private_ip]
+}
+
 # API
 resource "aws_route53_record" "public_api" {
   zone_id = aws_route53_zone.public.zone_id
@@ -45,17 +64,6 @@ resource "aws_route53_record" "public_ws" {
     evaluate_target_health = true
   }
 }
-
-# Application hosts
-resource "aws_route53_record" "public_apps" {
-  count   = length(aws_instance.app)
-  zone_id = aws_route53_zone.public.zone_id
-  name    = "app${count.index}"
-  type    = "A"
-  ttl     = "300"
-  records = [aws_instance.app[count.index].private_ip]
-}
-
 
 # Shared host
 resource "aws_route53_record" "public_shared" {
