@@ -55,7 +55,7 @@ class OrderProcessingHybridNotificationJob implements JobInterface, RetryableJob
     {
         \Yii::error([
             'attempt' => $attempt,
-            'message' => 'Order completed hybrid notification error',
+            'message' => 'Order processing hybrid notification error',
             'error' => $error->getMessage(),
             'orderId' => $this->orderId,
         ], 'OrderProcessingHybridNotificationJob');
