@@ -5,6 +5,7 @@ namespace modules\taskList\src\entities\userTask;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTask;
+use modules\taskList\src\entities\TargetObject;
 use Yii;
 
 class UserTaskQuery
@@ -167,10 +168,10 @@ class UserTaskQuery
         return self::getQueryUserTaskByUserTaskList($userId, $taskListId, $targetObject, $targetObjectId)->andWhere(['IN', 'ut_status_id', $statuses]);
     }
 
-    public static function getQueryUserTaskByTargetIdAndStatuses(string $targetObject, int $targetObjectId, array $statuses): UserTaskScopes
+    public static function getQueryUserTaskByTargetIdAndStatuses(int $targetObjectId, array $statuses, array $targetObjects = [TargetObject::TARGET_OBJ_LEAD]): UserTaskScopes
     {
         return UserTask::find()
-            ->andWhere(['ut_target_object' => $targetObject])
+            ->andWhere(['ut_target_object' => $targetObjects])
             ->andWhere(['ut_target_object_id' => $targetObjectId])
             ->andWhere(['IN', 'ut_status_id', $statuses]);
     }

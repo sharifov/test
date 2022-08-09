@@ -255,7 +255,6 @@ class LeadTaskListService
     public function canceledAllUserTask()
     {
         $userTasks = UserTaskQuery::getQueryUserTaskByTargetIdAndStatuses(
-            TargetObject::TARGET_OBJ_LEAD,
             $this->lead->id,
             [UserTask::STATUS_PROCESSING]
         )->all();
