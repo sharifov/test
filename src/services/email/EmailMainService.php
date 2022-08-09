@@ -62,7 +62,7 @@ class EmailMainService implements EmailServiceInterface
 
     private EmailServiceHelper $helper;
     private EmailService $oldService;
-    private EmailsNormalizeService $normalizedService;
+    private $normalizedService;
     private EmailRepository $emailRepository;
     private EmailOldRepository $emailOldRepository;
 
