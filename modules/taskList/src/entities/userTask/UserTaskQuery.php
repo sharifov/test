@@ -5,6 +5,7 @@ namespace modules\taskList\src\entities\userTask;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTask;
+use modules\taskList\src\entities\TargetObject;
 use Yii;
 
 class UserTaskQuery
@@ -47,8 +48,7 @@ class UserTaskQuery
             ->andWhere(['ut_target_object_id' => $targetObjectId])
             ->andWhere(['IN', 'ut_status_id', $utStatusIds])
             ->andWhere(['<=', 'ut_start_dt', $dtNowFormatted])
-            ->andWhere(['OR', ['ut_end_dt' => null], ['>=', 'ut_end_dt', $dtNowFormatted]])
-        ;
+            ->andWhere(['OR', ['ut_end_dt' => null], ['>=', 'ut_end_dt', $dtNowFormatted]]);
 
         if (!empty($excludeIds)) {
             $userTasksQuery->andWhere(['NOT IN', 'ut_id', $excludeIds]);
@@ -166,5 +166,13 @@ class UserTaskQuery
     public static function getQueryUserTaskByUserTaskListAndStatuses(int $userId, int $taskListId, string $targetObject, int $targetObjectId, array $statuses): UserTaskScopes
     {
         return self::getQueryUserTaskByUserTaskList($userId, $taskListId, $targetObject, $targetObjectId)->andWhere(['IN', 'ut_status_id', $statuses]);
+    }
+
+    public static function getQueryUserTaskByTargetIdAndStatuses(int $targetObjectId, array $statuses, array $targetObjects = [TargetObject::TARGET_OBJ_LEAD]): UserTaskScopes
+    {
+        return UserTask::find()
+            ->andWhere(['ut_target_object' => $targetObjects])
+            ->andWhere(['ut_target_object_id' => $targetObjectId])
+            ->andWhere(['IN', 'ut_status_id', $statuses]);
     }
 }
