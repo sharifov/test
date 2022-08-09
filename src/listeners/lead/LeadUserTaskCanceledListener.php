@@ -9,8 +9,6 @@ use src\events\lead\LeadStatusChangedEvent;
 class LeadUserTaskCanceledListener
 {
     private const CANCELED_LEAD_STATUS = [
-        Lead::STATUS_PENDING,
-        Lead::STATUS_PROCESSING,
         Lead::STATUS_REJECT,
         Lead::STATUS_FOLLOW_UP,
         Lead::STATUS_ON_HOLD,
@@ -20,7 +18,6 @@ class LeadUserTaskCanceledListener
         Lead::STATUS_SNOOZE,
         Lead::STATUS_BOOK_FAILED,
         Lead::STATUS_ALTERNATIVE,
-        Lead::STATUS_NEW,
         Lead::STATUS_EXTRA_QUEUE,
         Lead::STATUS_CLOSED,
         Lead::STATUS_BUSINESS_EXTRA_QUEUE,
