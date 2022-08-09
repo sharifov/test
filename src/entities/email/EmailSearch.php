@@ -44,6 +44,7 @@ class EmailSearch extends Email
             [['template_type_name'], 'string'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['e_id', 'e_project_id', 'e_type_id', 'e_is_deleted', 'e_status_id', 'e_created_user_id', 'supervision_id', 'e_lead_id', 'e_case_id'], 'integer'],
+            [['e_created_dt', 'e_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 
@@ -73,7 +74,8 @@ class EmailSearch extends Email
         return Model::scenarios();
     }
 
-    public function search($params) {
+    public function search($params)
+    {
         $query = self::find()->joinWith(['contactFrom', 'contactTo', 'params']);
 
         $query->addSelect([
@@ -102,7 +104,8 @@ class EmailSearch extends Email
             'desc' => ['email_address.ea_email' => SORT_DESC],
         ];
 
-        if (!($this->load($params) && $this->validate())) {
+        $this->load($params);
+        if (!$this->validate()) {
             return $dataProvider;
         }
 
@@ -152,14 +155,10 @@ class EmailSearch extends Email
             }
         }
         if ($this->email_from) {
-            $query->joinWith(['contactFrom' => function ($q) {
-                $q->andFilterWhere(['like', 'ea_email', $this->email_from]);
-            }]);
+            $query->byEmailFromList([$this->email_from]);
         }
         if ($this->email_to) {
-            $query->joinWith(['contactTo' => function ($q) {
-                $q->andFilterWhere(['like', 'ea_email', $this->email_to]);
-            }]);
+            $query->byEmailToList([$this->email_to]);
         }
         if ($this->language_id) {
             $query->joinWith(['params' => function ($q) {
@@ -237,5 +236,4 @@ class EmailSearch extends Email
 
         return $dataProvider;
     }
-
 }

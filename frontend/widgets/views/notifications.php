@@ -1,4 +1,5 @@
 <?php
+
 use src\helpers\text\StringHelper;
 
 /* @var $model \common\models\Notifications[] */

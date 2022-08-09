@@ -92,6 +92,7 @@ use yii\web\UnprocessableEntityHttpException;
 use common\components\ReceiveEmailsJob;
 use yii\queue\Queue;
 use src\repositories\email\EmailRepositoryFactory;
+use src\services\email\EmailMainService;
 
 /**
  * Class CommunicationController
@@ -126,6 +127,7 @@ class CommunicationController extends ApiBaseController
     private $callService;
     private $conferenceStatusCallbackHandler;
     private $emailRepository;
+    private $emailService;
 
     /**
      * @param $id
@@ -133,12 +135,13 @@ class CommunicationController extends ApiBaseController
      * @param CallService $callService
      * @param array $config
      */
-    public function __construct($id, $module, CallService $callService, ConferenceStatusCallbackHandler $conferenceStatusCallbackHandler, $config = [])
+    public function __construct($id, $module, CallService $callService, ConferenceStatusCallbackHandler $conferenceStatusCallbackHandler, EmailMainService $emailService, $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->callService = $callService;
         $this->conferenceStatusCallbackHandler = $conferenceStatusCallbackHandler;
-        $this->emailRepository = EmailRepositoryFactory::getRepository();
+        $this->emailRepository = EmailRepositoryFactory::getRepository(); //TODO: remove after refactoring
+        $this->emailService = $emailService;
     }
 
     /**
@@ -2305,19 +2308,10 @@ class CommunicationController extends ApiBaseController
                 throw new NotFoundHttpException('Not found eq_status_id', 12);
             }
 
-            $email = $this->emailRepository->getModelQuery()->byCommunicationId($eq_id)->limit(1)->one();;
-            if ($email) {
-                if ($eq_status_id > 0) {
-                    try {
-                        $this->emailRepository->changeStatus($email, $eq_status_id);
-                    } catch (\Throwable $e) {
-                        Yii::error($e->getMessage(), 'API:Communication:updateEmailStatus:Email:save');
-                    }
-                }
-
-                $response['email'] = $email->e_id;
-            } else {
-                $response['error'] = 'Not found Communication ID (' . $eq_id . ')';
+            try {
+                $response['email'] = $this->emailService->updateEmailStatus($eq_id, $eq_status_id);
+            } catch (\Throwable $e) {
+                $response['error'] = $e->getMessage();
                 $response['error_code'] = 13;
             }
         } catch (\Throwable $e) {

@@ -41,6 +41,10 @@ class LeadTaskReAssignService extends LeadTaskAssignService
         )->exists();
 
         if ($existNewUserTaskComplete) {
+            \modules\taskList\src\helpers\TaskListHelper::debug(
+                'Exist UserTask Complete (Lead ID: ' . $this->lead->id . ', EmployeeID: ' . $this->lead->employee_id . '), TaskLIst ID (' . $this->taskList->tl_id . ')',
+                'info\UserTaskAssign:LeadTaskReAssignService:assign:info'
+            );
             return;
         }
 
@@ -64,11 +68,21 @@ class LeadTaskReAssignService extends LeadTaskAssignService
         }
 
         if ($oldUserTask->isComplete()) {
+            \modules\taskList\src\helpers\TaskListHelper::debug(
+                'Exist OldUserTask Complete (Lead ID: ' . $this->lead->id . ', EmployeeID: ' . $this->oldOwnerId . '), TaskLIst ID (' . $this->taskList->tl_id . ')',
+                'info\UserTaskAssign:LeadTaskReAssignService:assign:info'
+            );
             return;
         }
 
         $userTask = $oldUserTask
-            ->setOwner($this->lead->employee_id);
+            ->setOwner($this->lead->employee_id)
+            ->setStartDate($this->dtNowWithDelay->format('Y-m-d H:i:s'));
+
+        if ((int) $this->taskList->tl_duration_min > 0) {
+            $taskListEndDt = $this->dtNowWithDelay->modify(sprintf('+%d minutes', (int) $this->taskList->tl_duration_min));
+            $userTask->setEndDate($taskListEndDt->format('Y-m-d H:i:s'));
+        }
 
         if (!$userTask->validate()) {
             throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($userTask, ' '));

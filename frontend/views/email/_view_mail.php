@@ -31,7 +31,7 @@ use src\entities\email\helpers\EmailStatus;
                     ]) ?>
                 <?php endif; ?>
 
-               	<?= Html::a('<i class="fa fa-trash-o"></i>' . ($model->isDeleted() ? ' UnTrash' : '' ), ['soft-delete', 'id' => $model->e_id], [
+                <?= Html::a('<i class="fa fa-trash-o"></i>' . ($model->isDeleted() ? ' UnTrash' : '' ), ['soft-delete', 'id' => $model->e_id], [
                     'class' => 'btn btn-sm btn-default',
                     'data-placement' => 'top',
                     'data-toggle' => 'tooltip',

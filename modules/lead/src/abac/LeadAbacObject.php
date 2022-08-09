@@ -2,7 +2,9 @@
 
 namespace modules\lead\src\abac;
 
+use common\models\Department;
 use common\models\Lead;
+use common\models\Project;
 use modules\abac\components\AbacBaseModel;
 use modules\abac\src\entities\AbacInterface;
 use src\model\leadStatusReason\entity\LeadStatusReasonQuery;
@@ -484,6 +486,19 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_CONTAINS]
     ];
 
+    protected const ATTR_LEAD_SOURCE = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'source_cid',
+        'field' => 'source_cid',
+        'label' => 'Lead Source CID',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_TEXT,
+        'values' => [],
+        'multiple' => false,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2]
+    ];
+
+
     public const OBJECT_ATTRIBUTE_LIST = [
         self::ACT_USER_CONVERSION    => [self::ATTR_LEAD_IS_OWNER],
         self::UI_BLOCK_CLIENT_INFO   => [
@@ -532,7 +547,8 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
             self::ATTR_HAS_APPLIED_QUOTE,
             self::ATTR_WITHIN_PERSONAL_TAKE_LIMITS,
             self::ATTR_CAN_TAKE_BY_FREQUENCY_MINUTES,
-            self::ATTR_SNOOZE_COUNT
+            self::ATTR_SNOOZE_COUNT,
+            self::ATTR_LEAD_SOURCE
         ],
 
         self::LOGIC_CLIENT_DATA  => [self::ATTR_LEAD_IS_OWNER],
@@ -608,6 +624,13 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         $attrClientCreateMultiFieldsList = self::ATTR_MULTI_FIELD_NAME;
         $attrLeadCloseReasons = self::ATTR_CLOSE_REASON;
 
+        $attrLeadProjectName = self::ATTR_LEAD_PROJECT_NAME;
+        $projectNames = Project::getList();
+        $attrLeadProjectName['values'] = array_combine($projectNames, $projectNames);
+        $attrLeadDepartmentName = self::ATTR_LEAD_DEPARTMENT_NAME;
+        $departmentNames = Department::getList();
+        $attrLeadDepartmentName['values'] = array_combine($departmentNames, $departmentNames);
+
         $formPhoneCreateFields = [
             'phone' => 'Phone'
         ];
@@ -638,6 +661,8 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         $attributeList[self::OBJ_LEAD_PREFERENCES][] = $attrStatus;
         $attributeList[self::OBJ_LEAD][] = $attrStatus;
         $attributeList[self::OBJ_LEAD][] = $attrLeadCloseReasons;
+        $attributeList[self::OBJ_LEAD][] = $attrLeadProjectName;
+        $attributeList[self::OBJ_LEAD][] = $attrLeadDepartmentName;
         $attributeList[self::PHONE_CREATE_FORM][] = $attrPhoneCreateFieldsList;
         $attributeList[self::EMAIL_CREATE_FORM][] = $attrEmailCreateFieldsList;
         $attributeList[self::CLIENT_CREATE_FORM][] = $attrClientCreateFieldsList;

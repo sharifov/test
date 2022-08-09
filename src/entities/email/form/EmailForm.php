@@ -234,5 +234,4 @@ class EmailForm extends CompositeForm
         }
         return $result;
     }
-
 }

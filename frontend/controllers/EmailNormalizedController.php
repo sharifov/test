@@ -6,14 +6,13 @@ use common\components\CommunicationService;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Project;
-use common\models\search\EmailSearch;
 use common\models\UserProjectParams;
 use modules\email\src\abac\dto\EmailAbacDto;
 use modules\email\src\abac\EmailAbacObject;
 use src\auth\Auth;
 use src\entities\email\Email;
 use src\entities\email\EmailBody;
-use src\entities\email\EmailSearch as EmailNormalizedSearch;
+use src\entities\email\EmailSearch;
 use src\entities\email\form\EmailForm;
 use src\entities\email\helpers\EmailContactType;
 use src\entities\email\helpers\EmailFilterType;
@@ -70,7 +69,7 @@ class EmailNormalizedController extends FController
      */
     public function actionIndex()
     {
-        $searchModel = new EmailNormalizedSearch();
+        $searchModel = new EmailSearch();
 
         $params = Yii::$app->request->queryParams;
         if (Yii::$app->user->identity->canRole('supervision')) {
@@ -145,7 +144,7 @@ class EmailNormalizedController extends FController
     {
         /** @var Employee $user */
         $user = Auth::user();
-        $searchModel = new EmailNormalizedSearch();
+        $searchModel = new EmailSearch();
         $modelEmailView = null;
         $emailForm = null;
 
@@ -168,7 +167,7 @@ class EmailNormalizedController extends FController
                     }
 
                     $this->emailService->sendMail($email);
-                    Yii::$app->session->setFlash('success', $flashMessage. '<strong>Email Message</strong> was successfully sent to <strong>' . $email->getEmailTo() . '</strong>');
+                    Yii::$app->session->setFlash('success', $flashMessage . '<strong>Email Message</strong> was successfully sent to <strong>' . $email->getEmailTo() . '</strong>');
 
                     return $this->redirect(['inbox', 'id' => $email->e_id]);
                 } catch (\Throwable $e) {

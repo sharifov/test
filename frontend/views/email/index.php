@@ -37,10 +37,10 @@ $user = Yii::$app->user->identity;
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
 
     <?php if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_EMAIL_NORMALIZED_FORM_ENABLE)) : ?>
-    	<?php $normalizedTotal = EmailsNormalizeService::getTotalConnectedWithOld();
-    	   $oldTotal = EmailsNormalizeService::getOldTotal();
-    	   $alertClass = ($normalizedTotal < $oldTotal) ? 'warning' : 'info';
-    	?>
+        <?php $normalizedTotal = EmailsNormalizeService::getTotalConnectedWithOld();
+           $oldTotal = EmailsNormalizeService::getOldTotal();
+           $alertClass = ($normalizedTotal < $oldTotal) ? 'warning' : 'info';
+        ?>
         <div class="alert alert-<?= $alertClass?> alert-dismissible" role="alert">
             <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <i class="fa fa-info-circle"></i> Normalized emails <?=  $normalizedTotal?> from <?=  $oldTotal?>

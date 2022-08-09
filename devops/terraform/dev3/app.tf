@@ -8,8 +8,9 @@ resource "aws_instance" "app" {
   vpc_security_group_ids = [aws_security_group.app.id]
 
   root_block_device {
-    volume_size = 30
+    volume_size = var.APP_VOLUME_SIZE
     volume_type = "gp3"
+    encrypted   = false
   }
 
   tags = {
@@ -18,7 +19,11 @@ resource "aws_instance" "app" {
     Project     = var.PROJECT
     Ns          = var.NAMESPACE
     Domain      = var.DOMAIN
+    API         = "api.{var.DOMAIN}"
+    App         = var.PROJECT
     Kind        = "app"
+    Monitoring  = "prometheus"
+    Terraform   = "true"
   }
 }
 
@@ -117,7 +122,7 @@ resource "aws_lb_target_group_attachment" "centrifugo" {
   target_id        = aws_instance.shared.id
 }
 
-# Application Security Group
+# App Security Group
 resource "aws_security_group" "app" {
   name        = "private-${var.PROJECT}-${var.ENV}"
   description = "Allows internal communication betwen ALB and TG"
@@ -187,6 +192,14 @@ resource "aws_security_group" "app" {
     cidr_blocks = [var.VPC_CIDR, var.INFRA_CIDR]
   }
 
+  ingress {
+    description = "NPM"
+    from_port   = 3000
+    to_port     = 3100
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -200,6 +213,6 @@ resource "aws_security_group" "app" {
     Project     = var.PROJECT
     Ns          = var.NAMESPACE
     Domain      = var.DOMAIN
+    Terraform   = "true"
   }
 }
-

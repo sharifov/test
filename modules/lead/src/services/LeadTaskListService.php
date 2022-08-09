@@ -59,16 +59,31 @@ class LeadTaskListService
                         ))->create();
 
                         if (!$assignChecker->check()) {
+                            \modules\taskList\src\helpers\TaskListHelper::debug(
+                                'Not Found Valid Phone or Email (Lead ID: ' . $this->lead->id . ', Task Object: ' . $taskList->tl_object . ')',
+                                'info\UserTaskAssign:LeadTaskListService:assignReAssign:info'
+                            );
                             continue;
                         }
 
                         $dtNowWithDelay = $dtNow->modify(sprintf('+%d hour', $taskList->getDelayHoursParam()));
-                        $userShiftSchedules = UserShiftScheduleQuery::getAllFromStartDateByUserId($this->lead->employee_id, $dtNowWithDelay);
+
+                        $taskListEndDt = null;
+                        if ((int)$taskList->tl_duration_min > 0) {
+                            $taskListEndDt = $dtNowWithDelay->modify(sprintf('+%d minutes', $taskList->tl_duration_min));
+                        }
+
+                        $userShiftSchedules = UserShiftScheduleQuery::getAllFromStartDateByUserId(
+                            $this->lead->employee_id,
+                            $dtNowWithDelay,
+                            $taskListEndDt
+                        );
 
                         if (empty($userShiftSchedules)) {
                             $this->canceledUserTask($taskList->tl_id);
                             throw new TaskListAssignException('UserShiftSchedules not found by EmployeeId (' .
-                                $this->lead->employee_id . ') and StartDateTime:' . $dtNowWithDelay->format('Y-m-d H:i:s'));
+                                $this->lead->employee_id . ') and StartDateTime:' . $dtNowWithDelay->format('Y-m-d H:i:s')
+                                . ' and EndTime:' . ($taskListEndDt ? $taskListEndDt->format('Y-m-d H:i:s') : 'null'));
                         }
 
                         if ($this->isEmptyOldOwner()) {
@@ -90,8 +105,11 @@ class LeadTaskListService
 
                         $assignService->assign();
                     } catch (TaskListAssignException $exception) {
+                        $message = AppHelper::throwableLog($exception);
+                        $message['taskListId'] = $taskList->tl_id ?? null;
+                        $message['leadId'] = $this->lead->id ?? null;
                         \Yii::info(
-                            AppHelper::throwableLog($exception),
+                            $message,
                             'info\LeadTaskListService:assignReAssign:TaskListAssignException'
                         );
                     } catch (\RuntimeException | \DomainException $throwable) {
@@ -156,6 +174,10 @@ class LeadTaskListService
         );
         if (!$can) {
             if ($isResultBool) {
+                \modules\taskList\src\helpers\TaskListHelper::debug(
+                    'ABAC(' . LeadTaskListAbacObject::PROCESSING_TASK . ') is failed (Lead ID: ' . $this->lead->id . ')',
+                    'info\UserTaskAssign:LeadTaskListService:isProcessAllowed:info'
+                );
                 return false;
             }
             throw new \RuntimeException('ABAC(' . LeadTaskListAbacObject::PROCESSING_TASK . ') is failed');
@@ -163,6 +185,10 @@ class LeadTaskListService
 
         if (!$this->hasActiveLeadObjectSegment()) {
             if ($isResultBool) {
+                \modules\taskList\src\helpers\TaskListHelper::debug(
+                    'Has ActiveLeadObjectSegment is false (Lead ID: ' . $this->lead->id . ')',
+                    'info\UserTaskAssign:LeadTaskListService:isProcessAllowed:info'
+                );
                 return false;
             }
             throw new \RuntimeException('Has ActiveLeadObjectSegment is false');
@@ -176,6 +202,10 @@ class LeadTaskListService
         /** @fflag FFlag::FF_KEY_LEAD_TASK_ASSIGN, Lead to task List assign checker */
         if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_LEAD_TASK_ASSIGN)) {
             if ($isResultBool) {
+                \modules\taskList\src\helpers\TaskListHelper::debug(
+                    'Feature Flag(' . FFlag::FF_KEY_LEAD_TASK_ASSIGN . ') is disabled',
+                    'info\UserTaskAssign:LeadTaskListService:isEnableFFAndNotEmptyOwner:info'
+                );
                 return false;
             }
             throw new \RuntimeException('Feature Flag(' . FFlag::FF_KEY_LEAD_TASK_ASSIGN . ') is disabled');
@@ -183,6 +213,10 @@ class LeadTaskListService
 
         if (!$this->lead->employee ?? null) {
             if ($isResultBool) {
+                \modules\taskList\src\helpers\TaskListHelper::debug(
+                    'Lead(ID:' . $this->lead->id . ') owner is empty',
+                    'info\UserTaskAssign:LeadTaskListService:isEnableFFAndNotEmptyOwner:info'
+                );
                 return false;
             }
             throw new \RuntimeException('Lead owner is empty');
@@ -215,6 +249,19 @@ class LeadTaskListService
                 $userTask->setStatusCancel();
                 (new UserTaskRepository($userTask))->save();
             }
+        }
+    }
+
+    public function canceledAllUserTask()
+    {
+        $userTasks = UserTaskQuery::getQueryUserTaskByTargetIdAndStatuses(
+            $this->lead->id,
+            [UserTask::STATUS_PROCESSING]
+        )->all();
+
+        foreach ($userTasks as $userTask) {
+            $userTask->setStatusCancel();
+            (new UserTaskRepository($userTask))->save();
         }
     }
 }

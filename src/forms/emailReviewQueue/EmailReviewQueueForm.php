@@ -107,10 +107,10 @@ class EmailReviewQueueForm extends Model
             [['emailMessage'], 'string'],
             [['emailSubject'], 'string', 'max' => 200, 'min' => 5],
             [['emailFromName', 'emailToName'], 'string', 'max' => 50],
-            [['emailId'], 'exist', 'skipOnError' => true, 'targetClass' => EmailNorm::class, 'targetAttribute' => ['emailId' => 'e_id'], 'when' => function($model) {
+            [['emailId'], 'exist', 'skipOnError' => true, 'targetClass' => EmailNorm::class, 'targetAttribute' => ['emailId' => 'e_id'], 'when' => function ($model) {
                 return $model->emailIsNorm == 1;
             }],
-            [['emailId'], 'exist', 'skipOnError' => true, 'targetClass' => Email::class, 'targetAttribute' => ['emailId' => 'e_id'], 'when' => function($model) {
+            [['emailId'], 'exist', 'skipOnError' => true, 'targetClass' => Email::class, 'targetAttribute' => ['emailId' => 'e_id'], 'when' => function ($model) {
                 return $model->emailIsNorm === null;
             }],
             [['emailQueueId'], 'exist', 'skipOnError' => true, 'targetClass' => EmailReviewQueue::class, 'targetAttribute' => ['emailQueueId' => 'erq_id']],

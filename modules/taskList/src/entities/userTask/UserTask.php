@@ -22,6 +22,7 @@ use yii\helpers\ArrayHelper;
  * @property string|null $ut_target_object
  * @property int $ut_target_object_id
  * @property int $ut_task_list_id
+ * @property string|null $ut_description
  * @property string $ut_start_dt
  * @property string $ut_end_dt
  * @property int|null $ut_priority
@@ -96,6 +97,8 @@ class UserTask extends \yii\db\ActiveRecord
             [['ut_year'], 'integer'],
 
             [['ut_month'], 'integer'],
+
+            [['ut_description'], 'string', 'max' => 255]
         ];
     }
 
@@ -151,6 +154,7 @@ class UserTask extends \yii\db\ActiveRecord
             'ut_start_dt' => 'Start Dt',
             'ut_end_dt' => 'End Dt',
             'ut_priority' => 'Priority',
+            'ut_description' => 'Note',
             'ut_status_id' => 'Status',
             'ut_created_dt' => 'Created Dt',
             'ut_year' => 'Year',
@@ -283,6 +287,18 @@ class UserTask extends \yii\db\ActiveRecord
         return $this;
     }
 
+    public function setStartDate(string $startDate): UserTask
+    {
+        $this->ut_start_dt = $startDate;
+        return $this;
+    }
+
+    public function setEndDate(?string $endDate): UserTask
+    {
+        $this->ut_end_dt = $endDate;
+        return $this;
+    }
+
     public function getLastStatusLogByStatusId(int $statusId): ?UserTaskStatusLog
     {
         return UserTaskStatusLog::find()
@@ -292,5 +308,10 @@ class UserTask extends \yii\db\ActiveRecord
             ])
             ->limit(1)
             ->one();
+    }
+
+    public function isOwner(?int $userId): bool
+    {
+        return $this->ut_user_id === $userId;
     }
 }

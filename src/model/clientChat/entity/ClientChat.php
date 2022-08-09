@@ -27,6 +27,7 @@ use src\model\clientChat\useCase\cloneChat\ClientChatCloneDto;
 use src\model\clientChatCase\entity\ClientChatCase;
 use src\model\clientChatChannel\entity\ClientChatChannel;
 use src\model\clientChatFeedback\entity\ClientChatFeedback;
+use src\model\clientChatFormResponse\entity\ClientChatFormResponse;
 use src\model\clientChatHold\entity\ClientChatHold;
 use src\model\clientChatLastMessage\entity\ClientChatLastMessage;
 use src\model\clientChatLead\entity\ClientChatLead;
@@ -294,6 +295,11 @@ class ClientChat extends \yii\db\ActiveRecord
     public function getCases(): ActiveQuery
     {
         return $this->hasMany(Cases::class, ['cs_id' => 'cccs_case_id'])->viaTable(ClientChatCase::tableName(), ['cccs_chat_id' => 'cch_id']);
+    }
+
+    public function getFormResponses(): ActiveQuery
+    {
+        return $this->hasMany(ClientChatFormResponse::class, ['ccfr_client_chat_id' => 'cch_id']);
     }
 
     public function getFeedback(): ActiveQuery

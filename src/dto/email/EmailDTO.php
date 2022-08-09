@@ -98,7 +98,7 @@ class EmailDTO
         $this->messageId = $mail['ei_message_id'];
         //$this->communicationId = $mail['ei_id'];
 
-        if ($attachPaths = ArrayHelper::getValue($mail, 'attach_paths')){
+        if ($attachPaths = ArrayHelper::getValue($mail, 'attach_paths')) {
             $this->attachPaths = explode(',', $attachPaths);
         }
 
@@ -116,7 +116,6 @@ class EmailDTO
         $this->emailSubject = $gmail->getSubject();
         $this->bodyHtml = $gmail->getContent();
         $this->createdDt = date('Y-m-d H:i:s');
-        $this->inboxEmailId = $mail['ei_id'];
         $this->inboxCreatedDt = $gmail->getDate();
         $this->refMessageId = $gmail->getReferences();
         $this->messageId = $gmail->getMessageId();
@@ -136,8 +135,7 @@ class EmailDTO
         array $attachments = [],
         $typeId = EmailType::OUTBOX,
         $statusId = EmailStatus::PENDING
-        )
-    {
+    ) {
         $this->projectId = $order->or_project_id;
         $this->leadId = $order->or_lead_id;
         $this->typeId = $typeId;
@@ -169,7 +167,7 @@ class EmailDTO
         $instance->caseId = $data['caseId'] ?? null;
         $instance->depId = $data['depId'] ?? null;
         $instance->clientId = $data['clientId'] ?? null;
-        $instance->type = $data['typeId'] ?? EmailType::OUTBOX;
+        $instance->typeId = $data['typeId'] ?? EmailType::OUTBOX;
         $instance->statusId = $data['statusId'] ?? EmailStatus::PENDING;
         $instance->isNew = true;
         $instance->emailTo = $data['emailTo'] ?? null;
@@ -182,7 +180,7 @@ class EmailDTO
         $instance->bodyHtml = $data['bodyHtml'] ?? null;
         $instance->createdDt = $data['createdDt'] ?? date('Y-m-d H:i:s');
         $instance->createdUserId = $data['createdUserId'] ?? null;
-        $instance->templateTypeId = $data['templateTypeId'] ?? ($data['templateKey'] ? $this->getTemplateIdByKey($templateKey) : null);
+        $instance->templateTypeId = $data['templateTypeId'] ?? (isset($data['templateKey']) ? self::getTemplateIdByKey($data['templateKey']) : null);
         $instance->inboxEmailId = $data['inboxEmailId'] ?? null;
         $instance->inboxCreatedDt = $data['inboxCreatedDt'] ?? null;
         $instance->refMessageId = $data['refMessageId'] ?? null;
@@ -197,7 +195,7 @@ class EmailDTO
      * @param string $templateKey
      * @return int|null
      */
-    private function getTemplateIdByKey(string $templateKey)
+    public static function getTemplateIdByKey(string $templateKey)
     {
         $templateTypeId = EmailTemplateType::find()
             ->select(['etp_id'])

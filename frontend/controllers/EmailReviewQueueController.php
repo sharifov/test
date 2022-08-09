@@ -146,7 +146,7 @@ class EmailReviewQueueController extends FController
             if ($email) {
                 try {
                     $email = $this->emailService->updateAfterReview($form, $email);
-                    $this->emailService->sendMail($email);
+                    $this->emailService->sendMail($email, $email->emailData ?? []);
 
                     $emailQueue->statusToReviewed();
                     $emailQueue->erq_user_reviewer_id = Auth::id();

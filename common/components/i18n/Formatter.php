@@ -1004,6 +1004,14 @@ class Formatter extends \yii\i18n\Formatter
         return $this->nullDisplay;
     }
 
+    public function asArray($data): string
+    {
+        if ($data) {
+            return VarDumper::dumpAsString($data);
+        }
+        return $this->nullDisplay;
+    }
+
     public function asFileLogType($value): string
     {
         if ($value === null) {

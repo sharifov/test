@@ -83,7 +83,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             'subject'   =>  $emailOld->e_email_subject,
             'text'      =>  $emailOld->e_email_body_text,
             'bodyHtml'  =>  $emailOld->e_email_body_blob ? TextConvertingHelper::unCompress($emailOld->e_email_body_blob) : $emailOld->body_html,
-            'data'      =>  $emailOld->e_email_data,
+            'data'      =>  !empty($emailOld->e_email_data) ? $emailOld->e_email_data : null,
         ];
 
         $data['log'] = [
@@ -222,7 +222,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             $email->refresh();
 
             //=link Clients
-            $clientsIds = $form->clients ?? [$this->helper->detectClientId($email->emailTo)];
+            $clientsIds = $form->clients ?? [$this->helper->detectClientId($email->getEmailTo(false))];
             if (!empty($clientsIds)) {
                 $this->emailRepository->linkClients($email, $clientsIds);
             }
@@ -286,12 +286,15 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             //=EmailBody
             $bodyText = $form->body->getText();
             $emailBody = $email->emailBody;
-            $emailBody->attributes = [
+            $emailBodyAttr = [
                 'embd_email_subject' => $form->body->subject,
                 'embd_email_body_text' => $bodyText,
-                'embd_email_data' => $form->body->data,
                 'embd_hash' => hash('crc32b', join(' | ', [$form->body->subject, $bodyText])),
             ];
+            if ($form->body->data !== null) {
+                $emailBodyAttr['embd_email_data'] = $form->body->data;
+            }
+            $emailBody->attributes = $emailBodyAttr;
             $emailBody->save();
             //=!EmailBody
 
@@ -304,7 +307,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             $contactsByType = ArrayHelper::index($email->emailContacts, 'ec_type_id');
             $contactsById = ArrayHelper::index($email->emailContacts, 'ec_id');
             foreach ($form->contacts as $contactForm) {
-                if (isset($contactForm->id)) {
+                if (isset($contactForm->id) && !empty($contactForm->id)) {
                     $contact = $contactsById[$contactForm->id];
                 } else {
                     $contact = $contactsByType[$contactForm->type];
@@ -341,7 +344,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             //=!link Leads
 
             //=link Reply
-            if ($form->replyId !== null) {
+            if (!empty($form->replyId)) {
                 $this->emailRepository->linkReply($email, $form->replyId);
             }
             //=!link Reply
@@ -406,13 +409,13 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             'status'        =>  EmailStatus::PENDING,
             'createdDt'     =>  date('Y-m-d H:i:s'),
             'params'        => [
-                'templateType'  =>  $previewEmailForm->getEmailTemplateId() ?? null,
+                'templateType'  =>  $previewEmailForm->getEmailTemplateId() ?: null,
                 'language'      =>  $previewEmailForm->getLanguageId() ?? null,
             ],
             'body'          =>  [
                 'subject'   =>  $previewEmailForm->getEmailSubject(),
                 'bodyHtml'  =>  $previewEmailForm->getEmailMessage(),
-                'data'      =>  $attachments,
+                'data'      =>  !empty($attachments) ? $attachments : null,
             ],
             'contacts'      =>  [
                 'from' => [
@@ -503,7 +506,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             'body'  =>  [
                 'subject'   =>  $emailDTO->emailSubject,
                 'bodyHtml'  =>  $emailDTO->bodyHtml,
-                'data'      =>  $emailDTO->attachments,
+                'data'      =>  !empty($emailDTO->attachments) ? $emailDTO->attachments : null,
             ],
             'contacts' => [
                 'from' => [
@@ -522,7 +525,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
                 'refMessageId'      =>  $emailDTO->refMessageId,
                 'inboxCreatedDt'    =>  $emailDTO->inboxCreatedDt,
                 'inboxEmailId'      =>  $emailDTO->inboxEmailId,
-                'isNew'             =>  $emailDTO->isNew,
+                'isNew'             =>  $emailDTO->isNew !== null ? intval($emailDTO->isNew) : null,
             ]
         ];
 

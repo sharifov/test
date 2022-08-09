@@ -83,6 +83,7 @@ use src\listeners\lead\LeadTaskEventListener;
 use src\listeners\lead\LeadTaskListListener;
 use src\listeners\lead\LeadTipsSplitListener;
 use src\listeners\lead\LeadTrashEventLogListener;
+use src\listeners\lead\LeadUserTaskCanceledListener;
 use src\listeners\lead\leadWebEngage\LeadBookedWebEngageListener;
 use src\listeners\lead\leadWebEngage\LeadSoldWebEngageListener;
 use src\listeners\lead\leadWebEngage\LeadTrashedWebEngageListener;
@@ -138,6 +139,7 @@ return [
     ],
 
     LeadStatusChangedEvent::class => [
+        LeadUserTaskCanceledListener::class,
         LeadQcallProcessingListener::class,
         LeadFromSnoozeNotificationListener::class,
         LeadPoorProcessingRemoverListener::class,

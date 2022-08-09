@@ -32,10 +32,10 @@ class EmailServiceHelper
 
     /**
      * @param string $subject
-     * @param string $refMessageId
+     * @param string|null $refMessageId
      * @return int|null
      */
-    public function detectLeadId(string $subject, string $refMessageId): ?int
+    public function detectLeadId(string $subject, ?string $refMessageId): ?int
     {
         try {
             $lead = $this->getLeadFromSubjectByIdOrHash($subject);
@@ -51,10 +51,10 @@ class EmailServiceHelper
 
     /**
      * @param string $subject
-     * @param string $refMessageId
+     * @param string|null $refMessageId
      * @return int|null
      */
-    public function detectCaseId(string $subject, string $refMessageId): ?int
+    public function detectCaseId(string $subject, ?string $refMessageId): ?int
     {
         try {
             $case = $this->getCaseFromSubjectByIdOrHash($subject);
@@ -262,7 +262,7 @@ class EmailServiceHelper
             }
         }
 
-        $employees = Employee::find()->where(['email' => $this->$email])->all();
+        $employees = Employee::find()->where(['email' => $email])->all();
         if ($employees) {
             foreach ($employees as $employe) {
                 $users[$employe->id] = $employe->id;
@@ -275,11 +275,22 @@ class EmailServiceHelper
     /**
      *
      * @param string $email
-     * @return int
+     * @return int|null
      */
-    public function getUserIdByEmail(string $email): int
+    public function getUserIdByEmail(string $email): ?int
     {
-        $user = $this->getUsersIdByEmail($email);
-        return reset($user);
+        $users = $this->getUsersIdByEmail($email);
+        return !empty($user) ? reset($users) : null;
+    }
+
+    public function getProjectIdByDepOrUpp($emailTo): ?int
+    {
+        if ($dep = DepartmentEmailProject::find()->byEmail($emailTo)->one()) {
+            return $dep->dep_project_id;
+        } else if ($upp = UserProjectParams::find()->byEmail($emailTo)->one()) {
+            return $upp->upp_project_id;
+        }
+
+        return null;
     }
 }

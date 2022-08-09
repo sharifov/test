@@ -138,7 +138,7 @@ class EmailOldRepository implements EmailRepositoryInterface
     public function getEmailCountForLead(int $leadId, int $type = 0): int
     {
         $query = Email::find()->lead($leadId)->notDeleted();
-        if($type > 0) {
+        if ($type > 0) {
             $query = $query->byType($type);
         }
         return $query->count();
@@ -199,8 +199,8 @@ class EmailOldRepository implements EmailRepositoryInterface
 
     public function getLastInboxId(): ?int
     {
-        $lastInbox = Email::find()->select(['e_inbox_email_id'])->orderByLastInbox()->limit(1)->one();
-        return $lastInbox['e_inbox_email_id'] ?? null;
+        $lastInbox = Email::find()->select(['e_inbox_email_id'])->orderByLastInbox()->limit(1)->scalar();
+        return $lastInbox !== false ? $lastInbox : null;
     }
 
     public function getModelQuery(): ActiveQuery
@@ -211,6 +211,14 @@ class EmailOldRepository implements EmailRepositoryInterface
     public function getTableName(): string
     {
         return Email::tableName();
+    }
+
+    public function findByCommunicationId(int $communicationId): Email
+    {
+        if ($email = Email::find()->byCommunicationId($communicationId)->limit(1)->one()) {
+            return $email;
+        }
+        throw new NotFoundException('Email not found. Communication ID: ' . $communicationId);
     }
 
     public function getRawSqlCountGroupedByLead(): string

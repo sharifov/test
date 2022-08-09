@@ -14,6 +14,8 @@ use modules\fileStorage\src\entity\fileLead\FileLead;
 use modules\fileStorage\src\entity\fileCase\FileCase;
 use modules\fileStorage\src\entity\fileCase\FileCaseRepository;
 use modules\fileStorage\src\services\url\UrlGenerator;
+use modules\fileStorage\src\entity\fileStorage\FileStorage;
+use modules\fileStorage\src\services\CreateByApiDto;
 
 /**
  * Class AttachmentsService

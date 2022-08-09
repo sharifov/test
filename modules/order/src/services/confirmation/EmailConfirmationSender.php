@@ -208,7 +208,7 @@ class EmailConfirmationSender
         $body,
         array $files
     ): void {
-        try{
+        try {
             $emailDTO = EmailDTO::newInstance()->fillFromOrderConfirm(
                 $order,
                 $templateKey,
@@ -218,7 +218,8 @@ class EmailConfirmationSender
                 $languageId,
                 $subject,
                 $body,
-                $files);
+                $files
+            );
 
             $mail = $this->emailService->createFromDTO($emailDTO, false);
 

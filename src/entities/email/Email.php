@@ -16,12 +16,13 @@ use src\entities\email\helpers\EmailContactType;
 use src\entities\email\helpers\EmailStatus;
 use src\entities\email\helpers\EmailType;
 use src\entities\EventTrait;
-use src\exceptions\CreateModelException;
+use src\exception\CreateModelException;
 use src\model\BaseActiveRecord;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
+use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 
 /**
  * This is the model class for table "email_norm".
@@ -72,7 +73,6 @@ use yii\helpers\ArrayHelper;
  * @property string|null $emailFromName
  * @property string|null $emailTo
  * @property string|null $emailToName
- * @property string|null $templateTypeName
  * @property string|null $statusName
  * @property string|null $emailSubject
  * @property int|null $communicationId
@@ -84,7 +84,6 @@ use yii\helpers\ArrayHelper;
  * @property string|null $hash
  * @property string|null $messageId
  * @property string|null $statusDoneDt
- * @property string|null $statusName
  *
  *
  *
@@ -260,10 +259,14 @@ class Email extends BaseActiveRecord implements EmailInterface
 
     public function getEmailTo($masking = true): ?string
     {
-        return $this->contactTo->getEmail(EmailType::isOutbox($this->e_type_id) && $masking) ?? null;
+        if ($this->contactTo) {
+            return $this->contactTo->getEmail(EmailType::isOutbox($this->e_type_id) && $masking) ?? null;
+        }
+
+        return null;
     }
 
-    public function getEmailFromName(): string
+    public function getEmailFromName(): ?string
     {
         return $this->contactFrom->ea_name ?? null;
     }
@@ -283,6 +286,14 @@ class Email extends BaseActiveRecord implements EmailInterface
         return EmailStatus::getName($this->e_status_id);
     }
 
+    /**
+     * @return string
+     */
+    public function getTypeName()
+    {
+        return EmailType::getName($this->e_type_id) ?? '-';
+    }
+
     public function getEmailSubject(): string
     {
         return $this->emailBody->embd_email_subject;
@@ -290,7 +301,7 @@ class Email extends BaseActiveRecord implements EmailInterface
 
     public function getEmailData()
     {
-        return $this->emailBody->embd_email_data;
+        return $this->emailBody->getEmailData();
     }
 
     public function getEmailBodyHtml(): ?string
@@ -339,6 +350,7 @@ class Email extends BaseActiveRecord implements EmailInterface
             'e_is_deleted' => 'Is Deleted',
             'e_status_id' => 'Status ID',
             'e_created_user_id' => 'Created User ID',
+            'e_updated_user_id' => 'Updated User ID',
             'e_created_dt' => 'Created Dt',
             'e_updated_dt' => 'Updated Dt',
             'e_body_id' => 'Body ID',
@@ -372,6 +384,23 @@ class Email extends BaseActiveRecord implements EmailInterface
                 'class' => MetricEmailCounterBehavior::class,
             ],
         ];
+    }
+
+    //TODO: maybe move to event
+    public function afterSave($insert, $changedAttributes)
+    {
+        parent::afterSave($insert, $changedAttributes);
+
+        if (!empty($this->leads)) {
+            foreach ($this->leads as $lead) {
+                $lead->updateLastAction(LeadPoorProcessingLogStatus::REASON_EMAIL);
+            }
+        }
+        if (!empty($this->cases)) {
+            foreach ($this->cases as $case) {
+                $case->updateLastAction();
+            }
+        }
     }
 
     /**
