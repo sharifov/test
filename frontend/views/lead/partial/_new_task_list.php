@@ -72,23 +72,32 @@ $shiftScheduleEventTasks = \yii\helpers\ArrayHelper::map($shiftScheduleEventTask
                             <span class="my-task-list-start" style="padding-left: 15px">Started: <?= $userShiftSchedule['title'] ?? '' ?></span>
                         </div>
                         <div class="table-responsive">
-                            <table class="table table-striped table-bordered">
+                            <table class="table table-bordered">
                                 <thead>
                                 <tr>
                                     <th style="width: 50px"></th>
                                     <th>Task</th>
+                                    <th>Start</th>
                                     <th>Deadline</th>
+                                    <th>Completed</th>
                                     <th>Notes</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 <?php foreach ($shiftScheduleEventTask as $userTask) : ?>
-                                    <tr>
+                                    <tr style="background-color: <?= UserTaskHelper::getColorByStatus((int)$userTask['ut_status_id'])?>">
                                         <td style="width: 50px" class="text-center">
-                                            <?= UserTaskHelper::renderStatus($userTask['ut_status_id']) ?>
+                                            <?= UserTaskHelper::renderStatus((int)$userTask['ut_status_id']) ?>
                                         </td>
                                         <td><?= $userTask['tl_title'] ?? '' ?></td>
+                                        <td><?= \src\helpers\DateHelper::getDateTimeImmutableUTC($userTask['ut_start_dt'])->format('d.m.y [H:i]') ?></td>
                                         <td></td>
+                                        <td><?php if (!empty($userTask['complete_time']) && (int)$userTask['ut_status_id'] === UserTask::STATUS_COMPLETE) {
+                                                echo \src\helpers\DateHelper::getDateTimeImmutableUTC($userTask['complete_time'])->format('d.m.y [H:i]');
+                                            }
+                                            ?>
+                                        </td>
+
                                         <td>
                                             <?php
                                             $dto = new TaskListAbacDto();
@@ -102,7 +111,7 @@ $shiftScheduleEventTasks = \yii\helpers\ArrayHelper::map($shiftScheduleEventTask
                                                    data-new-note="<?= empty($description) ?>"
                                                    title="<?= $description ?>"
                                                 >
-                                                    <?= empty($description) ? 'Add note' : \yii\helpers\StringHelper::truncate($description, 15) ?>
+                                                    <?= empty($description) ? 'Add note' : 'View note' ?>
                                                 </a>
                                             <?php else : ?>
                                                 <span
