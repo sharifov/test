@@ -33,7 +33,7 @@ $js = <<<JS
                    success: function(response){
                        if(response.userTaskId){
                            $("#modal-sm").modal("hide")
-                           $('.js-add_note_task_list[data-usertaskid="'+response.userTaskId+'"]').html(response.truncateNote)
+                           $('.js-add_note_task_list[data-usertaskid="'+response.userTaskId+'"]').html('View note')
                            $('.js-add_note_task_list[data-usertaskid="'+response.userTaskId+'"]').attr('title', response.note)
                        }
                    }
