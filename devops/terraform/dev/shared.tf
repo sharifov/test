@@ -20,6 +20,8 @@ resource "aws_instance" "shared" {
     Domain      = var.DOMAIN
     App         = "redis, beanstalkd, centrifugo"
     Kind        = "shared"
+    Monitoring  = "prometheus"
+    Terraform   = "true"
   }
 }
 
@@ -54,11 +56,11 @@ resource "aws_security_group" "shared" {
   }
 
   ingress {
-    description = "Redis"
-    from_port   = 6379
-    to_port     = 6379
-    protocol    = "tcp"
-    cidr_blocks = [var.VPC_CIDR, var.INFRA_CIDR]
+    description     = "Redis"
+    from_port       = 6379
+    to_port         = 6379
+    protocol        = "tcp"
+    security_groups = [aws_security_group.app.id]
   }
 
   ingress {
@@ -130,5 +132,6 @@ resource "aws_security_group" "shared" {
     Project     = var.PROJECT
     Ns          = var.NAMESPACE
     Domain      = var.DOMAIN
+    Terraform   = "true"
   }
 }

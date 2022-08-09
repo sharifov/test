@@ -22,6 +22,8 @@ resource "aws_instance" "app" {
     API         = "api.{var.DOMAIN}"
     App         = var.PROJECT
     Kind        = "app"
+    Monitoring  = "prometheus"
+    Terraform   = "true"
   }
 }
 
@@ -211,5 +213,6 @@ resource "aws_security_group" "app" {
     Project     = var.PROJECT
     Ns          = var.NAMESPACE
     Domain      = var.DOMAIN
+    Terraform   = "true"
   }
 }

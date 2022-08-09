@@ -4,7 +4,13 @@ resource "aws_acm_certificate" "wildcard_cert" {
   validation_method         = "DNS"
 
   tags = {
-    Name = var.DOMAIN
+    Name        = var.DOMAIN
+    Environment = var.ENV
+    Project     = var.PROJECT
+    Ns          = var.NAMESPACE
+    Domain      = var.DOMAIN
+    App         = var.PROJECT
+    Terraform   = "true"
   }
 }
 

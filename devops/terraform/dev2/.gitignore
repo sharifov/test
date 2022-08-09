@@ -21,5 +21,5 @@ override.tf.json
 .terraformrc
 terraform.rc
 
-# Ignore variables.tf
+# Ignore decrypted vars
 variables.tf

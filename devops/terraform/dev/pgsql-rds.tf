@@ -6,37 +6,34 @@ module "pgsql" {
   identifier            = "pgsql-${var.PROJECT}-${var.ENV}"
   engine                = "postgres"
   engine_version        = "12.8"
+  major_engine_version  = "12"
+  family                = "postgres12"
   instance_class        = var.PGSQL_RDS_INSTANCE_TYPE
   allocated_storage     = var.PGSQL_RDS_VOLUME_SIZE
   max_allocated_storage = var.PGSQL_RDS_VOLUME_MAX
   storage_encrypted     = true
+  multi_az              = false
   port                  = "5432"
 
-  name                   = var.PGSQL_RDS_DATABASE
-  username               = var.PGSQL_RDS_USERNAME
-  password               = var.PGSQL_RDS_PASSWORD
-  create_random_password = false
+  name     = var.PGSQL_RDS_DATABASE
+  username = var.PGSQL_RDS_USERNAME
+  password = var.PGSQL_RDS_PASSWORD
 
-  multi_az                            = false
+  subnet_ids                          = var.PRIVATE_SUBNETS
   vpc_security_group_ids              = [aws_security_group.pgsql.id]
+  create_db_subnet_group              = true
   iam_database_authentication_enabled = true
 
-  maintenance_window     = "Mon:00:00-Mon:03:00"
-  backup_window          = "03:00-06:00"
-  monitoring_interval    = "30"
-  monitoring_role_name   = "pgsql-${var.PROJECT}-${var.ENV}"
-  create_monitoring_role = true
+  maintenance_window = "Mon:00:00-Mon:03:00"
+  backup_window      = "03:00-06:00"
+  #backup_retention_period = var.IS_PRODUCTION ? 14 : 2
+  skip_final_snapshot = true
+  deletion_protection = var.IS_PRODUCTION ? true : false
 
-  create_db_subnet_group  = true
-  subnet_ids              = var.PRIVATE_SUBNETS
-  family                  = "postgres12"
-  major_engine_version    = "12"
-  deletion_protection     = false
-  skip_final_snapshot     = true
-  backup_retention_period = var.IS_PRODUCTION ? 14 : 2
-
+  create_monitoring_role          = true
+  monitoring_interval             = "30"
+  monitoring_role_name            = "pgsql-${var.PROJECT}-${var.ENV}"
   enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
-  #create_cloudwatch_log_group           = true
   #performance_insights_enabled          = true
   performance_insights_retention_period = 7
 
@@ -45,10 +42,11 @@ module "pgsql" {
     Environment = var.ENV
     Ns          = var.NAMESPACE
     Domain      = var.DOMAIN
+    Kind        = "db"
+    Monitoring  = "prometheus"
+    Terraform   = "true"
   }
-
 }
-
 
 # PostgreSQL SecurityGroup
 resource "aws_security_group" "pgsql" {
@@ -80,5 +78,6 @@ resource "aws_security_group" "pgsql" {
     Project     = var.PROJECT
     Ns          = var.NAMESPACE
     Domain      = var.DOMAIN
+    Terraform   = "true"
   }
 }
