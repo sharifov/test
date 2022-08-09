@@ -287,6 +287,18 @@ class UserTask extends \yii\db\ActiveRecord
         return $this;
     }
 
+    public function setStartDate(string $startDate): UserTask
+    {
+        $this->ut_start_dt = $startDate;
+        return $this;
+    }
+
+    public function setEndDate(?string $endDate): UserTask
+    {
+        $this->ut_end_dt = $endDate;
+        return $this;
+    }
+
     public function getLastStatusLogByStatusId(int $statusId): ?UserTaskStatusLog
     {
         return UserTaskStatusLog::find()
