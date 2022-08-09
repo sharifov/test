@@ -48,6 +48,7 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_REFACTORING_INCOMING_CALL_ENABLE = 'refactoringIncomingCallEnable';
     public const FF_KEY_SEGMENT_SIMPLE_LEAD_ENABLE = 'segmentSimpleLead';
     public const FF_KEY_LEAD_TASK_LIST_HISTORY_MODAL_ENABLE = 'leadTaskListHistoryModalEnable';
+    public const FF_KEY_TWO_FACTOR_AUTH_MODULE = 'twoFactorAuthModule';
 
 
     public const FF_KEY_LIST = [
