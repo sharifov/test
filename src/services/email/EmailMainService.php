@@ -572,4 +572,32 @@ class EmailMainService implements EmailServiceInterface
         $emailReviewQueueManageService = Yii::createObject(EmailReviewQueueManageService::class);
         return $emailReviewQueueManageService->createByEmail($emailToReview, $departmentId);
     }
+
+    /**
+     *
+     * @param EmailInterface $email
+     * @param string $message
+     *
+     * return EmailInterface
+     */
+    public function moveToCancel($email, string $message)
+    {
+        $calledFrom = $this->getCalledFrom($email);
+        $emailOld = ($calledFrom == self::FROM_NORM) ? $this->setEmailObjById($email->e_id) : $email;
+
+        $emailOld->statusToCancel($message);
+        $emailOld->refresh();
+        $this->setEmailObj($emailOld);
+
+        if ($this->normalizedService !== null) {
+            $emailNorm = ($calledFrom == self::FROM_OLD) ? $this->setEmailNormObjById($email->e_id) : $email;
+            if (isset($emailNorm)) {
+                $emailNorm->statusToCancel($message);
+                $emailNorm->refresh();
+                $this->setEmailNormObj($emailNorm);
+            }
+        }
+
+        return ($calledFrom == self::FROM_OLD) ? $emailOld : $emailNorm ?? $email;
+    }
 }
