@@ -53,7 +53,7 @@ class TargetObjectCallService
                 CallLog::tableName() . '.cl_id = ' . CallLogLead::tableName() . '.cll_cl_id'
             )
             ->where(['cll_lead_id' => $leadId])
-            ->andWhere(['cl_type_id' =>  CallLogType::OUT])
+            ->andWhere(['IN', 'cl_type_id', [CallLogType::OUT, CallLogType::IN]])
             ->andWhere(['cl_status_id' => CallLogStatus::COMPLETE])
             ->andWhere(['>=', 'cl_duration', $this->getCallCompletedDuration()])
         ;
