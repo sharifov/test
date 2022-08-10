@@ -5,6 +5,7 @@ namespace modules\user\userActivity\service;
 use common\models\UserOnline;
 use modules\user\src\events\UserEvents;
 use modules\user\userActivity\entity\UserActivity;
+use Yii;
 use yii\helpers\VarDumper;
 
 /**
@@ -127,7 +128,8 @@ class UserActivityService
 
     /**
      * @param int $userId
-     * @param string $date
+     * @param string $fromDateTime
+     * @param string $endDateTime
      * @param string|null $eventName
      * @param int $delayMin
      * @param int $minimumDuration
@@ -135,14 +137,17 @@ class UserActivityService
      */
     public static function getUniteEventsByUserId(
         int $userId,
-        string $date,
+        string $fromDateTime,
+        string $toDateTime,
         ?string $eventName = null,
         int $delayMin = 3,
         int $minimumDuration = 3
     ): array {
 
         $data = [];
-        $query = UserActivity::find()->where(['ua_user_id' => $userId, 'toDate(ua_start_dt)' => $date]);
+        $query = UserActivity::find()->where(['ua_user_id' => $userId]); //, 'toDate(ua_start_dt)' => $fromDateTime
+        $query->andWhere(['between', 'ua_start_dt', $fromDateTime, $toDateTime]);
+
         if ($eventName) {
             $query->andWhere(['ua_object_event' => $eventName]);
         }

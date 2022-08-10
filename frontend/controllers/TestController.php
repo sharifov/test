@@ -2657,7 +2657,12 @@ class TestController extends FController
     public function actionUserActivityUnite()
     {
 
-        $data = UserActivityService::getUniteEventsByUserId(Auth::id(), date('Y-m-d'), UserEvents::EVENT_ACTIVE);
+        $data = UserActivityService::getUniteEventsByUserId(
+            Auth::id(),
+            date('Y-m-08 00:00:00'),
+            date('Y-m-d 20:00:00'),
+            UserEvents::EVENT_ACTIVE
+        );
         VarDumper::dump($data, 10, true);
         /*$db = \Yii::$app->clickhouse;
         $query = new Query();

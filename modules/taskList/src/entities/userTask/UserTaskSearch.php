@@ -215,7 +215,7 @@ class UserTaskSearch extends UserTask
         }
 
 
-        if ($startDateTime && $endDateTime) {
+        if (!empty($startDateTime) && !empty($endDateTime)) {
             try {
                 $dTStart = new \DateTimeImmutable(date('Y-m-d 00:00:00', $startDateTime));
                 $dTEnd = new \DateTime(date('Y-m-d 23:59:59', $endDateTime));
