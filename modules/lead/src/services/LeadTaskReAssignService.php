@@ -32,24 +32,7 @@ class LeadTaskReAssignService extends LeadTaskAssignService
 
     public function assign(): void
     {
-        $existNewUserTaskComplete = UserTaskQuery::getQueryUserTaskByUserTaskListAndStatuses(
-            $this->lead->employee_id,
-            $this->taskList->tl_id,
-            TargetObject::TARGET_OBJ_LEAD,
-            $this->lead->id,
-            [UserTask::STATUS_COMPLETE]
-        )->exists();
-
-        if ($existNewUserTaskComplete) {
-            \modules\taskList\src\helpers\TaskListHelper::debug(
-                'Exist UserTask Complete (Lead ID: ' . $this->lead->id . ', EmployeeID: ' . $this->lead->employee_id . '), TaskLIst ID (' . $this->taskList->tl_id . ')',
-                'info\UserTaskAssign:LeadTaskReAssignService:assign:info'
-            );
-            return;
-        }
-
-        $oldUserTask = UserTaskQuery::getQueryUserTaskByUserTaskList(
-            $this->oldOwnerId,
+        $oldUserTask = UserTaskQuery::getQueryUserTaskByTargetObjectAndTaskList(
             $this->taskList->tl_id,
             TargetObject::TARGET_OBJ_LEAD,
             $this->lead->id,

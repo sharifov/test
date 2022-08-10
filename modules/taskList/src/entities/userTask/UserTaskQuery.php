@@ -175,4 +175,12 @@ class UserTaskQuery
             ->andWhere(['ut_target_object_id' => $targetObjectId])
             ->andWhere(['IN', 'ut_status_id', $statuses]);
     }
+
+    public static function getQueryUserTaskByTargetObjectAndTaskList(int $taskListId, string $targetObject, int $targetObjectId): UserTaskScopes
+    {
+        return UserTask::find()
+            ->andWhere(['ut_target_object' => $targetObject])
+            ->andWhere(['ut_target_object_id' => $targetObjectId])
+            ->andWhere(['ut_task_list_id' => $taskListId]);
+    }
 }
