@@ -50,16 +50,16 @@ class FController extends Controller
 
             unset($user, $timezone);
 
-//            if (!\Yii::$app->request->isAjax) {
-//                $limitUserConnection = SettingHelper::getLimitUserConnection() ?: \Yii::$app->params['limitUserConnections'];
-//
-//                if ($limitUserConnection > 0) {
-//                    $countConnections = UserConnection::find()->where(['uc_user_id' => \Yii::$app->user->id])->count();
-//                    if ($countConnections >= $limitUserConnection && 'site/error' != \Yii::$app->controller->action->uniqueId) {
-//                        throw new ForbiddenHttpException('Denied Access: You have too many connections (' . $countConnections . '). Close the old browser tabs and try again!');
-//                    }
-//                }
-//            }
+            if (!\Yii::$app->request->isAjax) {
+                $limitUserConnection = SettingHelper::getLimitUserConnection() ?: \Yii::$app->params['limitUserConnections'];
+
+                if ($limitUserConnection > 0) {
+                    $countConnections = UserConnection::find()->where(['uc_user_id' => \Yii::$app->user->id])->count();
+                    if ($countConnections >= $limitUserConnection && 'site/error' != \Yii::$app->controller->action->uniqueId) {
+                        throw new ForbiddenHttpException('Denied Access: You have too many connections (' . $countConnections . '). Close the old browser tabs and try again!');
+                    }
+                }
+            }
         }
 
         return parent::beforeAction($action);
