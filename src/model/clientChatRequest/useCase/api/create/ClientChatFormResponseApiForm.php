@@ -2,8 +2,7 @@
 
 namespace src\model\clientChatRequest\useCase\api\create;
 
-use DateTime;
-use Exception;
+use DateTimeInterface;
 use yii\base\Model;
 
 /**
@@ -27,17 +26,8 @@ class ClientChatFormResponseApiForm extends Model
             [['rid', 'createdAt', 'formKey', 'formValue'], 'required'],
             [['rid'], 'string', 'max' => 64],
             [['formKey'], 'string', 'max' => 255],
-            ['createdAt', 'validateCreatedAt'],
+            ['createdAt', 'date', 'format' => 'php:' . DateTimeInterface::RFC3339_EXTENDED],
             ['formValue', 'string', 'max' => 255],
         ];
-    }
-
-    public function validateCreatedAt($attribute)
-    {
-        try {
-            new DateTime($this->createdAt);
-        } catch (Exception $e) {
-            $this->addError($attribute, "The format of " . $attribute . " is invalid.");
-        }
     }
 }
