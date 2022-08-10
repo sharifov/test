@@ -195,8 +195,7 @@ class UserTaskSearch extends UserTask
             $this->clientEndDate = $endDate;
 
             $startDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($startDate));
-            $endDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
-
+            $endDateTime = Employee::convertTimeFromUserDtToUTC((new \DateTime($endDate))->setTime(23, 59, 59)->getTimestamp());
             $query->andWhere([
                 'OR',
                 ['between', 'ut_start_dt', $startDateTime, $endDateTime],
