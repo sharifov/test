@@ -12,3 +12,4 @@ mysql/dump/*
 !mysql/dump/.gitkeep
 psql/dump/*
 !psql/dump/.gitkeep
+clickhouse/data

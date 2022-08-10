@@ -506,6 +506,7 @@ class LeadController extends FController
                         if ($canSendWithoutReview) {
                             $previewEmailForm->is_send = true;
                             $this->emailService->sendMail($mail, $attachments);
+                            $this->emailService->leadTaskJob($mail->e_id, $mail->lead);
                             Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>' . $mail->getEmailTo() . '</strong>');
 
                             if ($offerList = @json_decode($previewEmailForm->e_offer_list)) {

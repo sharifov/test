@@ -175,7 +175,6 @@ class EmailMainService implements EmailServiceInterface
             $this->addToABTesting($email);
             $tplType = $email->templateType ? $email->templateType->etp_key : null;
             $this->leadProcessAfterEmailSending($email->e_id, $tplType, $email->lead);
-            $this->leadTaskJob($email->e_id, $email->lead);
         } catch (\Throwable $exception) {
             $error = VarDumper::dumpAsString($exception->getMessage());
             \Yii::error($error, 'EmailMainService:sendMail:exception');
@@ -190,7 +189,7 @@ class EmailMainService implements EmailServiceInterface
         }
     }
 
-    private function leadTaskJob(int $emailId, ?Lead $lead)
+    public function leadTaskJob(int $emailId, ?Lead $lead, bool $useOwner = false)
     {
         if ($emailId && $lead && (new LeadTaskListService($lead))->isProcessAllowed()) {
             $job = new UserTaskCompletionJob(
@@ -198,7 +197,7 @@ class EmailMainService implements EmailServiceInterface
                 $lead->id,
                 TaskObject::OBJ_EMAIL,
                 $emailId,
-                Auth::id()
+                ($useOwner && $lead->employee_id) ? $lead->employee_id : Auth::id()
             );
             \Yii::$app->queue_job->push($job);
         }
@@ -533,6 +532,7 @@ class EmailMainService implements EmailServiceInterface
         if ($emailOld = $this->emailOldRepository->findReceived($messageId, $emailTo)->limit(1)->one()) {
             $this->emailOldRepository->saveInboxId($emailOld, $inboxId);
         }
+        $emailNorm = null;
         if ($this->normalizedService !== null) {
             if ($emailNorm = $this->emailRepository->findReceived($messageId, $emailTo)->limit(1)->one()) {
                 $this->emailRepository->saveInboxId($emailNorm, $inboxId);
