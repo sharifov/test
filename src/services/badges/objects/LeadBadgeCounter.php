@@ -327,7 +327,7 @@ class LeadBadgeCounter implements BadgeCounterInterface
     private function getLeadBusinessExtraQueue(): ?int
     {
         /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
-        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) === true) {
+        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) === true) {
             return null;
         }
 

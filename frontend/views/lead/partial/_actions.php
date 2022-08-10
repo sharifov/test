@@ -447,6 +447,15 @@ $leadAbacDto = new LeadAbacDto($leadModel, $userId);
 <?php Modal::end()?>
 
 
+<?php /** @fflag FFlag::FF_KEY_LEAD_TASK_LIST_HISTORY_MODAL_ENABLE, Enable modal in lead view with history of task */ ?>
+<?php if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_LEAD_TASK_LIST_HISTORY_MODAL_ENABLE)) : ?>
+    <?php Modal::begin(['id' => 'user-task-list__modal',
+        'title' => 'History',
+        'size' => Modal::SIZE_LARGE
+    ])?>
+    <?php Modal::end()?>
+<?php endif; ?>
+
 <?php
 
 if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::VIEW_MODE && ($user->isAdmin() || $user->isSupervision()))) {
@@ -731,6 +740,38 @@ if ($leadForm->mode !== $leadForm::VIEW_MODE || ($leadForm->mode === $leadForm::
     
 JS;
     $this->registerJs($js);
+}
+
+
+/** @fflag FFlag::FF_KEY_LEAD_TASK_LIST_HISTORY_MODAL_ENABLE, Enable modal in lead view with history of task */
+if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_LEAD_TASK_LIST_HISTORY_MODAL_ENABLE)) {
+    $taskListModalJs = <<<TASK_LIST_MODAL
+    /***  User Task List modal ***/
+    $(document).on('click','#task-list-modal-btn', function (e) {
+        //$('#popover-quick-search').popover('hide');
+        e.preventDefault();
+        let url = $('#task-list-modal-btn').data('url');
+        $('#preloader').removeClass('d-none');
+        var modal = $('#user-task-list__modal');
+        
+         $.ajax({
+            type: 'post',
+            data: {'gds': $('#gds-selector').val()},
+            url: url,
+            success: function (data) {
+                $('#preloader').addClass('d-none');
+                modal.find('.modal-body').html(data);
+                modal.modal('show');
+            },
+            error: function (error) {
+               // var obj = JSON.parse(error.data); // $.parseJSON( e.data );
+                $('#preloader').addClass('d-none');
+                createNotify('Error', error.statusText, 'error');
+            }
+        });
+    });
+TASK_LIST_MODAL;
+    $this->registerJs($taskListModalJs);
 }
 
 

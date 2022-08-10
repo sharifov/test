@@ -4,9 +4,9 @@ namespace modules\smartLeadDistribution\src\services;
 
 use common\models\Employee;
 use common\models\Lead;
+use common\models\UserProfile;
 use modules\featureFlag\FFlag;
-use modules\smartLeadDistribution\abac\dto\SmartLeadDistributionAbacDto;
-use modules\smartLeadDistribution\abac\SmartLeadDistributionAbacObject;
+use modules\smartLeadDistribution\src\entities\LeadRatingAllowedInterval;
 use modules\smartLeadDistribution\src\entities\LeadRatingParameter;
 use modules\smartLeadDistribution\src\entities\LeadRatingProcessingLog;
 use modules\smartLeadDistribution\src\objects\LeadRatingObjectInterface;
@@ -14,6 +14,10 @@ use modules\smartLeadDistribution\src\SmartLeadDistribution;
 use src\access\ConditionExpressionService;
 use src\auth\Auth;
 use src\helpers\ErrorsToStringHelper;
+use src\model\leadData\entity\LeadData;
+use src\model\leadData\repository\LeadDataRepository;
+use src\model\leadDataKey\services\LeadDataKeyDictionary;
+use src\repositories\lead\LeadBadgesRepository;
 use Yii;
 
 class SmartLeadDistributionService
@@ -47,28 +51,36 @@ class SmartLeadDistributionService
         ]);
     }
 
-    public static function getAllowedCategories(?Employee $employee = null): array
+    /**
+     * @param Employee|null $employee
+     * @return null|LeadRatingAllowedInterval
+     */
+    public static function getAllowedPointIntervalForBusinessInbox(?Employee $employee = null): ?LeadRatingAllowedInterval
     {
+        $setting = Yii::$app->params['settings']['smart_lead_distribution_by_agent_skill_and_points'];
         $employee = $employee ?? Auth::user();
-        $allowedCategory = [];
-        $dto = new SmartLeadDistributionAbacDto();
+        $employeeSkillID = $employee->userProfile->up_skill;
+        $allowedInterval = null;
 
-        /** @abac SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_FIRST_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, Access to first category business lead */
-        if (Yii::$app->abac->can($dto, SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_FIRST_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, $employee)) {
-            $allowedCategory[] = SmartLeadDistribution::CATEGORY_FIRST;
+        if (isset($setting['business']) && !empty($employeeSkillID)) {
+            $leadBadgeRepository = new LeadBadgesRepository();
+            $leadsBySkill = $leadBadgeRepository->countBusinessLeadsByAgentSkill();
+
+            if ((int)$employeeSkillID === UserProfile::SKILL_TYPE_JUNIOR && $leadsBySkill[$employeeSkillID] === 0) {
+                $employeeSkillID = UserProfile::SKILL_TYPE_MIDDLE;
+            }
+
+            /** @var array{from: int, to: int} $pointInterval */
+            foreach ($setting['business'] as $skillID => $pointInterval) {
+                if ((int)$employeeSkillID === (int)$skillID) {
+                    $allowedInterval = new LeadRatingAllowedInterval($pointInterval);
+
+                    break;
+                }
+            }
         }
 
-        /** @abac SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_FIRST_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, Access to second category business lead */
-        if (Yii::$app->abac->can($dto, SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_SECOND_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, $employee)) {
-            $allowedCategory[] = SmartLeadDistribution::CATEGORY_SECOND;
-        }
-
-        /** @abac SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_FIRST_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, Access to third category business lead */
-        if (Yii::$app->abac->can($dto, SmartLeadDistributionAbacObject::QUERY_BUSINESS_LEAD_THIRD_CATEGORY, SmartLeadDistributionAbacObject::ACTION_ACCESS, $employee)) {
-            $allowedCategory[] = SmartLeadDistribution::CATEGORY_THIRD;
-        }
-
-        return $allowedCategory;
+        return $allowedInterval;
     }
 
     /**
@@ -176,15 +188,106 @@ class SmartLeadDistributionService
         return $result;
     }
 
-    public static function getCategoryByPoints(int $points): int
+    public static function getCategoryByPoints(int $points): ?int
     {
-        foreach (SmartLeadDistribution::CATEGORY_TOTAL_SCORE_LIST as $index => $category) {
-            if ($points > $category['from'] && $points < $category['to']) {
+        $categories = Yii::$app->params['settings']['smart_lead_distribution_rating_categories'];
+
+        foreach ($categories as $index => $category) {
+            if ($points >= $category['points']['from'] && $points <= $category['points']['to']) {
                 return $index;
             }
         }
 
-        return SmartLeadDistribution::CATEGORY_THIRD;
+        return null;
+    }
+
+    public static function recalculateRatingForLead(Lead $lead): bool
+    {
+        $points = SmartLeadDistributionService::countPoints($lead);
+        $category = SmartLeadDistributionService::getCategoryByPoints($points);
+        $needUpdate = false;
+
+        $oldValuePoints = LeadData::find()
+            ->where([
+                'ld_lead_id' => $lead->id,
+                'ld_field_key' => LeadDataKeyDictionary::KEY_LEAD_RATING_POINTS_DYNAMIC,
+            ])
+            ->limit(1)
+            ->one();
+
+        if ($oldValuePoints === null || (int)$oldValuePoints->ld_field_value !== $points) {
+            $needUpdate = true;
+        }
+
+        $oldValueCategory = LeadData::find()
+            ->where([
+                'ld_lead_id' => $lead->id,
+                'ld_field_key' => LeadDataKeyDictionary::KEY_LEAD_RATING_CATEGORY_DYNAMIC,
+            ])
+            ->limit(1)
+            ->one();
+
+        if ($oldValueCategory === null || (int)$oldValueCategory->ld_field_value !== $category) {
+            $needUpdate = true;
+        }
+
+        if ($needUpdate === true) {
+            try {
+                $leadDataRepository = \Yii::createObject(LeadDataRepository::class);
+
+                if ($oldValuePoints !== null) {
+                    $oldValuePoints->ld_field_value = (string)$points;
+                    $leadDataPointsDynamic = $oldValuePoints;
+                } else {
+                    $leadDataPointsDynamic = LeadData::create($lead->id, LeadDataKeyDictionary::KEY_LEAD_RATING_POINTS_DYNAMIC, $points);
+                }
+
+                $leadDataRepository->save($leadDataPointsDynamic);
+
+                if ($category !== null) {
+                    if ($oldValueCategory !== null) {
+                        $oldValueCategory->ld_field_value = (string)$category;
+                        $leadDataCategoryDynamic = $oldValueCategory;
+                    } else {
+                        $leadDataCategoryDynamic = LeadData::create($lead->id, LeadDataKeyDictionary::KEY_LEAD_RATING_CATEGORY_DYNAMIC, (string)$category);
+                    }
+
+                    $leadDataRepository->save($leadDataCategoryDynamic);
+                }
+
+                return true;
+            } catch (\Throwable $e) {
+                \Yii::error([
+                    'message' => $e->getMessage(),
+                    'leadId' => $lead->id,
+                    'points' => $points,
+                    'category' => $category,
+                ], 'SmartLeadDistributionService::recalculateRatingForLead');
+            }
+        }
+
+        return false;
+    }
+
+    public static function getCategoriesAsIdName(): array
+    {
+        $setting = Yii::$app->params['settings']['smart_lead_distribution_rating_categories'];
+        $data = [];
+
+        if (!empty($setting)) {
+            foreach ($setting as $id => $category) {
+                $data[$id] = $category['name'];
+            }
+        }
+
+        return $data;
+    }
+
+    public static function getCategoryById(int $id): ?array
+    {
+        $setting = Yii::$app->params['settings']['smart_lead_distribution_rating_categories'];
+
+        return $setting[$id] ?? null;
     }
 
     public static function ffIsEnable(): bool

@@ -33,6 +33,8 @@ class ClientChatForm extends ActiveRecord
 {
     public const CACHE_DURATION = 60 * 60;
 
+    public const KEY_BOOKING_ID = 'cc_form_booking_id';
+
     public function rules(): array
     {
         return [

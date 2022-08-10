@@ -3,6 +3,7 @@
 namespace webapi\modules\v1\controllers;
 
 use common\components\jobs\clientChat\ClientChatFeedbackJob;
+use common\components\jobs\clientChat\ClientChatFormResponseJob;
 use common\components\jobs\clientChat\ClientChatRequestCreateJob;
 use common\components\Metrics;
 use common\models\ApiLog;
@@ -19,6 +20,8 @@ use src\model\clientChatForm\form\ClientChatFormApiForm;
 use src\model\clientChatForm\helper\ClientChatFormTranslateHelper;
 use src\model\clientChatRequest\entity\ClientChatRequest;
 use src\model\clientChatRequest\repository\ClientChatRequestRepository;
+use src\model\clientChatRequest\useCase\api\create\ClientChatFormResponseApiForm;
+use src\model\clientChatRequest\useCase\api\create\ClientChatFormResponseService;
 use src\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
 use src\model\clientChatRequest\useCase\api\create\ClientChatRequestFeedbackSubForm;
 use src\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
@@ -61,16 +64,20 @@ class ClientChatRequestController extends ApiBaseController
      */
     private ClientChatRequestRepository $clientChatRequestRepository;
 
+    private ClientChatFormResponseService $clientChatFormResponseService;
+
     public function __construct(
         $id,
         $module,
         ClientChatRequestService $clientChatRequestService,
         ClientChatRequestRepository $clientChatRequestRepository,
+        ClientChatFormResponseService $clientChatFormResponseService,
         $config = []
     ) {
         $this->clientChatRequestService = $clientChatRequestService;
         parent::__construct($id, $module, $config);
         $this->clientChatRequestRepository = $clientChatRequestRepository;
+        $this->clientChatFormResponseService = $clientChatFormResponseService;
     }
 
     /**
@@ -1083,6 +1090,148 @@ class ClientChatRequestController extends ApiBaseController
         ));
     }
 
+    /**
+     * @api {post} /v1/client-chat-request/chat-form-response Client Chat Form Response
+     * @apiVersion 0.1.0
+     * @apiName ClientChatFormResponse
+     * @apiGroup ClientChat
+     * @apiPermission Authorized User
+     * @apiDescription Action handle the Client Chat Form Responses.
+     *
+     * @apiHeader {string} Authorization    Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string}   apiKey               Api key, required for accept to endpoint
+     * @apiParam {string}   event                Event, that should be handled. Available values: `FORM_SUBMITTED`
+     * @apiParam {json}     data                 JSON object with request data
+     * @apiParam {string}   data.id              Mongodb ID of client chat form message
+     * @apiParam {string}   data.rid             Room id in rocket chat
+     * @apiParam {string}   data.formKey         Form key
+     * @apiParam {string}   data.formValue       Form value
+     * @apiParam {string}   data.createdAt       Created datetime for data in outer service (ISODate)
+     *
+     * @apiParamExample {json} Request-Example FORM_SUBMITTED:
+     * {
+     *      "apiKey": "038ce0121a1666678d4db57cb10e8667b98d8b08c408cdf7c9b04f1430071826",
+     *      "event": "FORM_SUBMITTED",
+     *      "data": {
+     *          "id": "d95ff567-3ce3-47b9-a937-1e716cae74fc",
+     *          "rid": "b3166811-302b-4de6-bb0f-b969575de4d5",
+     *          "createdAt": "2022-02-23T14:58:37.034Z",
+     *          "formKey: "cc_form_booking_id",
+     *          "formValue: "12345",
+     *      }
+     * }
+     *
+     * @apiSuccessExample Success-Response:
+     *  HTTP/1.1 200 OK
+     *  {
+     *     "status": 200
+     *     "message": "Ok"
+     *  }
+     *
+     * @apiErrorExample {json} Error-Response (400):
+     *
+     * HTTP/1.1 400 Bad Request
+     * {
+     *      "status":400,
+     *      "message":"Client Chat Form Response validate failed.",
+     *      "errors":["Event is invalid."],
+     *      "code":"13104"
+     * }
+     *
+     * @return ErrorResponse|Response
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function actionChatFormResponse()
+    {
+        if (SettingHelper::isClientChatApiLogEnabled()) {
+            $this->startApiLog($this->action->uniqueId);
+        }
+
+        if (!\Yii::$app->request->isPost) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('Not found POST request'),
+                new CodeMessage(ApiCodeException::REQUEST_IS_NOT_POST)
+            );
+        }
+
+        if (!\Yii::$app->request->post()) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('POST data request is empty'),
+                new CodeMessage(ApiCodeException::POST_DATA_IS_EMPTY)
+            );
+        }
+
+        $event = \Yii::$app->request->post('event');
+        $data = \Yii::$app->request->post('data');
+
+        if (!$event || !$data) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('Event or data is not provided'),
+                new CodeMessage(ApiCodeException::EVENT_OR_DATA_IS_NOT_PROVIDED)
+            );
+        }
+
+        $form = (new ClientChatRequestApiForm())->fillIn($event, $data);
+        if (!$form->validate()) {
+            return $this->endApiLog(new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('Client Chat Form Response validate failed.'),
+                new ErrorsMessage($form->getErrorSummary(true)),
+                new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
+            ));
+        }
+
+        try {
+            $clientChatRequest = ClientChatRequest::createByApi($form);
+            $this->clientChatRequestRepository->save($clientChatRequest);
+        } catch (\Throwable $e) {
+            return $this->endApiLog(new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('Client Chat Form Response not saved.'),
+                new ErrorsMessage($e->getMessage()),
+                new CodeMessage(ApiCodeException::CLIENT_CHAT_REQUEST_CREATE_FAILED)
+            ));
+        }
+
+        $form = new ClientChatFormResponseApiForm();
+        if (!$form->load($data, "") || !$form->validate()) {
+            return $this->endApiLog(new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('Client Chat Form Response validate failed.'),
+                new ErrorsMessage($form->getErrorSummary(true)),
+                new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
+            ));
+        }
+
+        try {
+            $this->clientChatFormResponseService->createFormResponse($form->rid, $form->formKey, $form->formValue, $form->createdAt);
+        } catch (\Throwable $e) {
+            return $this->endApiLog(
+                new ErrorResponse(
+                    new StatusCodeMessage(400),
+                    new MessageMessage('Client Chat Form Response not saved.'),
+                    new ErrorsMessage($e->getMessage()),
+                    new CodeMessage(ApiCodeException::CLIENT_CHAT_FORM_CREATE_FAILED)
+                )
+            );
+        }
+
+        return $this->endApiLog(
+            new SuccessResponse(
+                new StatusCodeMessage(200),
+                new MessageMessage($resultMessage ?? 'Ok')
+            )
+        );
+    }
     /**
      * @param ApiLog $apiLog
      * @param Response $response

@@ -19,6 +19,7 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_BADGE_COUNT_ENABLE = 'badgeCountEnable';
     public const FF_KEY_PHONE_WIDGET_ACCEPTED_PANEL_ENABLED = 'phoneWidgetAcceptedPanelEnabled';
     public const FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE = 'objectSegmentModuleEnable';
+    public const FF_KEY_EMAIL_NORMALIZED_FORM_ENABLE = 'emailNormalizedFormEnable';
     public const FF_KEY_LEAD_TASK_ASSIGN = 'leadTaskAssign';
     public const FF_KEY_SALE_VIEW_IN_LEAD_ENABLE = 'saleViewInLeadEnable';
     public const FF_KEY_BEQ_ENABLE = 'beqEnable';
@@ -45,7 +46,12 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_USER_SKILL_IN_ABAC_ENABLE = 'userSkillInAbacEnable';
     public const FF_KEY_DISPLAY_SKILL_FIELD_ON_MULTIPLE_UPDATE_USERS = 'displaySkillFieldOnMultipleUpdateUsers';
     public const FF_KEY_REFACTORING_INCOMING_CALL_ENABLE = 'refactoringIncomingCallEnable';
+    public const FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE = 'newUserTaskInLeadViewEnable';
+    public const FF_KEY_SEGMENT_SIMPLE_LEAD_ENABLE = 'segmentSimpleLead';
+    public const FF_KEY_LEAD_TASK_LIST_HISTORY_MODAL_ENABLE = 'leadTaskListHistoryModalEnable';
+    public const FF_KEY_DEBUG_ASSIGN_USER_TASK = 'debugAssignUserTaskEnable';
 
+    public const FF_KEY_USER_TASK_COMPLETION_DEBUG = 'userTaskCompletionDebug';
 
     public const FF_KEY_LIST = [
         self::FF_KEY_LPP_ENABLE,
@@ -57,6 +63,7 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_BADGE_COUNT_ENABLE,
         self::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE,
         self::FF_KEY_PHONE_WIDGET_ACCEPTED_PANEL_ENABLED,
+        self::FF_KEY_EMAIL_NORMALIZED_FORM_ENABLE,
         self::FF_KEY_LEAD_TASK_ASSIGN,
         self::FF_KEY_SALE_VIEW_IN_LEAD_ENABLE,
         self::FF_KEY_COMPARE_QUOTE_AND_LEAD_FLIGHT_REQUEST,
@@ -82,15 +89,18 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_USER_SKILL_IN_ABAC_ENABLE,
         self::FF_KEY_DISPLAY_SKILL_FIELD_ON_MULTIPLE_UPDATE_USERS,
         self::FF_KEY_REFACTORING_INCOMING_CALL_ENABLE,
+        self::FF_KEY_SEGMENT_SIMPLE_LEAD_ENABLE,
+        self::FF_KEY_LEAD_TASK_LIST_HISTORY_MODAL_ENABLE,
+        self::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE,
+        self::FF_KEY_DEBUG_ASSIGN_USER_TASK,
+        self::FF_KEY_USER_TASK_COMPLETION_DEBUG,
     ];
-
 
     public const FF_OBJECT_LIST = [
         self::FF_KEY_DEBUG => DebugFeatureFlag::class,
         //self::FF_KEY_LPP_LEAD_CREATED => UserFeatureFlag::class,
         //self::FF_KEY_PHONE_WIDGET_ACCEPTED_PANEL_ENABLED => DateTimeFeatureFlag::class
     ];
-
 
     public const FF_CATEGORY_LEAD               = 'lead';
     public const FF_CATEGORY_SYSTEM             = 'system';

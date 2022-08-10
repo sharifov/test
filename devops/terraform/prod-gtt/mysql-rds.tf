@@ -1,3 +1,4 @@
+# MySQL RDS Instance
 module "mysql" {
   source  = "terraform-aws-modules/rds/aws"
   version = "~> 4.4.0"
@@ -5,37 +6,34 @@ module "mysql" {
   identifier            = "mysql-${var.PROJECT}-${var.NAMESPACE}"
   engine                = "mysql"
   engine_version        = "8.0.28"
+  major_engine_version  = "8.0"
+  family                = "mysql8.0"
   instance_class        = var.MYSQL_RDS_INSTANCE_TYPE
   allocated_storage     = var.MYSQL_RDS_VOLUME_SIZE
-  max_allocated_storage = var.MYSQL_RDS_VOLUME_LIMIT
+  max_allocated_storage = var.MYSQL_RDS_VOLUME_MAX
   storage_encrypted     = true
+  multi_az              = false
   port                  = "3306"
 
-  db_name                = var.MYSQL_RDS_DATABASE
-  username               = var.MYSQL_RDS_USERNAME
-  password               = var.MYSQL_RDS_PASSWORD
-  create_random_password = false
+  db_name  = var.MYSQL_RDS_DATABASE
+  username = var.MYSQL_RDS_USERNAME
+  password = var.MYSQL_RDS_PASSWORD
 
-  multi_az                            = false
+  subnet_ids                          = var.PRIVATE_SUBNETS
   vpc_security_group_ids              = [aws_security_group.mysql.id]
+  create_db_subnet_group              = true
   iam_database_authentication_enabled = true
 
-  maintenance_window     = "Mon:00:00-Mon:03:00"
-  backup_window          = "03:00-06:00"
-  monitoring_interval    = "30"
-  monitoring_role_name   = "mysql-${var.PROJECT}-${var.NAMESPACE}"
-  create_monitoring_role = true
-
-  create_db_subnet_group  = true
-  subnet_ids              = var.PRIVATE_SUBNETS
-  family                  = "mysql8.0"
-  major_engine_version    = "8.0"
-  deletion_protection     = var.IS_PRODUCTION ? true : false
-  skip_final_snapshot     = true
+  maintenance_window      = "Mon:00:00-Mon:03:00"
+  backup_window           = "03:00-06:00"
   backup_retention_period = var.IS_PRODUCTION ? 14 : 2
+  skip_final_snapshot     = true
+  deletion_protection     = var.IS_PRODUCTION ? true : false
 
+  create_monitoring_role                = true
+  monitoring_interval                   = "30"
+  monitoring_role_name                  = "mysql-${var.PROJECT}-${var.NAMESPACE}"
   enabled_cloudwatch_logs_exports       = ["audit", "error", "general"]
-  create_cloudwatch_log_group           = true
   performance_insights_enabled          = true
   performance_insights_retention_period = 7
 
@@ -65,58 +63,53 @@ module "mysql" {
       ]
     },
   ]
+
   tags = {
     Project     = var.PROJECT
     Environment = var.ENV
     Ns          = var.NAMESPACE
     Domain      = var.DOMAIN
+    Role        = "primary"
+    Kind        = "db"
+    Monitoring  = "prometheus"
+    Terraform   = "true"
   }
-
 }
 
 module "mysql_replica" {
   source  = "terraform-aws-modules/rds/aws"
   version = "~> 4.4.0"
 
-  identifier = "mysql-replica-${var.PROJECT}-${var.NAMESPACE}"
-
-  # Source database. For cross-region use db_instance_arn
-  replicate_source_db    = module.mysql.db_instance_id
-  create_random_password = false
-
+  identifier            = "mysql-replica-${var.PROJECT}-${var.NAMESPACE}"
   engine                = "mysql"
   engine_version        = "8.0.28"
-  family                = "mysql8.0"
   major_engine_version  = "8.0"
-  instance_class        = "db.t4g.small"
+  family                = "mysql8.0"
+  instance_class        = "db.t4g.medium"
   allocated_storage     = var.MYSQL_RDS_VOLUME_SIZE
-  max_allocated_storage = var.MYSQL_RDS_VOLUME_LIMIT
+  max_allocated_storage = var.MYSQL_RDS_VOLUME_MAX
   storage_encrypted     = true
+  multi_az              = false
+  port                  = "3306"
+  replicate_source_db   = module.mysql.db_instance_id
 
-  port = "3306"
-
-  multi_az                            = false
+  subnet_ids                          = var.PRIVATE_SUBNETS
   vpc_security_group_ids              = [aws_security_group.mysql.id]
+  create_db_subnet_group              = false
   iam_database_authentication_enabled = false
 
   maintenance_window = "Tue:00:00-Tue:03:00"
   backup_window      = "03:00-06:00"
+  #backup_retention_period = var.IS_PRODUCTION ? 14 : 2
+  skip_final_snapshot = true
+  deletion_protection = var.IS_PRODUCTION ? true : false
 
-  backup_retention_period = 0
-  skip_final_snapshot     = true
-  deletion_protection     = false
-
+  create_monitoring_role                = true
+  monitoring_interval                   = "30"
+  monitoring_role_name                  = "mysql-replica-${var.PROJECT}-${var.NAMESPACE}"
   enabled_cloudwatch_logs_exports       = ["audit", "error", "general"]
-  create_cloudwatch_log_group           = true
   performance_insights_enabled          = true
   performance_insights_retention_period = 7
-
-  tags = {
-    Environment = var.ENV
-    Project     = var.PROJECT
-    Ns          = var.NAMESPACE
-    Role        = "replica"
-  }
 
   parameters = [
     {
@@ -128,6 +121,7 @@ module "mysql_replica" {
       value = "utf8mb4"
     }
   ]
+
   options = [
     {
       option_name = "MARIADB_AUDIT_PLUGIN"
@@ -143,6 +137,16 @@ module "mysql_replica" {
       ]
     },
   ]
+
+  tags = {
+    Environment = var.ENV
+    Project     = var.PROJECT
+    Ns          = var.NAMESPACE
+    Role        = "replica"
+    Kind        = "db"
+    Monitoring  = "prometheus"
+    Terraform   = "true"
+  }
 }
 
 resource "aws_security_group" "mysql" {
@@ -174,5 +178,6 @@ resource "aws_security_group" "mysql" {
     Project     = var.PROJECT
     Ns          = var.NAMESPACE
     Domain      = var.DOMAIN
+    Terraform   = "true"
   }
 }

@@ -309,4 +309,31 @@ class TaskList extends ActiveRecord
         $params = JsonHelper::decode($this->tl_params_json);
         return (int) ($params['delayHours'] ?? 0);
     }
+
+    public static function create(
+        string $title,
+        string $object,
+        int $targetObjectId,
+        ?string $condition,
+        ?array $conditionJson,
+        ?array $paramsJson,
+        ?int $durationMin,
+        int $enableType,
+        ?string $cronExpression = '* * * * *',
+        int $sortOrder = 0
+    ): TaskList {
+        $model = new self();
+        $model->tl_title = $title;
+        $model->tl_object = $object;
+        $model->tl_target_object_id = $targetObjectId;
+        $model->tl_condition = $condition;
+        $model->tl_condition_json = $conditionJson;
+        $model->tl_params_json = $paramsJson;
+        $model->tl_duration_min = $durationMin;
+        $model->tl_enable_type = $enableType;
+        $model->tl_cron_expression = $cronExpression;
+        $model->tl_sort_order = $sortOrder;
+
+        return $model;
+    }
 }

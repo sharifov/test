@@ -22,6 +22,6 @@ class EmailViewLeadOwnerRule extends Rule
             return false;
         }
 
-        return $email->eLead->isOwner((int)$userId);
+        return $email->lead->isOwner((int)$userId);
     }
 }

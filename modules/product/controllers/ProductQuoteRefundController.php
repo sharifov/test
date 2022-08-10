@@ -35,6 +35,9 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
+use src\services\email\EmailMainService;
+use src\exception\CreateModelException;
+use src\exception\EmailNotSentException;
 
 /**
  * Class FlightQuoteRefundController
@@ -44,6 +47,7 @@ use yii\web\ForbiddenHttpException;
  * @property-read ProductQuoteRepository $productQuoteRepository
  * @property-read CasesCommunicationService $casesCommunicationService
  * @property-read VoluntaryRefundService $voluntaryRefundService
+ * @property-read EmailMainService $emailService
  */
 class ProductQuoteRefundController extends \frontend\controllers\FController
 {
@@ -51,6 +55,7 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
     private ProductQuoteRepository $productQuoteRepository;
     private CasesCommunicationService $casesCommunicationService;
     private VoluntaryRefundService $voluntaryRefundService;
+    private EmailMainService $emailService;
 
     public function __construct(
         $id,
@@ -59,6 +64,7 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
         ProductQuoteRepository $productQuoteRepository,
         CasesCommunicationService $casesCommunicationService,
         VoluntaryRefundService $voluntaryRefundService,
+        EmailMainService $emailService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -66,6 +72,7 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
         $this->productQuoteRepository = $productQuoteRepository;
         $this->casesCommunicationService = $casesCommunicationService;
         $this->voluntaryRefundService = $voluntaryRefundService;
+        $this->emailService = $emailService;
     }
 
     /**
@@ -153,7 +160,8 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
                 $emailData['original_quote'] = $originalQuote->serialize();
                 $emailData['refund'] = $productQuoteRefund->serialize();
                 $emailData['refundData'] = $productQuoteRefund->orderRefund->serialize() ?? [];
-                $bookingId = ArrayHelper::getValue($emailData, 'original_quote.data.flights.0.fqf_booking_id', '') ?? '';
+                $bookingId = $originalQuote->getLastBookingId();
+                $emailData['case']['order_uid'] = $bookingId;
                 $emailData['booking_hash_code'] = ProjectHashGenerator::getHashByProjectId($case->cs_project_id, $bookingId);
                 if (!empty($emailData['original_quote']['data'])) {
                     ArrayHelper::remove($emailData['original_quote']['data'], 'fq_origin_search_data');
@@ -239,70 +247,41 @@ class ProductQuoteRefundController extends \frontend\controllers\FController
                     $originQuote = $this->productQuoteRepository->find($previewEmailForm->productQuoteId);
                     $productQuoteRefund = $this->productQuoteRefundRepository->find($previewEmailForm->productQuoteRefundId);
 
-                    $mail = new Email();
-                    $mail->e_project_id = $case->cs_project_id;
-                    $mail->e_case_id = $case->cs_id;
-                    if ($previewEmailForm->email_tpl_id) {
-                        $mail->e_template_type_id = $previewEmailForm->email_tpl_id;
-                    }
-                    $mail->e_type_id = Email::TYPE_OUTBOX;
-                    $mail->e_status_id = Email::STATUS_PENDING;
-                    $mail->e_email_subject = $previewEmailForm->email_subject;
-                    $mail->body_html = $previewEmailForm->email_message;
-                    $mail->e_email_from = $previewEmailForm->email_from;
-
-                    $mail->e_email_from_name = $previewEmailForm->email_from_name;
-                    $mail->e_email_to_name = $previewEmailForm->email_to_name;
-
-                    if ($previewEmailForm->language_id) {
-                        $mail->e_language_id = $previewEmailForm->language_id;
-                    }
-
-                    $mail->e_email_to = $previewEmailForm->email_to;
-                    //$mail->email_data = [];
-                    $mail->e_created_dt = date('Y-m-d H:i:s');
-                    $mail->e_created_user_id = Yii::$app->user->id;
-
-                    if ($mail->save()) {
-                        $mail->e_message_id = $mail->generateMessageId();
-                        $mail->update();
-
+                    try {
+                        $mail = $this->emailService->createFromCase($previewEmailForm, $case);
                         $previewEmailForm->is_send = true;
-
-                        $mailResponse = $mail->sendMail();
-
-                        if (isset($mailResponse['error']) && $mailResponse['error']) {
-                            throw new \RuntimeException('Error: Email Message has not been sent to ' .  $mail->e_email_to);
-                        }
-
-                        $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_EMAIL_SEND, ($mail->eTemplateType->etp_name ?? '') . ' email sent. By: ' . Auth::user()->username, [], CaseEventLog::CATEGORY_INFO);
-
-                        $productQuoteRefund->pending();
-                        $this->productQuoteRefundRepository->save($productQuoteRefund);
-
-                        try {
-                            $whData = HybridWhData::getData(HybridWhData::WH_TYPE_VOLUNTARY_REFUND_UPDATE);
-                            $whData['booking_id'] = $previewEmailForm->bookingId;
-                            $whData['product_quote_gid'] = $originQuote->pq_gid;
-                            $whData['refund_gid'] = $productQuoteRefund->pqr_gid;
-                            $whData['refund_order_id'] = $productQuoteRefund->pqr_cid;
-                            $whData['refund_status'] = ProductQuoteRefundStatus::getClientKeyStatusById($productQuoteRefund->pqr_status_id);
-                            \Yii::$app->hybrid->wh($case->cs_project_id, HybridWhData::WH_TYPE_VOLUNTARY_REFUND_UPDATE, ['data' => $whData]);
-                            $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_WH_SEND_OTA, 'WH to HybridService sent successfully', $whData, CaseEventLog::CATEGORY_DEBUG);
-                        } catch (\Throwable $throwable) {
-                            // $errorData = [];
-                            $errorData = AppHelper::throwableLog($throwable);
-                            $errorData['description'] = 'OTA site is not informed (hybridService->whVoluntaryRefund)';
-                            $errorData['project_id'] = $case->cs_project_id;
-                            $errorData['case_id'] = $case->cs_id;
-                            $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_WH_SEND_OTA, 'WH to HybridService failed', $errorData, CaseEventLog::CATEGORY_ERROR);
-                            Yii::warning($errorData, 'ProductQuoteRefundController:actionVoluntaryRefundSendEmail:Throwable');
-                        }
-
-                        return '<script>$("#modal-md").modal("hide"); createNotify("Success", "Success: <strong>Email Message</strong> is sent to <strong>' . $mail->e_email_to . '</strong>", "success")</script>';
+                        $this->emailService->sendMail($mail);
+                    } catch (CreateModelException $e) {
+                        throw new \RuntimeException($e->getErrorSummary(false)[0]);
+                    } catch (EmailNotSentException $e) {
+                        throw new \RuntimeException('Error: Email Message has not been sent to ' .  $e->getEmailTo(false));
                     }
 
-                    throw new \RuntimeException($mail->getErrorSummary(false)[0]);
+                    $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_EMAIL_SEND, ($mail->getTemplateTypeName() ?? '') . ' email sent. By: ' . Auth::user()->username, [], CaseEventLog::CATEGORY_INFO);
+
+                    $productQuoteRefund->pending();
+                    $this->productQuoteRefundRepository->save($productQuoteRefund);
+
+                    try {
+                        $whData = HybridWhData::getData(HybridWhData::WH_TYPE_VOLUNTARY_REFUND_UPDATE);
+                        $whData['booking_id'] = $previewEmailForm->bookingId;
+                        $whData['product_quote_gid'] = $originQuote->pq_gid;
+                        $whData['refund_gid'] = $productQuoteRefund->pqr_gid;
+                        $whData['refund_order_id'] = $productQuoteRefund->pqr_cid;
+                        $whData['refund_status'] = ProductQuoteRefundStatus::getClientKeyStatusById($productQuoteRefund->pqr_status_id);
+                        \Yii::$app->hybrid->wh($case->cs_project_id, HybridWhData::WH_TYPE_VOLUNTARY_REFUND_UPDATE, ['data' => $whData]);
+                        $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_WH_SEND_OTA, 'WH to HybridService sent successfully', $whData, CaseEventLog::CATEGORY_DEBUG);
+                    } catch (\Throwable $throwable) {
+                        // $errorData = [];
+                        $errorData = AppHelper::throwableLog($throwable);
+                        $errorData['description'] = 'OTA site is not informed (hybridService->whVoluntaryRefund)';
+                        $errorData['project_id'] = $case->cs_project_id;
+                        $errorData['case_id'] = $case->cs_id;
+                        $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_WH_SEND_OTA, 'WH to HybridService failed', $errorData, CaseEventLog::CATEGORY_ERROR);
+                        Yii::warning($errorData, 'ProductQuoteRefundController:actionVoluntaryRefundSendEmail:Throwable');
+                    }
+
+                    return '<script>$("#modal-md").modal("hide"); createNotify("Success", "Success: <strong>Email Message</strong> is sent to <strong>' . $mail->getEmailTo(false) . '</strong>", "success")</script>';
                 } catch (\DomainException | \RuntimeException $throwable) {
                     Yii::error(AppHelper::throwableLog($throwable), 'ProductQuoteRefundController::actionVoluntaryRefundSendEmail::DomainException|RuntimeException');
                     $previewEmailForm->addError('error', $throwable->getMessage());

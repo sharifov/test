@@ -101,11 +101,18 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
 
     public function beforeSave($insert): bool
     {
+        $time = time();
+        if (!$this->uss_year_start || !$this->uss_month_start) {
+            if (!empty($this->uss_start_utc_dt) && ($newTime = strtotime($this->uss_start_utc_dt))) {
+                $time = $newTime;
+            }
+        }
+
         if (!$this->uss_year_start) {
-            $this->uss_year_start = (int) date('Y');
+            $this->uss_year_start = (int)date('Y', $time);
         }
         if (!$this->uss_month_start) {
-            $this->uss_month_start = (int) date('m');
+            $this->uss_month_start = (int)date('m', $time);
         }
         return parent::beforeSave($insert);
     }

@@ -32,20 +32,7 @@ class LeadTaskReAssignService extends LeadTaskAssignService
 
     public function assign(): void
     {
-        $existNewUserTaskComplete = UserTaskQuery::getQueryUserTaskByUserTaskListAndStatuses(
-            $this->lead->employee_id,
-            $this->taskList->tl_id,
-            TargetObject::TARGET_OBJ_LEAD,
-            $this->lead->id,
-            [UserTask::STATUS_COMPLETE]
-        )->exists();
-
-        if ($existNewUserTaskComplete) {
-            return;
-        }
-
-        $oldUserTask = UserTaskQuery::getQueryUserTaskByUserTaskList(
-            $this->oldOwnerId,
+        $oldUserTask = UserTaskQuery::getQueryUserTaskByTargetObjectAndTaskList(
             $this->taskList->tl_id,
             TargetObject::TARGET_OBJ_LEAD,
             $this->lead->id,
@@ -64,11 +51,21 @@ class LeadTaskReAssignService extends LeadTaskAssignService
         }
 
         if ($oldUserTask->isComplete()) {
+            \modules\taskList\src\helpers\TaskListHelper::debug(
+                'Exist OldUserTask Complete (Lead ID: ' . $this->lead->id . ', EmployeeID: ' . $this->oldOwnerId . '), TaskLIst ID (' . $this->taskList->tl_id . ')',
+                'info\UserTaskAssign:LeadTaskReAssignService:assign:info'
+            );
             return;
         }
 
         $userTask = $oldUserTask
-            ->setOwner($this->lead->employee_id);
+            ->setOwner($this->lead->employee_id)
+            ->setStartDate($this->dtNowWithDelay->format('Y-m-d H:i:s'));
+
+        if ((int) $this->taskList->tl_duration_min > 0) {
+            $taskListEndDt = $this->dtNowWithDelay->modify(sprintf('+%d minutes', (int) $this->taskList->tl_duration_min));
+            $userTask->setEndDate($taskListEndDt->format('Y-m-d H:i:s'));
+        }
 
         if (!$userTask->validate()) {
             throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($userTask, ' '));

@@ -16,6 +16,8 @@ use kivork\search\core\urlsig\UrlSignature;
 use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
+use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacDto;
+use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\objectSegment\src\contracts\ObjectSegmentListContract;
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
@@ -97,6 +99,8 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
+use src\repositories\email\EmailRepositoryFactory;
+use src\entities\email\helpers\EmailType;
 
 /**
  * This is the model class for table "leads".
@@ -1477,7 +1481,17 @@ class Lead extends ActiveRecord implements Objectable
         );
         /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
         if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) && $this->isBusinessType()) {
-            LeadBusinessExtraQueueService::addLeadBusinessExtraQueueJob($this, 'Added new Business Extra Queue Countdown');
+            $leadBusinessExtraQueueObjectDto = new LeadBusinessExtraQueueAbacDto($this);
+            if (!$employee = Employee::find()->where(['id' => $this->employee_id])->limit(1)->one()) {
+                throw new \RuntimeException('LeadOwner not found by ID(' . $this->employee_id . ')');
+            }
+            /** @abac LeadBusinessExtraQueueAbacDto, LeadBusinessExtraQueueAbacObject::PROCESS_ACCESS, LeadBusinessExtraQueueAbacObject::ACTION_PROCESS, Access to processing in business Extra Queue */
+            if (Yii::$app->abac->can($leadBusinessExtraQueueObjectDto, LeadBusinessExtraQueueAbacObject::PROCESS_ACCESS, LeadBusinessExtraQueueAbacObject::ACTION_PROCESS, $employee)) {
+                LeadBusinessExtraQueueService::addLeadBusinessExtraQueueJob(
+                    $this,
+                    'Added new Business Extra Queue Countdown'
+                );
+            }
         }
     }
 
@@ -4751,15 +4765,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
      */
     public function getCountEmails(int $type_id = 0): int
     {
-        $query = Email::find();
-        $query->where(['e_lead_id' => $this->id, 'e_is_deleted' => false]);
-
-        if ($type_id !== 0) {
-            $query->andWhere(['e_type_id' => $type_id]);
-        }
-        $count = $query->count();
-
-        return (int) $count;
+        return EmailRepositoryFactory::getRepository()->getEmailCountForLead($this->id, $type_id);
     }
 
     /**
@@ -4883,8 +4889,8 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             $countSmsIn = $this->getCountSms(Sms::TYPE_INBOX);
             $countSmsOut = $this->getCountSms(Sms::TYPE_OUTBOX);
 
-            $countEmailIn = $this->getCountEmails(Email::TYPE_INBOX);
-            $countEmailOut = $this->getCountEmails(Email::TYPE_OUTBOX);
+            $countEmailIn = $this->getCountEmails(EmailType::INBOX);
+            $countEmailOut = $this->getCountEmails(EmailType::OUTBOX);
         } else {
             $countCalls = $this->getCountCalls();
             $countSms = $this->getCountSms();

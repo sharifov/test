@@ -28,20 +28,23 @@ class UserTaskAssignJob extends BaseJob implements JobInterface
         try {
             $leads = Lead::find()
                 ->byClient($this->clientId)
+                ->andWhere(['NOT', ['employee_id' => null]])
                 ->andWhere(['l_is_test' => 0])
                 ->all();
 
             foreach ($leads as $lead) {
-                /** @abac $leadTaskListAbacDto, LeadTaskListAbacObject::PROCESSING_TASK, LeadTaskListAbacObject::ACTION_ACCESS, Lead to task List processing checker */
-                $canProcessingTask = Yii::$app->abac->can(
-                    new LeadTaskListAbacDto($lead, $lead->employee_id),
-                    LeadTaskListAbacObject::PROCESSING_TASK,
-                    LeadTaskListAbacObject::ACTION_ACCESS,
-                    $lead->employee
-                );
+                if ($lead->employee) {
+                    /** @abac $leadTaskListAbacDto, LeadTaskListAbacObject::PROCESSING_TASK, LeadTaskListAbacObject::ACTION_ACCESS, Lead to task List processing checker */
+                    $canProcessingTask = Yii::$app->abac->can(
+                        new LeadTaskListAbacDto($lead, $lead->employee_id),
+                        LeadTaskListAbacObject::PROCESSING_TASK,
+                        LeadTaskListAbacObject::ACTION_ACCESS,
+                        $lead->employee
+                    );
 
-                if ($canProcessingTask) {
-                    (new LeadTaskListService($lead))->assign();
+                    if ($canProcessingTask) {
+                        (new LeadTaskListService($lead))->assign();
+                    }
                 }
             }
         } catch (\RuntimeException | \DomainException $throwable) {

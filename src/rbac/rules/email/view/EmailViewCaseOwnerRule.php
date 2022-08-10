@@ -22,6 +22,6 @@ class EmailViewCaseOwnerRule extends Rule
             return false;
         }
 
-        return $email->eCase->isOwner((int)$userId);
+        return $email->case->isOwner((int)$userId);
     }
 }

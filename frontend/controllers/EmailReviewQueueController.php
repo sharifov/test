@@ -7,33 +7,43 @@ use common\models\Email;
 use common\models\Notifications;
 use common\models\Quote;
 use common\models\QuoteCommunication;
-use frontend\helpers\JsonHelper;
 use frontend\models\CommunicationForm;
 use frontend\widgets\notification\NotificationMessage;
-use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\services\url\UrlGenerator;
 use src\auth\Auth;
 use src\entities\cases\CaseEventLog;
+use src\exception\EmailNotSentException;
 use src\forms\emailReviewQueue\EmailReviewQueueForm;
 use src\model\emailReviewQueue\entity\EmailReviewQueue;
 use src\model\emailReviewQueue\entity\EmailReviewQueueSearch;
 use src\model\emailReviewQueue\entity\EmailReviewQueueStatus;
 use src\repositories\quote\QuoteRepository;
+use src\services\email\EmailService;
+use Yii;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
+use src\services\email\EmailMainService;
 
+/**
+ * Class EmailReviewQueueController
+ * @property UrlGenerator $fileStorageUrlGenerator
+ * @property QuoteRepository $quoteRepository
+ * @property EmailMainService $emailService
+ */
 class EmailReviewQueueController extends FController
 {
     private UrlGenerator $fileStorageUrlGenerator;
     private QuoteRepository $quoteRepository;
+    private EmailMainService $emailService;
 
-    public function __construct($id, $module, UrlGenerator $fileStorageUrlGenerator, QuoteRepository $quoteRepository, $config = [])
+    public function __construct($id, $module, UrlGenerator $fileStorageUrlGenerator, QuoteRepository $quoteRepository, EmailMainService $emailService, $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->fileStorageUrlGenerator = $fileStorageUrlGenerator;
         $this->quoteRepository = $quoteRepository;
+        $this->emailService = $emailService;
     }
 
     /**
@@ -97,7 +107,7 @@ class EmailReviewQueueController extends FController
         $isReview = (bool)\Yii::$app->request->get('review', false);
         $isTake = (bool)\Yii::$app->request->get('take', false);
 
-        $email = $model->erqEmail;
+        $email = $model->email;
         $previewForm = new EmailReviewQueueForm($email, $model->erq_id);
         $displayActionBtns = false;
         if ($isReview && $model->isPending()) {
@@ -131,57 +141,51 @@ class EmailReviewQueueController extends FController
         $form = new EmailReviewQueueForm(null, null);
         $form->sendEmailScenario();
         if ($form->load(\Yii::$app->request->post()) && $form->validate()) {
-            $email = Email::findOne($form->emailId);
             $emailQueue = $this->findModel($form->emailQueueId);
+            $email = $emailQueue->email;
             if ($email) {
-                $email->e_email_from = $form->emailFrom;
-                $email->e_email_from_name = $form->emailFromName;
-                $email->e_email_to = $form->emailTo;
-                $email->e_email_to_name = $form->emailToName;
-                $email->e_email_subject = $form->emailSubject;
-                $email->e_status_id = Email::STATUS_PENDING;
-                $email->body_html = $form->emailMessage;
-                $attachments = JsonHelper::decode($email->e_email_data);
+                try {
+                    $email = $this->emailService->updateAfterReview($form, $email);
+                    $this->emailService->sendMail($email, $email->emailData ?? []);
 
-                if ($email->save()) {
-                    $mailResponse = $email->sendMail($attachments);
+                    $emailQueue->statusToReviewed();
+                    $emailQueue->erq_user_reviewer_id = Auth::id();
+                    $emailQueue->save();
 
-                    if (empty($mailResponse['error'])) {
-                        $emailQueue->statusToReviewed();
-                        $emailQueue->erq_user_reviewer_id = Auth::id();
-                        $emailQueue->save();
-
-                        if ($case = $email->eCase) {
-                            $case->addEventLog(CaseEventLog::EMAIL_REVIEWED, ($email->eTemplateType->etp_name ?? '') . ' email sent. By: ' . $email->e_email_from_name, [], CaseEventLog::CATEGORY_INFO);
-                        }
-
-                        if ($email->e_lead_id) {
-                            /*
-                             * TODO: The similar logic exist in `\frontend\controllers\LeadController::actionView`. Need to shrink code duplications.
-                             */
-                            $quoteIdSubquery = (new Query())
-                                ->select(['qc_quote_id'])
-                                ->from(['qc' => QuoteCommunication::tableName()])
-                                ->where('qc_communication_type=:communication_type', [':communication_type' => CommunicationForm::TYPE_EMAIL])
-                                ->distinct();
-                            /** @var Quote[] $quotes */
-                            $quotes = Quote::find()->where(['IN', 'id', $quoteIdSubquery])->all();
-                            foreach ($quotes as $quote) {
-                                $quote->setStatusSend();
-                                $this->quoteRepository->save($quote);
-                            }
-                        }
-
-                        \Yii::$app->session->setFlash('success', 'Email(' . $email->e_id . ') was sent to ' . $email->e_email_to);
-                        return $this->redirect('/email-review-queue/index');
+                    if ($case = $emailQueue->emailCase) {
+                        $case->addEventLog(CaseEventLog::EMAIL_REVIEWED, $emailQueue->emailTemplateName . ' email sent. By: ' . $form->emailFromName, [], CaseEventLog::CATEGORY_INFO);
                     }
-                    $form->addError('general', 'Error: Email Message has not been sent to ' .  $email->e_email_to . '; Reason: ' . $email->e_error_message);
+
+                    if ($email->e_lead_id ?? $email->lead) {
+                        /*
+                         * TODO: The similar logic exist in `\frontend\controllers\LeadController::actionView`. Need to shrink code duplications.
+                         */
+                        $quoteIdSubquery = (new Query())
+                        ->select(['qc_quote_id'])
+                        ->from(['qc' => QuoteCommunication::tableName()])
+                        ->where('qc_communication_type=:communication_type', [':communication_type' => CommunicationForm::TYPE_EMAIL])
+                        ->distinct();
+                        /** @var Quote[] $quotes */
+                        $quotes = Quote::find()->where(['IN', 'id', $quoteIdSubquery])->all();
+                        foreach ($quotes as $quote) {
+                            $quote->setStatusSend();
+                            $this->quoteRepository->save($quote);
+                        }
+                    }
+
+                    Yii::$app->session->setFlash('success', '<strong>Email (' . $email->e_id . ')</strong> was sent to <strong>' . $email->getEmailTo() . '</strong>');
+                    return $this->redirect('/email-review-queue/index');
+                } catch (EmailNotSentException $e) {
+                    $form->addError('general', 'Error: Email Message has not been sent to ' .  $e->getEmailTo() . '; Reason: ' . $e->getMessage());
+                } catch (\Throwable $e) {
+                    $form->addError('general', 'Error: Email Message has not been sent to ' .  $form->emailTo . '; Reason: ' . $e->getMessage() . '<br/>' . $e->getTraceAsString());
                 }
             }
         }
         return $this->render('partial/_preview_email', [
             'previewForm' => $form,
-            'displayActionBtns' => true
+            'displayActionBtns' => true,
+            'files' => []
         ]);
     }
 
@@ -198,15 +202,13 @@ class EmailReviewQueueController extends FController
             $emailReviewQueue->statusToReject();
             $emailReviewQueue->erq_user_reviewer_id = Auth::id();
             if ($emailReviewQueue->save()) {
-                $email = $emailReviewQueue->erqEmail;
+                $email = $emailReviewQueue->email;
                 $message = 'Email(' . $emailReviewQueue->erq_email_id . ') was rejected by (' . $emailReviewQueue->erqUserReviewer->username . ')';
-                $email->statusToCancel();
-                $email->e_error_message = $message;
-                $email->update();
-                if ($email->e_lead_id && ($lead = $email->eLead)) {
+                $email->statusToCancel($message);
+                if ($lead = $emailReviewQueue->emailLead) {
                     $message .= '<br> Lead (Id: ' . Purifier::createLeadShortLink($lead) . ')';
                 }
-                if ($email->e_case_id && ($case = $email->eCase)) {
+                if ($case = $emailReviewQueue->emailCase) {
                     $message .= '<br> Case (Id: ' . Purifier::createCaseShortLink($case) . ')';
                 }
                 if ($ntf = Notifications::create($emailReviewQueue->erq_owner_id, 'Email(' . $emailReviewQueue->erq_email_id . ') was rejected by (' . $emailReviewQueue->erqUserReviewer->username . ')', $message, Notifications::TYPE_WARNING, true)) {
@@ -219,7 +221,8 @@ class EmailReviewQueueController extends FController
         }
         return $this->render('partial/_preview_email', [
             'previewForm' => $form,
-            'displayActionBtns' => true
+            'displayActionBtns' => true,
+            'files' => []
         ]);
     }
 

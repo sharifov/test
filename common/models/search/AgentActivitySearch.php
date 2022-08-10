@@ -2,21 +2,18 @@
 
 namespace common\models\search;
 
+use common\models\Call;
+use common\models\Employee;
+use common\models\Lead;
+use common\models\LeadFlow;
+use common\models\Quote;
+use common\models\Sms;
+use common\models\UserGroupAssign;
+use src\repositories\email\EmailRepositoryFactory;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
-use common\models\Employee;
-use Yii;
-use common\models\Call;
 use yii\data\SqlDataProvider;
-use yii\db\Expression;
 use yii\db\Query;
-use common\models\Lead;
-use common\models\Quote;
-use common\models\UserGroupAssign;
-use yii\helpers\VarDumper;
-use common\models\Sms;
-use common\models\Email;
-use common\models\LeadFlow;
 
 /**
  * AgentActivitySearch
@@ -50,12 +47,12 @@ class AgentActivitySearch extends Call
     public function rules()
     {
         return [
-            [['date_range','date_from', 'date_to', 'user_groups', 'id', 'username', 'c_project_id','c_call_type_id','s_type_id','s_project_id','project_id'], 'safe'],
+            [['date_range','date_from', 'date_to', 'user_groups', 'id', 'username', 'c_project_id','c_call_type_id', 's_type_id', 's_project_id','project_id'], 'safe'],
             [['to_status', 'from_status'], 'safe'],
             [['date_from', 'date_to'], 'default', 'value' => date('Y-m-d H:i')],
 
 
-            [['lf_owner_id'], 'integer'],
+            [['lf_owner_id', 'e_type_id', 'e_project_id'], 'integer'],
             [['isExtraQLostLeads'], 'boolean'],
         ];
     }
@@ -124,6 +121,8 @@ class AgentActivitySearch extends Call
         $date_to = Employee::convertTimeFromUserDtToUTC(strtotime($this->date_to));
         $between_condition = " BETWEEN '{$date_from}' AND '{$date_to}'";
 
+        $emailTableName = EmailRepositoryFactory::getRepository()->getTableName();
+
         $query->addSelect(['(SELECT COUNT(*) FROM `call` WHERE (c_created_dt ' . $between_condition . ') AND c_created_user_id=e.id AND c_call_type_id = ' . Call::CALL_TYPE_IN . ') AS inbound_calls ']);
         $query->addSelect(['(SELECT COUNT(*) FROM `call` WHERE (c_created_dt ' . $between_condition . ') AND c_created_user_id=e.id AND c_call_type_id = ' . Call::CALL_TYPE_OUT . ') AS outbound_calls ']);
         $query->addSelect(['(SELECT SUM(c_call_duration) FROM `call` WHERE (c_created_dt ' . $between_condition . ') AND c_created_user_id=e.id) AS call_duration ']);
@@ -132,8 +131,8 @@ class AgentActivitySearch extends Call
         $query->addSelect(['(SELECT COUNT(*) FROM sms WHERE (s_created_dt ' . $between_condition . ') AND s_created_user_id=e.id AND s_type_id = 1) AS sms_sent ']);
         $query->addSelect(['(SELECT COUNT(*) FROM sms WHERE (s_created_dt ' . $between_condition . ') AND s_created_user_id=e.id AND s_type_id = 2) AS sms_received ']);
 
-        $query->addSelect(['(SELECT COUNT(*) FROM email WHERE (e_created_dt ' . $between_condition . ') AND e_created_user_id=e.id AND e_type_id = 1) AS email_sent ']);
-        $query->addSelect(['(SELECT COUNT(*) FROM email WHERE (e_created_dt ' . $between_condition . ') AND e_created_user_id=e.id AND e_type_id = 2) AS email_received ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM ' . $emailTableName . ' WHERE (e_created_dt ' . $between_condition . ') AND e_created_user_id=e.id AND e_type_id = 1) AS email_sent ']);
+        $query->addSelect(['(SELECT COUNT(*) FROM ' . $emailTableName . ' WHERE (e_created_dt ' . $between_condition . ') AND e_created_user_id=e.id AND e_type_id = 2) AS email_received ']);
 
         $query->addSelect(['(SELECT COUNT(*) FROM quote_status_log WHERE (created ' . $between_condition . ') AND employee_id=e.id AND status = ' . Quote::STATUS_SENT . ') AS quotes_sent ']);
 
@@ -417,7 +416,7 @@ class AgentActivitySearch extends Call
 
     public function searchEmail($params)
     {
-        $query = Email::find();
+        $query = EmailRepositoryFactory::getRepository()->getModelQuery();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -433,8 +432,7 @@ class AgentActivitySearch extends Call
             return $dataProvider;
         }
 
-        $query->where(['e_created_user_id' => $this->id]);
-        $query->andWhere(['between','e_created_dt', $this->date_from, $this->date_to]);
+        $query->createdBy($this->id)->createdBetween($this->date_from, $this->date_to);
 
         $query->andFilterWhere([
             'e_project_id' => $this->e_project_id,

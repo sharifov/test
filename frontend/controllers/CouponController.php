@@ -7,8 +7,11 @@ use common\models\EmailTemplateType;
 use frontend\models\CaseCouponPreviewEmailForm;
 use src\auth\Auth;
 use src\entities\cases\Cases;
-use src\helpers\app\AppHelper;
+use src\exception\CreateModelException;
+use src\exception\EmailNotSentException;
+use src\model\coupon\entity\coupon\Coupon;
 use src\model\coupon\entity\coupon\CouponStatus;
+use src\model\coupon\entity\coupon\search\CouponSearch;
 use src\model\coupon\entity\couponCase\CouponCase;
 use src\model\coupon\entity\couponClient\CouponClient;
 use src\model\coupon\entity\couponClient\repository\CouponClientRepository;
@@ -19,16 +22,16 @@ use src\model\coupon\useCase\request\RequestForm;
 use src\model\coupon\useCase\send\SendCouponsForm;
 use src\model\coupon\useCase\send\SendCouponsService;
 use src\repositories\cases\CasesRepository;
+use src\services\email\EmailMainService;
+use src\services\email\EmailService;
 use Yii;
-use src\model\coupon\entity\coupon\Coupon;
-use src\model\coupon\entity\coupon\search\CouponSearch;
+use yii\db\StaleObjectException;
+use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
-use yii\filters\VerbFilter;
 use yii\web\Response;
-use yii\db\StaleObjectException;
 
 /**
  * Class CouponController
@@ -36,19 +39,29 @@ use yii\db\StaleObjectException;
  * @property RequestCouponService $requestCoupon
  * @property SendCouponsService $sendCouponsService
  * @property CasesRepository $casesRepository
+ * @property EmailMainService $emailService
  */
 class CouponController extends FController
 {
     private $requestCoupon;
     private $sendCouponsService;
     private $casesRepository;
+    private EmailMainService $emailService;
 
-    public function __construct($id, $module, RequestCouponService $requestCoupon, SendCouponsService $sendCouponsService, CasesRepository $casesRepository, $config = [])
-    {
+    public function __construct(
+        $id,
+        $module,
+        RequestCouponService $requestCoupon,
+        SendCouponsService $sendCouponsService,
+        CasesRepository $casesRepository,
+        EmailMainService $emailService,
+        $config = []
+    ) {
         parent::__construct($id, $module, $config);
         $this->requestCoupon = $requestCoupon;
         $this->sendCouponsService = $sendCouponsService;
         $this->casesRepository = $casesRepository;
+        $this->emailService = $emailService;
     }
 
     /**
@@ -249,72 +262,42 @@ class CouponController extends FController
                     $case = $this->casesRepository->find($previewEmailForm->e_case_id);
                     $coupons = CouponCase::find()->getByCaseId($case ? $case->cs_id : 0)->all();
 
-                    $mail = new Email();
-                    $mail->e_project_id = $case->cs_project_id;
-                    $mail->e_case_id = $case->cs_id;
-                    if ($previewEmailForm->e_email_tpl_id) {
-                        $mail->e_template_type_id = $previewEmailForm->e_email_tpl_id;
-                    }
-                    $mail->e_type_id = Email::TYPE_OUTBOX;
-                    $mail->e_status_id = Email::STATUS_PENDING;
-                    $mail->e_email_subject = $previewEmailForm->e_email_subject;
-                    $mail->body_html = $previewEmailForm->e_email_message;
-                    $mail->e_email_from = $previewEmailForm->e_email_from;
+                    $mail = $this->emailService->createFromCase($previewEmailForm, $case);
+                    $previewEmailForm->is_send = true;
+                    $this->emailService->sendMail($mail);
+                    Yii::$app->session->setFlash('send-success', 'Success: <strong>Email Message</strong> is sent to <strong>' . $mail->getEmailTo() . '</strong>');
 
-                    $mail->e_email_from_name = $previewEmailForm->e_email_from_name;
-                    $mail->e_email_to_name = $previewEmailForm->e_email_to_name;
+                    $selectedCoupons = json_decode($previewEmailForm->coupon_list, true);
 
-                    if ($previewEmailForm->e_language_id) {
-                        $mail->e_language_id = $previewEmailForm->e_language_id;
-                    }
+                    foreach ($selectedCoupons as $couponId) {
+                        $coupon = Coupon::findOne((int)$couponId);
+                        if ($coupon) {
+                            $coupon->c_status_id = CouponStatus::SENT;
+                            $coupon->save();
 
-                    $mail->e_email_to = $previewEmailForm->e_email_to;
-                    //$mail->e_email_data = [];
-                    $mail->e_created_dt = date('Y-m-d H:i:s');
-                    $mail->e_created_user_id = Yii::$app->user->id;
+                            if ($clientId = ArrayHelper::getValue($case, 'client.id')) {
+                                $couponClient = CouponClient::create($coupon->c_id, $clientId);
+                                (new CouponClientRepository())->save($couponClient);
 
-                    if ($mail->save()) {
-                        $mail->e_message_id = $mail->generateMessageId();
-                        $mail->update();
-
-                        $previewEmailForm->is_send = true;
-
-                        $mailResponse = $mail->sendMail();
-
-                        $selectedCoupons = json_decode($previewEmailForm->coupon_list, true);
-
-                        foreach ($selectedCoupons as $couponId) {
-                            $coupon = Coupon::findOne((int)$couponId);
-                            if ($coupon) {
-                                $coupon->c_status_id = CouponStatus::SENT;
-                                $coupon->save();
-
-                                if ($clientId = ArrayHelper::getValue($case, 'client.id')) {
-                                    $couponClient = CouponClient::create($coupon->c_id, $clientId);
-                                    (new CouponClientRepository())->save($couponClient);
-
-                                    $couponSend = CouponSend::create($coupon->c_id, Auth::id(), $mail->e_email_to);
-                                    (new CouponSendRepository())->save($couponSend);
-                                }
+                                $couponSend = CouponSend::create($coupon->c_id, Auth::id(), $mail->getEmailTo(false));
+                                (new CouponSendRepository())->save($couponSend);
                             }
                         }
-
-                        if (isset($mailResponse['error']) && $mailResponse['error']) {
-                            $previewEmailForm->addError('error', 'Error: Email Message has not been sent to ' .  $mail->e_email_to);
-                        } else {
-                            Yii::$app->session->setFlash('success', 'Success: <strong>Email Message</strong> is sent to <strong>' . $mail->e_email_to . '</strong>');
-
-                            $form = new SendCouponsForm();
-                            $form->caseId = $case->cs_id;
-                            return $this->render('/cases/coupons/view', [
-                                'model' => $case,
-                                'coupons' => $coupons,
-                                'sendCouponsForm' => $form
-                            ]);
-                        }
-                    } else {
-                        throw new \RuntimeException($mail->getErrorSummary(false)[0]);
                     }
+
+                    $form = new SendCouponsForm();
+                    $form->caseId = $case->cs_id;
+                    return $this->render('/cases/coupons/view', [
+                        'model' => $case,
+                        'coupons' => $coupons,
+                        'sendCouponsForm' => $form
+                    ]);
+                } catch (CreateModelException $e) {
+                    $errorsMessage = VarDumper::dumpAsString($e->getErrors());
+                    Yii::error($e->getMessage(), 'CouponController::actionSend::CreateModelException');
+                    $previewEmailForm->addError('error', 'Error: Email has not been created. ' .  $errorsMessage);
+                } catch (EmailNotSentException $e) {
+                    $previewEmailForm->addError('error', 'Error: Email Message has not been sent to ' .  $e->getEmailTo());
                 } catch (\DomainException | \RuntimeException $e) {
                     Yii::error($e->getMessage(), 'CouponController::actionSend::DomainException|RuntimeException');
                     $previewEmailForm->addError('error', $e->getMessage());

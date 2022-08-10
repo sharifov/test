@@ -40,6 +40,8 @@ use yii\helpers\ArrayHelper;
  */
 class LeadPreviewEmailForm extends Model implements EmailPreviewFromInterface
 {
+    use EmailPreviewFormTrait;
+
     public $e_lead_id;
     public $e_email_from;
     public $e_email_to;

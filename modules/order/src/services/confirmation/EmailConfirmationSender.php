@@ -16,17 +16,25 @@ use modules\order\src\entities\orderEmail\OrderEmail;
 use modules\product\src\entities\productQuote\ProductQuote;
 use src\model\project\entity\projectLocale\ProjectLocale;
 use yii\helpers\VarDumper;
+use src\dto\email\EmailDTO;
+use src\services\email\EmailMainService;
+use src\exception\CreateModelException;
+use src\exception\EmailNotSentException;
 
 /**
  * @property string $template
+ * @property EmailMainService $emailService
  */
 class EmailConfirmationSender
 {
     private string $template;
 
+    private EmailMainService $emailService;
+
     public function __construct(string $template = 'order_update')
     {
         $this->template = $template;
+        $this->emailService = EmailMainService::newInstance();
     }
 
     public function sendWithoutAttachments(Order $order): void
@@ -200,45 +208,33 @@ class EmailConfirmationSender
         $body,
         array $files
     ): void {
-        $mail = new Email();
-        $mail->e_project_id = $order->or_project_id;
-        $mail->e_lead_id = $order->or_lead_id;
-        $templateTypeId = EmailTemplateType::find()
-            ->select(['etp_id'])
-            ->andWhere(['etp_key' => $templateKey])
-            ->asArray()
-            ->one();
-        if ($templateTypeId) {
-            $mail->e_template_type_id = $templateTypeId['etp_id'];
-        }
-        $mail->e_type_id = Email::TYPE_OUTBOX;
-        $mail->e_status_id = Email::STATUS_PENDING;
-        $mail->e_email_subject = $subject;
-        $mail->body_html = $body;
-        $mail->e_email_from = $from;
-        $mail->e_email_from_name = $fromName;
-        $mail->e_language_id = $languageId;
-        $mail->e_email_to = $to;
-        $mail->e_created_dt = date('Y-m-d H:i:s');
-        if ($files) {
-            $mail->e_email_data = json_encode($files);
-        }
+        try {
+            $emailDTO = EmailDTO::newInstance()->fillFromOrderConfirm(
+                $order,
+                $templateKey,
+                $from,
+                $fromName,
+                $to,
+                $languageId,
+                $subject,
+                $body,
+                $files
+            );
 
-        if (!$mail->save()) {
-            throw new \DomainException(VarDumper::dumpAsString($mail->getErrors()));
-        }
+            $mail = $this->emailService->createFromDTO($emailDTO, false);
 
-        $orderEmail = new OrderEmail();
-        $orderEmail->oe_order_id = $order->or_id;
-        $orderEmail->oe_email_id = $mail->e_id;
-        $orderEmail->save();
+            $orderEmail = new OrderEmail();
+            $orderEmail->oe_order_id = $order->or_id;
+            $orderEmail->oe_email_id = $mail->e_id;
+            $orderEmail->save();
 
-        $mail->e_message_id = $mail->generateMessageId();
-        $mail->save();
-        $mailResponse = $mail->sendMail($files);
-
-        if ($mailResponse['error'] !== false) {
+            $this->emailService->sendMail($mail, $files);
+        } catch (CreateModelException $e) {
+            throw new \DomainException(VarDumper::dumpAsString($e->getErrors()));
+        } catch (EmailNotSentException $e) {
             throw new \DomainException('Email(Id: ' . $mail->e_id . ') has not been sent.');
+        } catch (\Throwable $e) {
+            throw new \DomainException(VarDumper::dumpAsString($e->getMessage()));
         }
     }
 

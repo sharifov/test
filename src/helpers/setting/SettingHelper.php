@@ -936,8 +936,11 @@ class SettingHelper
             }
 
             if ($lead !== null && $lead->hasFlightDetails()) {
-                $tripTypeKey = $typeList[$lead->trip_type];
-                if (!isset($researchLink['types'][$tripTypeKey]) || !isset($researchLink['cabinClassMappings'][$lead->cabin])) {
+                $tripType = (string) $lead->trip_type;
+                $tripType = trim(mb_strtoupper($tripType));
+                $tripTypeKey = $typeList[$tripType] ?? null;
+
+                if ($tripTypeKey === null || !isset($researchLink['types'][$tripTypeKey]) || !isset($researchLink['cabinClassMappings'][$lead->cabin])) {
                     continue;
                 }
             }

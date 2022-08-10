@@ -4,17 +4,22 @@ namespace console\controllers;
 
 use common\models\Call;
 use common\models\ClientEmail;
+use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadFlow;
 use common\models\LeadQcall;
 use common\models\Project;
 use common\models\Task;
 use modules\featureFlag\FFlag;
+use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacDto;
+use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
+use modules\smartLeadDistribution\src\services\SmartLeadDistributionService;
 use src\exception\BoResponseException;
 use src\helpers\app\AppHelper;
 use src\helpers\DateHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\leadBusinessExtraQueue\entity\LeadBusinessExtraQueue;
+use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
 use src\model\leadBusinessExtraQueue\service\LeadToBusinessExtraQueueService;
 use src\model\leadBusinessExtraQueue\service\LeadToClosedFromBusinessExtraQueueService;
 use src\model\leadBusinessExtraQueueRule\entity\LeadBusinessExtraQueueRule;
@@ -31,6 +36,7 @@ use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLog;
 use src\model\leadUserData\entity\LeadUserData;
 use src\model\leadUserData\entity\LeadUserDataDictionary;
 use src\model\leadUserData\repository\LeadUserDataRepository;
+use src\repositories\lead\LeadBadgesRepository;
 use src\repositories\lead\LeadRepository;
 use src\services\cases\CasesSaleService;
 use Yii;
@@ -180,6 +186,17 @@ class LeadController extends Controller
                     echo $lead->id . ' -  offset_gmt: ' . $lead->offset_gmt . ' -  ip: ' . $lead->request_ip . ' - OK - ';
                     if (isset($out['data']['timeZone'])) {
                         VarDumper::dump($out['data']['timeZone']);
+                    }
+                }
+                /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+                if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) && $lead->isBusinessType() && $lead->isProcessing()) {
+                    $leadBusinessExtraQueueObjectDto = new LeadBusinessExtraQueueAbacDto($lead);
+                    if (!$employee = Employee::find()->where(['id' => $lead])->limit(1)->one()) {
+                        throw new \RuntimeException('LeadOwner not found by ID(' . $lead->employee_id . ')');
+                    }
+                    /** @abac LeadBusinessExtraQueueAbacDto, LeadBusinessExtraQueueAbacObject::ACTION_PROCESS, LeadBusinessExtraQueueAbacObject::ACTION_PROCESS, Access to processing in business Extra Queue */
+                    if (Yii::$app->abac->can($leadBusinessExtraQueueObjectDto, LeadBusinessExtraQueueAbacObject::ACTION_PROCESS, LeadBusinessExtraQueueAbacObject::ACTION_PROCESS, $employee)) {
+                        LeadBusinessExtraQueueService::addLeadBusinessExtraQueueJob($lead, 'Added new Business Extra Queue Countdown', true);
                     }
                 }
                 echo "\r\n";
@@ -948,5 +965,18 @@ class LeadController extends Controller
     private function validateDate(\DateTime $dateObject, string $date, string $format = 'Y-m-d H:i:s'): bool
     {
         return $dateObject->format($format) === $date;
+    }
+
+    public function actionRecalculateRatingBusinessLeads()
+    {
+        $leadBadgeRepository = new LeadBadgesRepository();
+        $leads = $leadBadgeRepository->getBusinessInboxQuery()
+            ->all();
+
+        if (count($leads) > 0) {
+            foreach ($leads as $lead) {
+                SmartLeadDistributionService::recalculateRatingForLead($lead);
+            }
+        }
     }
 }

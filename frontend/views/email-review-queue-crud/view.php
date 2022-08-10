@@ -8,7 +8,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model src\model\emailReviewQueue\entity\EmailReviewQueue */
 
-$this->title = $model->erqEmail->e_email_subject . ' (' . $model->erq_email_id . ')';
+$this->title = $model->emailSubject . ' (' . $model->erq_email_id . ')';
 $this->params['breadcrumbs'][] = ['label' => 'Email Review Queues', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);

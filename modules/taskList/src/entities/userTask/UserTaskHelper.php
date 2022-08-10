@@ -53,6 +53,30 @@ class UserTaskHelper
         );
     }
 
+    public static function renderStatus(?int $status): string
+    {
+        switch ($status) {
+            case UserTask::STATUS_COMPLETE:
+                return '<i class="fa fa-check-square-o" aria-hidden="true"></i>';
+            case UserTask::STATUS_CANCEL:
+                return '<i class="fa fa-times" aria-hidden="true"></i>';
+            default:
+                return '<i class="fa fa-square-o" aria-hidden="true"></i>';
+        }
+    }
+
+    public static function getColorByStatus(?int $status): string
+    {
+        switch ($status) {
+            case UserTask::STATUS_COMPLETE:
+                return 'rgba(83, 162, 101, 0.1)';
+            case UserTask::STATUS_CANCEL:
+                return 'rgba(255, 192, 82, 0.1)';
+            default:
+                return 'none';
+        }
+    }
+
     public static function getStatusLabelClass(?int $statusId): string
     {
         return self::STATUS_LIST_LABEL_MAP[$statusId] ?? 'default';

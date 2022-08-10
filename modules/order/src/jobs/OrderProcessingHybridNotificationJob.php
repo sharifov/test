@@ -12,7 +12,7 @@ use yii\queue\RetryableJobInterface;
  *
  * @property $orderId
  */
-class OrderProcessingHybridNotificationJob implements JobInterface
+class OrderProcessingHybridNotificationJob implements JobInterface, RetryableJobInterface
 {
     public $orderId;
 
@@ -41,22 +41,25 @@ class OrderProcessingHybridNotificationJob implements JobInterface
                 'status' => OrderStatus::PROCESSING,
                 'error' => $e->getMessage(),
             ], 'OrderProcessingHybridNotificationJob');
+
+            throw new \Exception('Retry job');
         }
     }
-//
-//    public function getTtr(): int
-//    {
-//        return 1 * 60;
-//    }
-//
-//    public function canRetry($attempt, $error): bool
-//    {
-//        \Yii::error([
-//            'attempt' => $attempt,
-//            'message' => 'Order processing hybrid notification error',
-//            'error' => $error->getMessage(),
-//            'orderId' => $this->orderId,
-//        ], 'OrderProcessingHybridNotificationJob');
-//        return !($attempt > 5);
-//    }
+
+    public function getTtr(): int
+    {
+        return 2 * 60;
+    }
+
+    public function canRetry($attempt, $error): bool
+    {
+        \Yii::error([
+            'attempt' => $attempt,
+            'message' => 'Order processing hybrid notification error',
+            'error' => $error->getMessage(),
+            'orderId' => $this->orderId,
+        ], 'OrderProcessingHybridNotificationJob');
+
+        return $attempt <= 15;
+    }
 }
