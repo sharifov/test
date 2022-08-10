@@ -22,7 +22,7 @@ module "pgsql" {
   subnet_ids                          = var.PRIVATE_SUBNETS
   vpc_security_group_ids              = [aws_security_group.pgsql.id]
   create_db_subnet_group              = true
-  iam_database_authentication_enabled = true
+  iam_database_authentication_enabled = false
 
   maintenance_window = "Mon:00:00-Mon:03:00"
   backup_window      = "03:00-06:00"
