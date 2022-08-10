@@ -27,7 +27,7 @@ class ClientChatFormResponseApiForm extends Model
             [['rid', 'createdAt', 'formKey', 'formValue'], 'required'],
             [['rid'], 'string', 'max' => 64],
             [['formKey'], 'string', 'max' => 255],
-            ['createdAt', 'date','format' => 'php:Y-m-d'],
+            ['createdAt', 'validateCreatedAt'],
             ['formValue', 'string', 'max' => 255],
         ];
     }
