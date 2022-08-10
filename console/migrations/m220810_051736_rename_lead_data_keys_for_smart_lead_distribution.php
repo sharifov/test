@@ -1,6 +1,8 @@
 <?php
 
+use src\model\leadDataKey\entity\LeadDataKey;
 use src\model\leadDataKey\services\LeadDataKeyDictionary;
+use yii\caching\TagDependency;
 use yii\db\Migration;
 
 /**
@@ -24,6 +26,8 @@ class m220810_051736_rename_lead_data_keys_for_smart_lead_distribution extends M
         ], [
             'ldk_key' => LeadDataKeyDictionary::KEY_LEAD_RATING_CATEGORY
         ]);
+
+        TagDependency::invalidate(Yii::$app->cache, LeadDataKey::CACHE_TAG);
     }
 
     /**
@@ -42,5 +46,7 @@ class m220810_051736_rename_lead_data_keys_for_smart_lead_distribution extends M
         ], [
             'ldk_key' => LeadDataKeyDictionary::KEY_LEAD_RATING_CATEGORY
         ]);
+
+        TagDependency::invalidate(Yii::$app->cache, LeadDataKey::CACHE_TAG);
     }
 }
