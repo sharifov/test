@@ -409,7 +409,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             'status'        =>  EmailStatus::PENDING,
             'createdDt'     =>  date('Y-m-d H:i:s'),
             'params'        => [
-                'templateType'  =>  $previewEmailForm->getEmailTemplateId() ?: null,
+                'templateType'  =>  $previewEmailForm->getEmailTemplateId(),
                 'language'      =>  $previewEmailForm->getLanguageId() ?? null,
             ],
             'body'          =>  [
