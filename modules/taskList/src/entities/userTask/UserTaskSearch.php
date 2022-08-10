@@ -162,15 +162,15 @@ class UserTaskSearch extends UserTask
      *
      * @param array $params
      * @param int $userId
-     * @param string|null $startDate
-     * @param string|null $endDate
+     * @param \DateTime|null $startDate
+     * @param \DateTime|null $endDate
      * @return ActiveDataProvider
      */
     public function searchByUserId(
         array $params,
         int $userId,
-        ?string $startDate = null,
-        ?string $endDate = null
+        ?\DateTime $startDate = null,
+        ?\DateTime $endDate = null
     ): ActiveDataProvider {
         $query = UserTask::find();
 
@@ -191,11 +191,11 @@ class UserTaskSearch extends UserTask
         $query->andWhere(['ut_user_id' => $userId]);
 
         if (!empty($startDate) && !empty($endDate)) {
-            $this->clientStartDate = $startDate;
-            $this->clientEndDate = $endDate;
+            $this->clientStartDate = $startDate->format('Y-m-d');
+            $this->clientEndDate = $endDate->format('Y-m-d');
 
-            $startDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($startDate));
-            $endDateTime = Employee::convertTimeFromUserDtToUTC((new \DateTime($endDate))->setTime(23, 59, 59)->getTimestamp());
+            $startDateTime = Employee::convertTimeFromUserDtToUTC($startDate->getTimestamp());
+            $endDateTime = Employee::convertTimeFromUserDtToUTC($endDate->getTimestamp());
             $query->andWhere([
                 'OR',
                 ['between', 'ut_start_dt', $startDateTime, $endDateTime],
