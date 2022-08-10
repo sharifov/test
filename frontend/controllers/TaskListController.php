@@ -78,13 +78,8 @@ class TaskListController extends FController
         $startDate = Yii::$app->request->get('startDate', date('Y-m-d'));
         $endDate = Yii::$app->request->get('endDate', date('Y-m-d', strtotime('+1 day')));
 
-        try {
-            $startDate = new \DateTime($startDate);
-            $endDate = (new \DateTime($endDate))->setTime(23, 59, 59);
-        } catch (\Throwable $throwable) {
-            $startDate = new \DateTime(date('Y-m-d'));
-            $endDate = (new \DateTime(date('Y-m-d', strtotime('+1 day'))))->setTime(23, 59, 59);
-        }
+        $startDate = new \DateTime($startDate);
+        $endDate = (new \DateTime($endDate))->setTime(23, 59, 59);
 
         $dataProvider = $searchModel->searchByUserId(Yii::$app->request->queryParams, $user->id, $startDate, $endDate);
 
