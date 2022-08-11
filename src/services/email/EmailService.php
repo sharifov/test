@@ -2,272 +2,350 @@
 
 namespace src\services\email;
 
-use common\models\ClientEmail;
-use common\models\DepartmentEmailProject;
 use common\models\Email;
-use common\models\Employee;
 use common\models\Lead;
-use common\models\UserProjectParams;
+use frontend\models\EmailPreviewFromInterface;
+use src\dto\email\EmailDTO;
 use src\entities\cases\Cases;
-use src\repositories\cases\CasesRepository;
-use src\repositories\lead\LeadRepository;
-use src\repositories\NotFoundException;
+use src\entities\email\EmailInterface;
+use src\entities\email\helpers\EmailStatus;
+use src\entities\email\helpers\EmailType;
+use src\exception\CreateModelException;
+use src\forms\emailReviewQueue\EmailReviewQueueForm;
 use Yii;
+use src\entities\email\form\EmailForm;
 
 /**
  * Class EmailService
  *
- * @property LeadRepository $leadRepository
- * @property CasesRepository $casesRepository
+ * @property EmailServiceHelper $helper
  */
-class EmailService
+class EmailService extends SendMail implements EmailServiceInterface
 {
     /**
-     * @var LeadRepository
+     * @var EmailServiceHelper
      */
-    private $leadRepository;
-
-    /**
-     * @var CasesRepository
-     */
-    private $casesRepository;
+    private $helper;
 
     /**
      * EmailService constructor.
-     * @param LeadRepository $leadRepository
-     * @param CasesRepository $casesRepository
+     * @param EmailServiceHelper $helper
      */
-    public function __construct(LeadRepository $leadRepository, CasesRepository $casesRepository)
+    public function __construct(EmailServiceHelper $helper)
     {
-        $this->leadRepository = $leadRepository;
-        $this->casesRepository = $casesRepository;
+        $this->helper = $helper;
     }
 
     /**
+     *
      * @param Email $email
-     * @return int|null
+     * @return array
      */
-    public function detectLeadId(Email $email): ?int
+    protected function generateContentData(EmailInterface $email)
     {
-        $subject = $email->e_email_subject;
+        $content_data['email_body_html'] = $email->getEmailBodyHtml();
+        $content_data['email_body_text'] = $email->e_email_body_text;
+        $content_data['email_subject'] = $email->e_email_subject;
+        $content_data['email_reply_to'] = $email->e_email_from;
+        $content_data['email_cc'] = $email->e_email_cc;
+        $content_data['email_bcc'] = $email->e_email_bc;
 
-        try {
-            $lead = $this->getLeadFromSubjectByIdOrHash($subject);
-
-            if (!$lead && !$lead = $this->getLeadFromSubjectByKivTag($email->e_ref_message_id)) {
-//              $lead = $this->getLeadByLastEmail($email->e_email_from);
-            }
-        } catch (NotFoundException $exception) {
-            Yii::info('(' . $exception->getCode() . ') ' . $exception->getMessage() . ' File: ' . $exception->getFile() . '(Line: ' . $exception->getLine() . ')' . '; message_id: ' . $email->e_ref_message_id, 'info\SalesEmailService:detectLeadId:NotFoundException');
+        if ($email->e_email_from_name) {
+            $content_data['email_from_name'] = $email->e_email_from_name;
+        }
+        if ($email->e_email_to_name) {
+            $content_data['email_to_name'] = $email->e_email_to_name;
+        }
+        if ($email->e_message_id) {
+            $content_data['email_message_id'] = $email->e_message_id;
         }
 
-        $email->e_lead_id = $lead->id ?? null;
+        return $content_data;
+    }
 
-        return $email->e_lead_id;
+
+    public function sendMail(EmailInterface $email, array $data = [])
+    {
+        $contentData = $this->generateContentData($email);
+        return $this->sendToCommunication($email, $contentData, $data);
     }
 
     /**
+     *
      * @param Email $email
-     * @return int|null
+     * @param array $requestData
      */
-    public function detectCaseId(Email $email): ?int
+    public function updataAfterSendMail(Email $email, $requestData)
     {
-        $subject = $email->e_email_subject;
+        if ($requestData && isset($requestData['eq_status_id'])) {
+            $email->updateAttributes([
+                'e_status_id' => $requestData['eq_status_id'],
+                'e_type_id' =>  EmailType::isDraft($email->e_type_id) ? EmailType::OUTBOX : $email->e_type_id,
+                'e_communication_id' =>  $requestData['eq_id']
+            ]);
+        }
+    }
 
+    public function create(EmailForm $form)
+    {
         try {
-            $case = $this->getCaseFromSubjectByIdOrHash($subject);
-
-            if (!$case && !$case = $this->getCaseFromSubjectByKivTag($email->e_ref_message_id)) {
-//              $case = $this->getCaseByLastEmail($email->e_email_from);
+            $email = new Email();
+            if ($form->emailId) {
+                $email->e_id = $form->emailId;
             }
-        } catch (NotFoundException $exception) {
-            Yii::info('(' . $exception->getCode() . ') ' . $exception->getMessage() . ' File: ' . $exception->getFile() . '(Line: ' . $exception->getLine() . ')' . '; message_id: ' . $email->e_ref_message_id, 'info\SalesEmailService:detectCaseId:NotFoundException');
-        }
+            $email->e_type_id = $form->type;
+            $email->e_status_id = $form->status;
+            $email->e_is_new = $form->log->isNew;
+            $email->e_is_deleted = $form->isDeleted ?? 0;
+            $email->e_reply_id = $form->replyId ?? null;
+            $email->e_priority = $form->params->priority ?? null;
+            $email->e_communication_id = $form->log->communicationId ?? null;
+            $email->e_email_to = $form->contacts['to']->email;
+            $email->e_email_to_name = $form->contacts['to']->name;
+            $email->e_email_from = $form->contacts['from']->email;
+            $email->e_email_from_name = $form->contacts['from']->name;
+            //$email->e_email_cc = TODO: CC, BCC
+            $email->e_email_subject = $form->body->subject;
+            $email->e_project_id = $form->projectId;
+            $email->body_html = $form->body->bodyHtml;
+            $email->e_created_dt = $form->createdDt;
+            $email->e_inbox_email_id = $form->log->inboxEmailId;
+            $email->e_inbox_created_dt = $form->log->inboxCreatedDt;
+            $email->e_ref_message_id = $form->log->refMessageId;
+            $email->e_message_id = $form->log->messageId;
+            $email->e_language_id = $form->params->language;
+            $email->e_template_type_id = $form->params->templateType;
+            $email->e_error_message = $form->log->errorMessage;
+            $email->e_client_id = $form->clients ?? null;
+            $email->e_lead_id = $form->leads ?? null;
+            $email->e_case_id = $form->cases ?? null;
+            $email->e_created_user_id = $form->getUserId() ?? null;
+            $email->e_email_data = !empty($form->body->data) ? json_encode($form->body->data) : null;
 
-        $email->e_case_id = $case->cs_id ?? null;
-
-        return $email->e_case_id;
-    }
-
-    /**
-     * @param string $email
-     * @return bool
-     */
-    public function isNotInternalEmail(string $email): bool
-    {
-        if (UserProjectParams::find()->byEmail($email)->one()) {
-            return false;
-        }
-        if (Employee::find()->byEmail($email)->one()) {
-            return false;
-        }
-        if (DepartmentEmailProject::find()->byEmail($email)->one()) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * @param string|null $subject
-     * @return Cases
-     */
-    private function getCaseFromSubjectByIdOrHash(?string $subject): ?Cases
-    {
-        if (!$subject) {
-            return null;
-        }
-
-        preg_match('~\[cid:(\d+)\]~si', $subject, $matches);
-
-        if (!empty($matches[1])) {
-            $case_id = (int) $matches[1];
-            $case = $this->casesRepository->find($case_id);
-        }
-
-        if (empty($case)) {
-            $matches = [];
-            preg_match('~\[gid:(\w+)\]~si', $subject, $matches);
-            if (!empty($matches[1])) {
-                $case = $this->casesRepository->findByGid((int)$matches[1]);
+            if (!$email->save()) {
+                throw new CreateModelException(get_class($email), $email->getErrors());
+            } elseif ($email->e_message_id == null) {
+                $email->e_message_id = $email->generateMessageId();
+                $email->update();
             }
+        } catch (\Throwable $e) {
+            throw $e;
         }
 
-        return $case ?? null;
+        return $email;
     }
 
     /**
-     * @param string|null $refMessageId
-     * @return Cases|null
+     *
+     * @param Email $email
+     * @param EmailForm $form
+     * @throws \RuntimeException
+     * @throws Throwable
+     * @return Email
      */
-    private function getCaseFromSubjectByKivTag(?string $refMessageId): ?Cases
+    public function update($email, EmailForm $form)
     {
-        if (!$refMessageId) {
-            return null;
-        }
-
-        $matches = [];
-        preg_match_all('~<kiv\.(.+)>~iU', $refMessageId, $matches);
-        if (!empty($matches[1])) {
-            foreach ($matches[1] as $messageId) {
-                $messageArr = explode('.', $messageId);
-                $caseId = end($messageArr);
-                if (!empty($caseId)) {
-                    $case_id = (int) $caseId;
-                    $case = $this->casesRepository->find($case_id);
-                    if ($case) {
-                        return $case;
-                    }
-                }
+        try {
+            $email->e_type_id = $form->type;
+            $email->e_status_id = $form->status;
+            $email->e_is_new = $form->log->isNew;
+            if ($form->isDeleted !== null) {
+                $email->e_is_deleted = $form->isDeleted;
             }
-        }
-        return null;
-    }
-
-    /**
-     * @param string $emailFrom
-     * @return Cases|null
-     */
-    private function getCaseByLastEmail(string $emailFrom): ?Cases
-    {
-        $clientEmail = ClientEmail::find()->where(['email' => $emailFrom])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-        if (
-            $clientEmail &&
-            $clientEmail->client_id &&
-            !$case = $this->casesRepository->getByClient($clientEmail->client_id)
-        ) {
-            $case = $this->casesRepository->getByClientWithAnyStatus($clientEmail->client_id);
-        }
-
-        return $case ?? null;
-    }
-
-    /**
-     * @param string|null $subject
-     * @return Lead|null
-     */
-    private function getLeadFromSubjectByIdOrHash(?string $subject): ?Lead
-    {
-        if (!$subject) {
-            return null;
-        }
-
-        preg_match('~\[lid:(\d+)\]~si', $subject, $matches);
-
-        if (!empty($matches[1])) {
-            $lead_id = (int) $matches[1];
-            $lead = $this->leadRepository->get($lead_id);
-        }
-
-        if (empty($lead)) {
-            $matches = [];
-            preg_match('~\[uid:(\w+)\]~si', $subject, $matches);
-            if (!empty($matches[1])) {
-                $lead = $this->leadRepository->getByUid((int)$matches[1]);
+            if (!empty($form->replyId)) {
+                $email->e_reply_id = $form->replyId;
             }
-        }
-
-        return $lead ?? null;
-    }
-
-    /**
-     * @param string|null $refMessageId
-     * @return Lead|null
-     */
-    private function getLeadFromSubjectByKivTag(?string $refMessageId): ?Lead
-    {
-        if (!$refMessageId) {
-            return null;
-        }
-
-        $matches = [];
-        preg_match_all('~<kiv\.(.+)>~iU', $refMessageId, $matches);
-        if (!empty($matches[1])) {
-            foreach ($matches[1] as $messageId) {
-                $messageArr = explode('.', $messageId);
-                if (!empty($messageArr[2])) {
-                    $lead_id = (int) $messageArr[2];
-
-                    $lead = $this->leadRepository->get($lead_id);
-                    if ($lead) {
-                        return $lead;
-                    }
-                }
+            if ($form->log->errorMessage !== null) {
+                $email->e_error_message = $form->log->errorMessage;
             }
+            if ($form->params->priority !== null) {
+                $email->e_priority = $form->params->priority;
+            }
+            if ($form->log->communicationId !== null) {
+                $email->e_communication_id = $form->log->communicationId;
+            }
+            if ($form->log->statusDoneDt !== null) {
+                $email->e_status_done_dt = $form->log->statusDoneDt;
+            }
+            if ($form->log->readDt !== null) {
+                $email->e_read_dt = $form->log->readDt;
+            }
+            $email->e_email_to = $form->contacts['to']->email;
+            $email->e_email_to_name = $form->contacts['to']->name;
+            $email->e_email_from = $form->contacts['from']->email;
+            $email->e_email_from_name = $form->contacts['from']->name;
+            //$email->e_email_cc = TODO: CC, BCC
+            $email->e_email_subject = $form->body->subject;
+            $email->e_project_id = $form->projectId;
+            $email->body_html = $form->body->bodyHtml;
+            $email->e_updated_dt = $form->createdDt;
+            $email->e_updated_user_id = $form->getUserId() ?? null;
+            $email->e_inbox_email_id = $form->log->inboxEmailId;
+            $email->e_inbox_created_dt = $form->log->inboxCreatedDt;
+            $email->e_ref_message_id = $form->log->refMessageId;
+            if ($form->log->messageId !== null) {
+                $email->e_message_id = $form->log->messageId;
+            }
+            $email->e_language_id = $form->params->language;
+            $email->e_template_type_id = $form->params->templateType;
+            if ($form->clients !== null) {
+                $email->e_client_id = $form->clients;
+            }
+            if ($form->leads !== null) {
+                $email->e_lead_id = is_array($form->leads) ? $form->leads[0] : $form->leads;
+            }
+            if ($form->cases !== null) {
+                $email->e_case_id = $form->cases;
+            }
+            $email->e_updated_user_id = $form->getUserId() ?? null;
+            if (!empty($form->body->data)) {
+                $email->e_email_data = json_encode($form->body->data);
+            }
+
+            if (!$email->save()) {
+                throw new \RuntimeException('Email save failed: ' . $email->getErrorSummary(true)[0]);
+            }
+        } catch (\Throwable $e) {
+            throw $e;
         }
-        return null;
+
+        return $email;
     }
 
     /**
-     * @param string $emailFrom
-     * @return Lead|null
+     *
+     * @param EmailPreviewFromInterface $previewEmailForm
+     * @return \common\models\Email
      */
-    private function getLeadByLastEmail(string $emailFrom): ?Lead
+    public function createFromPreviewForm(EmailPreviewFromInterface $previewEmailForm, array $attachments = [])
     {
-        $clientEmail = ClientEmail::find()->where(['email' => $emailFrom])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-        if (
-            $clientEmail &&
-            $clientEmail->client_id &&
-            !$lead = $this->leadRepository->getActiveByClientId($clientEmail->client_id)
-        ) {
-            $lead = $this->leadRepository->getByClientId($clientEmail->client_id);
+        $mail = new Email();
+        if ($previewEmailForm->getEmailTemplateId()) {
+            $mail->e_template_type_id = $previewEmailForm->getEmailTemplateId();
+        }
+        $mail->e_type_id = EmailType::OUTBOX;
+        $mail->e_status_id = EmailStatus::PENDING;
+        $mail->e_email_subject = $previewEmailForm->getEmailSubject();
+        $mail->body_html = $previewEmailForm->getEmailMessage();
+        $mail->e_email_from = $previewEmailForm->getEmailFrom();
+        $mail->e_email_from_name = $previewEmailForm->getEmailFromName();
+        $mail->e_email_to_name = $previewEmailForm->getEmailToName();
+        if ($previewEmailForm->getLanguageId()) {
+            $mail->e_language_id = $previewEmailForm->getLanguageId();
+        }
+        $mail->e_email_to = $previewEmailForm->getEmailTo();
+        $mail->e_created_dt = date('Y-m-d H:i:s');
+        $mail->e_created_user_id = \Yii::$app->user->id;
+        $mail->e_email_data = !empty($attachments) ? json_encode($attachments) : null;
+
+        return $mail;
+    }
+
+    public function createFromLead(EmailPreviewFromInterface $previewEmailForm, Lead $lead, array $attachments = []): Email
+    {
+        try {
+            $mail = $this->createFromPreviewForm($previewEmailForm, $attachments);
+            $mail->e_project_id = $lead->project_id;
+            $mail->e_lead_id = $lead->id;
+
+            if ($mail->save()) {
+                $mail->e_message_id = $mail->generateMessageId();
+                $mail->update();
+            } else {
+                throw new CreateModelException(get_class($mail), $mail->getErrors());
+            }
+        } catch (\Throwable $e) {
+            throw $e;
         }
 
-        return $lead ?? null;
+        return $mail;
     }
 
-    public function detectClientId(string $email)
+    public function createFromCase(EmailPreviewFromInterface $previewEmailForm, Cases $case, array $attachments = []): Email
     {
-        $clientEmail = ClientEmail::find()->where(['email' => $email])->one();
+        try {
+            $mail = $this->createFromPreviewForm($previewEmailForm, $attachments);
+            $mail->e_project_id = $case->cs_project_id;
+            $mail->e_case_id = $case->cs_id;
 
-        return $clientEmail->client_id ?? null;
+            if ($mail->save()) {
+                $mail->e_message_id = $mail->generateMessageId();
+                $mail->update();
+            } else {
+                throw new CreateModelException(get_class($mail), $mail->getErrors());
+            }
+        } catch (\Throwable $e) {
+            throw $e;
+        }
+
+        return $mail;
     }
 
-    /**
-     * @param string $body
-     * @return string
-     */
-    public static function prepareEmailBody(string $body): string
+    public function updateAfterReview(EmailReviewQueueForm $form, $email)
     {
-        return str_replace('class="editable"', 'class="editable" contenteditable="true" ', $body);
+        try {
+            $email->e_email_from = $form->emailFrom;
+            $email->e_email_from_name = $form->emailFromName;
+            $email->e_email_to = $form->emailTo;
+            $email->e_email_to_name = $form->emailToName;
+            $email->e_email_subject = $form->emailSubject;
+            $email->e_status_id = EmailStatus::PENDING;
+            $email->body_html = $form->emailMessage;
+
+            if (!$email->save()) {
+                throw new \Exception($email->getErrorSummary(true)[0]);
+            }
+        } catch (\Throwable $e) {
+            throw $e;
+        }
+
+        return $email;
+    }
+
+    public function createFromDTO(EmailDTO $emailDTO, $autoDetectEmpty = true): Email
+    {
+        try {
+            $email = new Email();
+            $email->e_type_id = $emailDTO->typeId;
+            $email->e_status_id = $emailDTO->statusId;
+            $email->e_is_new = $emailDTO->isNew;
+            $email->e_email_to = $emailDTO->emailTo;
+            $email->e_email_to_name = $emailDTO->emailToName;
+            $email->e_email_from = $emailDTO->emailFrom;
+            $email->e_email_from_name = $emailDTO->emailFromName;
+            $email->e_email_cc = !empty($emailDTO->emailCc) ? $emailDTO->emailCc : null;
+            $email->e_email_subject = $emailDTO->emailSubject;
+            $email->e_project_id = $emailDTO->projectId ?? $this->helper->getProjectIdByDepOrUpp($emailDTO->emailTo);
+            $email->body_html = $emailDTO->bodyHtml;
+            $email->e_created_dt = $emailDTO->createdDt;
+            $email->e_inbox_email_id = $emailDTO->inboxEmailId;
+            $email->e_inbox_created_dt = $emailDTO->inboxCreatedDt;
+            $email->e_ref_message_id = $emailDTO->refMessageId;
+            $email->e_message_id = $emailDTO->messageId;
+            $email->e_language_id = $emailDTO->languageId;
+            $email->e_template_type_id = $emailDTO->templateTypeId;
+            $email->e_client_id = $emailDTO->clientId ?? null;
+            $email->e_lead_id = $emailDTO->leadId ?? null;
+            $email->e_case_id = $emailDTO->caseId ?? null;
+            $email->e_created_user_id = $emailDTO->createdUserId ?? null;
+            $email->e_email_data = !empty($emailDTO->attachments) ? json_encode($emailDTO->attachments) : null;
+            if ($autoDetectEmpty) {
+                $email->e_client_id = $emailDTO->clientId ?? $this->helper->detectClientId($emailDTO->emailFrom);
+                $email->e_lead_id = $emailDTO->leadId ?? $this->helper->detectLeadId($emailDTO->emailSubject, $emailDTO->refMessageId);
+                $email->e_case_id = $emailDTO->caseId ?? $this->helper->detectCaseId($emailDTO->emailSubject, $emailDTO->refMessageId);
+                $email->e_created_user_id = $emailDTO->createdUserId ?? $this->helper->getUserIdByEmail($emailDTO->emailTo);
+            }
+
+            if (!$email->save()) {
+                throw new CreateModelException(get_class($email), $email->getErrors());
+            } elseif ($email->e_message_id == null) {
+                $email->e_message_id = $email->generateMessageId();
+                $email->update();
+            }
+        } catch (\Throwable $e) {
+            throw $e;
+        }
+
+        return $email;
     }
 }

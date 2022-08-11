@@ -18,6 +18,10 @@ class PhoneAssignChecker implements TaskAssignCheckerInterface
     public function check(): bool
     {
         if (empty($this->lead->client_id)) {
+            \modules\taskList\src\helpers\TaskListHelper::debug(
+                'ClientLead is empty  (Lead ID: ' . $this->lead->id . ')',
+                'info\UserTaskAssign:PhoneAssignChecker:check:info'
+            );
             return false;
         }
         return ClientPhoneQuery::getQueryClientPhoneByClientId($this->lead->client_id)->exists();

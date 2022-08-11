@@ -6,6 +6,7 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
+use modules\smartLeadDistribution\src\services\SmartLeadDistributionService;
 use modules\smartLeadDistribution\src\SmartLeadDistribution;
 use src\model\leadDataKey\services\LeadDataKeyDictionary;
 use src\repositories\lead\LeadBadgesRepository;
@@ -38,7 +39,7 @@ class LeadRatingReportSearch extends Lead
         return [
             [['id', 'ratingCategoryId', 'ratingPoints', 'project_id', 'userGroupId', 'userDepartmentId'], 'integer'],
             [['ratingCategoryIds', 'leadStatusIds', 'projectIds', 'userGroupIds', 'userDepartmentIds'], 'safe'],
-            ['ratingCategoryIds', 'default', 'value' => array_keys(SmartLeadDistribution::CATEGORY_LIST)],
+            ['ratingCategoryIds', 'default', 'value' => array_keys(SmartLeadDistributionService::getCategoriesAsIdName())],
             [['ratingCategoryIds', 'leadStatusIds'], 'required'],
 
             [['createdDateRange'], 'string'],

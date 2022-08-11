@@ -5,6 +5,17 @@ resource "aws_lb" "app" {
   security_groups = [aws_security_group.app.id, aws_security_group.lb.id]
   internal        = false
   idle_timeout    = 120
+
+  tags = {
+    Name        = "lb-${var.PROJECT}-${var.NAMESPACE}"
+    Environment = var.ENV
+    Project     = var.PROJECT
+    Ns          = var.NAMESPACE
+    Domain      = var.DOMAIN
+    Monitoring  = "prometheus"
+    Kind        = "lb"
+    Terraform   = "true"
+  }
 }
 
 # Redirect to HTTPS
@@ -133,5 +144,6 @@ resource "aws_security_group" "lb" {
     Project     = var.PROJECT
     Ns          = var.NAMESPACE
     Domain      = var.DOMAIN
+    Terraform   = "true"
   }
 }

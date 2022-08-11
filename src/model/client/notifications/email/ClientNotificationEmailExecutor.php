@@ -39,6 +39,7 @@ class ClientNotificationEmailExecutor
         $this->casesCommunicationService = $casesCommunicationService;
     }
 
+    //TODO: refactor using EmailMainService
     public function execute(ClientNotificationEmailList $notification): void
     {
         if (!$notification->isNew()) {
@@ -75,6 +76,7 @@ class ClientNotificationEmailExecutor
         try {
             $case = Cases::findOne($notification->getData()->caseId);
             $emailData = $this->casesCommunicationService->getEmailDataWithoutAgentData($case);
+            $emailData['case']['order_uid'] = $bookingId;
             $emailData['reprotection_quote'] = $quote->serialize();
             $emailData['original_quote'] = $quote->serialize();
             $emailData['booking_hash_code'] = $bookingHashCode;

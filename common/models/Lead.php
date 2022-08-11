@@ -99,6 +99,8 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
+use src\repositories\email\EmailRepositoryFactory;
+use src\entities\email\helpers\EmailType;
 
 /**
  * This is the model class for table "leads".
@@ -4763,15 +4765,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
      */
     public function getCountEmails(int $type_id = 0): int
     {
-        $query = Email::find();
-        $query->where(['e_lead_id' => $this->id, 'e_is_deleted' => false]);
-
-        if ($type_id !== 0) {
-            $query->andWhere(['e_type_id' => $type_id]);
-        }
-        $count = $query->count();
-
-        return (int) $count;
+        return EmailRepositoryFactory::getRepository()->getEmailCountForLead($this->id, $type_id);
     }
 
     /**
@@ -4895,8 +4889,8 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             $countSmsIn = $this->getCountSms(Sms::TYPE_INBOX);
             $countSmsOut = $this->getCountSms(Sms::TYPE_OUTBOX);
 
-            $countEmailIn = $this->getCountEmails(Email::TYPE_INBOX);
-            $countEmailOut = $this->getCountEmails(Email::TYPE_OUTBOX);
+            $countEmailIn = $this->getCountEmails(EmailType::INBOX);
+            $countEmailOut = $this->getCountEmails(EmailType::OUTBOX);
         } else {
             $countCalls = $this->getCountCalls();
             $countSms = $this->getCountSms();

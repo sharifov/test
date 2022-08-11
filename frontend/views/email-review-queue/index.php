@@ -43,7 +43,8 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'erq_email_id',
                 'value' => static function (EmailReviewQueue $model) {
-                    return Html::a('<i class="fa fa-link"></i> ' . $model->erq_email_id, ['/email/view', 'id' => $model->erq_email_id], ['target' => '_blank', 'data-pjax' => 0]);
+                    $url = ($model->erq_email_is_norm) ? '/email-normalized/view' : '/email/view';
+                    return Html::a('<i class="fa fa-link"></i> ' . $model->erq_email_id, [$url, 'id' => $model->erq_email_id], ['target' => '_blank', 'data-pjax' => 0]);
                 },
                 'format' => 'raw',
                 'options' => [
@@ -68,33 +69,33 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'label' => 'Email Subject',
                 'value' => static function (EmailReviewQueue $model) {
-                    return $model->erqEmail->e_email_subject;
+                    return $model->emailSubject;
                 }
             ],
             [
                 'label' => 'Email Template Name',
                 'value' => static function (EmailReviewQueue $model) {
-                    return $model->erqEmail->eTemplateType->etp_name ?? '--';
+                    return $model->emailTemplateName;
                 }
             ],
             [
                 'label' => 'Email Lead',
                 'value' => static function (EmailReviewQueue $model) {
-                    return $model->erqEmail->eLead;
+                    return $model->emailLead;
                 },
                 'format' => 'lead',
             ],
             [
                 'label' => 'Email Case',
                 'value' => static function (EmailReviewQueue $model) {
-                    return $model->erqEmail->eCase;
+                    return $model->emailCase;
                 },
                 'format' => 'case',
             ],
             [
                 'label' => 'Email Status',
                 'value' => static function (EmailReviewQueue $model) {
-                    return $model->erqEmail->statusName;
+                    return $model->emailStatusName;
                 },
                 'format' => 'raw'
             ],

@@ -30,7 +30,7 @@ class EmailReviewQueueSearch extends EmailReviewQueue
             [['erq_status_id'], 'in', 'range' => array_keys(EmailReviewQueueStatus::getPendingList()), 'on' => self::SCENARIO_PENDING_STATUSES],
             [['erq_status_id'], 'in', 'range' => array_keys(EmailReviewQueueStatus::getCompletedList()), 'on' => self::SCENARIO_COMPLETED_STATUSES],
             [['erq_department_id'], 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['erq_department_id' => 'dep_id']],
-            [['erq_email_id'], 'exist', 'skipOnError' => true, 'targetClass' => Email::class, 'targetAttribute' => ['erq_email_id' => 'e_id']],
+            [['erq_email_id'], 'exist', 'skipOnError' => true, 'targetRelation' => 'email'],
             [['erq_owner_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['erq_owner_id' => 'id']],
             [['erq_project_id'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['erq_project_id' => 'id']],
             [['erq_user_reviewer_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['erq_user_reviewer_id' => 'id']],

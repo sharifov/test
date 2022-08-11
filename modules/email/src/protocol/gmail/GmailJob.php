@@ -9,7 +9,7 @@ use modules\email\src\entity\emailAccount\EmailAccount;
 use modules\email\src\Notifier;
 use modules\email\src\Projects;
 use src\helpers\app\AppHelper;
-use src\services\email\EmailService;
+use src\services\email\EmailMainService;
 use yii\base\BaseObject;
 use yii\queue\JobInterface;
 
@@ -50,8 +50,7 @@ class GmailJob extends BaseObject implements JobInterface
             $logger->timerStart('gmail_service')->log(Message::info('Start Gmail Service'));
 
             $api = new GmailApiService(GmailClient::createByAccount($account), $account->ea_email, $logger, $this->useBatchRequest);
-            $emailService = \Yii::createObject(EmailService::class);
-            $result = (new GmailService($api, $account, $logger, $emailService, new Projects($this->projects)))
+            $result = (new GmailService($api, $account, $logger, EmailMainService::newInstance(), new Projects($this->projects)))
                 ->downloadMessages($account->ea_gmail_command, new GmailCriteria($this->dayTo, $this->limit, $this->dayFrom));
 
             if ($result->emailsTo) {

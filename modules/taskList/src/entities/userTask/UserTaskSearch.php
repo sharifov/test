@@ -217,15 +217,15 @@ class UserTaskSearch extends UserTask
 
         if ($startDateTime && $endDateTime) {
             try {
-                $dTStart = new \DateTimeImmutable(date('Y-m-d 00:00:00', $startDateTime));
-                $dTEnd = new \DateTime(date('Y-m-d 23:59:59', $endDateTime));
+                $dTStart = (new \DateTimeImmutable($startDateTime))->setTime(0, 0);
+                $dTEnd = (new \DateTime($endDateTime))->setTime(23, 59, 59);
                 $sqlDTRestriction = DBHelper::yearMonthRestrictionQuery(
                     $dTStart,
                     $dTEnd,
                     'ut_year',
                     'ut_month'
                 );
-                $query->where($sqlDTRestriction);
+                $query->andWhere($sqlDTRestriction);
             } catch (\RuntimeException | \DomainException $throwable) {
                 $message = AppHelper::throwableLog($throwable);
                 $message['model'] = ArrayHelper::toArray($this);
@@ -335,6 +335,39 @@ class UserTaskSearch extends UserTask
         }
 
         $query->andFilterWhere(['like', 'ut_target_object', $this->ut_target_object]);
+
+        return $dataProvider;
+    }
+
+    public function searchByTargetObjectAndTargetObjectId(string $targetObject, int $targetObjectId, array $params): ActiveDataProvider
+    {
+        $query = UserTask::find()
+            ->where([
+                'AND',
+                ['ut_target_object' => $targetObject],
+                ['ut_target_object_id' => $targetObjectId],
+            ]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['ut_created_dt' => SORT_DESC]],
+            'pagination' => ['pageSize' => 10],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            $query->where('0=1');
+
+            return $dataProvider;
+        }
+
+        if ($this->ut_start_dt) {
+            $query->andFilterWhere(['>=', 'ut_start_dt',
+                Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_start_dt))])
+                ->andFilterWhere(['<=', 'ut_start_dt',
+                    Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_start_dt) + 3600 * 24)]);
+        }
 
         return $dataProvider;
     }

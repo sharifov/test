@@ -9,7 +9,7 @@ Group=phpfpm_exporter
 Type=simple
 ExecStart=/usr/local/bin/phpfpm_exporter \
     --addr ":9280" \
-    --fastcgi "unix:///var/run/php/php8.0-fpm.sock"
+    --fastcgi "unix:///var/run/php/php8.1-fpm.sock"
 
 [Install]
 WantedBy=multi-user.target

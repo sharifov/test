@@ -22,4 +22,20 @@ class RbacQueryService
             ->where(['a.type' => Item::TYPE_ROLE])
             ->column();
     }
+
+    public static function getRolesListWithPermissionsCount()
+    {
+        $columns =  (new Query())
+            ->select(['a.name', 'count(*)'])
+            ->from(['a' => 'auth_item'])
+            ->where(['a.type' => Item::TYPE_ROLE])
+            ->innerJoin('auth_item_child aic', 'aic.parent = a.name')
+            ->groupBy('a.name')
+            ->all();
+        $result = [];
+        foreach ($columns as $column) {
+            $result[$column['name']] = $column['name'] . '  - permissions count  - ' . $column['count(*)'];
+        }
+        return $result;
+    }
 }

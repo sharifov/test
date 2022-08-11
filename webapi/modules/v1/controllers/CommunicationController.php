@@ -91,6 +91,8 @@ use yii\web\NotFoundHttpException;
 use yii\web\UnprocessableEntityHttpException;
 use common\components\ReceiveEmailsJob;
 use yii\queue\Queue;
+use src\repositories\email\EmailRepositoryFactory;
+use src\services\email\EmailMainService;
 
 /**
  * Class CommunicationController
@@ -124,6 +126,8 @@ class CommunicationController extends ApiBaseController
 
     private $callService;
     private $conferenceStatusCallbackHandler;
+    private $emailRepository;
+    private $emailService;
 
     /**
      * @param $id
@@ -131,11 +135,13 @@ class CommunicationController extends ApiBaseController
      * @param CallService $callService
      * @param array $config
      */
-    public function __construct($id, $module, CallService $callService, ConferenceStatusCallbackHandler $conferenceStatusCallbackHandler, $config = [])
+    public function __construct($id, $module, CallService $callService, ConferenceStatusCallbackHandler $conferenceStatusCallbackHandler, EmailMainService $emailService, $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->callService = $callService;
         $this->conferenceStatusCallbackHandler = $conferenceStatusCallbackHandler;
+        $this->emailRepository = EmailRepositoryFactory::getRepository(); //TODO: remove after refactoring
+        $this->emailService = $emailService;
     }
 
     /**
@@ -2302,22 +2308,10 @@ class CommunicationController extends ApiBaseController
                 throw new NotFoundHttpException('Not found eq_status_id', 12);
             }
 
-            $email = Email::findOne(['e_communication_id' => $eq_id]);
-            if ($email) {
-                if ($eq_status_id > 0) {
-                    $email->e_status_id = $eq_status_id;
-                    if ($eq_status_id === Email::STATUS_DONE) {
-                        $email->e_status_done_dt = date('Y-m-d H:i:s');
-                    }
-
-                    if (!$email->save()) {
-                        Yii::error(VarDumper::dumpAsString($email->errors), 'API:Communication:updateEmailStatus:Email:save');
-                    }
-                }
-
-                $response['email'] = $email->e_id;
-            } else {
-                $response['error'] = 'Not found Communication ID (' . $eq_id . ')';
+            try {
+                $response['email'] = $this->emailService->updateEmailStatus($eq_id, $eq_status_id);
+            } catch (\Throwable $e) {
+                $response['error'] = $e->getMessage();
                 $response['error_code'] = 13;
             }
         } catch (\Throwable $e) {
@@ -2654,31 +2648,17 @@ class CommunicationController extends ApiBaseController
             $filter = [];
             $dateTime = null;
             if (null === $last_id) {
-                $lastEmail = Email::find()->where(['>', 'e_inbox_email_id', 0])->orderBy(['e_inbox_email_id' => SORT_DESC])->limit(1)->one();
-
-                if ($lastEmail) {
-                    //$filter['last_dt'] = $lastEmail->e_inbox_created_dt;
-                    $filter['last_id'] = $lastEmail->e_inbox_email_id;
-                } else {
-                    $filter['last_id'] = 1;
-                }
+                $filter['last_id'] = $this->emailRepository->getLastInboxId() ?? 1;
             } else {
                 $filter['last_id'] = (int)$last_id;
 
-                $checkLastEmail = Email::find()->where(['e_inbox_email_id' => $filter['last_id']])->limit(1)->one();
+                $checkLastEmail = $this->emailRepository->getModelQuery()->byInboxId($filter['last_id'])->limit(1)->one();
                 if ($checkLastEmail) {
                     $response[] = 'Last ID ' . $filter['last_id'] . ' Exists';
                     return $response;
                 }
 
-                $lastEmail = Email::find()->where(['>', 'e_inbox_email_id', 0])->orderBy(['e_inbox_email_id' => SORT_DESC])->limit(1)->one();
-
-                if ($lastEmail) {
-                    //$filter['last_dt'] = $lastEmail->e_inbox_created_dt;
-                    $filter['last_id'] = $lastEmail->e_inbox_email_id;
-                } else {
-                    $filter['last_id'] = 1;
-                }
+                $filter['last_id'] = $this->emailRepository->getLastInboxId() ?? 1;
             }
 
             Yii::$app->redis->set('new_email_message_received', true);

@@ -2,20 +2,20 @@
 
 namespace modules\taskList\src\services\taskCompletion\taskCompletionChecker;
 
-use common\models\Email;
 use modules\taskList\src\entities\taskList\TaskList;
 use modules\taskList\src\objects\email\EmailTaskDto;
 use modules\taskList\src\objects\email\EmailTaskObject;
 use src\access\ConditionExpressionService;
 use src\access\CronExpressionService;
+use src\entities\email\EmailInterface;
 
 class EmailCompletionChecker implements CompletionCheckerInterface
 {
-    private Email $taskModel;
+    private EmailInterface $taskModel;
     private TaskList $taskList;
 
     public function __construct(
-        Email $taskModel,
+        EmailInterface $taskModel,
         TaskList $taskList
     ) {
         $this->taskModel = $taskModel;

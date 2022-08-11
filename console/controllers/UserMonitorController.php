@@ -2,39 +2,17 @@
 
 namespace console\controllers;
 
-use common\models\Airline;
-use common\models\ClientPhone;
-use common\models\Department;
-use common\models\DepartmentPhoneProject;
-use common\models\Email;
-use common\models\Employee;
-use common\models\GlobalLog;
 use common\models\Lead;
-use common\models\LeadFlow;
 //use common\models\LeadLog;
 use common\models\LeadQcall;
 use common\models\Notifications;
-use common\models\Project;
-use common\models\ProjectWeight;
-use common\models\Quote;
 use common\models\UserConnection;
 use common\models\UserOnline;
-use common\models\UserProjectParams;
-use modules\requestControl\models\UserSiteActivity;
-use src\entities\cases\Cases;
-use src\helpers\email\TextConvertingHelper;
-use src\logger\db\GlobalLogInterface;
-use src\logger\db\LogDTO;
 use src\model\user\entity\monitor\UserMonitor;
-use src\services\lead\qcall\CalculateDateService;
-use yii\base\InvalidConfigException;
-use yii\console\Controller;
 use Yii;
-use yii\db\ActiveRecord;
+use yii\console\Controller;
 use yii\db\Exception;
-use yii\db\Expression;
 use yii\db\Query;
-use yii\helpers\ArrayHelper;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
 

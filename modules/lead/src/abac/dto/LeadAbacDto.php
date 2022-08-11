@@ -46,6 +46,9 @@ class LeadAbacDto extends \stdClass
     public ?string $closeReason = '';
     public ?int $quotesCount = null;
     public ?int $flightSegmentsCount = null;
+    public string $project_name;
+    public string $department_name;
+    public string $source_cid;
 
     /**
      * @param Lead|null $lead
@@ -60,6 +63,9 @@ class LeadAbacDto extends \stdClass
             $this->has_owner_query = $this->has_owner;
             $this->quotesCount = $lead->quotesCount;
             $this->flightSegmentsCount = $lead->leadFlightSegmentsCount;
+            $this->project_name = $lead->project->name ?? '';
+            $this->department_name = $lead->lDep->dep_name ?? '';
+            $this->source_cid = $lead->source->cid ?? '';
 
             if ($this->has_owner) {
                 $this->is_common_group = EmployeeGroupAccess::isUserInCommonGroup($userId, $lead->employee_id);

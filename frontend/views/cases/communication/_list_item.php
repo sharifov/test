@@ -1,18 +1,13 @@
 <?php
 
-use frontend\helpers\EmailHelper;
-use src\auth\Auth;
-use src\helpers\call\CallHelper;
-use src\model\clientChat\entity\ClientChat;
-use yii\helpers\Html;
-use yii\widgets\ActiveForm;
+use common\models\Call;
 use common\models\Email;
 use common\models\Sms;
-use common\models\Call;
-use src\helpers\email\MaskEmailHelper;
+use frontend\widgets\communication\CommunicationListItemWidget;
+use src\helpers\call\CallHelper;
 use src\helpers\phone\MaskPhoneHelper;
-use modules\email\src\abac\dto\EmailAbacDto;
-use modules\email\src\abac\EmailAbacObject;
+use src\model\clientChat\entity\ClientChat;
+use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $dataProvider yii\data\ActiveDataProvider */
@@ -76,38 +71,8 @@ use modules\email\src\abac\EmailAbacObject;
     <?php endif;?>
 <?php endif;?>
 
-<?php if ($model['type'] === 'email') :
-        $mail = Email::findOne($model['id']);
-    if ($mail) : ?>
-        <div class="chat__message chat__message--<?=($mail->e_type_id == Email::TYPE_INBOX ? 'client' : 'system')?> chat__message--email">
-            <div class="chat__icn"><i class="fa fa-envelope-o"></i></div>
-            <?= EmailHelper::getIconForCommunicationBlock($mail) ?>
-            <div class="chat__message-heading">
-            <?php if ($mail->e_type_id == Email::TYPE_INBOX) :?>
-                    <div class="chat__sender">Email from (<?=Html::encode($mail->e_email_from_name)?> <<strong><?=Html::encode(MaskEmailHelper::masking($mail->e_email_from, $disableMasking))?>> )</strong>
-                            to (<?=Html::encode($mail->e_email_to_name)?> <<strong><?=Html::encode($mail->e_email_to)?></strong>>)</div>
-            <?php else : ?>
-                    <div class="chat__sender">Email from <?=($mail->eCreatedUser ? Html::encode($mail->eCreatedUser->username) : '-') ?>, (<?=Html::encode($mail->e_email_from_name)?> <<strong><?=Html::encode($mail->e_email_from)?></strong>>) to
-                        (<?=Html::encode($mail->e_email_to_name)?> <<strong><?=Html::encode(MaskEmailHelper::masking($mail->e_email_to, $disableMasking))?></strong>>)</div>
-            <?php endif;?>
-                <div class="chat__date"><?=Yii::$app->formatter->asDatetime(strtotime($mail->e_created_dt))?> <?=$mail->e_language_id ? '(' . $mail->e_language_id . ')' : ''?></div> <?php //11:01AM | June 9?>
-            </div>
-            <div class="card-body">
-                <h5 class="chat__subtitle"><?= wordwrap(Html::encode($mail->e_email_subject), 60, '<br />', true) ?></h5>
-                <div class="">
-                <?php echo \yii\helpers\StringHelper::truncate(Email::stripHtmlTags($mail->getEmailBodyHtml()), 300, '...', null, true)?>
-                </div>
-            <?php /*if (Auth::can('email/view', ['email' => $mail])) : */?>
-
-                <?php /** @abac new EmailAbacDto($mail), EmailAbacObject::ACT_VIEW, EmailAbacObject::ACTION_ACCESS, Restrict access to button email details on case*/ ?>
-                <?php if (Yii::$app->abac->can(new EmailAbacDto($mail), EmailAbacObject::ACT_VIEW, EmailAbacObject::ACTION_ACCESS)) : ?>
-                    <div class="chat__message-footer">
-                        <?= EmailHelper::renderDetailButton($mail) ?>
-                    </div>
-                <?php endif;?>
-            </div>
-        </div>
-    <?php endif;?>
+<?php if ($model['type'] === 'email') :?>
+    <?= CommunicationListItemWidget::widget(['type' => $model['type'], 'id' => $model['id'], 'disableMasking' => $disableMasking]);?>
 <?php endif;?>
 
 <?php if ($model['type'] === 'sms') :

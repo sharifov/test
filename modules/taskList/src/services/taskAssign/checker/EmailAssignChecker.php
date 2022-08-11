@@ -18,6 +18,10 @@ class EmailAssignChecker implements TaskAssignCheckerInterface
     public function check(): bool
     {
         if (empty($this->lead->client_id)) {
+            \modules\taskList\src\helpers\TaskListHelper::debug(
+                'ClientLead is empty  (Lead ID: ' . $this->lead->id . ')',
+                'info\UserTaskAssign:EmailAssignChecker:check:info'
+            );
             return false;
         }
 

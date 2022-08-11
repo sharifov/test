@@ -3,6 +3,7 @@
 use common\models\Department;
 use common\models\UserGroup;
 use kartik\select2\Select2;
+use modules\smartLeadDistribution\src\services\SmartLeadDistributionService;
 use modules\smartLeadDistribution\src\SmartLeadDistribution;
 use yii\widgets\ActiveForm;
 use yii\bootstrap4\Html;
@@ -56,7 +57,7 @@ use yii\bootstrap4\Html;
                 <div class="col-md-2">
                     <?= $form->field($model, 'ratingCategoryIds')
                         ->widget(Select2::class, [
-                            'data' => SmartLeadDistribution::CATEGORY_LIST,
+                            'data' => SmartLeadDistributionService::getCategoriesAsIdName(),
                             'size' => Select2::SMALL,
                             'options' => ['placeholder' => 'Select Category'],
                             'pluginOptions' => ['allowClear' => true, 'multiple' => true],

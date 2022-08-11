@@ -2,6 +2,7 @@
 
 use src\access\EmployeeProjectAccess;
 use yii\helpers\Html;
+use src\repositories\email\EmailRepositoryFactory;
 
 /* @var $this yii\web\View */
 
@@ -173,7 +174,7 @@ $userId = Yii::$app->user->id;
             <div class="animated flipInY col-md-3 col-sm-6 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-envelope"></i></div>
-                    <div class="count"><?= \common\models\Email::find()->where('DATE(e_created_dt) = DATE(NOW())')->count() ?></div>
+                    <div class="count"><?= EmailRepositoryFactory::getRepository()->getTodayCount() ?></div>
                     <h3><?= Html::a('Emails', ['email/index']) ?></h3>
                     <p>Today count of Emails</p>
                 </div>

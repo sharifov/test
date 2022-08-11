@@ -33,6 +33,8 @@ use yii\base\Model;
 
 class CaseCouponPreviewEmailForm extends Model implements EmailPreviewFromInterface
 {
+    use EmailPreviewFormTrait;
+
     public $e_case_id;
     public $e_email_from;
     public $e_email_to;

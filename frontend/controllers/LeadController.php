@@ -4,13 +4,11 @@ namespace frontend\controllers;
 
 use common\components\BackOffice;
 use common\components\CommunicationService;
-use common\components\jobs\LeadPoorProcessingRemoverJob;
 use common\models\Call;
 use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Department;
-use common\models\DepartmentPhoneProject;
 use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\GlobalLog;
@@ -19,16 +17,25 @@ use common\models\LeadCallExpert;
 use common\models\LeadChecklist;
 use common\models\LeadFlow;
 //use common\models\LeadLog;
+use common\models\Employee;
 use common\models\LeadQcall;
 use common\models\LeadTask;
 use common\models\local\LeadAdditionalInformation;
 use common\models\Note;
-use common\models\ProjectEmailTemplate;
-use common\models\QuoteCommunication;
+use common\models\Quote;
+use common\models\QuotePrice;
 use common\models\search\LeadCallExpertSearch;
 use common\models\search\LeadChecklistSearch;
+use common\models\search\LeadSearch;
+use common\models\Sms;
+use common\models\SmsTemplateType;
+use frontend\models\CommunicationForm;
+use frontend\models\LeadForm;
+use frontend\models\LeadPreviewEmailForm;
+use frontend\models\LeadPreviewSmsForm;
 use frontend\models\LeadUserRatingForm;
-use kivork\rbacExportImport\src\formatters\FileSizeFormatter;
+use frontend\models\ProfitSplitForm;
+use frontend\models\TipsSplitForm;
 use modules\email\src\abac\dto\EmailPreviewDto;
 use modules\email\src\abac\EmailAbacObject;
 use modules\featureFlag\FFlag;
@@ -43,28 +50,22 @@ use modules\offer\src\entities\offer\search\OfferSearch;
 use modules\offer\src\entities\offerSendLog\CreateDto;
 use modules\offer\src\entities\offerSendLog\OfferSendLogType;
 use modules\offer\src\services\OfferSendLogService;
-use modules\order\src\entities\order\search\OrderCrudSearch;
-use common\models\Sms;
-use common\models\SmsTemplateType;
-use common\models\UserProjectParams;
-use frontend\models\CommunicationForm;
-use frontend\models\LeadForm;
-use frontend\models\LeadPreviewEmailForm;
-use frontend\models\LeadPreviewSmsForm;
-use frontend\models\SendEmailForm;
 use modules\order\src\entities\order\search\OrderSearch;
+use modules\taskList\src\entities\TargetObject;
+use modules\taskList\src\entities\userTask\UserTaskSearch;
+use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTaskQuery;
 use modules\twilio\components\TwilioCommunicationService;
 use PHPUnit\Framework\Warning;
-use src\access\EmployeeAccess;
 use src\auth\Auth;
 use src\entities\cases\Cases;
+use src\exception\EmailNotSentException;
+use src\exception\CreateModelException;
 use src\forms\CompositeFormHelper;
 use src\forms\lead\CloneReasonForm;
 use src\forms\lead\ItineraryEditForm;
 use src\forms\lead\LeadCreateForm;
 use src\forms\leadflow\TakeOverReasonForm;
 use src\helpers\app\AppHelper;
-use src\helpers\email\MaskEmailHelper;
 use src\helpers\setting\SettingHelper;
 use src\logger\db\GlobalLogInterface;
 use src\logger\db\LogDTO;
@@ -76,17 +77,13 @@ use src\model\clientChat\entity\ClientChat;
 use src\model\clientChat\permissions\ClientChatActionPermission;
 use src\model\clientChatLead\entity\ClientChatLead;
 use src\model\clientChatLead\entity\ClientChatLeadRepository;
-use src\model\contactPhoneData\entity\ContactPhoneData;
 use src\model\contactPhoneList\service\ContactPhoneListService;
-use src\model\department\department\DefaultPhoneType;
 use src\model\email\useCase\send\fromLead\AbacEmailList;
 use src\model\emailReviewQueue\EmailReviewQueueManageService;
-use src\model\emailReviewQueue\entity\EmailReviewQueue;
 use src\model\lead\useCases\lead\create\CreateLeadByChatDTO;
 use src\model\lead\useCases\lead\create\LeadCreateByChatForm;
 use src\model\lead\useCases\lead\create\LeadManageForm;
 use src\model\lead\useCases\lead\create\LeadManageService as UseCaseLeadManageService;
-use src\model\lead\useCases\lead\import\LeadImportForm;
 use src\model\lead\useCases\lead\import\LeadImportParseService;
 use src\model\lead\useCases\lead\import\LeadImportService;
 use src\model\lead\useCases\lead\import\LeadImportUploadForm;
@@ -94,11 +91,11 @@ use src\model\lead\useCases\lead\link\LeadLinkChatForm;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
+use src\model\leadUserConversion\service\LeadUserConversionDictionary;
+use src\model\leadUserConversion\service\LeadUserConversionService;
 use src\model\leadUserRating\abac\dto\LeadUserRatingAbacDto;
 use src\model\leadUserRating\abac\LeadUserRatingAbacObject;
 use src\model\leadUserRating\service\LeadUserRatingService;
-use src\model\leadUserConversion\service\LeadUserConversionDictionary;
-use src\model\leadUserConversion\service\LeadUserConversionService;
 use src\model\sms\useCase\send\fromLead\AbacSmsFromNumberList;
 use src\quoteCommunication\Repo;
 use src\repositories\cases\CasesRepository;
@@ -106,6 +103,7 @@ use src\repositories\lead\LeadRepository;
 use src\repositories\NotFoundException;
 use src\repositories\quote\QuoteRepository;
 use src\services\client\ClientManageService;
+use src\services\email\EmailMainService;
 use src\services\email\EmailService;
 use src\services\lead\LeadAssignService;
 use src\services\lead\LeadBusinessExtraQueueService;
@@ -122,7 +120,6 @@ use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
-use yii\validators\StringValidator;
 use yii\web\BadRequestHttpException;
 use yii\web\Cookie;
 use yii\web\ForbiddenHttpException;
@@ -131,13 +128,8 @@ use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
 use yii\web\UploadedFile;
 use yii\widgets\ActiveForm;
-use common\models\Quote;
-use common\models\Employee;
-use common\models\search\LeadSearch;
-use frontend\models\ProfitSplitForm;
-use common\models\QuotePrice;
-use frontend\models\TipsSplitForm;
-use common\models\local\LeadLogMessage;
+use src\repositories\email\EmailRepositoryFactory;
+use src\services\email\EmailServiceHelper;
 
 /**
  * Class LeadController
@@ -154,6 +146,7 @@ use common\models\local\LeadLogMessage;
  * @property UrlGenerator $fileStorageUrlGenerator
  * @property UseCaseLeadManageService $useCaseLeadManageService
  * @property EmailReviewQueueManageService $emailReviewQueueManageService
+ * @property EmailMainService $emailService
  */
 class LeadController extends FController
 {
@@ -170,6 +163,7 @@ class LeadController extends FController
     private UrlGenerator $fileStorageUrlGenerator;
     private UseCaseLeadManageService $useCaseLeadManageService;
     private EmailReviewQueueManageService $emailReviewQueueManageService;
+    private EmailMainService $emailService;
 
     public function __construct(
         $id,
@@ -187,6 +181,7 @@ class LeadController extends FController
         UrlGenerator $fileStorageUrlGenerator,
         UseCaseLeadManageService $useCaseLeadManageService,
         EmailReviewQueueManageService $emailReviewQueueManageService,
+        EmailMainService $emailService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -203,6 +198,7 @@ class LeadController extends FController
         $this->fileStorageUrlGenerator = $fileStorageUrlGenerator;
         $this->useCaseLeadManageService = $useCaseLeadManageService;
         $this->emailReviewQueueManageService = $emailReviewQueueManageService;
+        $this->emailService = $emailService;
     }
 
     public function behaviors(): array
@@ -486,7 +482,6 @@ class LeadController extends FController
         $previewEmailForm->e_lead_id = $lead->id;
         $previewEmailForm->is_send = false;
 
-
         if ($previewEmailForm->load(Yii::$app->request->post())) {
             $previewEmailForm->e_lead_id = $lead->id;
             if ($previewEmailForm->validate()) {
@@ -501,81 +496,51 @@ class LeadController extends FController
                 /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND, Restrict access to send email in preview email */
                 $canSend = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND);
                 if ($canSend) {
-                    $mail = new Email();
-                    $mail->e_project_id = $lead->project_id;
-                    $mail->e_lead_id = $lead->id;
-                    if ($previewEmailForm->e_email_tpl_id) {
-                        $mail->e_template_type_id = $previewEmailForm->e_email_tpl_id;
-                    }
-                    $mail->e_type_id = Email::TYPE_OUTBOX;
-                    $mail->e_status_id = Email::STATUS_PENDING;
-                    $mail->e_email_subject = $previewEmailForm->e_email_subject;
-                    $mail->body_html = $previewEmailForm->e_email_message;
-                    $mail->e_email_from = $previewEmailForm->e_email_from;
-
-                    $mail->e_email_from_name = $previewEmailForm->e_email_from_name;
-                    $mail->e_email_to_name = $previewEmailForm->e_email_to_name;
-
-                    if ($previewEmailForm->e_language_id) {
-                        $mail->e_language_id = $previewEmailForm->e_language_id;
-                    }
-
-                    $mail->e_email_to = $previewEmailForm->e_email_to;
-                    $mail->e_created_dt = date('Y-m-d H:i:s');
-                    $mail->e_created_user_id = Yii::$app->user->id;
                     $attachments = [];
                     /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_ATTACH_FILES, Restrict access to attach files in lead communication block */
                     $canAttachFiles = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_ATTACH_FILES);
                     if ($canAttachFiles && FileStorageSettings::canEmailAttach() && $previewEmailForm->files) {
                         $attachments['files'] = $this->fileStorageUrlGenerator->generateForExternal($previewEmailForm->getFilesPath());
                     }
-                    $mail->e_email_data = json_encode($attachments);
-                    if ($mail->save()) {
-                        $mail->e_message_id = $mail->generateMessageId();
-                        $mail->update();
+
+                    try {
+                        $mail = $this->emailService->createFromLead($previewEmailForm, $lead, $attachments);
 
                         /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND_WITHOUT_REVIEW, Restrict access to send without review email */
                         $canSendWithoutReview = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND_WITHOUT_REVIEW);
 
                         if ($canSendWithoutReview) {
                             $previewEmailForm->is_send = true;
-                            $mailResponse = $mail->sendMail($attachments);
+                            $this->emailService->sendMail($mail, $attachments);
+                            $this->emailService->leadTaskJob($mail->e_id, $mail->lead);
+                            Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>' . $mail->getEmailTo() . '</strong>');
 
-                            if (isset($mailResponse['error']) && $mailResponse['error']) {
-                                //echo $mailResponse['error']; exit; //'Error: <strong>Email Message</strong> has not been sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
-                                Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>' . MaskEmailHelper::masking($mail->e_email_to) . '</strong>');
-                                Yii::error('Error: Email Message has not been sent to ' . $mail->e_email_to . "\r\n " . $mailResponse['error'], 'LeadController:view:Email:sendMail');
-                            } else {
-                                //echo '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
-
-                                if ($offerList = @json_decode($previewEmailForm->e_offer_list)) {
-                                    if (is_array($offerList)) {
-                                        $service = Yii::createObject(OfferSendLogService::class);
-                                        foreach ($offerList as $offerId) {
-                                            $service->log(new CreateDto($offerId, OfferSendLogType::EMAIL, $user->id, $previewEmailForm->e_email_to));
-                                        }
+                            if ($offerList = @json_decode($previewEmailForm->e_offer_list)) {
+                                if (is_array($offerList)) {
+                                    $service = Yii::createObject(OfferSendLogService::class);
+                                    foreach ($offerList as $offerId) {
+                                        $service->log(new CreateDto($offerId, OfferSendLogType::EMAIL, $user->id, $previewEmailForm->e_email_to));
                                     }
                                 }
-
-                                /*
-                                 * TODO: The similar logic exist in `\frontend\controllers\EmailReviewQueueController::actionSend`. Need to shrink code duplications.
-                                 */
-                                /** @var string[] $quoteIds */
-                                $quoteIds = Json::decode($previewEmailForm->e_quote_list);
-                                /** @var Quote[] $quoteObjects */
-                                $quoteObjects = Quote::find()->where(['IN', 'id', $quoteIds])->all();
-                                foreach ($quoteObjects as $quoteObject) {
-                                    Repo::createForEmail($mail->e_id, $quoteObject->id, $previewEmailForm->e_qc_uid);
-                                    $quoteObject->setStatusSend();
-                                    // - Do email should be sent if quote didn't change status?
-                                    // - Do we should call saving request in loop? Calling all updates via one request would be better way
-                                    if (!$this->quoteRepository->save($quoteObject)) {
-                                        Yii::error($quoteObject->errors, 'LeadController:view:Email:Quote:save');
-                                    }
-                                }
-
-                                Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>' . MaskEmailHelper::masking($mail->e_email_to) . '</strong>');
                             }
+
+                            /*
+                             * TODO: The similar logic exist in `\frontend\controllers\EmailReviewQueueController::actionSend`. Need to shrink code duplications.
+                             */
+                            /** @var string[] $quoteIds */
+                            $quoteIds = Json::decode($previewEmailForm->e_quote_list);
+                            /** @var Quote[] $quoteObjects */
+                            $quoteObjects = Quote::find()->where(['IN', 'id', $quoteIds])->all();
+                            foreach ($quoteObjects as $quoteObject) {
+                                Repo::createForEmail($mail->e_id, $quoteObject->id, $previewEmailForm->e_qc_uid);
+                                $quoteObject->setStatusSend();
+                                // - Do email should be sent if quote didn't change status?
+                                // - Do we should call saving request in loop? Calling all updates via one request would be better way
+                                if (!$this->quoteRepository->save($quoteObject)) {
+                                    Yii::error($quoteObject->errors, 'LeadController:view:Email:Quote:save');
+                                }
+                            }
+
                             $this->refresh('#communication-form');
                         } else {
                             $mail->statusToReview();
@@ -590,13 +555,19 @@ class LeadController extends FController
                                     Yii::error($quoteObject->errors, 'LeadController:view:Email:Quote:save');
                                 }
                             }
-                            $mail->update();
                             Yii::$app->session->setFlash('send-warning', '<strong>Email Message</strong> has been sent for review');
                             $this->refresh('#communication-form');
                         }
-                    } else {
-                        $previewEmailForm->addError('e_email_subject', VarDumper::dumpAsString($mail->errors));
-                        Yii::error(VarDumper::dumpAsString($mail->errors), 'LeadController:view:Email:save');
+                    } catch (CreateModelException $e) {
+                        $errorsMessage = VarDumper::dumpAsString($e->getErrors());
+                        $previewEmailForm->addError('e_email_subject', $errorsMessage);
+                        Yii::error($errorsMessage, 'LeadController:view:Email:save');
+                    } catch (EmailNotSentException $e) {
+                        Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>' . $e->getEmailTo() . '</strong>');
+                        Yii::error('Error: Email Message has not been sent to ' . $e->getEmailTo(false) . "\r\n " . $e->getMessage(), 'LeadController:view:Email:sendMail');
+                    } catch (\Throwable $e) {
+                        Yii::$app->session->setFlash('send-error', $e->getMessage() . '<br/>' . $e->getTraceAsString());
+                        Yii::error($e->getMessage(), 'LeadController:view:Email:save');
                     }
                 } else {
                     Yii::$app->session->setFlash('send-warning', 'Access denied: you dont have permission to send email');
@@ -778,7 +749,7 @@ class LeadController extends FController
                                 Yii::info('Allowed quantity of selected quotes is from ' . $tplConfigQuotes['minSelectedCount'] . ' to ' . $tplConfigQuotes['maxSelectedCount'] . ' inclusive. You selected ' . $selectedQuotes . '.', 'info\LeadController:view:mailPreview');
                                 $comForm->c_preview_email = 0;
                             } else {
-                                $emailBodyHtml = EmailService::prepareEmailBody($mailPreview['data']['email_body_html']);
+                                $emailBodyHtml = EmailServiceHelper::prepareEmailBody($mailPreview['data']['email_body_html']);
 
                                 $keyCache = md5($emailBodyHtml);
                                 Yii::$app->cacheFile->set($keyCache, $emailBodyHtml, 60 * 60);
@@ -907,11 +878,7 @@ class LeadController extends FController
 
         $quotesProvider = $lead->getQuotesProvider([]);
 
-
-        $queryEmail = (new \yii\db\Query())
-            ->select(['e_id AS id', new Expression('"email" AS type'), 'e_lead_id AS lead_id', 'e_created_dt AS created_dt'])
-            ->from('email')
-            ->where(['e_lead_id' => $lead->id]);
+        $queryEmail = EmailRepositoryFactory::getRepository()->getCommunicationLogQueryForLead($lead->id);
 
         $querySms = (new \yii\db\Query())
             ->select(['s_id AS id', new Expression('"sms" AS type'), 's_lead_id AS lead_id', 's_created_dt AS created_dt'])
@@ -1042,6 +1009,14 @@ class LeadController extends FController
 //        $tmpl = $isQA ? 'view_qa' : 'view';
         $tmpl = 'view';
 
+        $shiftScheduleEventTasks = [];
+        /** @fflag FFlag::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE, New User Task List in Lead view Enable */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE)) {
+            $shiftScheduleEventTasks = ShiftScheduleEventTaskQuery::getAllByLeadId($lead->id, Auth::id())
+                ->asArray()
+                ->all();
+        }
+
         return $this->render($tmpl, [
             'leadForm' => $leadForm,
             'previewEmailForm' => $previewEmailForm,
@@ -1056,6 +1031,7 @@ class LeadController extends FController
             'itineraryForm' => $itineraryForm,
             'dataProviderNotes' => $dataProviderNotes,
             'modelNote' => $modelNote,
+            'shiftScheduleEventTasks' => $shiftScheduleEventTasks,
 
             'dataProviderOffers' => $dataProviderOffers,
             'dataProviderOrders' => $dataProviderOrders,
@@ -2878,6 +2854,23 @@ class LeadController extends FController
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'isAgent' => $isAgent,
+        ]);
+    }
+
+    public function actionAjaxGetUserTask(int $leadID): string
+    {
+        $searchModel = new UserTaskSearch();
+        $dataProvider = $searchModel->searchByTargetObjectAndTargetObjectId(
+            TargetObject::TARGET_OBJ_LEAD,
+            $leadID,
+            $this->request->queryParams
+        );
+
+
+        return $this->renderAjax('user-task/user-task-list', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'leadID' => $leadID,
         ]);
     }
 
