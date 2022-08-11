@@ -35,10 +35,10 @@ class UserTaskStatusLogSearch extends UserTaskStatusLog
     {
         $query = UserTaskStatusLog::find();
 
-        // add conditions that should always apply here
-
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['utsl_id' => SORT_DESC]],
+            'pagination' => ['pageSize' => 30],
         ]);
 
         $this->load($params);

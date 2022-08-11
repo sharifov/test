@@ -2,33 +2,35 @@
 
 namespace modules\taskList\controllers;
 
+use frontend\controllers\FController;
 use modules\taskList\src\entities\userTask\UserTaskStatusLog;
 use modules\taskList\src\entities\userTask\UserTaskStatusLogSearch;
-use yii\web\Controller;
+use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
  * UserTaskStatusLogCrudController implements the CRUD actions for UserTaskStatusLog model.
  */
-class UserTaskStatusLogCrudController extends Controller
+class UserTaskStatusLogCrudController extends FController
 {
-    /**
-     * @inheritDoc
-     */
-    public function behaviors()
+    public function init(): void
     {
-        return array_merge(
-            parent::behaviors(),
-            [
-                'verbs' => [
-                    'class' => VerbFilter::className(),
-                    'actions' => [
-                        'delete' => ['POST'],
-                    ],
+        parent::init();
+        $this->layoutCrud();
+    }
+
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'verbs' => [
+                'class' => VerbFilter::class,
+                'actions' => [
+                    'delete' => ['POST'],
                 ],
-            ]
-        );
+            ],
+        ];
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     /**
