@@ -176,11 +176,12 @@ class Notifications extends ActiveRecord
     }
 
     /**
+     * @param $id
      * @return string
      */
-    public function getNotifyType()
+    public static function getNotifyType($id): string
     {
-        switch ($this->n_type_id) {
+        switch ($id) {
             case self::TYPE_SUCCESS:
                 $str = 'success';
                 break;

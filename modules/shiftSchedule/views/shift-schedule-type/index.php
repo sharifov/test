@@ -24,6 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <p>
         <?= Html::a('<i class="fa fa-plus"></i> Create Shift Schedule Type', ['create'], ['class' => 'btn btn-success']) ?>
+        <?= Html::a('<i class="fa fa-list"></i> Type Label List', ['/shift/shift-schedule-type-label/index'], ['class' => 'btn btn-primary']) ?>
     </p>
 
     <?php Pjax::begin(); ?>
@@ -47,14 +48,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'options' => ['style' => 'width:100px']
             ],
-//            [
-//                'attribute' => 'al_action',
-//                'value' => function (\common\models\ApiLog $model) {
-//                    return '<b>' . Html::encode($model->al_action) . '</b>';
-//                },
-//                'format' => 'raw',
-//                'filter' => \common\models\ApiLog::getActionFilter(Yii::$app->request->isPjax)
-//            ],
 //            'sst_id',
             [
                 'label' => 'icon',
@@ -83,10 +76,28 @@ $this->params['breadcrumbs'][] = $this->title;
             'sst_key',
             'sst_name',
             'sst_title',
+            [
+                'label' => 'Labels',
+                'value' => static function (ShiftScheduleType $model) {
+                    $labelList = $model->getLabelList();
+                    return $labelList ? implode(', ', $labelList) : '-';
+                },
+                // 'format' => 'raw',
+                //'options' => ['style' => 'width:60px']
+            ],
             'sst_enabled:boolean',
             'sst_readonly:boolean',
-            'sst_work_time:boolean',
+            //'sst_subtype_id',
             //'sst_color',
+            [
+                'attribute' => 'sst_subtype_id',
+                'value' => static function (ShiftScheduleType $model) {
+                    return $model->getSubtypeName();
+                },
+                'filter' => ShiftScheduleType::getSubtypeList()
+                // 'format' => 'raw',
+                // 'options' => ['style' => 'width:180px']
+            ],
             [
                 'attribute' => 'sst_color',
                 'value' => static function (ShiftScheduleType $model) {

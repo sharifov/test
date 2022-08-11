@@ -16,7 +16,7 @@ class LajaxLanguageItemPluginAsset extends \yii\web\AssetBundle
     public function init()
     {
         parent::init();
-
+        
         $app = \Yii::$app->id;
 
         if ($app === 'app-console') {

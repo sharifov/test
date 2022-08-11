@@ -8,6 +8,7 @@ use src\model\callLog\entity\callLog\CallLogType;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 use yii\widgets\ActiveForm;
+use src\repositories\email\EmailRepositoryFactory;
 
 /* @var $this yii\web\View */
 /* @var $dataStats [] */
@@ -228,7 +229,7 @@ $user = Yii::$app->user->identity;
             <div class="animated flipInY col-lg-2 col-md-2 col-sm-6 col-xs-12">
                 <div class="tile-stats">
                     <div class="icon"><i class="fa fa-envelope"></i></div>
-                    <div class="count"><?=\common\models\Email::find()->where('DATE(e_created_dt) = DATE(NOW())')->cache(600)->count()?></div>
+                    <div class="count"><?= EmailRepositoryFactory::getRepository()->getTodayCount(600)?></div>
                     <h3><?=Html::a('Emails', ['email/index'])?></h3>
                     <p>Today count of Emails</p>
                 </div>

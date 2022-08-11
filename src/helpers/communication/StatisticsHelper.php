@@ -3,23 +3,20 @@
 namespace src\helpers\communication;
 
 use common\models\Call;
-use common\models\Email;
 use common\models\Lead;
 use common\models\Sms;
-use src\entities\cases\Cases;
 use src\entities\cases\CasesStatus;
 use src\model\callLog\entity\callLog\CallLog;
 use src\model\callLog\entity\callLog\CallLogType;
 use src\model\callLog\entity\callLogCase\CallLogCase;
 use src\model\callLog\entity\callLogLead\CallLogLead;
-use src\model\clientChat\entity\ClientChat;
 use src\model\clientChatCase\entity\ClientChatCase;
 use src\model\clientChatLead\entity\ClientChatLead;
-use Yii;
-use yii\data\ActiveDataProvider;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
+use src\repositories\email\EmailRepositoryFactory;
+use src\entities\email\helpers\EmailType;
 
 /**
  * Class StatisticsHelper
@@ -62,11 +59,12 @@ class StatisticsHelper
      */
     public function setEmailCount(): StatisticsHelper
     {
-        $column = $this->type === self::TYPE_LEAD ? 'e_lead_id' : 'e_case_id';
-        $this->emailCount = (int) Email::find()
-            ->where([$column => $this->id])
-            ->cache($this->cacheDuration)
-            ->count();
+        if ($this->type === self::TYPE_LEAD) {
+            $this->emailCount = EmailRepositoryFactory::getRepository()->getEmailCountByLead($this->id, $this->cacheDuration);
+        } else {
+            $this->emailCount = EmailRepositoryFactory::getRepository()->getEmailCountByCase($this->id, $this->cacheDuration);
+        }
+
         return $this;
     }
 
@@ -234,27 +232,11 @@ class StatisticsHelper
 
     public static function getLastCommunicationByCaseId(int $caseId): array
     {
-        $queryEmailIn = (new Query())
-            ->select([
-                new Expression('"email" AS type'),
-                new Expression('"In" AS direction'),
-                'e_case_id AS case_id',
-                'MAX(e_created_dt) AS created_dt'
-            ])
-            ->from(Email::tableName())
-            ->where(['e_case_id' => $caseId])
-            ->andWhere(['e_type_id' => Email::TYPE_INBOX]);
+        $emailRepository = EmailRepositoryFactory::getRepository();
 
-        $queryEmailOut = (new Query())
-            ->select([
-                new Expression('"email" AS type'),
-                new Expression('"Out" AS direction'),
-                'e_case_id AS case_id',
-                'MAX(e_created_dt) AS created_dt'
-            ])
-            ->from(Email::tableName())
-            ->where(['e_case_id' => $caseId])
-            ->andWhere(['e_type_id' => Email::TYPE_OUTBOX]);
+        $queryEmailIn = $emailRepository->getQueryLastEmailByCase($caseId, EmailType::INBOX);
+
+        $queryEmailOut = $emailRepository->getQueryLastEmailByCase($caseId, EmailType::OUTBOX);
 
         $querySmsIn = (new Query())
             ->select([

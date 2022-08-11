@@ -2,10 +2,10 @@
 # Sync s3 buckets
 #
 # Example:
-#   sync-s3.sh s3://dev-crm-storage-data/
+#   sync-s3.sh s3://dev-storage-data/
 #
 
-dotenv="/var/www/crm/.env"
+dotenv="/var/www/app/.env"
 if [ ! -e "$dotenv" ]; then
     echo "Error: can't locate $dotenv"
     exit 1

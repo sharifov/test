@@ -1,5 +1,7 @@
 <?php
 
+use modules\lead\src\abac\queue\LeadQueueBusinessInboxAbacDto;
+use modules\lead\src\abac\queue\LeadQueueBusinessInboxAbacObject;
 use src\formatters\client\ClientTimeFormatter;
 use src\model\client\helpers\ClientFormatter;
 use yii\helpers\Html;
@@ -35,7 +37,13 @@ $this->params['breadcrumbs'][] = $this->title;
             },
             'options' => [
                 'style' => 'width:80px'
-            ]
+            ],
+            /** @abac LeadQueueBusinessInboxAbacObject::UI_QUEUE_COLUMN, LeadQueueBusinessInboxAbacObject::ACTION_COLUMN_LEAD_ID, Show lead id */
+            'visible' => \Yii::$app->abac->can(
+                null,
+                LeadQueueBusinessInboxAbacObject::UI_QUEUE_COLUMN,
+                LeadQueueBusinessInboxAbacObject::ACTION_COLUMN_LEAD_ID
+            ),
         ],
 
         [
@@ -52,15 +60,19 @@ $this->params['breadcrumbs'][] = $this->title;
             'attribute' => 'project_id',
             'relation' => 'project'
         ],
-
         [
             'attribute' => 'source_id',
             'value' => function (Lead $model) {
                 return $model->source ? $model->source->name : '-';
             },
-            'filter' => \common\models\Sources::getList(true)
+            'filter' => \common\models\Sources::getList(true),
+            /** @abac LeadQueueBusinessInboxAbacObject::UI_QUEUE_COLUMN, LeadQueueBusinessInboxAbacObject::ACTION_COLUMN_SOURCE_ID, Show source_id */
+            'visible' => \Yii::$app->abac->can(
+                null,
+                LeadQueueBusinessInboxAbacObject::UI_QUEUE_COLUMN,
+                LeadQueueBusinessInboxAbacObject::ACTION_COLUMN_SOURCE_ID
+            ),
         ],
-
         [
             'attribute' => 'pending',
             'label' => 'Pending Time',
@@ -79,7 +91,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'options' => [
                 'style' => 'width:160px'
             ],
-            'format' => 'raw'
+            'format' => 'raw',
+            /** @abac LeadQueueBusinessInboxAbacObject::UI_QUEUE_COLUMN, LeadQueueBusinessInboxAbacObject::ACTION_COLUMN_PENDING_TIME, Show pending */
+            'visible' => \Yii::$app->abac->can(
+                null,
+                LeadQueueBusinessInboxAbacObject::UI_QUEUE_COLUMN,
+                LeadQueueBusinessInboxAbacObject::ACTION_COLUMN_PENDING_TIME
+            ),
         ],
 
         [
@@ -139,9 +157,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'style' => 'width:160px'
             ]
         ],
-
-        'client_id:client',
-
+        [
+            'attribute' => 'client_id',
+            'format' => 'client',
+            'enableSorting' => false,
+        ],
         [
             'header' => 'Client time',
             'format' => 'raw',
@@ -149,8 +169,13 @@ $this->params['breadcrumbs'][] = $this->title;
                 return ClientTimeFormatter::format($model->getClientTime2(), $model->offset_gmt);
             },
             'options' => ['style' => 'width:90px'],
+            /** @abac LeadQueueBusinessInboxAbacObject::UI_QUEUE_COLUMN, LeadQueueBusinessInboxAbacObject::ACTION_COLUMN_CLIENT_TIME, Show Client time */
+            'visible' => \Yii::$app->abac->can(
+                null,
+                LeadQueueBusinessInboxAbacObject::UI_QUEUE_COLUMN,
+                LeadQueueBusinessInboxAbacObject::ACTION_COLUMN_CLIENT_TIME
+            ),
         ],
-
         [
             'header' => 'Location',
             'format' => 'raw',
@@ -170,6 +195,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 return $str ?: '-';
             },
             'options' => ['style' => 'width:90px'],
+            /** @abac LeadQueueBusinessInboxAbacObject::UI_QUEUE_COLUMN, LeadQueueBusinessInboxAbacObject::ACTION_COLUMN_LOCATION, Show Location */
+            'visible' => \Yii::$app->abac->can(
+                null,
+                LeadQueueBusinessInboxAbacObject::UI_QUEUE_COLUMN,
+                LeadQueueBusinessInboxAbacObject::ACTION_COLUMN_LOCATION
+            ),
         ],
 
         [
@@ -186,7 +217,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             //'format' => 'raw'
         ],
-
         [
             'header' => 'Depart',
             'value' => static function (Lead $model) {
@@ -206,7 +236,13 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'options' => [
                 'style' => 'width:100px'
-            ]
+            ],
+            /** @abac LeadQueueBusinessInboxAbacObject::UI_QUEUE_COLUMN, LeadQueueBusinessInboxAbacObject::ACTION_COLUMN_DEPART, Show Depart */
+            'visible' => \Yii::$app->abac->can(
+                null,
+                LeadQueueBusinessInboxAbacObject::UI_QUEUE_COLUMN,
+                LeadQueueBusinessInboxAbacObject::ACTION_COLUMN_DEPART
+            ),
         ],
 
         [
@@ -231,7 +267,13 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'options' => [
                 'style' => 'width:140px'
-            ]
+            ],
+            /** @abac LeadQueueBusinessInboxAbacObject::UI_QUEUE_COLUMN, LeadQueueBusinessInboxAbacObject::ACTION_COLUMN_SEGMENTS, Show Segments */
+            'visible' => \Yii::$app->abac->can(
+                null,
+                LeadQueueBusinessInboxAbacObject::UI_QUEUE_COLUMN,
+                LeadQueueBusinessInboxAbacObject::ACTION_COLUMN_SEGMENTS
+            ),
         ],
 
         [
@@ -270,6 +312,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'value' => static function (Lead $model) {
                 return $model->request_ip;
             },
+            /** @abac LeadQueueBusinessInboxAbacObject::UI_QUEUE_COLUMN, LeadQueueBusinessInboxAbacObject::ACTION_COLUMN_REQUEST_IP, Show request_ip */
+            'visible' => \Yii::$app->abac->can(
+                null,
+                LeadQueueBusinessInboxAbacObject::UI_QUEUE_COLUMN,
+                LeadQueueBusinessInboxAbacObject::ACTION_COLUMN_REQUEST_IP
+            ),
         ],
 
         [
@@ -336,7 +384,15 @@ $this->params['breadcrumbs'][] = $this->title;
                     return Auth::can('lead/view', ['lead' => $model]);
                 },*/
                 'view' => static function (Lead $model, $key, $index) {
-                    return Auth::can('lead/view', ['lead' => $model]);
+                    /** @abac LeadQueueBusinessInboxAbacObject::UI_BUTTON_VIEW, LeadQueueBusinessInboxAbacObject::ACTION_READ, Show view button */
+                    $leadQueueBusinessInboxAbacDto = new LeadQueueBusinessInboxAbacDto($model, Auth::id());
+                    $abacCan = \Yii::$app->abac->can(
+                        $leadQueueBusinessInboxAbacDto,
+                        LeadQueueBusinessInboxAbacObject::UI_BUTTON_VIEW,
+                        LeadQueueBusinessInboxAbacObject::ACTION_READ
+                    );
+                    $authCan = Auth::can('lead/view', ['lead' => $model]);
+                    return ($abacCan && $authCan);
                 },
             ],
             'buttons' => [

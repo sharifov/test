@@ -1,0 +1,26 @@
+---
+plugin: aws_ec2
+# uncomment this to run it localy
+# boto_profile: aws-dev-infra
+cache: false
+regions:
+  - us-east-1
+filters:
+  tag:Environment:
+    - dev3
+  tag:Project:
+    - crm
+  tag:Ns:
+    - kiv
+  instance-state-name: running
+keyed_groups:
+  - prefix: ''
+    separator: ''
+    key: tags['Kind']
+
+compose:
+  ansible_host: private_ip_address
+  private_ip: private_ip_address
+
+hostnames:
+  - tag:Name

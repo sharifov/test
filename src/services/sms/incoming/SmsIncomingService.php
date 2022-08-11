@@ -5,9 +5,13 @@ namespace src\services\sms\incoming;
 use common\models\Client;
 use common\models\Department;
 use common\models\Project;
+use modules\featureFlag\FFlag;
 use src\auth\Auth;
 use src\dispatchers\EventDispatcher;
 use src\entities\cases\Cases;
+use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
+use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogQuery;
+use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogStatus;
 use src\model\phoneList\entity\PhoneList;
 use src\services\cases\CasesCommunicationService;
 use src\services\cases\CasesCreateService;
@@ -168,6 +172,15 @@ class SmsIncomingService
             $leadId = $lead->id;
         }
         $sms = Sms::createIncomingByLeadType($form, $clientId ?: null, $ownerId, $leadId);
+        /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+        if (
+            \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE)
+            && isset($lead)
+            && $lead->isBusinessType()
+            && !LeadBusinessExtraQueueLogQuery::isLeadWasInBusinessExtraQueue($lead->id)
+        ) {
+            LeadBusinessExtraQueueService::addLeadBusinessExtraQueueRemoverJob($lead->id, LeadBusinessExtraQueueLogStatus::REASON_RECEIVED_SMS);
+        }
         $this->smsRepository->save($sms);
         if ($leadId === null) {
 //            Yii::info('Incoming sms. Internal Phone: ' . $form->si_phone_to . '. Sms Id: ' . $sms->s_id . ' | No new lead creation allowed on SMS.', 'info\SmsIncomingService');

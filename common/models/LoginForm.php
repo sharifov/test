@@ -94,6 +94,7 @@ class LoginForm extends Model
 
             $isLogin = Yii::$app->user->login($user, $this->rememberMe ? 3600 * 24 * 30 : 0);
             if ($isLogin) {
+                Employee::updateAll(['last_login_dt' => date('Y-m-d H:i:s')], ['id' => $user->id]);
                 self::sendWsIdentityCookie(Yii::$app->user->identity, $this->rememberMe ? 3600 * 24 * 30 : 0);
             }
             return $isLogin;
@@ -184,7 +185,7 @@ class LoginForm extends Model
 
     public function afterValidate(): void
     {
-        if ($this->hasErrors()) {
+        if ($this->hasErrors() && (isset($this->_user) && !$this->_user->isBlocked() || !isset($this->_user))) {
             $user = $this->_user ?? Employee::findOne(['username' => $this->username]);
             $userFailedLogin = UserFailedLogin::create(
                 $this->username,
@@ -199,7 +200,8 @@ class LoginForm extends Model
                     'LoginForm:afterValidate:saveFailed'
                 );
             }
-
+        }
+        if ($this->hasErrors()) {
             if ($this->_user) {
                 (new AntiBruteForceService())->checkAttempts($this->_user);
             }

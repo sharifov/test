@@ -6,10 +6,10 @@ use yii\helpers\Html;
 /* @var $model \common\models\QuoteCommunication */
 
 $this->title = 'Create Email Quote';
-$this->params['breadcrumbs'][] = ['label' => 'Email Quotes', 'url' => ['index']];
+$this->params['breadcrumbs'][] = ['label' => 'Quote Communication', 'url' => ['index']];
 $this->params['breadcrumbs'][] = $this->title;
 ?>
-<div class="email-quote-create">
+<div class="quote-communication-create">
 
     <h1><?= Html::encode($this->title) ?></h1>
 

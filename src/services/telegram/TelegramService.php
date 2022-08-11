@@ -4,6 +4,7 @@ namespace src\services\telegram;
 
 use common\models\UserProfile;
 use frontend\helpers\JsonHelper;
+use modules\featureFlag\FFlag;
 use src\helpers\app\AppHelper;
 use Yii;
 use yii\helpers\ArrayHelper;
@@ -43,6 +44,8 @@ class TelegramService
     public const FILTER_SYMBOL_LIST = [
         '_', '@', '*', '`',
     ];
+
+    public const LAST_MESSAGE_TO_USER = 'lastMessageToUser';
 
     /**
      * @param string $responseBody
@@ -113,5 +116,28 @@ class TelegramService
             $message .= ' Environment: ' . $env;
         }
         return $message;
+    }
+
+    public static function setLastTimeMessageToUser(int $userId): void
+    {
+        Yii::$app->redis->set(self::getRedisKeyForLastMessageToUser($userId), time());
+    }
+
+    public static function getTimeForLastSentMessageToUser(int $userId): int
+    {
+        $timestamp = Yii::$app->redis->get(self::getRedisKeyForLastMessageToUser($userId)) ?? 0;
+
+        return intval($timestamp);
+    }
+
+    private static function getRedisKeyForLastMessageToUser(int $userId): string
+    {
+        return self::LAST_MESSAGE_TO_USER . $userId;
+    }
+
+    public static function delayForTelegramMessagesIsEnable(): bool
+    {
+        /** @fflag FFlag::FF_KEY_TELEGRAM_MESSAGE_DELAY_ENABLE, Delay for telegram notification messages */
+        return Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_TELEGRAM_MESSAGE_DELAY_ENABLE);
     }
 }

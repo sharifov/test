@@ -3,6 +3,7 @@
 use common\models\Call;
 use frontend\widgets\newWebPhone\DeviceAsset;
 use frontend\widgets\newWebPhone\DeviceStorageKey;
+use modules\featureFlag\FFlag;
 use src\auth\Auth;
 
 /** @var View $this */
@@ -167,6 +168,8 @@ if (!Auth::can('PhoneWidget_Dialpad')) {
 
   <div class="call-pane-incoming call-pane-initial" id="call-pane-incoming"> </div>
 
+  <div class="call-pane-outgoing call-pane-initial" id="call-pane-accepted"> </div>
+
   <div class="call-pane-outgoing call-pane-initial" id="call-pane-outgoing"> </div>
 
   <!-- Dial popup -->
@@ -280,6 +283,7 @@ $csrf_token = Yii::$app->request->csrfToken;
 
 DeviceAsset::register($this);
 $phoneDeviceRemoteLogsEnabled = SettingHelper::phoneDeviceLogsEnabled() ? 'true' : 'false';
+$enableAcceptedPanel = Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_PHONE_WIDGET_ACCEPTED_PANEL_ENABLED) ? 'true' : 'false';
 
 $js = <<<JS
 
@@ -335,7 +339,8 @@ window.phoneWidget.initParams = {
     'ajaxCheckUserForCallUrl': '$ajaxCheckUserForCallUrl',
     'phoneNumbers': toSelect($('.custom-phone-select'),  JSON.parse('{$formattedPhoneProject}')),
     'createCallUrl': '$createCallUrl',
-    'userId': $userId
+    'userId': $userId,
+    'enableAcceptedPanel': $enableAcceptedPanel
 };
 PhoneWidget.init(window.phoneWidget.initParams);
 JS;

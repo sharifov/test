@@ -23,8 +23,6 @@ $pjaxListId = 'pjax-api-log';
 
     <h1><i class="fa fa-list"></i> <?= Html::encode($this->title) ?></h1>
 
-    <?php // echo $this->render('_search', ['model' => $searchModel]);?>
-
     <p>
         <?= Html::a('<i class="fa fa-remove"></i> Truncate ApiLog table', ['delete-all'], [
             'class' => 'btn btn-danger',
@@ -44,10 +42,13 @@ $pjaxListId = 'pjax-api-log';
 
     <?php Pjax::begin(['id' => $pjaxListId, 'scrollTo' => 0]); ?>
 
+    <?php  echo $this->render('_search', ['model' => $searchModel]);?>
+
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'layout' => "{errors}\n{pager}\n{summary}\n{items}\n{pager}",
+        'summary' => 'Showing <b>{begin}-{end}</b> of <b>{totalCount}</b> items.</br>From <b>' . $searchModel->createTimeStart . ' </b> to <b>' . $searchModel->createTimeEnd . ' </b>',
         'columns' => [
             [
                 'attribute' => 'al_id',
@@ -62,7 +63,7 @@ $pjaxListId = 'pjax-api-log';
                     return '<b>' . Html::encode($model->al_action) . '</b>';
                 },
                 'format' => 'raw',
-                'filter' => \common\models\ApiLog::getActionFilter(Yii::$app->request->isPjax)
+                'filter' => \common\models\ApiLog::getActionFilter(Yii::$app->request->isPjax, $searchModel->createTimeRange),
             ],
             [
                 'label' => 'Relative Time',
@@ -182,7 +183,7 @@ yii\bootstrap4\Modal::begin([
 ]);
 yii\bootstrap4\Modal::end();
 
-$ajaxUrl = \yii\helpers\Url::to(['/api-log/ajax-action-list']);
+$ajaxUrl = \yii\helpers\Url::to(['/api-log/ajax-action-list', 'timeRange' => $searchModel->createTimeRange]);
 $actionValue = $searchModel->al_action ? md5($searchModel->al_action) : '';
 
 $jsCode = <<<JS
@@ -192,20 +193,17 @@ $jsCode = <<<JS
     function updateActionList() {
         $.getJSON(ajaxUrlCategoryList, function(response) {
             let obj = $( "select[name='ApiLogSearch[al_action]']" );
-        
             obj.html('').append('<option value=""></option>');
+
             $.each(response.data, function(){
                 let selected = '';
-                
                 if (actionValue === this.hash) {
                     selected = 'selected';
                 }
                 obj.append('<option value="'+ this.name +'" ' + selected + '>'+ this.name +' - ['+ this.cnt +']</option>')
             });
-
         });
     }
-
     setTimeout(updateActionList, 2000);
 
     $(document).on('click', '.showDetail', function(){

@@ -9,6 +9,7 @@ use common\models\ClientPhone;
 use common\models\Lead;
 use common\models\Notifications;
 use common\models\Quote;
+use common\models\QuoteCommunicationOpenLog;
 use common\models\UserProjectParams;
 use common\models\VisitorLog;
 use frontend\helpers\JsonHelper;
@@ -18,6 +19,7 @@ use src\model\leadData\services\LeadDataService;
 use src\services\quote\quotePriceService\ClientQuotePriceService;
 use webapi\src\behaviors\ApiUserProjectRelatedAccessBehavior;
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\web\BadRequestHttpException;
@@ -50,11 +52,15 @@ class QuoteController extends ApiBaseController
      * @apiParam {string}           [clientIP]          Client IP address
      * @apiParam {bool}             [clientUseProxy]    Client Use Proxy
      * @apiParam {string}           [clientUserAgent]   Client User Agent
+     * @apiParam {object}           [queryParams]       Query params, sent to service that calling get-info
      *
      *
      * @apiParamExample {json} Request-Example:
      * {
      *      "uid": "5b6d03d61f078",
+     *      "queryParams": {
+     *          "qc": "sk2N5"
+     *      },
      *      "apiKey": "d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd"
      * }
      *
@@ -143,7 +149,7 @@ class QuoteController extends ApiBaseController
      *                       "cabin": "Y",
      *                       "ticket_id": 1,
      *                       "baggage": {
-     *                           "": {
+     *                           "ADT": {
      *                               "allowPieces": 2,
      *                               "allowMaxSize": "UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS",
      *                               "allowMaxWeight": "UP TO 50 POUNDS/23 KILOGRAMS",
@@ -155,7 +161,10 @@ class QuoteController extends ApiBaseController
      *                                   "lastPiece": 1
      *                               }
      *                           }
-     *                       }
+     *                       },
+     *                      "isChangedOrigin": false,
+     *                      "isChangedDestination": false,
+     *                      "isChangedDeparture": false
      *                   },
      *                   {
      *                       "segmentId": 2,
@@ -176,7 +185,7 @@ class QuoteController extends ApiBaseController
      *                       "cabin": "Y",
      *                       "ticket_id": 2,
      *                       "baggage": {
-     *                           "": {
+     *                           "ADT": {
      *                               "allowPieces": 2,
      *                               "allowMaxSize": "UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS",
      *                               "allowMaxWeight": "UP TO 50 POUNDS/23 KILOGRAMS",
@@ -188,7 +197,10 @@ class QuoteController extends ApiBaseController
      *                                   "lastPiece": 1
      *                               }
      *                           }
-     *                       }
+     *                       },
+     *                      "isChangedOrigin": false,
+     *                      "isChangedDestination": false,
+     *                      "isChangedDeparture": false
      *                   },
      *                   {
      *                       "segmentId": 3,
@@ -209,7 +221,7 @@ class QuoteController extends ApiBaseController
      *                       "cabin": "Y",
      *                       "ticket_id": 2,
      *                       "baggage": {
-     *                           "": {
+     *                           "ADT": {
      *                               "allowPieces": 2,
      *                               "allowMaxSize": "UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS",
      *                               "allowMaxWeight": "UP TO 50 POUNDS/23 KILOGRAMS",
@@ -221,7 +233,10 @@ class QuoteController extends ApiBaseController
      *                                   "lastPiece": 1
      *                               }
      *                           }
-     *                       }
+     *                       },
+     *                      "isChangedOrigin": false,
+     *                      "isChangedDestination": false,
+     *                      "isChangedDeparture": false
      *                   }
      *               ],
      *               "duration": 1185
@@ -248,7 +263,7 @@ class QuoteController extends ApiBaseController
      *                       "cabin": "Y",
      *                       "ticket_id": 1,
      *                       "baggage": {
-     *                           "": {
+     *                           "ADT": {
      *                               "allowPieces": 1,
      *                               "allowMaxSize": "UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS ‡",
      *                               "allowMaxWeight": "UP TO 50 POUNDS/23 ‡ MD« KILOGRAMS",
@@ -260,7 +275,10 @@ class QuoteController extends ApiBaseController
      *                                   "lastPiece": 1
      *                               }
      *                           }
-     *                       }
+     *                       },
+     *                      "isChangedOrigin": false,
+     *                      "isChangedDestination": false,
+     *                      "isChangedDeparture": false
      *                   },
      *                   {
      *                       "segmentId": 2,
@@ -281,7 +299,7 @@ class QuoteController extends ApiBaseController
      *                       "cabin": "Y",
      *                       "ticket_id": 2,
      *                       "baggage": {
-     *                           "": {
+     *                           "ADT": {
      *                               "allowPieces": 1,
      *                               "allowMaxSize": "UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS ‡",
      *                               "allowMaxWeight": "UP TO 50 POUNDS/23 ‡ MD« KILOGRAMS",
@@ -293,7 +311,10 @@ class QuoteController extends ApiBaseController
      *                                   "lastPiece": 1
      *                               }
      *                           }
-     *                       }
+     *                       },
+     *                      "isChangedOrigin": false,
+     *                      "isChangedDestination": false,
+     *                      "isChangedDeparture": false
      *                   },
      *                   {
      *                       "segmentId": 3,
@@ -314,7 +335,7 @@ class QuoteController extends ApiBaseController
      *                       "cabin": "Y",
      *                       "ticket_id": 2,
      *                       "baggage": {
-     *                           "": {
+     *                           "ADT": {
      *                               "allowPieces": 1,
      *                               "allowMaxSize": "UP TO 62 LINEAR INCHES/158 LINEAR CENTIMETERS ‡",
      *                               "allowMaxWeight": "UP TO 50 POUNDS/23 ‡ MD« KILOGRAMS",
@@ -326,7 +347,10 @@ class QuoteController extends ApiBaseController
      *                                   "lastPiece": 1
      *                               }
      *                           }
-     *                       }
+     *                       },
+     *                      "isChangedOrigin": false,
+     *                      "isChangedDestination": false,
+     *                      "isChangedDeparture": false
      *                   }
      *               ],
      *               "duration": 1222
@@ -437,8 +461,20 @@ class QuoteController extends ApiBaseController
      *      ],
      *      "lead_data": [
      *          {
-     *              "ld_field_key": "kayakclickid",
-     *              "ld_field_value": "example_value132"
+     *              "ld_field_key": "example_key",
+     *              "ld_field_value": "example_value"
+     *          },
+     *          {
+     *              "ld_field_key": "example_key",
+     *              "ld_field_value": "example_value"
+     *          }
+     *      ],
+     *      "experiments": [
+     *          {
+     *              "ex_code": "wpl5.0",
+     *          },
+     *          {
+     *              "ex_code": "wpl6.2",
      *          }
      *      ],
      *      "department_key": "chat",
@@ -463,11 +499,11 @@ class QuoteController extends ApiBaseController
      *       "status": 404,
      *       "type": "yii\\web\\NotFoundHttpException"
      *   }
+     *
+     * @throws InvalidConfigException
      */
-
     public function actionGetInfo(): array
     {
-
         $this->checkPost();
         $apiLog = $this->startApiLog($this->action->uniqueId);
 
@@ -478,6 +514,8 @@ class QuoteController extends ApiBaseController
         if (!$uid) {
             throw new BadRequestHttpException('Not found UID on POST request', 1);
         }
+
+        QuoteCommunicationOpenLog::createByRequestData(\Yii::$app->getRequest()->getBodyParams());
 
         if ($this->apiProject) {
             $projectIds = [$this->apiProject->id];
@@ -641,7 +679,6 @@ class QuoteController extends ApiBaseController
                             }
                         }
                     }
-                    //exec(dirname(Yii::getAlias('@app')) . '/yii quote/send-opened-notification '.$uid.'  > /dev/null 2>&1 &');
                 }
             }
         } catch (\Throwable $e) {

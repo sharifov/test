@@ -1,5 +1,6 @@
 <?php
 
+use frontend\controllers\CasesController;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
@@ -9,6 +10,8 @@ use yii\widgets\Pjax;
 /* @var $isAdmin boolean */
 /* @var $searchModel common\models\search\SaleSearch */
 /* @var $dataProvider yii\data\ArrayDataProvider */
+
+$differentProject = CasesController::DIFFERENT_PROJECT
 ?>
 
 <div class="x_panel" id="search-sale-panel" style="display: none;">
@@ -35,7 +38,7 @@ use yii\widgets\Pjax;
     <div class="x_content" style="display: block;">
         <div class="sale-search">
 
-            <h1 title="<?=Yii::$app->params['backOffice']['serverUrl']?>"></h1>
+            <h1 title="<?=Yii::$app->params['backOffice']['url']?>"></h1>
 
             <?php Pjax::begin(['id' => 'pjax-sale-search-list', 'timeout' => 15000, 'enablePushState' => true]); ?>
 
@@ -258,16 +261,23 @@ $jsCode = <<<JS
             type: 'post',
             data: {gid: gid, h: h},
             success: function (data) {
-                if (data.error != '') {
-                    alert('Error: ' + data.error);
+                if (data.error !== '') {
+                    if(data.error_type && data.error_type === "$differentProject"){
+                        let modal = $('#modalCaseSm');
+                        modal.modal('show');
+                        modal.find('.modal-header').html('<h3 class="text-danger font-weight-bold">Wrong Project!!! <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+                        modal.find('.modal-body').html('<h5>' + data.error + '</h5>');
+                    } else {
+                        alert('Error: ' + data.error);
+                        createNotifyByObject({
+                            title: "Error add Sale",
+                            type: "error",
+                            text: 'Error add sale in case',
+                            hide: true
+                        });
+                    }
                     btn.removeClass('disabled');
                     btn.find('span').removeClass('fa-spinner fa-spin').addClass('fa-plus');
-                    createNotifyByObject({
-                        title: "Error add Sale",
-                        type: "error",
-                        text: 'Error add sale in case',
-                        hide: true
-                    });
                 } else {
                     btn.parent().parent().addClass('success');
                     btn.find('span').removeClass('fa-spinner fa-spin').addClass('fa-check');

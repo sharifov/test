@@ -25,6 +25,8 @@ class ApiCodeException
     public const DATA_NOT_FOUND = Module::API . 112;
     public const REQUEST_ALREADY_PROCESSED = Module::API . 113;
     public const REQUEST_DATA_INVALID = Module::API . 114;
+    public const DATA_EXPIRED = Module::API . 115;
+    public const CLIENT_CHAT_FORM_CREATE_FAILED = Module::API . 116;
 
     public const COMMUNICATION_ERROR = Module::API . 120;
 

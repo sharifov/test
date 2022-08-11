@@ -17,6 +17,7 @@ use yii\grid\SerialColumn;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
 use yii\widgets\Pjax;
+use dosamigos\datepicker\DatePicker;
 
 ?>
 
@@ -56,6 +57,24 @@ use yii\widgets\Pjax;
     <?= $activeForm->field($refundForm, 'caseId')->hiddenInput()->label(false) ?>
     <?= $activeForm->field($refundForm->getRefundForm(), 'currency')->hiddenInput()->label(false) ?>
     <?= \common\widgets\Alert::widget() ?>
+    <div class="row">
+        <div class="col-md-4">
+            <?= $activeForm->field($refundForm, 'expirationDate', [
+                'labelOptions' => ['class' => 'control-label']
+            ])->widget(DatePicker::class, [
+                'inline' => false,
+                'clientOptions' => [
+                    'autoclose' => true,
+                    'format' => 'yyyy-mm-dd',
+                ],
+                'options' => [
+                    'autocomplete' => 'off',
+                    'placeholder' => 'Choose Date',
+                ],
+            ]) ?>
+        </div>
+    </div>
+
   <div class="row">
     <div class="col-md-12">
         <div class="d-flex justify-content-between align-items-center">

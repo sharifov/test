@@ -14,6 +14,7 @@ use src\model\leadUserConversion\abac\LeadUserConversionAbacObject;
 use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\model\leadUserConversion\entity\LeadUserConversionQuery;
 use src\model\leadUserConversion\repository\LeadUserConversionRepository;
+use src\model\leadUserConversion\service\LeadUserConversionService;
 use src\repositories\lead\LeadRepository;
 use src\services\lead\LeadStateService;
 
@@ -78,8 +79,7 @@ class LeadStatusReasonService
     private function clientNeedsNoSales(HandleReasonDto $dto): void
     {
         $this->leadToConversion($dto)
-            ->createQaTaskLead($dto)
-            ->toBonusQueue($dto);
+            ->createQaTaskLead($dto);
     }
 
     private function competitorHasABetterContract(HandleReasonDto $dto): void
@@ -92,11 +92,17 @@ class LeadStatusReasonService
     private function invalid(HandleReasonDto $dto): void
     {
         $this->leadToConversion($dto)
+            ->createQaTaskLead($dto);
+    }
+
+    private function properFollowUpDone(HandleReasonDto $dto): void
+    {
+        $this->leadToConversion($dto)
             ->createQaTaskLead($dto)
             ->toBonusQueue($dto);
     }
 
-    private function properFollowUpDone(HandleReasonDto $dto): void
+    private function properFollowUpDoneNeverAnswered(HandleReasonDto $dto): void
     {
         $this->leadToConversion($dto)
             ->createQaTaskLead($dto)
@@ -130,7 +136,7 @@ class LeadStatusReasonService
     private function duplicated(HandleReasonDto $dto): void
     {
         $stateService = \Yii::createObject(LeadStateService::class);
-        $stateService->duplicate($dto->lead, $dto->lead->employee_id, null, $dto->creatorId);
+        $stateService->duplicate($dto->lead, $dto->lead->employee_id, $dto->originId, $dto->creatorId);
         $this->leadToConversion($dto)->createQaTaskLead($dto);
     }
 
@@ -143,6 +149,10 @@ class LeadStatusReasonService
 
     private function leadToConversion(HandleReasonDto $dto): self
     {
+        if (LeadUserConversionService::leadIsExcludeFromConversionByDescription($dto->lead->id, $dto->reason) === true) {
+            return $this;
+        }
+
         $leadClosedCount = LeadFlowQuery::countByStatus($dto->lead->id, Lead::STATUS_CLOSED);
         if (empty($dto->lead->employee_id)) {
             throw new \RuntimeException('Lead has no owner; Cannot Close;');
@@ -154,7 +164,7 @@ class LeadStatusReasonService
             /** @abac new LeadAbacUserConversionAbacDto($lead, Auth::id()), LeadUserConversionAbacObject::OBJ_USER_CONVERSION, LeadUserConversionAbacObject::ACTION_CREATE, Access to create lead user conversion */
             $canAbac = \Yii::$app->abac->can($abacDto, LeadUserConversionAbacObject::OBJ_USER_CONVERSION, LeadUserConversionAbacObject::ACTION_CREATE);
             if ($canAbac) {
-                if (!$this->leadUserConversionRepository->exist($dto->lead->id, $dto->lead->id)) {
+                if (!$this->leadUserConversionRepository->exist($dto->lead->id, $dto->lead->employee_id)) {
                     $leadUserConversion = LeadUserConversion::create(
                         $dto->lead->id,
                         $dto->lead->employee_id,

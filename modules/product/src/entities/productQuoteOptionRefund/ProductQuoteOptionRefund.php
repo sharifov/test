@@ -263,6 +263,16 @@ class ProductQuoteOptionRefund extends \yii\db\ActiveRecord implements Serializa
         $this->pqor_status_id = ProductQuoteOptionRefundStatus::NEW;
     }
 
+    /**
+     * Sets quote option in status "expired"
+     *
+     * @return void
+     */
+    public function expired(): void
+    {
+        $this->pqor_status_id = ProductQuoteOptionRefundStatus::EXPIRED;
+    }
+
     public function serialize(): array
     {
         return (new ProductQuoteOptionRefundSerializer($this))->getData();

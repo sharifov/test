@@ -6,6 +6,9 @@ use common\models\Department;
 use common\models\DepartmentPhoneProject;
 use common\models\Lead;
 use frontend\helpers\JsonHelper;
+use http\Exception\InvalidArgumentException;
+use modules\shiftSchedule\src\services\ShiftScheduleDictionary;
+use src\model\priceResearchLink\service\PriceResearchLinkService;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;
@@ -677,9 +680,19 @@ class SettingHelper
         return self::prePareStatusIds(Yii::$app->params['settings']['active_quote_change_statuses']);
     }
 
+    public static function getAcceptedQuoteChangeStatuses(): array
+    {
+        return self::prePareStatusIds(Yii::$app->params['settings']['accepted_quote_change_statuses']);
+    }
+
     public static function getActiveQuoteRefundStatuses(): array
     {
         return self::prePareStatusIds(Yii::$app->params['settings']['active_quote_refund_statuses']);
+    }
+
+    public static function getAcceptedQuoteRefundStatuses(): array
+    {
+        return self::prePareStatusIds(Yii::$app->params['settings']['accepted_quote_refund_statuses']);
     }
 
     public static function getFinishedQuoteChangeStatuses(): array
@@ -787,14 +800,29 @@ class SettingHelper
         return (bool) (Yii::$app->params['settings']['two_factor_authentication_enable'] ?? false);
     }
 
-    public static function getTwoFactorAuthCounter(): int
+    public static function getTwoFactorAuthMaxAttempts(): int
     {
-        return (int) (Yii::$app->params['settings']['two_factor_counter'] ?? 60);
+        return (int) (Yii::$app->params['settings']['two_factor_attempts_settings']['max_attempts'] ?? 60);
+    }
+
+    public static function getTwoFactorAuthWarningAttemptsRemain(): int
+    {
+        return (int) (Yii::$app->params['settings']['two_factor_attempts_settings']['show_warning_attempts_remain'] ?? 3);
     }
 
     public static function isEnabledAuthClients(): bool
     {
-        return (bool) (Yii::$app->params['settings']['enable_auth_clients'] ?? false);
+        return (self::isEnabledGoogleAuthClient() || self::isEnabledMicrosoftAuthClient());
+    }
+
+    public static function isEnabledGoogleAuthClient(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['enable_auth_clients']['auth_google'] ?? false);
+    }
+
+    public static function isEnabledMicrosoftAuthClient(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['enable_auth_clients']['auth_microsoft'] ?? false);
     }
 
     public static function getCleanLeadPoorProcessingLogAfterDays(): int
@@ -863,9 +891,17 @@ class SettingHelper
             return [];
         }
 
+        if (array_key_exists('sources', $settings) && is_array($settings['sources'])) {
+            $sources = $settings['sources'];
+        } else {
+            self::leadRedialExcludeAttributesErrorLog('sources');
+            return [];
+        }
+
         return [
             'projects' => $projects,
             'departments' => $departments,
+            'sources' => $sources,
             'cabins' => $cabins,
             'noFlightDetails' => $noFlightDetails,
             'isTest' => $isTest
@@ -876,7 +912,7 @@ class SettingHelper
      * @return array
      * @throws \RuntimeException
      */
-    public static function getPriceResearchLinksNamesArray(): array
+    public static function getPriceResearchLinksNamesArray(?Lead $lead = null): array
     {
         $researchLinks = Yii::$app->params['settings']['price_research_links'] ?? null;
         if (empty($researchLinks)) {
@@ -888,6 +924,8 @@ class SettingHelper
             throw new \RuntimeException($error);
         }
         $results = [];
+        $typeList = PriceResearchLinkService::getTypeListEquivalentLeadTypes();
+
         foreach ($researchLinks as $key => $researchLink) {
             if (!is_array($researchLink)) {
                 $error = 'Price research links settings is invalid. Link value must be array, arrayKey is ' . $researchLink;
@@ -896,6 +934,17 @@ class SettingHelper
             if (!ArrayHelper::getValue($researchLink, 'enabled')) {
                 continue;
             }
+
+            if ($lead !== null && $lead->hasFlightDetails()) {
+                $tripType = (string) $lead->trip_type;
+                $tripType = trim(mb_strtoupper($tripType));
+                $tripTypeKey = $typeList[$tripType] ?? null;
+
+                if ($tripTypeKey === null || !isset($researchLink['types'][$tripTypeKey]) || !isset($researchLink['cabinClassMappings'][$lead->cabin])) {
+                    continue;
+                }
+            }
+
             $linkName  = ArrayHelper::getValue($researchLink, 'name');
             $results[$key] = $linkName;
         }
@@ -945,24 +994,99 @@ class SettingHelper
     private static function getShiftSchedule(): array
     {
         return Yii::$app->params['settings']['shift_schedule'] ?? [
-                'generate_enabled'        => false,
-                'days_limit'              => 20,
-                'days_offset'             => 0
+                'generate_enabled' => ShiftScheduleDictionary::DEFAULT_GENERATE_ENABLED,
+                'days_limit' => ShiftScheduleDictionary::DEFAULT_DAYS_LIMIT,
+                'days_offset' => ShiftScheduleDictionary::DEFAULT_DAYS_OFFSET
             ];
     }
 
     public static function getShiftScheduleGenerateEnabled(): bool
     {
-        return (bool) (self::getShiftSchedule()['generate_enabled'] ?? false);
+        return (bool)(self::getShiftSchedule()['generate_enabled'] ?? ShiftScheduleDictionary::DEFAULT_GENERATE_ENABLED);
     }
 
     public static function getShiftScheduleDaysLimit(): int
     {
-        return (int) (self::getShiftSchedule()['days_limit'] ?? 20);
+        $daysLimit = (int)(self::getShiftSchedule()['days_limit'] ?? 0);
+
+        if ($daysLimit <= 0) {
+            Yii::warning([
+                'message' => 'Days limit cannot be less or equal to 0',
+                'daysLimit' => $daysLimit,
+            ], 'SettingHelper:getShiftScheduleDaysLimit:DaysLimitIsInvalid');
+
+            return ShiftScheduleDictionary::DEFAULT_DAYS_LIMIT;
+        }
+        return $daysLimit;
     }
 
     public static function getShiftScheduleDaysOffset(): int
     {
-        return (int) (self::getShiftSchedule()['days_offset'] ?? 0);
+        $daysOffset = (int) (self::getShiftSchedule()['days_offset'] ?? ShiftScheduleDictionary::DEFAULT_DAYS_OFFSET);
+        if ($daysOffset < 0) {
+            Yii::warning([
+                'message' => 'DaysOffset cannot be less to 0',
+                'daysOffset' => $daysOffset,
+            ], 'SettingHelper:getShiftScheduleDaysOffset:DaysOffsetLimitIsInvalid');
+            return ShiftScheduleDictionary::DEFAULT_DAYS_OFFSET;
+        }
+        return $daysOffset;
+    }
+
+    public static function isClientChatDebugEnable(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['client_chat_debug_enable'] ?? false);
+    }
+
+    public static function isEnableAgentCallQueueJobAfterChangeCallStatusReady(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['enable_agent_call_queue_job_after_change_call_status_ready'] ?? true);
+    }
+
+    public static function isSyncOverridePhoneToEnable(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['call_sync_override_phone_to_enable'] ?? false);
+    }
+
+    public static function isOverridePhoneToForwarderFrom(): bool
+    {
+        return (bool) (Yii::$app->params['settings']['call_is_override_phone_to_forwarded_from'] ?? false);
+    }
+
+    /**
+     * @return string
+     */
+    public static function getEmailFrom(): string
+    {
+        $email = \Yii::$app->params['settings']['email_component']['email_from'] ?? '';
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return $email;
+        }
+        throw new InvalidArgumentException('Invalid email_from address');
+    }
+
+    public static function getOtpEmailCodeLifeTime(): int
+    {
+        return (int)(Yii::$app->params['settings']['otp_email_settings']['code_life_time'] ?? 120);
+    }
+
+    public static function getOtpEmailProjectId(): int
+    {
+        return (int)(Yii::$app->params['settings']['otp_email_settings']['project_id'] ?? 2);
+    }
+
+    public static function getOtpEmailTemplateType(): string
+    {
+        return Yii::$app->params['settings']['otp_email_settings']['template_type'] ?? 'two_factor_auth';
+    }
+
+    public static function getOtpEmailTemplateSubject(): string
+    {
+        return Yii::$app->params['settings']['otp_email_settings']['template_subject'] ?? 'Your Two-Factor verification code!';
+    }
+
+    public static function getClientReturnSegmentListKeys(): array
+    {
+        return Yii::$app->params['settings']['client_return_segment_list_keys'] ?? [];
     }
 }

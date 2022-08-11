@@ -593,6 +593,20 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                             windowObjectReference.focus();
                         }
                     }
+                    if (obj.cmd === 'reloadShitScheduleRequest') {
+                        $(document).trigger('reloadShitScheduleRequest')
+                    }
+
+                    if (obj.cmd === 'updateLeadHeader') {
+                        let gid = obj.data.lead.gid;
+
+                        if ((location.pathname).includes('/lead/view/' + gid)) {
+                            setTimeout(function(){
+                                pjaxReload({container: '#pjax-lead-header', async: false, timeout: 5000});
+                                pjaxReload({container: '#pjax-lead-header-sidebar', async: false, timeout: 5000});
+                            }, 1000);
+                        }
+                    }
                 }
                 // onlineObj.find('i').removeClass('danger').removeClass('warning').addClass('success');
             } catch (error) {

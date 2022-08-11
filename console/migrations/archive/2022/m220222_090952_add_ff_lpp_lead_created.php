@@ -33,7 +33,7 @@ class m220222_090952_add_ff_lpp_lead_created extends Migration
                     'ff_description' => 'Lead Poor Processing DT lead created restriction for rule Scheduled communication'
                 ]
             );
-            Yii::$app->ff->invalidateCache();
+            Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableLog($throwable), 'm220222_090952_add_ff_lpp_lead_created:safeUp:Throwable');
         }
@@ -50,7 +50,7 @@ class m220222_090952_add_ff_lpp_lead_created extends Migration
             }
             $featureFlagService = new \kivork\FeatureFlag\Services\FeatureFlagService();
             $featureFlagService::delete(FFlag::FF_KEY_LPP_LEAD_CREATED);
-            Yii::$app->ff->invalidateCache();
+            Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableLog($throwable), 'm220222_090952_add_ff_lpp_lead_created:safeDown:Throwable');
         }

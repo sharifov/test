@@ -10,12 +10,16 @@ use frontend\widgets;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\entity\fileLead\FileLead;
 use modules\fileStorage\src\entity\fileLead\FileLeadQuery;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
+use modules\lead\src\abac\LeadSearchAbacObject;
 use src\auth\Auth;
 use Yii;
 use common\models\Lead;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -39,6 +43,11 @@ class LeadsController extends FController
     public function behaviors()
     {
         $behaviors = [
+            'access' => [
+                'allowActions' => [
+                    'view'
+                ],
+            ],
             'verbs' => [
                 'class' => VerbFilter::class,
                 'actions' => [
@@ -108,18 +117,14 @@ class LeadsController extends FController
 
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
-
-        if ($user->isAgent()) {
-            $isAgent = true;
-        } else {
-            $isAgent = false;
-        }
+        /** @abac null, LeadSearchAbacObject::ADVANCED_SEARCH, LeadSearchAbacObject::ACTION_ACCESS, Access to Advanced Search Lead  */
+        $accessAdvancedSearch = Yii::$app->abac->can(null, LeadSearchAbacObject::ADVANCED_SEARCH, LeadSearchAbacObject::ACTION_ACCESS);
 
         if ($user->isSupervision()) {
             $params['LeadSearch']['supervision_id'] = $user->id;
         }
 
-        if (!$params && $isAgent) {
+        if (!$params && !$accessAdvancedSearch) {
             $params['LeadSearch']['employee_id'] = $user->id;
         }
 
@@ -127,7 +132,7 @@ class LeadsController extends FController
             $params['LeadSearch']['l_is_test'] = '0';
         }
 
-        if ($isAgent) {
+        if (!$accessAdvancedSearch) {
             $dataProvider = $searchModel->searchAgent($params, Auth::user());
         } else {
             $dataProvider = $searchModel->search($params, Auth::user());
@@ -160,7 +165,7 @@ class LeadsController extends FController
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-            'isAgent' => $isAgent,
+            'accessAdvancedSearch' => $accessAdvancedSearch,
         ]);
     }
 
@@ -281,6 +286,11 @@ class LeadsController extends FController
     public function actionView($id, $showInPopUp = null)
     {
         $model = $this->findModel($id);
+
+        /** @abac $abacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS, Access to view lead  */
+        if (!Yii::$app->abac->can(new LeadAbacDto($model, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access Denied.');
+        }
 
         $searchModel = new QuoteSearch();
         $searchModelSegments = new LeadFlightSegmentSearch();

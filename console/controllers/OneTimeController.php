@@ -48,8 +48,11 @@ use src\model\contactPhoneList\service\PhoneNumberService;
 use src\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
 use src\model\contactPhoneServiceInfo\repository\ContactPhoneServiceInfoRepository;
 use src\model\emailList\entity\EmailList;
+use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
 use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\model\phoneList\entity\PhoneList;
+use src\repositories\client\ClientEmailRepository;
+use src\repositories\client\ClientPhoneRepository;
 use src\repositories\client\ClientsQuery;
 use src\services\cases\CasesSaleService;
 use src\services\client\ClientCreateForm;
@@ -373,9 +376,11 @@ class OneTimeController extends Controller
             Console::startProgress(0, $countCases);
 
             foreach ($cases as $key => $value) {
+                $project = Project::findOne($value['cs_project_id']);
                 $job = new CreateSaleFromBOJob();
                 $job->case_id = $value['cs_id'];
                 $job->phone = $this->getPhoneByClient($value['cs_client_id'])['phone'];
+                $job->project_key = $project->api_key ?? null;
                 Yii::$app->queue_job->priority(100)->push($job);
                 $processed++;
                 Console::updateProgress($processed, $countCases);
@@ -416,7 +421,8 @@ class OneTimeController extends Controller
             SELECT 
                 cases.cs_id,
                 cases.cs_client_id,
-                case_sale.css_sale_id
+                case_sale.css_sale_id,
+                cases.cs_project_id
             FROM
                 cases
             INNER JOIN
@@ -460,9 +466,11 @@ class OneTimeController extends Controller
 
             foreach ($cases as $key => $value) {
                 if (empty($value['css_sale_id'])) {
+                    $project = Project::findOne($value['cs_project_id']);
                     $job = new CreateSaleFromBOJob();
                     $job->case_id = $value['cs_id'];
                     $job->phone = $this->getPhoneByClient($value['cs_client_id'])['phone'];
+                    $job->project_key = $project->api_key ?? null;
                     Yii::$app->queue_job->priority(10)->push($job);
                 } else {
                     $job = new UpdateSaleFromBOJob();
@@ -603,7 +611,8 @@ class OneTimeController extends Controller
         return Yii::$app->db->createCommand(
             'SELECT 
                     cases.cs_id,
-                    cases.cs_client_id
+                    cases.cs_client_id,
+                    cases.cs_project_id
                 FROM
                     cases
                 LEFT JOIN
@@ -900,17 +909,18 @@ class OneTimeController extends Controller
     {
         $oldPhones = ClientPhone::find()->andWhere(['client_id' => $fromId])->asArray()->all();
         foreach ($oldPhones as $oldPhone) {
-            $phone = new ClientPhone();
+            $phone = ClientPhone::create($oldPhone['phone'], $toId);
             $phone->enablelAferSave = false;
-            $phone->client_id = $toId;
-            $phone->phone = $oldPhone['phone'];
             $phone->created = $oldPhone['created'];
             $phone->is_sms = $oldPhone['is_sms'];
             $phone->validate_dt = $oldPhone['validate_dt'];
             $phone->type = $oldPhone['type'] ?: ClientPhone::PHONE_NOT_SET;
             $phone->cp_title = $oldPhone['cp_title'];
             $phone->detachBehavior('timestamp');
-            if (!$phone->save()) {
+            try {
+                $clientPhoneRepository = Yii::createObject(ClientPhoneRepository::class);
+                $clientPhoneRepository->save($phone);
+            } catch (\RuntimeException $e) {
                 Yii::error(VarDumper::dumpAsString([
                     'fromId' => $fromId,
                     'toId' => $toId,
@@ -925,14 +935,16 @@ class OneTimeController extends Controller
     {
         $oldEmails = ClientEmail::find()->andWhere(['client_id' => $fromId])->asArray()->all();
         foreach ($oldEmails as $oldEmail) {
-            $email = new ClientEmail();
-            $email->client_id = $toId;
-            $email->email = $oldEmail['email'];
+            $email = ClientEmail::create($oldEmail['email'], $toId);
             $email->created = $oldEmail['created'];
             $email->type = $oldEmail['type'] ?: ClientEmail::EMAIL_NOT_SET;
             $email->ce_title = $oldEmail['ce_title'];
             $email->detachBehavior('timestamp');
-            if (!$email->save()) {
+
+            try {
+                $clientPhoneRepository = Yii::createObject(ClientEmailRepository::class);
+                $clientPhoneRepository->save($email);
+            } catch (\RuntimeException $e) {
                 Yii::error(VarDumper::dumpAsString([
                     'fromId' => $fromId,
                     'toId' => $toId,
@@ -1757,5 +1769,23 @@ class OneTimeController extends Controller
                 'OneTimeController:actionFillDefaultCurrencyInLeadPreferences:Throwable'
             );
         }
+    }
+
+    public function actionDeleteBusinessExtraQueueFromPendingLeads()
+    {
+        $leads = Lead
+            ::find()
+            ->alias('l')
+            ->where(['status' => Lead::STATUS_PENDING])
+            ->innerJoin(['lead_business_extra_queue AS lbeq', 'lbeq.lbeq_lead_id = l.id'])
+            ->all();
+        $countLeads = count($leads);
+        foreach ($leads as $lead) {
+            LeadBusinessExtraQueueService::addLeadBusinessExtraQueueRemoverJob($lead, 'Delete due to Pending status');
+        }
+        \Yii::info(
+            $countLeads,
+            'info\OneTimeController::actionDeleteBusinessExtraQueueFromNotProcessingLeads'
+        );
     }
 }

@@ -323,7 +323,7 @@ class SmsController extends FController
         $errors = 0;
 
         /** @var CommunicationService $com */
-        $com = Yii::$app->communication; //get('communication');
+        $com = Yii::$app->comms; //get('communication');
         $model = new SmsInboxForm();
         $total = 0;
 

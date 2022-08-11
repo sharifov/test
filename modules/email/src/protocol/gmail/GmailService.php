@@ -18,6 +18,11 @@ use src\services\email\EmailService;
 use src\services\email\incoming\EmailIncomingService;
 use Yii;
 use yii\helpers\VarDumper;
+use src\services\email\EmailMainService;
+use src\dto\email\EmailDTO;
+use src\exception\CreateModelException;
+use src\services\email\EmailServiceHelper;
+use src\repositories\email\EmailRepositoryFactory;
 
 /**
  * Class Gmail
@@ -31,7 +36,7 @@ use yii\helpers\VarDumper;
  * @property array $debugEmails
  * @property array $emailsTo
  * @property Logger $logger
- * @property EmailService $emailService
+ * @property EmailMainService $emailService
  * @property Projects $projects
  * @property array $usersForNotification
  */
@@ -53,7 +58,7 @@ class GmailService
         GmailApiService $api,
         EmailAccount $account,
         Logger $logger,
-        EmailService $emailService,
+        EmailMainService $emailService,
         Projects $projects
     ) {
         $this->api = $api;
@@ -185,40 +190,24 @@ class GmailService
                 continue;
             }
 
-            $email = new Email();
-            $email->e_type_id = Email::TYPE_INBOX;
-            $email->e_status_id = Email::STATUS_DONE;
-            $email->e_is_new = true;
-            $email->e_email_to = $emailTo;
-            $email->e_email_from = $gmail->getFromEmail();
-            $email->e_email_from_name = $gmail->getFromName();
-            $email->e_email_subject = $gmail->getSubject();
-            $email->e_project_id = $this->projects->getProjectId($emailTo);
-            $email->body_html = $gmail->getContent();
-            $email->e_created_dt = date('Y-m-d H:i:s');
-            $email->e_inbox_created_dt = $gmail->getDate();
-            $email->e_ref_message_id = $gmail->getReferences();
-            $email->e_message_id = $gmail->getMessageId();
-
-            $lead_id = $this->emailService->detectLeadId($email);
-            $case_id = $this->emailService->detectCaseId($email);
-
-            if ($users = $email->getUsersIdByEmail()) {
-                $email->e_created_user_id = end($users);
-                reset($users);
-            }
-
-            if (!$email->save()) {
+            try {
+                $emailDTO = EmailDTO::newInstance()->fillFromGmail($gmail, $emailTo);
+                $this->emailService->receiveEmail($emailDTO);
+                $users = (Yii::createObject(EmailServiceHelper::class))->getUsersIdByEmail($emailTo);
+            } catch (\Throwable $e) {
+                $error = $e->getMessage();
+                if ($e instanceof CreateModelException) {
+                    $error = $e->getErrors();
+                }
                 $savedError = true;
-                $this->logger->log(Message::error('(' . VarDumper::dumpAsString($email->getErrors()) . ')'));
-                self::error(['category' => 'saveMessage', 'messageId' => $gmail->getId(), 'model' => $email->getAttributes(), 'error' => $email->getErrors()]);
+                $this->logger->log(Message::error('(' . VarDumper::dumpAsString($error) . ')'));
+                self::error(['category' => 'saveMessage', 'messageId' => $gmail->getId(), 'error' => $error]);
                 continue;
             }
 
             $this->logger->log(Message::info('+'));
             $this->addSavedEmail($gmail->getId());
             $this->addUsersForNotification($users);
-            $this->processEmail($email);
         }
 
         if ($savedError === false) {
@@ -228,7 +217,7 @@ class GmailService
 
     private function processEmail(Email $email): void
     {
-        if ($email->e_lead_id === null && $email->e_case_id === null && $this->emailService->isNotInternalEmail($email->e_email_from)) {
+        if ($email->e_lead_id === null && $email->e_case_id === null && EmailServiceHelper::isNotInternalEmail($email->e_email_from)) {
             try {
                 $process = (Yii::createObject(EmailIncomingService::class))->create(
                     $email->e_id,
@@ -252,6 +241,7 @@ class GmailService
                 $job = new CreateSaleFromBOJob();
                 $job->case_id = $email->e_case_id;
                 $job->email = $email->e_email_from;
+                $job->project_key = $email->project->api_key ?? null;
                 Yii::$app->queue_job->priority(100)->push($job);
             } catch (\Throwable $throwable) {
                 self::error(['category' => 'addToJobFailed', 'error' => AppHelper::throwableFormatter($throwable)]);
@@ -288,7 +278,7 @@ class GmailService
 
     private function emailExist(string $messageId, string $emailTo): bool
     {
-        return Email::find()->where(['e_message_id' => $messageId, 'e_email_to' => $emailTo])->exists();
+        return EmailRepositoryFactory::getRepository()->findReceived($messageId, $emailTo)->exists();
     }
 
     private function addProcessedEmail(string $id): void

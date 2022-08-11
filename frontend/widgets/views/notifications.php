@@ -1,4 +1,7 @@
 <?php
+
+use src\helpers\text\StringHelper;
+
 /* @var $model \common\models\Notifications[] */
 /* @var $newCount integer */
 ?>
@@ -30,7 +33,7 @@
                         <span class="time"><?=Yii::$app->formatter->asRelativeTime(strtotime($item->n_created_dt))?></span>
                     </span>
                     <span class="message">
-                        <?=\yii\helpers\StringHelper::truncate(\common\models\Email::stripHtmlTags($item->n_message), 80, '...');?><br>
+                        <?= StringHelper::truncate(StringHelper::stripHtmlTags($item->n_message), 80, '...');?><br>
                     </span>
                 </a>
                 <?php
@@ -44,7 +47,7 @@
                     $message = str_replace("\n", '', $message);
                     $message = str_replace('"', '\"', $message);
 
-                    $type = $item->getNotifyType();
+                    $type = \common\models\Notifications::getNotifyType($item->n_type_id);
 
                     if ($n === 0) {
                         $js2 = '
@@ -126,11 +129,11 @@ $js = <<<JS
     $("#notify-pjax").on("pjax:beforeSend", function() {
         $('#notify-pjax .info-number i').removeClass('fa-comment-o').addClass('fa-spin fa-spinner');
     });
-    
+
     $("#notify-pjax").on("pjax:complete", function() {
         $('#notify-pjax .info-number i').removeClass('fa-spin fa-spinner').addClass('fa-comment-o');
     });
-    
+
     $("#notify-pjax").on('pjax:timeout', function(event) {
         $('#notify-pjax .info-number i').removeClass('fa-spin fa-spinner').addClass('fa-comment-o');
         event.preventDefault()

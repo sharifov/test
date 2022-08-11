@@ -3,6 +3,7 @@
 namespace modules\flight\src\useCases\voluntaryExchangeManualCreate\form;
 
 use common\components\validators\IsArrayValidator;
+use common\components\validators\NormalizeDateValidator;
 use common\models\Airline;
 use common\models\Employee;
 use modules\flight\models\Flight;
@@ -41,6 +42,7 @@ use yii\helpers\ArrayHelper;
  * @property $serviceFee
  * @property $currencyRate
  * @property $currencyCode
+ * @property string|null $expirationDate
  *
  * @property ItineraryDumpDTO[] $itinerary
  * @property array $baggageFormsData
@@ -124,7 +126,7 @@ class VoluntaryQuoteCreateForm extends ChangeQuoteCreateForm
     {
         return [
             [['gds', 'pcc', 'tripType', 'cabin', 'validatingCarrier', 'fareType', 'reservationDump'], 'string'],
-            [['gds', 'validatingCarrier', 'cabin', 'tripType', 'fareType', 'reservationDump', 'quoteCreator', 'keyTripList', 'pcc'], 'required'],
+            [['gds', 'validatingCarrier', 'cabin', 'tripType', 'fareType', 'reservationDump', 'quoteCreator', 'keyTripList', 'pcc', 'expirationDate'], 'required'],
             ['quoteCreator', 'integer'],
 
             [['reservationDump'], 'string'],
@@ -156,6 +158,8 @@ class VoluntaryQuoteCreateForm extends ChangeQuoteCreateForm
             [['serviceFeeAmount'], 'filter', 'filter' => static function ($value) {
                 return empty($value) ? null : VoluntaryExchangeBOService::prepareFloat($value);
             }],
+            ['expirationDate', NormalizeDateValidator::class],
+            ['expirationDate', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
         ];
     }
 
@@ -218,9 +222,19 @@ class VoluntaryQuoteCreateForm extends ChangeQuoteCreateForm
         return $this->itinerary;
     }
 
+    public function setItinerary($itinerary): array
+    {
+        return $this->itinerary = $itinerary;
+    }
+
     public function getSegmentTripFormsData(): array
     {
         return $this->segmentTripFormsData;
+    }
+
+    public function setSegmentTripFormsData($segmentTripFormsData): array
+    {
+        return $this->segmentTripFormsData = $segmentTripFormsData;
     }
 
     public function getFlightQuotePaxPriceForms(): array

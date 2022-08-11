@@ -106,6 +106,7 @@ class CommunicationForm extends Model
     public $c_voice_sid;
     public $c_call_id;
 
+    public $c_qc_uid; // Quote Communication id
     public $c_quotes;
     public $c_offers;
 
@@ -124,7 +125,7 @@ class CommunicationForm extends Model
      * @param string $languageId
      * @param array $config
      */
-    public function __construct(?string $languageId = null, AbacSmsFromNumberList $smsFromNumberList, AbacEmailList $emailFromList, $config = [])
+    public function __construct(AbacSmsFromNumberList $smsFromNumberList, AbacEmailList $emailFromList, ?string $languageId = null, $config = [])
     {
         $this->c_language_id = self::getDefaultLanguage($languageId);
         parent::__construct($config);
@@ -151,7 +152,7 @@ class CommunicationForm extends Model
     public function rules(): array
     {
         return [
-            [['c_type_id', 'c_lead_id'], 'required'],
+            [['c_type_id', 'c_lead_id', 'c_qc_uid'], 'required'],
 
             [['c_email_to', 'c_language_id', 'c_email_tpl_key'], 'required', 'when' => static function (CommunicationForm $model) {
                 return (int) $model->c_type_id === self::TYPE_EMAIL;
@@ -244,7 +245,7 @@ class CommunicationForm extends Model
 
             [['c_language_id'], 'string', 'max' => 5],
 
-            [['c_quotes'], 'string'], //'each', 'rule' => ['integer']],
+            [['c_quotes', 'c_qc_uid'], 'string'], //'each', 'rule' => ['integer']],
             [['c_quotes'], 'validateQuotes'],
 
             [['c_offers'], 'string'], //'each', 'rule' => ['integer']],
@@ -355,6 +356,7 @@ class CommunicationForm extends Model
     {
         return [
             'c_type_id'         => 'Communication Type',
+            'c_qc_uid'         => 'Communication Type UID',
             'c_lead_id'         => 'Lead Id',
             'c_sms_tpl_id'      => 'SMS Template',
             'c_sms_tpl_key'      => 'SMS Template',
@@ -372,5 +374,10 @@ class CommunicationForm extends Model
             'c_quotes'          => 'Checked Quotes',
             'c_offers'          => 'Checked Offers',
         ];
+    }
+
+    public function isEmailBlankType(): bool
+    {
+        return $this->c_email_tpl_key === self::TPL_TYPE_EMAIL_BLANK_KEY;
     }
 }

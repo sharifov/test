@@ -15,6 +15,9 @@ use yii\helpers\BaseConsole;
 use yii\helpers\Console;
 use yii\helpers\VarDumper;
 use yii\queue\Queue;
+use src\dto\email\EmailDTO;
+use src\exception\CreateModelException;
+use src\services\email\EmailMainService;
 
 class CommunicationController extends Controller
 {
@@ -93,7 +96,8 @@ class CommunicationController extends Controller
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
 
         /** @var CommunicationService $communication */
-        $communication = Yii::$app->communication;
+        $communication = Yii::$app->comms;
+        $emailService = EmailMainService::newInstance();
 
         $filter = [];
         $dateTime = null;
@@ -137,27 +141,13 @@ class CommunicationController extends Controller
             foreach ($res['data']['emails'] as $mail) {
                 print_r($mail['ei_id']);
 
-
-                $email = new Email();
-
-                $email->e_type_id = Email::TYPE_INBOX;
-                $email->e_status_id = Email::STATUS_DONE;
-                $email->e_is_new = true;
-
-                $email->e_email_to = $mail['ei_email_to'];
-                $email->e_email_from = $mail['ei_email_from'];
-                $email->e_email_subject = $mail['ei_email_subject'];
-                $email->e_project_id = $mail['ei_project_id'];
-                $email->body_html = $mail['ei_email_text'];
-                $email->e_created_dt = $mail['ei_created_dt'];
-
-                $email->e_inbox_email_id = $mail['ei_id'];
-                $email->e_inbox_created_dt = $mail['ei_created_dt'];
-                $email->e_ref_message_id = $mail['ei_ref_mess_ids'];
-                $email->e_message_id = $mail['ei_message_id'];
-
-                if (!$email->save()) {
-                    Yii::error(VarDumper::dumpAsString($email->errors), 'API:Communication:newMessagesReceived:Email:save');
+                try {
+                    $emailDTO = EmailDTO::newInstance()->fillFromCommunication($mail);
+                    $emailService->createFromDTO($emailDTO, false);
+                } catch (CreateModelException $e) {
+                    Yii::error(VarDumper::dumpAsString($e->getErrors()), 'API:Communication:newMessagesReceived:Email:save');
+                } catch (\Throwable $e) {
+                    Yii::error($e->getMessage(), 'API:Communication:newMessagesReceived:Email:save');
                 }
             }
 

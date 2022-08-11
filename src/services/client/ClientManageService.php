@@ -150,7 +150,7 @@ class ClientManageService
             $phone->phone = $form->phone;
         }
         if ($form->type !== null) {
-            $phone->type = $form->type;
+            $phone->setType($form->type);
         }
         if ($form->cp_title !== null) {
             $phone->cp_title = $form->cp_title;
@@ -173,11 +173,12 @@ class ClientManageService
     /**
      * @param Client $client
      * @param EmailCreateForm $emailForm
+     * @return ClientEmail|null
      */
-    public function addEmail(Client $client, EmailCreateForm $emailForm): void
+    public function addEmail(Client $client, EmailCreateForm $emailForm): ?ClientEmail
     {
         if (!$emailForm->email) {
-            return;
+            return null;
         }
         if (!$this->clientEmailRepository->exists($client->id, $emailForm->email)) {
             $email = ClientEmail::create(
@@ -187,7 +188,9 @@ class ClientManageService
                 $emailForm->ce_title
             );
             $this->clientEmailRepository->save($email);
+            return $email;
         }
+        return null;
     }
 
     /**
@@ -201,7 +204,7 @@ class ClientManageService
             $email->email = $form->email;
         }
         if ($form->type !== null) {
-            $email->type = $form->type;
+            $email->setType($form->type);
         }
         if ($form->ce_title !== null) {
             $email->ce_title = $form->ce_title;

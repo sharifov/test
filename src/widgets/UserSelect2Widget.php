@@ -2,9 +2,11 @@
 
 namespace src\widgets;
 
+use common\models\Employee;
 use kartik\select2\Select2;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Url;
+use yii\helpers\VarDumper;
 use yii\web\JsExpression;
 use yii\web\View;
 
@@ -50,6 +52,15 @@ class UserSelect2Widget extends Select2
             'templateSelection' => new JsExpression('function (data) { return data.selection || data.text;}'),
         ], $this->pluginOptions);
         $this->options = ArrayHelper::merge(['placeholder' => $this->placeholder, 'class' => 'form-control'], $this->options);
+
+        if (!empty($this->value)) {
+            $userId = intval($this->value);
+            $user = Employee::find()->select(['id', 'username'])->where(['id' => $userId])->cache(3600)->one();
+
+            if ($user) {
+                $this->data[$user->id] = $user->username;
+            }
+        }
     }
 
     public function registerAssets(): void

@@ -35,6 +35,9 @@ class GaRequestService extends Component
         $this->initRequest();
     }
 
+    /**
+     * @return bool
+     */
     private function initRequest(): bool
     {
         try {
@@ -58,9 +61,8 @@ class GaRequestService extends Component
      * @param string $method
      * @param array $headers
      * @param array $options
-     * @param string|null $format
+     * @param null|string $format
      * @return Response
-     * @throws \yii\httpclient\Exception
      */
     public function sendRequest(
         array $data = [],
@@ -89,5 +91,14 @@ class GaRequestService extends Component
             $this->curlRequest->setUrl($this->debugUrl);
         }
         return $this->curlRequest->send();
+    }
+
+    /**
+     * @return bool
+     */
+    public function ping(): bool
+    {
+        $response = $this->sendRequest([], 'get');
+        return $response->statusCode === '401' || $response->statusCode === '200';
     }
 }

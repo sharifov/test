@@ -2,10 +2,11 @@
 
 use common\components\logger\FilebeatTarget;
 use common\helpers\LogHelper;
+use common\components\ApplicationStatus;
 
 $commonParams = yii\helpers\ArrayHelper::merge(
     require __DIR__ . '/../../common/config/params.php',
-    require __DIR__ . '/../../common/config/params-local.php',
+    require __DIR__ . '/../../common/config/params-local.php'
 );
 
 return [
@@ -16,6 +17,9 @@ return [
     'vendorPath' => dirname(dirname(__DIR__)) . '/vendor',
     'timeZone' => 'UTC',
     'components' => [
+        'applicationStatus' => [
+            'class' => ApplicationStatus::class
+        ],
         'db' => [
             'class' => 'yii\db\Connection',
             'dsn' => '',
@@ -69,10 +73,6 @@ return [
                     },
                     'logFile' => '@runtime/logs/stash.log'
                 ],
-//                [
-//                    'class' => 'yii\log\DbTarget',
-//                    'levels' => ['error', 'warning'],
-//                ]
             ],
         ],
         'formatter_search' => [
@@ -119,15 +119,27 @@ return [
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
             'viewPath' => '@common/mail',
-            'useFileTransport' => true,
+            'useFileTransport' => false,
+            'transport' => [
+                'class' => 'Swift_SmtpTransport',
+                'host' => '',
+                'port' => '',
+                'username' => '',
+                'password' => '',
+                'encryption' => '',
+            ],
         ],
-        'communication' => [
+        'email' => [
+            'class' => 'common\components\email\EmailComponent',
+            'defaultFromEmail' => '',
+        ],
+        'comms' => [
             'class' => \common\components\CommunicationService::class,
             'url' => 'https://communication.api.travelinsides.com/v1/',
             'url2' => 'https://communication.api.travelinsides.com/v2/',
             'username' => 'sales',
             'password' => '',
-            'xAccelRedirectCommunicationUrl' => '',
+            'xAccelRedirectCommsUrl' => '',
             'voipApiUsername' => 'sales',
             'host' => ''
         ],
@@ -257,14 +269,9 @@ return [
             'apikey' => '',
         ],
         'abac' => require __DIR__ . '/abac.php',
+        'objectSegment' => require __DIR__ . '/objectSegment.php',
         'event' => require __DIR__ . '/event.php',
-        'ff' => require __DIR__ . '/featureFlag.php',
-//        'abac' => [
-//            'class' => \modules\abac\components\AbacComponent::class,
-//            'modules' => [
-//                'order' => \modules\order\src\abac\OrderAbacObject::class
-//            ],
-//        ],
+        'featureFlag' => require __DIR__ . '/featureFlag.php',
         'snowplow' => [
             'class' => \common\components\SnowplowService::class,
             'collectorUrl' => 'sp.ovago.com',
@@ -290,11 +297,13 @@ return [
         \common\bootstrap\SetUp::class,
         \common\bootstrap\SetUpListeners::class,
         \common\bootstrap\Logger::class,
+        \common\bootstrap\DeleteLogger::class,
         \common\bootstrap\FileStorage::class,
         \common\bootstrap\PaymentSetup::class,
         \common\bootstrap\OrderProcessManagerQueue::class,
         \modules\order\bootstrap\Logger::class,
         \common\bootstrap\FlightQuoteReprotectionDecisionSetup::class,
         \common\bootstrap\LeadRedialSetUp::class,
+        \modules\shiftSchedule\bootstrap\Logger::class
     ],
 ];

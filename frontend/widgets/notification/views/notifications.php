@@ -75,7 +75,7 @@ if (!$count) {
             <?php
             if ($notification->isMustPopupShow()) {
                 $title = Html::encode($notification->n_title);
-                $type = $notification->getNotifyType();
+                $type = Notifications::getNotifyType($notification->n_type_id);
                 $message = str_replace(["\r\n", "\n", '"'], ['', '', '\"'], $notification->n_message);
                 $desktopMessage = str_replace('"', '\"', strip_tags($notification->n_message));
                 $pNotifiers .= "notificationPNotify('" . $type . "', '" . $title . "', '" . $message . "', '" . $desktopMessage . "');" . PHP_EOL;

@@ -57,7 +57,7 @@ class UserShiftAssign extends \yii\db\ActiveRecord
             ['usa_user_id', 'integer'],
             ['usa_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['usa_user_id' => 'id']],
 
-            ['usa_created_dt', 'date', 'format' => 'php:Y-m-d'],
+            ['usa_created_dt', 'date', 'format' => 'php:Y-m-d H:i:s'],
             ['usa_created_user_id', 'integer', 'max' => self::MAX_VALUE_INT],
         ];
     }
@@ -103,5 +103,13 @@ class UserShiftAssign extends \yii\db\ActiveRecord
     public static function tableName(): string
     {
         return 'user_shift_assign';
+    }
+
+    public static function getAssignedShits(): array
+    {
+        return Shift::find()->select(['shift.sh_id', 'shift.sh_name'])
+            ->andWhere(["IN", 'shift.sh_id', UserShiftAssign::find()->select('usa_sh_id')])
+            ->asArray()
+            ->all();
     }
 }

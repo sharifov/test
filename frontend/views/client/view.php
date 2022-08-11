@@ -1,6 +1,8 @@
 <?php
 
 use common\models\Client;
+use common\models\Lead;
+use src\entities\cases\CasesStatus;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 use yii\grid\GridView;
@@ -9,6 +11,8 @@ use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\Client */
+/* @var $leadsDataProvider yii\data\ActiveDataProvider */
+/* @var $casesDataProvider yii\data\ActiveDataProvider */
 
 $this->title = 'Client: ' . $model->id;
 $this->params['breadcrumbs'][] = ['label' => 'Client', 'url' => ['index']];
@@ -83,6 +87,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'cl_locale',
             'cl_marketing_country',
             'cl_call_recording_disabled:booleanByLabel',
+            [
+                'label' => 'Client Return Type',
+                'value' => static function (Client $model) {
+                    return \src\helpers\client\ClientReturnHelper::displayClientReturnLabels($model->id, \src\auth\Auth::id());
+                },
+                'format' => 'raw'
+            ],
         ],
     ]) ?>
     </div>
@@ -157,10 +168,12 @@ $this->params['breadcrumbs'][] = $this->title;
 
             echo GridView::widget([
                 'dataProvider' => $leadsDataProvider,
+                'showHeader' => false,
                 'columns' => [
                     [
                     'value' => static function (array $model) {
-                        return '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $model['id'], ['lead/view', 'gid' => $model['gid']], ['target' => '_blank', 'data-pjax' => 0]) . ($model['request_ip'] ? ' (IP: ' . $model['request_ip'] . ')' : '');
+                        $statusLabel = Html::tag('span', Lead::getStatus($model['status']), ['class' => 'label ' . Lead::getStatusLabelClass($model['status'])]);
+                        return '<i class="fa fa-link"></i> ' . Html::a('lead: ' . $model['id'], ['lead/view', 'gid' => $model['gid']], ['target' => '_blank', 'data-pjax' => 0]) . ($model['request_ip'] ? ' (IP: ' . $model['request_ip'] . ')' : '') . ' ' . $statusLabel;
                     },
                     'format' => 'html'
                     ]
@@ -178,10 +191,11 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 echo GridView::widget([
                     'dataProvider' => $casesDataProvider,
+                    'showHeader' => false,
                     'columns' => [
                         [
                             'value' => static function (array $model) {
-                                return '<i class="fa fa-link"></i> ' . Html::a('case: ' . $model['cs_id'], ['cases/view', 'gid' => $model['cs_gid'] ], ['target' => '_blank', 'data-pjax' => 0]);
+                                return '<i class="fa fa-link"></i> ' . Html::a('case: ' . $model['cs_id'], ['cases/view', 'gid' => $model['cs_gid'] ], ['target' => '_blank', 'data-pjax' => 0]) . ' ' . CasesStatus::getLabel($model['cs_status'], '');
                             },
                             'format' => 'html'
                         ]

@@ -131,6 +131,9 @@ class ReProtectionQuoteManualCreateService
         $this->productQuoteDataManageService = $productQuoteDataManageService;
     }
 
+    /**
+     * @throws \yii\db\StaleObjectException
+     */
     public function createReProtectionManual(
         Flight $flight,
         ProductQuote $originProductQuote,
@@ -149,7 +152,7 @@ class ReProtectionQuoteManualCreateService
         }
 
         $originFlightQuote = $originProductQuote->flightQuote;
-        $productQuote = $this->copyOriginalProductQuote($originProductQuote, $form->quoteCreator, $form->quoteCreator);
+        $productQuote = $this->copyOriginalProductQuote($originProductQuote, $form);
 
         $quoteData = self::prepareFlightQuoteData($form);
         $flightQuoteCreateDTO = FlightQuoteCreateDTO::fillChangeQuoteManual($flight, $productQuote, $quoteData, Auth::id(), $form);
@@ -187,6 +190,9 @@ class ReProtectionQuoteManualCreateService
                 $flightQuoteTrip->delete();
             }
         }
+        foreach ($segments as $i => $segment) {
+            $segmentIata2Index[$segment['segmentIata']] = $i;
+        }
 
         $flightQuoteSegments = [];
         foreach ($form->itinerary as $key => $itinerary) {
@@ -205,9 +211,19 @@ class ReProtectionQuoteManualCreateService
             $keyIata = $flightQuoteSegment->fqs_departure_airport_iata . $flightQuoteSegment->fqs_arrival_airport_iata;
             $flightQuoteSegments[$keyIata] = $flightQuoteSegment;
 
-            $flightQuoteTrip->fqt_duration += $flightQuoteSegment->fqs_duration;
-            $flightQuoteTrip->update(false, ['fqt_duration']);
+            if (isset($segmentIata2Index[$keyIata])) {
+                $segment = $segments[$segmentIata2Index[$keyIata]];
+                $flightQuoteTrip->fqt_duration += $segment['flightDuration'] + $segment['layoverDuration'];
+            }
         }
+        unset($keyIata, $flightQuoteTrip, $flightQuoteTripId, $segmentDto, $flightQuoteSegment, $segmentIata2Index, $segment);
+
+        foreach ($tripList as $flightQuoteTrip) {
+            if ($flightQuoteTrip->getOldAttribute('fqt_duration') != $flightQuoteTrip->fqt_duration) {
+                $flightQuoteTrip->update(false, ['fqt_duration']);
+            }
+        }
+        unset($flightQuoteTrip);
 
         if ($form->getBaggageFormsData()) {
             foreach ($form->getBaggageFormsData() as $postKey => $postValues) {
@@ -307,9 +323,10 @@ class ReProtectionQuoteManualCreateService
         return (int) sprintf('%d%d%d', $diff->y, $diff->m, $diff->d) >= 1;
     }
 
-    private function copyOriginalProductQuote(ProductQuote $originalQuote, ?int $ownerId, ?int $creatorId): ProductQuote
+    private function copyOriginalProductQuote(ProductQuote $originalQuote, ChangeQuoteCreateForm $form): ProductQuote
     {
-        $productQuote = ProductQuote::copy($originalQuote, $ownerId, $creatorId);
+        $productQuote = ProductQuote::copy($originalQuote, $form->quoteCreator, $form->quoteCreator);
+        $productQuote->pq_expiration_dt = $form->expirationDate;
         $this->productQuoteRepository->save($productQuote);
 
         foreach ($originalQuote->productQuoteOptions as $originalProductQuoteOption) {

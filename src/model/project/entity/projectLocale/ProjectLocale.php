@@ -153,7 +153,7 @@ class ProjectLocale extends \yii\db\ActiveRecord
             ->byProject($projectId)
             ->enabled()
             ->languageNotNull()
-            ->orderBy(['pl_language_id' => SORT_ASC])
+            ->orderBy(['pl_default' => SORT_DESC, 'pl_language_id' => SORT_ASC])
             ->asArray(true)
             ->all(),
             'pl_language_id',

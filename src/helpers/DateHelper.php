@@ -45,4 +45,50 @@ class DateHelper
         $createdDateTime = DateTime::createFromFormat($format, $date);
         return $createdDateTime && $createdDateTime->format($format) === $date;
     }
+
+    /**
+     * @param string $date
+     * @param string $format
+     * @return string
+     */
+    public static function toFormat(string $date, string $format = 'Y-m-d'): string
+    {
+        return date($format, strtotime($date));
+    }
+
+    public static function getDateTimeImmutableUTC(string $date): \DateTimeImmutable
+    {
+        return (new \DateTimeImmutable($date, new \DateTimeZone('UTC')));
+    }
+
+    public static function toFormatByUTC(string $date, string $format = 'Y-m-d'): string
+    {
+        return self::getDateTimeImmutableUTC($date)->format($format);
+    }
+
+    public static function getDifferentInDaysByDatesUTC(string $startDate, string $endDate): int
+    {
+        $startDateTime = self::getDateTimeImmutableUTC($startDate);
+        $endDateTime = self::getDateTimeImmutableUTC($endDate);
+
+        return (int)$startDateTime->diff($endDateTime)->format('%a');
+    }
+
+    public static function getDifferentInMinutesByDatesUTC(string $startDate, string $endDate): int
+    {
+        $startDateTime = self::getDateTimeImmutableUTC($startDate);
+        $endDateTime = self::getDateTimeImmutableUTC($endDate);
+
+        $diff = $startDateTime->diff($endDateTime)->format('%a-%h-%i-%s');
+        $diffParts = explode('-', $diff);
+
+        return ((int)$diffParts[0] * 24 * 60) + ((int)$diffParts[1] * 60) + (int)$diffParts[2];
+    }
+
+    public static function getDateTimeWithAddedMinutesUTC(string $date, int $minutes, string $format = 'Y-m-d H:i:s'): string
+    {
+        $dateTime = self::getDateTimeImmutableUTC($date);
+
+        return $dateTime->modify("+{$minutes} minutes")->format($format);
+    }
 }

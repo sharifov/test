@@ -15,7 +15,7 @@ namespace src\model\department\department;
  */
 class LeadSettings
 {
-    public bool $createOnCall;
+    public CreateOnCallSetting $createOnCall;
     public bool $createOnSms;
     public array $createOnDepartmentEmail;
     public array $createOnPersonalEmail;
@@ -25,7 +25,7 @@ class LeadSettings
 
     public function __construct(array $params)
     {
-        $this->createOnCall = (bool)($params['createOnCall'] ?? false);
+        $this->createOnCall = new CreateOnCallSetting($params['createOnCall'] ?? []);
         $this->createOnSms = (bool)($params['createOnSms'] ?? false);
         $this->createOnDepartmentEmail = (isset($params['createOnDepartmentEmail']) && is_array($params['createOnDepartmentEmail'])) ? $params['createOnDepartmentEmail'] : [];
         $this->createOnPersonalEmail = (isset($params['createOnPersonalEmail']) && is_array($params['createOnPersonalEmail'])) ? $params['createOnPersonalEmail'] : [];

@@ -52,4 +52,24 @@ class ClientEmailQuery extends ActiveQuery
 
         return $query->asArray()->all();
     }
+
+    public static function getQueryClientEmailByClientId(int $clientId): ClientEmailQuery
+    {
+        return ClientEmail::find()
+            ->andWhere(['client_id' => $clientId])
+            ->andWhere([
+                'OR',
+                ['IS', 'type', null],
+                ['<>', 'type', ClientEmail::EMAIL_INVALID],
+            ]);
+    }
+
+    /**
+     * @param string $email
+     * @return $this
+     */
+    public function byEmail(string $email): self
+    {
+        return $this->andWhere(['email' => $email])->orderBy(['id' => SORT_DESC])->limit(1);
+    }
 }

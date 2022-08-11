@@ -22,4 +22,12 @@ class Scopes extends \yii\db\ActiveQuery
     {
         return parent::one($db);
     }
+
+    /**
+     * @return Scopes
+     */
+    public function excludeDeleteStatus(): Scopes
+    {
+        return $this->andWhere(['<>', 'uss_status_id', UserShiftSchedule::STATUS_DELETED]);
+    }
 }

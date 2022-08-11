@@ -60,7 +60,7 @@ class ProductQuoteOrigin extends \yii\db\ActiveRecord
         return 'product_quote_origin';
     }
 
-    public function create(int $productId, int $quoteId): self
+    public static function create(int $productId, int $quoteId): self
     {
         $self = new self();
         $self->pqo_product_id = $productId;

@@ -3,9 +3,11 @@
 namespace modules\flight\controllers;
 
 use common\components\BackOffice;
+use common\models\Airports;
 use common\models\Currency;
 use common\models\Notifications;
 use common\models\Project;
+use DateTime;
 use frontend\helpers\JsonHelper;
 use modules\cases\src\abac\CasesAbacObject;
 use modules\cases\src\abac\dto\CasesAbacDto;
@@ -16,6 +18,7 @@ use modules\flight\models\FlightPax;
 use modules\flight\models\FlightQuoteFlight;
 use modules\flight\models\query\FlightQuoteTicketQuery;
 use modules\flight\src\dto\flightQuoteSearchDTO\FlightQuoteSearchDTO;
+use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use modules\flight\src\helpers\FlightQuoteHelper;
 use modules\flight\src\repositories\flight\FlightRepository;
 use modules\flight\src\repositories\flightQuotePaxPriceRepository\FlightQuotePaxPriceRepository;
@@ -60,6 +63,7 @@ use src\repositories\lead\LeadRepository;
 use src\repositories\NotFoundException;
 use src\services\parsingDump\BaggageService;
 use src\services\parsingDump\ReservationService;
+use src\services\quote\addQuote\AddQuoteManualService;
 use src\services\quote\addQuote\guard\GdsByQuoteGuard;
 use src\services\TransactionManager;
 use webapi\src\request\BoRequestDataHelper;
@@ -1010,6 +1014,7 @@ class FlightQuoteController extends FController
             $form = new VoluntaryQuoteCreateForm(Auth::id(), $flight, true, $voluntaryExchangeBOService->getServiceFeeAmount());
             $form->setCustomerPackage($voluntaryExchangeBOService->getCustomerPackage());
             $form->setServiceFeeCurrency($voluntaryExchangeBOService->getServiceFeeCurrency());
+            $form->setExpirationDate(FlightQuoteHelper::getExpirationDate($originProductQuote->flightQuote));
         } catch (\RuntimeException | \DomainException $exception) {
             $message = ArrayHelper::merge(AppHelper::throwableLog($exception), $getParams);
             Yii::warning($message, 'FlightQuoteController:actionCreateVoluntaryQuote:Exception');
@@ -1076,16 +1081,19 @@ class FlightQuoteController extends FController
                     $segments = $reservationService->parseResult;
                 }
 
+                $pastSegments = AddQuoteManualService::getPastSegmentsByProductQuote($gds, $originProductQuote);
+                [$form, $mergedSegments] = AddQuoteManualService::updateFormAndMergeSegments($form, $itinerary, $pastSegments, $segments);
+
                 $userId = Auth::id();
                 $flightQuote = Yii::createObject(TransactionManager::class)
-                    ->wrap(function () use ($flight, $originProductQuote, $form, $userId, $segments, $changeId) {
+                    ->wrap(function () use ($flight, $originProductQuote, $form, $userId, $mergedSegments, $changeId) {
                         return $this->voluntaryQuoteManualCreateService->createProcessing(
                             $flight,
                             $originProductQuote,
                             $form,
                             $userId,
-                            $segments,
-                            $changeId
+                            $mergedSegments,
+                            $changeId,
                         );
                     });
 
@@ -1183,6 +1191,7 @@ class FlightQuoteController extends FController
             }
 
             $form = new ReProtectionQuoteCreateForm(Auth::id(), $flightId);
+            $form->setExpirationDate(FlightQuoteHelper::getExpirationDate($originProductQuote->flightQuote));
         } catch (\Throwable $throwable) {
             Yii::warning(AppHelper::throwableLog($throwable), 'FlightQuoteController:actionCreateReProtectionQuote:Throwable');
             return $throwable->getMessage();
@@ -1256,16 +1265,19 @@ class FlightQuoteController extends FController
                     $segments = $reservationService->parseResult;
                 }
 
+                $pastSegments = AddQuoteManualService::getPastSegmentsByProductQuote($gds, $originProductQuote);
+                [$form, $mergedSegments] = AddQuoteManualService::updateFormAndMergeSegments($form, $itinerary, $pastSegments, $segments);
+
                 $userId = Auth::id();
                 $flightQuote = Yii::createObject(TransactionManager::class)
-                    ->wrap(function () use ($flight, $originProductQuote, $form, $userId, $segments, $changeId) {
+                    ->wrap(function () use ($flight, $originProductQuote, $form, $userId, $mergedSegments, $changeId) {
                         return $this->reProtectionQuoteManualCreateService->createReProtectionManual(
                             $flight,
                             $originProductQuote,
                             $form,
                             $userId,
-                            $segments,
-                            $changeId
+                            $mergedSegments,
+                            $changeId,
                         );
                     });
 
@@ -1354,9 +1366,9 @@ class FlightQuoteController extends FController
 
                         if ($isNextTrip) {
                             ++$tripIndex;
-                            $trips[$tripIndex]['duration'] = $segment['flightDuration'];
+                            $trips[$tripIndex]['duration'] = $segment['flightDuration'] + $segment['layoverDuration'];
                         } else {
-                            $trips[$tripIndex]['duration'] += $segment['flightDuration'];
+                            $trips[$tripIndex]['duration'] += $segment['flightDuration'] + $segment['layoverDuration'];
                         }
                         $segment['tripIndex'] = $tripIndex;
                         $trips[$tripIndex]['segments'][] = $segment;
@@ -1463,7 +1475,7 @@ class FlightQuoteController extends FController
 
             $message = '';
             $errors = [];
-            $form = new VoluntaryRefundCreateForm();
+
             try {
                 if (!$project = Project::findOne(['id' => $projectId])) {
                     throw new NotFoundException('Project not found');
@@ -1472,6 +1484,16 @@ class FlightQuoteController extends FController
                 if (!$flightQuoteFlight = FlightQuoteFlight::findOne(['fqf_fq_id' => $flightQuoteId])) {
                     throw new NotFoundException('BookingId not found');
                 }
+
+                if (!$originProductQuote = ProductQuote::findOne(['pq_id' => $originProductQuoteId])) {
+                    throw new \RuntimeException('OriginProductQuote not found');
+                }
+                if (!$originProductQuote->flightQuote) {
+                    throw new \RuntimeException('Sorry, Refund quote could not be created because originalQuote does not find a flight');
+                }
+
+                $form = new VoluntaryRefundCreateForm();
+                $form->setExpirationDate(FlightQuoteHelper::getExpirationDate($originProductQuote->flightQuote));
 
                 $boDataRequest = BoRequestDataHelper::getRequestDataForVoluntaryRefundData($project->api_key, $flightQuoteFlight->fqf_booking_id);
                 $result = BackOffice::voluntaryRefund($boDataRequest, 'flight-request/get-refund-data');

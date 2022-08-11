@@ -2,11 +2,16 @@
 
 namespace src\services\quote\addQuote;
 
+use common\models\Airports;
 use common\models\Quote;
 use common\models\QuoteSegment;
 use common\models\QuoteTrip;
+use DateTime;
+use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
 use src\exception\AdditionalDataException;
 use src\helpers\ErrorsToStringHelper;
+use src\services\parsingDump\ReservationService;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class AddQuoteManualService
@@ -63,5 +68,90 @@ class AddQuoteManualService
             }
         }
         return $result;
+    }
+
+    public static function getPastSegmentsByProductQuote($gds, $productQuote): array
+    {
+        $reservationService = new ReservationService($gds);
+        $productFlightQuote = $productQuote->flightQuote;
+        $pastParsedSegments = [];
+        $countTrips = count($productFlightQuote->flightQuoteTrips);
+        if ($countTrips) {
+            foreach ($productFlightQuote->flightQuoteTrips as $tripKey => $trip) {
+                if (count($trip->flightQuoteSegments)) {
+                    foreach ($trip->flightQuoteSegments as $key => $segment) {
+                        $departureTimeZone = null;
+                        if ($departureAirport = Airports::findByIata($segment->fqs_departure_airport_iata)) {
+                            $departureTimeZone = new \DateTimeZone($departureAirport->timezone);
+                        }
+                        $departureDateTime = DateTime::createFromFormat('Y-m-d H:i:s', $segment->fqs_departure_dt, $departureTimeZone);
+                        $now = new DateTime('now', $departureTimeZone);
+
+                        if ($now->getTimestamp() >= $departureDateTime->getTimestamp()) {
+                            $segment = $reservationService->parseSegment($pastParsedSegments, $key + 1, $segment);
+                            $segment['segment_trip_key'] = $tripKey + 1;
+                            $pastParsedSegments[] = $segment;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $pastParsedSegments;
+    }
+
+    public static function updateSegmentTripFormsData($form, $totalTrips, $pastSegmentsItinerary): array
+    {
+        $newSegmentTripFormData = $form->getSegmentTripFormsData();
+        $updatedSegmentsTrip = $pastSegmentTripFormData = [];
+
+        $tripKey = 0;
+        foreach ($pastSegmentsItinerary as $item) {
+            $tripKey = $item->tripKey ?? 1;
+            $pastSegmentTripFormData['SegmentTripForm_' . $item->departureAirportCode . $item->destinationAirportCode] = [
+                'segment_iata' => $item->departureAirportCode . $item->destinationAirportCode,
+                'segment_trip_key' => $tripKey
+            ];
+        }
+
+        foreach ($newSegmentTripFormData as $keyTripForm => $value) {
+            if (!is_array($value) || !array_key_exists('segment_iata', $value) || !array_key_exists('segment_trip_key', $value)) {
+                continue;
+            }
+            $updatedSegmentsTrip[$keyTripForm] = [
+                'segment_iata' => $value['segment_iata'],
+                'segment_trip_key' => $tripKey + (int)$value['segment_trip_key'],
+            ];
+        }
+
+        return array_merge($pastSegmentTripFormData, $updatedSegmentsTrip);
+    }
+
+    public static function updateFormAndMergeSegments($form, $itinerary, $pastSegments, $segments): array
+    {
+        $pastSegmentsItinerary = [];
+        $totalTrips = count(explode(',', $form->keyTripList));
+        $totalPastTrips = count(ArrayHelper::map($pastSegments, 'segment_trip_key', ''));
+        if ($totalPastTrips === 0 || $totalTrips === $totalPastTrips) {
+            $mergedSegments = $segments;
+        } else {
+            $form->keyTripList = implode(',', array_keys(ArrayHelper::map($pastSegments, 'segment_trip_key', '')));
+            foreach ($pastSegments as $key => $pastSegment) {
+                if ($pastSegment['segment_trip_key'] > ($totalPastTrips - $totalTrips)) {
+                    unset($pastSegments[$key]);
+                } else {
+                    $pastSegmentsItinerary[] = (new ItineraryDumpDTO([]))
+                        ->feelByParsedReservationDump($pastSegment);
+                }
+            }
+            $form->itinerary = array_merge($pastSegmentsItinerary, $itinerary);
+            $mergedSegments = array_merge($pastSegments, $segments);
+            $totalTrips = count(explode(',', $form->keyTripList));
+        }
+
+        $updatedSegmentTripFormData = AddQuoteManualService::updateSegmentTripFormsData($form, $totalTrips, $pastSegmentsItinerary);
+        $form->setSegmentTripFormsData($updatedSegmentTripFormData);
+
+        return [$form, $mergedSegments, $totalTrips];
     }
 }

@@ -27,7 +27,11 @@ use yii\widgets\ActiveForm;
     </div>
     <div class="col-md-6">
         <?= $form->field($leadForm, 'depId', [
-        ])->dropDownList(LeadHelper::getDepartments(Yii::$app->user)) ?>
+        ])->dropDownList(LeadHelper::getDepartments(Yii::$app->user), [
+            'data' => [
+                'value' => null,
+            ]
+        ]) ?>
     </div>
     <div class="col-md-6">
         <?= $form->field($leadForm->preferences, 'currency')->widget(Select2::class, [

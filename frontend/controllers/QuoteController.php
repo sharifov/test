@@ -54,6 +54,7 @@ use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Json;
+use yii\web\ForbiddenHttpException;
 use yii\web\Response;
 use yii\web\BadRequestHttpException;
 use common\models\Employee;
@@ -80,6 +81,7 @@ class QuoteController extends FController
             'access' => [
                 'allowActions' => [
                     'auto-adding-quotes',
+                    'ajax-search-quotes',
                 ],
             ],
         ];
@@ -148,6 +150,13 @@ class QuoteController extends FController
     {
         try {
             $lead = Lead::findOne(['id' => $leadId]);
+
+            $leadAbacDto = new LeadAbacDto($lead, Auth::id());
+            /** @abac new $leadAbacDto, LeadAbacObject::OBJ_LEAD_QUOTE_SEARCH, LeadAbacObject::ACTION_ACCESS_QUOTE_SEARCH, Access Quote Search */
+            if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_LEAD_QUOTE_SEARCH, LeadAbacObject::ACTION_ACCESS_QUOTE_SEARCH)) {
+                throw new ForbiddenHttpException('Access Denied.');
+            }
+
             $gds = Yii::$app->request->post('gds', '');
 //            $pjaxId = Yii::$app->request->post('pjaxId', '');
 
@@ -304,6 +313,7 @@ class QuoteController extends FController
                             $quote->provider_project_id = $providerProjectId;
                             $quote->q_client_currency = $currency->cur_code;
                             $quote->q_client_currency_rate = $currency->cur_base_rate;
+                            $quote->q_create_type_id = Quote::CREATE_TYPE_QUOTE_SEARCH;
                             $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'search']);
 
                             if (isset($entry['tickets'])) {
@@ -603,6 +613,7 @@ class QuoteController extends FController
 
             $preparedQuoteData = QuoteHelper::formatQuoteData(['results' => [$searchQuoteRequest['data']]]);
             $addQuoteService = Yii::createObject(AddQuoteService::class);
+            $preparedQuoteData['results'][0]['createTypeId'] = Quote::CREATE_TYPE_SMART_SEARCH;
             $quoteUid = $addQuoteService->createByData($preparedQuoteData['results'][0], $lead, $projectProviderId);
 
             Notifications::pub(
@@ -1069,12 +1080,14 @@ class QuoteController extends FController
                     : Quote::findOne(['id' => $attr['Quote']['id']]);
                 if ($quote->isNewRecord) {
                     $quote->uid = uniqid();
+                    $quote->q_create_type_id = Quote::CREATE_TYPE_MANUAL;
                 }
                 $changedAttributes = $quote->attributes;
                 $changedAttributes['selling'] = ($quote->isNewRecord)
                     ? 0 : $quote->quotePrice()['selling'];
                 if ($quote !== null) {
                     $quote->attributes = $attr['Quote'];
+                    $quote->q_create_type_id = Quote::CREATE_TYPE_MANUAL;
 
                     if (!empty($quote->pricing_info)) {
                         $pricing = $quote->parsePriceDump($quote->pricing_info);
@@ -1311,6 +1324,7 @@ class QuoteController extends FController
             }
             $prices = [];
             $quote = new Quote();
+            $quote->q_create_type_id = Quote::CREATE_TYPE_MANUAL;
             if (empty($qId)) {
                 $quote->id = 0;
                 $quote->lead_id = $leadId;
@@ -1395,7 +1409,7 @@ class QuoteController extends FController
 
         try {
             /** @fflag FFlag::FF_KEY_ADD_AUTO_QUOTES, Auto add quote */
-            if (!Yii::$app->ff->can(FFlag::FF_KEY_ADD_AUTO_QUOTES)) {
+            if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_ADD_AUTO_QUOTES)) {
                 throw new \RuntimeException('Auto add quote is disabled');
             }
             $lead = Lead::findOne($leadId);
@@ -1407,47 +1421,8 @@ class QuoteController extends FController
             if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_ADD_AUTO_QUOTES, LeadAbacObject::ACTION_ACCESS)) {
                 throw new \RuntimeException('Check ABAC(' . LeadAbacObject::ACT_ADD_AUTO_QUOTES . ') access is failed');
             }
-
-            $keyCache = sprintf('quick-search-new-%d-%s-%s', $lead->id, $gds, $lead->generateLeadKey());
-            $quotes = \Yii::$app->cacheFile->get($keyCache);
-
-            if ($quotes === false) {
-                $dto = new SearchServiceQuoteDTO($lead);
-                $quotes = SearchService::getOnlineQuotes($dto);
-
-                if ($quotes && !empty($quotes['data']['results']) && empty($quotes['error'])) {
-                    \Yii::$app->cacheFile->set($keyCache, $quotes = QuoteHelper::formatQuoteData($quotes['data']), 600);
-                } else {
-                    throw new \RuntimeException(!empty($quotes['error']) ? JsonHelper::decode($quotes['error'])['Message'] : 'Search result is empty!');
-                }
-            }
-
-            $form = (new FlightQuoteSearchForm())->setSortBy(Quote::SORT_BY_PRICE_ASC);
-            $dataProvider = new ArrayDataProvider([
-                'allModels' => $quotes['results'] ?? [],
-                'pagination' => [
-                    'pageSize' => Yii::$app->ff->val(FFlag::FF_KEY_ADD_AUTO_QUOTES) ?? 5,
-                    'params' => array_merge(Yii::$app->request->get(), $form->getFilters()),
-                ],
-                'sort' => [
-                    'defaultOrder' => ['autoSort' => SORT_ASC, 'price' => SORT_ASC],
-                    'attributes' => [
-                        'price' => [
-                            'asc' => ['price' => SORT_ASC],
-                            'desc' => ['price' => SORT_DESC],
-                            'default' => SORT_ASC,
-                        ],
-                        'autoSort' => [
-                            'asc' => ['autoSort' => SORT_ASC],
-                            'desc' => ['autoSort' => SORT_DESC],
-                            'default' => SORT_ASC,
-                        ],
-                    ],
-                ],
-            ]);
-
             $addQuoteService = Yii::createObject(AddQuoteService::class);
-            $addQuoteService->autoSelectQuotes($dataProvider->getModels(), $lead, Auth::user(), true);
+            $addQuoteService->addAutoQuotes($lead, $gds, Auth::user());
 
             $response['status'] = 1;
             $response['message'] = 'Auto add quotes completed successfully';
@@ -1466,7 +1441,7 @@ class QuoteController extends FController
 
     private function logQuote(Quote $quote): void
     {
-        $data = (new Quote())->getDataForProfit($quote->id);
+        $data = Quote::getDataForProfit($quote->id);
         (\Yii::createObject(GlobalLogInterface::class))->log(
             new LogDTO(
                 get_class($quote),

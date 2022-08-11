@@ -2,6 +2,7 @@
 
 namespace modules\flight\src\useCases\reProtectionQuoteManualCreate\form;
 
+use common\components\validators\NormalizeDateValidator;
 use common\models\Airline;
 use common\models\Employee;
 use frontend\helpers\JsonHelper;
@@ -30,6 +31,7 @@ use yii\helpers\Html;
  * @property $segment_trip_data
  * @property $keyTripList
  * @property $flightId
+ * @property string|null $expirationDate
  *
  * @property ItineraryDumpDTO[] $itinerary
  * @property array $baggageFormsData
@@ -66,7 +68,7 @@ class ReProtectionQuoteCreateForm extends ChangeQuoteCreateForm
     {
         return [
             [['gds', 'pcc', 'tripType', 'cabin', 'validatingCarrier', 'fareType', 'reservationDump'], 'string'],
-            [['gds', 'validatingCarrier', 'cabin', 'tripType', 'fareType', 'reservationDump', 'quoteCreator', 'keyTripList'], 'required'],
+            [['gds', 'validatingCarrier', 'cabin', 'tripType', 'fareType', 'reservationDump', 'quoteCreator', 'keyTripList', 'expirationDate'], 'required'],
             ['quoteCreator', 'integer'],
 
             [['reservationDump'], 'string'],
@@ -87,6 +89,8 @@ class ReProtectionQuoteCreateForm extends ChangeQuoteCreateForm
 
             [['flightId'], 'integer'],
             [['flightId'], 'exist', 'skipOnError' => true, 'targetClass' => Flight::class, 'targetAttribute' => ['flightId' => 'fl_id']],
+            ['expirationDate', NormalizeDateValidator::class],
+            ['expirationDate', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
         ];
     }
 
@@ -132,8 +136,18 @@ class ReProtectionQuoteCreateForm extends ChangeQuoteCreateForm
         return $this->itinerary;
     }
 
+    public function setItinerary($itinerary): array
+    {
+        return $this->itinerary = $itinerary;
+    }
+
     public function getSegmentTripFormsData(): array
     {
         return $this->segmentTripFormsData;
+    }
+
+    public function setSegmentTripFormsData($segmentTripFormsData): array
+    {
+        return $this->segmentTripFormsData = $segmentTripFormsData;
     }
 }

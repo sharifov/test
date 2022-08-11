@@ -15,6 +15,7 @@ use src\helpers\setting\SettingHelper;
 use src\model\saleTicket\useCase\create\SaleTicketService;
 use src\repositories\cases\CasesRepository;
 use src\repositories\cases\CasesSaleRepository;
+use src\repositories\client\ClientEmailRepository;
 use src\services\cases\CasesManageService;
 use src\services\cases\CasesSaleService;
 use Yii;
@@ -84,7 +85,11 @@ class CaseController extends Controller
                         throw new Exception($client->getErrorSummary(true)[0]);
                     }
                     $clientEmail = ClientEmail::create($refund['email'], $client->getPrimaryKey(), ClientEmail::EMAIL_NOT_SET);
-                    if (!$clientEmail->save()) {
+
+                    try {
+                        $clientEmailRepository = Yii::createObject(ClientEmailRepository::class);
+                        $clientEmailRepository->save($clientEmail);
+                    } catch (\RuntimeException $e) {
                         throw new Exception($clientEmail->getErrorSummary(true)[0]);
                     }
                     $case = Cases::createExchangeByImport($client->getPrimaryKey(), $refund['projectid'], $refund['bookingid'], $refund['categoryid'], $refund['subject'], CasesSourceType::OTHER);
@@ -97,6 +102,7 @@ class CaseController extends Controller
                     $job->order_uid = $refund['bookingid'];
                     $job->email = $refund['email'];
                     $job->phone = '';
+                    $job->project_key = $case->project->api_key ?? null;
                     Yii::$app->queue_job->priority(100)->push($job);
 
                     $transaction->commit();

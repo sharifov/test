@@ -62,6 +62,8 @@ use src\model\phoneList\entity\PhoneList;
 use src\model\phoneList\helpers\formatters\PhoneListFormatter;
 use src\model\user\entity\paymentCategory\UserPaymentCategory;
 use src\model\user\entity\payroll\UserPayroll;
+use yii\helpers\FormatConverter;
+use src\helpers\app\AppHelper;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
@@ -408,6 +410,19 @@ class Formatter extends \yii\i18n\Formatter
         return \modules\lead\src\helpers\formatters\lead\Formatter::asLead($lead, $class);
     }
 
+    public function asLeads($leads, ?string $class = null): string
+    {
+        if (empty($leads)) {
+            return $this->nullDisplay;
+        }
+
+        $return = '';
+        foreach ($leads as $lead) {
+            $return .= \modules\lead\src\helpers\formatters\lead\Formatter::asLead($lead, $class);
+        }
+        return $return;
+    }
+
     public function asCase(?Cases $case, ?string $class = null): string
     {
         if ($case === null) {
@@ -415,6 +430,19 @@ class Formatter extends \yii\i18n\Formatter
         }
 
         return \src\model\cases\helpers\formatters\cases\Formatter::asCase($case, $class);
+    }
+
+    public function asCases($cases, ?string $class = null): string
+    {
+        if (empty($cases)) {
+            return $this->nullDisplay;
+        }
+
+        $return = '';
+        foreach ($cases as $case) {
+            $return .= \src\model\cases\helpers\formatters\cases\Formatter::asCase($case, $class);
+        }
+        return $return;
     }
 
     public function asCaseSale(?CaseSale $caseSale): string
@@ -529,12 +557,62 @@ class Formatter extends \yii\i18n\Formatter
      * @return string
      * @throws \yii\base\InvalidConfigException
      */
+    public function asDateTimeByUserTimezone($dateTime, string $timezone = 'UTC', string $format = 'php:d-M-Y [H:i]'): string
+    {
+        if (!$dateTime) {
+            return $this->nullDisplay;
+        }
+
+        if (is_numeric($dateTime) && $dateTime >= 0) {
+            if (strncmp($format, 'php:', 4) === 0) {
+                $format = substr($format, 4);
+            } else {
+                $format = FormatConverter::convertDateIcuToPhp($format, "datetime", $this->locale);
+            }
+            try {
+                $dateTime = (new \DateTimeImmutable(date('Y-m-d H:i:s', intval($dateTime)), new \DateTimeZone('UTC')))
+                ->setTimezone(new \DateTimeZone($timezone))
+                ->format($format);
+            } catch (\Throwable $throwable) {
+                $message = AppHelper::throwableLog($throwable);
+                $message['dateTime'] = $dateTime;
+                $message['timezone'] = $timezone;
+                $message['format'] = $format;
+                $dateTime = '';
+                \Yii::warning($message, 'Formatter:asByUserDateTimeSecond');
+            }
+        }
+        return $dateTime;
+    }
+
+    /**
+     * @param $dateTime
+     * @param string $format
+     * @return string
+     * @throws \yii\base\InvalidConfigException
+     */
     public function asByUserDateTime($dateTime, $format = 'php:d-M-Y [H:i]'): string
     {
         if (!$dateTime) {
             return $this->nullDisplay;
         }
         return Html::tag('i', '', ['class' => 'fa fa-calendar']) . ' ' . $this->asDatetime(strtotime($dateTime), $format);
+    }
+
+    /**
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function asByUserDateTimeAndUTC($dateTime, $format = 'php:d-M-Y [H:i]', string $timeZone = 'UTC'): string
+    {
+        if (!$dateTime) {
+            return $this->nullDisplay;
+        }
+
+        return Html::tag(
+            'span',
+            $this->asByUserDateTime($dateTime, $format),
+            ['title' => $this->asDateTimeByUserTimezone($dateTime, $timeZone, $format) . ' ' . Html::encode($timeZone)]
+        );
     }
 
     public function asByUserDate($dateTime, $format = 'php:d-M-Y'): string
@@ -596,7 +674,11 @@ class Formatter extends \yii\i18n\Formatter
         }
 
         if (is_string($value)) {
-            $name = $value;
+            if ($entity = Employee::find()->select(['username', 'id'])->where(['username' => $value])->cache(3600)->one()) {
+                $name = $entity->username . ' (' . $entity->id . ')';
+            } else {
+                $name = $value;
+            }
         } elseif ($value instanceof Employee) {
             $name = $value->username . ' (' . $value->id . ')';
         } elseif (is_int($value)) {
@@ -754,6 +836,19 @@ class Formatter extends \yii\i18n\Formatter
         return Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::a($value, ['/client/view', 'id' => $value], ['data-pjax' => 0, 'target' => '_blank']);
     }
 
+    public function asClients($clients): string
+    {
+        if (empty($clients)) {
+            return $this->nullDisplay;
+        }
+
+        $return = '';
+        foreach ($clients as $client) {
+            $return .= Html::tag('i', '', ['class' => 'fa fa-user']) . ' ' . Html::a($client, ['/client/view', 'id' => $client], ['data-pjax' => 0, 'target' => '_blank']);
+        }
+        return $return;
+    }
+
     public function asCouponStatus($value): string
     {
         if ($value === null) {
@@ -909,6 +1004,14 @@ class Formatter extends \yii\i18n\Formatter
         return $this->nullDisplay;
     }
 
+    public function asArray($data): string
+    {
+        if ($data) {
+            return VarDumper::dumpAsString($data);
+        }
+        return $this->nullDisplay;
+    }
+
     public function asFileLogType($value): string
     {
         if ($value === null) {
@@ -1046,5 +1149,48 @@ class Formatter extends \yii\i18n\Formatter
                    '</span>';
         }
         return $number;
+    }
+
+    /**
+     * @param $value
+     * @param string $code
+     * @param int $precision
+     * @param int $decimals
+     * @param string|null $decimal_separator
+     * @param string|null $thousands_separator
+     * @return string
+     */
+    public function asNumCurrency(
+        $value,
+        string $code = 'USD',
+        int $precision = 2,
+        int $decimals = 2,
+        ?string $decimal_separator = '.',
+        ?string $thousands_separator = ','
+    ): string {
+        if ($value === null) {
+            return $this->nullDisplay;
+        }
+
+        $num = number_format(
+            round((float) $value, $precision),
+            $decimals,
+            $decimal_separator,
+            $thousands_separator
+        );
+
+        return $code . ' ' . $num;
+    }
+
+    /**
+     * @param int $minutes
+     * @param string $format
+     * @return string
+     */
+    public function asHoursDuration(int $minutes, string $format = '%02dh %02dm'): string
+    {
+        $partOfHours = intdiv($minutes, 60);
+        $partOfMinutes = $minutes % 60;
+        return sprintf($format, $partOfHours, $partOfMinutes);
     }
 }

@@ -19,7 +19,7 @@ class CreateRedialCall
             $redialCall->clientId
         ))->isDisabledRecord();
 
-        return \Yii::$app->communication->createCall(
+        return \Yii::$app->comms->createCall(
             new \src\model\call\useCase\conference\create\CreateCallForm([
                 'device' => $device,
                 'user_id' => $redialCall->userId,
@@ -34,6 +34,9 @@ class CreateRedialCall
                 'call_recording_disabled' => $recordDisabled,
                 'friendly_name' => FriendlyName::next(),
                 'is_redial_call' => true,
+                'project' => $redialCall->projectName,
+                'source' => Call::SOURCE_LIST[Call::SOURCE_REDIAL_CALL],
+                'type' => Call::TYPE_LIST[Call::CALL_TYPE_OUT],
             ])
         );
     }

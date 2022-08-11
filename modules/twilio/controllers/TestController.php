@@ -23,7 +23,7 @@ class TestController extends Controller
 //      $twComService->password = 'Sales2018!';
 //      $twComService->init();
 
-        $this->comService = \Yii::$app->communication;
+        $this->comService = \Yii::$app->comms;
         var_dump($this->comService);
         die;
     }

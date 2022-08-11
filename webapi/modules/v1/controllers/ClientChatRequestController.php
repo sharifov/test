@@ -3,6 +3,7 @@
 namespace webapi\modules\v1\controllers;
 
 use common\components\jobs\clientChat\ClientChatFeedbackJob;
+use common\components\jobs\clientChat\ClientChatFormResponseJob;
 use common\components\jobs\clientChat\ClientChatRequestCreateJob;
 use common\components\Metrics;
 use common\models\ApiLog;
@@ -19,9 +20,15 @@ use src\model\clientChatForm\form\ClientChatFormApiForm;
 use src\model\clientChatForm\helper\ClientChatFormTranslateHelper;
 use src\model\clientChatRequest\entity\ClientChatRequest;
 use src\model\clientChatRequest\repository\ClientChatRequestRepository;
+use src\model\clientChatRequest\useCase\api\create\ClientChatFormResponseApiForm;
+use src\model\clientChatRequest\useCase\api\create\ClientChatFormResponseService;
 use src\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
 use src\model\clientChatRequest\useCase\api\create\ClientChatRequestFeedbackSubForm;
 use src\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
+use src\model\clientChatRequest\useCase\api\create\FeedbackFormBase;
+use src\model\clientChatRequest\useCase\api\create\FeedbackRejectedForm;
+use src\model\clientChatRequest\useCase\api\create\FeedbackRequestedForm;
+use src\model\clientChatRequest\useCase\api\create\FeedbackSubmittedForm;
 use src\repositories\NotFoundException;
 use webapi\src\ApiCodeException;
 use webapi\src\response\ErrorResponse;
@@ -57,35 +64,21 @@ class ClientChatRequestController extends ApiBaseController
      */
     private ClientChatRequestRepository $clientChatRequestRepository;
 
+    private ClientChatFormResponseService $clientChatFormResponseService;
+
     public function __construct(
         $id,
         $module,
         ClientChatRequestService $clientChatRequestService,
         ClientChatRequestRepository $clientChatRequestRepository,
+        ClientChatFormResponseService $clientChatFormResponseService,
         $config = []
     ) {
         $this->clientChatRequestService = $clientChatRequestService;
         parent::__construct($id, $module, $config);
         $this->clientChatRequestRepository = $clientChatRequestRepository;
+        $this->clientChatFormResponseService = $clientChatFormResponseService;
     }
-
-//    /**
-//     * @return array
-//     * @throws \yii\web\NotAcceptableHttpException
-//     */
-//    public function behaviors(): array
-//    {
-//        $behaviors = [
-//            'HttpCache' => [
-//                'class' => HttpCache::class,
-//                'only' => ['projectConfig'],
-//                'lastModified' => static function () {
-//                    return strtotime(ClientChatProjectConfig::find()->max('ccpc_updated_dt'));
-//                },
-//            ],
-//        ];
-//        return ArrayHelper::merge(parent::behaviors(), $behaviors);
-//    }
 
     /**
      * @return array
@@ -122,77 +115,76 @@ class ClientChatRequestController extends ApiBaseController
      *
      * @apiParamExample {json} Request-Example ROOM_CONNECTED:
      * {
-            "event": "ROOM_CONNECTED",
-            "data": {
-                "rid": "d83ef2d3-30bf-4636-a2c6-7f5b4b0e81a4",
-                "geo": {
-                    "ip": "92.115.180.30",
-                    "version": "IPv4",
-                    "city": "Chisinau",
-                    "region": "Chi\u0219in\u0103u Municipality",
-                    "region_code": "CU",
-                    "country": "MD",
-                    "country_name": "Republic of Moldova",
-                    "country_code": "MD",
-                    "country_code_iso3": "MDA",
-                    "country_capital": "Chisinau",
-                    "country_tld": ".md",
-                    "continent_code": "EU",
-                    "in_eu": false,
-                    "postal": "MD-2000",
-                    "latitude": 47.0056,
-                    "longitude": 28.8575,
-                    "timezone": "Europe\/Chisinau",
-                    "utc_offset": "+0300",
-                    "country_calling_code": "+373",
-                    "currency": "MDL",
-                    "currency_name": "Leu",
-                    "languages": "ro,ru,gag,tr",
-                    "country_area": 33843,
-                    "country_population": 3545883,
-                    "asn": "AS8926",
-                    "org": "Moldtelecom SA"
-                },
-                "visitor": {
-                    "conversations": 0,
-                    "lastAgentMessage": null,
-                    "lastVisitorMessage": null,
-                    "id": "fef46d63-8a30-4eec-89eb-62f1bfc0ffcd",
-                    "username": "Test Usrename",
-                    "name": "Test Name",
-                    "uuid": "54d87707-bb54-46e3-9eca-8f776c7bcacf",
-                    "project": "ovago",
-                    "channel": "1",
-                    "email": "test@techork.com",
-                    "leadIds": [
-                        234556,
-                        357346
-                    ],
-                    "caseIds": [
-                        345464634,
-                        345634634
-                    ]
-                },
-                "sources": {
-                    "crossSystemXp": "123465.1"
-                },
-                "page": {
-                    "url": "https:\/\/dev-ovago.travel-dev.com\/search\/WAS-FRA%2F2021-03-22%2F2021-03-28",
-                    "title": "Air Ticket Booking - Find Cheap Flights and Airfare Deals - Ovago.com",
-                    "referrer": "https:\/\/dev-ovago.travel-dev.com\/search\/WAS-FRA%2F2021-03-22%2F2021-03-28"
-                },
-                "system": {
-                    "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/85.0.4183.102 Safari\/537.36",
-                    "language": "en-US",
-                    "resolution": "1920x1080"
-                },
-                "custom": {
-                    "event": {
-                        "eventName": "UPDATE",
-                        "eventProps": []
-                    }
-                }
-            }
+     * "event": "ROOM_CONNECTED",
+     * "data": {
+     * "rid": "d83ef2d3-30bf-4636-a2c6-7f5b4b0e81a4",
+     * "geo": {
+     * "ip": "92.115.180.30",
+     * "version": "IPv4",
+     * "city": "Chisinau",
+     * "region": "Chi\u0219in\u0103u Municipality",
+     * "region_code": "CU",
+     * "country": "MD",
+     * "country_name": "Republic of Moldova",
+     * "country_code": "MD",
+     * "country_code_iso3": "MDA",
+     * "country_capital": "Chisinau",
+     * "country_tld": ".md",
+     * "continent_code": "EU",
+     * "in_eu": false,
+     * "postal": "MD-2000",
+     * "latitude": 47.0056,
+     * "longitude": 28.8575,
+     * "timezone": "Europe\/Chisinau",
+     * "utc_offset": "+0300",
+     * "country_calling_code": "+373",
+     * "currency": "MDL",
+     * "currency_name": "Leu",
+     * "languages": "ro,ru,gag,tr",
+     * "country_area": 33843,
+     * "country_population": 3545883,
+     * "asn": "AS8926",
+     * "org": "Moldtelecom SA"
+     * },
+     * "visitor": {
+     * "conversations": 0,
+     * "lastAgentMessage": null,
+     * "lastVisitorMessage": null,
+     * "id": "fef46d63-8a30-4eec-89eb-62f1bfc0ffcd",
+     * "username": "Test Usrename",
+     * "name": "Test Name",
+     * "uuid": "54d87707-bb54-46e3-9eca-8f776c7bcacf",
+     * "project": "ovago",
+     * "channel": "1",
+     * "email": "test@techork.com",
+     * "leadIds": [
+     * 234556,
+     * 357346
+     * ],
+     * "caseIds": [
+     * 345464634,
+     * 345634634
+     * ]
+     * },
+     * "sources": {
+     * },
+     * "page": {
+     * "url": "https:\/\/dev-ovago.travel-dev.com\/search\/WAS-FRA%2F2021-03-22%2F2021-03-28",
+     * "title": "Air Ticket Booking - Find Cheap Flights and Airfare Deals - Ovago.com",
+     * "referrer": "https:\/\/dev-ovago.travel-dev.com\/search\/WAS-FRA%2F2021-03-22%2F2021-03-28"
+     * },
+     * "system": {
+     * "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/85.0.4183.102 Safari\/537.36",
+     * "language": "en-US",
+     * "resolution": "1920x1080"
+     * },
+     * "custom": {
+     * "event": {
+     * "eventName": "UPDATE",
+     * "eventProps": []
+     * }
+     * }
+     * }
      * }
      *
      * @apiSuccessExample Success-Response:
@@ -309,65 +301,65 @@ class ClientChatRequestController extends ApiBaseController
      *
      * @apiParamExample {json} Request-Example AGENT_UTTERED:
      * {
-            "event": "AGENT_UTTERED",
-            "data": {
-                "id": "G6CBYkRYBotjaPPSu",
-                "rid": "e19bf809-12c9-4981-89d0-da2f5d071890",
-                "token": "56976e05-1916-44fb-a074-5a8d0358019b",
-                "visitor": {
-                    "conversations": 0,
-                    "lastAgentMessage": null,
-                    "lastVisitorMessage": null,
-                    "id": "56976e05-1916-44fb-a074-5a8d0358019b",
-                    "username": "guest-1219",
-                    "phone": null,
-                    "token": "56976e05-1916-44fb-a074-5a8d0358019b"
-                },
-                "agent": {
-                    "name": "vadim_larsen_admin",
-                    "username": "vadim_larsen_admin",
-                    "email": "vadim.larsen@techork.com"
-                },
-                "msg": "test",
-                "timestamp": 1602587182948,
-                "u": {
-                    "_id": "MszwfgYRGB9Tpw5Et",
-                    "username": "vadim.larsen"
-                },
-                    "agentId": "MszwfgYRGB9Tpw5Et"
-                }
+     * "event": "AGENT_UTTERED",
+     * "data": {
+     * "id": "G6CBYkRYBotjaPPSu",
+     * "rid": "e19bf809-12c9-4981-89d0-da2f5d071890",
+     * "token": "56976e05-1916-44fb-a074-5a8d0358019b",
+     * "visitor": {
+     * "conversations": 0,
+     * "lastAgentMessage": null,
+     * "lastVisitorMessage": null,
+     * "id": "56976e05-1916-44fb-a074-5a8d0358019b",
+     * "username": "guest-1219",
+     * "phone": null,
+     * "token": "56976e05-1916-44fb-a074-5a8d0358019b"
+     * },
+     * "agent": {
+     * "name": "vadim_larsen_admin",
+     * "username": "vadim_larsen_admin",
+     * "email": "vadim.larsen@techork.com"
+     * },
+     * "msg": "test",
+     * "timestamp": 1602587182948,
+     * "u": {
+     * "_id": "MszwfgYRGB9Tpw5Et",
+     * "username": "vadim.larsen"
+     * },
+     * "agentId": "MszwfgYRGB9Tpw5Et"
+     * }
      * }
      *
      * @apiParamExample {json} Request-Example GUEST_UTTERED with Attachment:
      * {
-            "event": "GUEST_UTTERED",
-            "data": {
-                "id": "93ea7e9d-04cc-4f96-8bbf-d8b646113fd7",
-                "rid": "88c395e3-fe19-4fe2-99dc-b0a1874efbdd",
-                "token": "9728d3b4-5754-4339-9b0f-1c75edc727e9",
-                "visitor": {
-                    "conversations": 0,
-                    "lastAgentMessage": null,
-                    "lastVisitorMessage": null,
-                    "id": "9728d3b4-5754-4339-9b0f-1c75edc727e9",
-                    "name": "Henry Fonda",
-                    "username": "guest-1220",
-                    "phone": null,
-                    "token": "9728d3b4-5754-4339-9b0f-1c75edc727e9"
-                },
-                "agent": {
-                    "name": "bot",
-                    "username": "bot",
-                    "email": "bot@techork.com"
-                },
-                "msg": "Hi",
-                "timestamp": 1602588445024,
-                "u": {
-                    "_id": "cYNGwXX6L8cN3eb2Q",
-                    "username": "guest-1220",
-                    "name": "Henry Fonda"
-                }
-            }
+     * "event": "GUEST_UTTERED",
+     * "data": {
+     * "id": "93ea7e9d-04cc-4f96-8bbf-d8b646113fd7",
+     * "rid": "88c395e3-fe19-4fe2-99dc-b0a1874efbdd",
+     * "token": "9728d3b4-5754-4339-9b0f-1c75edc727e9",
+     * "visitor": {
+     * "conversations": 0,
+     * "lastAgentMessage": null,
+     * "lastVisitorMessage": null,
+     * "id": "9728d3b4-5754-4339-9b0f-1c75edc727e9",
+     * "name": "Henry Fonda",
+     * "username": "guest-1220",
+     * "phone": null,
+     * "token": "9728d3b4-5754-4339-9b0f-1c75edc727e9"
+     * },
+     * "agent": {
+     * "name": "bot",
+     * "username": "bot",
+     * "email": "bot@techork.com"
+     * },
+     * "msg": "Hi",
+     * "timestamp": 1602588445024,
+     * "u": {
+     * "_id": "cYNGwXX6L8cN3eb2Q",
+     * "username": "guest-1220",
+     * "name": "Henry Fonda"
+     * }
+     * }
      * }
      *
      * @apiSuccessExample Success-Response:
@@ -523,85 +515,85 @@ class ClientChatRequestController extends ApiBaseController
      * },
      *
      * "channels": [
-        {
-            "id": 2,
-            "name": "Channel 2",
-            "priority": 1,
-            "default": false,
-            "enabled": true,
-            "settings": {
-                "max_dialog_count": 4,
-                "feedback_rating_enabled": false,
-                "feedback_message_enabled": true,
-                "history_email_enabled": false,
-                "history_download_enabled": true
-            }
-        },
-        {
-            "id": 3,
-            "name": "Channel 11",
-            "priority": 2,
-            "default": true,
-            "enabled": true,
-            "settings": {
-                "max_dialog_count": 1,
-                "feedback_rating_enabled": true,
-                "feedback_message_enabled": true,
-                "history_email_enabled": true,
-                "history_download_enabled": true
-            }
-        }
-    ],
-    "language_id": "ru-RU",
-        "translations": {
-            "connection_lost": {
-                "title": "Connection Lost",
-                "subtitle": "Trying to reconnect"
-            },
-            "waiting_for_response": "Waiting for response",
-            "waiting_for_agent": "Waiting for an agent",
-            "video_reply": "Video message",
-            "audio_reply": "Audio message",
-            "image_reply": "Image message",
-            "new_message": "New message",
-            "agent": "Agent",
-            "textarea_placeholder": "Type a message...",
-            "registration": {
-                "title": "Welcome",
-                "subtitle": "Be sure to leave a message",
-                "name": "Name",
-                "name_placeholder": "Your name",
-                "email": "Email",
-                "email_placeholder": "Your email",
-                "department": "Department",
-                "department_placeholder": "Choose a department",
-                "start_chat": "Start chat"
-            },
-            "conversations": {
-                "no_conversations": "No conversations yet",
-                "no_archived_conversations": "No archived conversations yet",
-                "history": "Conversation history",
-                "active": "Active",
-                "archived": "Archived Chats",
-                "start_new": "New Chat"
-            },
-            "file_upload": {
-                "file_too_big": "This file is too big. Max file size is {{size}}",
-                "file_too_big_alt": "No archived conversations yetThis file is too large",
-                "generic_error": "Failed to upload, please try again",
-                "not_allowed": "This file type is not supported",
-                "drop_file": "Drop file here to upload it",
-                "upload_progress": "Uploading file..."
-            },
-            "department": {
-                "sales": "Sales",
-                "support": "Support",
-                "exchange": "Exchange"
-            }
-        },
-        "cache": true
-    }
-    }
+     * {
+     * "id": 2,
+     * "name": "Channel 2",
+     * "priority": 1,
+     * "default": false,
+     * "enabled": true,
+     * "settings": {
+     * "max_dialog_count": 4,
+     * "feedback_rating_enabled": false,
+     * "feedback_message_enabled": true,
+     * "history_email_enabled": false,
+     * "history_download_enabled": true
+     * }
+     * },
+     * {
+     * "id": 3,
+     * "name": "Channel 11",
+     * "priority": 2,
+     * "default": true,
+     * "enabled": true,
+     * "settings": {
+     * "max_dialog_count": 1,
+     * "feedback_rating_enabled": true,
+     * "feedback_message_enabled": true,
+     * "history_email_enabled": true,
+     * "history_download_enabled": true
+     * }
+     * }
+     * ],
+     * "language_id": "ru-RU",
+     * "translations": {
+     * "connection_lost": {
+     * "title": "Connection Lost",
+     * "subtitle": "Trying to reconnect"
+     * },
+     * "waiting_for_response": "Waiting for response",
+     * "waiting_for_agent": "Waiting for an agent",
+     * "video_reply": "Video message",
+     * "audio_reply": "Audio message",
+     * "image_reply": "Image message",
+     * "new_message": "New message",
+     * "agent": "Agent",
+     * "textarea_placeholder": "Type a message...",
+     * "registration": {
+     * "title": "Welcome",
+     * "subtitle": "Be sure to leave a message",
+     * "name": "Name",
+     * "name_placeholder": "Your name",
+     * "email": "Email",
+     * "email_placeholder": "Your email",
+     * "department": "Department",
+     * "department_placeholder": "Choose a department",
+     * "start_chat": "Start chat"
+     * },
+     * "conversations": {
+     * "no_conversations": "No conversations yet",
+     * "no_archived_conversations": "No archived conversations yet",
+     * "history": "Conversation history",
+     * "active": "Active",
+     * "archived": "Archived Chats",
+     * "start_new": "New Chat"
+     * },
+     * "file_upload": {
+     * "file_too_big": "This file is too big. Max file size is {{size}}",
+     * "file_too_big_alt": "No archived conversations yetThis file is too large",
+     * "generic_error": "Failed to upload, please try again",
+     * "not_allowed": "This file type is not supported",
+     * "drop_file": "Drop file here to upload it",
+     * "upload_progress": "Uploading file..."
+     * },
+     * "department": {
+     * "sales": "Sales",
+     * "support": "Support",
+     * "exchange": "Exchange"
+     * }
+     * },
+     * "cache": true
+     * }
+     * }
      *
      *
      * @apiSuccessExample {json} Not Modified-Response (304):
@@ -632,7 +624,7 @@ class ClientChatRequestController extends ApiBaseController
 
         $projectId = (int)\Yii::$app->request->get('project_id');
         $projectKey = \Yii::$app->request->get('project_key');
-        $noCache = (int) \Yii::$app->request->get('nocache', 0);
+        $noCache = (int)\Yii::$app->request->get('nocache', 0);
 
         if ($projectKey) {
             /** @var Project $project */
@@ -710,6 +702,7 @@ class ClientChatRequestController extends ApiBaseController
      * @apiName ClientChatFeedback
      * @apiGroup ClientChat
      * @apiPermission Authorized User
+     * @apiDescription Action handle the feedback requests.
      *
      * @apiHeader {string} Authorization    Credentials <code>base64_encode(Username:Password)</code>
      * @apiHeaderExample {json} Header-Example:
@@ -718,17 +711,96 @@ class ClientChatRequestController extends ApiBaseController
      *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
      *  }
      *
-     * @apiParamExample {json} Request-Example LEAVE_FEEDBACK:
+     * @apiParam {string}   apiKey               Api key, required for accept to endpoint
+     * @apiParam {string}   event                Event, that should be handled. Available values: `FEEDBACK_REQUESTED`, `FEEDBACK_REJECTED` & `FEEDBACK_SUBMITTED`
+     * @apiParam {json}     data                 JSON object with request data
+     * @apiParam {string}   data.id              Mongodb ID of feedback message
+     * @apiParam {string}   data.rid             Room id in rocket chat
+     * @apiParam {string}   data.type            Feedback type. Available values: `fullscreen`, `inline`, `sticky` & `questions`
+     * @apiParam {string}   [data.template]      Template
+     * @apiParam {string}   data.createdAt       Created datetime for data in outer service (ISODate)
+     * @apiParam {string}   data.triggerSource   Trigger source, available values: `agent`, `chat-close` & `bot`
+     * @apiParam {json}     [data.requestedBy]   Agent, who requested feedback. equals to null for feedbacks on chat close or triggered by bot
+     * @apiParam {json}     data.requestedFor    Agent, that will be target for feedback result
+     *
+     * @apiParamExample {json} Request-Example FEEDBACK_REQUESTED:
      * {
-     *      "event": "LEAVE_FEEDBACK",
+     *      "apiKey": "038ce0121a1666678d4db57cb10e8667b98d8b08c408cdf7c9b04f1430071826",
+     *      "event": "FEEDBACK_REQUESTED",
      *      "data": {
-     *          "rid": "20a20989-4d26-42f4-9a1c-2948ce4c4d56",
-     *          "comment": "Hello, this is my feedback",
-     *          "rating": 4,
-     *          "visitor": {
-     *              "id": "1c1d90ff-5489-45f5-b19b-2181a65ce898",
-     *              "project": "ovago"
+     *          "id": "d95ff567-3ce3-47b9-a937-1e716cae74fc",
+     *          "rid": "b3166811-302b-4de6-bb0f-b969575de4d5",
+     *          "type": "inline",
+     *          "template": "Sales mark",
+     *          "createdAt": "2022-02-23T14:58:37.034Z",
+     *          "triggerSource": "agent",
+     *          "requestedBy": {
+     *              "name": "Administrator",
+     *              "username": "admin"
+     *          },
+     *          "requestedFor": {
+     *              "name": "Administrator",
+     *              "username": "superadmin"
      *          }
+     *      }
+     * }
+     *
+     * @apiParamExample {json} Request-Example FEEDBACK_REJECTED:
+     * {
+     *      "apiKey": "038ce0121a1666678d4db57cb10e8667b98d8b08c408cdf7c9b04f1430071826",
+     *      "event": "FEEDBACK_REJECTED",
+     *      "data": {
+     *          "id": "d95ff567-3ce3-47b9-a937-1e716cae74fc",
+     *          "rid": "b3166811-302b-4de6-bb0f-b969575de4d5",
+     *          "type": "inline",
+     *          "template": "Sales mark",
+     *          "createdAt": "2022-02-23T14:58:37.034Z",
+     *          "triggerSource": "agent",
+     *          "requestedBy": {
+     *              "name": "Administrator",
+     *              "username": "admin"
+     *          },
+     *          "requestedFor": {
+     *              "name": "Administrator",
+     *              "username": "superadmin"
+     *          }
+     *      }
+     * }
+     *
+     * @apiParamExample {json} Request-Example FEEDBACK_SUBMITTED:
+     * {
+     *      "apiKey": "038ce0121a1666678d4db57cb10e8667b98d8b08c408cdf7c9b04f1430071826",
+     *      "event": "FEEDBACK_SUBMITTED",
+     *      "data": {
+     *          "id": "d95ff567-3ce3-47b9-a937-1e716cae74fc",
+     *          "rid": "b3166811-302b-4de6-bb0f-b969575de4d5",
+     *          "type": "inline",
+     *          "template": "Sales mark",
+     *          "createdAt": "2022-02-23T14:58:37.034Z",
+     *          "triggerSource": "agent",
+     *          "requestedBy": {
+     *              "name": "Administrator",
+     *              "username": "admin"
+     *          },
+     *          "requestedFor": {
+     *              "name": "Administrator",
+     *              "username": "superadmin"
+     *          },
+     *          "submittedAt": "2022-02-23T15:35:11.034Z",
+     *          "responses": [
+     *              {
+     *                  "question": "How was our service?",
+     *                  "response": 4
+     *              },
+     *              {
+     *                  "question": "Please rate agent response speed",
+     *                  "response": "good"
+     *              },
+     *              {
+     *                  "question": "Was your problem solved?",
+     *                  "response": true
+     *              }
+     *          ]
      *      }
      * }
      *
@@ -736,19 +808,21 @@ class ClientChatRequestController extends ApiBaseController
      *  HTTP/1.1 200 OK
      *  {
      *     "status": 200
-     *     "message": "Ok"
+     *     "message": "Feedback added to queue (jobId: 1)"
      *  }
      *
      * @apiErrorExample {json} Error-Response (400):
      *
      * HTTP/1.1 400 Bad Request
      * {
-     *  "status":400,
-     *  "message":"Some errors occurred while creating client chat request",
-     *  "code":"13104",
-     *  "errors":["Event is invalid."]
+     *      "status":400,
+     *      "message":"Client Chat validate failed.",
+     *      "errors":["Event is invalid."],
+     *      "code":"13104"
      * }
      *
+     * @return ErrorResponse|Response
+     * @throws \yii\base\InvalidConfigException
      */
     public function actionFeedback()
     {
@@ -793,8 +867,25 @@ class ClientChatRequestController extends ApiBaseController
             ));
         }
 
-        $feedbackForm = (new ClientChatRequestFeedbackSubForm())->fillIn($data);
-        if (!$feedbackForm->validate()) {
+        switch ($form->event) {
+            case FeedbackFormBase::EVENT_FEEDBACK_REQUESTED:
+                $feedbackForm = new FeedbackRequestedForm();
+                break;
+            case FeedbackFormBase::EVENT_FEEDBACK_REJECTED:
+                $feedbackForm = new FeedbackRejectedForm();
+                break;
+            case FeedbackFormBase::EVENT_FEEDBACK_SUBMITTED:
+                $feedbackForm = new FeedbackSubmittedForm();
+                break;
+            default:
+                return new ErrorResponse(
+                    new StatusCodeMessage(400),
+                    new MessageMessage('Received event is not provided'),
+                    new CodeMessage(ApiCodeException::EVENT_OR_DATA_IS_NOT_PROVIDED)
+                );
+        }
+
+        if (!$feedbackForm->load($data, "") || !$feedbackForm->validate()) {
             return $this->endApiLog(new ErrorResponse(
                 new StatusCodeMessage(400),
                 new MessageMessage('Feedback validate failed.'),
@@ -816,41 +907,33 @@ class ClientChatRequestController extends ApiBaseController
         }
 
         try {
-            if (Yii::$app->params['settings']['enable_client_chat_job']) {
-                $feedbackJob = new ClientChatFeedbackJob();
-                $feedbackJob->rid = $feedbackForm->rid;
-                $feedbackJob->comment = $feedbackForm->comment;
-                $feedbackJob->rating = $feedbackForm->rating;
+            $feedbackJob = new ClientChatFeedbackJob();
+            $feedbackJob->feedbackForm = $feedbackForm;
 
-                if ($feedbackJobId = Yii::$app->queue_client_chat_job->priority(10)->push($feedbackJob)) {
-                    $clientChatRequest->ccr_job_id = $feedbackJobId;
-                    $clientChatRequest->save();
-                    $resultMessage = 'Feedback added to queue (jobId: ' . $feedbackJobId . ')';
-                } else {
-                    throw new \Exception('Feedback not added to queue. ClientChatRequest ID : ' .
-                        $clientChatRequest->ccr_rid);
-                }
+            if ($feedbackJobId = Yii::$app->queue_client_chat_job->priority(10)->push($feedbackJob)) {
+                $clientChatRequest->ccr_job_id = $feedbackJobId;
+                $clientChatRequest->save();
+                $resultMessage = "Feedback added to queue (jobId: {$feedbackJobId})";
             } else {
-                $clientChatFeedback = $this->clientChatRequestService->createOrUpdateFeedback(
-                    $feedbackForm->rid,
-                    $feedbackForm->comment,
-                    $feedbackForm->rating
-                );
-                $resultMessage = 'Feedback saved (id: ' . $clientChatFeedback->ccf_id . ')';
+                throw new \Exception("Feedback not added to queue. ClientChatRequest ID : {$clientChatRequest->ccr_rid}");
             }
         } catch (\Throwable $e) {
-            return $this->endApiLog(new ErrorResponse(
-                new StatusCodeMessage(400),
-                new MessageMessage('Client Chat Feedback not saved.'),
-                new ErrorsMessage($e->getMessage()),
-                new CodeMessage(ApiCodeException::CLIENT_CHAT_FEEDBACK_CREATE_FAILED)
-            ));
+            return $this->endApiLog(
+                new ErrorResponse(
+                    new StatusCodeMessage(400),
+                    new MessageMessage('Client Chat Feedback not saved.'),
+                    new ErrorsMessage($e->getMessage()),
+                    new CodeMessage(ApiCodeException::CLIENT_CHAT_FEEDBACK_CREATE_FAILED)
+                )
+            );
         }
 
-        return $this->endApiLog(new SuccessResponse(
-            new StatusCodeMessage(200),
-            new MessageMessage($resultMessage ?? 'Ok'),
-        ));
+        return $this->endApiLog(
+            new SuccessResponse(
+                new StatusCodeMessage(200),
+                new MessageMessage($resultMessage ?? 'Ok')
+            )
+        );
     }
 
     /**
@@ -893,40 +976,40 @@ class ClientChatRequestController extends ApiBaseController
      * "status": 200,
      * "message": "OK",
      * "data": {
-        "data_form": [
-            {
-                "type": "textarea",
-                "name": "example_name",
-                "className": "form-control",
-                "label": "Please, describe problem",
-                "required": true,
-                "rows": 5
-            },
-            {
-                "type": "select",
-                "name": "destination",
-                "className": "form-control",
-                "label": "Куда летим?",
-                "values": [
-                    "label": "Амстердам",
-                    "value": "AMS",
-                    "selected": true
-                ],
-                [
-                    "label": "Магадан",
-                    "value": "GDX",
-                    "selected": false
-                ]
-            },
-            {
-                "type": "button",
-                "name": "button-123",
-                "className": "btn-success btn",
-                "label": "Submit"
-            }
-        ],
-        "from_cache" : true
-     }
+     * "data_form": [
+     * {
+     * "type": "textarea",
+     * "name": "example_name",
+     * "className": "form-control",
+     * "label": "Please, describe problem",
+     * "required": true,
+     * "rows": 5
+     * },
+     * {
+     * "type": "select",
+     * "name": "destination",
+     * "className": "form-control",
+     * "label": "Куда летим?",
+     * "values": [
+     * "label": "Амстердам",
+     * "value": "AMS",
+     * "selected": true
+     * ],
+     * [
+     * "label": "Магадан",
+     * "value": "GDX",
+     * "selected": false
+     * ]
+     * },
+     * {
+     * "type": "button",
+     * "name": "button-123",
+     * "className": "btn-success btn",
+     * "label": "Submit"
+     * }
+     * ],
+     * "from_cache" : true
+     * }
      *
      * @apiErrorExample {json} Error-Response (400):
      *
@@ -1007,6 +1090,148 @@ class ClientChatRequestController extends ApiBaseController
         ));
     }
 
+    /**
+     * @api {post} /v1/client-chat-request/chat-form-response Client Chat Form Response
+     * @apiVersion 0.1.0
+     * @apiName ClientChatFormResponse
+     * @apiGroup ClientChat
+     * @apiPermission Authorized User
+     * @apiDescription Action handle the Client Chat Form Responses.
+     *
+     * @apiHeader {string} Authorization    Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string}   apiKey               Api key, required for accept to endpoint
+     * @apiParam {string}   event                Event, that should be handled. Available values: `FORM_SUBMITTED`
+     * @apiParam {json}     data                 JSON object with request data
+     * @apiParam {string}   data.id              Mongodb ID of client chat form message
+     * @apiParam {string}   data.rid             Room id in rocket chat
+     * @apiParam {string}   data.formKey         Form key
+     * @apiParam {string}   data.formValue       Form value
+     * @apiParam {string}   data.createdAt       Created datetime for data in outer service (ISODate)
+     *
+     * @apiParamExample {json} Request-Example FORM_SUBMITTED:
+     * {
+     *      "apiKey": "038ce0121a1666678d4db57cb10e8667b98d8b08c408cdf7c9b04f1430071826",
+     *      "event": "FORM_SUBMITTED",
+     *      "data": {
+     *          "id": "d95ff567-3ce3-47b9-a937-1e716cae74fc",
+     *          "rid": "b3166811-302b-4de6-bb0f-b969575de4d5",
+     *          "createdAt": "2022-02-23T14:58:37.034Z",
+     *          "formKey: "cc_form_booking_id",
+     *          "formValue: "12345",
+     *      }
+     * }
+     *
+     * @apiSuccessExample Success-Response:
+     *  HTTP/1.1 200 OK
+     *  {
+     *     "status": 200
+     *     "message": "Ok"
+     *  }
+     *
+     * @apiErrorExample {json} Error-Response (400):
+     *
+     * HTTP/1.1 400 Bad Request
+     * {
+     *      "status":400,
+     *      "message":"Client Chat Form Response validate failed.",
+     *      "errors":["Event is invalid."],
+     *      "code":"13104"
+     * }
+     *
+     * @return ErrorResponse|Response
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function actionChatFormResponse()
+    {
+        if (SettingHelper::isClientChatApiLogEnabled()) {
+            $this->startApiLog($this->action->uniqueId);
+        }
+
+        if (!\Yii::$app->request->isPost) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('Not found POST request'),
+                new CodeMessage(ApiCodeException::REQUEST_IS_NOT_POST)
+            );
+        }
+
+        if (!\Yii::$app->request->post()) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('POST data request is empty'),
+                new CodeMessage(ApiCodeException::POST_DATA_IS_EMPTY)
+            );
+        }
+
+        $event = \Yii::$app->request->post('event');
+        $data = \Yii::$app->request->post('data');
+
+        if (!$event || !$data) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('Event or data is not provided'),
+                new CodeMessage(ApiCodeException::EVENT_OR_DATA_IS_NOT_PROVIDED)
+            );
+        }
+
+        $form = (new ClientChatRequestApiForm())->fillIn($event, $data);
+        if (!$form->validate()) {
+            return $this->endApiLog(new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('Client Chat Form Response validate failed.'),
+                new ErrorsMessage($form->getErrorSummary(true)),
+                new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
+            ));
+        }
+
+        try {
+            $clientChatRequest = ClientChatRequest::createByApi($form);
+            $this->clientChatRequestRepository->save($clientChatRequest);
+        } catch (\Throwable $e) {
+            return $this->endApiLog(new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('Client Chat Form Response not saved.'),
+                new ErrorsMessage($e->getMessage()),
+                new CodeMessage(ApiCodeException::CLIENT_CHAT_REQUEST_CREATE_FAILED)
+            ));
+        }
+
+        $form = new ClientChatFormResponseApiForm();
+        if (!$form->load($data, "") || !$form->validate()) {
+            return $this->endApiLog(new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('Client Chat Form Response validate failed.'),
+                new ErrorsMessage($form->getErrorSummary(true)),
+                new CodeMessage(ApiCodeException::FAILED_FORM_VALIDATE)
+            ));
+        }
+
+        try {
+            $this->clientChatFormResponseService->createFormResponse($form->rid, $form->formKey, $form->formValue, $form->createdAt);
+        } catch (\Throwable $e) {
+            return $this->endApiLog(
+                new ErrorResponse(
+                    new StatusCodeMessage(400),
+                    new MessageMessage('Client Chat Form Response not saved.'),
+                    new ErrorsMessage($e->getMessage()),
+                    new CodeMessage(ApiCodeException::CLIENT_CHAT_FORM_CREATE_FAILED)
+                )
+            );
+        }
+
+        return $this->endApiLog(
+            new SuccessResponse(
+                new StatusCodeMessage(200),
+                new MessageMessage($resultMessage ?? 'Ok')
+            )
+        );
+    }
     /**
      * @param ApiLog $apiLog
      * @param Response $response

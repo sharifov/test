@@ -395,7 +395,7 @@ class Order extends ActiveRecord implements Serializable, ProductDataInterface
                     [
                         'OR',
                         ['=', 'product_quote.pq_status_id', ProductQuoteStatus::BOOKED],
-                        ['=', 'product_quote.pq_status_id', ProductQuoteStatus::DECLINED]
+//                        ['=', 'product_quote.pq_status_id', ProductQuoteStatus::DECLINED]
                     ]
                 ]
             ])

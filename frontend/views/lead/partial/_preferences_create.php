@@ -42,7 +42,11 @@ use yii\widgets\ActiveForm;
         </div>
         <div class="col-md-2 col-sm-12">
             <?= $form->field($leadForm, 'depId', [
-            ])->dropDownList(LeadHelper::getDepartments(Yii::$app->user)) ?>
+            ])->dropDownList(LeadHelper::getDepartments(Yii::$app->user), [
+                'data' => [
+                    'value' => null,
+                ]
+            ]) ?>
         </div>
         <?php if ($delayedChargeAccess) : ?>
             <div class="col-md-3">

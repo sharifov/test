@@ -12,8 +12,10 @@ use Gnello\Mattermost\Driver;
 use modules\cases\src\abac\CasesAbacObject;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeCreatedEvent;
+use modules\user\src\update\UpdateForm;
 use src\auth\Auth;
 use src\helpers\setting\SettingHelper;
+use src\model\call\socket\CallUpdateMessage;
 use src\model\call\useCase\createCall\CreateCallForm;
 use src\model\client\notifications\client\entity\NotificationType;
 use common\components\purifier\Purifier;
@@ -65,6 +67,11 @@ use src\model\clientChatRequest\useCase\api\create\ClientChatRequestApiForm;
 use src\model\clientChatRequest\useCase\api\create\ClientChatRequestService;
 use src\model\clientChatUnread\entity\ClientChatUnread;
 use src\model\clientChatVisitorData\entity\ClientChatVisitorData;
+use src\model\clientData\entity\ClientData;
+use src\model\clientData\entity\ClientDataQuery;
+use src\model\clientDataKey\entity\ClientDataKey;
+use src\model\clientDataKey\entity\ClientDataKeyDictionary;
+use src\model\clientDataKey\service\ClientDataKeyService;
 use src\model\conference\entity\aggregate\ConferenceLogAggregate;
 use src\model\conference\entity\aggregate\Duration;
 use src\model\conference\entity\aggregate\log\HtmlFormatter;
@@ -75,6 +82,7 @@ use src\model\conference\useCase\PrepareCurrentCallsForNewCall;
 use src\model\conference\useCase\statusCallBackEvent\ConferenceStatusCallbackForm;
 use src\model\department\department\DefaultPhoneType;
 use src\model\leadRedial\assign\LeadRedialAccessChecker;
+use src\model\leadRedial\assign\LeadRedialAssigner;
 use src\model\leadRedial\assign\Users;
 use src\model\leadRedial\entity\CallRedialUserAccess;
 use src\model\leadRedial\entity\CallRedialUserAccessRepository;
@@ -86,6 +94,7 @@ use src\model\project\entity\params\Params;
 use src\model\user\reports\stats\UserStatsReport;
 use src\model\voip\phoneDevice\device\ReadyVoipDevice;
 use src\model\voip\phoneDevice\PhoneDeviceLogForm;
+use src\repositories\lead\LeadRepository;
 use src\services\clientChatMessage\ClientChatMessageService;
 use src\services\clientChatUserAccessService\ClientChatUserAccessService;
 use src\services\sms\incoming\SmsIncomingForm;
@@ -104,6 +113,17 @@ use yii\rbac\Role;
 
 class TestController extends Controller
 {
+    public function actionW()
+    {
+        $s = \Yii::createObject(LeadRedialAssigner::class);
+        $s->assign(513249, 295, new \DateTimeImmutable());
+        die;
+        $call = Call::findOne(3386979);
+        $message = (new AcceptCallMessage())->create($call, 295);
+        Notifications::publish('acceptedCall', ['user_id' => 295], $message);
+//        Notifications::publish('acceptedCallHide', ['user_id' => 295], []);
+    }
+
     public function actionTestWs()
     {
         Notifications::publish(
@@ -113,6 +133,17 @@ class TestController extends Controller
                 'data' => 'testData',
             ]
         );
+    }
+
+    public function actionRr()
+    {
+        $user = Employee::findOne(294);
+        $updatedUser = Employee::findOne(294);
+        $form = new UpdateForm($user, $updatedUser);
+        $form->form_roles = ['admin', 'agent_qw'];
+        $form->validate();
+        VarDumper::dump($form);
+        VarDumper::dump($form->getErrors());
     }
 
     public function actionT()
@@ -269,7 +300,7 @@ JSON;
 
     public function actionQ()
     {
-        echo \Yii::$app->communication->makeCallClientNotification(
+        echo \Yii::$app->comms->makeCallClientNotification(
             '+14157693509',
             '+37369305726',
             'Hello world',
@@ -756,7 +787,7 @@ JSON;
                 464 . '-desk',
                 'Call - Long Queue Time',
                 '<strong>Hello World</strong> Hello World',
-                'info',
+                Notifications::getNotifyType(Notifications::TYPE_WARNING),
                 $message,
                 true
             )
@@ -774,5 +805,32 @@ JSON;
     {
         echo 'Blameable ' . Auth::employeeId();
         die;
+    }
+
+    public function actionTestClientData()
+    {
+        $keyId = ClientDataKeyService::getIdByKeyCache(ClientDataKeyDictionary::APP_CALL_OUT_TOTAL_COUNT);
+        if ($keyId) {
+            ClientDataQuery::createOrIncrementValue(460864, $keyId, new \DateTimeImmutable());
+
+            $clientData = ClientDataQuery::findOneByClientAndKeyId(460864, $keyId);
+            if ($clientData) {
+                echo Console::renderColoredString('%r --- Notif: Client Data id ' . $clientData->cd_id . ' value: ' . $clientData->cd_field_value . '  %r' . ' %n', true), PHP_EOL;
+            } else {
+                echo Console::renderColoredString('%g --- Client Data not found') . PHP_EOL;
+            }
+        } else {
+            echo Console::renderColoredString('%g --- Key not found') . PHP_EOL;
+        }
+    }
+
+    public function actionClientReturn($leadId)
+    {
+        $lead = Lead::findOne($leadId);
+        if ($lead) {
+            $lead->sold(464);
+            $repo = \Yii::createObject(LeadRepository::class);
+            $repo->save($lead);
+        }
     }
 }

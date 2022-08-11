@@ -7,13 +7,16 @@
  */
 
 use common\models\Lead;
+use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use src\auth\Auth;
 use src\helpers\lead\LeadHelper;
+use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
 use yii\helpers\Html;
 
 $bundle = \frontend\assets\TimerAsset::register($this);
+$timerExtraCss = 'vertical-align: 3px;font-size: 12px; margin-left: 5px;';
 ?>
 
 <div class="page-header">
@@ -31,24 +34,11 @@ $bundle = \frontend\assets\TimerAsset::register($this);
                     <?= LeadHelper::displaySnoozeFor($lead, time(), 'vertical-align: 3px;font-size: 12px; margin-left: 5px;') ?>
                 <?php endif; ?>
 
+                <?php if (LeadBusinessExtraQueueService::ffIsEnabled()) : ?>
+                    <?= LeadHelper::displayBusinessExtraQueueTimerIfExists($lead, $timerExtraCss) ?>
+                <?php endif; ?>
                 <?php if (LeadHelper::isShowLppTimer($lead)) : ?>
-                    <?= LeadHelper::displayLeadPoorProcessingTimer($lead->minLpp->lpp_expiration_dt, $lead->minLpp->lppLppd->lppd_name, 'vertical-align: 3px;font-size: 12px; margin-left: 5px;') ?>
-                    <?php
-                    $js = <<<JS
-  $('.enable-timer-lpp').each( function (i, e) {
-      let seconds = $(e).attr('data-seconds');
-      if (seconds < 0) {
-          var params = {format: '%d %H:%M:%S', seconds: Math.abs(seconds)};
-      } else {
-          var params = {format: '%d %H:%M:%S', countdown: true, duration: seconds + 's', callback: function () {
-              $(e).timer('remove').timer({format: '%d %H:%M:%S', seconds: 0}).timer('start');
-          }};
-      }
-      $(e).timer(params).timer('start');
-  });
-JS;
-                    $this->registerJs($js, \yii\web\View::POS_READY);
-                    ?>
+                    <?= LeadHelper::displayLeadPoorProcessingTimer($lead->minLpp->lpp_expiration_dt, $lead->minLpp->lppLppd->lppd_name, $timerExtraCss) ?>
                 <?php elseif ($lead->l_expiration_dt) : ?>
                     <?php if (LeadHelper::expiredLead($lead)) : ?>
                         <span
@@ -155,3 +145,25 @@ if ($lead->l_expiration_dt && !LeadHelper::expiredLead($lead)) :
 JS;
     $this->registerJs($js);
 endif;
+
+$jsTimerLPP = <<<JS
+  $('.enable-timer-lpp').each( function (i, e) {
+      let seconds = $(e).attr('data-seconds');
+      if (seconds < 0) {
+          var params = {format: '%d %H:%M:%S', seconds: Math.abs(seconds)};
+      } else {
+          var params = {format: '%d %H:%M:%S', countdown: true, duration: seconds + 's', callback: function () {
+              $(e).timer('remove').timer({format: '%d %H:%M:%S', seconds: 0}).timer('start');
+              
+              $(e).closest('span.label.label-warning')
+                  .removeClass('label-warning')
+                  .addClass('label-danger');
+          }};
+      }
+      $(e).timer(params).timer('start');
+  });
+JS;
+
+if (LeadHelper::isShowLppTimer($lead) || LeadBusinessExtraQueueService::ffIsEnabled() === true) {
+    $this->registerJs($jsTimerLPP, \yii\web\View::POS_READY);
+}

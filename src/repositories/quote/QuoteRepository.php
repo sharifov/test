@@ -71,4 +71,22 @@ class QuoteRepository
         }
         $this->eventDispatcher->dispatchAll($quote->releaseEvents());
     }
+
+
+    public function getAmountQuoteByLeadIdAndStatusesAndCreateTypes(int $leadId, array $statuses, array $createdTypes): int
+    {
+        return (int)Quote::find()
+            ->andWhere(['lead_id' => $leadId])
+            ->andWhere(['status' => $statuses])
+            ->andWhere(['q_create_type_id' => $createdTypes])
+            ->count();
+    }
+
+    public function getAmountQuoteByLeadIdAndStatuses(int $leadId, array $statuses): int
+    {
+        return (int)Quote::find()
+            ->andWhere(['lead_id' => $leadId])
+            ->andWhere(['status' => $statuses])
+            ->count();
+    }
 }

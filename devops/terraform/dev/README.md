@@ -15,21 +15,40 @@ CRM: Terraform
 ### Infrastructure deployment
 
 ##### 1. Configure AWS access profile
-    aws configure --profile aws-dev-infra
-
+```
+aws configure --profile aws-dev-infra
+```
 
 ##### 2. Decrypt terraform variable file with sops
 
-    export SOPS_AGE_KEY_FILE="$HOME/.sops/aws-dev-age"
-    export SOPS_AGE_RECIPIENTS="age13svya8dz2uwhw4j8qy93hvyc3q7u03y2xqj5fgda7uc89gmsvcqqh62nf0"
-    sops -d enc.variables > variables.tf
+````
+export SOPS_AGE_KEY_FILE="$HOME/.sops/aws-dev-age"
+export SOPS_AGE_RECIPIENTS="age13svya8dz2uwhw4j8qy93hvyc3q7u03y2xqj5fgda7uc89gmsvcqqh62nf0"
+sops -d enc.variables > variables.tf
+```
 
 ##### 3. Initialize terraform
-    terraform init
+
+```
+terraform init
+```
 
 ##### 4. Review terraform plan
-    terraform plan
+
+```
+terraform plan
+```
 
 ##### 5. Apply the plan and save the output
-    terraform apply
 
+```
+terraform apply
+```
+
+##### 6. Generate keys for s3 bucket
+
+```
+aws iam create-access-key \
+    --user-name attachments-crm-dev \
+    --profile aws-dev-infra
+```

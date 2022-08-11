@@ -10,13 +10,13 @@ let userComponent = {
     },
     methods: {
         userName() {
-            return this.$root.getUserName(this.item.uo_user_id);
+            return this.item.userName;
         },
         userIconClass() {
-            return this.$root.getUserIconClass(this.item.uo_user_id);
+            return this.$root.getUserIconClass(this.item);
         },
         userTooltip() {
-            return this.$root.getUserTooltipName(this.item.uo_user_id);
+            return this.$root.getUserTooltipName(this.item);
         }
         // stateClass() {
         //     return 'text-' + (this.item.uo_idle_state ? 'info' : 'success')
@@ -151,7 +151,6 @@ const callJoinUserComponent = {
     }
 };
 
-
 const callItemComponent = {
     template: '#call-item-tpl',
     components: {
@@ -199,7 +198,7 @@ const callItemComponent = {
         },
         showTransferLabelForCall()
         {
-            return this.item.c_is_transfer ? true : false;
+            return !!this.item.c_is_transfer;
         },
         callTypeName() {
             return this.item.c_call_type_id > 0 ? this.$root.callTypeList[this.item.c_call_type_id] : '-';
@@ -218,7 +217,7 @@ const callItemComponent = {
             return name;
         },
         isCallAssignedToUserGroups() {
-            console.log(this.item);
+            // console.log(this.item);
         },
 
         callStatusTimerDateTime() {
@@ -349,8 +348,7 @@ var callMapApp = Vue.createApp({
             callUserAccessStatusTypeList: [],
             callUserAccessStatusTypeListLabel: [],
             callList: [],
-            onlineUserList: [],
-            userStatusList: [],
+            callListData: [],
             sortingOnline: -1,
             isAdmin: false,
             userAccessDepartments: [],
@@ -360,6 +358,17 @@ var callMapApp = Vue.createApp({
             userDepartments: [],
             userProjects: [],
             showStatusList: [],
+
+            userListData: [],
+            userData: [],
+            filteredUserData: null,
+            filteredUserListData: null,
+
+            filteredCallData: null,
+            filteredCallListData: null,
+            filters: {
+                selectedDep: null,
+            }
         };
     },
     created() {
@@ -370,6 +379,21 @@ var callMapApp = Vue.createApp({
         this.getCalls();
     },
     computed: {
+        selectedDep: {
+            get: function () {
+                return +this.filters.selectedDep;
+            },
+            set: function (value) {
+                this.filters.selectedDep = value;
+            }
+        },
+        callCounter: function () {
+            if (this.filteredCallData !== null) {
+                return this.filteredCallData.length;
+            } else {
+                return this.callList && this.callList.length || 0;
+            }
+        },
         ivrCounter: function () {
             return this.getCallListByStatusId([1], this.availableCallTypeList, this.availableCallSourceList).length;
         },
@@ -396,19 +420,29 @@ var callMapApp = Vue.createApp({
             return this.getCallListByStatusId([3, 4], this.availableCallTypeList, this.availableCallSourceList);
         },
         onlineUserCounter: function () {
-            return this.onlineUserList.length;
+            return (this.filteredUserData || this.userData).length;
         },
         idleUserList: function () {
-            return this.onlineUserList.filter(function (item) {
-                if (item.uo_idle_state) {
+            return (this.filteredUserData || this.userData).filter(function (item) {
+                if (item.online.uo_idle_state) {
                     return item;
                 }
             });
         }
     },
     methods: {
+        getUserName: function (userId) {
+            return userId > 0 ? this.userList[userId] : userId;
+        },
         getCallListByStatusId(statusList, typeList, sourceList) {
-            return this.callList.filter(function (item) {
+            let data;
+            if (this.filteredCallData !== null) {
+                data = this.filteredCallData;
+            } else {
+                data = this.callList;
+            }
+
+            return data.filter(function (item) {
                 if (item.c_status_id) {
                     let statusId = parseInt(item.c_status_id);
                     let callTypeId = parseInt(item.c_call_type_id);
@@ -418,53 +452,6 @@ var callMapApp = Vue.createApp({
                     }
                 }
             });
-        },
-
-        userOnlineFindIndex(userId) {
-            let index = -1;
-            userId = parseInt(userId);
-            if (this.onlineUserList) {
-                index = this.onlineUserList.findIndex(x => parseInt(x.uo_user_id) === userId);
-            }
-            return index;
-        },
-        deleteUserOnline(data) {
-            let index = this.userOnlineFindIndex(data.uo_user_id);
-            this.onlineUserList.splice(index, 1);
-        },
-        addUserOnline(data) {
-            let index = this.userOnlineFindIndex(data.uo_user_id);
-            if (index > -1) {
-                return this.updateUserOnline(data);
-            }
-
-            if (!this.isAdmin && (!this.userAccessDepartments.includes(data.uo_user_id.toString()) || !this.userAccessProjects.includes(data.uo_user_id.toString()))) {
-                return false;
-            }
-
-            this.onlineUserList = [data, ...this.onlineUserList];
-            //this.callList.push(callData);
-        },
-
-        updateUserOnline(data) {
-            this.onlineUserList = this.onlineUserList.map((x) => {
-                if (x.uo_user_id === data.uo_user_id) {
-                    return data;
-                }
-                return x;
-            });
-        },
-
-        userOnlineList() {
-            return this.onlineUserList.slice(0).sort((a, b) => this.getUserName(a.uo_user_id).toUpperCase() < this.getUserName(b.uo_user_id).toUpperCase() ? this.sortingOnline : -this.sortingOnline)
-        },
-        findCallIndexById(id) {
-            let index = -1;
-            id = parseInt(id)
-            if (this.callList) {
-                index = this.callList.findIndex(item => parseInt(item.c_id) === id)
-            }
-            return index
         },
         removeCall(index) {
             // if (this.callList.length === 1) {
@@ -476,12 +463,24 @@ var callMapApp = Vue.createApp({
                 return i !== index;
             });
         },
+        callDataIndex(callId) {
+            if (!this.callListData.length) {
+                this.callListData = this.callList.map(function (item) {
+                    return item.c_id;
+                });
+            }
+            return this.callListData.indexOf(callId);
+        },
         actionCall(callData) {
-            if (this.callList.find(x => parseInt(x.c_id) === parseInt(callData.c_id))) {
+            console.log("CALLLIST: ", this.callList);
+            let index = this.callDataIndex(callData.c_id);
+            if (index !== -1) {
                 if (this.showStatusList.includes(callData.c_status_id)) {
                     return this.updateCall(callData);
                 } else {
-                    this.removeCall(this.findCallIndexById(callData.c_id));
+                    this.callList.splice(index, 1);
+                    this.callListData.splice(index, 1);
+                    this.deleteFilteredCallData(callData);
                     return false;
                 }
             }
@@ -492,6 +491,8 @@ var callMapApp = Vue.createApp({
         },
         addCall(callData) {
             this.callList = [...this.callList, callData];
+            this.callListData.push(callData.c_id);
+            this.addFilteredCallData(callData);
         },
         validateCall(callData) {
             let statusId = parseInt(callData.c_status_id);
@@ -508,6 +509,7 @@ var callMapApp = Vue.createApp({
                 }
                 return x;
             });
+            this.updateFilteredCallData(callData);
         },
         getCalls() {
             axios
@@ -523,6 +525,7 @@ var callMapApp = Vue.createApp({
             axios
                 .get('/monitor/static-data-api')
                 .then(response => {
+                    console.log("RESPONSE: ", response.data);
                     this.projectList = response.data.projectList;
                     this.depList = response.data.depList;
                     this.userList = response.data.userList;
@@ -533,9 +536,7 @@ var callMapApp = Vue.createApp({
                     this.availableCallSourceList = response.data.availableCallSourceList;
                     this.callUserAccessStatusTypeList = response.data.callUserAccessStatusTypeList;
                     this.callUserAccessStatusTypeListLabel = response.data.callUserAccessStatusTypeListLabel;
-                    this.onlineUserList = response.data.onlineUserList;
                     this.userTimeZone = response.data.userTimeZone;
-                    this.userStatusList = response.data.userStatusList;
                     this.isAdmin = response.data.isAdmin;
                     this.userAccessDepartments = response.data.userAccessDepartments;
                     this.userAccessProjects = response.data.userAccessProjects;
@@ -544,6 +545,22 @@ var callMapApp = Vue.createApp({
                     this.userDepartments = response.data.userDepartments;
                     this.userProjects = response.data.userProjects;
                     this.showStatusList = response.data.showCallStatusList;
+
+                    this.userData = response.data.userData || [];
+
+                    this.depListProcessed = [{
+                        label: ' --- ',
+                        id: null
+                    }];
+                    for (let dep in this.depList) {
+                        if (!this.depList.hasOwnProperty(dep)) {
+                            continue;
+                        }
+                        this.depListProcessed.push({
+                            label: this.depList[dep],
+                            id: dep
+                        });
+                    }
                 })
                 .catch(error => {
                     console.error("There was an error!", error);
@@ -602,74 +619,237 @@ var callMapApp = Vue.createApp({
             return userId > 0 ? this.userList[userId] : userId;
         },
 
-        getUserIconClass(userId) {
-            let iconClass = 'fa fa-user text-success'
-            let item = this.userStatusFind(userId)
-            let isUserIdle = this.idleUserList.find(x => parseInt(x.uo_user_id) === userId);
-            if (item) {
-                if ((+item.us_is_on_call)) {
-                    iconClass = 'fa fa-phone text-success'
-                } else if (!(+item.us_call_phone_status)) {
-                    iconClass = 'fa fa-tty text-danger'
-                } else if (+item.us_has_call_access) {
-                    iconClass = 'fa fa-random'
-                }
-            } else if (isUserIdle) {
-                iconClass = 'fa fa-user text-warning';
+        userDataList() {
+            let data;
+            if (this.filteredUserData !== null) {
+                data = this.filteredUserData;
+            } else {
+                data = this.userData;
             }
-            return iconClass
-        },
 
-        getUserTooltipName(userId) {
-            let tooltip = 'Ready'
-            let item = this.userStatusFind(userId)
-            let isUserIdle = this.idleUserList.find(x => parseInt(x.uo_user_id) === userId);
-            if (item) {
-                if ((+item.us_is_on_call)) {
-                    tooltip = 'On Call'
-                } else if (!(+item.us_call_phone_status)) {
-                    tooltip = 'Busy'
-                } else if (+item.us_has_call_access) {
-                    tooltip = 'Assigned'
-                }
-            } else if (isUserIdle) {
-                tooltip = 'Idle';
-            }
-            return tooltip
+            return data
+                .slice(0)
+                .sort((a, b) => (a.userName && a.userName.toUpperCase() || '') < (b.userName && b.userName.toUpperCase() || '') ?
+                    this.sortingOnline :
+                    -this.sortingOnline
+                );
         },
-
-        userStatusFindIndex(userId) {
-            let index = -1
-            userId = parseInt(userId)
-            if (this.userStatusList) {
-                index = this.userStatusList.findIndex(x => parseInt(x.us_user_id) === userId)
-            }
-            return index
-        },
-
-        userStatusFind(userId) {
-            userId = parseInt(userId)
-            return this.userStatusList.find(x => parseInt(x.us_user_id) === userId);
-        },
-
-        deleteUserStatus(data) {
-            let index = this.userStatusFindIndex(data.us_user_id)
-            this.userStatusList.splice(index, 1);
-        },
-        addUserStatus(data) {
-            let index = this.userStatusFindIndex(data.us_user_id)
-            if (index > -1) {
-                return this.updateUserStatus(data);
-            }
-            this.userStatusList = [data, ...this.userStatusList];
-        },
-        updateUserStatus(data) {
-            this.userStatusList = this.userStatusList.map((x) => {
-                if (parseInt(x.us_user_id) === parseInt(data.us_user_id)) {
-                    return data;
+        updateUserData(data, updateType) {
+            this.userData = this.userData.map((x) => {
+                if (x.user_id === data.user_id) {
+                    x[updateType] = data[updateType];
+                    return x;
                 }
                 return x;
             });
         },
+        userDataIndex(userId) {
+            if (!this.userListData.length) {
+                this.userListData = this.userData.map(function (item) {
+                    return item.user_id;
+                });
+            }
+            return this.userListData.indexOf(userId);
+        },
+        deleteUserData(data) {
+            let index = this.userDataIndex(data.user_id);
+            if (index !== -1) {
+                this.userData.splice(index, 1);
+                this.userListData.splice(index, 1);
+                this.deleteFilteredUserData(data);
+            }
+        },
+        addUserData(data, updateType) {
+            let index = this.userDataIndex(data.user_id);
+            if (index > -1) {
+                this.updateFilteredUserData(data, updateType);
+                return this.updateUserData(data, updateType);
+            }
+
+            if (!this.isAdmin && (!this.userAccessDepartments.includes(data.user_id.toString()) || !this.userAccessProjects.includes(data.user_id.toString()))) {
+                return false;
+            }
+
+            this.userData.push(data);
+            this.userListData.push(data.user_id);
+            this.addFilteredUserData(data);
+        },
+        getUserIconClass(item) {
+            let iconClass = 'fa fa-user text-success';
+            let isUserIdle;
+            if (item && item.status) {
+                if ((+item.status.us_is_on_call)) {
+                    iconClass = 'fa fa-phone text-success';
+                } else if (!(+item.status.us_call_phone_status)) {
+                    iconClass = 'fa fa-tty text-danger';
+                } else if (+item.status.us_has_call_access) {
+                    iconClass = 'fa fa-random';
+                }
+            } else {
+                isUserIdle = this.idleUserList.find(x => parseInt(x.user_id) === item.user_id);
+                if (isUserIdle) {
+                    iconClass = 'fa fa-user text-warning';
+                }
+            }
+            return iconClass;
+        },
+        getUserTooltipName(item) {
+            let tooltip = 'Ready';
+            let isUserIdle;
+            if (item && item.status) {
+                if ((+item.status.us_is_on_call)) {
+                    tooltip = 'On Call';
+                } else if (!(+item.status.us_call_phone_status)) {
+                    tooltip = 'Busy';
+                } else if (+item.status.us_has_call_access) {
+                    tooltip = 'Assigned';
+                }
+            } else {
+                isUserIdle = this.idleUserList.find(x => parseInt(x.user_id) === item.user_id);
+                if (isUserIdle) {
+                    tooltip = 'Idle';
+                }
+            }
+            return tooltip;
+        },
+
+        selectDepartment(selected) {
+            this.selectedDep = selected;
+            this.applyFilters();
+        },
+        depListData() {
+            return this.depListProcessed;
+        },
+        resetFilters() {
+            this.filteredUserData = null;
+            this.filteredUserListData = null;
+            this.filteredCallData = null;
+            this.filteredCallListData = null;
+        },
+        applyFilters() {
+            if (this.selectedDep) {
+                this.filteredUserData = this.userData.filter(function (item) {
+                    return item.userDep.indexOf(this.selectedDep) !== -1;
+                }.bind(this));
+                this.filteredUserListData = this.filteredUserData.map(function (item) {
+                    return item.user_id;
+                });
+
+                this.filteredCallData = this.callList.filter(function (item) {
+                    if (!Array.isArray(item.c_dep_id)) {
+                        userDepList = [item.c_dep_id];
+                    } else {
+                        userDepList = item.c_dep_id;
+                    }
+                    return userDepList.indexOf(this.selectedDep) !== -1;
+                }.bind(this));
+                this.filteredCallListData = this.filteredCallData.map(function (item) {
+                    return item.c_id;
+                });
+            } else {
+                this.resetFilters();
+            }
+        },
+        isFilterEnabled() {
+            return !!this.selectedDep;
+        },
+
+        filteredUserDataIndex(userId) {
+            if (!this.filteredUserListData.length) {
+                this.filteredUserListData = this.filteredUserData.map(function (item) {
+                    return item.user_id;
+                });
+            }
+            return this.filteredUserListData.indexOf(userId);
+        },
+
+        updateFilteredUserData(data, updateType) {
+            if (this.isFilterEnabled()) {
+                let index = this.filteredUserDataIndex(data.user_id);
+                if (index !== -1) {
+                    this.filteredUserData = this.filteredUserData.map((x) => {
+                        if (x.user_id === data.user_id) {
+                            x[updateType] = data[updateType];
+                            return x;
+                        }
+                        return x;
+                    });
+                }
+            }
+        },
+        addFilteredUserData(data) {
+            if (this.isFilterEnabled() && this.matchesTheFilterCriteria(data)) {
+                this.filteredUserData.push(data);
+                this.filteredUserListData.push(data.user_id);
+            }
+        },
+        deleteFilteredUserData(data) {
+            if (this.isFilterEnabled()) {
+                let index = this.filteredUserDataIndex(data.user_id);
+                if (index !== -1) {
+                    this.filteredUserData.splice(index, 1);
+                    this.filteredUserListData.splice(index, 1);
+                }
+            }
+        },
+
+        filteredCallDataIndex(callId) {
+            if (!this.filteredCallListData.length) {
+                this.filteredCallListData = this.filteredCallData.map(function (item) {
+                    return item.c_id;
+                });
+            }
+            return this.filteredCallListData.indexOf(callId);
+        },
+        updateFilteredCallData(data) {
+            if (this.isFilterEnabled()) {
+                let index = this.filteredCallDataIndex(data.c_id);
+                if (index !== -1) {
+                    this.filteredCallData = this.filteredCallData.map((x) => {
+                        if (x.c_id === data.c_id) {
+                            return data;
+                        }
+                        return x;
+                    });
+                }
+            }
+        },
+        addFilteredCallData(data) {
+            if (this.isFilterEnabled() && this.matchesTheFilterCriteria(data)) {
+                this.filteredCallData.push(data);
+                this.filteredCallListData.push(data.c_id);
+            }
+        },
+        deleteFilteredCallData(data) {
+            if (this.isFilterEnabled()) {
+                let index = this.filteredCallDataIndex(data.c_id);
+                if (index !== -1) {
+                    this.filteredCallData.splice(index, 1);
+                    this.filteredCallListData.splice(index, 1);
+                }
+            }
+        },
+
+        matchesTheFilterCriteria(data) {
+            if (this.selectedDep) {
+                var userDepList;
+                if (data.userDep) {
+                    userDepList = data.userDep;
+                } else if (data.c_dep_id) {
+                    if (!Array.isArray(data.c_dep_id)) {
+                        userDepList = [data.c_dep_id];
+                    } else {
+                        userDepList = data.c_dep_id;
+                    }
+                }
+                if (userDepList) {
+                    return data.userDep.indexOf(this.selectedDep) !== -1;
+                }
+
+                return false;
+            }
+
+            return false;
+        }
     }
 }).mount('#realtime-map-app');

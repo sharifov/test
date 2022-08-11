@@ -3,59 +3,63 @@
 
 - name: Setup shared server
   hosts: shared
-  remote_user: "{{ ssh_user }}"
+  remote_user: ubuntu
   gather_facts: false
   roles:
     - role: common
       tags: common
-      become: yes
+      become: true
 
     - role: beanstalkd
       tags: beanstalkd
-      become: yes
+      become: true
 
     - role: centrifugo
       tags: centrifugo
-      become: yes
+      become: true
 
     - role: redis
       tags: redis
-      become: yes
+      become: true
 
     - role: docker
       tags: docker
-      become: yes
+      become: true
 
     - role: antispam
       tags: antispam
       vars:
         antispam_ver: latest
-      become: yes
+      become: true
+
+    - role: clickhouse
+      tags: clickhouse
+      become: true
 
     - role: filebeat
       tags: filebeat
-      become: yes
+      become: true
 
     - role: node_exporter
       tags: node-exporter
-      become: yes
+      become: true
 
     - role: beanstalkd_exporter
       tags: beanstalkd-exporter
-      become: yes
+      become: true
 
     - role: redis_exporter
       tags: redis-exporter
-      become: yes
+      become: true
 
     - role: mysqld_exporter
       tags: mysqld-exporter
-      become: yes
+      become: true
 
     - role: postgresql_exporter
       tags: postgresql-exporter
-      become: yes
+      become: true
 
     - role: beat_exporter
       tags: beat-exporter
-      become: yes
+      become: true

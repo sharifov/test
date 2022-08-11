@@ -130,7 +130,7 @@ $this->params['breadcrumbs'][] = $this->title;
             /*[
                 'attribute' => 'e_updated_user_id',
                 'value' => static function (\common\models\Email $model) {
-                    return ($model->eUpdatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->eUpdatedUser->username) : $model->e_updated_user_id);
+                    return ($model->updatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->updatedUser->username) : $model->e_updated_user_id);
                 },
                 'format' => 'raw'
             ],*/

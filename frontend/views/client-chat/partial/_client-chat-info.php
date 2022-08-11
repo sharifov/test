@@ -6,6 +6,7 @@ use frontend\widgets\clientChat\ClientChatClientInfoWidget;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\offer\src\entities\offer\OfferQuery;
+use modules\taskList\abac\TaskListAbacObject;
 use src\auth\Auth;
 use src\entities\cases\CasesStatus;
 use src\helpers\clientChat\ClientChatHelper;
@@ -44,6 +45,7 @@ $formatter->timeZone = Auth::user()->timezone;
 
 $cases = $clientChat->cases;
 $leads = $clientChat->leads;
+$formResponses = $clientChat->formResponses;
 ?>
 
 <div class="_rc-client-chat-info-wrapper">
@@ -408,9 +410,9 @@ $leads = $clientChat->leads;
                                             ]) ?>
                                       <?php endif; ?>
                                         <?php
-                                         /** @abac LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS, Access To Take Lead*/
+                                         /** @abac LeadAbacObject::ACT_TAKE_LEAD_FROM_CHAT, LeadAbacObject::ACTION_ACCESS, Access To Take Lead From Chat*/
                                         $leadAbacDto = new LeadAbacDto($lead, Auth::id());
-                                        if (Auth::can('leadSection', ['lead' => $lead]) && Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS)) :
+                                        if (Auth::can('leadSection', ['lead' => $lead]) && Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD_FROM_CHAT, LeadAbacObject::ACTION_ACCESS)) :
                                             echo Html::a('<i class="fa fa-download"></i> Take', null, [
                                                 'class' => 'dropdown-item',
                                                 'id' => 'take_button',
@@ -454,6 +456,32 @@ $leads = $clientChat->leads;
         'timeout' => 5000,
         'enablePushState' => false,
     ]); */ ?>
+    <?php /** @abac ClientChatAbacObject::UI_CLIENT_CHAT_FORM, ClientChatAbacObject::ACTION_ACCESS, Access To show|add|send Client Chat Form Response */ ?>
+    <?php  if (Yii::$app->abac->can(null, ClientChatAbacObject::UI_CLIENT_CHAT_FORM, ClientChatAbacObject::ACTION_ACCESS)) : ?>
+        <div class="_rc-block-wrapper">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Client Chat Form </h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li>
+                            <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+
+                <div class="x_content">
+                    <?php foreach ($formResponses as $formResponse) : ?>
+                        <div class="_cc-addition-data-item">
+                            <span><?= $formResponse->clientChatForm->ccf_name ?></span>
+                            <span ><?= $formResponse->ccfr_value ?></span>
+                        </div>
+                    <?php endforeach ?>
+
+                </div>
+            </div>
+        </div>
+    <?php endif ?>
 
         <?php if ($clientChat->ccv && $clientChat->ccv->ccvCvd) : ?>
             <div class="_rc-block-wrapper">
@@ -514,59 +542,6 @@ $leads = $clientChat->leads;
     JS;
     $this->registerJs($js);
 endif; ?>
-    <?php
-    $js = <<<JS
-
-    window.clientChatHoldTimeProgressbar =  function (
-        formatTimer,
-        maxProgressBar,
-        leftProgressBar,
-        warningZone
-        ){
-    
-        var progressBoxObj = $('#progressBar');
-        var progressLineObj = progressBoxObj.find('.progress-bar');
-        var progressBarWidth = 0;
-        var timerProgressBar;
-        
-        startTimer(leftProgressBar);
-
-        function startTimer(sec) {
-            let seconds = new Date().getTime() + (1000 * sec);
-            $('#clock').countdown(seconds)
-                .on('update.countdown', function(event) {
-                    let format = formatTimer;
-                    $(this).html(event.strftime(format));
-                    
-                })
-                .on('finish.countdown', function(event) {
-                     $('#clock').html('00:00');  
-                     $('#progress_bar_box').hide();               
-                });
-        }
-    
-        timerProgressBar = setInterval(function() {
-            
-            if (leftProgressBar <= 0) {
-                progressLineObj.removeClass('bg-warning progress-bar-animated progress-bar-striped');
-                progressLineObj.width(0);
-                clearInterval(timerProgressBar);
-                return false;
-            }
-            leftProgressBar--;
-            progressBarWidth = leftProgressBar * progressBoxObj.width() / maxProgressBar;
-            
-            if (leftProgressBar < warningZone) {
-                progressLineObj.removeClass('bg-info').addClass('bg-warning');
-            } 
-            progressLineObj.width(progressBarWidth);       
-    
-        }, 1000);
-    }    
-    
-JS;
-    $this->registerJs($js);
-    ?>
 
 <?php
 $clientInfoUrl = \yii\helpers\Url::to(['/client/ajax-get-info']);

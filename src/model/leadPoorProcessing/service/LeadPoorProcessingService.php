@@ -7,6 +7,7 @@ use common\components\jobs\LeadPoorProcessingRemoverJob;
 use common\models\EmailTemplateType;
 use common\models\Employee;
 use common\models\Lead;
+use frontend\helpers\RedisHelper;
 use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
@@ -78,7 +79,7 @@ class LeadPoorProcessingService
                     }
                 } catch (\RuntimeException | \DomainException $throwable) {
                     /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
-                    if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                    if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG)) {
                         $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $logData);
                         \Yii::warning($message, 'LeadPoorProcessingService:removeFromLead:Exception');
                     }
@@ -121,7 +122,7 @@ class LeadPoorProcessingService
             $leadPoorProcessingLogRepository->save(true);
         } catch (\RuntimeException | \DomainException $throwable) {
             /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
-            if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+            if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG)) {
                 $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), $logData);
                 \Yii::info($message, 'info\LeadPoorProcessingService:removeFromLeadAndKey:Exception');
             }
@@ -138,12 +139,12 @@ class LeadPoorProcessingService
         int $priority = 100
     ): void {
         /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
-        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_LPP_ENABLE)) {
             return;
         }
 
         $idKey = 'adder_' . $leadId . '_' . implode('_', $dataKeys);
-        if (!self::checkDuplicate($idKey)) {
+        if (RedisHelper::checkDuplicate($idKey)) {
             return;
         }
 
@@ -171,12 +172,12 @@ class LeadPoorProcessingService
         int $priority = 100
     ): void {
         /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
-        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_LPP_ENABLE)) {
             return;
         }
 
         $idKey = 'remover_' . $leadId . '_' . implode('_', $dataKeys);
-        if (!self::checkDuplicate($idKey)) {
+        if (RedisHelper::checkDuplicate($idKey)) {
             return;
         }
 
@@ -207,15 +208,5 @@ class LeadPoorProcessingService
             throw new \RuntimeException('EmailTemplateType not found by(' . $templateKey . ')');
         }
         return (bool) ArrayHelper::getValue($tpl->etp_params_json, 'quotes.selectRequired', false);
-    }
-
-    private static function checkDuplicate(string $idKey, int $pauseSecond = 10): bool
-    {
-        $redis = Yii::$app->redis;
-        if (!$redis->get($idKey)) {
-            $redis->setex($idKey, $pauseSecond, true);
-            return true;
-        }
-        return false;
     }
 }

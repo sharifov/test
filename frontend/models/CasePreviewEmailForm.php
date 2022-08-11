@@ -42,8 +42,10 @@ use yii\helpers\ArrayHelper;
  *
  */
 
-class CasePreviewEmailForm extends Model
+class CasePreviewEmailForm extends Model implements EmailPreviewFromInterface
 {
+    use EmailPreviewFormTrait;
+
     public $e_case_id;
     public $e_email_from;
     public $e_email_to;
@@ -190,5 +192,10 @@ class CasePreviewEmailForm extends Model
     public function isSubjectEdited(): bool
     {
         return strcmp($this->e_email_subject_origin, $this->e_email_subject) !== 0;
+    }
+
+    public function countLettersInEmailMessage(): int
+    {
+        return !empty($this->e_email_message) ? mb_strlen($this->e_email_message) : 0;
     }
 }

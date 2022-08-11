@@ -3,8 +3,12 @@
 namespace modules\shiftSchedule\src\entities\userShiftSchedule\search;
 
 use common\models\Employee;
+use modules\shiftSchedule\src\abac\ShiftAbacObject;
+use modules\shiftSchedule\src\entities\userShiftSchedule\Scopes;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use yii\data\ActiveDataProvider;
+use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 
 /**
  * @property string $clientStartDate
@@ -14,6 +18,10 @@ class SearchUserShiftSchedule extends UserShiftSchedule
 {
     public string $clientStartDate = '';
     public string $clientEndDate = '';
+    public $shiftIds = [];
+    public string $startedDateRange = '';
+    public string $endedDateRange = '';
+    private bool $excludeDeleteStatus = false;
 
     public function rules(): array
     {
@@ -48,22 +56,37 @@ class SearchUserShiftSchedule extends UserShiftSchedule
 
             ['uss_user_id', 'integer'],
             ['uss_sst_id', 'integer'],
+
+            ['shiftIds', 'each', 'rule' => ['integer']],
+            ['startedDateRange', 'string'],
+            [['startedDateRange', 'endedDateRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
         ];
     }
 
-    public function search($params): ActiveDataProvider
+    private function filterSearchQuery(Scopes $query): void
     {
-        $query = static::find();
+        if (!empty($this->shiftIds)) {
+            $query->andWhere(['IN', 'uss_shift_id', $this->shiftIds]);
+        }
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-        ]);
+        if (!empty($this->startedDateRange)) {
+            $startedRange = explode(' - ', $this->startedDateRange);
 
-        $this->load($params);
+            if ($startedRange[0] && $startedRange[1]) {
+                $fromDate = date('Y-m-d', strtotime($startedRange[0]));
+                $toDate = date('Y-m-d', strtotime($startedRange[1]));
+                $query->andWhere(['BETWEEN', 'DATE(uss_start_utc_dt)', $fromDate, $toDate]);
+            }
+        }
 
-        if (!$this->validate()) {
-            // $query->where('0=1');
-            return $dataProvider;
+        if (!empty($this->endedDateRange)) {
+            $endedRange = explode(' - ', $this->endedDateRange);
+
+            if ($endedRange[0] && $endedRange[1]) {
+                $fromDate = date('Y-m-d', strtotime($endedRange[0]));
+                $toDate = date('Y-m-d', strtotime($endedRange[1]));
+                $query->andWhere(['BETWEEN', 'DATE(uss_end_utc_dt)', $fromDate, $toDate]);
+            }
         }
 
         $query->andFilterWhere([
@@ -85,6 +108,25 @@ class SearchUserShiftSchedule extends UserShiftSchedule
         ]);
 
         $query->andFilterWhere(['like', 'uss_description', $this->uss_description]);
+    }
+
+    public function search($params): ActiveDataProvider
+    {
+        $query = static::find();
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'key' => 'uss_id',
+            'sort' => ['defaultOrder' => ['uss_id' => SORT_DESC]],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            return $dataProvider;
+        }
+
+        $this->filterSearchQuery($query);
 
         return $dataProvider;
     }
@@ -104,6 +146,10 @@ class SearchUserShiftSchedule extends UserShiftSchedule
     ): ActiveDataProvider {
         $query = static::find();
 
+        if ($this->excludeDeleteStatus) {
+            $query->excludeDeleteStatus();
+        }
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => ['defaultOrder' => ['uss_id' => SORT_DESC]],
@@ -119,7 +165,7 @@ class SearchUserShiftSchedule extends UserShiftSchedule
             return $dataProvider;
         }
 
-        $query->where(['uss_user_id' => $userId]);
+        $query->andWhere(['uss_user_id' => $userId]);
 
         if (!empty($startDate) && !empty($endDate)) {
             $this->clientStartDate = $startDate;
@@ -161,5 +207,27 @@ class SearchUserShiftSchedule extends UserShiftSchedule
         ]);
 
         return $dataProvider;
+    }
+
+    public function searchIds($params): array
+    {
+        $query = static::find()->select('uss_id');
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            $query->where('0=1');
+
+            return [];
+        }
+
+        $this->filterSearchQuery($query);
+
+        return ArrayHelper::map($query->asArray()->all(), 'uss_id', 'uss_id');
+    }
+
+    public function enableExcludeDeleteStatus()
+    {
+        $this->excludeDeleteStatus = true;
     }
 }

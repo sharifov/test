@@ -4,6 +4,7 @@ namespace src\services\badges\objects;
 
 use common\models\Employee;
 use common\models\search\LeadQcallSearch;
+use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use src\auth\Auth;
@@ -85,6 +86,11 @@ class LeadBadgeCounter implements BadgeCounterInterface
                         $result['extra-queue'] = $count;
                     }
                     break;
+                case 'business-extra-queue':
+                    if ($count = $this->getLeadBusinessExtraQueue()) {
+                        $result['business-extra-queue'] = $count;
+                    }
+                    break;
                 case 'closed':
                     if ($count = $this->getLeadClosedQueue()) {
                         $result['closed'] = $count;
@@ -115,6 +121,26 @@ class LeadBadgeCounter implements BadgeCounterInterface
         }
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
+        /** @fflag FFlag::FF_KEY_BUSINESS_QUEUE_LIMIT, Business Queue Limit Enable */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BUSINESS_QUEUE_LIMIT)) {
+            $limit = 0;
+            if ($user->isAgent()) {
+                $userParams = $user->userParams;
+                if ($userParams) {
+                    if ($userParams->up_business_inbox_show_limit_leads > 0) {
+                        $limit = $userParams->up_business_inbox_show_limit_leads;
+                    }
+                } else {
+                    return null;
+                }
+            }
+            $count = $this->leadBadgesRepository->getBusinessInboxCount($user);
+
+            if ($limit > 0 && $count > 0 && $count > $limit) {
+                return $limit;
+            }
+            return $count;
+        }
         return $this->leadBadgesRepository->getBusinessInboxCount($user);
     }
 
@@ -296,6 +322,16 @@ class LeadBadgeCounter implements BadgeCounterInterface
             return null;
         }
         return $this->leadBadgesRepository->getExtraQueueCount();
+    }
+
+    private function getLeadBusinessExtraQueue(): ?int
+    {
+        /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) === true) {
+            return null;
+        }
+
+        return $this->leadBadgesRepository->getBusinessExtraQueueCount();
     }
 
     private function getLeadClosedQueue(): ?int

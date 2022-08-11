@@ -1887,7 +1887,9 @@ input[disabled] + .radio-tab__text {
 .ll-trash {
   background-color: #8e99a5;
 }
-
+.ll-close {
+    background-color: #8e99a5;
+}
 .ll-booked {
   background-color: #0BB094;
 }
@@ -5581,6 +5583,7 @@ input[disabled] + .radio-tab__text {
 }
 .navbar-nav .dropdown-menu {
     margin: 0;
+    z-index: 100041;
 }
 .navbar-nav .show .dropdown-menu.msg_list {
     width: 400px !important;
@@ -6037,3 +6040,10 @@ ul.bar_tabs>li.active {
     overflow-y: scroll;
 }
 /************* END BUG REPORT FORM ****************/
+li.select2-selection__choice:first-of-type {
+  max-width: 85%;
+}
+
+li.select2-selection__choice {
+  white-space: pre-line;
+}

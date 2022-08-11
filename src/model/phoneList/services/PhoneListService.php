@@ -25,7 +25,7 @@ class PhoneListService
             'error' => false
         ];
 
-        $phoneNumbersData = Yii::$app->communication->phoneNumberList();
+        $phoneNumbersData = Yii::$app->comms->phoneNumberList();
         if ($phoneNumbersData) {
             if (!empty($phoneNumbersData['error'])) {
                 $data['error'] = 'Error: ' . $phoneNumbersData['error'];

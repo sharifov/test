@@ -31,8 +31,8 @@ MonitorCallIncomingAsset::register($this);
                         <div class="clearfix"></div>
                     </div>
                     <div class="x_content">
-                        <transition-group name="fade2" tag="div" class="card-body">
-                            <div v-for="(item, index) in userOnlineList()" class="list-item truncate" :key="item" style="width: 150px;">
+                        <transition-group name="fade" tag="div" class="card-body">
+                            <div v-for="(item, index) in userDataList()" class="list-item truncate" :key="item" style="width: 150px;">
                                 <user-component :item="item" :key="item.uo_user_id" :index="index"></user-component>
                             </div>
                         </transition-group>
@@ -40,41 +40,73 @@ MonitorCallIncomingAsset::register($this);
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="x_panel">
-                    <div class="x_title">
-                        <h2>Metrics</h2>
-                        <ul class="nav navbar-right panel_toolbox">
-                            <li>
-                                <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
-                            </li>
-                        </ul>
-                        <div class="clearfix"></div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="x_panel">
+                            <div class="x_title">
+                                <h2>Filters: </h2>
+                                <ul class="nav navbar-right panel_toolbox">
+                                    <li>
+                                        <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                    </li>
+                                </ul>
+                                <div class="clearfix"></div>
+                            </div>
+                            <div class="x_content">
+                                <div class="col-md-4">
+                                    <div class="form-group field-leadsearch-employee_id">
+                                        <label class="control-label" for="leadsearch-employee_id">Select department:</label>
+                                        <select v-model="filters.selectedDep" class="form-control" v-on:input="selectDepartment($event.target.value)">
+                                            <option v-for="option in depListData()" :value="option.id">
+                                                {{ option.label }}
+                                            </option>
+                                        </select>
+                                        <div class="help-block"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="x_content">
-                        <div class="tile_count">
-                            <div class="col-md-4 col-sm-4  tile_stats_count">
-                                <span class="count_top"><i class="fa fa-list"></i> Call Items</span>
-                                <div class="count" v-cloak>{{ callList.length }}</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="x_panel">
+                            <div class="x_title">
+                                <h2>Metrics</h2>
+                                <ul class="nav navbar-right panel_toolbox">
+                                    <li>
+                                        <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                    </li>
+                                </ul>
+                                <div class="clearfix"></div>
                             </div>
-                            <div class="col-md-4 col-sm-4  tile_stats_count">
-                                <span class="count_top"><i class="fa fa-recycle"></i> IVR</span>
-                                <div class="count" v-cloak>{{ ivrCounter }}</div>
-                            </div>
-                            <div class="col-md-4 col-sm-4  tile_stats_count">
-                                <span class="count_top"><i class="fa fa-pause"></i> Queue</span>
-                                <div class="count" v-cloak>{{ queueCounter }}</div>
-                            </div>
-                            <div class="col-md-4 col-sm-4  tile_stats_count">
-                                <span class="count_top"><i class="fa fa-phone"></i> InProgress / Ringing</span>
-                                <div class="count" v-cloak>{{ inProgressCounter }} / {{ ringingCounter }}</div>
-                            </div>
-                            <div class="col-md-4 col-sm-4  tile_stats_count">
-                                <span class="count_top"><i class="fa fa-stop"></i> Delay / Hold</span>
-                                <div class="count"v-cloak>{{ delayCounter }} / {{ holdCounter }}</div>
-                            </div>
-                            <div class="col-md-4 col-sm-4  tile_stats_count">
-                                <span class="count_top"><i class="fa fa-user"></i> Idle / OnLine</span>
-                                <div class="count" v-cloak>{{ idleUserList.length }} / {{ onlineUserCounter }}</div>
+                            <div class="x_content">
+                                <div class="tile_count">
+                                    <div class="col-md-4 col-sm-4  tile_stats_count">
+                                        <span class="count_top"><i class="fa fa-list"></i> Call Items</span>
+                                        <div class="count" v-cloak>{{ callCounter }}</div>
+                                    </div>
+                                    <div class="col-md-4 col-sm-4  tile_stats_count">
+                                        <span class="count_top"><i class="fa fa-recycle"></i> IVR</span>
+                                        <div class="count" v-cloak>{{ ivrCounter }}</div>
+                                    </div>
+                                    <div class="col-md-4 col-sm-4  tile_stats_count">
+                                        <span class="count_top"><i class="fa fa-pause"></i> Queue</span>
+                                        <div class="count" v-cloak>{{ queueCounter }}</div>
+                                    </div>
+                                    <div class="col-md-4 col-sm-4  tile_stats_count">
+                                        <span class="count_top"><i class="fa fa-phone"></i> InProgress / Ringing</span>
+                                        <div class="count" v-cloak>{{ inProgressCounter }} / {{ ringingCounter }}</div>
+                                    </div>
+                                    <div class="col-md-4 col-sm-4  tile_stats_count">
+                                        <span class="count_top"><i class="fa fa-stop"></i> Delay / Hold</span>
+                                        <div class="count"v-cloak>{{ delayCounter }} / {{ holdCounter }}</div>
+                                    </div>
+                                    <div class="col-md-4 col-sm-4  tile_stats_count">
+                                        <span class="count_top"><i class="fa fa-user"></i> Idle / OnLine</span>
+                                        <div class="count" v-cloak>{{ idleUserList.length }} / {{ onlineUserCounter }}</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -162,10 +194,10 @@ centrifuge.on('connect', function(ctx){
         let jsonData = message.data;
         if (jsonData.object === 'userOnline') {
             if (jsonData.action === 'delete') {
-                callMapApp.deleteUserOnline(jsonData.data.userOnline);
+                callMapApp.deleteUserData(jsonData.data.userOnline);
             } else {
                 //console.info(jsonData.data);
-                callMapApp.addUserOnline(jsonData.data.userOnline);
+                callMapApp.addUserData(jsonData.data.userOnline, 'online');
             }
         }
     });
@@ -175,9 +207,9 @@ centrifuge.on('connect', function(ctx){
         // console.log(jsonData.data);
         if (jsonData.object === 'userStatus') {
             if (jsonData.action === 'delete') {
-                callMapApp.deleteUserStatus(jsonData.data.userStatus);
+                callMapApp.deleteUserData(jsonData.data.userStatus);
             } else {
-                callMapApp.addUserStatus(jsonData.data.userStatus);
+                callMapApp.addUserData(jsonData.data.userStatus, 'status');
             }
         }
         //console.log(jsonData.data.userOnline.uo_idle_state);

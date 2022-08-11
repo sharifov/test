@@ -49,6 +49,7 @@ class CallUserAccessSearch extends CallUserAccess
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['cua_created_dt' => SORT_DESC]]
         ]);
 
         $this->load($params);

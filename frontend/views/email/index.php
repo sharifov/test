@@ -8,6 +8,12 @@ use yii\grid\GridView;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
 use src\helpers\email\MaskEmailHelper;
+use modules\featureFlag\FFlag;
+use src\services\email\EmailsNormalizeService;
+use src\entities\email\EmailInterface;
+use src\entities\email\helpers\EmailType;
+use common\models\Language;
+use src\entities\email\helpers\EmailStatus;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\EmailSearch */
@@ -29,6 +35,17 @@ $user = Yii::$app->user->identity;
         'scrollTo' => 0
     ]); ?>
     <?php // echo $this->render('_search', ['model' => $searchModel]);?>
+
+    <?php if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_EMAIL_NORMALIZED_FORM_ENABLE)) : ?>
+        <?php $normalizedTotal = EmailsNormalizeService::getTotalConnectedWithOld();
+           $oldTotal = EmailsNormalizeService::getOldTotal();
+           $alertClass = ($normalizedTotal < $oldTotal) ? 'warning' : 'info';
+        ?>
+        <div class="alert alert-<?= $alertClass?> alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <i class="fa fa-info-circle"></i> Normalized emails <?=  $normalizedTotal?> from <?=  $oldTotal?>
+        </div>
+    <?php endif ?>
 
     <div class="row">
         <?php $form = ActiveForm::begin([
@@ -81,6 +98,25 @@ $user = Yii::$app->user->identity;
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
             'e_id',
+            [
+                'attribute' => 'normalized',
+                'visible' => Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_EMAIL_NORMALIZED_FORM_ENABLE),
+                'value' => static function (\common\models\Email $model) {
+                    return $model->normalized ?
+                        Html::a('<span class="label label-success">yes</span>', ['email-normalized/view', 'id' => $model->normalized->e_id], ['target' => '_blank', 'data-pjax' => 0]) :
+                        Html::button('<i class="fa fa-refresh"></i> Normalize', [
+                            'class' => 'btn btn-warning btn-xs take-processing-btn js_email_normalize',
+                            'data-url' => \yii\helpers\Url::to(['email-normalized/normalize', 'id' => $model->e_id]),
+                        ]);
+                },
+                'format' => 'raw',
+                'options' => [
+                    'style' => 'width:80px'
+                ],
+                'contentOptions' => [
+                    'class' => 'text-center'
+                ]
+            ],
             ['class' => 'yii\grid\ActionColumn',
                 'template' => '{view} {update} {delete}',
                 'visibleButtons' => [
@@ -102,12 +138,12 @@ $user = Yii::$app->user->identity;
             [
                 'class' => \common\components\grid\project\ProjectColumn::class,
                 'attribute' => 'e_project_id',
-                'relation' => 'eProject',
+                'relation' => 'project',
             ],
 //            [
 //                'attribute' => 'e_project_id',
 //                'value' => static function (\common\models\Email $model) {
-//                    return $model->eProject ? '<span class="badge badge-info">' . Html::encode($model->eProject->name) . '</span>' : '-';
+//                    return $model->project ? '<span class="badge badge-info">' . Html::encode($model->project->name) . '</span>' : '-';
 //                },
 //                'format' => 'raw',
 //                'filter' => $projectList
@@ -115,22 +151,12 @@ $user = Yii::$app->user->identity;
             //'e_email_from',
             [
                 'attribute' => 'e_email_from',
-                'value' => static function (\common\models\Email $model) {
-                    if ($model->e_type_id == $model::TYPE_INBOX) {
-                        return MaskEmailHelper::masking($model->e_email_from);
-                    }
-                    return $model->e_email_from;
-                },
+                'value' => 'emailFrom'
             ],
             //'e_email_to',
             [
                 'attribute' => 'e_email_to',
-                'value' => static function (\common\models\Email $model) {
-                    if ($model->e_type_id == $model::TYPE_OUTBOX) {
-                        return MaskEmailHelper::masking($model->e_email_to);
-                    }
-                    return $model->e_email_to;
-                },
+                'value' => 'emailTo'
             ],
             'e_lead_id',
             'e_case_id',
@@ -143,29 +169,28 @@ $user = Yii::$app->user->identity;
             //'e_type_id',
             [
                 'attribute' => 'e_type_id',
-                'value' => static function (\common\models\Email $model) {
-                    return $model->getTypeName();
+                'value' => static function (EmailInterface $model) {
+                    return EmailType::getName($model->e_type_id);
                 },
-                'filter' => \common\models\Email::TYPE_LIST
+                'filter' => EmailType::getList()
             ],
             //'e_template_type_id',
             [
                 'attribute' => 'e_template_type_name',
-                'value' => static function (\common\models\Email $model) {
-                    return $model->eTemplateType ? $model->eTemplateType->etp_name : '-';
-                },
+                'value' => 'templateType.etp_name',
                 'label' => 'Template Name'
                 //'filter' =>
             ],
             //'e_language_id',
             [
                 'attribute' => 'e_language_id',
-                'value' => static function (\common\models\Email $model) {
-                    return $model->e_language_id;
-                },
-                'filter' => \common\models\Language::getLanguages(true)
+                'value' => 'languageId',
+                'filter' => Language::getLanguages(true)
             ],
-            'e_communication_id',
+            [
+                'attribute' => 'e_communication_id',
+                'value' => 'communicationId',
+            ],
             //'e_is_deleted',
             //'e_is_new:boolean',
             //'e_delay',
@@ -173,10 +198,10 @@ $user = Yii::$app->user->identity;
             //'e_status_id',
             [
                 'attribute' => 'e_status_id',
-                'value' => static function (\common\models\Email $model) {
-                    return $model->getStatusName();
+                'value' => static function (EmailInterface $model) {
+                    return EmailStatus::getName($model->e_status_id);
                 },
-                'filter' => \common\models\Email::STATUS_LIST
+                'filter' => EmailStatus::getList()
             ],
             'attribute' => 'e_client_id:client',
             //'e_status_done_dt',
@@ -185,7 +210,7 @@ $user = Yii::$app->user->identity;
             /*[
                 'attribute' => 'e_updated_user_id',
                 'value' => static function (\common\models\Email $model) {
-                    return ($model->eUpdatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->eUpdatedUser->username) : $model->e_updated_user_id);
+                    return ($model->updatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->updatedUser->username) : $model->e_updated_user_id);
                 },
                 'filter' => $userList,
                 'format' => 'raw'
@@ -194,14 +219,14 @@ $user = Yii::$app->user->identity;
             [
                 'class' => UserSelect2Column::class,
                 'attribute' => 'e_created_user_id',
-                'relation' => 'eCreatedUser',
+                'relation' => 'createdUser',
                 'placeholder' => ''
             ],
 
 //            [
 //                'attribute' => 'e_created_user_id',
 //                'value' => static function (\common\models\Email $model) {
-//                    return ($model->eCreatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->eCreatedUser->username) : $model->e_created_user_id);
+//                    return ($model->createdUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->createdUser->username) : $model->e_created_user_id);
 //                },
 //                'filter' => $userList,
 //                'format' => 'raw'
@@ -217,7 +242,7 @@ $user = Yii::$app->user->identity;
             /*[
                 'attribute' => 'e_created_user_id',
                 'value' => static function (\common\models\Email $model) {
-                    return  ($model->eCreatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->eCreatedUser->username) : $model->e_created_user_id);
+                    return  ($model->createdUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->createdUser->username) : $model->e_created_user_id);
                 'format' => 'raw'
                 },
             ],*/
@@ -312,3 +337,25 @@ $user = Yii::$app->user->identity;
 
     </script>
 </div>
+
+<?php
+$jsCode = <<<JS
+    $(document).on('click', '.js_email_normalize', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        var url = $(this).data('url');
+        var elm = $(this);
+        elm.html('<i class="fa fa-sync fa-spin"></i>');
+
+        $.post( url, function() {})
+          .done(function(data) {
+            elm.parent().html(data.html);
+          })
+          .fail(function(data) {
+            elm.html('<i class="fa fa-exclamation-triangle" aria-hidden="true"></i>');
+          });
+    });
+JS;
+
+$this->registerJs($jsCode, \yii\web\View::POS_READY);

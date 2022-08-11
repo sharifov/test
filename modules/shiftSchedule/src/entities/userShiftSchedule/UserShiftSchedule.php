@@ -4,8 +4,12 @@ namespace modules\shiftSchedule\src\entities\userShiftSchedule;
 
 use common\models\Employee;
 use modules\shiftSchedule\src\entities\shift\Shift;
+use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
+use modules\shiftSchedule\src\events\ShiftScheduleEventChangedEvent;
+use src\auth\Auth;
+use src\entities\EventTrait;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -45,6 +49,8 @@ use yii\db\BaseActiveRecord;
  */
 class UserShiftSchedule extends \yii\db\ActiveRecord
 {
+    use EventTrait;
+
     private const MAX_VALUE_INT = 2147483647;
 
     public const STATUS_PENDING = 1;
@@ -52,6 +58,8 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
     public const STATUS_DONE = 3;
     public const STATUS_CANCELED = 6;
     public const STATUS_DELETED = 8;
+
+    public const DEFAULT_DURATION_HOURS = 8;
 
     private const STATUS_LIST = [
         self::STATUS_PENDING => 'Pending',
@@ -93,13 +101,26 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
 
     public function beforeSave($insert): bool
     {
+        $time = time();
+        if (!$this->uss_year_start || !$this->uss_month_start) {
+            if (!empty($this->uss_start_utc_dt) && ($newTime = strtotime($this->uss_start_utc_dt))) {
+                $time = $newTime;
+            }
+        }
+
         if (!$this->uss_year_start) {
-            $this->uss_year_start = date('Y', strtotime($this->uss_start_utc_dt));
+            $this->uss_year_start = (int)date('Y', $time);
         }
         if (!$this->uss_month_start) {
-            $this->uss_month_start = (int) date('m', strtotime($this->uss_start_utc_dt));
+            $this->uss_month_start = (int)date('m', $time);
         }
         return parent::beforeSave($insert);
+    }
+
+    public function afterDelete(): void
+    {
+        parent::afterDelete();
+        ShiftScheduleRequest::deleteAll(['ssr_uss_id' => $this->uss_id]);
     }
 
     public function rules(): array
@@ -142,7 +163,15 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
 
             ['uss_created_user_id', 'integer'],
             ['uss_updated_user_id', 'integer'],
+
+            ['uss_sst_id', 'required'],
             ['uss_sst_id', 'integer'],
+
+            [['uss_shift_id', 'uss_ssr_id', 'uss_duration',
+                'uss_customized', 'uss_sst_id'], 'default', 'value' => null],
+            [['uss_user_id', 'uss_shift_id', 'uss_ssr_id', 'uss_duration',
+                'uss_status_id', 'uss_type_id', 'uss_customized', 'uss_sst_id'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true],
+
 
             ['uss_year_start', 'integer', 'max' => 2200, 'min' => 2000],
             ['uss_month_start', 'integer', 'max' => 12, 'min' => 1],
@@ -289,8 +318,88 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
     /**
      * @return string
      */
-    public function getShiftTitle(): string
+    public function getShiftName(): string
     {
-        return (!$this->shift || empty($this->shift->sh_title)) ? '-' : $this->shift->sh_title;
+        return $this->shift ? $this->shift->sh_name : '-';
+    }
+
+    public static function create(
+        int $userId,
+        ?string $description,
+        string $startDateTime,
+        string $endDateTime,
+        int $duration,
+        int $status,
+        int $type,
+        int $scheduleType
+    ): self {
+        $self = new self();
+        $self->uss_user_id = $userId;
+        $self->uss_description = $description;
+        $self->uss_start_utc_dt = $startDateTime;
+        $self->uss_end_utc_dt = $endDateTime;
+        $self->uss_duration = $duration;
+        $self->uss_status_id = $status;
+        $self->uss_type_id = $type;
+        $self->uss_sst_id = $scheduleType;
+        return $self;
+    }
+
+    public function isOwner(int $userId): bool
+    {
+        return $this->uss_user_id === $userId;
+    }
+
+    public function editFromCalendar(
+        int $status,
+        int $type,
+        \DateTimeImmutable $startDateTime,
+        \DateTimeImmutable $endDateTime,
+        int $duration,
+        ?string $description
+    ): void {
+        $this->uss_status_id = $status;
+        $this->uss_sst_id = $type;
+        $this->uss_start_utc_dt = $startDateTime->format('Y-m-d H:i:s');
+        $this->uss_end_utc_dt = $endDateTime->format('Y-m-d H:i:s');
+        $this->uss_duration = $duration;
+        $this->uss_description = $description;
+    }
+
+    public function setNewOwner(int $id): void
+    {
+        $this->uss_user_id = $id;
+    }
+
+    public function isDeletedStatus(): bool
+    {
+        return $this->uss_status_id === self::STATUS_DELETED;
+    }
+
+    /**
+     * @return void
+     */
+    public function setStatusDelete(int $userId)
+    {
+        $oldEvent = clone $this;
+        $this->uss_status_id = UserShiftSchedule::STATUS_DELETED;
+        $changedAttributes = $this->getDirtyAttributes();
+        $this->recordChangeEvent($oldEvent, $changedAttributes, $userId);
+    }
+
+    /**
+     * @param UserShiftSchedule $oldEvent
+     * @param array $changedAttributes
+     * @param Employee $user
+     * @return void
+     */
+    public function recordChangeEvent(UserShiftSchedule $oldEvent, array $changedAttributes, int $userId)
+    {
+        $this->recordEvent(new ShiftScheduleEventChangedEvent($this, $oldEvent, $changedAttributes, $userId));
+    }
+
+    public static function getProcessingStatuses(): array
+    {
+        return [self::STATUS_APPROVED, self::STATUS_DONE];
     }
 }

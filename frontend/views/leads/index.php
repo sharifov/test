@@ -26,7 +26,7 @@ use common\models\Call;
 /* @var $this View */
 /* @var $searchModel common\models\search\LeadSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
-/* @var $isAgent bool */
+/* @var $accessAdvancedSearch bool */
 
 $this->title = 'Search Leads';
 $this->params['breadcrumbs'][] = $this->title;
@@ -37,7 +37,7 @@ $user = Auth::user();
 
 if ($user->isAdmin()) {
 } else {
-    if ($isAgent) {
+    if (!$accessAdvancedSearch) {
         unset($statusList[Lead::STATUS_PENDING]);
     }
 }
@@ -88,7 +88,7 @@ $this->registerJs($js);
         </div>
         <div class="x_content" style="display: <?=(Yii::$app->request->isPjax || Yii::$app->request->get('LeadSearch')) ? 'block' : 'none'?>">
             <?php
-            if ($isAgent) {
+            if (!$accessAdvancedSearch) {
                 $searchTpl = '_search_agent';
             } else {
                 $searchTpl = '_search';
@@ -128,7 +128,7 @@ $this->registerJs($js);
 
     <?php
 
-    $showFilter = $isAgent ? false : true;
+    $showFilter = $accessAdvancedSearch;
 
     $gridColumns = [
         [
@@ -313,7 +313,7 @@ $this->registerJs($js);
             'value' => static function (Lead $model) {
                 return Yii::$app->formatter->asRelativeTime(strtotime($model->created)); // Lead::getPendingAfterCreate($model->created);
             },
-            'visible' => !$isAgent,
+            'visible' => $accessAdvancedSearch,
             'format' => 'raw'
         ],
         [
@@ -400,13 +400,13 @@ $this->registerJs($js);
             'options' => [
                 'style' => 'width:200px'
             ],
-            'visible' => (!$isAgent && $searchModel->show_fields && in_array('check_list', $searchModel->show_fields, true)),
+            'visible' => ($accessAdvancedSearch && $searchModel->show_fields && in_array('check_list', $searchModel->show_fields, true)),
         ],
         [
             'header' => 'Quotes',
-            'value' => static function (Lead $model) use ($isAgent) {
+            'value' => static function (Lead $model) use ($accessAdvancedSearch) {
                 if ($model->quotesCount) {
-                    if ($isAgent) {
+                    if (!$accessAdvancedSearch) {
                         return $model->quotesCount;
                     }
                     return Html::a($model->quotesCount, [
@@ -440,7 +440,7 @@ $this->registerJs($js);
             'contentOptions' => [
                 'class' => 'text-center'
             ],
-            'visible' => (!$isAgent && $searchModel->show_fields && in_array('expert_quotes', $searchModel->show_fields, true)),
+            'visible' => ($accessAdvancedSearch && $searchModel->show_fields && in_array('expert_quotes', $searchModel->show_fields, true)),
         ],
         [
             'header' => 'Segments',
@@ -492,7 +492,7 @@ $this->registerJs($js);
                 return $model->employee ? '<i class="fa fa-user"></i> ' . Html::encode($model->employee->username) : '-';
             },
             'data' => $lists->getEmployees(true) ?: [],
-            'filter' => $isAgent ? '' : true,
+            'filter' => $accessAdvancedSearch ? true : '',
             'id' => 'employee-filter',
             'options' => ['width' => '200px'],
             'pluginOptions' => ['allowClear' => true]
@@ -557,7 +557,6 @@ $this->registerJs($js);
     echo GridView::widget([
         'id' => $gridId,
         'dataProvider' => $dataProvider,
-        //'filterModel' => $isAgent ? false : $searchModel,
         'filterModel' => $searchModel,
 
         'columns' => $gridColumns,

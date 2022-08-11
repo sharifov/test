@@ -78,6 +78,9 @@ class VoluntaryQuoteManualCreateService
         $this->objectCollection = $objectCollection;
     }
 
+    /**
+     * @throws \yii\db\StaleObjectException
+     */
     public function createProcessing(
         Flight $flight,
         ProductQuote $originProductQuote,
@@ -131,6 +134,9 @@ class VoluntaryQuoteManualCreateService
                 $flightQuoteTrip->delete();
             }
         }
+        foreach ($segments as $i => $segment) {
+            $segmentIata2Index[$segment['segmentIata']] = $i;
+        }
 
         $flightQuoteSegments = [];
         foreach ($form->itinerary as $key => $itinerary) {
@@ -149,9 +155,19 @@ class VoluntaryQuoteManualCreateService
             $keyIata = $flightQuoteSegment->fqs_departure_airport_iata . $flightQuoteSegment->fqs_arrival_airport_iata;
             $flightQuoteSegments[$keyIata] = $flightQuoteSegment;
 
-            $flightQuoteTrip->fqt_duration += $flightQuoteSegment->fqs_duration;
-            $flightQuoteTrip->update(false, ['fqt_duration']);
+            if (isset($segmentIata2Index[$keyIata])) {
+                $segment = $segments[$segmentIata2Index[$keyIata]];
+                $flightQuoteTrip->fqt_duration += $segment['flightDuration'] + $segment['layoverDuration'];
+            }
         }
+        unset($keyIata, $flightQuoteTrip, $flightQuoteTripId, $segmentDto, $flightQuoteSegment, $segmentIata2Index, $segment);
+
+        foreach ($tripList as $flightQuoteTrip) {
+            if ($flightQuoteTrip->getOldAttribute('fqt_duration') != $flightQuoteTrip->fqt_duration) {
+                $flightQuoteTrip->update(false, ['fqt_duration']);
+            }
+        }
+        unset($flightQuoteTrip);
 
         if ($form->getBaggageFormsData()) {
             foreach ($form->getBaggageFormsData() as $postKey => $postValues) {
@@ -281,6 +297,7 @@ class VoluntaryQuoteManualCreateService
         $productQuote->pq_origin_price = $sellingSum;
         $productQuote->pq_client_price = $sellingSum;
         $productQuote->pq_client_currency = $form->currencyCode;
+        $productQuote->pq_expiration_dt = $form->expirationDate;
         $this->objectCollection->getProductQuoteRepository()->save($productQuote);
 
         return $productQuote;

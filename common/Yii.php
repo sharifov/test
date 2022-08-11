@@ -35,7 +35,7 @@ abstract class BaseApplication extends yii\base\Application
  * Include only Web application related components here
  *
  * @property \aki\telegram\Telegram $telegram The Telegram component. This property is read-only. Extended component.
- * @property \common\components\CommunicationService $communication The CommunicationService component. This property is read-only. Extended component.
+ * @property \common\components\CommunicationService $comms The CommunicationService component. This property is read-only. Extended component.
  * @property \common\components\HybridService $hybrid The HybridService component. This property is read-only. Extended component.
  * @property \common\components\CurrencyService $currency The CurrencyService component.
  * @property \common\components\AirSearchService $airsearch The AirSearchService component.
@@ -55,15 +55,15 @@ abstract class BaseApplication extends yii\base\Application
  * @property \kivork\PrometheusClient\components\PrometheusClient $prometheus Prometheus client component
  * @property \sorokinmedia\centrifugo\Client $centrifugo Centrifugo client component
  * @property \modules\abac\components\AbacComponent $abac ABAC component
+ * @property \modules\objectSegment\components\ObjectSegmentComponent $objectSegment Object Segment component
  * @property \common\components\SnowplowService $snowplow Snowplow component
  * @property \common\components\antispam\CallAntiSpamService $callAntiSpam CallAntiSpamService component
  * @property \yii\i18n\Formatter $formatter_search Search Formatter component w/o timezone
  * @property \yii\authclient\Collection $authClientCollection Auth Client Collection
- * @property \kivork\FeatureFlag\components\FeatureFlagComponent $ff FeatureFlag component
+ * @property \kivork\FeatureFlag\components\FeatureFlagComponent $featureFlag FeatureFlag component
  * @property \modules\eventManager\components\EventManagerComponent $event Event component
- *
- *
- *
+ * @property \common\components\ApplicationStatus $applicationStatus application status component
+ * @property \common\components\email\EmailComponent $email application status component
  */
 class WebApplication extends yii\web\Application
 {

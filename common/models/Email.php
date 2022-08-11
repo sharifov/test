@@ -4,13 +4,23 @@ namespace common\models;
 
 use common\components\ChartTools;
 use common\components\CommunicationService;
+use common\components\jobs\UserTaskCompletionJob;
 use common\models\query\EmailQuery;
+use common\models\DepartmentEmailProject;
+use common\models\UserProjectParams;
 use DateTime;
 use modules\featureFlag\FFlag;
+use modules\lead\src\services\LeadTaskListService;
+use modules\taskList\src\entities\TargetObject;
+use modules\taskList\src\entities\TaskObject;
+use src\auth\Auth;
 use src\behaviors\metric\MetricEmailCounterBehavior;
 use src\entities\cases\Cases;
 use src\helpers\app\AppHelper;
 use src\helpers\email\TextConvertingHelper;
+use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
+use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogQuery;
+use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogStatus;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
@@ -18,12 +28,17 @@ use src\model\leadUserData\entity\LeadUserData;
 use src\model\leadUserData\entity\LeadUserDataDictionary;
 use src\model\leadUserData\repository\LeadUserDataRepository;
 use src\services\abtesting\email\EmailTemplateOfferABTestingService;
-use src\services\email\EmailService;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
+use src\entities\email\Email as EmailNormalized;
+use src\entities\email\helpers\EmailType;
+use src\helpers\email\MaskEmailHelper;
+use src\services\email\EmailServiceHelper;
+use src\entities\email\EmailInterface;
+use src\entities\EventTrait;
 
 /**
  * This is the model class for table "email".
@@ -69,22 +84,50 @@ use yii\helpers\VarDumper;
  *
  * @property string $body_html
  *
- * @property Employee $eCreatedUser
- * @property Cases $eCase
- * @property Language $eLanguage
- * @property Lead $eLead
- * @property Project $eProject
- * @property EmailTemplateType $eTemplateType
+ * @property Employee $createdUser
+ * @property Cases $case
+ * @property Language $language
+ * @property Lead $lead
+ * @property Project $project
+ * @property EmailTemplateType $templateType
  * @property mixed $emailData
  * @property string|mixed $statusName
  * @property array $usersIdByEmail
  * @property string|mixed $typeName
  * @property string $emailBodyHtml
  * @property string|mixed $priorityName
- * @property Employee $eUpdatedUser
+ * @property Employee $updatedUser
+ * @property Client $client
+ *
+ * @property int|null $leadId
+ * @property int|null $caseId
+ * @property int|null $clientId
+ * @property int|null $projectId
+ * @property int|null $templateTypeId
+ * @property string|null $templateTypeName
+ * @property string $emailFrom
+ * @property string|null $emailFromName
+ * @property string|null $emailTo
+ * @property string|null $emailToName
+ * @property string|null $templateTypeName
+ * @property string|null $statusName
+ * @property string|null $emailSubject
+ * @property int|null $communicationId
+ * @property string|null $languageId
+ * @property int|null $departmentId
+ * @property string|null $emailBodyHtml
+ * @property array|null $emailData
+ * @property string|null $errorMessage
+ * @property string|null $hash
+ * @property string|null $messageId
+ * @property string|null $statusDoneDt
+ * @property string|null $statusName
+ *
  */
-class Email extends \yii\db\ActiveRecord
+class Email extends \yii\db\ActiveRecord implements EmailInterface
 {
+    use EventTrait;
+
     public const TYPE_DRAFT     = 0;
     public const TYPE_OUTBOX    = 1;
     public const TYPE_INBOX     = 2;
@@ -283,15 +326,12 @@ class Email extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getECase()
+    public function getCase(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Cases::class, ['cs_id' => 'e_case_id']);
     }
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getECreatedUser()
+    public function getCreatedUser(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Employee::class, ['id' => 'e_created_user_id']);
     }
@@ -299,7 +339,7 @@ class Email extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getELanguage()
+    public function getLanguage()
     {
         return $this->hasOne(Language::class, ['language_id' => 'e_language_id']);
     }
@@ -307,15 +347,12 @@ class Email extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getELead()
+    public function getLead()
     {
         return $this->hasOne(Lead::class, ['id' => 'e_lead_id']);
     }
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getEProject()
+    public function getProject(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Project::class, ['id' => 'e_project_id']);
     }
@@ -323,7 +360,7 @@ class Email extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getETemplateType()
+    public function getTemplateType()
     {
         return $this->hasOne(EmailTemplateType::class, ['etp_id' => 'e_template_type_id']);
     }
@@ -331,7 +368,7 @@ class Email extends \yii\db\ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getEUpdatedUser()
+    public function getUpdatedUser()
     {
         return $this->hasOne(Employee::class, ['id' => 'e_updated_user_id']);
     }
@@ -339,6 +376,19 @@ class Email extends \yii\db\ActiveRecord
     public function getClient(): \yii\db\ActiveQuery
     {
         return $this->hasOne(Client::class, ['id' => 'e_client_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getNormalized()
+    {
+        return $this->hasOne(EmailNormalized::class, ['e_id' => 'e_id']);
+    }
+
+    public function getTemplateTypeName(): ?string
+    {
+        return $this->templateType->etp_name ?? null;
     }
 
     /**
@@ -360,6 +410,12 @@ class Email extends \yii\db\ActiveRecord
         return json_decode($this->e_email_data, true);
     }
 
+    public function updateEmailData($emailData)
+    {
+        $this->updateAttributes(['e_email_data' => json_encode($emailData)]);
+        return $this;
+    }
+
     public function setQuotes($quotes)
     {
         $this->quotes = implode(',', $quotes);
@@ -371,52 +427,14 @@ class Email extends \yii\db\ActiveRecord
     }
 
     /**
-     * @param $text
-     * @return mixed
+     * @deprecated. use through EmailMainService
      */
-    public static function stripHtmlTags($text)
-    {
-        $text = preg_replace(
-            [
-                // Remove invisible content
-                '@<head[^>]*?>.*?</head>@siu',
-                '@<style[^>]*?>.*?</style>@siu',
-                '@<script[^>]*?.*?</script>@siu',
-                '@<object[^>]*?.*?</object>@siu',
-                '@<embed[^>]*?.*?</embed>@siu',
-                '@<applet[^>]*?.*?</applet>@siu',
-                '@<noframes[^>]*?.*?</noframes>@siu',
-                '@<noscript[^>]*?.*?</noscript>@siu',
-                '@<noembed[^>]*?.*?</noembed>@siu',
-                // Add line breaks before and after blocks
-                '@</?((address)|(blockquote)|(center)|(del))@iu',
-                '@</?((div)|(h[1-9])|(ins)|(isindex)|(p)|(pre))@iu',
-                '@</?((dir)|(dl)|(dt)|(dd)|(li)|(menu)|(ol)|(ul))@iu',
-                '@</?((table)|(th)|(td)|(caption))@iu',
-                '@</?((form)|(button)|(fieldset)|(legend)|(input))@iu',
-                '@</?((label)|(select)|(optgroup)|(option)|(textarea))@iu',
-                '@</?((frameset)|(frame)|(iframe))@iu',
-            ],
-            [
-                ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-                "\n\$0", "\n\$0", "\n\$0", "\n\$0", "\n\$0", "\n\$0",
-                "\n\$0", "\n\$0",
-            ],
-            $text
-        );
-
-        $text = strip_tags($text);
-        $text = preg_replace('!\s+!', ' ', $text);
-
-        return $text;
-    }
-
     public function sendMail(array $data = []): array
     {
         $out = ['error' => false];
 
         /** @var CommunicationService $communication */
-        $communication = Yii::$app->communication;
+        $communication = Yii::$app->comms;
         $data['project_id'] = $this->e_project_id;
 
         $content_data['email_body_html'] = $this->getEmailBodyHtml();
@@ -438,7 +456,7 @@ class Email extends \yii\db\ActiveRecord
             $content_data['email_message_id'] = $this->e_message_id;
         }
 
-        $tplType = $this->eTemplateType ? $this->eTemplateType->etp_key : null;
+        $tplType = $this->templateType ? $this->templateType->etp_key : null;
 
         try {
             $request = $communication->mailSend($this->e_project_id, $tplType, $this->e_email_from, $this->e_email_to, $content_data, $data, ($this->e_language_id ?: 'en-US'), 0);
@@ -460,11 +478,14 @@ class Email extends \yii\db\ActiveRecord
                 $out['error'] = $this->e_error_message;
             }
             /** @fflag FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES, A/B testing for email offer templates enable/disable */
-            if ($this->e_status_id === self::STATUS_DONE && Yii::$app->ff->can(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES)) {
-                EmailTemplateOfferABTestingService::incrementCounterByTemplateAndProjectIds(
-                    $this->e_template_type_id,
-                    $this->e_project_id
-                );
+            if ($this->e_status_id !== self::STATUS_ERROR && Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES)) {
+                if ($this->e_template_type_id && $this->e_project_id && isset($this->lead)) {
+                    EmailTemplateOfferABTestingService::incrementCounterByTemplateAndProjectIds(
+                        $this->e_template_type_id,
+                        $this->e_project_id,
+                        $this->lead->l_dep_id
+                    );
+                }
             }
             if ($this->e_id && $this->e_lead_id && LeadPoorProcessingService::checkEmailTemplate($tplType)) {
                 LeadPoorProcessingService::addLeadPoorProcessingRemoverJob(
@@ -476,8 +497,28 @@ class Email extends \yii\db\ActiveRecord
                     ],
                     LeadPoorProcessingLogStatus::REASON_EMAIL
                 );
+                $lead = $this->lead;
+                if (
+                    \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE)
+                    && isset($lead)
+                    && $lead->isBusinessType()
+                    && LeadBusinessExtraQueueLogQuery::isLeadWasInBusinessExtraQueue($lead->id)
+                ) {
+                    try {
+                        LeadBusinessExtraQueueService::addLeadBusinessExtraQueueRemoverJob(
+                            $this->e_lead_id,
+                            LeadBusinessExtraQueueLogStatus::REASON_SENT_EMAIL
+                        );
+                    } catch (\RuntimeException | \DomainException $throwable) {
+                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['callId' => $this->callId]);
+                        \Yii::warning($message, 'Email:addLeadBusinessExtraQueueRemoverJob:Exception');
+                    } catch (\Throwable $throwable) {
+                        $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), ['callId' => $this->callId]);
+                        \Yii::error($message, 'Email:addLeadBusinessExtraQueueRemoverJob:Throwable');
+                    }
+                }
 
-                if (($lead = $this->eLead) && $lead->employee_id && $lead->isProcessing()) {
+                if (($lead = $this->lead) && $lead->employee_id && $lead->isProcessing()) {
                     try {
                         $leadUserData = LeadUserData::create(
                             LeadUserDataDictionary::TYPE_EMAIL_OFFER,
@@ -494,6 +535,17 @@ class Email extends \yii\db\ActiveRecord
                         \Yii::error($message, 'Email:LeadUserData:Throwable');
                     }
                 }
+            }
+
+            if ($this->e_id && ($lead = $this->lead) && (new LeadTaskListService($lead))->isProcessAllowed()) {
+                $job = new UserTaskCompletionJob(
+                    TargetObject::TARGET_OBJ_LEAD,
+                    $lead->id,
+                    TaskObject::OBJ_EMAIL,
+                    $this->e_id,
+                    Auth::id()
+                );
+                Yii::$app->queue_job->push($job);
             }
         } catch (\Throwable $exception) {
             $error = VarDumper::dumpAsString($exception->getMessage());
@@ -527,6 +579,7 @@ class Email extends \yii\db\ActiveRecord
     }
 
     /**
+     * @deprecated
      * @return int|mixed
      */
     public function detectLeadId()
@@ -596,6 +649,7 @@ class Email extends \yii\db\ActiveRecord
 
 
     /**
+     * @deprecated
      * @return array
      */
     public function getUsersIdByEmail(): array
@@ -621,6 +675,9 @@ class Email extends \yii\db\ActiveRecord
         return $users;
     }
 
+    /**
+     * @deprecated
+     */
     public function getUserIdByEmail(string $email): int
     {
         $user = [];
@@ -704,6 +761,7 @@ class Email extends \yii\db\ActiveRecord
     }
 
     /**
+     * @deprecated
      * @param string $startDate
      * @param string $endDate
      * @param string|null $groupingBy
@@ -839,15 +897,29 @@ class Email extends \yii\db\ActiveRecord
         return $emailStats;
     }
 
+    /**
+     * @deprecated
+     */
+    public static function getProjectIdByDepOrUpp($emailTo)
+    {
+        if ($dep = DepartmentEmailProject::find()->byEmail($emailTo)->one()) {
+            return $dep->dep_project_id;
+        } else if ($upp = UserProjectParams::find()->byEmail($emailTo)->one()) {
+            return $upp->upp_project_id;
+        }
+
+        return null;
+    }
+
     public function afterSave($insert, $changedAttributes)
     {
         parent::afterSave($insert, $changedAttributes);
 
-        if ($this->e_lead_id && $this->eLead) {
-            $this->eLead->updateLastAction(LeadPoorProcessingLogStatus::REASON_EMAIL);
+        if ($this->e_lead_id && $this->lead) {
+            $this->lead->updateLastAction(LeadPoorProcessingLogStatus::REASON_EMAIL);
         }
-        if ($this->e_case_id && $this->eCase) {
-            $this->eCase->updateLastAction();
+        if ($this->e_case_id && $this->case) {
+            $this->case->updateLastAction();
         }
     }
 
@@ -864,8 +936,8 @@ class Email extends \yii\db\ActiveRecord
             }
 
             if (!$this->e_client_id) {
-                $emailService = Yii::createObject(EmailService::class);
-                $this->e_client_id = $emailService->detectClientId($this->e_email_to);
+                $emailServiceHelper = Yii::createObject(EmailServiceHelper::class);
+                $this->e_client_id = $emailServiceHelper->detectClientId($this->e_email_to);
             }
 
             return true;
@@ -896,9 +968,11 @@ class Email extends \yii\db\ActiveRecord
         return $this->e_created_user_id ? true : false;
     }
 
-    public function statusToReview(): void
+    public function statusToReview()
     {
-        $this->e_status_id = self::STATUS_REVIEW;
+        $this->updateAttributes(['e_status_id' => self::STATUS_REVIEW]);
+
+        return $this;
     }
 
     public function statusIsReview(): bool
@@ -916,8 +990,133 @@ class Email extends \yii\db\ActiveRecord
         return $this->e_status_id === self::STATUS_DONE;
     }
 
-    public function statusToCancel(): void
+    /**
+     *
+     * @param string $errorMessage
+     * @return Email
+     */
+    public function statusToCancel(string $errorMessage)
     {
-        $this->e_status_id = self::STATUS_CANCEL;
+        $this->updateAttributes([
+            'e_error_message' => $errorMessage,
+            'e_status_id' => self::STATUS_CANCEL,
+        ]);
+
+        return $this;
+    }
+
+    /**
+     *
+     * @param string $errorMessage
+     * @return Email
+     */
+    public function statusToError(string $errorMessage)
+    {
+        $this->updateAttributes([
+            'e_error_message' => $errorMessage,
+            'e_status_id' => self::STATUS_ERROR,
+        ]);
+
+        return $this;
+    }
+
+    public function getEmailFrom($masking = true): ?string
+    {
+        return (EmailType::isInbox($this->e_type_id) && $masking) ?  MaskEmailHelper::masking($this->e_email_from) : $this->e_email_from;
+    }
+
+    public function getEmailTo($masking = true): ?string
+    {
+        return (EmailType::isOutbox($this->e_type_id) && $masking) ?  MaskEmailHelper::masking($this->e_email_to) : $this->e_email_to;
+    }
+
+    public function getEmailFromName(): ?string
+    {
+        return $this->e_email_from_name;
+    }
+
+    public function getEmailToName(): ?string
+    {
+        return $this->e_email_to_name;
+    }
+
+    public function hasLead(): bool
+    {
+        return $this->e_lead_id !== null;
+    }
+
+    public function hasCase(): bool
+    {
+        return $this->e_case_id !== null;
+    }
+
+    public function hasClient(): bool
+    {
+        return $this->e_client_id !== null;
+    }
+
+    public function getProjectId(): ?int
+    {
+        return $this->e_project_id;
+    }
+
+    public function getDepartmentId(): ?int
+    {
+        return $this->lead->l_dep_id ?? null;
+    }
+
+    public function getTemplateTypeId(): ?int
+    {
+        return $this->e_template_type_id;
+    }
+
+    public function getLeadId(): ?int
+    {
+        return $this->e_lead_id;
+    }
+
+    public function getCaseId(): ?int
+    {
+        return $this->e_case_id;
+    }
+
+    public function getClientId(): ?int
+    {
+        return $this->e_client_id;
+    }
+
+    public function getLanguageId(): ?string
+    {
+        return $this->e_language_id;
+    }
+
+    public function getStatusDoneDt(): ?string
+    {
+        return $this->e_status_done_dt;
+    }
+
+    public function getErrorMessage(): ?string
+    {
+        return $this->e_error_message;
+    }
+
+    public function getCommunicationId()
+    {
+        return $this->e_communication_id;
+    }
+
+    public function getEmailSubject()
+    {
+        return $this->e_email_subject;
+    }
+
+    public function isDeleted()
+    {
+        return $this->e_is_deleted;
+    }
+
+    public function isNew()
+    {
+        return $this->e_is_new ?? false;
     }
 }

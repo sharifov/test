@@ -12,6 +12,9 @@ use src\entities\cases\events\CasesAutoProcessingStatusEvent;
 use src\entities\cases\events\CasesErrorStatusEvent;
 use src\entities\cases\events\CasesUpdatedInfoEvent;
 use src\entities\cases\events\CasesBookingIdChangeEvent;
+use src\entities\cases\events\CasesTakeOverEvent;
+use src\entities\cases\events\CasesManualChangeStatusProcessingEvent;
+use src\entities\cases\events\CasesMultipleChangeStatusProcessingEvent;
 use src\listeners\cases\CasesFollowUpStatusEventLogListener;
 use src\listeners\cases\CasesNewStatusEventLogListener;
 use src\listeners\cases\CasesPendingStatusEventLogListener;
@@ -27,6 +30,9 @@ use src\listeners\cases\CasesSwitchStatusAwaitingtoErrorListener;
 use src\listeners\cases\CasesCreateEventLogListener;
 use src\listeners\cases\CasesUpdatedInfoEventLogListener;
 use src\listeners\cases\CasesBookingIdChangeEventLogListener;
+use src\listeners\cases\CasesTakeOverEventNotificationListener;
+use src\listeners\cases\CasesManualChangeStatusProcessingEventNotificationListener;
+use src\listeners\cases\CasesMultipleChangeStatusProcessingEventNotificationListener;
 
 return [
     CasesCreatedEvent::class => [CasesCreateEventLogListener::class],
@@ -41,4 +47,7 @@ return [
     CasesErrorStatusEvent::class => [CasesErrorStatusEventLogListener::class, CasesSwitchStatusAwaitingtoErrorListener::class],
     CasesUpdatedInfoEvent::class => [CasesUpdatedInfoEventLogListener::class],
     CasesBookingIdChangeEvent::class => [CasesBookingIdChangeEventLogListener::class],
+    CasesTakeOverEvent::class => [CasesTakeOverEventNotificationListener::class],
+    CasesManualChangeStatusProcessingEvent::class => [CasesManualChangeStatusProcessingEventNotificationListener::class],
+    CasesMultipleChangeStatusProcessingEvent::class => [CasesMultipleChangeStatusProcessingEventNotificationListener::class],
 ];

@@ -21,6 +21,7 @@ class Access
     private $groups;
     private $projects;
     private $departments;
+    private $skill;
 
     public function __construct(Employee $user, AccessCache $cache)
     {
@@ -113,5 +114,18 @@ class Access
         $this->groups = $this->user->getGroupsToArray();
 
         return $this->groups;
+    }
+
+    public function getSkill(): ?string
+    {
+        if ($this->skill === null) {
+            $this->skill = $this->cache->getSkill();
+        }
+
+        if ($this->skill === null) {
+            $this->skill = $this->user->userProfile->up_skill;
+        }
+
+        return $this->skill;
     }
 }

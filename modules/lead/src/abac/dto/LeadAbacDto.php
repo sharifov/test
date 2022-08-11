@@ -46,12 +46,16 @@ class LeadAbacDto extends \stdClass
     public ?string $closeReason = '';
     public ?int $quotesCount = null;
     public ?int $flightSegmentsCount = null;
+    public string $project_name;
+    public string $department_name;
+    public string $source_cid;
 
     /**
      * @param Lead|null $lead
-     * @param int $userId
+     * @param int|null $userId
+     * @throws \Exception
      */
-    public function __construct(?Lead $lead, int $userId)
+    public function __construct(?Lead $lead, ?int $userId)
     {
         if ($lead) {
             $this->is_owner = $lead->isOwner($userId);
@@ -59,6 +63,9 @@ class LeadAbacDto extends \stdClass
             $this->has_owner_query = $this->has_owner;
             $this->quotesCount = $lead->quotesCount;
             $this->flightSegmentsCount = $lead->leadFlightSegmentsCount;
+            $this->project_name = $lead->project->name ?? '';
+            $this->department_name = $lead->lDep->dep_name ?? '';
+            $this->source_cid = $lead->source->cid ?? '';
 
             if ($this->has_owner) {
                 $this->is_common_group = EmployeeGroupAccess::isUserInCommonGroup($userId, $lead->employee_id);
@@ -82,13 +89,18 @@ class LeadAbacDto extends \stdClass
                 if ($lead->isBookFailed()) {
                     $fromStatuses = [Lead::STATUS_BOOK_FAILED];
                 }
+
+                if ($lead->isAlternative()) {
+                    $fromStatuses = [Lead::STATUS_ALTERNATIVE];
+                }
                 $isAccessLeadByFrequency = $user->accessTakeLeadByFrequencyMinutes([], $fromStatuses);
                 $this->canTakeByFrequencyMinutes = $isAccessLeadByFrequency['access'];
             }
 
             $this->status_id = $lead->status;
-
-            $this->snoozeCount = LeadQuery::countSnoozeLeadsByOwner($userId);
+            if ($userId) {
+                $this->snoozeCount = LeadQuery::countSnoozeLeadsByOwner($userId);
+            }
         }
     }
 }

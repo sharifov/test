@@ -6,6 +6,8 @@ use common\components\jobs\LeadPoorProcessingJob;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadQcall;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
 use src\access\EmployeeAccess;
 use src\guards\lead\TakeGuard;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
@@ -72,7 +74,11 @@ class LeadAssignService
             throw new \DomainException('Lead is unavailable to "Take" now!');
         }
 
-        $this->checkTakeAccess($lead, $user);
+        $leadAbacDto = new LeadAbacDto($lead, $user->getId());
+        /** @abac $leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS, Access to take lead */
+        if (!Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS)) {
+            throw new \DomainException('Access to Take Lead is denied');
+        }
 
         $lead->processing($user->id, $creatorId, $reason);
 

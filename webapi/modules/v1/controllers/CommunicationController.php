@@ -59,6 +59,7 @@ use src\model\emailList\entity\EmailList;
 use src\model\leadRedial\assign\LeadRedialUnAssigner;
 use src\model\leadRedial\queue\AutoTakeJob;
 use src\model\phoneList\entity\PhoneList;
+use src\model\phoneList\services\InternalPhones;
 use src\model\sms\entity\smsDistributionList\SmsDistributionList;
 use src\model\user\entity\userStatus\UserStatus;
 use src\model\userVoiceMail\entity\UserVoiceMail;
@@ -90,6 +91,8 @@ use yii\web\NotFoundHttpException;
 use yii\web\UnprocessableEntityHttpException;
 use common\components\ReceiveEmailsJob;
 use yii\queue\Queue;
+use src\repositories\email\EmailRepositoryFactory;
+use src\services\email\EmailMainService;
 
 /**
  * Class CommunicationController
@@ -123,6 +126,8 @@ class CommunicationController extends ApiBaseController
 
     private $callService;
     private $conferenceStatusCallbackHandler;
+    private $emailRepository;
+    private $emailService;
 
     /**
      * @param $id
@@ -130,11 +135,13 @@ class CommunicationController extends ApiBaseController
      * @param CallService $callService
      * @param array $config
      */
-    public function __construct($id, $module, CallService $callService, ConferenceStatusCallbackHandler $conferenceStatusCallbackHandler, $config = [])
+    public function __construct($id, $module, CallService $callService, ConferenceStatusCallbackHandler $conferenceStatusCallbackHandler, EmailMainService $emailService, $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->callService = $callService;
         $this->conferenceStatusCallbackHandler = $conferenceStatusCallbackHandler;
+        $this->emailRepository = EmailRepositoryFactory::getRepository(); //TODO: remove after refactoring
+        $this->emailService = $emailService;
     }
 
     /**
@@ -411,7 +418,6 @@ class CommunicationController extends ApiBaseController
                     $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
                     $callFilterGuardService = new CallFilterGuardService($client_phone_number, $departmentPhoneProjectParamsService, $this->callService);
                     $logExecutionTime->end();
-
                     if (!$isTrustStirCall && $callFilterGuardService->isEnable() && !$callFilterGuardService->isTrusted()) {
                         $logExecutionTime->start('CallFilterGuardService:runRepression');
                         $callFilterGuardService->runRepression($postCall);
@@ -434,9 +440,26 @@ class CommunicationController extends ApiBaseController
                         $departmentPhone->dpp_source_id = $source->id;
                     }
                 }
+                if (!empty($postCall['flow_department'])) {
+                    $departmentId = Department::find()->select('dep_id')->andWhere(['dep_key' => $postCall['flow_department']])->scalar();
+                    if ($departmentId) {
+                        $departmentId = (int)$departmentId;
+                    } else {
+                        $departmentId = null;
+                        Yii::error([
+                            'message' => 'Not found department',
+                            'callSid' => $callSid,
+                            'flow_department' => $postCall['flow_department'],
+                        ], 'CommunicationController:voiceIncoming');
+                    }
+                } elseif ($departmentPhone->dpp_dep_id) {
+                    $departmentId = $departmentPhone->dpp_dep_id;
+                } else {
+                    $departmentId = null;
+                }
 
                 $call_project_id = $departmentPhone->dpp_project_id;
-                $call_dep_id = $departmentPhone->dpp_dep_id;
+                $call_dep_id = $departmentId;
                 $call_source_id = $departmentPhone->dpp_source_id;
                 $call_language_id = $departmentPhone->dpp_language_id;
 
@@ -463,7 +486,7 @@ class CommunicationController extends ApiBaseController
                         if (SettingHelper::callSpamFilterEnabled() && ($callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate()) || $callLogFilterGuard->guardTrust(SettingHelper::getCallTrustFilterRate()))) {
                             if (CallRedialGuard::guard($callModel->cProject->project_key ?? '', $callModel->cDep->dep_key ?? '')) {
                                 $logExecutionTime->start('redial');
-                                $result = Yii::$app->communication->twilioDial(
+                                $result = Yii::$app->comms->twilioDial(
                                     $incoming_phone_number,
                                     $client_phone_number,
                                     SettingHelper::getCallbackToCallerCurlTimeout(),
@@ -549,6 +572,10 @@ class CommunicationController extends ApiBaseController
 
                 $callModel->c_source_type_id = Call::SOURCE_GENERAL_LINE;
 
+                if (!empty($postCall['flow_department'])) {
+                    return $this->ivrFlowFinish($callModel, $departmentPhone);
+                }
+
                 if ($ivrEnable) {
                     $ivrSelectedDigit = isset($postCall['Digits']) ? (int)$postCall['Digits'] : null;
                     $ivrStep = (int)Yii::$app->request->get('step', 1);
@@ -598,7 +625,7 @@ class CommunicationController extends ApiBaseController
                             if (SettingHelper::callSpamFilterEnabled() && ($callLogFilterGuard->guardSpam(SettingHelper::getCallSpamFilterRate()) || $callLogFilterGuard->guardTrust(SettingHelper::getCallTrustFilterRate()))) {
                                 if (CallRedialGuard::guard($callModel->cProject->project_key ?? '', $callModel->cDep->dep_key ?? '')) {
                                     $logExecutionTime->start('redial');
-                                    $result = Yii::$app->communication->twilioDial(
+                                    $result = Yii::$app->comms->twilioDial(
                                         $incoming_phone_number,
                                         $client_phone_number,
                                         SettingHelper::getCallbackToCallerCurlTimeout(),
@@ -1385,7 +1412,13 @@ class CommunicationController extends ApiBaseController
             $call->c_is_new = true;
             $call->c_created_dt = date('Y-m-d H:i:s');
             $call->c_from = $calData['From'];
-            $call->c_to = $calData['To']; //Called
+            if (!empty($calData['ForwardedFrom']) && SettingHelper::isOverridePhoneToForwarderFrom() && ($forwardedPhoneListId = PhoneList::find()->select(['pl_id'])->byPhone($calData['ForwardedFrom'])->scalar())) {
+                $call->c_to = $calData['ForwardedFrom'];
+                $call->setDataPhoneListId((int)$forwardedPhoneListId);
+            } else {
+                $call->c_to = $calData['To'];
+                $call->setDataPhoneListId($phoneListId);
+            }
             $call->c_created_user_id = null;
 
             if ($clientId) {
@@ -1404,7 +1437,6 @@ class CommunicationController extends ApiBaseController
             $call->c_recording_disabled = (bool)($calData['call_recording_disabled'] ?? false);
             $call->setDataPriority($priority);
             $call->setDataCreatedParams($calData);
-            $call->setDataPhoneListId($phoneListId);
             $call->setDataCreatorType((int)($calData['creator_type_id'] ?? null));
 
             if (!$call->save()) {
@@ -2171,6 +2203,92 @@ class CommunicationController extends ApiBaseController
         return $responseData;
     }
 
+    protected function ivrFlowFinish(Call $callModel, DepartmentPhoneProject $departmentPhoneProject): array
+    {
+        $response = [];
+
+        try {
+            $dParams = @json_decode($departmentPhoneProject->dpp_params, true);
+            $ivrParams = $dParams['ivr'] ?? [];
+            $repeatParams = $dParams['queue_repeat'] ?? [];
+            $queueLongTimeParams = new QueueLongTimeNotificationParams(empty($dParams['queue_long_time_notification']) ? [] : $dParams['queue_long_time_notification']);
+
+            $delayJob = 7;
+            $job = new CallQueueJob();
+            $job->call_id = $callModel->c_id;
+            $job->source_id = $departmentPhoneProject->dpp_source_id;
+            $job->delay = 0;
+            $job->delayJob = $delayJob;
+            $jobId = Yii::$app->queue_job->delay($delayJob)->priority(100)->push($job);
+
+            try {
+                if (!$jobId) {
+                    throw new \DomainException('Not created CallQueueJob');
+                }
+                if ($repeatParams) {
+                    (new RepeatMessageCallJobCreator())->create($callModel, $departmentPhoneProject->dpp_id, $repeatParams);
+                }
+                if ($queueLongTimeParams->isActive()) {
+                    (new QueueLongTimeNotificationJobCreator())->create($callModel, $departmentPhoneProject->dpp_id, $queueLongTimeParams->getDelay() + 7);
+                }
+            } catch (\Throwable $e) {
+                Yii::error([
+                    'message' => 'Create call job Error.',
+                    'useCase' => 'Processing Incoming call. ivrFlowFinish',
+                    'error' => $e->getMessage(),
+                    'call' => $callModel->getAttributes(),
+                ], 'CallQueueStartCallService::JobsCreate');
+            }
+
+            $responseTwml = new VoiceResponse();
+
+            if (!empty($ivrParams['entry_pause'])) {
+                $responseTwml->pause(['length' => (int)$ivrParams['entry_pause']]);
+            }
+            if (!empty($ivrParams['entry_phrase'])) {
+                $company = '';
+                if ($callModel->cProject && $callModel->cProject->name) {
+                    $company = ' ' . strtolower($callModel->cProject->name);
+                }
+                $entryPhrase = str_replace('{{project}}', $company, $ivrParams['entry_phrase']);
+                $sayParams = [];
+                if (!empty($ivrParams['entry_language'])) {
+                    $sayParams['language'] = $ivrParams['entry_language'];
+                }
+                if (!empty($ivrParams['entry_voice'])) {
+                    $sayParams['voice'] = $ivrParams['entry_voice'];
+                }
+                $responseTwml->say($entryPhrase, $sayParams);
+            }
+
+            if (!empty($ivrParams['hold_play'])) {
+                $responseTwml->play($ivrParams['hold_play'], ['loop' => 0]);
+            }
+
+            $response = [];
+            $response['twml'] = (string) $responseTwml;
+            $responseData = [
+                'status' => 200,
+                'name' => 'Success',
+                'code' => 0,
+                'message' => '',
+                'data' => ['response' => $response]
+            ];
+        } catch (\Throwable $e) {
+            $responseTwml = new VoiceResponse();
+            $responseTwml->reject(['reason' => 'busy']);
+            $response['twml'] = (string) $responseTwml;
+            $responseData = [
+                'status' => 404,
+                'name' => 'Error',
+                'code' => 404,
+                'message' => 'Sales Communication error: ' . $e->getMessage() . "\n" . $e->getFile() . ':' . $e->getLine(),
+            ];
+            $responseData['data']['response'] = $response;
+        }
+        return $responseData;
+    }
+
 
     /**
      * @return mixed
@@ -2190,22 +2308,10 @@ class CommunicationController extends ApiBaseController
                 throw new NotFoundHttpException('Not found eq_status_id', 12);
             }
 
-            $email = Email::findOne(['e_communication_id' => $eq_id]);
-            if ($email) {
-                if ($eq_status_id > 0) {
-                    $email->e_status_id = $eq_status_id;
-                    if ($eq_status_id === Email::STATUS_DONE) {
-                        $email->e_status_done_dt = date('Y-m-d H:i:s');
-                    }
-
-                    if (!$email->save()) {
-                        Yii::error(VarDumper::dumpAsString($email->errors), 'API:Communication:updateEmailStatus:Email:save');
-                    }
-                }
-
-                $response['email'] = $email->e_id;
-            } else {
-                $response['error'] = 'Not found Communication ID (' . $eq_id . ')';
+            try {
+                $response['email'] = $this->emailService->updateEmailStatus($eq_id, $eq_status_id);
+            } catch (\Throwable $e) {
+                $response['error'] = $e->getMessage();
                 $response['error_code'] = 13;
             }
         } catch (\Throwable $e) {
@@ -2542,31 +2648,17 @@ class CommunicationController extends ApiBaseController
             $filter = [];
             $dateTime = null;
             if (null === $last_id) {
-                $lastEmail = Email::find()->where(['>', 'e_inbox_email_id', 0])->orderBy(['e_inbox_email_id' => SORT_DESC])->limit(1)->one();
-
-                if ($lastEmail) {
-                    //$filter['last_dt'] = $lastEmail->e_inbox_created_dt;
-                    $filter['last_id'] = $lastEmail->e_inbox_email_id;
-                } else {
-                    $filter['last_id'] = 1;
-                }
+                $filter['last_id'] = $this->emailRepository->getLastInboxId() ?? 1;
             } else {
                 $filter['last_id'] = (int)$last_id;
 
-                $checkLastEmail = Email::find()->where(['e_inbox_email_id' => $filter['last_id']])->limit(1)->one();
+                $checkLastEmail = $this->emailRepository->getModelQuery()->byInboxId($filter['last_id'])->limit(1)->one();
                 if ($checkLastEmail) {
                     $response[] = 'Last ID ' . $filter['last_id'] . ' Exists';
                     return $response;
                 }
 
-                $lastEmail = Email::find()->where(['>', 'e_inbox_email_id', 0])->orderBy(['e_inbox_email_id' => SORT_DESC])->limit(1)->one();
-
-                if ($lastEmail) {
-                    //$filter['last_dt'] = $lastEmail->e_inbox_created_dt;
-                    $filter['last_id'] = $lastEmail->e_inbox_email_id;
-                } else {
-                    $filter['last_id'] = 1;
-                }
+                $filter['last_id'] = $this->emailRepository->getLastInboxId() ?? 1;
             }
 
             Yii::$app->redis->set('new_email_message_received', true);

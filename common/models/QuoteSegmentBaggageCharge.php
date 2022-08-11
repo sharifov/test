@@ -52,6 +52,8 @@ class QuoteSegmentBaggageCharge extends \yii\db\ActiveRecord
             [['qsbc_max_weight', 'qsbc_max_size'], 'string', 'max' => 100],
             [['qsbc_segment_id'], 'exist', 'skipOnError' => true, 'targetClass' => QuoteSegment::class, 'targetAttribute' => ['qsbc_segment_id' => 'qs_id']],
             [['qsbc_updated_user_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['qsbc_updated_user_id' => 'id']],
+
+            [['qsbc_pax_code'], 'default', 'value' => Quote::PASSENGER_ADULT],
         ];
     }
 
@@ -62,17 +64,17 @@ class QuoteSegmentBaggageCharge extends \yii\db\ActiveRecord
     {
         return [
             'qsbc_id' => 'Qsbc ID',
-            'qsbc_pax_code' => 'Qsbc Pax Code',
-            'qsbc_segment_id' => 'Qsbc Segment ID',
-            'qsbc_first_piece' => 'Qsbc First Piece',
-            'qsbc_last_piece' => 'Qsbc Last Piece',
-            'qsbc_price' => 'Qsbc Price',
-            'qsbc_currency' => 'Qsbc Currency',
-            'qsbc_max_weight' => 'Qsbc Max Weight',
-            'qsbc_max_size' => 'Qsbc Max Size',
-            'qsbc_created_dt' => 'Qsbc Created Dt',
-            'qsbc_updated_dt' => 'Qsbc Updated Dt',
-            'qsbc_updated_user_id' => 'Qsbc Updated User ID',
+            'qsbc_pax_code' => 'Pax Code',
+            'qsbc_segment_id' => 'Segment ID',
+            'qsbc_first_piece' => 'First Piece',
+            'qsbc_last_piece' => 'Last Piece',
+            'qsbc_price' => 'Price',
+            'qsbc_currency' => 'Currency',
+            'qsbc_max_weight' => 'Max Weight',
+            'qsbc_max_size' => 'Max Size',
+            'qsbc_created_dt' => 'Created Dt',
+            'qsbc_updated_dt' => 'Updated Dt',
+            'qsbc_updated_user_id' => 'Updated User ID',
         ];
     }
 

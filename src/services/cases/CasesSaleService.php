@@ -5,6 +5,7 @@ namespace src\services\cases;
 use common\components\BackOffice;
 use common\helpers\LogHelper;
 use common\models\CaseSale;
+use common\models\Project;
 use Exception;
 use frontend\helpers\JsonHelper;
 use frontend\models\form\CreditCardForm;
@@ -15,6 +16,7 @@ use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use modules\order\src\services\OrderManageService;
+use src\entities\cases\CaseEventLog;
 use src\entities\cases\Cases;
 use src\exception\BoResponseException;
 use src\forms\caseSale\CaseSaleRequestBoForm;
@@ -22,6 +24,7 @@ use src\helpers\app\AppHelper;
 use src\helpers\ErrorsToStringHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\saleTicket\useCase\create\SaleTicketService;
+use src\repositories\cases\CasesRepository;
 use src\repositories\cases\CasesSaleRepository;
 use Yii;
 use yii\db\Transaction;
@@ -74,6 +77,11 @@ class CasesSaleService
      */
     private $namref = [];
 
+    /**
+     * @var CasesRepository
+     */
+    private $casesRepository;
+
     private SaleTicketService $saleTicketService;
     private OrderCreateFromSaleService $orderCreateFromSaleService;
     private OrderRepository $orderRepository;
@@ -84,13 +92,15 @@ class CasesSaleService
         SaleTicketService $saleTicketService,
         OrderCreateFromSaleService $orderCreateFromSaleService,
         OrderRepository $orderRepository,
-        FlightFromSaleService $flightFromSaleService
+        FlightFromSaleService $flightFromSaleService,
+        CasesRepository $casesRepository
     ) {
         $this->casesSaleRepository = $casesSaleRepository;
         $this->saleTicketService = $saleTicketService;
         $this->orderCreateFromSaleService = $orderCreateFromSaleService;
         $this->orderRepository = $orderRepository;
         $this->flightFromSaleService = $flightFromSaleService;
+        $this->casesRepository = $casesRepository;
     }
 
     /**
@@ -497,7 +507,6 @@ class CasesSaleService
      * @param int $requestTime
      * @param int $withRefundRules
      * @return array
-     * @throws BadRequestHttpException
      */
     public function detailRequestToBackOffice(int $sale_id, int $withFareRules = 0, int $requestTime = 120, int $withRefundRules = 0): ?array
     {
@@ -542,7 +551,7 @@ class CasesSaleService
                 ]
             ];
 
-            $host = Yii::$app->params['backOffice']['serverUrlV3'];
+            $host = Yii::$app->params['backOffice']['urlV3'];
             $responseBO = BackOffice::sendRequest2('payment/add-credit-card', $data, 'POST', $requestTime, $host);
 
             if ($responseBO->isOk) {
@@ -574,9 +583,10 @@ class CasesSaleService
      * @param string|null $order_uid
      * @param string|null $email
      * @param string|null $phone
+     * @param string|null $project_key
      * @return array
      */
-    public function getSaleFromBo(?string $order_uid = null, ?string $email = null, ?string $phone = null): array
+    public function getSaleFromBo(?string $order_uid = null, ?string $email = null, ?string $phone = null, ?string $project_key = null): array
     {
         $form = new CaseSaleRequestBoForm();
         $form->orderUid = $order_uid;
@@ -591,13 +601,13 @@ class CasesSaleService
             return [];
         }
 
-        if ($order_uid && $result = $this->searchRequestToBackOffice(['confirmation_number' => $order_uid])) {
+        if ($order_uid && $result = $this->searchRequestToBackOffice(['confirmation_number' => $order_uid, 'project_key' => $project_key])) {
             return $result;
         }
-        if ($email && $result = $this->searchRequestToBackOffice(['email' => $email])) {
+        if ($email && $result = $this->searchRequestToBackOffice(['email' => $email, 'project_key' => $project_key])) {
             return $result;
         }
-        if ($phone && $result = $this->searchRequestToBackOffice(['phone' => $phone])) {
+        if ($phone && $result = $this->searchRequestToBackOffice(['phone' => $phone, 'project_key' => $project_key])) {
             return $result;
         }
         return [];
@@ -623,6 +633,8 @@ class CasesSaleService
                     $caseSale->css_cs_id = $csId;
                     $caseSale->css_sale_id = $saleId;
                     $caseSale->css_sale_book_id = $saleData['bookingId'] ?? $saleData['confirmationNumber'] ?? null;
+                    $case->cs_order_uid = $caseSale->css_sale_book_id;
+                    $this->casesRepository->save($case);
 
                     $caseSale = $this->saveAdditionalData($caseSale, $case, $refreshSaleData);
 
@@ -633,6 +645,8 @@ class CasesSaleService
                             'saleData' => LogHelper::hidePersonalData($refreshSaleData, self::SENSITIVE_KEYS)
                         ]));
                     }
+
+//                    $this->updateCaseProjectBySale($case, $refreshSaleData);
 
                     if ($caseSale->css_cs_id && SettingHelper::isEnableOrderFromSale()) {
                         $transaction = new Transaction(['db' => Yii::$app->db]);
@@ -732,7 +746,7 @@ class CasesSaleService
             ],
             'email' => $email
         ];
-        $response = BackOffice::sendRequest2('payment/invoke-new-cc-info', $data, 'POST', 30, Yii::$app->params['backOffice']['serverUrlV3'], true);
+        $response = BackOffice::sendRequest2('payment/invoke-new-cc-info', $data, 'POST', 30, Yii::$app->params['backOffice']['urlV3'], true);
         if ($response->isOk) {
             $responseData = $response->data;
             Yii::info(VarDumper::dumpAsString($responseData), 'info\CasesSaleService::sendCcInfo::BOResponse');
@@ -749,12 +763,58 @@ class CasesSaleService
         return $result;
     }
 
-    public function getSaleData(string $bookingId): array
+    public function getSaleData(string $project_key, string $bookingId): array
     {
-        $saleSearch = $this->getSaleFromBo($bookingId);
+        $saleSearch = $this->getSaleFromBo($bookingId, null, null, $project_key);
         if (empty($saleSearch['saleId'])) {
-            throw new BoResponseException('Sale not found by Booking ID(' . $bookingId . ') from "cs/search"');
+            throw new BoResponseException('Sale not found by Booking ID(' . $bookingId . ') and Project Key (' . $project_key . ') from "cs/search"');
         }
         return $this->detailRequestToBackOffice($saleSearch['saleId'], 0, 120, 1);
+    }
+
+    /**
+     * @param Cases $case
+     * @param array $refreshSaleData
+     */
+    public function updateCaseProjectBySale(Cases $case, array $refreshSaleData)
+    {
+        try {
+            $saleProjectApiKey = $refreshSaleData['projectApiKey'] ?? null;
+
+            if (!empty($saleProjectApiKey)) {
+                $allCaseSales = $case->getCaseSale()->all();
+                $allCaseSalesProjectApi = [];
+
+                foreach ($allCaseSales as $caseSale) {
+                    $existSaleData = isset($caseSale->css_sale_data['projectApiKey']);
+                    if ($existSaleData && !in_array($caseSale->css_sale_data['projectApiKey'], $allCaseSalesProjectApi)) {
+                        $allCaseSalesProjectApi[] = $caseSale->css_sale_data['projectApiKey'];
+                    }
+                }
+
+                if (count($allCaseSalesProjectApi) == 1 && isset($allCaseSalesProjectApi[0])) {
+                    $caseProject = $case->project;
+                    if ($caseProject) {
+                        if ($caseProject->api_key !== trim($saleProjectApiKey)) {
+                            $newProject = Project::findOne(['api_key' => $saleProjectApiKey]);
+                            if ($newProject) {
+                                $case->cs_project_id = $newProject->id;
+                                $this->casesRepository->save($case);
+
+                                $description = 'Case project was changed.';
+                                $data = [
+                                    'old_project' => $caseProject->name,
+                                    'new_project' => $newProject->name,
+                                ];
+
+                                $case->addEventLog(CaseEventLog::CASE_UPDATE_INFO, $description, $data);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (\Throwable $throwable) {
+            AppHelper::throwableLogger($throwable, 'CasesSaleService:updateCaseProject:Throwable');
+        }
     }
 }

@@ -9,9 +9,16 @@ use common\models\local\LeadAdditionalInformation;
 use common\models\query\LeadQuery;
 use common\models\query\SourcesQuery;
 use DateTime;
+use frontend\helpers\RedisHelper;
 use frontend\helpers\JsonHelper;
 use frontend\widgets\notification\NotificationMessage;
 use kivork\search\core\urlsig\UrlSignature;
+use modules\featureFlag\FFlag;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
+use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacDto;
+use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
+use modules\objectSegment\src\contracts\ObjectSegmentListContract;
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\product\Product;
@@ -19,6 +26,8 @@ use src\auth\Auth;
 use src\behaviors\metric\MetricLeadCounterBehavior;
 use src\entities\EventTrait;
 use src\events\lead\LeadBookedEvent;
+use src\events\lead\LeadBusinessExtraQueueEvent;
+use src\events\lead\LeadCallExpertChangedEvent;
 use src\events\lead\LeadCallExpertRequestEvent;
 use src\events\lead\LeadCallStatusChangeEvent;
 use src\events\lead\LeadCloseEvent;
@@ -62,13 +71,16 @@ use src\model\client\helpers\ClientFormatter;
 use src\model\clientChatLead\entity\ClientChatLead;
 use src\model\lead\useCases\lead\api\create\LeadCreateForm;
 use src\model\lead\useCases\lead\import\LeadImportForm;
+use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
 use src\model\leadData\entity\LeadData;
+use src\model\leadDataKey\services\LeadDataKeyDictionary;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\model\leadUserRating\entity\LeadUserRating;
+use src\repositories\client\ClientPhoneRepository;
 use src\services\lead\calculator\LeadTripTypeCalculator;
 use src\services\lead\calculator\SegmentDTO;
 use src\services\lead\qcall\Config;
@@ -87,6 +99,8 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
+use src\repositories\email\EmailRepositoryFactory;
+use src\entities\email\helpers\EmailType;
 
 /**
  * This is the model class for table "leads".
@@ -273,6 +287,7 @@ class Lead extends ActiveRecord implements Objectable
     public const STATUS_NEW         = 16;
     public const STATUS_EXTRA_QUEUE = 17;
     public const STATUS_CLOSED      = 18;
+    public const STATUS_BUSINESS_EXTRA_QUEUE = 19;
 
     public const STATUS_LIST = [
         self::STATUS_PENDING        => 'Pending',
@@ -289,6 +304,7 @@ class Lead extends ActiveRecord implements Objectable
         self::STATUS_NEW            => 'New',
         self::STATUS_EXTRA_QUEUE    => 'Extra queue',
         self::STATUS_CLOSED         => 'Closed',
+        self::STATUS_BUSINESS_EXTRA_QUEUE => 'Business extra queue',
     ];
 
     public const TRAVEL_DATE_PASSED_STATUS_LIST = [
@@ -318,6 +334,12 @@ class Lead extends ActiveRecord implements Objectable
         self::STATUS_BOOKED         => 'll-booked',
         self::STATUS_SNOOZE         => 'll-snooze',
         self::STATUS_CLOSED         => 'll-close',
+        self::STATUS_REJECT         => 'label-default',
+        self::STATUS_NEW            => 'label-default',
+        self::STATUS_BOOK_FAILED    => 'label-default',
+        self::STATUS_ALTERNATIVE    => 'label-default',
+        self::STATUS_EXTRA_QUEUE    => 'label-default',
+        self::STATUS_BUSINESS_EXTRA_QUEUE => 'label-default',
     ];
 
 
@@ -722,6 +744,7 @@ class Lead extends ActiveRecord implements Objectable
         $clone->status                 = null;
         $clone->clone_id               = $this->id;
         $clone->employee_id            = null;
+        $clone->hybrid_uid            = null;
         $clone->l_type_create          = self::TYPE_CREATE_CLONE;
         $clone->bo_flight_id           = 0;
         $clone->final_profit           = null;
@@ -1130,6 +1153,10 @@ class Lead extends ActiveRecord implements Objectable
 
         $this->status = $status;
         $this->l_status_dt = date('Y-m-d H:i:s');
+
+        if (LeadHelper::checkCallExpertNeededChange($this)) {
+            $this->recordEvent(new LeadCallExpertChangedEvent($this->id));
+        }
     }
 
     /**
@@ -1452,6 +1479,20 @@ class Lead extends ActiveRecord implements Objectable
                 $description
             )
         );
+        /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) && $this->isBusinessType()) {
+            $leadBusinessExtraQueueObjectDto = new LeadBusinessExtraQueueAbacDto($this);
+            if (!$employee = Employee::find()->where(['id' => $this->employee_id])->limit(1)->one()) {
+                throw new \RuntimeException('LeadOwner not found by ID(' . $this->employee_id . ')');
+            }
+            /** @abac LeadBusinessExtraQueueAbacDto, LeadBusinessExtraQueueAbacObject::PROCESS_ACCESS, LeadBusinessExtraQueueAbacObject::ACTION_PROCESS, Access to processing in business Extra Queue */
+            if (Yii::$app->abac->can($leadBusinessExtraQueueObjectDto, LeadBusinessExtraQueueAbacObject::PROCESS_ACCESS, LeadBusinessExtraQueueAbacObject::ACTION_PROCESS, $employee)) {
+                LeadBusinessExtraQueueService::addLeadBusinessExtraQueueJob(
+                    $this,
+                    'Added new Business Extra Queue Countdown'
+                );
+            }
+        }
     }
 
     /**
@@ -1810,6 +1851,7 @@ class Lead extends ActiveRecord implements Objectable
                 self::STATUS_BOOK_FAILED,
                 self::STATUS_ALTERNATIVE,
                 self::STATUS_EXTRA_QUEUE,
+                self::STATUS_BUSINESS_EXTRA_QUEUE,
             ],
             true
         );
@@ -2251,6 +2293,19 @@ class Lead extends ActiveRecord implements Objectable
 
     public function updateLastAction(?string $description = null): int
     {
+        $idKey = 'update_last_action_' . $this->id;
+
+        if (RedisHelper::checkDuplicate($idKey, 5)) {
+            \Yii::info(
+                [
+                    'message' => 'Checked Duplicate Update Last Action in Lead',
+                    'leadId' => $this->id
+                ],
+                'Lead:updateLastAction:checkDuplicate'
+            );
+            return 0;
+        }
+
         $result = self::updateAll(['l_last_action_dt' => date('Y-m-d H:i:s')], ['id' => $this->id]);
 
         if ($this->isProcessing()) {
@@ -2659,6 +2714,9 @@ class Lead extends ActiveRecord implements Objectable
             case self::STATUS_EXTRA_QUEUE:
                 $label = '<span class="label label-default">' . self::getStatus($status) . '</span>';
                 break;
+            case self::STATUS_BUSINESS_EXTRA_QUEUE:
+                $label = '<span class="label label-default">' . self::getStatus($status) . '</span>';
+                break;
         }
         return $label;
     }
@@ -2691,6 +2749,7 @@ class Lead extends ActiveRecord implements Objectable
             case self::STATUS_BOOK_FAILED:
             case self::STATUS_ALTERNATIVE:
             case self::STATUS_EXTRA_QUEUE:
+            case self::STATUS_BUSINESS_EXTRA_QUEUE:
                 $label = '<span class="label label-default">' . self::getStatus($status) . '</span>';
                 break;
         }
@@ -2715,7 +2774,7 @@ class Lead extends ActiveRecord implements Objectable
         $statusName = self::STATUS_LIST[$this->status] ?? '-';
 
         if ($label) {
-            $class = $this->getStatusLabelClass();
+            $class = self::getStatusLabelClass($this->status);
             $statusName = '<span class="label ' . $class . '" style="font-size: 13px">' . Html::encode($statusName) . '</span>';
         }
 
@@ -2723,11 +2782,12 @@ class Lead extends ActiveRecord implements Objectable
     }
 
     /**
+     * @param int|null $status
      * @return string
      */
-    public function getStatusLabelClass(): string
+    public static function getStatusLabelClass(?int $status): string
     {
-        return self::STATUS_CLASS_LIST[$this->status] ?? 'label-default';
+        return self::STATUS_CLASS_LIST[$status] ?? 'label-default';
     }
 
 
@@ -3054,11 +3114,11 @@ Reason: {reason}',
             $client->created = date('Y-m-d H:i:s');
 
             if ($client->save()) {
-                $clientPhone = new ClientPhone();
-                $clientPhone->phone = $phoneNumber;
-                $clientPhone->client_id = $client->id;
-                $clientPhone->comments = 'incoming';
-                if (!$clientPhone->save()) {
+                $clientPhone = ClientPhone::create($phoneNumber, $client->id, null, 'incoming');
+                try {
+                    $clientPhoneRepository = Yii::createObject(ClientPhoneRepository::class);
+                    $clientPhoneRepository->save($clientPhone);
+                } catch (\RuntimeException $e) {
                     Yii::error(VarDumper::dumpAsString($clientPhone->errors), 'Model:Lead:createNewLeadByPhone:ClientPhone:save');
                 }
             }
@@ -4036,30 +4096,19 @@ Reason: {reason}',
     {
         $project = $this->project;
 
-        $upp = null;
-        if ($project) {
-            $upp = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->withPhoneList()->one();
-            /*if ($upp) {
-                $mailFrom = $upp->upp_email;
-            }*/
-        }
+        $uppQuery = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->withPhoneList();
+        $upp = $this->project ? $uppQuery->one() : null;
 
         if ($quoteIds && is_array($quoteIds)) {
             foreach ($quoteIds as $qid) {
                 $quoteModel = Quote::findOne($qid);
                 if ($quoteModel) {
-                    $cabinClasses = [];
-                    //$quoteItem = $quoteModel->getInfoForEmail2();
                     $quoteItem = [
                         'id' => $quoteModel->id,
                         'uid' => $quoteModel->uid,
                         'cabinClass' => $quoteModel->cabin,
                         'tripType' => $quoteModel->trip_type,
                         'hasSeparates' =>  $quoteModel->getTicketSegments() ? true : false
-
-                        //'airlineCode' => $quoteModel->main_airline_code,
-                        //'offerData' =>  $quoteModel->getInfoForEmail2()
-                        //'shortUrl' => $quoteModel->quotePrice(),
                     ];
 
                     $quoteItem = array_merge($quoteItem, $quoteModel->getInfoForEmail2($lang));
@@ -4385,12 +4434,19 @@ Reason: {reason}',
      */
     public static function getProcessingStatuses(): array
     {
-        return [
+        $list = [
             self::STATUS_SNOOZE => self::STATUS_LIST[self::STATUS_SNOOZE],
             self::STATUS_PROCESSING => self::STATUS_LIST[self::STATUS_PROCESSING],
             self::STATUS_ON_HOLD => self::STATUS_LIST[self::STATUS_ON_HOLD],
             self::STATUS_EXTRA_QUEUE => self::STATUS_LIST[self::STATUS_EXTRA_QUEUE],
         ];
+
+        /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) === true) {
+            $list[self::STATUS_BUSINESS_EXTRA_QUEUE] = self::STATUS_LIST[self::STATUS_BUSINESS_EXTRA_QUEUE];
+        }
+
+        return $list;
     }
 
     /**
@@ -4709,15 +4765,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
      */
     public function getCountEmails(int $type_id = 0): int
     {
-        $query = Email::find();
-        $query->where(['e_lead_id' => $this->id, 'e_is_deleted' => false]);
-
-        if ($type_id !== 0) {
-            $query->andWhere(['e_type_id' => $type_id]);
-        }
-        $count = $query->count();
-
-        return (int) $count;
+        return EmailRepositoryFactory::getRepository()->getEmailCountForLead($this->id, $type_id);
     }
 
     /**
@@ -4841,8 +4889,8 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             $countSmsIn = $this->getCountSms(Sms::TYPE_INBOX);
             $countSmsOut = $this->getCountSms(Sms::TYPE_OUTBOX);
 
-            $countEmailIn = $this->getCountEmails(Email::TYPE_INBOX);
-            $countEmailOut = $this->getCountEmails(Email::TYPE_OUTBOX);
+            $countEmailIn = $this->getCountEmails(EmailType::INBOX);
+            $countEmailOut = $this->getCountEmails(EmailType::OUTBOX);
         } else {
             $countCalls = $this->getCountCalls();
             $countSms = $this->getCountSms();
@@ -5158,6 +5206,27 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         $this->setStatus(self::STATUS_EXTRA_QUEUE);
     }
 
+    public function toBusinessExtraQueue(?int $newOwnerId = null, ?int $creatorId = null, ?string $reason = ''): void
+    {
+        if ($this->isBusinessExtraQueue()) {
+            return;
+        }
+        $this->changeOwner($newOwnerId);
+
+        $this->recordEvent(
+            new LeadBusinessExtraQueueEvent(
+                $this,
+                $this->status,
+                $this->employee_id,
+                $newOwnerId,
+                $creatorId,
+                $reason
+            )
+        );
+
+        $this->setStatus(self::STATUS_BUSINESS_EXTRA_QUEUE);
+    }
+
     public function hasTakenFromExtraToProcessing(): bool
     {
         if ($this->isProcessing()) {
@@ -5199,6 +5268,11 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return $this->status === self::STATUS_EXTRA_QUEUE;
     }
 
+    public function isBusinessExtraQueue(): bool
+    {
+        return $this->status === self::STATUS_BUSINESS_EXTRA_QUEUE;
+    }
+
     public function isClosed(): bool
     {
         return $this->status === self::STATUS_CLOSED;
@@ -5208,10 +5282,10 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     {
         $url = '/smart/search/';
 
-        $flightSegments = LeadFlightSegment::findAll(['lead_id' => $this->id]);
+        $flightSegments = $this->getleadFlightSegments()->orderBy(['departure' => SORT_ASC])->all();
         $segmentsStr = [];
         $signedParams = [];
-        $flexParams = [];
+        $flexParams = ['departureFlexd' => null];
         foreach ($flightSegments as $key => $entry) {
             if ($this->isRoundTrip()) {
                 $trip = '';
@@ -5220,6 +5294,12 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
                     $flexParams['departureFlexd'] = LeadUrlHelper::formatFlexOptions($entry['flexibility'], $entry['flexibility_type']);
                 }
                 if ($key == 1) {
+                    if (
+                        $flightSegments[0]['origin'] !== $flightSegments[1]['destination'] ||
+                        ($flightSegments[0]['origin'] == $flightSegments[1]['destination'] && $flightSegments[0]['destination'] !== $flightSegments[1]['origin'])
+                    ) {
+                        $trip = $entry['origin'] . '-' . $entry['destination'] . '/';
+                    }
                     $flexParams['returnFlexd'] = LeadUrlHelper::formatFlexOptions($entry['flexibility'], $entry['flexibility_type']);
                 }
                 $segmentsStr[] = $trip . date('Y-m-d', strtotime($entry['departure']));
@@ -5227,6 +5307,13 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
                 $segmentsStr[] = $entry['origin'] . '-' . $entry['destination'] . '/' . date('Y-m-d', strtotime($entry['departure']));
                 if ($this->isOneWayTrip()) {
                     $flexParams['departureFlexd'] = LeadUrlHelper::formatFlexOptions($entry['flexibility'], $entry['flexibility_type']);
+                }
+                if ($this->isMultiDestination()) {
+                    $flexParams['departureFlexd'] .= LeadUrlHelper::formatFlexOptions($entry['flexibility'], $entry['flexibility_type']);
+                    if ($key > 1) {
+                        //unset($flexParams['departureFlexd']);
+                        $flexParams = ['departureFlexd' => null];
+                    }
                 }
             }
             array_push($signedParams, $entry['origin'], $entry['destination']);
@@ -5267,5 +5354,19 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     public function setCabinClassEconomy(): void
     {
         $this->cabin = self::CABIN_ECONOMY;
+    }
+
+    public function statusIsBusinessExtraQueue(): bool
+    {
+        return $this->status === self::STATUS_BUSINESS_EXTRA_QUEUE;
+    }
+
+    public function isBusinessType(): bool
+    {
+        return (bool) $this
+            ->getLeadData()
+            ->where(['ld_field_key' => LeadDataKeyDictionary::KEY_LEAD_OBJECT_SEGMENT])
+            ->andWhere(['ld_field_value' => ObjectSegmentListContract::OBJECT_SEGMENT_LIST_KEY_LEAD_TYPE_BUSINESS])
+            ->count();
     }
 }

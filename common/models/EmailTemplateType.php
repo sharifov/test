@@ -227,7 +227,7 @@ class EmailTemplateType extends \yii\db\ActiveRecord
         ];
 
         /** @var CommunicationService $communication */
-        $communication = Yii::$app->communication;
+        $communication = Yii::$app->comms;
         $mailTypes = $communication->mailTypes();
 
         if ($mailTypes && isset($mailTypes['data']['types'])) {
@@ -332,11 +332,15 @@ class EmailTemplateType extends \yii\db\ActiveRecord
             $query->orHaving(['=', 'COUNT(ettp_project_id)', 0]);
         }
         /** @fflag FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES, A/B testing for email offer templates enable/disable */
-        if (Yii::$app->ff->can(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES) && $lead) {
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES) && $lead) {
             $emailAbTestingService = new EmailTemplateOfferABTestingService();
             $etpId = $emailAbTestingService->assignEmailOfferTemplateToLead($lead);
             if ($etpId) {
-                $query->orWhere(['etp_id' => $etpId]);
+                $defaultTemplateId = $emailAbTestingService->getDefaultOfferTemplateId();
+                if ($etpId !== $defaultTemplateId) {
+                    $query->andWhere(['<>', 'etp_id', $defaultTemplateId])
+                          ->orWhere(['etp_id' => $etpId]);
+                }
             }
         }
 

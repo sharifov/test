@@ -24,7 +24,10 @@ use common\models\TipsSplit;
 use common\models\UserDepartment;
 use common\models\UserGroupAssign;
 use common\models\UserProfile;
+use modules\featureFlag\FFlag;
 use modules\fileStorage\src\entity\fileLead\FileLead;
+use modules\smartLeadDistribution\src\services\SmartLeadDistributionService;
+use modules\smartLeadDistribution\src\SmartLeadDistribution;
 use src\access\EmployeeGroupAccess;
 use src\access\EmployeeProjectAccess;
 use src\auth\Auth;
@@ -33,12 +36,14 @@ use src\model\callLog\entity\callLog\CallLogType;
 use src\model\callLog\entity\callLogLead\CallLogLead;
 use src\model\clientChatLead\entity\ClientChatLead;
 use src\model\leadData\entity\LeadData;
+use src\model\leadDataKey\services\LeadDataKeyDictionary;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
 use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\model\leadUserRating\entity\LeadUserRating;
 use src\model\leadUserRating\entity\LeadUserRatingQuery;
 use src\model\quoteLabel\entity\QuoteLabel;
 use src\repositories\lead\LeadBadgesRepository;
+use src\services\caseSale\PnrPreparingService;
 use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
@@ -48,6 +53,8 @@ use yii\db\ActiveQuery;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
+use modules\lead\src\abac\queue\LeadQueueBusinessInboxAbacObject;
+use src\repositories\email\EmailRepositoryFactory;
 
 /**
  * LeadSearch represents the model behind the search form of `common\models\Lead`.
@@ -121,6 +128,7 @@ class LeadSearch extends Lead
     public $createdRangeTime;
     public $updatedRangeTime;
     public $lastActionRangeTime;
+    public $conversionRangeTime;
     public $statusRangeTime;
     public $soldRangeTime;
     public $createTimeRange;
@@ -173,11 +181,15 @@ class LeadSearch extends Lead
     public $extra_timer;
     public $excludeExtraQueue;
     public $excludeBonusQueue;
+    public $luc_user_id;
     private $leadBadgesRepository;
 
     private $defaultDateRange;
     private $defaultMinDate;
     private $defaultMaxDate;
+
+    public const EXTRA_QUEUE_TYPE_DEFAULT = 'default';
+    public const EXTRA_QUEUE_TYPE_BUSINESS = 'business';
 
     public function __construct($config = [])
     {
@@ -196,11 +208,11 @@ class LeadSearch extends Lead
         return [
             [['datetime_start', 'datetime_end', 'createTimeRange'], 'safe'],
             [['date_range'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'projectId', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id', 'l_type_create'], 'integer'],
+            [['id', 'client_id', 'employee_id', 'status', 'project_id', 'projectId', 'adults', 'children', 'infants', 'rating', 'called_expert', 'cnt', 'l_answered', 'supervision_id', 'limit', 'bo_flight_id', 'l_duplicate_lead_id', 'l_type_create', 'luc_user_id'], 'integer'],
             [['email_status', 'quote_status', 'l_is_test', 'l_type'], 'integer'],
             [['lfOwnerId', 'userGroupId', 'departmentId', 'projectId', 'createdType', 'lead_type'], 'integer'],
 
-            [['client_name', 'client_email', 'quote_pnr', 'gid', 'origin_country', 'destination_country', 'l_request_hash'], 'string'],
+            [['client_name', 'client_email', 'gid', 'origin_country', 'destination_country', 'l_request_hash'], 'string'],
 
             [['origin_airport', 'destination_airport'], 'safe'],
 
@@ -222,7 +234,7 @@ class LeadSearch extends Lead
                 return is_array($value) ? $value : [];
             }, 'skipOnEmpty' => true],
 
-            [['departRangeTime', 'createdRangeTime', 'soldRangeTime', 'updatedRangeTime', 'lastActionRangeTime', 'statusRangeTime'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            [['departRangeTime', 'createdRangeTime', 'soldRangeTime', 'updatedRangeTime', 'lastActionRangeTime', 'statusRangeTime', 'conversionRangeTime'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
 
             ['remainingDays', 'integer'],
             ['remainingDays', 'filter', 'filter' => static function ($value) {
@@ -232,7 +244,13 @@ class LeadSearch extends Lead
             ['l_is_test', 'in', 'range' => [0,1]],
             ['l_call_status_id', 'integer'],
             [['defaultUserTz', 'reportTimezone', 'timeFrom', 'timeTo'], 'string'],
-            [['quote_pnr'], 'string', 'min' => 5],
+
+            [['quote_pnr'], 'string', 'min' => 5, 'max' => 6],
+            [['quote_pnr'], 'trim', 'skipOnEmpty' => true],
+            [['quote_pnr'], 'filter', 'filter' => static function ($value) {
+                return empty($value) ? $value : (new PnrPreparingService($value, '/([a-zA-Z\d]{5,6})/'))->getPnr();
+            }],
+
             [
                 [
                     'emailsQtyFrom', 'emailsQtyTo', 'smsQtyFrom', 'smsQtyTo',
@@ -279,6 +297,7 @@ class LeadSearch extends Lead
             'callsQtyFrom' => 'Calls From', 'callsQtyTo' => 'Calls To',
             'chatsQtyFrom' => 'Chats From', 'chatsQtyTo' => 'Chats To',
             'projectId' => 'Project',
+            'userGroupId' => 'User Group',
             'quoteTypeId' => 'Quote Type',
             'includedFiles' => 'Included Files',
             'origin_airport' => 'Origin Location Code',
@@ -534,6 +553,29 @@ class LeadSearch extends Lead
             $query->andWhere(['IN', 'leads.id', $subQuery]);
         }
 
+        /** @fflag FFlag::FF_KEY_HIDE_LANGUAGE_FIELD_COMMUNICATION_BLOCK, Filter Conversion Date and User In LeadSearch Enable */
+        $filterByConversionDateAndUserIsEnable = Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_FILTER_CONVERSION_DATE_AND_USER_IN_LEAD_SEARCH);
+
+        if ($filterByConversionDateAndUserIsEnable) {
+            if ($this->conversionRangeTime) {
+                $conversionRange = explode(" - ", $this->conversionRangeTime);
+                $subQuery = LeadUserConversion::find()->select(['DISTINCT(lead_user_conversion.luc_lead_id)'])->where('lead_user_conversion.luc_lead_id = leads.id');
+
+                if ($conversionRange[0]) {
+                    $subQuery->andFilterWhere(['>=', 'luc_created_dt', date('Y-m-d', (strtotime($conversionRange[0])))]);
+                }
+                if ($conversionRange[1]) {
+                    $subQuery->andFilterWhere(['<=', 'luc_created_dt', date('Y-m-d', (strtotime($conversionRange[1])))]);
+                }
+                $query->andWhere(['IN', 'leads.id', $subQuery]);
+            }
+
+            if ($this->luc_user_id) {
+                $subQuery = LeadUserConversion::find()->select(['DISTINCT(lead_user_conversion.luc_lead_id)'])->where('lead_user_conversion.luc_lead_id = leads.id');
+                $subQuery->andWhere(['luc_user_id' => $this->luc_user_id]);
+                $query->andWhere(['IN', 'leads.id', $subQuery]);
+            }
+        }
         if ($this->client_name) {
             $query->joinWith(['client' => function ($q) {
                 if ($this->client_name) {
@@ -715,14 +757,10 @@ class LeadSearch extends Lead
         }
 
         if (!empty($this->emailsQtyFrom) || !empty($this->emailsQtyTo)) {
-            $query->leftJoin([
-                'emails' => Email::find()
-                    ->select([
-                        'e_lead_id',
-                        new Expression('COUNT(e_lead_id) AS cnt')
-                    ])
-                    ->groupBy(['e_lead_id'])
-            ], 'leads.id = emails.e_lead_id');
+            $query->leftJoin(
+                '(' . EmailRepositoryFactory::getRepository()->getRawSqlCountGroupedByLead() . ') AS emails',
+                'leads.id = emails.e_lead_id'
+            );
 
             if (!empty($this->emailsQtyFrom)) {
                 if ((int) $this->emailsQtyFrom === 0) {
@@ -888,11 +926,35 @@ class LeadSearch extends Lead
         }
 
         if (ArrayHelper::isIn($this->is_conversion, ['1', '0'], false)) {
-            $leadIds = LeadUserConversion::find()
-                ->select('luc_lead_id')
-                ->groupBy(['luc_lead_id'])
-                ->indexBy('luc_lead_id')
-                ->column();
+            if ($filterByConversionDateAndUserIsEnable) {
+                if (!empty($this->luc_user_id)) {
+                    $leadIds = LeadUserConversion
+                        ::find()
+                        ->select(['luc_lead_id'])
+                        ->where(['luc_user_id' => $this->luc_user_id])
+                        ->groupBy(['luc_lead_id']);
+                } else {
+                    $leadIds = LeadUserConversion
+                        ::find()
+                        ->select('luc_lead_id')
+                        ->groupBy(['luc_lead_id']);
+                }
+            } else {
+                if (!empty($this->employee_id)) {
+                    $leadIds = LeadUserConversion
+                        ::find()
+                        ->select(['luc_lead_id'])
+                        ->where(['luc_user_id' => $this->employee_id])
+                        ->groupBy(['luc_lead_id']);
+                } else {
+                    $leadIds = LeadUserConversion
+                        ::find()
+                        ->select('luc_lead_id')
+                        ->groupBy(['luc_lead_id']);
+                }
+            }
+
+
             $command = $this->is_conversion ? 'IN' : 'NOT IN';
 
             $query->andWhere([
@@ -900,6 +962,10 @@ class LeadSearch extends Lead
                 'leads.id',
                 $leadIds
             ]);
+        }
+
+        if ($this->userGroupId) {
+            $query->andWhere(['employee_id' => UserGroupAssign::find()->select(['ugs_user_id'])->andWhere(['ugs_group_id' => $this->userGroupId])]);
         }
 
         return $dataProvider;
@@ -1039,6 +1105,30 @@ class LeadSearch extends Lead
             }
 
             $query->andWhere(['IN', 'leads.id', $subQuery]);
+        }
+
+        /** @fflag FFlag::FF_KEY_HIDE_LANGUAGE_FIELD_COMMUNICATION_BLOCK, Filter Conversion Date and User In LeadSearch Enable */
+        $filterByConversionDateAndUserIsEnable = Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_FILTER_CONVERSION_DATE_AND_USER_IN_LEAD_SEARCH);
+
+        if ($filterByConversionDateAndUserIsEnable) {
+            if ($this->conversionRangeTime) {
+                $conversionRange = explode(" - ", $this->conversionRangeTime);
+                $subQuery = LeadUserConversion::find()->select(['DISTINCT(lead_user_conversion.luc_lead_id)'])->where('lead_user_conversion.luc_lead_id = leads.id');
+
+                if ($conversionRange[0]) {
+                    $subQuery->andFilterWhere(['>=', 'luc_created_dt', date('Y-m-d', (strtotime($conversionRange[0])))]);
+                }
+                if ($conversionRange[1]) {
+                    $subQuery->andFilterWhere(['<=', 'luc_created_dt', date('Y-m-d', (strtotime($conversionRange[1])))]);
+                }
+                $query->andWhere(['IN', 'leads.id', $subQuery]);
+            }
+
+            if ($this->luc_user_id) {
+                $subQuery = LeadUserConversion::find()->select(['DISTINCT(lead_user_conversion.luc_lead_id)'])->where('lead_user_conversion.luc_lead_id = leads.id');
+                $subQuery->andWhere(['luc_user_id' => $this->luc_user_id]);
+                $query->andWhere(['IN', 'leads.id', $subQuery]);
+            }
         }
 
         if ($this->client_name) {
@@ -1202,11 +1292,7 @@ class LeadSearch extends Lead
         ]);
 
         $query->addSelect([
-            'emailOffers' => (new Query())
-                ->select(['count(*)'])
-                ->from(Email::tableName())
-                ->andWhere([Email::tableName() . '.e_template_type_id' => 1])
-                ->andWhere(Email::tableName() . '.e_lead_id = ' . Lead::tableName() . '.id')
+            'emailOffers' => EmailRepositoryFactory::getRepository()->getSubQueryLeadEmailOffer()
         ]);
 
         $query->addSelect([
@@ -1217,6 +1303,32 @@ class LeadSearch extends Lead
                 ->andWhere(Quote::tableName() . '.lead_id = ' . Lead::tableName() . '.id')
                 ->limit(1)
         ]);
+
+        if ($filterByConversionDateAndUserIsEnable) {
+            if (ArrayHelper::isIn($this->is_conversion, ['1', '0'], false)) {
+                if (!empty($this->luc_user_id)) {
+                    $leadIds = LeadUserConversion
+                        ::find()
+                        ->select(['luc_lead_id'])
+                        ->where(['luc_user_id' => $this->luc_user_id])
+                        ->groupBy(['luc_lead_id']);
+                } else {
+                    $leadIds = LeadUserConversion
+                        ::find()
+                        ->select('luc_lead_id')
+                        ->groupBy(['luc_lead_id']);
+                }
+
+
+                $command = $this->is_conversion ? 'IN' : 'NOT IN';
+
+                $query->andWhere([
+                    $command,
+                    'leads.id',
+                    $leadIds
+                ]);
+            }
+        }
 
 //        $sqlRaw = $query->createCommand()->getRawSql();
 //        VarDumper::dump($sqlRaw, 10, true); die;
@@ -1593,11 +1705,7 @@ class LeadSearch extends Lead
         ]);
 
         $query->addSelect([
-            'emailOffers' => (new Query())
-                ->select(['count(*)'])
-                ->from(Email::tableName())
-                ->andWhere([Email::tableName() . '.e_template_type_id' => 1])
-                ->andWhere(Email::tableName() . '.e_lead_id = ' . Lead::tableName() . '.id')
+            'emailOffers' => EmailRepositoryFactory::getRepository()->getSubQueryLeadEmailOffer()
         ]);
 
         $query->addSelect([
@@ -2235,7 +2343,7 @@ class LeadSearch extends Lead
             //$dataProvider->setTotalCount($this->limit);
         }
 
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
+        $query->with(['client']);
 
         return $dataProvider;
     }
@@ -2351,7 +2459,7 @@ class LeadSearch extends Lead
 //            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
 //        }
 
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'leadChecklists', 'leadChecklists.lcType', 'employee']);
+        $query->with(['client', 'leadChecklists', 'leadChecklists.lcType', 'employee']);
         $query->with([
            'minLpp' => static function (ActiveQuery $query) {
                 $query->joinWith('lppLppd')->andWhere(['lppd_enabled' => 1]);
@@ -2423,7 +2531,7 @@ class LeadSearch extends Lead
         }
 
         if ($user->isAdmin()) {
-            $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'project', 'leadFlightSegments']);
+            $query->with(['client', 'project', 'leadFlightSegments']);
         }
 
         if ($this->expiration_dt) {
@@ -2445,7 +2553,7 @@ class LeadSearch extends Lead
     {
 //        $projectIds = array_keys(EmployeeAccess::getProjects());
         $query = $this->leadBadgesRepository->getFollowUpQuery($user)->with('project');
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
+        $query->with(['client']);
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
         $leadTable = Lead::tableName();
@@ -2564,8 +2672,6 @@ class LeadSearch extends Lead
 
         $query->with([
             'client',
-            'client.clientEmails',
-            'client.clientPhones',
             'employee',
             'leadFlightSegments' => static function (ActiveQuery $query) {
                 return $query->orderBy(['id' => SORT_ASC]);
@@ -2588,7 +2694,7 @@ class LeadSearch extends Lead
     {
 //        $projectIds = array_keys(EmployeeAccess::getProjects());
         $query = $this->leadBadgesRepository->getBonusQuery($user)->with('project');
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
+        $query->with(['client']);
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
         $leadTable = Lead::tableName();
@@ -2665,6 +2771,37 @@ class LeadSearch extends Lead
             $leadTable . '.l_type' => $this->l_type,
         ]);
 
+        if ($this->departRangeTime) {
+            $departRange = explode(" - ", $this->departRangeTime);
+            $having = [];
+            if ($departRange[0] && $departRange[1]) {
+                $having[] = "MAX(departure) >= '" . date('Y-m-d', strtotime($departRange[0])) . "'";
+                $having[] = "MIN(departure) <= '" . date('Y-m-d', strtotime($departRange[1])) . "'";
+                $subQuery = LeadFlightSegment::find()->select(['DISTINCT(lead_id)'])->groupBy('lead_id')->having(implode(" AND ", $having));
+                $query->andWhere(['IN', 'leads.id', $subQuery]);
+            }
+        }
+
+        if (!empty($this->origin_airport)) {
+            $query->innerJoin([
+                'segment_origin_airport' => LeadFlightSegment
+                    ::find()
+                    ->select(['lead_id'])
+                    ->where(['origin' => $this->origin_airport])
+                    ->groupBy(['lead_id'])
+            ], 'leads.id = segment_origin_airport.lead_id');
+        }
+
+        if (!empty($this->destination_airport)) {
+            $query->innerJoin([
+                'segment_destination_airport' => LeadFlightSegment
+                    ::find()
+                    ->select(['lead_id'])
+                    ->where(['destination' => $this->destination_airport])
+                    ->groupBy(['lead_id'])
+            ], 'leads.id = segment_destination_airport.lead_id');
+        }
+
 //        $query
 //        ->andWhere(['IN','leads.status', [self::STATUS_FOLLOW_UP]])
 //        ->andWhere(['IN', $leadTable . '.project_id', $projectIds])
@@ -2707,8 +2844,6 @@ class LeadSearch extends Lead
 
         $query->with([
             'client',
-            'client.clientEmails',
-            'client.clientPhones',
             'employee',
             'leadFlightSegments' => static function (ActiveQuery $query) {
                 return $query->orderBy(['id' => SORT_ASC]);
@@ -2877,6 +3012,35 @@ class LeadSearch extends Lead
     public function searchBusinessInbox($params, Employee $user): ActiveDataProvider
     {
         $query = $this->leadBadgesRepository->getBusinessInboxQuery($user);
+
+        /** @fflag FFlag::FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE, Smart Lead Distribution Enable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SMART_LEAD_DISTRIBUTION_ENABLE) === true) {
+            $allowedInterval = SmartLeadDistributionService::getAllowedPointIntervalForBusinessInbox();
+
+            if ($allowedInterval !== null) {
+                $query->leftJoin(
+                    'lead_data',
+                    'leads.id = lead_data.ld_lead_id AND lead_data.ld_field_key = :key',
+                    [
+                        'key' => LeadDataKeyDictionary::KEY_LEAD_RATING_POINTS_DYNAMIC,
+                    ]
+                );
+
+                $query->andWhere([
+                    'OR',
+                    [
+                        'BETWEEN',
+                        'lead_data.ld_field_value',
+                        $allowedInterval->from,
+                        $allowedInterval->to
+                    ],
+                    [
+                        'lead_data.ld_field_value' => null,
+                    ],
+                ]);
+            }
+        }
+
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
         $leadTable = Lead::tableName();
 
@@ -2884,14 +3048,33 @@ class LeadSearch extends Lead
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort' => ['defaultOrder' => ['created' => SORT_DESC]],
+            'sort' => ['defaultOrder' => ['created' => SORT_ASC]],
             'pagination' => $this->limit > 0 ? false : ['pageSize' => 20],
+            'key' => function (Lead $model) {
+                return md5($model->id);
+            },
         ]);
 
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
+            $query->where('0=1');
             return $dataProvider;
+        }
+
+        /** @abac null, LeadQueueBusinessInboxAbacObject::QUERY_LISTING, LeadQueueBusinessInboxAbacObject::ACTION_READ_WT_USER_RESTRICTION, Shown leads where user restriction */
+        $canUserRestriction = \Yii::$app->abac->can(
+            null,
+            LeadQueueBusinessInboxAbacObject::QUERY_LISTING,
+            LeadQueueBusinessInboxAbacObject::ACTION_READ_WT_USER_RESTRICTION
+        );
+        if ($canUserRestriction) {
+            $query->leftJoin(ProfitSplit::tableName(), 'ps_lead_id = ' . $leadTable . '.id AND ps_user_id = ' . $user->id);
+            $query->leftJoin(TipsSplit::tableName(), 'ts_lead_id = ' . $leadTable . '.id AND ts_user_id = ' . $user->id);
+            $query->andWhere(['OR',
+                [$leadTable . '.employee_id' => $user->id],
+                ['IS', $leadTable . '.employee_id', null],
+                ['ps_user_id' => $user->id],
+                ['ts_user_id' => $user->id]
+            ]);
         }
 
         // grid filtering conditions
@@ -2910,10 +3093,9 @@ class LeadSearch extends Lead
 
         if ($this->limit > 0) {
             $query->limit($this->limit);
-            //$dataProvider->setTotalCount($this->limit);
         }
 
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
+        $query->with(['client']);
 
         return $dataProvider;
     }
@@ -2957,7 +3139,7 @@ class LeadSearch extends Lead
             $leadTable . '.l_type' => $this->l_type,
         ]);
 
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
+        $query->with(['client']);
 
         return $dataProvider;
     }
@@ -3010,7 +3192,7 @@ class LeadSearch extends Lead
         }
 
         if ($user->isAdmin()) {
-            $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'project', 'leadFlightSegments']);
+            $query->with(['client', 'project', 'leadFlightSegments']);
         }
 
         return $dataProvider;
@@ -3075,7 +3257,7 @@ class LeadSearch extends Lead
         }
 
         if ($user->isAdmin()) {
-            $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'project', 'leadFlightSegments']);
+            $query->with(['client', 'project', 'leadFlightSegments']);
         }
 
         if ($this->expiration_dt) {
@@ -3216,21 +3398,16 @@ class LeadSearch extends Lead
         ]);
 
         if (ArrayHelper::isIn($this->is_conversion, ['1', '0'], false)) {
-            $leadIds = LeadUserConversion::find()
-                ->select('luc_lead_id')
-                ->groupBy(['luc_lead_id'])
-                ->indexBy('luc_lead_id')
-                ->column();
-            $command = $this->is_conversion ? 'IN' : 'NOT IN';
-
-            $query->andWhere([
-                $command,
-                $leadTable . '.id',
-                $leadIds
-            ]);
+            $lucTableName = LeadUserConversion::tableName();
+            if ($this->is_conversion) {
+                $query->innerJoin($lucTableName . ' AS luc', 'luc.luc_lead_id=id');
+            } else {
+                $query->innerJoin($lucTableName . ' AS luc', 'luc.luc_lead_id=id')
+                      ->andWhere(['luc.luc_lead_id' => new Expression('null')]);
+            }
         }
 
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'employee']);
+        $query->with(['client',  'employee']);
 
         return $dataProvider;
     }
@@ -3290,7 +3467,7 @@ class LeadSearch extends Lead
 //            $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
 //        }
 
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones', 'employee', 'project']);
+        $query->with(['client', 'employee', 'project']);
 
         return $dataProvider;
     }
@@ -3608,7 +3785,7 @@ class LeadSearch extends Lead
 
         if ($category == 'finalProfit') {
             $query->select(['e.id', 'e.username']);
-            $query->addSelect(['(SELECT 
+            $query->addSelect(['(SELECT
             SUM(CASE
                     WHEN
                         employee_id = e.id AND lead_origin = 1
@@ -3616,9 +3793,9 @@ class LeadSearch extends Lead
                     final_profit - agents_processing_fee
                     WHEN
                         employee_id = e.id AND lead_origin = 0
-                    THEN                  
-                    -((final_profit - agents_processing_fee) * (lead_ps / 100)) 
-                    WHEN 
+                    THEN
+                    -((final_profit - agents_processing_fee) * (lead_ps / 100))
+                    WHEN
                     user_id = e.id AND lead_origin = 0
                     THEN
                     (final_profit - agents_processing_fee) * (lead_ps / 100)
@@ -3627,17 +3804,17 @@ class LeadSearch extends Lead
         FROM
             leads
                 LEFT JOIN
-            (SELECT 
+            (SELECT
                 employee_id AS user_id,
                     id AS lead_id,
                     100 AS lead_ps,
                     TRUE AS lead_origin
             FROM
                 leads
-            WHERE               
+            WHERE
                 leads.id IN (SELECT id FROM leads WHERE (updated ' . $between_condition . ') AND status=' . Lead::STATUS_SOLD . ')
-                UNION ALL                 
-            SELECT 
+                UNION ALL
+            SELECT
                 ps_user_id AS user_id,
                     ps_lead_id AS lead_id,
                     ps_percent AS lead_ps,
@@ -3657,28 +3834,28 @@ class LeadSearch extends Lead
 
         if ($category == 'profitPerPax') {
             $query->select(['e.id', 'e.username']);
-            $query->addSelect(['(SELECT 
+            $query->addSelect(['(SELECT
             SUM(CASE
                     WHEN
                         employee_id = e.id AND lead_origin = 1
                     THEN
-                    (final_profit - agents_processing_fee) / (adults + children)                    
+                    (final_profit - agents_processing_fee) / (adults + children)
                     ELSE 0
                 END)
         FROM
             leads
                 LEFT JOIN
-            (SELECT 
+            (SELECT
                 employee_id AS user_id,
                     id AS lead_id,
                     100 AS lead_ps,
                     TRUE AS lead_origin
             FROM
                 leads
-            WHERE               
+            WHERE
                 leads.id IN (SELECT id FROM leads WHERE (updated ' . $between_condition . ') AND status=' . Lead::STATUS_SOLD . ')
-                UNION ALL                 
-            SELECT 
+                UNION ALL
+            SELECT
                 ps_user_id AS user_id,
                     ps_lead_id AS lead_id,
                     ps_percent AS lead_ps,
@@ -3693,7 +3870,7 @@ class LeadSearch extends Lead
 
         if ($category == 'tips') {
             $query->select(['e.id', 'e.username']);
-            $query->addSelect(['(SELECT 
+            $query->addSelect(['(SELECT
             SUM(CASE
                     WHEN
                         employee_id = e.id AND lead_origin = 1
@@ -3701,9 +3878,9 @@ class LeadSearch extends Lead
                     tips / 2
                     WHEN
                         employee_id = e.id AND lead_origin = 0
-                    THEN                  
-                    -((tips / 2) * (lead_ps / 100)) 
-                    WHEN 
+                    THEN
+                    -((tips / 2) * (lead_ps / 100))
+                    WHEN
                     user_id = e.id AND lead_origin = 0
                     THEN
                     (tips / 2) * (lead_ps / 100)
@@ -3712,17 +3889,17 @@ class LeadSearch extends Lead
         FROM
             leads
                 LEFT JOIN
-            (SELECT 
+            (SELECT
                 employee_id AS user_id,
                     id AS lead_id,
                     100 AS lead_ps,
                     TRUE AS lead_origin
             FROM
                 leads
-            WHERE               
+            WHERE
                 leads.id IN (SELECT id FROM leads WHERE (updated ' . $between_condition . ') AND status=' . Lead::STATUS_SOLD . ')
-                UNION ALL                 
-            SELECT 
+                UNION ALL
+            SELECT
                 ts_user_id AS user_id,
                     ts_lead_id AS lead_id,
                     ts_percent AS lead_ps,
@@ -3736,7 +3913,7 @@ class LeadSearch extends Lead
         }
 
         if ($category == 'leadConversion') {
-            $query->select(['employee_id, 
+            $query->select(['employee_id,
                              (SUM(CASE WHEN status IN(' . Lead::STATUS_SOLD . ',' . Lead::STATUS_BOOKED . ') AND (updated ' . $between_condition . ') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status=' . Lead::STATUS_PROCESSING . ' AND employee_id=lf_owner_id AND lf_from_status_id=' . Lead::STATUS_SNOOZE . ' OR lf_from_status_id=' . Lead::STATUS_PENDING . ' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END) /
                              SUM(CASE WHEN status NOT IN(' . Lead::STATUS_REJECT . ', ' . Lead::STATUS_TRASH . ', ' . Lead::STATUS_SNOOZE . ') AND (updated ' . $between_condition . ') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status=' . Lead::STATUS_PROCESSING . ' AND employee_id=lf_owner_id AND lf_from_status_id=' . Lead::STATUS_SNOOZE . ' OR lf_from_status_id=' . Lead::STATUS_PENDING . ' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END)) AS leadConversion,
                              SUM(CASE WHEN status IN(' . Lead::STATUS_SOLD . ',' . Lead::STATUS_BOOKED . ') AND (updated ' . $between_condition . ') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status=' . Lead::STATUS_PROCESSING . ' AND employee_id=lf_owner_id AND lf_from_status_id=' . Lead::STATUS_SNOOZE . ' OR lf_from_status_id=' . Lead::STATUS_PENDING . ' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END) AS leadsToProcessing,
@@ -3817,7 +3994,7 @@ class LeadSearch extends Lead
         $query = new Query();
 
         if ($category == 'teamsProfit') {
-            $query->addSelect(['ug_name', 'SUM((SELECT 
+            $query->addSelect(['ug_name', 'SUM((SELECT
             SUM(CASE
                     WHEN
                         employee_id = e.id AND lead_origin = 1
@@ -3825,9 +4002,9 @@ class LeadSearch extends Lead
                     final_profit - agents_processing_fee
                     WHEN
                         employee_id = e.id AND lead_origin = 0
-                    THEN                  
-                    -((final_profit - agents_processing_fee) * (lead_ps / 100)) 
-                    WHEN 
+                    THEN
+                    -((final_profit - agents_processing_fee) * (lead_ps / 100))
+                    WHEN
                     user_id = e.id AND lead_origin = 0
                     THEN
                     (final_profit - agents_processing_fee) * (lead_ps / 100)
@@ -3836,17 +4013,17 @@ class LeadSearch extends Lead
         FROM
             leads
                 LEFT JOIN
-            (SELECT 
+            (SELECT
                 employee_id AS user_id,
                     id AS lead_id,
                     100 AS lead_ps,
                     TRUE AS lead_origin
             FROM
                 leads
-            WHERE               
+            WHERE
                 leads.id IN (select id from leads where (updated ' . $between_condition . ') and status=' . Lead::STATUS_SOLD . ')
-                UNION ALL                 
-            SELECT 
+                UNION ALL
+            SELECT
                 ps_user_id AS user_id,
                     ps_lead_id AS lead_id,
                     ps_percent AS lead_ps,
@@ -3888,28 +4065,28 @@ class LeadSearch extends Lead
         }
 
         if ($category == 'teamsProfitPerPax') {
-            $query->addSelect(['ug_name', 'AVG((SELECT 
+            $query->addSelect(['ug_name', 'AVG((SELECT
             SUM(CASE
                     WHEN
                         employee_id = e.id AND lead_origin = 1
                     THEN
-                    (final_profit - agents_processing_fee) / (adults + children)                    
+                    (final_profit - agents_processing_fee) / (adults + children)
                     ELSE 0
                 END)
         FROM
             leads
                 LEFT JOIN
-            (SELECT 
+            (SELECT
                 employee_id AS user_id,
                     id AS lead_id,
                     100 AS lead_ps,
                     TRUE AS lead_origin
             FROM
                 leads
-            WHERE               
+            WHERE
                 leads.id IN (SELECT id FROM leads WHERE (updated ' . $between_condition . ') AND status=' . Lead::STATUS_SOLD . ')
-                UNION ALL                 
-            SELECT 
+                UNION ALL
+            SELECT
                 ps_user_id AS user_id,
                     ps_lead_id AS lead_id,
                     ps_percent AS lead_ps,
@@ -3936,28 +4113,28 @@ class LeadSearch extends Lead
         }
 
         if ($category == 'teamsProfitPerAgent') {
-            $query->addSelect(['ug_name', 'AVG((SELECT 
+            $query->addSelect(['ug_name', 'AVG((SELECT
             SUM(CASE
                     WHEN
                         employee_id = e.id AND lead_origin = 1
                     THEN
-                    (final_profit - agents_processing_fee)                 
+                    (final_profit - agents_processing_fee)
                     ELSE 0
                 END)
         FROM
             leads
                 LEFT JOIN
-            (SELECT 
+            (SELECT
                 employee_id AS user_id,
                     id AS lead_id,
                     100 AS lead_ps,
                     TRUE AS lead_origin
             FROM
                 leads
-            WHERE               
+            WHERE
                 leads.id IN (SELECT id FROM leads WHERE (updated ' . $between_condition . ') AND status=' . Lead::STATUS_SOLD . ')
-                UNION ALL                 
-            SELECT 
+                UNION ALL
+            SELECT
                 ps_user_id AS user_id,
                     ps_lead_id AS lead_id,
                     ps_percent AS lead_ps,
@@ -3984,7 +4161,7 @@ class LeadSearch extends Lead
         }
 
         if ($category == 'teamsConversion') {
-            $query->addSelect(['ug_name,  
+            $query->addSelect(['ug_name,
                              (SUM(CASE WHEN status IN(' . Lead::STATUS_SOLD . ',' . Lead::STATUS_BOOKED . ') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status=' . Lead::STATUS_PROCESSING . ' AND employee_id=lf_owner_id AND lf_from_status_id=' . Lead::STATUS_SNOOZE . ' OR lf_from_status_id=' . Lead::STATUS_PENDING . ' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END) /
                              SUM(CASE WHEN status NOT IN(' . Lead::STATUS_REJECT . ', ' . Lead::STATUS_TRASH . ', ' . Lead::STATUS_SNOOZE . ') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status=' . Lead::STATUS_PROCESSING . ' AND employee_id=lf_owner_id AND lf_from_status_id=' . Lead::STATUS_SNOOZE . ' OR lf_from_status_id=' . Lead::STATUS_PENDING . ' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END))  as teamsConversion,
                              SUM(CASE WHEN status IN(' . Lead::STATUS_SOLD . ',' . Lead::STATUS_BOOKED . ') AND (updated ' . $between_condition . ') AND employee_id IS NOT NULL AND status IS NOT NULL AND id in (SELECT lead_id as id FROM lead_flow WHERE status=' . Lead::STATUS_PROCESSING . ' AND employee_id=lf_owner_id AND lf_from_status_id=' . Lead::STATUS_SNOOZE . ' OR lf_from_status_id=' . Lead::STATUS_PENDING . ' AND employee_id IS NOT NULL AND lf_owner_id IS NOT NULL) THEN 1 ELSE 0 END) AS teamLeadsToProcessing,
@@ -4106,23 +4283,23 @@ class LeadSearch extends Lead
 
         $query = new Query();
 
-        $query->select(['lf.lf_owner_id AS user_id, DATE(CONVERT_TZ(DATE_SUB(lf.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) as created_date, COUNT(*) as cnt, 
-                
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND `lf_from_status_id` = ' . Lead::STATUS_PENDING . ' AND lfw.status = ' . Lead::STATUS_PROCESSING . $queryByProject . $queryByCreatedType . ') AS newTotal,    
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND `lf_from_status_id` = ' . Lead::STATUS_PENDING . ' AND lfw.status = ' . Lead::STATUS_PROCESSING . ' AND lf_description = "Take" ' . $queryByProject . $queryByCreatedType . ') AS inboxLeadsTaken,    
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND `lf_from_status_id` = ' . Lead::STATUS_PENDING . ' AND lfw.status = ' . Lead::STATUS_PROCESSING . ' AND lf_description = "Call AutoCreated Lead" ' . $queryByProject . $queryByCreatedType . ') AS callLeadsTaken,    
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND `lf_from_status_id` = ' . Lead::STATUS_PENDING . ' AND lfw.status = ' . Lead::STATUS_PROCESSING . ' AND lf_description = "Lead redial" ' . $queryByProject . $queryByCreatedType . ') AS redialLeadsTaken,    
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND lf_from_status_id IS NULL AND lfw.status = ' . Lead::STATUS_PROCESSING . ' AND ls.clone_id IS NULL ' . $queryByProject . $queryByCreatedType . ') AS leadsCreated,    
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND lf_from_status_id IS NULL AND lfw.status = ' . Lead::STATUS_PROCESSING . '  AND lfw.lf_description <> "Manual create" AND ls.clone_id IS NOT NULL ' . $queryByProject . $queryByCreatedType . ') AS leadsCloned,    
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND `lf_from_status_id` = ' . Lead::STATUS_FOLLOW_UP . ' AND lfw.status =  ' . Lead::STATUS_PROCESSING . $queryByProject . $queryByCreatedType . ') AS followUpTotal,              
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lfw.employee_id AND `lf_from_status_id` = ' . Lead::STATUS_PROCESSING . ' AND lfw.status =  ' . Lead::STATUS_FOLLOW_UP . $queryByProject . $queryByCreatedType . ') AS toFollowUp,                
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND `lf_from_status_id` = ' . Lead::STATUS_FOLLOW_UP . ' AND lfw.status = ' . Lead::STATUS_PROCESSING . $queryByProject . $queryByCreatedType . ') AS followUpLeadsTaken,    
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND `lf_from_status_id` = ' . Lead::STATUS_PROCESSING . ' AND lfw.status = ' . Lead::STATUS_TRASH . $queryByProject . $queryByCreatedType . ') AS trashLeads,    
-            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND lfw.status = ' . Lead::STATUS_SOLD . $queryByProject . $queryByCreatedType . ') AS soldLeads,    
-            (SELECT SUM(CASE WHEN ls.final_profit IS NOT NULL AND ls.final_profit > 0 THEN ls.final_profit ELSE 0 END) FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND lfw.status = ' . Lead::STATUS_SOLD . $queryByProject . $queryByCreatedType . ') AS profit,    
+        $query->select(['lf.lf_owner_id AS user_id, DATE(CONVERT_TZ(DATE_SUB(lf.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) as created_date, COUNT(*) as cnt,
+
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND `lf_from_status_id` = ' . Lead::STATUS_PENDING . ' AND lfw.status = ' . Lead::STATUS_PROCESSING . $queryByProject . $queryByCreatedType . ') AS newTotal,
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND `lf_from_status_id` = ' . Lead::STATUS_PENDING . ' AND lfw.status = ' . Lead::STATUS_PROCESSING . ' AND lf_description = "Take" ' . $queryByProject . $queryByCreatedType . ') AS inboxLeadsTaken,
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND `lf_from_status_id` = ' . Lead::STATUS_PENDING . ' AND lfw.status = ' . Lead::STATUS_PROCESSING . ' AND lf_description = "Call AutoCreated Lead" ' . $queryByProject . $queryByCreatedType . ') AS callLeadsTaken,
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND `lf_from_status_id` = ' . Lead::STATUS_PENDING . ' AND lfw.status = ' . Lead::STATUS_PROCESSING . ' AND lf_description = "Lead redial" ' . $queryByProject . $queryByCreatedType . ') AS redialLeadsTaken,
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND lf_from_status_id IS NULL AND lfw.status = ' . Lead::STATUS_PROCESSING . ' AND ls.clone_id IS NULL ' . $queryByProject . $queryByCreatedType . ') AS leadsCreated,
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND lf_from_status_id IS NULL AND lfw.status = ' . Lead::STATUS_PROCESSING . '  AND lfw.lf_description <> "Manual create" AND ls.clone_id IS NOT NULL ' . $queryByProject . $queryByCreatedType . ') AS leadsCloned,
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND `lf_from_status_id` = ' . Lead::STATUS_FOLLOW_UP . ' AND lfw.status =  ' . Lead::STATUS_PROCESSING . $queryByProject . $queryByCreatedType . ') AS followUpTotal,
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lfw.employee_id AND `lf_from_status_id` = ' . Lead::STATUS_PROCESSING . ' AND lfw.status =  ' . Lead::STATUS_FOLLOW_UP . $queryByProject . $queryByCreatedType . ') AS toFollowUp,
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND `lf_from_status_id` = ' . Lead::STATUS_FOLLOW_UP . ' AND lfw.status = ' . Lead::STATUS_PROCESSING . $queryByProject . $queryByCreatedType . ') AS followUpLeadsTaken,
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND user_id = lfw.employee_id AND `lf_from_status_id` = ' . Lead::STATUS_PROCESSING . ' AND lfw.status = ' . Lead::STATUS_TRASH . $queryByProject . $queryByCreatedType . ') AS trashLeads,
+            (SELECT COUNT(*) AS cnt FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND lfw.status = ' . Lead::STATUS_SOLD . $queryByProject . $queryByCreatedType . ') AS soldLeads,
+            (SELECT SUM(CASE WHEN ls.final_profit IS NOT NULL AND ls.final_profit > 0 THEN ls.final_profit ELSE 0 END) FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND lfw.status = ' . Lead::STATUS_SOLD . $queryByProject . $queryByCreatedType . ') AS profit,
             (SELECT SUM(CASE WHEN ls.tips IS NOT NULL THEN ls.tips ELSE 0 END) FROM lead_flow lfw LEFT JOIN leads ls ON lfw.lead_id = ls.id WHERE DATE(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) = created_date AND TIME(CONVERT_TZ(DATE_SUB(lfw.created, INTERVAL ' . $timeSub . ' Hour), "+00:00", "' . $utcOffsetDST . '")) <= TIME("' . $differenceTimeToFrom . '") AND user_id = lf_owner_id AND lfw.status = ' . Lead::STATUS_SOLD . $queryByProject . $queryByCreatedType . ') AS tips
-                
-            FROM lead_flow AS lf WHERE lf.created ' . $between_condition . ' AND lf.lf_owner_id IS NOT NULL ' . $queryByOwner . $queryByGroup . $queryByDepartment . '        
+
+            FROM lead_flow AS lf WHERE lf.created ' . $between_condition . ' AND lf.lf_owner_id IS NOT NULL ' . $queryByOwner . $queryByGroup . $queryByDepartment . '
         ']);
 
         $query->groupBy(['created_date', 'lf.lf_owner_id']);
@@ -4299,7 +4476,7 @@ class LeadSearch extends Lead
             SUM(IF(lf.lf_from_status_id = ' . Lead::STATUS_PENDING . ' AND lf.status = ' . Lead::STATUS_PROCESSING . ' AND lf.lf_description = "Lead redial", 1, 0)) redialLeadsTaken,
             SUM(IF(lf.lf_from_status_id IS NULL AND lf.status = ' . Lead::STATUS_PROCESSING . ' AND ls.clone_id IS NULL AND lf.lf_owner_id = lf.employee_id, 1, 0)) leadsCreated,
             SUM(IF(lf.lf_from_status_id IS NULL AND lf.status = ' . Lead::STATUS_PROCESSING . ' AND ls.clone_id IS NOT NULL AND lf.lf_owner_id = lf.employee_id AND lf.lf_description <> "Manual create", 1, 0)) leadsCloned,
-            SUM(IF(lf.lf_from_status_id = ' . Lead::STATUS_FOLLOW_UP . ' AND lf.status = ' . Lead::STATUS_PROCESSING . ', 1, 0)) followUpTotal,	
+            SUM(IF(lf.lf_from_status_id = ' . Lead::STATUS_FOLLOW_UP . ' AND lf.status = ' . Lead::STATUS_PROCESSING . ', 1, 0)) followUpTotal,
             (SELECT COUNT(*) FROM lead_flow lfw WHERE lfw.created ' . $between_condition . ' AND lfw.employee_id = lf.lf_owner_id AND lfw.lf_from_status_id = ' . Lead::STATUS_PROCESSING . ' AND lfw.status = ' . Lead::STATUS_FOLLOW_UP . ' ) toFollowUp,
             SUM(IF(lf.lf_from_status_id = ' . Lead::STATUS_FOLLOW_UP . ' AND lf.status = ' . Lead::STATUS_PROCESSING . ' AND lf.lf_owner_id = lf.employee_id, 1, 0)) followUpLeadsTaken,
             SUM(IF(lf.lf_from_status_id = ' . Lead::STATUS_PROCESSING . ' AND lf.status = ' . Lead::STATUS_TRASH . ' AND lf.lf_owner_id = lf.employee_id, 1, 0)) trashLeads,
@@ -4418,9 +4595,14 @@ class LeadSearch extends Lead
      * @param Employee $user
      * @return ActiveDataProvider
      */
-    public function searchExtraQueue($params, Employee $user): ActiveDataProvider
+    public function searchExtraQueue($params, Employee $user, string $queueType = self::EXTRA_QUEUE_TYPE_DEFAULT): ActiveDataProvider
     {
-        $query = $this->leadBadgesRepository->getExtraQueueQuery();
+        if ($queueType === self::EXTRA_QUEUE_TYPE_BUSINESS) {
+            $query = $this->leadBadgesRepository->getExtraQueueQuery(Lead::STATUS_BUSINESS_EXTRA_QUEUE);
+        } else {
+            $query = $this->leadBadgesRepository->getExtraQueueQuery(Lead::STATUS_EXTRA_QUEUE);
+        }
+
         $query->select(['*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
         $leadTable = Lead::tableName();
 
@@ -4447,6 +4629,7 @@ class LeadSearch extends Lead
             $leadTable . '.l_init_price' => $this->l_init_price,
             $leadTable . '.l_call_status_id' => $this->l_call_status_id,
             $leadTable . '.l_type' => $this->l_type,
+            $leadTable . '.l_answered' => $this->l_answered,
         ]);
 
         if ($this->email_status > 0) {
@@ -4508,8 +4691,59 @@ class LeadSearch extends Lead
                 ->andFilterWhere(['<=', 'l_last_action_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->l_last_action_dt) + 3600 * 24)]);
         }
 
-        $query->with(['client', 'client.clientEmails', 'client.clientPhones']);
+        $query->with(['client']);
 
+        return $dataProvider;
+    }
+
+    public function searchBusinessExtraQueue($params, Employee $user): ActiveDataProvider
+    {
+        return $this->searchExtraQueue($params, $user, self::EXTRA_QUEUE_TYPE_BUSINESS);
+    }
+
+    /**
+     * @param $params
+     * @return ActiveDataProvider
+     */
+    public function searchSoldLeadWithoutProfitSplit($params): ActiveDataProvider
+    {
+        $query = Lead::find()
+            ->leftJoin('profit_split', 'profit_split.ps_lead_id = leads.id')
+            ->where(['status' => Lead::STATUS_SOLD])
+            ->andWhere(['IS', 'profit_split.ps_lead_id', new \yii\db\Expression('null')]);
+
+        $leadTable = Lead::tableName();
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => ['defaultOrder' => ['id' => SORT_DESC]]
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            $query->where('0=1');
+            return $dataProvider;
+        }
+
+        if ($this->createdRangeTime) {
+            $createdRange = explode(" - ", $this->createdRangeTime);
+            if ($createdRange[0]) {
+                $query->andFilterWhere(['>=', 'leads.created', Employee::convertTimeFromUserDtToUTC(strtotime($createdRange[0]))]);
+            }
+            if ($createdRange[1]) {
+                $query->andFilterWhere(['<=', 'leads.created', Employee::convertTimeFromUserDtToUTC(strtotime($createdRange[1]) + 86399)]);
+            }
+        }
+
+        $query->andFilterWhere([
+            $leadTable . '.id' => $this->id,
+            $leadTable . '.project_id' => $this->project_id,
+            $leadTable . '.source_id' => $this->source_id,
+            $leadTable . '.client_id' => $this->client_id,
+            $leadTable . '.cabin' => $this->cabin,
+            $leadTable . '.uid' => $this->uid,
+            $leadTable . '.employee_id' => $this->employee_id,
+        ]);
         return $dataProvider;
     }
 }

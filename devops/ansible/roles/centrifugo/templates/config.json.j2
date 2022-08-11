@@ -7,5 +7,8 @@
   "tls": false,
   "tls_key": "centrifugossl.key",
   "tls_cert": "centrifugossl.crt",
-  "prometheus": true
+  "prometheus": true,
+  "allowed_origins": [
+    "{{ common_config_params_url }}"
+  ]
 }

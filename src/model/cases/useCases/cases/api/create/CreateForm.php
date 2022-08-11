@@ -18,6 +18,7 @@ use yii\base\Model;
  * @property int $category_id
  * @property string|null $order_uid
  * @property array $order_info
+ * @property array $experiments
  * @property int|null $project_id
  * @property string|null $subject
  * @property string|null $description
@@ -33,6 +34,7 @@ class CreateForm extends Model
     public $category_id;
     public $order_uid;
     public $order_info;
+    public $experiments;
     public $project_id;
     public $subject;
     public $description;
@@ -115,6 +117,8 @@ class CreateForm extends Model
                 }
             }, 'skipOnEmpty' => true, 'skipOnError' => true],
 
+            ['experiments', IsArrayValidator::class, 'skipOnEmpty' => true, 'skipOnError' => true],
+
             ['project_key', 'default', 'value' => null],
             ['project_key', 'string', 'max' => 100],
             [['project_key'], 'exist', 'skipOnError' => true, 'targetClass' => Project::class,
@@ -140,6 +144,13 @@ class CreateForm extends Model
             $this->project_id = Project::find()
                 ->select('id')
                 ->where(['project_key' => $this->project_key])
+                ->scalar();
+        }
+
+        if (empty($this->project_key) && $this->project_id) {
+            $this->project_key = Project::find()
+                ->select('api_key')
+                ->where(['id' => $this->project_id])
                 ->scalar();
         }
 

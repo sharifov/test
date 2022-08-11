@@ -1,5 +1,6 @@
 <?php
 
+use frontend\helpers\TimeConverterHelper;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
 use yii\bootstrap4\Html;
 use yii\helpers\Url;
@@ -60,7 +61,15 @@ $this->params['breadcrumbs'][] = $this->title;
                 'ssr_end_time_utc',
 
                 'ssr_timezone',
-                'ssr_duration_time',
+                [
+                    'label' => 'Duration Time (Hours:Minutes)',
+                    'value' => static function (
+                        ShiftScheduleRule $model
+                    ) {
+                        return  '<i class="fa fa-hourglass-end"></i> ' . TimeConverterHelper::minutesToHours($model->ssr_duration_time);
+                    },
+                    'format' => 'raw'
+                ],
                 //'ssr_start_time_loc',
                 //'ssr_end_time_loc',
 

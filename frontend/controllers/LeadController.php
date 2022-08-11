@@ -4,13 +4,11 @@ namespace frontend\controllers;
 
 use common\components\BackOffice;
 use common\components\CommunicationService;
-use common\components\jobs\LeadPoorProcessingRemoverJob;
 use common\models\Call;
 use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
 use common\models\Department;
-use common\models\DepartmentPhoneProject;
 use common\models\Email;
 use common\models\EmailTemplateType;
 use common\models\GlobalLog;
@@ -19,47 +17,55 @@ use common\models\LeadCallExpert;
 use common\models\LeadChecklist;
 use common\models\LeadFlow;
 //use common\models\LeadLog;
+use common\models\Employee;
 use common\models\LeadQcall;
 use common\models\LeadTask;
 use common\models\local\LeadAdditionalInformation;
 use common\models\Note;
-use common\models\ProjectEmailTemplate;
+use common\models\Quote;
+use common\models\QuotePrice;
 use common\models\search\LeadCallExpertSearch;
 use common\models\search\LeadChecklistSearch;
-use frontend\models\LeadUserRatingForm;
-use kivork\rbacExportImport\src\formatters\FileSizeFormatter;
-use modules\email\src\abac\dto\EmailPreviewDto;
-use modules\email\src\abac\EmailAbacObject;
-use modules\fileStorage\FileStorageSettings;
-use modules\fileStorage\src\services\url\UrlGenerator;
-use modules\lead\src\abac\dto\LeadAbacDto;
-use modules\lead\src\abac\LeadAbacObject;
-use modules\offer\src\entities\offer\search\OfferSearch;
-use modules\offer\src\entities\offerSendLog\CreateDto;
-use modules\offer\src\entities\offerSendLog\OfferSendLogType;
-use modules\offer\src\services\OfferSendLogService;
-use modules\order\src\entities\order\search\OrderCrudSearch;
+use common\models\search\LeadSearch;
 use common\models\Sms;
 use common\models\SmsTemplateType;
-use common\models\UserProjectParams;
 use frontend\models\CommunicationForm;
 use frontend\models\LeadForm;
 use frontend\models\LeadPreviewEmailForm;
 use frontend\models\LeadPreviewSmsForm;
-use frontend\models\SendEmailForm;
+use frontend\models\LeadUserRatingForm;
+use frontend\models\ProfitSplitForm;
+use frontend\models\TipsSplitForm;
+use modules\email\src\abac\dto\EmailPreviewDto;
+use modules\email\src\abac\EmailAbacObject;
+use modules\featureFlag\FFlag;
+use modules\fileStorage\FileStorageSettings;
+use modules\fileStorage\src\services\url\UrlGenerator;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
+use modules\lead\src\abac\LeadExpertCallObject;
+use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
+use modules\lead\src\abac\services\AbacLeadExpertCallService;
+use modules\offer\src\entities\offer\search\OfferSearch;
+use modules\offer\src\entities\offerSendLog\CreateDto;
+use modules\offer\src\entities\offerSendLog\OfferSendLogType;
+use modules\offer\src\services\OfferSendLogService;
 use modules\order\src\entities\order\search\OrderSearch;
+use modules\taskList\src\entities\TargetObject;
+use modules\taskList\src\entities\userTask\UserTaskSearch;
+use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTaskQuery;
 use modules\twilio\components\TwilioCommunicationService;
 use PHPUnit\Framework\Warning;
-use src\access\EmployeeAccess;
 use src\auth\Auth;
 use src\entities\cases\Cases;
+use src\exception\EmailNotSentException;
+use src\exception\CreateModelException;
 use src\forms\CompositeFormHelper;
 use src\forms\lead\CloneReasonForm;
 use src\forms\lead\ItineraryEditForm;
 use src\forms\lead\LeadCreateForm;
 use src\forms\leadflow\TakeOverReasonForm;
 use src\helpers\app\AppHelper;
-use src\helpers\email\MaskEmailHelper;
 use src\helpers\setting\SettingHelper;
 use src\logger\db\GlobalLogInterface;
 use src\logger\db\LogDTO;
@@ -71,17 +77,13 @@ use src\model\clientChat\entity\ClientChat;
 use src\model\clientChat\permissions\ClientChatActionPermission;
 use src\model\clientChatLead\entity\ClientChatLead;
 use src\model\clientChatLead\entity\ClientChatLeadRepository;
-use src\model\contactPhoneData\entity\ContactPhoneData;
 use src\model\contactPhoneList\service\ContactPhoneListService;
-use src\model\department\department\DefaultPhoneType;
 use src\model\email\useCase\send\fromLead\AbacEmailList;
 use src\model\emailReviewQueue\EmailReviewQueueManageService;
-use src\model\emailReviewQueue\entity\EmailReviewQueue;
 use src\model\lead\useCases\lead\create\CreateLeadByChatDTO;
 use src\model\lead\useCases\lead\create\LeadCreateByChatForm;
 use src\model\lead\useCases\lead\create\LeadManageForm;
 use src\model\lead\useCases\lead\create\LeadManageService as UseCaseLeadManageService;
-use src\model\lead\useCases\lead\import\LeadImportForm;
 use src\model\lead\useCases\lead\import\LeadImportParseService;
 use src\model\lead\useCases\lead\import\LeadImportService;
 use src\model\lead\useCases\lead\import\LeadImportUploadForm;
@@ -89,11 +91,11 @@ use src\model\lead\useCases\lead\link\LeadLinkChatForm;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
+use src\model\leadUserConversion\service\LeadUserConversionDictionary;
+use src\model\leadUserConversion\service\LeadUserConversionService;
 use src\model\leadUserRating\abac\dto\LeadUserRatingAbacDto;
 use src\model\leadUserRating\abac\LeadUserRatingAbacObject;
 use src\model\leadUserRating\service\LeadUserRatingService;
-use src\model\leadUserConversion\service\LeadUserConversionDictionary;
-use src\model\leadUserConversion\service\LeadUserConversionService;
 use src\model\sms\useCase\send\fromLead\AbacSmsFromNumberList;
 use src\quoteCommunication\Repo;
 use src\repositories\cases\CasesRepository;
@@ -101,8 +103,10 @@ use src\repositories\lead\LeadRepository;
 use src\repositories\NotFoundException;
 use src\repositories\quote\QuoteRepository;
 use src\services\client\ClientManageService;
+use src\services\email\EmailMainService;
 use src\services\email\EmailService;
 use src\services\lead\LeadAssignService;
+use src\services\lead\LeadBusinessExtraQueueService;
 use src\services\lead\LeadCloneService;
 use src\services\lead\LeadManageService;
 use src\services\TransactionManager;
@@ -116,7 +120,6 @@ use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
-use yii\validators\StringValidator;
 use yii\web\BadRequestHttpException;
 use yii\web\Cookie;
 use yii\web\ForbiddenHttpException;
@@ -125,13 +128,8 @@ use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
 use yii\web\UploadedFile;
 use yii\widgets\ActiveForm;
-use common\models\Quote;
-use common\models\Employee;
-use common\models\search\LeadSearch;
-use frontend\models\ProfitSplitForm;
-use common\models\QuotePrice;
-use frontend\models\TipsSplitForm;
-use common\models\local\LeadLogMessage;
+use src\repositories\email\EmailRepositoryFactory;
+use src\services\email\EmailServiceHelper;
 
 /**
  * Class LeadController
@@ -148,6 +146,7 @@ use common\models\local\LeadLogMessage;
  * @property UrlGenerator $fileStorageUrlGenerator
  * @property UseCaseLeadManageService $useCaseLeadManageService
  * @property EmailReviewQueueManageService $emailReviewQueueManageService
+ * @property EmailMainService $emailService
  */
 class LeadController extends FController
 {
@@ -164,6 +163,7 @@ class LeadController extends FController
     private UrlGenerator $fileStorageUrlGenerator;
     private UseCaseLeadManageService $useCaseLeadManageService;
     private EmailReviewQueueManageService $emailReviewQueueManageService;
+    private EmailMainService $emailService;
 
     public function __construct(
         $id,
@@ -181,6 +181,7 @@ class LeadController extends FController
         UrlGenerator $fileStorageUrlGenerator,
         UseCaseLeadManageService $useCaseLeadManageService,
         EmailReviewQueueManageService $emailReviewQueueManageService,
+        EmailMainService $emailService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
@@ -197,6 +198,7 @@ class LeadController extends FController
         $this->fileStorageUrlGenerator = $fileStorageUrlGenerator;
         $this->useCaseLeadManageService = $useCaseLeadManageService;
         $this->emailReviewQueueManageService = $emailReviewQueueManageService;
+        $this->emailService = $emailService;
     }
 
     public function behaviors(): array
@@ -213,6 +215,8 @@ class LeadController extends FController
                     'ajax-link-to-call',
                     'extra-queue',
                     'closed',
+                    'create',
+                    'business-extra-queue',
                 ],
             ],
         ];
@@ -253,12 +257,12 @@ class LeadController extends FController
     {
         $gid = mb_substr($gid, 0, 32);
         $lead = Lead::find()->where(['gid' => $gid])->limit(1)->one();
-
         if (!$lead) {
             throw new NotFoundHttpException('Not found lead ID: ' . $gid);
         }
 
-        if (!Auth::can('lead/view', ['lead' => $lead])) {
+        /** @abac $abacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS, Access to view lead  */
+        if (!Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS)) {
             throw new ForbiddenHttpException('Access Denied.');
         }
 
@@ -274,7 +278,6 @@ class LeadController extends FController
         $isQA = $user->isQa();
         $is_supervision = $user->isSupervision();
         $is_agent = $user->isAgent();
-
 
         if (Yii::$app->request->post('hasEditable')) {
             $value = '';
@@ -418,7 +421,6 @@ class LeadController extends FController
         }
 
 
-
         Yii::$app->cache->delete(sprintf('quick-search-%d-%d', $lead->id, Yii::$app->user->identity->getId()));
         if (!$isQA && !$lead->permissionsView()) {
             throw new UnauthorizedHttpException('Not permissions view lead ID: ' . $lead->id);
@@ -480,7 +482,6 @@ class LeadController extends FController
         $previewEmailForm->e_lead_id = $lead->id;
         $previewEmailForm->is_send = false;
 
-
         if ($previewEmailForm->load(Yii::$app->request->post())) {
             $previewEmailForm->e_lead_id = $lead->id;
             if ($previewEmailForm->validate()) {
@@ -495,81 +496,51 @@ class LeadController extends FController
                 /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND, Restrict access to send email in preview email */
                 $canSend = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND);
                 if ($canSend) {
-                    $mail = new Email();
-                    $mail->e_project_id = $lead->project_id;
-                    $mail->e_lead_id = $lead->id;
-                    if ($previewEmailForm->e_email_tpl_id) {
-                        $mail->e_template_type_id = $previewEmailForm->e_email_tpl_id;
-                    }
-                    $mail->e_type_id = Email::TYPE_OUTBOX;
-                    $mail->e_status_id = Email::STATUS_PENDING;
-                    $mail->e_email_subject = $previewEmailForm->e_email_subject;
-                    $mail->body_html = $previewEmailForm->e_email_message;
-                    $mail->e_email_from = $previewEmailForm->e_email_from;
-
-                    $mail->e_email_from_name = $previewEmailForm->e_email_from_name;
-                    $mail->e_email_to_name = $previewEmailForm->e_email_to_name;
-
-                    if ($previewEmailForm->e_language_id) {
-                        $mail->e_language_id = $previewEmailForm->e_language_id;
-                    }
-
-                    $mail->e_email_to = $previewEmailForm->e_email_to;
-                    $mail->e_created_dt = date('Y-m-d H:i:s');
-                    $mail->e_created_user_id = Yii::$app->user->id;
                     $attachments = [];
-                    /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_ATTACH_FILES, Restrict access to attach files in lead communication block*/
+                    /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_ATTACH_FILES, Restrict access to attach files in lead communication block */
                     $canAttachFiles = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_ATTACH_FILES);
                     if ($canAttachFiles && FileStorageSettings::canEmailAttach() && $previewEmailForm->files) {
                         $attachments['files'] = $this->fileStorageUrlGenerator->generateForExternal($previewEmailForm->getFilesPath());
                     }
-                    $mail->e_email_data = json_encode($attachments);
-                    if ($mail->save()) {
-                        $mail->e_message_id = $mail->generateMessageId();
-                        $mail->update();
+
+                    try {
+                        $mail = $this->emailService->createFromLead($previewEmailForm, $lead, $attachments);
 
                         /** @abac $abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND_WITHOUT_REVIEW, Restrict access to send without review email */
                         $canSendWithoutReview = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_EMAIL, EmailAbacObject::ACTION_SEND_WITHOUT_REVIEW);
 
                         if ($canSendWithoutReview) {
                             $previewEmailForm->is_send = true;
-                            $mailResponse = $mail->sendMail($attachments);
+                            $this->emailService->sendMail($mail, $attachments);
+                            $this->emailService->leadTaskJob($mail->e_id, $mail->lead);
+                            Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>' . $mail->getEmailTo() . '</strong>');
 
-                            if (isset($mailResponse['error']) && $mailResponse['error']) {
-                                //echo $mailResponse['error']; exit; //'Error: <strong>Email Message</strong> has not been sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
-                                Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>' . MaskEmailHelper::masking($mail->e_email_to) . '</strong>');
-                                Yii::error('Error: Email Message has not been sent to ' . $mail->e_email_to . "\r\n " . $mailResponse['error'], 'LeadController:view:Email:sendMail');
-                            } else {
-                                //echo '<strong>Email Message</strong> has been successfully sent to <strong>'.$mail->e_email_to.'</strong>'; exit;
-
-                                if ($offerList = @json_decode($previewEmailForm->e_offer_list)) {
-                                    if (is_array($offerList)) {
-                                        $service = Yii::createObject(OfferSendLogService::class);
-                                        foreach ($offerList as $offerId) {
-                                            $service->log(new CreateDto($offerId, OfferSendLogType::EMAIL, $user->id, $previewEmailForm->e_email_to));
-                                        }
+                            if ($offerList = @json_decode($previewEmailForm->e_offer_list)) {
+                                if (is_array($offerList)) {
+                                    $service = Yii::createObject(OfferSendLogService::class);
+                                    foreach ($offerList as $offerId) {
+                                        $service->log(new CreateDto($offerId, OfferSendLogType::EMAIL, $user->id, $previewEmailForm->e_email_to));
                                     }
                                 }
-
-                                /*
-                                * TODO: The similar logic exist in `\frontend\controllers\EmailReviewQueueController::actionSend`. Need to shrink code duplications.
-                                 */
-                                /** @var string[] $quoteIds */
-                                $quoteIds = Json::decode($previewEmailForm->e_quote_list);
-                                /** @var Quote[] $quoteObjects */
-                                $quoteObjects = Quote::find()->where(['IN', 'id', $quoteIds])->all();
-                                foreach ($quoteObjects as $quoteObject) {
-                                    Repo::createForEmail($mail->e_id, $quoteObject->id);
-                                    $quoteObject->setStatusSend();
-                                    // - Do email should be sent if quote didn't change sxtatus?
-                                    // - Do we should call saving request in loop? Calling all updates via one request would be better way
-                                    if (!$this->quoteRepository->save($quoteObject)) {
-                                        Yii::error($quoteObject->errors, 'LeadController:view:Email:Quote:save');
-                                    }
-                                }
-
-                                Yii::$app->session->setFlash('send-success', '<strong>Email Message</strong> has been successfully sent to <strong>' . MaskEmailHelper::masking($mail->e_email_to) . '</strong>');
                             }
+
+                            /*
+                             * TODO: The similar logic exist in `\frontend\controllers\EmailReviewQueueController::actionSend`. Need to shrink code duplications.
+                             */
+                            /** @var string[] $quoteIds */
+                            $quoteIds = Json::decode($previewEmailForm->e_quote_list);
+                            /** @var Quote[] $quoteObjects */
+                            $quoteObjects = Quote::find()->where(['IN', 'id', $quoteIds])->all();
+                            foreach ($quoteObjects as $quoteObject) {
+                                Repo::createForEmail($mail->e_id, $quoteObject->id, $previewEmailForm->e_qc_uid);
+                                $quoteObject->setStatusSend();
+                                // - Do email should be sent if quote didn't change status?
+                                // - Do we should call saving request in loop? Calling all updates via one request would be better way
+                                if (!$this->quoteRepository->save($quoteObject)) {
+                                    Yii::error($quoteObject->errors, 'LeadController:view:Email:Quote:save');
+                                }
+                            }
+
                             $this->refresh('#communication-form');
                         } else {
                             $mail->statusToReview();
@@ -579,18 +550,24 @@ class LeadController extends FController
                             /** @var Quote[] $quoteObjects */
                             $quoteObjects = Quote::find()->where(['IN', 'id', $quoteIds])->all();
                             foreach ($quoteObjects as $quoteObject) {
-                                Repo::createForEmail($mail->e_id, $quoteObject->id);
+                                Repo::createForEmail($mail->e_id, $quoteObject->id, $previewEmailForm->e_qc_uid);
                                 if (!$this->quoteRepository->save($quoteObject)) {
                                     Yii::error($quoteObject->errors, 'LeadController:view:Email:Quote:save');
                                 }
                             }
-                            $mail->update();
                             Yii::$app->session->setFlash('send-warning', '<strong>Email Message</strong> has been sent for review');
                             $this->refresh('#communication-form');
                         }
-                    } else {
-                        $previewEmailForm->addError('e_email_subject', VarDumper::dumpAsString($mail->errors));
-                        Yii::error(VarDumper::dumpAsString($mail->errors), 'LeadController:view:Email:save');
+                    } catch (CreateModelException $e) {
+                        $errorsMessage = VarDumper::dumpAsString($e->getErrors());
+                        $previewEmailForm->addError('e_email_subject', $errorsMessage);
+                        Yii::error($errorsMessage, 'LeadController:view:Email:save');
+                    } catch (EmailNotSentException $e) {
+                        Yii::$app->session->setFlash('send-error', 'Error: <strong>Email Message</strong> has not been sent to <strong>' . $e->getEmailTo() . '</strong>');
+                        Yii::error('Error: Email Message has not been sent to ' . $e->getEmailTo(false) . "\r\n " . $e->getMessage(), 'LeadController:view:Email:sendMail');
+                    } catch (\Throwable $e) {
+                        Yii::$app->session->setFlash('send-error', $e->getMessage() . '<br/>' . $e->getTraceAsString());
+                        Yii::error($e->getMessage(), 'LeadController:view:Email:save');
                     }
                 } else {
                     Yii::$app->session->setFlash('send-warning', 'Access denied: you dont have permission to send email');
@@ -646,7 +623,7 @@ class LeadController extends FController
                         /** @var Quote[] $quoteObjects */
                         $quoteObjects = Quote::find()->where(['IN', 'id', $quoteIds])->all();
                         foreach ($quoteObjects as $quote) {
-                            Repo::createForSms($sms->s_id, $quote->id);
+                            Repo::createForSms($sms->s_id, $quote->id, $previewSmsForm->s_qc_uid);
                             $quote->setStatusSend();
                             if (!$this->quoteRepository->save($quote)) {
                                 Yii::error($quote->errors, 'LeadController:view:Sms:Quote:save');
@@ -672,7 +649,7 @@ class LeadController extends FController
             }
         }
 
-        $comForm = new CommunicationForm($lead->l_client_lang, $smsFromNumberList, $emailFromList);
+        $comForm = new CommunicationForm($smsFromNumberList, $emailFromList, $lead->l_client_lang);
         $comForm->c_preview_email = 0;
         $comForm->c_preview_sms = 0;
         $comForm->c_voice_status = 0;
@@ -687,7 +664,7 @@ class LeadController extends FController
                     $comForm->c_preview_email = 1;
 
                     /** @var CommunicationService $communication */
-                    $communication = Yii::$app->communication;
+                    $communication = Yii::$app->comms;
                     $data['origin'] = '';
 
                     $content_data['email_body_html'] = $comForm->c_email_message;
@@ -713,48 +690,45 @@ class LeadController extends FController
                     if ($comForm->c_email_tpl_id > 0) {
                         $previewEmailForm->e_email_tpl_id = $comForm->c_email_tpl_id;
 
-                        $tpl = EmailTemplateType::findOne($comForm->c_email_tpl_id);
-                        //$mailSend = $communication->mailSend(7, 'cl_offer', 'test@gmail.com', 'test2@gmail.com', $content_data, $data, 'ru-RU', 10);
-
-                        if ($comForm->offerList) {
-                            $content_data = $lead->getOfferEmailData($comForm->offerList, $projectContactInfo);
-                        } else {
-                            $content_data = $lead->getEmailData2($comForm->quoteList, $projectContactInfo, $lang);
-                        }
-
+                        // Initiate basic state of `$content_data`
+                        $content_data = ($comForm->offerList)
+                            ? $lead->getOfferEmailData($comForm->offerList, $projectContactInfo)
+                            : $lead->getEmailData2($comForm->quoteList, $projectContactInfo, $lang);
+                        $content_data['quotes'] = array_map(function ($quoteArray) use ($comForm) {
+                            $quoteArray['qc'] = $comForm->c_qc_uid;
+                            return $quoteArray;
+                        }, $content_data['quotes'] ?? []);
                         $content_data['content'] = $comForm->c_email_message;
                         $content_data['subject'] = $comForm->c_email_subject;
-                        $content_data['department'] = [];
-                        if ($department = $lead->lDep) {
-                            $content_data['department']['key'] = $department->dep_key;
-                            $content_data['department']['name'] = $department->dep_name;
-                        }
+                        $content_data['department'] = is_null($lead->lDep) ? [] : ['key' => $lead->lDep->dep_key, 'name' => $lead->lDep->dep_name];
 
                         $previewEmailForm->e_email_subject = $comForm->c_email_subject;
                         $previewEmailForm->e_content_data = $content_data;
 
-                        //echo json_encode($content_data); exit;
-
-                        //echo (Html::encode(json_encode($content_data)));
-                        //VarDumper::dump($content_data, 10 , true); exit;
-
-                        $mailPreview = $communication->mailPreview($lead->project_id, ($tpl ? $tpl->etp_key : ''), $comForm->c_email_from, $comForm->c_email_to, $content_data, $language);
-
+                        $tpl = EmailTemplateType::findOne($comForm->c_email_tpl_id);
+                        $templateType = $tpl ? $tpl->etp_key : '';
                         if ($tpl) {
-                            $tplConfigQuotes = $tpl->etp_params_json['quotes'];
-                            if ($tplConfigQuotes['originalRequired'] === true) {
-                                $checkOriginalQuoteExistence = false;
-                                foreach ($lead->quotes as $quote) {
-                                    if ($quote->type_id === Quote::TYPE_ORIGINAL) {
-                                        $checkOriginalQuoteExistence = true;
-                                    }
-                                }
+                            if (isset($tpl->etp_params_json['quotes']['originalRequired']) && $tpl->etp_params_json['quotes']['originalRequired'] === true) {
+                                $checkOriginalQuoteExistence = array_reduce($lead->quotes, function ($acc, $quote) {
+                                    return $quote->type_id === Quote::TYPE_ORIGINAL ? true : $acc;
+                                }, false);
                             }
                         }
 
+                        $mailPreview = $communication->mailPreview($lead->project_id, $templateType, $comForm->c_email_from, $comForm->c_email_to, $content_data, $language);
                         if ($mailPreview && isset($mailPreview['data'])) {
                             $selectedQuotes = count($comForm->quoteList);
-                            if (isset($mailPreview['error']) && $mailPreview['error']) {
+                            $tplConfigQuotes = $tpl->etp_params_json['quotes']; // << This row can make unexpected behavior
+
+                            /*
+                             * In this case we must use mutually exclusive condition sequence, so the conditions for
+                             * them were taken out as apart variables. I hope this improve readability.
+                             */
+                            $mailPreviewScenario_1 = isset($mailPreview['error']) && $mailPreview['error'];
+                            $mailPreviewScenario_2 = isset($checkOriginalQuoteExistence) && !$checkOriginalQuoteExistence;
+                            $mailPreviewScenario_3 = (!(isset($tplConfigQuotes['minSelectedCount']) && $tplConfigQuotes['minSelectedCount'] <= $selectedQuotes) || !(isset($tplConfigQuotes['maxSelectedCount']) && $tplConfigQuotes['maxSelectedCount'] >= $selectedQuotes)) && $tplConfigQuotes['selectRequired'];
+
+                            if ($mailPreviewScenario_1) {
                                 $errorJson = @json_decode($mailPreview['error'], true);
                                 $comForm->addError('c_email_preview', 'Communication Server response: ' . ($errorJson['message'] ?? $mailPreview['error']));
 
@@ -766,23 +740,16 @@ class LeadController extends FController
                                 }
                                 Yii::error($errorLog, 'LeadController:view:mailPreview');
                                 $comForm->c_preview_email = 0;
-                            } elseif (isset($checkOriginalQuoteExistence) && !$checkOriginalQuoteExistence) {
+                            } elseif ($mailPreviewScenario_2) {
                                 $comForm->addError('originalQuotesRequired', 'Original quote required');
                                 Yii::info('Lead dont have quote with type original', 'info\LeadController:view:mailPreview');
                                 $comForm->c_preview_email = 0;
-                            } elseif ((!(isset($tplConfigQuotes['minSelectedCount']) && $tplConfigQuotes['minSelectedCount'] <= $selectedQuotes) || !(isset($tplConfigQuotes['maxSelectedCount']) && $tplConfigQuotes['maxSelectedCount'] >= $selectedQuotes)) && $tplConfigQuotes['selectRequired']) {
+                            } elseif ($mailPreviewScenario_3) {
                                 $comForm->addError('minMaxSelectedQuotes', 'Allowed quantity of selected quotes is from ' . $tplConfigQuotes['minSelectedCount'] . ' to ' . $tplConfigQuotes['maxSelectedCount'] . ' inclusive. You selected ' . $selectedQuotes . '.');
                                 Yii::info('Allowed quantity of selected quotes is from ' . $tplConfigQuotes['minSelectedCount'] . ' to ' . $tplConfigQuotes['maxSelectedCount'] . ' inclusive. You selected ' . $selectedQuotes . '.', 'info\LeadController:view:mailPreview');
                                 $comForm->c_preview_email = 0;
                             } else {
-//                                if ($comForm->offerList) {
-//                                    $service = Yii::createObject(OfferSendLogService::class);
-//                                    foreach ($comForm->offerList as $offerId) {
-//                                        $service->log(new CreateDto($offerId, OfferSendLogType::EMAIL, $user->id, $comForm->c_email_to));
-//                                    }
-//                                }
-
-                                $emailBodyHtml = EmailService::prepareEmailBody($mailPreview['data']['email_body_html']);
+                                $emailBodyHtml = EmailServiceHelper::prepareEmailBody($mailPreview['data']['email_body_html']);
 
                                 $keyCache = md5($emailBodyHtml);
                                 Yii::$app->cacheFile->set($keyCache, $emailBodyHtml, 60 * 60);
@@ -790,7 +757,7 @@ class LeadController extends FController
                                 $previewEmailForm->e_email_message = $emailBodyHtml;
                                 $previewEmailForm->e_email_message_edited = false;
 
-                                if (isset($mailPreview['data']['email_subject']) && $mailPreview['data']['email_subject']) {
+                                if (isset($mailPreview['data']['email_subject']) && $mailPreview['data']['email_subject'] && $comForm->isEmailBlankType() === false) {
                                     $previewEmailForm->e_email_subject = $mailPreview['data']['email_subject'];
                                     $previewEmailForm->e_email_subject_origin = $previewEmailForm->e_email_subject;
                                 }
@@ -821,7 +788,7 @@ class LeadController extends FController
                     $comForm->c_preview_sms = 1;
 
                     /** @var CommunicationService $communication */
-                    $communication = Yii::$app->communication;
+                    $communication = Yii::$app->comms;
 
                     //$data['origin'] = 'ORIGIN';
                     //$data['destination'] = 'DESTINATION';
@@ -851,6 +818,10 @@ class LeadController extends FController
 
                         $content_data = $lead->getEmailData2($comForm->quoteList, $projectContactInfo);
                         $content_data['content'] = $comForm->c_sms_message;
+                        $content_data['quotes'] = array_map(function ($quoteArray) use ($comForm) {
+                            $quoteArray['qc'] = $comForm->c_qc_uid;
+                            return $quoteArray;
+                        }, $content_data['quotes'] ?? []);
 
                         //VarDumper::dump($content_data, 10, true); exit;
 
@@ -907,11 +878,7 @@ class LeadController extends FController
 
         $quotesProvider = $lead->getQuotesProvider([]);
 
-
-        $queryEmail = (new \yii\db\Query())
-            ->select(['e_id AS id', new Expression('"email" AS type'), 'e_lead_id AS lead_id', 'e_created_dt AS created_dt'])
-            ->from('email')
-            ->where(['e_lead_id' => $lead->id]);
+        $queryEmail = EmailRepositoryFactory::getRepository()->getCommunicationLogQueryForLead($lead->id);
 
         $querySms = (new \yii\db\Query())
             ->select(['s_id AS id', new Expression('"sms" AS type'), 's_lead_id AS lead_id', 's_created_dt AS created_dt'])
@@ -930,7 +897,7 @@ class LeadController extends FController
             ->from('call_log_lead')
             ->innerJoin('call_log', 'call_log.cl_id = call_log_lead.cll_cl_id')
             ->where(['cll_lead_id' => $lead->id])
-            ->andWhere(['call_log.cl_type_id' => [CallLogType::IN,CallLogType::OUT]])
+            ->andWhere(['call_log.cl_type_id' => [CallLogType::IN, CallLogType::OUT]])
             ->orderBy(['created_dt' => SORT_ASC])
             ->groupBy(['id', 'type', 'lead_id']);
 
@@ -956,8 +923,10 @@ class LeadController extends FController
         }
 
         $modelLeadCallExpert = new LeadCallExpert();
-
-        if (!$lead->client->isExcluded()) {
+        $expertCallAbacDto = (new AbacLeadExpertCallService($lead, $user))->getLeadExpertCallDto();
+        /** @abac $expertCallAbacDto, LeadExpertCallObject::ACT_CALL, LeadExpertCallObject::ACTION_ACCESS, access new expert call */
+        $abacActNewExpertCall = \Yii::$app->abac->can($expertCallAbacDto, LeadExpertCallObject::ACT_CALL, LeadExpertCallObject::ACTION_ACCESS);
+        if (!$lead->client->isExcluded() && $abacActNewExpertCall) {
             if ($modelLeadCallExpert->load(Yii::$app->request->post())) {
                 $modelLeadCallExpert->lce_agent_user_id = Yii::$app->user->id;
                 $modelLeadCallExpert->lce_lead_id = $lead->id;
@@ -1031,8 +1000,22 @@ class LeadController extends FController
             ],
         ]);
 
+        $isCreatedFlightRequest = false;
+
+        if ($lead->status === Lead::STATUS_PROCESSING && $lead->leadFlightSegmentsCount > 0 && $lead->quotesCount === 0) {
+            $isCreatedFlightRequest = true;
+        }
+
 //        $tmpl = $isQA ? 'view_qa' : 'view';
         $tmpl = 'view';
+
+        $shiftScheduleEventTasks = [];
+        /** @fflag FFlag::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE, New User Task List in Lead view Enable */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE)) {
+            $shiftScheduleEventTasks = ShiftScheduleEventTaskQuery::getAllByLeadId($lead->id, Auth::id())
+                ->asArray()
+                ->all();
+        }
 
         return $this->render($tmpl, [
             'leadForm' => $leadForm,
@@ -1048,13 +1031,16 @@ class LeadController extends FController
             'itineraryForm' => $itineraryForm,
             'dataProviderNotes' => $dataProviderNotes,
             'modelNote' => $modelNote,
+            'shiftScheduleEventTasks' => $shiftScheduleEventTasks,
 
-            'dataProviderOffers'    => $dataProviderOffers,
-            'dataProviderOrders'    => $dataProviderOrders,
+            'dataProviderOffers' => $dataProviderOffers,
+            'dataProviderOrders' => $dataProviderOrders,
 
             'callFromNumberList' => $callFromNumberList,
             'smsFromNumberList' => $smsFromNumberList,
             'emailFromList' => $emailFromList,
+
+            'isCreatedFlightRequest' => $isCreatedFlightRequest,
         ]);
     }
 
@@ -1139,7 +1125,6 @@ class LeadController extends FController
     }
 
 
-
     public function actionSetUserRating()
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
@@ -1157,7 +1142,7 @@ class LeadController extends FController
             $leadId = $form->leadId;
             $lead = Lead::findOne(['id' => $leadId]);
             $leadUserRatingAbacDto = new LeadUserRatingAbacDto($lead, $user->id);
-            /** @abac leadUserRatingAbacDto, LeadUserRatingAbacObject::LEAD_RATING_FORM, LeadUserRatingAbacObject::ACTION_EDIT, Lead User Rating edit  */
+            /** @abac leadUserRatingAbacDto, LeadUserRatingAbacObject::LEAD_RATING_FORM, LeadUserRatingAbacObject::ACTION_EDIT, Lead User Rating edit */
             $can = Yii::$app->abac->can(
                 $leadUserRatingAbacDto,
                 LeadUserRatingAbacObject::LEAD_RATING_FORM,
@@ -1205,7 +1190,8 @@ class LeadController extends FController
                 if ($allowRbac) {
                     $user = Auth::user();
                     $leadAbacDto = new LeadAbacDto($lead, $user->getId());
-                    if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD, LeadAbacObject::ACTION_ACCESS)) {
+                    /** @abac $leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD_FROM_CHAT, LeadAbacObject::ACTION_ACCESS, Access to take lead from chat */
+                    if (Yii::$app->abac->can($leadAbacDto, LeadAbacObject::ACT_TAKE_LEAD_FROM_CHAT, LeadAbacObject::ACTION_ACCESS)) {
                         $lead->processing($user->getId(), Yii::$app->user->getId(), 'Take');
 
                         $this->transaction->wrap(function () use ($lead) {
@@ -1254,6 +1240,14 @@ class LeadController extends FController
     public function actionTake(string $gid)
     {
         $lead = $this->findLeadByGid($gid);
+
+        /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) === true && $lead->statusIsBusinessExtraQueue() === true) {
+            /** @abac LeadBusinessExtraQueueAbacObject::UI_ACCESS, LeadBusinessExtraQueueAbacObject::ACTION_ACCESS, Access to take from business extra queue */
+            if (!Yii::$app->abac->can(null, LeadBusinessExtraQueueAbacObject::UI_ACCESS, LeadBusinessExtraQueueAbacObject::ACTION_TAKE)) {
+                throw new ForbiddenHttpException('Access Denied.');
+            }
+        }
 
         if (!Auth::can('leadSection', ['lead' => $lead])) {
             throw new ForbiddenHttpException('Access Denied.');
@@ -1658,11 +1652,26 @@ class LeadController extends FController
     public function actionBusinessInbox(): string
     {
         $searchModel = new LeadSearch();
+        $params = Yii::$app->request->queryParams;
 
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
 
-        $dataProvider = $searchModel->searchBusinessInbox(Yii::$app->request->queryParams, $user);
+        /** @fflag FFlag::FF_KEY_BUSINESS_QUEUE_LIMIT, Business Queue Limit Enable */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BUSINESS_QUEUE_LIMIT)) {
+            if ($user->isAgent()) {
+                $userParams = $user->userParams;
+                if ($userParams) {
+                    if ($userParams->up_business_inbox_show_limit_leads > 0) {
+                        $params['LeadSearch']['limit'] = $userParams->up_business_inbox_show_limit_leads;
+                    }
+                } else {
+                    throw new NotFoundHttpException('Not set user params for agent! Please ask supervisor to set shift time and other.');
+                }
+            }
+        }
+
+        $dataProvider = $searchModel->searchBusinessInbox($params, $user);
 
         return $this->render('business-inbox', [
             'searchModel' => $searchModel,
@@ -1770,7 +1779,6 @@ class LeadController extends FController
                 $isAccessNewLead = $accessLeadByFrequency['access'];
             }
         }
-
 
 
         return $this->render('inbox', [
@@ -1930,6 +1938,11 @@ class LeadController extends FController
 
     public function actionClosed(): string
     {
+        /** @abac null, LeadAbacObject::OBJ_CLOSED_QUEUE, LeadAbacObject::ACTION_ACCESS, Access to page lead/closed */
+        if (!\Yii::$app->abac->can(null, LeadAbacObject::OBJ_CLOSED_QUEUE, LeadAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access Denied.');
+        }
+
         $searchModel = new LeadSearch();
 
         $user = Auth::user();
@@ -2013,20 +2026,22 @@ class LeadController extends FController
      */
     public function actionCreate()
     {
+        /** @abac null, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CREATE, Access to create lead */
+        if (!Yii::$app->abac->can(null, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CREATE)) {
+            throw new ForbiddenHttpException('Access Denied.');
+        }
+
         $data = CompositeFormHelper::prepareDataForMultiInput(
             Yii::$app->request->post(),
             'LeadCreateForm',
             ['emails' => 'EmailCreateForm', 'phones' => 'PhoneCreateForm', 'segments' => 'SegmentCreateForm']
         );
         $dto = new LeadAbacDto(null, Auth::id());
-        $delayedChargeAccess = Yii::$app->abac->can($dto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CREATE, Auth::user());
+        $delayedChargeAccess = Yii::$app->abac->can($dto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CREATE_DELAY_CHARGE, Auth::user());
         $form = new LeadCreateForm(count($data['post']['EmailCreateForm']), count($data['post']['PhoneCreateForm']), count($data['post']['SegmentCreateForm']));
         $form->assignDep(Department::DEPARTMENT_SALES);
         if ($form->load($data['post']) && $form->validate()) {
             try {
-                if ($form->depId === 0) {
-                    $form->depId = null;
-                }
                 if (!$delayedChargeAccess) {
                     $form->delayedCharge = false;
                 }
@@ -2072,9 +2087,6 @@ class LeadController extends FController
             $form = new LeadManageForm(0);
             if (Yii::$app->request->isPjax && $form->load($data['post']) && $form->validate()) {
                 try {
-                    if ($form->depId === 0) {
-                        $form->depId = null;
-                    }
                     $leadManageService = Yii::createObject(UseCaseLeadManageService::class);
                     $form->client->projectId = $form->projectId;
                     $form->client->typeCreate = Client::TYPE_CREATE_LEAD;
@@ -2317,7 +2329,7 @@ class LeadController extends FController
         );
 
         $dto = new LeadAbacDto(null, Auth::id());
-        $delayedChargeAccess = Yii::$app->abac->can($dto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CREATE, Auth::user());
+        $delayedChargeAccess = Yii::$app->abac->can($dto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CREATE_DELAY_CHARGE, Auth::user());
 
         $form = new LeadCreateForm(count($data['post']['EmailCreateForm']), count($data['post']['PhoneCreateForm']), count($data['post']['SegmentCreateForm']));
         $form->assignCase($case->cs_gid);
@@ -2449,7 +2461,7 @@ class LeadController extends FController
                 $clone = $this->leadCloneService->cloneLead($lead, Yii::$app->user->id, Yii::$app->user->id, $form->description);
                 Yii::$app->session->setFlash('success', 'Success');
 
-                if ((int) $lead->employee_id !== $user->getId()) {
+                if ((int)$lead->employee_id !== $user->getId()) {
                     $leadUserConversionService = Yii::createObject(LeadUserConversionService::class);
                     $leadUserConversionService->addAutomate(
                         $clone->id,
@@ -2662,6 +2674,11 @@ class LeadController extends FController
                     $errors = ActiveForm::validate($splitForm);
                 }
 
+                /** @abac null, LeadAbacObject::CHANGE_SPLIT_TIPS, LeadAbacObject::ACTION_UPDATE, hide split tips edition */
+                if (!Yii::$app->abac->can(null, LeadAbacObject::CHANGE_SPLIT_TIPS, LeadAbacObject::ACTION_UPDATE)) {
+                    $errors[] = 'Forbidden';
+                }
+
                 if (empty($errors) && $splitForm->save($errors)) {
                     return $this->redirect(['lead/view', 'gid' => $lead->gid]);
                 }
@@ -2779,7 +2796,7 @@ class LeadController extends FController
      */
     public function actionExtraQueue(): string
     {
-        $leadAbacDto = new LeadAbacDto(null, (int) Auth::id());
+        $leadAbacDto = new LeadAbacDto(null, (int)Auth::id());
         /** @abac $leadAbacDto, LeadAbacObject::OBJ_EXTRA_QUEUE, LeadAbacObject::ACTION_ACCESS, access to actionExtraQueue */
         $canLeadPoorProcessingLogs = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_EXTRA_QUEUE, LeadAbacObject::ACTION_ACCESS);
 
@@ -2806,6 +2823,54 @@ class LeadController extends FController
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'isAgent' => $isAgent,
+        ]);
+    }
+
+    /**
+     * @throws ForbiddenHttpException
+     */
+    public function actionBusinessExtraQueue(): string
+    {
+        if (LeadBusinessExtraQueueService::canAccess() === false) {
+            throw new ForbiddenHttpException('Access Denied.');
+        }
+
+        $searchModel = new LeadSearch();
+        $params = Yii::$app->request->queryParams;
+        $params2 = Yii::$app->request->post();
+        $params = array_merge($params, $params2);
+
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+        if ($user->isAgent()) {
+            $isAgent = true;
+        } else {
+            $isAgent = false;
+        }
+
+        $dataProvider = $searchModel->searchBusinessExtraQueue($params, $user);
+
+        return $this->render('business-extra-queue', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => $isAgent,
+        ]);
+    }
+
+    public function actionAjaxGetUserTask(int $leadID): string
+    {
+        $searchModel = new UserTaskSearch();
+        $dataProvider = $searchModel->searchByTargetObjectAndTargetObjectId(
+            TargetObject::TARGET_OBJ_LEAD,
+            $leadID,
+            $this->request->queryParams
+        );
+
+
+        return $this->renderAjax('user-task/user-task-list', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'leadID' => $leadID,
         ]);
     }
 

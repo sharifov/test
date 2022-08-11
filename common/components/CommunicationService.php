@@ -41,7 +41,7 @@ use yii\httpclient\Response;
  * @property string $securityVoiceMailRecordingUrl
  * @property string $securityCallRecordingUrl
  * @property string $securityConferenceRecordingUrl
- * @property string $xAccelRedirectCommunicationUrl
+ * @property string $xAccelRedirectCommsUrl
  * @property Request $request
  * @property string $voipApiUsername
  */
@@ -56,7 +56,7 @@ class CommunicationService extends Component implements CommunicationServiceInte
     public $securityVoiceMailRecordingUrl = '/voice-mail-record/record/';
     public $securityCallRecordingUrl = '/call/record/';
     public $securityConferenceRecordingUrl = '/conference/record/';
-    public $xAccelRedirectCommunicationUrl = '';
+    public $xAccelRedirectCommsUrl = '';
     public $voipApiUsername = '';
     public $host = '';
 
@@ -919,9 +919,15 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $callRecordingDisabled,
         $phoneListId,
         $toNumber,
-        $friendlyName
+        $friendlyName,
+        $project,
+        $source,
+        $type
     ): array {
         $data = [
+            'project' => $project,
+            'source' => $source,
+            'type' => $type,
             'call_id' => $id,
             'call_sid' => $sid,
             'to' => $to,
@@ -951,9 +957,15 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $friendlyName,
         $dep_id,
         $oldCallOwnerId,
-        $callGroupId
+        $callGroupId,
+        $project,
+        $source,
+        $type
     ): array {
         $data = [
+            'project' => $project,
+            'source' => $source,
+            'type' => $type,
             'call_id' => $id,
             'call_sid' => $sid,
             'to' => $to,
@@ -1044,9 +1056,15 @@ class CommunicationService extends Component implements CommunicationServiceInte
         bool $callRecordingDisabled,
         ?int $phoneListId,
         ?string $toNumber,
-        ?string $from
+        ?string $from,
+        $project,
+        $source,
+        $type
     ): array {
         $data = [
+            'project' => $project,
+            'source' => $source,
+            'type' => $type,
             'callSid' => $callSid,
             'parentCallSid' => $parentCallSid,
             'friendlyName' => $friendlyName,
@@ -1110,9 +1128,15 @@ class CommunicationService extends Component implements CommunicationServiceInte
         int $user_id,
         bool $callRecordingDisabled,
         ?int $phoneListId,
-        ?string $toNumber
+        ?string $toNumber,
+        $project,
+        $source,
+        $type
     ): array {
         $data = [
+            'project' => $project,
+            'source' => $source,
+            'type' => $type,
             'callSid' => $callSid,
             'conferenceSid' => $conferenceSid,
             'projectId' => $projectId,
@@ -1508,5 +1532,70 @@ class CommunicationService extends Component implements CommunicationServiceInte
         \Yii::error(VarDumper::dumpAsString($out['error']), 'Component:CommunicationService::makeCallClientNotification');
 
         throw new \DomainException('Make Call Client Notification error.');
+    }
+
+    /**
+     * Returns communication app availability
+     *
+     * @throws Exception
+     */
+    public function ping(): bool
+    {
+        $parsedUrl = parse_url($this->url);
+        if (isset($parsedUrl['scheme'], $parsedUrl['host'])) {
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, "{$parsedUrl['scheme']}://{$parsedUrl['host']}/application-status/ping");
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            $result = curl_exec($curl);
+            if (!curl_errno($curl) && $resultJson = Json::decode($result)) {
+                return !empty($resultJson['availability']);
+            }
+            return false;
+        }
+        return false;
+    }
+
+    public function getOriginalForwardedFromNumber(string $callSid): ?string
+    {
+        $response = $this->sendRequest('twilio/get-original-forwarded-from-number', [
+            'callSid' => $callSid,
+        ]);
+
+        if ($response->isOk) {
+            if (isset($response->data['forwardedNumber'])) {
+                return $response->data['forwardedNumber'];
+            }
+        } else {
+            \Yii::error([
+                'message' => 'Response is error',
+                'response' => VarDumper::dumpAsString($response->content),
+            ], 'CommunicationService::getOriginalForwardedFromNumber');
+        }
+        return null;
+    }
+
+    public function getEmailAttachments(int $emailId): array
+    {
+        $response = $this->sendRequest('email/get-email-incoming-attachments', ['emailId' => $emailId]);
+
+        if ($response->isOk) {
+            if (isset($response->data['data']['attachments'])) {
+                if (is_array($response->data['data']['attachments'])) {
+                    return $response->data['data']['attachments'];
+                }
+                \Yii::error([
+                    'error' => 'Attachments object is not array',
+                    'emailId' => $emailId,
+                ], 'Component:CommunicationService::getEmailAttachments');
+            } else {
+                \Yii::error([
+                    'error' => 'Not found attachments object',
+                    'emailId' => $emailId,
+                ], 'Component:CommunicationService::getEmailAttachments');
+            }
+        } else {
+            \Yii::error(VarDumper::dumpAsString($response->content, 10), 'Component:CommunicationService::getEmailAttachments');
+        }
+        return [];
     }
 }

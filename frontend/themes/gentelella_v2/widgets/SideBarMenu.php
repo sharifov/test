@@ -7,14 +7,20 @@
 namespace frontend\themes\gentelella_v2\widgets;
 
 use common\models\Employee;
+use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
+use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
+use modules\shiftSchedule\src\services\UserShiftScheduleService;
+use modules\taskList\abac\TaskListAbacObject;
+use modules\smartLeadDistribution\src\services\SmartLeadDistributionService;
 use src\auth\Auth;
 use modules\user\userFeedback\abac\dto\UserFeedbackAbacDto;
 use modules\user\userFeedback\abac\UserFeedbackAbacObject;
 use src\helpers\app\AppHelper;
+use src\services\lead\LeadBusinessExtraQueueService;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -104,9 +110,18 @@ class SideBarMenu extends \yii\bootstrap\Widget
 //            ];
 //        }
 
-        if (Auth::can('createLead')) {
-            $menuLItems[] = ['label' => 'Create Lead', 'url' => ['/lead/create'], 'icon' => 'plus'];
-        }
+        /** @abac null, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_CREATE, Access to create lead */
+        $menuLItems[] = [
+            'label' => 'Create Lead',
+            'url' => ['/lead/create'],
+            'icon' => 'plus',
+            'abac' => [
+                'dto' => null,
+                'object' => LeadAbacObject::OBJ_LEAD,
+                'action' => LeadAbacObject::ACTION_CREATE
+            ],
+        ];
+
         $menuLItems[] = ['label' => 'Create New Lead', 'url' => ['/lead/create2'], 'icon' => 'plus', 'attributes' => ['data-ajax-link' => true, 'data-modal-title' => 'Create New Lead']];
 
         $menuLItems[] = ['label' => 'Search Leads', 'url' => ['/leads/index'], 'icon' => 'search'];
@@ -133,6 +148,13 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 'object' => LeadAbacObject::OBJ_EXTRA_QUEUE,
                 'action' => LeadAbacObject::ACTION_ACCESS
             ],
+        ];
+
+        $menuLItems[] = [
+            'label' => 'Business Extra Queue <span id="badges-business-extra-queue" data-type="business-extra-queue" class="label-success label pull-right bginfo"></span>',
+            'url' => ['/lead/business-extra-queue'],
+            'icon' => 'history text-success',
+            'visible' => LeadBusinessExtraQueueService::canAccess(),
         ];
 
         $menuLItems[] = ['label' => 'Failed Bookings <span id="badges-failed-bookings" data-type="failed-bookings" class="label-success label pull-right bginfo"></span> ',
@@ -234,9 +256,22 @@ class SideBarMenu extends \yii\bootstrap\Widget
             $menuItems[] = ['label' => 'KPI <span id="kpi" class="label-info label pull-right"></span> ', 'url' => ['/kpi/index'], 'icon' => 'money'];
         }
 
-        /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access menu My Shift Schedule */
+
+        /** @abac TaskListAbacObject::ACT_MY_TASK_LIST, TaskListAbacObject::ACTION_ACCESS, Access menu My Task List */
         $menuItems[] = [
-            'label' => 'My Shift Schedule <sup style="color: red">NEW</sup>',
+            'label' => 'My Task List <sup style="color: red">NEW</sup>',
+            'url' => ['/task-list/index'],
+            'icon' => 'check-square-o',
+            'abac'  => [
+                'dto'    => null,
+                'object' => TaskListAbacObject::ACT_MY_TASK_LIST,
+                'action' => TaskListAbacObject::ACTION_ACCESS,
+            ],
+        ];
+
+        /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access menu My Shift Schedule */
+        $shiftMenuItems[] = [
+            'label' => 'My Shift',
             'url' => ['/shift-schedule/index'],
             'icon' => 'calendar',
             'abac'  => [
@@ -245,6 +280,36 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 'action' => ShiftAbacObject::ACTION_ACCESS,
             ],
         ];
+
+
+        $shiftMenuItems[] = [
+            'label' => 'Schedule Event Requests',
+            'url' => ['/shift/user-shift-schedule-request/index'],
+            'icon' => 'calendar-o',
+            'title' => 'User Shift Schedule Event Request',
+        ];
+
+        $shiftMenuItems[] = [
+            'label' => 'User Shift Calendar',
+            'url' => ['/shift-schedule/calendar'],
+            'icon' => 'calendar text-warning',
+            'title' => 'User Shift Schedule Calendar',
+            'abac'  => [
+                'dto'    => null,
+                'object' => ShiftAbacObject::OBJ_USER_SHIFT_CALENDAR,
+                'action' => ShiftAbacObject::ACTION_ACCESS,
+            ],
+        ];
+
+
+        $menuItems[] = [
+            'label' => 'Shift Schedule', //  <sup style="color: red">NEW</sup>
+            'url' => 'javascript:',
+            'icon' => 'calendar',
+            'items' => $shiftMenuItems
+        ];
+
+
 
         if (!$isUM) {
             // $cntNotifications = \common\models\Notifications::findNewCount(Yii::$app->user->id);
@@ -380,6 +445,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Visitor Data', 'url' => ['/client-chat-visitor-data-crud/index']],
                         ['label' => 'Client Chat QA', 'url' => ['/client-chat-qa/index']],
                         ['label' => 'Feedback', 'url' => ['/client-chat-feedback-crud/index']],
+                        ['label' => 'Chat Survey', 'url' => ['/client-chat-survey/index']],
                         ['label' => 'Last Message', 'url' => ['/client-chat-last-message-crud/index']],
                         ['label' => 'Hold', 'url' => ['/client-chat-hold-crud/index']],
                         ['label' => 'Unread messages', 'url' => ['/client-chat-unread/index']],
@@ -450,13 +516,19 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     'url' => 'javascript:',
                     'icon' => 'folder',
                     'items' => [
+                        ['label' => 'Quote Communication', 'url' => ['/quote-communication/index'], 'icon' => 'list'],
+                        ['label' => 'Quote Communication Open Log', 'url' => ['/quote-communication-open-log/index'], 'icon' => 'list'],
                         ['label' => 'Quote List', 'url' => ['/quotes/index'], 'icon' => 'list'],
                         ['label' => 'Quote Price List', 'url' => ['/quote-price/index'], 'icon' => 'list'],
                         ['label' => 'Flight Quote Label List', 'url' => ['/flight-quote-label-list-crud/index'], 'icon' => 'list'],
                         ['label' => 'Quote Label', 'url' => ['/quote-label-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Quote Trip', 'url' => ['/quote-trip-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Quote Segment', 'url' => ['/quote-segment-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Quote Segment Baggages', 'url' => ['/quote-segment-baggage-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Quote Segment Baggage Charges', 'url' => ['/quote-segment-baggage-charge-crud/index'], 'icon' => 'list'],
+                        ['label' => 'Quote Segment Stop CRUD', 'url' => ['/quote-segment-stop-crud/index'], 'icon' => 'list'],
                     ],
                 ],
-
                 ['label' => 'Call User Access', 'url' => ['/call-user-access/index'], 'icon' => 'list'],
                 [
                     'label' => 'Leads',
@@ -477,9 +549,22 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Lead Poor Processing Data', 'url' => ['/lead-poor-processing-data-crud/index']],
                         ['label' => 'Lead Poor Processing', 'url' => ['/lead-poor-processing-crud/index']],
                         ['label' => 'Lead Poor Processing Log', 'url' => ['/lead-poor-processing-log-crud/index']],
+                        ['label' => 'Lead Business Extra Queue Rules', 'url' => ['/lead-business-extra-queue-rule-crud/index']],
+                        ['label' => 'Lead Business Extra Queue', 'url' => ['/lead-business-extra-queue-crud/index']],
+                        ['label' => 'Lead Business Extra Queue Log', 'url' => ['/lead-business-extra-queue-log-crud/index']],
                         ['label' => 'Lead User Ratings', 'url' => ['/lead-user-rating-crud/index']],
                         ['label' => 'Lead Status Reason', 'url' => ['/lead-status-reason-crud/index']],
                         ['label' => 'Lead Status Reason Log', 'url' => ['/lead-status-reason-log-crud/index']],
+                        [
+                            'label' => 'Smart Lead Distribution',
+                            'url' => 'javascript:',
+                            'icon' => 'list',
+                            'items' => [
+                                ['label' => 'Lead Rating Parameters', 'url' => ['/smart-lead-distribution/lead-rating-parameter-crud/index']],
+                                ['label' => 'Summary Report', 'url' => ['/smart-lead-distribution/lead-rating-report/index']],
+                            ],
+                            'visible' => SmartLeadDistributionService::ffIsEnable()
+                        ]
                     ]
                 ],
                 [
@@ -540,6 +625,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Client Data', 'url' => ['/client-data-crud/index'], 'icon' => 'list'],
                     ]
                 ],
+                ['label' => 'Client User Return', 'url' => ['/client-user-return-crud/index'], 'icon' => 'user'],
             ],
         ];
 
@@ -645,6 +731,131 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Department Phones Import', 'url' => ['/department-phone-project/import']],
                     ]
                 ],
+
+                [
+                    'label' => 'Task List',
+                    'url' => 'javascript:',
+                    'icon' => 'list',
+                    'items' => [
+
+                        ['label' => 'Task List', 'url' => ['/task/task-list/index'],
+                            //'icon' => '',
+                            'title' => 'Task List'
+                        ],
+                        [
+                            'label' => 'User Task',
+                            'url' => ['/task/user-task-crud/index'],
+                        ],
+                        [
+                            'label' => 'User Task Status Logs',
+                            'url' => ['/task/user-task-status-log-crud/index'],
+                        ],
+                        [
+                            'label' => 'Object Segment Tasks',
+                            'url' => ['/object-segment/object-segment-task-crud/index'],
+                        ],
+                        [
+                            'label' => 'Shift schedule event task',
+                            'url' => ['/task/shift-schedule-event-task-crud/index'],
+                        ],
+
+                        [
+                            'label' => 'Advanced',
+                            'url' => 'javascript:',
+                            'icon' => 'folder',
+                            'items' => [
+//                                ['label' => 'Shift Schedule Type', 'url' => ['/shift/shift-schedule-type/index'],
+//                                    'title' => 'Shift Schedule Type'],
+//
+//
+//                                ['label' => 'Type Labels Assign',
+//                                    'url' => ['/shift/shift-schedule-type-label-assign/index'],
+//                                    // 'icon' => 'circle',
+//                                    'title' => 'Shift Schedule Type Labels Assign'
+//                                ],
+                            ]
+                        ],
+
+
+                    ],
+                ],
+
+                [
+                    'label' => 'Shift Schedules',
+                    'url' => 'javascript:',
+                    'icon' => 'calendar',
+                    'items' => [
+
+                        ['label' => 'Shift List', 'url' => ['/shift-crud/index'], 'title' => 'Shift CRUD'],
+
+                        ['label' => 'Schedule Rule', 'url' => ['/shift-schedule-rule-crud/index'],
+                            'title' => 'Shift Schedule Rule'],
+
+                        ['label' => 'Shift Events', 'url' => ['/user-shift-schedule-crud/index'],
+                            'title' => 'User Shift Schedule Events'],
+
+
+                        [
+                            'label' => 'Shift Requests History',
+                            'url' => ['/shift/shift-schedule-request/index'],
+                            'title' => 'User Shift Schedule Request History'
+                        ],
+
+                        [
+                            'label' => 'Shift Summary Report',
+                            'url' => ['/shift-schedule/summary-report'],
+                            'title' => 'Shift Summary Report',
+                            'visible' => UserShiftScheduleService::shiftSummaryReportIsEnable(),
+                        ],
+
+                        /** @abac ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_ACCESS, Access menu UserShiftAssign */
+                        [
+                            'label' => 'User Shift Schedule Assign',
+                            'url' => ['/shift/user-shift-assign/index'],
+                            'title' => 'User Shift Assign',
+                            'icon' => 'user-plus',
+                            'abac'  => [
+                                'dto'    => null,
+                                'object' => ShiftAbacObject::ACT_USER_SHIFT_ASSIGN,
+                                'action' => ShiftAbacObject::ACTION_ACCESS,
+                            ],
+                        ],
+
+                        [
+                            'label' => 'Advanced',
+                            'url' => 'javascript:',
+                            'icon' => 'folder',
+                            'items' => [
+                                ['label' => 'Shift Schedule Type', 'url' => ['/shift/shift-schedule-type/index'],
+                                    'title' => 'Shift Schedule Type'],
+
+                                ['label' => 'User Shift Assign CRUD', 'url' => ['/user-shift-assign-crud/index'],
+                                    'title' => 'Shift Schedule User Assign'],
+
+                                ['label' => 'Shift Category', 'url' => ['/shift-category-crud/index'],
+                                    'title' => 'Shift category CRUD'],
+
+                                ['label' => 'Type Labels',
+                                    'url' => ['/shift/shift-schedule-type-label/index'],
+                                    // 'icon' => 'circle',
+                                    'title' => 'Shift Schedule Type Labels'
+                                ],
+                                ['label' => 'Type Labels Assign',
+                                    'url' => ['/shift/shift-schedule-type-label-assign/index'],
+                                    // 'icon' => 'circle',
+                                    'title' => 'Shift Schedule Type Labels Assign'
+                                ],
+                                ['label' => 'User Shift Schedule Log',
+                                    'url' => ['/shift/user-shift-schedule-log-crud/index'],
+                                    // 'icon' => 'circle',
+                                    'title' => 'Shift Schedule Type Labels Assign'
+                                ],
+                            ]
+                        ],
+
+
+                    ],
+                ],
                 [
                     'label' => 'Phone Line',
                     'url' => 'javascript:',
@@ -683,6 +894,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'API Users', 'url' => ['/api-user/index'], 'icon' => 'users'],
                 ['label' => 'Tasks', 'url' => ['/task/index'], 'icon' => 'list'],
                 ['label' => 'Lead Tasks', 'url' => ['/lead-task/index'], 'icon' => 'list'],
+                ['label' => 'Profit Split', 'url' => ['/profit-split-crud/index'], 'icon' => 'money'],
 
                 ['label' => 'Check List Types', 'url' => ['/lead-checklist-type/index'], 'icon' => 'list', 'visible' => Yii::$app->user->can('manageLeadChecklistType')],
 
@@ -724,36 +936,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
 
                 ['label' => 'Call recording disabled', 'url' => ['/call-recording-disabled/list'], 'icon' => 'list'],
 
-                [
-                    'label' => 'Shift Schedules',
-                    'url' => 'javascript:',
-                    'icon' => 'calendar',
-                    'items' => [
-                        ['label' => 'Shift CRUD', 'url' => ['/shift-crud/index'], 'title' => 'Shift'],
-                        ['label' => 'Shift Category CRUD', 'url' => ['/shift-category-crud/index'],
-                            'title' => 'Shift category CRUD'],
-                        ['label' => 'Shift Schedule Type CRUD', 'url' => ['/shift/shift-schedule-type/index'],
-                            'title' => 'Shift Schedule Type'],
-                        ['label' => 'Shift Schedule Rule CRUD', 'url' => ['/shift-schedule-rule-crud/index'],
-                            'title' => 'Shift Schedule Rule'],
-                        ['label' => 'User Shift Assign CRUD', 'url' => ['/user-shift-assign-crud/index'],
-                            'title' => 'Shift Schedule User Assign'],
-                        ['label' => 'User Shift Schedule CRUD', 'url' => ['/user-shift-schedule-crud/index'],
-                            'title' => 'User Shift Schedule'],
-                        /** @abac ShiftAbacObject::ACT_USER_SHIFT_ASSIGN, ShiftAbacObject::ACTION_ACCESS, Access menu UserShiftAssign */
-                        [
-                            'label' => 'User Shift Assign',
-                            'url' => ['/shift/user-shift-assign/index'],
-                            'title' => 'Shift',
-                            'icon' => 'user-plus',
-                            'abac'  => [
-                                'dto'    => null,
-                                'object' => ShiftAbacObject::ACT_USER_SHIFT_ASSIGN,
-                                'action' => ShiftAbacObject::ACTION_ACCESS,
-                            ],
-                        ],
-                    ],
-                ],
+
             ]
         ];
 
@@ -894,6 +1077,29 @@ class SideBarMenu extends \yii\bootstrap\Widget
             ];
         }
 
+        if (class_exists('\modules\experiment\ExperimentModule')) {
+            $menuModuleItems[] = [
+                'label' => 'Experiments',
+                'url' => 'javascript:',
+                'icon' => 'flask',
+                'items' => \modules\experiment\ExperimentModule::getListMenu()
+            ];
+        }
+
+
+        /** @fflag FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE, Object Segment module enable/disable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_OBJECT_SEGMENT_MODULE_ENABLE)) {
+            $menuModuleItems[] =  [
+                'label' => 'Object Segment',
+                'url' => 'javascript:',
+                'icon' => 'cogs',
+                'items' => [
+                    ['label' => 'Object Segment List', 'url' => ['/object-segment/object-segment-list/index']],
+                    ['label' => 'Object Segment Rules', 'url' => ['/object-segment/object-segment-rule/index']],
+                ],
+            ];
+        }
+
         if ($menuModuleItems) {
             $menuItems[] = [
                 'label' => 'Modules',
@@ -923,6 +1129,25 @@ class SideBarMenu extends \yii\bootstrap\Widget
         ];
 
         $menuItems[] = ['label' => 'My Sales', 'url' => ['/sales/index'], 'icon' => 'money'];
+
+        $menuHeatMapItems[] = [
+            'label' => 'Heat Map Leads',
+            'url' => ['/heat-map-lead/index'],
+            'icon' => 'area-chart',
+            'abac' => [
+                'dto' => new LeadAbacDto(null, (int) Auth::id()),
+                'object' => LeadAbacObject::OBJ_HEAT_MAP_LEAD,
+                'action' => LeadAbacObject::ACTION_ACCESS
+            ],
+        ];
+        /** @fflag FFlag::FF_KEY_HEAT_MAP_AGENT_REPORT_ENABLE, Heat Map Agent Report enable\disable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_HEAT_MAP_AGENT_REPORT_ENABLE)) {
+            $menuHeatMapItems[] =  [
+                'label' => 'Heat Map Agent',
+                'url' => ['/heat-map-agent/index'],
+                'icon' => 'area-chart'
+            ];
+        }
 
         $menuItems[] = [
             'label' => 'Stats & Reports',
@@ -962,21 +1187,10 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'User Feedback Statistics', 'url' => ['/stats/user-feedback'], 'icon' => 'users'],
                 /** @abac $leadAbacDto, LeadAbacObject::OBJ_HEAT_MAP_LEAD, LeadAbacObject::ACTION_ACCESS, show heat-map-lead in menu */
                 [
-                    'label' => 'Leads',
+                    'label' => 'Heat Map',
                     'url' => 'javascript:',
                     'icon' => 'folder',
-                    'items' => [
-                        [
-                            'label' => 'Heat Map Leads',
-                            'url' => ['/heat-map-lead/index'],
-                            'icon' => 'area-chart',
-                            'abac' => [
-                                'dto' => new LeadAbacDto(null, (int) Auth::id()),
-                                'object' => LeadAbacObject::OBJ_HEAT_MAP_LEAD,
-                                'action' => LeadAbacObject::ACTION_ACCESS
-                            ],
-                        ],
-                    ],
+                    'items' => $menuHeatMapItems
                 ],
             ]
         ];
@@ -1006,6 +1220,12 @@ class SideBarMenu extends \yii\bootstrap\Widget
             ]
         ];
 
+        $menuInfoBlock = [];
+        /** @fflag FFlag::FF_KEY_INFO_BLOCK_ENABLE, Info Block Enable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_INFO_BLOCK_ENABLE)) {
+            $menuInfoBlock = ['label' => 'Info Block', 'url' => ['/info-block-crud/index'], 'icon' => 'list', 'visible' => \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_INFO_BLOCK_ENABLE)];
+        }
+
         $menuItems[] = [
             'label' => 'Logs & Tools',
             'url' => 'javascript:',
@@ -1015,12 +1235,18 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'System Logs', 'url' => ['/log/index'], 'icon' => 'bug text-warning'],
                 ['label' => 'API Logs', 'url' => ['/api-log/index'], 'icon' => 'sitemap'],
                 [
-                    'label' => Yii::t('language', 'Feature Flag'), 'url' => 'javascript:', 'icon' => 'folder',
+                    'label' => Yii::t('language', 'Feature Flag'), 'url' => 'javascript:', 'icon' => 'flag',
                     'items' => [
                         ['label' => Yii::t('menu', 'Feature Flag'), 'url' => ['/flag/feature-flag/index'],
-                            'icon' => 'flag', 'title' => 'Feature Flag CRUD'],
+                            'title' => 'Feature Flag CRUD'],
+                        ['label' => Yii::t('menu', 'Feature Flag Values'), 'url' => ['/flag/feature-flag-value/index'],
+                            'title' => 'Feature Flag Values'],
+                        ['label' => Yii::t('menu', 'Feature Flag Experiment'), 'url' => ['/flag/feature-flag-experiment/index'],
+                            'title' => 'Feature Flag Experiment'],
                         ['label' => Yii::t('menu', 'Feature Flag Docs'), 'url' => ['/flag/feature-flag/doc'],
                             'title' => 'Feature Flag Docs'],
+                        ['label' => Yii::t('menu', 'Feature Flag Test'), 'url' => ['/flag/feature-flag/test'],
+                            'title' => 'Feature Flag Test'],
                     ]
                 ],
                 [
@@ -1037,9 +1263,9 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 [
                     'label' => Yii::t('requestControl', 'Request Control'), 'url' => 'javascript:', 'icon' => 'folder',
                     'items' => [
-                        ['label' => 'User Site Activity', 'url' => ['/requestControl/user-site-activity'], 'icon' => 'bars'],
-                        ['label' => 'User Activity Report', 'url' => ['/requestControl/user-site-activity/report'], 'icon' => 'bar-chart'],
-                        ['label' => 'Request Control Manage', 'url' => ['/requestControl/manage'], 'icon' => 'bars']
+                        ['label' => 'User Site Activity', 'url' => ['/request-control/user-site-activity/index'], 'icon' => 'bars'],
+                        ['label' => 'User Activity Report', 'url' => ['/request-control/user-site-activity/report'], 'icon' => 'bar-chart'],
+                        ['label' => 'Request Control Manage', 'url' => ['/request-control/manage/index'], 'icon' => 'bars']
                     ]
                 ],
                 ['label' => 'Global Model Logs', 'url' => ['/global-log/index'], 'icon' => 'list'],
@@ -1051,10 +1277,11 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => Yii::t('menu', 'Check Exclude IP'), 'url' => ['/tools/check-exclude-ip']],
                         ['label' => Yii::t('menu', 'Stash Log Files'), 'url' => ['/tools/stash-log-file']],
                         ['label' => Yii::t('menu', 'DB Info'), 'url' => ['/tools/db-info']],
-                        ['label' => Yii::t('menu', 'DB View'), 'url' => ['/tools/db-view'], 'icon' => 'database'],
+                        ['label' => Yii::t('menu', 'Db Data Sensitive'), 'url' => ['/db-data-sensitive-crud/index'], 'icon' => 'database'],
                         ['label' => Yii::t('menu', 'Composer Info'), 'url' => ['/tools/composer-info']],
                         ['label' => 'Check phone', 'url' => ['/tools/check-phone'], 'icon' => 'volume-control-phone'],
                         ['label' => 'Import phones', 'url' => ['/tools/import-phone'], 'icon' => 'caret-square-o-up'],
+                        ['label' => 'Lead rating', 'url' => ['/tools/lead-rating'], 'visible' => SmartLeadDistributionService::ffIsEnable()],
                     ]
                 ],
 
@@ -1065,6 +1292,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Virtual cron', 'url' => ['/virtual-cron/cron-scheduler/index'], 'icon' => 'cogs'],
                 ['label' => 'Site ENV', 'url' => ['/setting/env'], 'icon' => 'info-circle'],
                 ['label' => 'Call Terminate Log', 'url' => ['/call-terminate-log-crud/index'], 'icon' => 'list'],
+                $menuInfoBlock,
             ]
         ];
 
@@ -1077,6 +1305,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 ['label' => 'Route', 'url' => ['/rbac/route']],
                 ['label' => 'Permission', 'url' => ['/rbac/permission']],
                 ['label' => 'Role', 'url' => ['/rbac/role']],
+                ['label' => 'RBAC Role Management', 'url' => ['/rbac-role-management/index/']],
                 ['label' => 'Import / Export', 'url' => ['/rbac-import-export/log']],
             ],
         ];
@@ -1086,7 +1315,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'url' => 'javascript:',
             'icon' => 'cogs',
             'items' => [
-                ['label' => 'ABAC Policy List', 'url' => ['/abac/abac-policy']],
+                ['label' => 'ABAC Policy List', 'url' => ['/abac/abac-policy/index']],
                 ['label' => 'Policy List Content', 'url' => ['/abac/abac-policy/list-content']],
                 ['label' => 'ABAC Doc', 'url' => ['/abac/abac-doc/index']],
             ],

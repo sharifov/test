@@ -76,6 +76,7 @@ use yii\db\ActiveRecord;
  * @property int|null $pq_updated_user_id
  * @property string|null $pq_created_dt
  * @property string|null $pq_updated_dt
+ * @property string|null $pq_expiration_dt
  * @property float|null $pq_profit_amount
  * @property int|null $pq_clone_id
  * @property float|null $pq_app_markup
@@ -120,6 +121,8 @@ use yii\db\ActiveRecord;
  * @property Quotable|null $childQuote
  * @property string|null $detailsPageUrl
  * @property string|null $diffUrl
+ * @property-read  ProductQuoteRefund[]|null $productQuoteRefundAccepted
+ * @property-read  ProductQuoteRefund[]|null $productQuoteChangeAccepted
  */
 class ProductQuote extends \yii\db\ActiveRecord implements Serializable
 {
@@ -147,7 +150,7 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
             [['pq_product_id', 'pq_order_id', 'pq_owner_user_id', 'pq_created_user_id', 'pq_updated_user_id'], 'integer'],
             [['pq_description'], 'string'],
             [['pq_price', 'pq_origin_price', 'pq_client_price', 'pq_service_fee_sum', 'pq_origin_currency_rate', 'pq_client_currency_rate', 'pq_profit_amount'], 'number'],
-            [['pq_created_dt', 'pq_updated_dt'], 'safe'],
+            [['pq_created_dt', 'pq_updated_dt', 'pq_expiration_dt'], 'safe'],
             [['pq_gid'], 'string', 'max' => 32],
             [['pq_name'], 'string', 'max' => 40],
             [['pq_origin_currency', 'pq_client_currency'], 'string', 'max' => 3],
@@ -306,6 +309,27 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     }
 
     /**
+     * Gets query for [[ProductQuoteRefunds]].
+     *
+     * @return ActiveQuery
+     */
+    public function getProductQuoteChangeAccepted(): ActiveQuery
+    {
+        return $this->hasMany(ProductQuoteChange::class, ['pqc_pq_id' => 'pq_id'])
+            ->andWhere(['pqc_status_id' => SettingHelper::getAcceptedQuoteChangeStatuses()]);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isProductQuoteChangeAccepted(): bool
+    {
+        return $this->getProductQuoteChangeAccepted()
+            ->limit(1)
+            ->exists();
+    }
+
+    /**
      * Gets query for [[ProductQuoteChanges]].
      *
      * @return ActiveQuery
@@ -341,6 +365,27 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function getProductQuoteRefundsActive(): ActiveQuery
     {
         return $this->hasMany(ProductQuoteRefund::class, ['pqr_product_quote_id' => 'pq_id'])->andWhere(['pqr_status_id' => SettingHelper::getActiveQuoteRefundStatuses()]);
+    }
+
+    /**
+     * Gets query for [[ProductQuoteRefunds]].
+     *
+     * @return ActiveQuery
+     */
+    public function getProductQuoteRefundAccepted(): ActiveQuery
+    {
+        return $this->hasMany(ProductQuoteRefund::class, ['pqr_product_quote_id' => 'pq_id'])
+            ->andWhere(['pqr_status_id' => SettingHelper::getAcceptedQuoteRefundStatuses()]);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isProductQuoteRefundAccepted(): bool
+    {
+        return $this->getProductQuoteRefundAccepted()
+            ->limit(1)
+            ->exists();
     }
 
     /**
@@ -1206,5 +1251,17 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
     public function getProductQuoteOptionsCount(): int
     {
         return $this->productQuoteOptions ? count($this->productQuoteOptions) : 0;
+    }
+
+    public static function updateProductQuoteStatusByBOSaleStatus(ProductQuote $originalProductQuote, array $saleData): void
+    {
+        if (!empty($originalProductQuote) && isset($saleData['saleStatus']) && is_string($saleData['saleStatus'])) {
+            $saleStatusBoMap = ProductQuoteStatus::STATUS_BO_MAP[strtolower($saleData['saleStatus'])] ?? null;
+            if (!empty($saleStatusBoMap) && $originalProductQuote->pq_status_id !== $saleStatusBoMap) {
+                $productQuoteRepository = \Yii::createObject(ProductQuoteRepository::class);
+                $originalProductQuote->setStatusWithEvent($saleStatusBoMap);
+                $productQuoteRepository->save($originalProductQuote);
+            }
+        }
     }
 }

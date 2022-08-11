@@ -10,6 +10,7 @@ use common\models\Lead;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\Quote;
+use common\models\QuoteCommunication;
 use common\models\search\LeadSearch;
 use common\models\Sms;
 use common\models\UserConnection;
@@ -675,6 +676,19 @@ class ClientChatController extends FController
                     'couchNoteForm' => new ClientChatCouchNoteForm($clientChat, Auth::user()),
                 ]);
             }
+
+            if ($clientChatHold = $clientChat->clientChatHold) {
+                $formatTimer = ClientChatHoldService::isMoreThanHourLeft($clientChatHold) ? "%H:%M:%S" : "%M:%S";
+                $maxProgressBar = $clientChatHold->deadlineStartDiffInSeconds();
+                $leftProgressBar = $clientChatHold->deadlineNowDiffInSeconds();
+                $warningZone = $clientChatHold->halfWarningSeconds();
+                $result['timer'] = [
+                    'formatTimer' => $formatTimer,
+                    'maxProgressBar' => $maxProgressBar,
+                    'leftProgressBar' => $leftProgressBar,
+                    'warningZone' => $warningZone
+                ];
+            }
         } catch (NotFoundException $e) {
             $result['message'][] = $e->getMessage();
         } catch (\DomainException | ForbiddenHttpException $e) {
@@ -1255,14 +1269,8 @@ class ClientChatController extends FController
                     $this->clientChatHoldRepository->save($clientChatHold);
                 }
 
-                $formatTimer = ClientChatHoldService::isMoreThanHourLeft($clientChatHold) ? "%H:%M:%S" : "%M:%S";
-                $maxProgressBar = $clientChatHold->deadlineStartDiffInSeconds();
-                $leftProgressBar = $clientChatHold->deadlineNowDiffInSeconds();
-                $warningZone = $clientChatHold->halfWarningSeconds();
-
                 return '<script>$("#modal-sm").modal("hide"); 
-                    refreshChatPage(' . $form->cchId . ');
-                    setTimeout(() => clientChatHoldTimeProgressbar("' . $formatTimer . '",' . $maxProgressBar . ',' . $leftProgressBar . ',' . $warningZone . '), 5500);                    
+                    refreshChatPage(' . $form->cchId . ');                  
                     createNotify("Success", "Chat status changed to Hold", "success");</script>';
             } catch (\Throwable $throwable) {
                 $form->addError('general', 'Internal Server Error');
@@ -1550,7 +1558,6 @@ class ClientChatController extends FController
     public function actionSendQuoteGenerate(): string
     {
         $errorMessage = '';
-        $captures = [];
 
         $form = new GenerateImagesForm();
 
@@ -1558,7 +1565,7 @@ class ClientChatController extends FController
             return $this->renderAjax('partial/_send_quote_generate', [
                 'errorMessage' => 'Cant load Data',
                 'form' => $form,
-                'captures' => $captures,
+                'captures' => [],
             ]);
         }
 
@@ -1566,7 +1573,7 @@ class ClientChatController extends FController
             return $this->renderAjax('partial/_send_quote_generate', [
                 'errorMessage' => '',
                 'form' => $form,
-                'captures' => $captures,
+                'captures' => [],
             ]);
         }
 
@@ -1574,29 +1581,34 @@ class ClientChatController extends FController
             if (!$this->sendQuoteCheckAccess($form->chat, Auth::user())) {
                 throw new \DomainException('Access denied.');
             }
-            foreach ($form->quotes as $quote) {
-                if ($capture = $this->generateQuoteCapture($quote)) {
-                    /** @var Quote $quote */
-                    $data = $quote->getPricesData();
-                    $selling = $data['total']['selling'] ?? 0;
-                    if (($pos = strpos($selling, '.')) > 0) {
-                        $str = substr($selling, $pos + 1, 2);
-                        if ($str == '') {
-                            $selling .= '00';
-                        } elseif (strlen($str) === 1) {
-                            $selling .= '0';
-                        }
-                    } else {
-                        $selling .= '.00';
-                    }
+
+            $captures = array_reduce($form->quotes, function ($acc, $quote) {
+                $qc_uid = QuoteCommunication::generateUid();
+                /** @var Quote $quote */
+                if ($capture = $this->generateQuoteCapture($quote, $qc_uid)) {
+                    $quotePricesData = $quote->getPricesData();
+
+                    // In this place were complicated logic with concats & etc.
+                    // Did we had a reason, that didn't allow to use something like `number_format/4` or `sprtintf/2`?
+                    /** @var string $selling */
+                    $selling = sprintf('%0.2f', $quotePricesData['total']['selling'] ?? 0);
+
+                    // In this line, basically, we are multiply the value by `10000`
+                    //
+                    // 1. Did we had a reason, that didn't allow to do something like this?
+                    // $price = (int)str_replace('.', '', $selling . '00');
+                    // or:
+                    // $price = (int)$selling * 10000;
+                    // This both would give the same result
+                    //
+                    // 2. Why we doing it? =) Are actual price measured in another currency/part?
                     $price = (int)(str_replace('.', '', $selling)) * 100;
-                    $captures[] = [
-                        'price' => $price,
-                        'data' => $capture,
-                        'quoteId' => $quote->id
-                    ];
+
+                    $acc[] = ['price' => $price, 'data' => $capture, 'quoteCommunicationUid' => $qc_uid, 'quoteId' => $quote->id];
                 }
-            }
+                return $acc;
+            }, []);
+
             if (!$captures) {
                 throw new \DomainException('Not generated captures. Try again.');
             }
@@ -1657,9 +1669,15 @@ class ClientChatController extends FController
 
             $quoteIds = ArrayHelper::getColumn($captures, 'quoteId');
             /** @var Quote[] $quoteList */
-            $quoteList = Quote::find()->where(['IN', 'id', $quoteIds])->all();
-            foreach ($quoteList as $quote) {
-                Repo::createForChat($chatId, $quote->id);
+            $quoteList = ArrayHelper::map(Quote::find()->where(['IN', 'id', $quoteIds])->all(), 'id', function ($quote) {
+                return $quote;
+            });
+
+            foreach ($captures as $capture) {
+                $quoteId = $capture['quoteId'];
+                $quoteCommunicationUid = $capture['quoteCommunicationUid'];
+                $quote = $quoteList[$quoteId];
+                Repo::createForChat($chatId, $quoteId, $quoteCommunicationUid);
                 $quote->setStatusSend();
                 if (!$this->quoteRepository->save($quote)) {
                     Yii::error($quote->errors, 'ClientChatController::sendQuote:Quote:save');
@@ -2060,9 +2078,15 @@ class ClientChatController extends FController
         return $lead->getQuotesProvider([], [Quote::STATUS_CREATED, Quote::STATUS_SENT, Quote::STATUS_OPENED]);
     }
 
-    private function generateQuoteCapture(Quote $quote): array
+    /**
+     * @param Quote $quote
+     * @param null|string $qc_uid
+     * @return array
+     * @throws \Exception
+     */
+    private function generateQuoteCapture(Quote $quote, ?string $qc_uid = null): array
     {
-        $communication = Yii::$app->communication;
+        $communication = Yii::$app->comms;
 
         $project = $quote->lead->project;
         $projectContactInfo = [];
@@ -2076,11 +2100,6 @@ class ClientChatController extends FController
             if (count($content_data['quotes']) > 1) {
                 throw new \DomainException('Count quotes > 1');
             }
-//            if (isset($content_data['quotes'][0])) {
-//                $tmp = $content_data['quotes'][0];
-//                unset($content_data['quotes']);
-//                $content_data['quote'] = $tmp;
-//            }
         } else {
             throw new \DomainException('Not found quote');
         }
@@ -2107,7 +2126,7 @@ class ClientChatController extends FController
 
             return [
                 'img' => $mailCapture['data']['img'],
-                'checkoutUrl' => $quote->getCheckoutUrlPage(),
+                'checkoutUrl' => $quote->getCheckoutUrlPage($qc_uid),
             ];
         } catch (\Throwable $e) {
             Yii::error(VarDumper::dumpAsString([

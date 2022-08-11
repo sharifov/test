@@ -5,12 +5,16 @@ namespace modules\abac\src\entities;
 use BaconQrCode\Renderer\Text\Html;
 use common\models\Employee;
 use modules\abac\src\AbacService;
+use src\behaviors\cache\CleanCacheBehavior;
+use src\helpers\app\AppHelper;
 use Yii;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\caching\TagDependency;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\BaseActiveRecord;
+use yii\helpers\Json;
 
 /**
  * This is the model class for table "abac_policy".
@@ -30,6 +34,7 @@ use yii\db\ActiveRecord;
  * @property int|null $ap_created_user_id
  * @property int|null $ap_updated_user_id
  * @property bool|null $ap_enabled
+ * @property string|null $ap_hash_code
  *
  * @property Employee $apCreatedUser
  * @property Employee $apUpdatedUser
@@ -44,7 +49,7 @@ class AbacPolicy extends ActiveRecord
         self::EFFECT_ALLOW => 'allow',
     ];
 
-
+    public const CACHE_KEY = 'abac-policy-model';
 
     /**
      * @return string
@@ -66,6 +71,7 @@ class AbacPolicy extends ActiveRecord
             [['ap_rule_type'], 'string', 'max' => 2],
             [['ap_subject'], 'string', 'max' => 10000],
             [['ap_object', 'ap_title'], 'string', 'max' => 255],
+            [['ap_hash_code'], 'string', 'max' => 32],
             [['ap_action'], 'string', 'max' => 1000],
             [['ap_enabled'], 'boolean'],
             [['ap_created_user_id'], 'exist', 'skipOnError' => true,
@@ -84,8 +90,8 @@ class AbacPolicy extends ActiveRecord
             'timestamp' => [
                 'class' => TimestampBehavior::class,
                 'attributes' => [
-                    ActiveRecord::EVENT_BEFORE_INSERT => ['ap_created_dt', 'ap_updated_dt'],
-                    ActiveRecord::EVENT_BEFORE_UPDATE => ['ap_updated_dt'],
+                    BaseActiveRecord::EVENT_BEFORE_INSERT => ['ap_created_dt', 'ap_updated_dt'],
+                    BaseActiveRecord::EVENT_BEFORE_UPDATE => ['ap_updated_dt'],
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
@@ -93,6 +99,11 @@ class AbacPolicy extends ActiveRecord
                 'class' => BlameableBehavior::class,
                 'createdByAttribute' => 'ap_created_user_id',
                 'updatedByAttribute' => 'ap_updated_user_id',
+                'defaultValue' => null,
+            ],
+            'cleanCache' => [
+                'class' => CleanCacheBehavior::class,
+                'tags' => [self::CACHE_KEY . $this->ap_object],
             ],
         ];
     }
@@ -118,6 +129,7 @@ class AbacPolicy extends ActiveRecord
             'ap_created_user_id' => 'Created User ID',
             'ap_updated_user_id' => 'Updated User ID',
             'ap_enabled' => 'Enabled',
+            'ap_hash_code' => 'Hash Code',
         ];
     }
 
@@ -131,10 +143,10 @@ class AbacPolicy extends ActiveRecord
             $this->ap_action = $this->getActionListById();
         }
 
-        if ($this->ap_subject_json) {
-            $this->ap_subject = $this->getDecodeCode();
+        if ($this->ap_subject_json && $subject = $this->getDecodeCode()) {
+            $this->ap_subject = $subject;
         }
-
+        $this->ap_hash_code = $this->generateHashCode();
         return true;
     }
 
@@ -260,5 +272,52 @@ class AbacPolicy extends ActiveRecord
             }
         }
         return $code;
+    }
+
+    /**
+     * @return array
+     */
+    public function getActionList(): array
+    {
+        $dataList = [];
+        if (!empty($this->ap_action)) {
+            $actionList = explode('|', $this->ap_action);
+            if ($actionList) {
+                foreach ($actionList as $item) {
+                    $dataList[] = str_replace(['(', ')'], '', $item);
+                }
+            }
+        }
+        return $dataList;
+    }
+
+    /**
+     * @return string
+     */
+    public function generateHashCode(): string
+    {
+        $data[] = $this->ap_object;
+        $data[] = $this->ap_action;
+        $data[] = $this->ap_subject;
+        $data[] = $this->ap_effect;
+        return AbacService::generateHashCode($data);
+    }
+
+    /**
+     * @return array
+     */
+    public static function getDuplicateListId(): array
+    {
+        return self::find()->select(['ap_hash_code'])
+            ->groupBy(['ap_hash_code'])
+            ->having('COUNT(*) > 1')->column();
+    }
+
+    /**
+     * @return string
+     */
+    public function getDump(): string
+    {
+        return base64_encode(Json::encode($this->attributes));
     }
 }

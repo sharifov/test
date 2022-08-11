@@ -5,6 +5,8 @@ namespace frontend\widgets\multipleUpdate\lead;
 use common\components\jobs\LeadPoorProcessingJob;
 use common\models\Employee;
 use common\models\Lead;
+use modules\lead\src\abac\dto\LeadAbacDto;
+use modules\lead\src\abac\LeadAbacObject;
 use src\auth\Auth;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
@@ -76,6 +78,14 @@ class MultipleUpdateService
             $oldOwnerId = $lead->employee_id;
 
             $newOwner = $this->getNewOwner($form->userId, $oldOwnerId);
+
+            if ($form->needOwnerUpdate() && $oldOwnerId !== $form->userId && (!$form->needStatusUpdate() || $form->statusId === $lead->status)) {
+                /** @abac $leadAbacDto, LeadAbacObject::ACT_CHANGE_OWNER, LeadAbacObject::ACTION_UPDATE, change of lead owner */
+                if (!Yii::$app->abac->can(new LeadAbacDto($lead, null), LeadAbacObject::ACT_CHANGE_OWNER, LeadAbacObject::ACTION_UPDATE)) {
+                    $this->addMessage('Lead ID: ' . $leadId . ' cannot be changed, because lead in sold status and has its owner');
+                    continue;
+                }
+            }
 
             if ($form->needStatusUpdate()) {
                 $this->changeStatus($lead, $form, $newOwner, $oldOwnerId, $creatorId);
@@ -265,6 +275,13 @@ class MultipleUpdateService
         } elseif ($form->isExtraQueue()) {
             try {
                 $this->leadStateService->extraQueue($lead, $newOwner->id, $creatorId, $form->message);
+                $this->addMessage($this->movedStateMessage($lead, 'Extra Queue', $oldOwnerId, $newOwner->id, $newOwner->userName));
+            } catch (\DomainException $e) {
+                $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());
+            }
+        } elseif ($form->isBusinessExtraQueue()) {
+            try {
+                $this->leadStateService->businessExtraQueue($lead, $newOwner->id, $creatorId, $form->message);
                 $this->addMessage($this->movedStateMessage($lead, 'Extra Queue', $oldOwnerId, $newOwner->id, $newOwner->userName));
             } catch (\DomainException $e) {
                 $this->addMessage('Lead: ' . $lead->id . ': ' . $e->getMessage());

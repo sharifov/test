@@ -7,8 +7,10 @@ use common\components\BackOffice;
 use common\models\query\EmployeeQuery;
 use common\models\search\EmployeeSearch;
 use frontend\models\UserFailedLogin;
+use kartik\password\StrengthValidator;
 use modules\product\src\entities\productType\ProductType;
 use src\access\EmployeeGroupAccess;
+use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\clientChatChannel\entity\ClientChatChannel;
 use src\model\clientChatUserAccess\entity\ClientChatUserAccess;
@@ -23,6 +25,7 @@ use src\model\user\entity\AccessCache;
 use src\model\user\entity\ShiftTime;
 use src\model\user\entity\StartTime;
 use src\model\user\entity\UserCache;
+use src\model\user\entity\UserRelations;
 use src\model\user\entity\userStatus\UserStatus;
 use src\model\userClientChatData\entity\UserClientChatData;
 use src\model\userData\entity\UserData;
@@ -30,6 +33,7 @@ use src\model\userData\entity\UserDataKey;
 use src\validators\SlugValidator;
 use Yii;
 use yii\base\NotSupportedException;
+use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -38,8 +42,14 @@ use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\helpers\VarDumper;
+use yii\helpers\Json;
 use yii\web\IdentityInterface;
 use yii\web\NotFoundHttpException;
+use src\logger\db\LogDTO;
+use common\models\GlobalLog;
+use src\logger\db\GlobalLogInterface;
+use src\services\log\GlobalEntityAttributeFormatServiceService;
+use modules\shiftSchedule\src\entities\shift\Shift;
 
 /**
  * This is the model class for table "employees".
@@ -57,6 +67,9 @@ use yii\web\NotFoundHttpException;
  * @property string $updated_at
  * @property string $last_activity
  * @property boolean $acl_rules_activated
+ * @property int|null $e_created_user_id
+ * @property int|null $e_updated_user_id
+ * @property string $last_login_dt
  *
  * @property bool $make_user_project_params
  *
@@ -93,6 +106,7 @@ use yii\web\NotFoundHttpException;
  * @property CouponSend[] $couponSend
  * @property LeadUserRating[] $leadUserRatings
  * @property UserShiftAssign[] $userShiftAssigns
+ * @property Shift[] $shifts
  *
  * @property string|bool|null $timezone
  * @property bool $isAllowCallExpert
@@ -103,6 +117,10 @@ use yii\web\NotFoundHttpException;
  * @property Access|null $access
  *
  * @property ActiveQuery $productType
+ *
+ * @property UserRelations|null $userRelations
+ * @property Employee $createdUser
+ * @property Employee $updatedUser
  */
 class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 {
@@ -117,6 +135,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public const ROLE_SUP_SUPER = 'sup_super';
     public const ROLE_EX_AGENT = 'ex_agent';
     public const ROLE_EX_SUPER = 'ex_super';
+    public const ROLE_QA_DEV = 'qa_developer';
+    public const ROLE_DEV = 'developer';
+
     /** admin child role  */
     public const ROLE_SALES_SENIOR = 'sales_senior';
     public const ROLE_EXCHANGE_SENIOR = 'exchange_senior';
@@ -176,6 +197,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
     private $access;
     private $permissionList = [];
+
+    private ?UserRelations $userRelations = null;
 
     public function loadCache(UserCache $cache): void
     {
@@ -406,8 +429,9 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             [['username', 'auth_key', 'password_hash', 'email', 'form_roles', 'full_name', 'nickname'], 'required'],
             [['password'], 'required', 'on' => self::SCENARIO_REGISTER],
             [['email', 'password', 'username', 'full_name', 'nickname'], 'trim'],
-            [['password'], 'string', 'min' => 8],
-            [['status'], 'integer'],
+            ['password', StrengthValidator::class, 'userAttribute' => 'username', 'min' => 10],
+            [['status'], 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
+            [['status', 'e_created_user_id', 'e_updated_user_id'], 'integer'],
             [['password_hash', 'password_reset_token', 'email'], 'string', 'max' => 255],
             [['username', 'full_name', 'nickname'], 'string', 'min' => 3, 'max' => 50],
             [['auth_key'], 'string', 'max' => 32],
@@ -420,11 +444,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             [['password_reset_token'], 'unique'],
             [
                 [
-                    'created_at', 'updated_at', 'last_activity', 'acl_rules_activated', 'user_groups',
+                    'created_at', 'updated_at', 'last_activity', 'user_groups', 'last_login_dt',
                     'user_projects', 'deleted', 'user_departments', 'client_chat_user_channel', 'user_shift_assigns',
                 ],
                 'safe',
             ],
+            ['acl_rules_activated', 'boolean'],
         ];
     }
 
@@ -451,6 +476,8 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             'full_name' => 'Full Name',
             'client_chat_user_channel' => 'Client chat user channel',
             'user_shift_assigns' => 'User Shift Assign',
+            'e_created_user_id' => 'Created User',
+            'e_updated_user_id' => 'Updated User',
         ];
     }
 
@@ -466,6 +493,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
                 ],
                 'value' => date('Y-m-d H:i:s') //new Expression('NOW()'),
             ],
+            'user' => [
+                'class' => BlameableBehavior::class,
+                'createdByAttribute' => 'e_created_user_id',
+                'updatedByAttribute' => 'e_updated_user_id',
+            ],
         ];
     }
 
@@ -478,6 +510,23 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return $this->hasOne(UserOnline::class, ['uo_user_id' => 'id']);
     }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getCreatedUser()
+    {
+        return $this->hasOne(Employee::className(), ['id' => 'e_created_user_id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getUpdatedUser()
+    {
+        return $this->hasOne(Employee::className(), ['id' => 'e_updated_user_id']);
+    }
+
 
     /**
      * Gets query for [[UserStatus]].
@@ -524,6 +573,23 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     public function getClientChatUserChannel()
     {
         return $this->hasMany(ClientChatUserChannel::class, ['ccuc_user_id' => 'id']);
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getClientChatChannel()
+    {
+        return $this->hasMany(ClientChatChannel::class, ['ccc_id' => 'ccuc_channel_id'])->viaTable('client_chat_user_channel', ['ccuc_user_id' => 'id']);
+    }
+
+    public function getClientChatUserChannelList(): array
+    {
+        if ($clientChatChannel = $this->clientChatChannel) {
+            return \yii\helpers\ArrayHelper::map($clientChatChannel, 'ccc_id', 'ccc_name');
+        }
+
+        return [];
     }
 
     /**
@@ -822,9 +888,41 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     /**
      * @return ActiveQuery
      */
+    public function getShifts()
+    {
+        return $this->hasMany(Shift::class, ['sh_id' => 'usa_sh_id'])->viaTable('user_shift_assign', ['usa_user_id' => 'id']);
+    }
+
+    /**
+    * @return array
+    */
+    public function getUserShiftAssignList(): array
+    {
+        if ($shifts = $this->shifts) {
+            return \yii\helpers\ArrayHelper::map($shifts, 'sh_id', 'sh_name');
+        }
+
+        return [];
+    }
+
+    /**
+     * @return ActiveQuery
+     */
     public function getProjects()
     {
         return $this->hasMany(Project::class, ['id' => 'project_id'])->viaTable('project_employee_access', ['employee_id' => 'id']);
+    }
+
+    /**
+     * @return array
+     */
+    public function getUserProjectList(): array
+    {
+        if ($projects = $this->projects) {
+            return \yii\helpers\ArrayHelper::map($projects, 'id', 'name');
+        }
+
+        return [];
     }
 
     /**
@@ -937,9 +1035,10 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @param Employee $user
      * @return array
      */
-    public static function getAllRoles(): array
+    public static function getAllRoles(Employee $user): array
     {
         $auth = \Yii::$app->authManager;
 
@@ -950,8 +1049,6 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
 
         $result = $auth->getRoles();
         $roles = ArrayHelper::map($result, 'name', 'description');
-        /** @var Employee $user */
-        $user = Yii::$app->user->identity;
 
         if ($user->isUserManager()) {
             if (isset($roles[self::ROLE_ADMIN])) {
@@ -1117,6 +1214,18 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
     }
 
+    public function updateRoles(array $roles): void
+    {
+        $auth = \Yii::$app->authManager;
+
+        $auth->revokeAll($this->id);
+
+        foreach ($roles as $role) {
+            $authorRole = $auth->getRole($role);
+            $auth->assign($authorRole, $this->id);
+        }
+    }
+
     /**
      * Generates password hash from password and sets it to the model
      *
@@ -1172,21 +1281,37 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         Yii::$app->db->createCommand()->delete('auth_assignment', 'user_id = :user_id', [':user_id' => $this->id])->execute();
     }
 
+    public function removeRoles(array $roles)
+    {
+        foreach ($roles as $role) {
+            Yii::$app->db->createCommand()->delete('auth_assignment', 'user_id = :user_id AND item_name = :item_name', [':user_id' => $this->id, ':item_name' => $role])->execute();
+        }
+    }
+
     public function addNewRoles(array $roles)
     {
         $data = [];
         foreach ($roles as $role) {
             $data[] = [
                 'item_name' => $role,
-                'user_id' => $this->id
+                'user_id' => $this->id,
+                'created_at' => strtotime(date('Y-m-d H:i:s'))
             ];
         }
-        Yii::$app->db->createCommand()->batchInsert('auth_assignment', ['item_name', 'user_id'], $data)->execute();
+        Yii::$app->db->createCommand()->batchInsert('auth_assignment', ['item_name', 'user_id', 'created_at'], $data)->execute();
     }
 
     public function removeAllDepartments()
     {
         Yii::$app->db->createCommand()->delete(UserDepartment::tableName(), 'ud_user_id = :ud_user_id', [':ud_user_id' => $this->id])->execute();
+    }
+
+    public function removeDepartments(array $departments)
+    {
+        UserDepartment::deleteAll([
+            'ud_user_id' => $this->id,
+            'ud_dep_id' => $departments,
+        ]);
     }
 
     public function addNewDepartments(array $departments)
@@ -1207,13 +1332,13 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         Yii::$app->db->createCommand()->delete(ClientChatUserChannel::tableName(), 'ccuc_user_id = :ccuc_user_id', [':ccuc_user_id' => $this->id])->execute();
     }
 
-    public function addClientChatChanels(array $chanels, ?int $createdUserId = null)
+    public function addClientChatChanels(array $channels, ?int $createdUserId = null)
     {
         $data = [];
-        foreach ($chanels as $chanel) {
+        foreach ($channels as $channel) {
             $data[] = [
                 'ccuc_user_id' => $this->id,
-                'ccuc_channel_id' => (int)$chanel,
+                'ccuc_channel_id' => (int)$channel,
                 'ccuc_created_dt' => date('Y-m-d H:i:s'),
                 'ccuc_created_user_id' => $createdUserId,
             ];
@@ -1403,17 +1528,26 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             ->orderBy(['ug_name' => SORT_ASC]);
     }
 
+    public function isUserGroupIntersection(array $groups): bool
+    {
+        foreach ($this->getUserGroupList() as $groupId => $groupName) {
+            if (in_array($groupId, $groups, true)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * @return array
      */
     public function getUserGroupList(): array
     {
-        $groups = [];
         if ($groupsModel = $this->ugsGroups) {
-            $groups = \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
+            return \yii\helpers\ArrayHelper::map($groupsModel, 'ug_id', 'ug_name');
         }
 
-        return $groups;
+        return [];
     }
 
     /**
@@ -1421,12 +1555,11 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function getUserDepartmentList(): array
     {
-        $groups = [];
         if ($model = $this->udDeps) {
-            $groups = \yii\helpers\ArrayHelper::map($model, 'dep_id', 'dep_name');
+            return \yii\helpers\ArrayHelper::map($model, 'dep_id', 'dep_name');
         }
 
-        return $groups;
+        return [];
     }
 
 
@@ -1612,12 +1745,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
     }
 
     /**
+     * @param int $userID
      * @param string|null $start_dt
      * @param string|null $end_dt
-     * @param int $userID
      * @return string
      */
-    public static function getTaskStatsSupervision(string $start_dt = null, string $end_dt = null, int $userID): string
+    public static function getTaskStatsSupervision(int $userID, ?string $start_dt = null, ?string $end_dt = null): string
     {
         if ($start_dt) {
             $start_dt = date('Y-m-d', strtotime($start_dt));
@@ -1859,7 +1992,7 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @param int $userID
      * @return int
      */
-    public static function getLeadCountByStatusSupervision(array $statusList = [], string $startDate = null, string $endDate = null, int $userID): int
+    public static function getLeadCountByStatusSupervision(array $statusList = [], string $startDate = null, string $endDate = null, int $userID = 0): int
     {
         if ($startDate) {
             $startDate = Employee::convertTimeFromUserDtToUTC(strtotime($startDate));
@@ -2494,7 +2627,12 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
 
         $query->andWhere(['up.up_call_type_id' => UserProfile::CALL_TYPE_WEB]);
-        $query->andWhere(['upp.upp_allow_general_line' => true, 'upp.upp_project_id' => $project_id]);
+        if ($call->isTransfer()) {
+            $query->andWhere(['upp.upp_allow_transfer' => true]);
+        } else {
+            $query->andWhere(['upp.upp_allow_general_line' => true]);
+        }
+        $query->andWhere(['upp.upp_project_id' => $project_id]);
 
         if ($exceptUserIds) {
             $query->andWhere(['NOT IN', 'uo.uo_user_id', $exceptUserIds]);
@@ -2573,18 +2711,17 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
      * @param int $time
      * @return string
      */
-    public static function convertTimeFromUserDtToUTC(int $time): string
+    public static function convertTimeFromUserDtToUTC(int $time, ?Employee $employee = null): string
     {
         $dateTime = '';
 
         if ($time >= 0) {
-
-            /** @var Employee $user */
-            $user = \Yii::$app->user->identity;
+            $user = $employee ?: \Yii::$app->user->identity ?? null;
+            if (!$user) {
+                throw new \RuntimeException('User is empty in method convertTimeFromUserDtToUTC');
+            }
             $timezone = $user->timezone;
-
             $dateTime = date('Y-m-d H:i:s', $time);
-
             try {
                 if ($timezone) {
                     $date = new \DateTime($dateTime, new \DateTimeZone($timezone));
@@ -2889,5 +3026,57 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
         }
         $sort = SettingHelper::getCallDistributionSort();
         return $sort;
+    }
+
+    public function getRelations(): UserRelations
+    {
+        if ($this->userRelations !== null) {
+            return $this->userRelations;
+        }
+        $this->userRelations = new UserRelations($this);
+        return $this->userRelations;
+    }
+
+    public function addLog($appId, $targetId, $oldAttr, $newAttr)
+    {
+        $globalLogFormatAttrService = \Yii::createObject(GlobalEntityAttributeFormatServiceService::class);
+
+        (\Yii::createObject(GlobalLogInterface::class))->log(
+            new LogDTO(
+                get_class($this),
+                $this->id,
+                $appId,
+                $targetId,
+                JSON::encode($oldAttr),
+                JSON::encode($newAttr),
+                $globalLogFormatAttrService->formatAttr(get_class($this), JSON::encode($oldAttr), JSON::encode($newAttr)),
+                GlobalLog::ACTION_TYPE_UPDATE
+            )
+        );
+    }
+
+    public function isSameUser(Employee $user): bool
+    {
+        return $this->id === $user->id;
+    }
+
+    public function isSameUserGroup(array $groups): bool
+    {
+        foreach ($this->getUserGroupList() as $groupId => $groupName) {
+            if (in_array($groupId, $groups, true)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function isSameDepartment(array $departments): bool
+    {
+        foreach ($this->getUserDepartmentList() as $departmentId => $departmentName) {
+            if (in_array($departmentId, $departments, true)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

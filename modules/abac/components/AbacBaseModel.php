@@ -13,7 +13,10 @@ use common\models\Department;
 use common\models\Employee;
 use common\models\Project;
 use common\models\UserGroup;
+use common\models\UserProfile;
 use common\models\UserRole;
+use modules\featureFlag\FFlag;
+use Yii;
 
 /**
  * Class AbacBaseModel
@@ -359,6 +362,18 @@ class AbacBaseModel
         'validation' => ['min' => 0, 'max' => 59, 'step' => 1]
     ];
 
+    protected const ATTR_USER_SKILL = [
+        'optgroup' => self::OPTGROUP_ENV_USER,
+        'id' => 'env_user_skill',
+        'field' => 'env.user.skill',
+        'label' => 'User Skill',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => true,
+        'operators' =>  [self::OP_IN, self::OP_NOT_IN]
+    ];
+
     protected const ATTRIBUTE_LIST = [
         self::ATTR_OBJ_AVAILABLE,
         self::ATTR_USER_USERNAME,
@@ -398,6 +413,14 @@ class AbacBaseModel
         $up = self::ATTR_USER_PROJECTS;
         $ud = self::ATTR_USER_DEPARTMENTS;
 
+        /** @fflag FFlag::FF_KEY_USER_SKILL_IN_ABAC_ENABLE, User Skill in abac parameters enable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_USER_SKILL_IN_ABAC_ENABLE)) {
+            $us = self::ATTR_USER_SKILL;
+
+            $us['values'] = self::getSkillList();
+            $attributeList[] = $us;
+        }
+
         $ur['values'] = self::getUserRoleList();
         $mur['values'] = $ur['values'];
         $ug['values'] = self::getUserGroupList();
@@ -419,7 +442,7 @@ class AbacBaseModel
      */
     protected static function getUserRoleList(): array
     {
-        return UserRole::getEnvList();
+        return UserRole::getEnvListWOCache();
     }
 
     /**
@@ -444,6 +467,11 @@ class AbacBaseModel
     protected static function getDepartmentList(): array
     {
         return Department::getEnvList();
+    }
+
+    protected static function getSkillList(): array
+    {
+        return UserProfile::SKILL_TYPE_LIST;
     }
 
     /**

@@ -1,6 +1,10 @@
 <?php
 
+use modules\shiftSchedule\src\events\ShiftScheduleEventChangedEvent;
+use modules\shiftSchedule\src\listeners\ShiftScheduleEventChangedListener;
+use modules\smartLeadDistribution\src\listeners\LeadRatingCalculationListener;
 use src\events\lead\LeadBookedEvent;
+use src\events\lead\LeadCallExpertChangedEvent;
 use src\events\lead\LeadCallExpertRequestEvent;
 use src\events\lead\LeadCloseEvent;
 use src\events\lead\LeadCountPassengersChangedEvent;
@@ -32,6 +36,9 @@ use src\events\lead\LeadTaskEvent;
 use src\events\lead\LeadTrashEvent;
 use src\listeners\lead\LeadBookedEventLogListener;
 use src\listeners\lead\LeadBookedNotificationsListener;
+use src\events\lead\LeadBusinessExtraQueueEvent;
+use src\listeners\lead\leadBusinessExtraQueue\LeadBusinessExtraQueueNotificationsListener;
+use src\listeners\lead\LeadCallExpertChangedListener;
 use src\listeners\lead\LeadCallExpertRequestEventListener;
 use src\listeners\lead\LeadCloseListener;
 use src\listeners\lead\LeadCountPassengersChangedEventListener;
@@ -62,22 +69,32 @@ use src\listeners\lead\LeadProcessingEventLogListener;
 use src\listeners\lead\LeadQcallAddListener;
 use src\listeners\lead\LeadQcallProcessingListener;
 use src\listeners\lead\LeadQuoteCloneEventListener;
+use src\listeners\lead\LeadRejectClientReturnIndicationListener;
 use src\listeners\lead\LeadRejectEventLogListener;
 use src\listeners\lead\LeadSendToGaListener;
 use src\listeners\lead\LeadSnoozeEventLogListener;
 use src\listeners\lead\LeadSnoozeNotificationsListener;
+use src\listeners\lead\LeadSoldClientReturnIndicationListener;
 use src\listeners\lead\LeadSoldEventLogListener;
 use src\listeners\lead\LeadSoldNotificationsListener;
 use src\listeners\lead\LeadSoldSplitListener;
+use src\listeners\lead\LeadInfoReloadListener;
 use src\listeners\lead\LeadTaskEventListener;
+use src\listeners\lead\LeadTaskListListener;
 use src\listeners\lead\LeadTipsSplitListener;
 use src\listeners\lead\LeadTrashEventLogListener;
+use src\listeners\lead\LeadUserTaskCanceledListener;
 use src\listeners\lead\leadWebEngage\LeadBookedWebEngageListener;
 use src\listeners\lead\leadWebEngage\LeadSoldWebEngageListener;
 use src\listeners\lead\leadWebEngage\LeadTrashedWebEngageListener;
+use src\listeners\lead\leadBusinessExtraQueue\LeadBusinessExtraQueueRemoveOnStatusChangeListener;
+use src\listeners\lead\leadBusinessExtraQueue\LeadBusinessExtraQueueEventLogListener;
 
 return [
-    LeadCreatedEvent::class => [LeadCreatedEventListener::class],
+    LeadCreatedEvent::class => [
+        LeadCreatedEventListener::class,
+        LeadRatingCalculationListener::class,
+    ],
     LeadCreatedManuallyEvent::class => [LeadSendToGaListener::class],
     LeadCreatedByIncomingCallEvent::class => [
         LeadCreatedByIncomingCallLogListener::class,
@@ -108,8 +125,10 @@ return [
 
     LeadDuplicateDetectedEvent::class => [LeadDuplicateDetectedEventListener::class],
     LeadOwnerChangedEvent::class => [
+        LeadTaskListListener::class,
         LeadOwnerChangedNotificationsListener::class,
         LeadPoorProcessingRemoverOwnerChangedListener::class,
+        LeadInfoReloadListener::class,
     ],
     LeadCallExpertRequestEvent::class => [LeadCallExpertRequestEventListener::class],
     LeadTaskEvent::class => [LeadTaskEventListener::class],
@@ -120,15 +139,21 @@ return [
     ],
 
     LeadStatusChangedEvent::class => [
+        LeadUserTaskCanceledListener::class,
         LeadQcallProcessingListener::class,
         LeadFromSnoozeNotificationListener::class,
         LeadPoorProcessingRemoverListener::class,
+        LeadBusinessExtraQueueRemoveOnStatusChangeListener::class,
     ],
     LeadPendingEvent::class => [LeadPendingEventLogListener::class],
     LeadProcessingEvent::class => [
         LeadProcessingEventLogListener::class,
+        LeadInfoReloadListener::class,
     ],
-    LeadRejectEvent::class => [LeadRejectEventLogListener::class],
+    LeadRejectEvent::class => [
+        LeadRejectEventLogListener::class,
+        LeadRejectClientReturnIndicationListener::class
+    ],
     LeadFollowUpEvent::class => [
         LeadFollowUpEventLogListener::class,
         LeadFollowUpNotificationsListener::class,
@@ -140,6 +165,7 @@ return [
         LeadTipsSplitListener::class,
         LeadPhoneTrustListener::class,
         LeadSoldWebEngageListener::class,
+        LeadSoldClientReturnIndicationListener::class
     ],
     LeadTrashEvent::class => [
         LeadTrashEventLogListener::class,
@@ -163,11 +189,24 @@ return [
     LeadExtraQueueEvent::class => [
         LeadExtraQueueEventLogListener::class,
         LeadExtraQueueNotificationsListener::class,
+        LeadInfoReloadListener::class,
+    ],
+    LeadBusinessExtraQueueEvent::class => [
+        LeadBusinessExtraQueueNotificationsListener::class,
+        LeadInfoReloadListener::class,
+        LeadBusinessExtraQueueEventLogListener::class,
     ],
     LeadPoorProcessingEvent::class => [
         LeadPoorProcessingAdderListener::class,
+        LeadInfoReloadListener::class,
     ],
     LeadCloseEvent::class => [
         LeadCloseListener::class
+    ],
+    LeadCallExpertChangedEvent::class => [
+        LeadCallExpertChangedListener::class
+    ],
+    ShiftScheduleEventChangedEvent::class => [
+        ShiftScheduleEventChangedListener::class
     ]
 ];

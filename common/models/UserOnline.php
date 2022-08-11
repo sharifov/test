@@ -8,6 +8,7 @@ use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
 /**
@@ -125,7 +126,33 @@ class UserOnline extends ActiveRecord
                             'action' => $action,
                             'id' => $this->uo_user_id,
                             'data' => [
-                                'userOnline' => $this->attributes,
+                                'userOnline' => ArrayHelper::toArray($this, [
+                                    UserOnline::class => [
+                                        'user_id' => 'uo_user_id',
+                                        'uo_user_id',
+                                        'uo_updated_dt',
+                                        'uo_idle_state',
+                                        'uo_idle_state_dt',
+                                        'userName' => function (UserOnline $uo) {
+                                            return $uo->uoUser->username ?? '';
+                                        },
+                                        'online' => function (UserOnline $uo) {
+                                            return $uo->attributes;
+                                        },
+                                        'status' => function (UserOnline $uo) {
+                                            return $uo->uoUser->userStatus->attributes ?? [];
+                                        },
+                                        'userDep' => function (UserOnline $uo) {
+                                            $deps = [];
+                                            foreach ($uo->uoUser->udDeps as $dep) {
+                                                if (isset($dep->dep_id)) {
+                                                    $deps[] = $dep->dep_id;
+                                                }
+                                            }
+                                            return $deps;
+                                        },
+                                    ],
+                                ]),
                             ]
                         ]
                     );

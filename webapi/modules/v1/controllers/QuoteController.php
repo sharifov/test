@@ -14,6 +14,7 @@ use common\models\Log;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\Quote;
+use common\models\QuoteCommunicationOpenLog;
 use common\models\QuotePrice;
 use common\models\UserProjectParams;
 use common\models\VisitorLog;
@@ -27,6 +28,7 @@ use src\exception\AdditionalDataException;
 use src\forms\quote\QuoteCreateDataForm;
 use src\forms\quote\QuoteCreateKeyForm;
 use src\helpers\app\AppHelper;
+use src\helpers\ErrorsToStringHelper;
 use src\logger\db\GlobalLogInterface;
 use src\logger\db\LogDTO;
 use src\model\leadData\services\LeadDataService;
@@ -101,7 +103,6 @@ class QuoteController extends ApiBaseController
     }
 
     /**
-     *
      * @api {post} /v1/quote/get-info Get Quote
      * @apiVersion 0.1.0
      * @apiName GetQuote
@@ -120,11 +121,15 @@ class QuoteController extends ApiBaseController
      * @apiParam {string}           [clientIP]          Client IP address
      * @apiParam {bool}             [clientUseProxy]    Client Use Proxy
      * @apiParam {string}           [clientUserAgent]   Client User Agent
+     * @apiParam {object}           [queryParams]       Query params, sent to service that calling get-info
      *
      *
      * @apiParamExample {json} Request-Example:
      * {
      *      "uid": "5b6d03d61f078",
+     *      "queryParams": {
+     *          "qc": "sk2N5"
+     *      },
      *      "apiKey": "d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd"
      * }
      *
@@ -348,8 +353,20 @@ class QuoteController extends ApiBaseController
      *      ],
      *      "lead_data": [
      *          {
-     *              "ld_field_key": "kayakclickid",
-     *              "ld_field_value": "example_value132"
+     *              "ld_field_key": "example_key",
+     *              "ld_field_value": "example_value"
+     *          },
+     *          {
+     *              "ld_field_key": "example_key",
+     *              "ld_field_value": "example_value"
+     *          }
+     *      ],
+     *      "experiments": [
+     *          {
+     *              "ex_code": "wpl5.0",
+     *          },
+     *          {
+     *              "ex_code": "wpl6.2",
      *          }
      *      ],
      *      "department_key": "chat",
@@ -375,19 +392,16 @@ class QuoteController extends ApiBaseController
      *       "type": "yii\\web\\NotFoundHttpException"
      *   }
      *
-     *
      * @return array
      * @throws BadRequestHttpException
      * @throws NotFoundHttpException
      * @throws UnprocessableEntityHttpException
+     * @throws \yii\base\InvalidConfigException
      */
-
-
     public function actionGetInfo(): array
     {
         $this->checkPost();
         $this->startApiLog($this->action->uniqueId);
-
 
         $uid = Yii::$app->request->post('uid');
         $clientIP = Yii::$app->request->post('clientIP');
@@ -395,6 +409,8 @@ class QuoteController extends ApiBaseController
         if (!$uid) {
             throw new BadRequestHttpException('Not found UID on POST request', 1);
         }
+
+        QuoteCommunicationOpenLog::createByRequestData(Yii::$app->getRequest()->getBodyParams());
 
         if ($this->apiProject) {
             $projectIds = [$this->apiProject->id];
@@ -517,7 +533,6 @@ class QuoteController extends ApiBaseController
                             }
                         }
                     }
-                    //exec(dirname(Yii::getAlias('@app')) . '/yii quote/send-opened-notification '.$uid.'  > /dev/null 2>&1 &');
                 }
             } elseif ($model->isDeclined()) {
                 if ($lead = $model->lead) {
@@ -568,6 +583,72 @@ class QuoteController extends ApiBaseController
     }
 
     /**
+     * @return array
+     * @throws BadRequestHttpException
+     * @throws NotFoundHttpException
+     * @throws UnprocessableEntityHttpException
+     * @throws \yii\base\InvalidConfigException
+     */
+
+    //apiDoc was missing and recreated briefly todo double check carefully
+    /**
+     * @api {post} /v1/quote/sync Sync Quote With BO
+     * @apiVersion 0.1.0
+     * @apiName SyncQuote
+     * @apiGroup Quotes
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization    Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {string{13}}       uid                 Quote UID
+     * @apiParam {string}           [apiKey]            API Key for Project (if not use Basic-Authorization)
+     *
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+     *      "uid": "5b6d03d61f078",
+     *      "queryParams": {
+     *          "qc": "sk2N5"
+     *      },
+     *      "apiKey": "d190c378e131ccfd8a889c8ee8994cb55f22fbeeb93f9b99007e8e7ecc24d0dd"
+     * }
+     *
+     * @apiSuccess {string} status    Status
+     * @apiSuccess {array} errors    Errors
+     * @apiSuccess {string} action    Action
+     * @apiSuccess {integer} response_id    Response Id
+     * @apiSuccess {DateTime} request_dt    Request Date & Time
+     * @apiSuccess {DateTime} response_dt   Response Date & Time
+     *
+     * @apiSuccessExample Success-Response:
+     * HTTP/1.1 200 OK
+     * {
+     *   "status": "Success",     *
+     *   "errors": [],     *
+     *   "action": "v1/quote/sync",
+     *   "response_id": 173,
+     *   "request_dt": "2018-08-16 06:42:03",
+     *   "response_dt": "2018-08-16 06:42:03"
+     * }
+     *
+     *
+     * @apiError UserNotFound The id of the User was not found.
+     *
+     * @apiErrorExample Error-Response:
+     *   HTTP/1.1 404 Not Found
+     *   {
+     *       "name": "Not Found",
+     *       "message": "Not found Quote UID: 30",
+     *       "code": 2,
+     *       "status": 404,
+     *       "type": "yii\\web\\NotFoundHttpException"
+     *   }
+     *
      * @return array
      * @throws BadRequestHttpException
      * @throws NotFoundHttpException
@@ -804,6 +885,7 @@ class QuoteController extends ApiBaseController
             $quote->attributes = $quoteAttributes;
             $quote->lead_id = $lead->id;
             $quote->employee_id = null;
+            $quote->q_create_type_id = Quote::CREATE_TYPE_EXPERT;
             $quote->setMetricLabels(['action' => 'created', 'type_creation' => 'web_api']);
 
             if ($checkPayment = ArrayHelper::getValue($quote, 'check_payment', true)) {
@@ -827,7 +909,10 @@ class QuoteController extends ApiBaseController
 
             $quote->save();
             if ($quote->hasErrors()) {
-                throw new \RuntimeException($quote->getErrorSummary(false)[0]);
+                throw new AdditionalDataException(
+                    ['quoteAttributes' => $quoteAttributes],
+                    ErrorsToStringHelper::extractFromModel($quote, ' ')
+                );
             }
 
             if (!ArrayHelper::keyExists($quote->gds, SearchService::GDS_LIST)) {

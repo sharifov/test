@@ -85,7 +85,8 @@ class UserProjectParamsController extends FController
     public function actionCreate()
     {
         $model = new UserProjectParams([
-            'upp_allow_general_line' => true
+            'upp_allow_general_line' => true,
+            'upp_allow_transfer' => true,
         ]);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
@@ -105,7 +106,8 @@ class UserProjectParamsController extends FController
     public function actionCreateAjax()
     {
         $model = new UserProjectParams([
-            'upp_allow_general_line' => true
+            'upp_allow_general_line' => true,
+            'upp_allow_transfer' => true
         ]);
         $model->upp_user_id = Yii::$app->request->get('user_id');
 

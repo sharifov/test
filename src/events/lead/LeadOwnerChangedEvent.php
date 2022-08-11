@@ -11,7 +11,7 @@ use common\models\Lead;
  * @property int|null $oldOwnerId
  * @property int $newOwnerId
  */
-class LeadOwnerChangedEvent implements LeadableEventInterface
+class LeadOwnerChangedEvent implements LeadableEventInterface, LeadableOwnerEventInterface
 {
     public $lead;
     public $oldOwnerId;
@@ -32,5 +32,15 @@ class LeadOwnerChangedEvent implements LeadableEventInterface
     public function getLead(): Lead
     {
         return $this->lead;
+    }
+
+    public function getOldOwnerId(): ?int
+    {
+        return $this->oldOwnerId;
+    }
+
+    public function getNewOwnerId(): ?int
+    {
+        return $this->newOwnerId;
     }
 }

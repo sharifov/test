@@ -42,6 +42,11 @@ class GlobalLog extends ActiveRecord
     public const MODEL_LPPD  = 'src\model\leadPoorProcessingData\entity\LeadPoorProcessingData';
     public const MODEL_ABAC_POLICY  = 'modules\abac\src\entities\AbacPolicy';
     public const MODEL_EMPLOYEE         = 'common\models\Employee';
+    public const MODEL_USER_PARAMS  = 'common\models\UserParams';
+    public const MODEL_USER_PROFILE = 'common\models\UserProfile';
+    public const MODEL_USER_PROJECT_PARAMS = 'common\models\UserProjectParams';
+    public const MODEL_USER_VOICE_MAIL = 'src\model\userVoiceMail\useCase\manage\UserVoiceMailForm';
+    public const MODEL_USER_PRODUCT_TYPE = 'common\models\UserProductType';
 
     public const MODEL_LIST         = [
         self::MODEL_CLIENT          => 'Client',
@@ -56,6 +61,11 @@ class GlobalLog extends ActiveRecord
         self::MODEL_LPPD => 'LeadPoorProcessingData',
         self::MODEL_ABAC_POLICY => 'AbacPolicy',
         self::MODEL_EMPLOYEE        => 'Employee',
+        self::MODEL_USER_PARAMS => 'UserParams',
+        self::MODEL_USER_PROFILE => 'UserProfile',
+        self::MODEL_USER_PROJECT_PARAMS => 'UserProjectParams',
+        self::MODEL_USER_VOICE_MAIL => 'UserVoiceMailForm',
+        self::MODEL_USER_PRODUCT_TYPE => 'UserProductType',
     ];
 
     public const APP_CONSOLE    = 'app-console';
@@ -70,10 +80,12 @@ class GlobalLog extends ActiveRecord
 
     public const ACTION_TYPE_CREATE = 1;
     public const ACTION_TYPE_UPDATE = 2;
+    public const ACTION_TYPE_DELETE = 3;
 
     public const ACTION_TYPE_LIST = [
         self::ACTION_TYPE_CREATE => 'Create',
-        self::ACTION_TYPE_UPDATE => 'Update'
+        self::ACTION_TYPE_UPDATE => 'Update',
+        self::ACTION_TYPE_DELETE => 'Delete',
     ];
 
     public const ACTION_TYPE_AR = [
@@ -88,6 +100,31 @@ class GlobalLog extends ActiveRecord
     public static function tableName()
     {
         return 'global_log';
+    }
+
+    public static function getPrevModels($prevId, $limit, $filters = null): array
+    {
+        if (isset($filters)) {
+            $mainQuery = self::find()
+                ->where(['>', 'gl_id', $prevId])
+                ->andFilterWhere($filters)
+                ->orderBy(['gl_id' => SORT_ASC])
+                ->limit($limit + 1);
+            return self::find()
+                ->from(['C' => $mainQuery])
+                ->orderBy(['gl_id' => SORT_DESC])
+                ->all();
+        }
+
+        $mainQuery = self::find()
+            ->where(['>', 'gl_id', $prevId])
+            ->orderBy(['gl_id' => SORT_ASC])
+            ->limit($limit + 1);
+        return self::find()
+            ->from(['C' => $mainQuery])
+            ->orderBy(['gl_id' => SORT_DESC])
+            ->limit($limit + 1)
+            ->all();
     }
 
     /**

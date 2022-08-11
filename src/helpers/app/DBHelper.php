@@ -17,6 +17,8 @@ use yii\db\Exception;
 
 class DBHelper
 {
+    private const YEAR_PARTITION_TPL = 'PARTITION y%s VALUES LESS THAN (%s) ENGINE = InnoDB';
+
     /**
      * Calculate from and to dates from a given date.
      * Given date -> from = start of the month, to = next month start date
@@ -102,5 +104,86 @@ class DBHelper
                 ':schema' => $schema,
             ]
         )->queryScalar();
+    }
+
+    public static function hasTable($table, ?\yii\db\Connection $db = null): bool
+    {
+        if (!$db) {
+            $db = Yii::$app->db;
+        }
+
+        $tableSchema = $db->getTableSchema($table, true);
+        return !is_null($tableSchema);
+    }
+
+    public static function dropTableIfExists($table, ?\yii\db\Connection $db = null): void
+    {
+        if (!$db) {
+            $db = Yii::$app->db;
+        }
+
+        if (self::hasTable($table, $db)) {
+            $db->createCommand()->dropTable($table)->execute();
+        }
+    }
+
+    public static function generateYearMonthPartition(
+        string $table,
+        string $yearColumn,
+        string $monthColumn,
+        \DateTimeImmutable $dateStart,
+        int $partitionYears = 5,
+        bool $isAddMaxPartition = true
+    ): string {
+        $result = 'ALTER TABLE `' . $table . '` PARTITION BY RANGE (`' . $yearColumn . '`)' . PHP_EOL;
+        $result .= 'SUBPARTITION BY LINEAR HASH (`' . $monthColumn . '`)' . PHP_EOL;
+        $result .= 'SUBPARTITIONS 12' . PHP_EOL;
+        $result .= '(' . PHP_EOL;
+
+        $result .= sprintf(
+            self::YEAR_PARTITION_TPL,
+            $dateStart->format('Y'),
+            $dateStart->modify('+ 1 years')->format('Y')
+        );
+        $result .= $partitionYears > 1 ? ','  . PHP_EOL : '';
+
+        for ($i = 1; $i < $partitionYears; $i++) {
+            $year = $dateStart->modify('+ ' . $i . ' years')->format('Y');
+            $nextYear = $dateStart->modify('+ ' . ($i + 1) . ' years')->format('Y');
+            $result .= sprintf(self::YEAR_PARTITION_TPL, $year, $nextYear);
+            $result .= $i + 1 < $partitionYears ? ','  . PHP_EOL : '';
+        }
+
+        $result .= $isAddMaxPartition ? ',' . PHP_EOL . 'PARTITION y VALUES LESS THAN MAXVALUE' . PHP_EOL : '';
+        $result .= ');';
+        return $result;
+    }
+
+    public static function generateAddPartitionYear(string $table, \DateTimeImmutable $dateYear): string
+    {
+        $partYear = $dateYear->format('Y');
+        $nextYear = $dateYear->modify('+ 1 year')->format('Y');
+        $partition = sprintf(self::YEAR_PARTITION_TPL, $partYear, $nextYear);
+
+        return 'ALTER TABLE `' . $table . '` ADD PARTITION (' . $partition . ');';
+    }
+
+    public static function yearMonthRestrictionQuery(
+        \DateTimeImmutable $startDT,
+        \DateTime $endDt,
+        string $yearColumn,
+        string $monthColumn
+    ): string {
+        $preparedYearMonth[(int) $endDt->format('Y')][] = (int) $endDt->format('n');
+        while ($endDt->modify('-1 months') > $startDT) {
+            $preparedYearMonth[(int) $endDt->format('Y')][] = (int) $endDt->format('n');
+        }
+
+        $queryWhereDT = [];
+        foreach ($preparedYearMonth as $year => $months) {
+            $queryWhereDT[] = '((' . $yearColumn . ' = ' . $year . ') AND (' . $monthColumn . ' IN (' . implode(',', $months) . ')))';
+        }
+
+        return implode(' OR ', $queryWhereDT);
     }
 }

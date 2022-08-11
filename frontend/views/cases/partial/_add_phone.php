@@ -1,6 +1,7 @@
 <?php
 
 use borales\extensions\phoneInput\PhoneInput;
+use common\models\ClientPhone;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
@@ -25,7 +26,8 @@ use yii\widgets\Pjax;
     <?= $form->field($model, 'phone')->widget(PhoneInput::class, [
         'options' => [
             'class' => 'form-control lead-form-input-element',
-            'onkeyup' => 'var value = $(this).val();$(this).val(value.replace(/[^0-9\+]+/g, ""));'
+            'onkeyup' => 'var value = $(this).val();$(this).val(value.replace(/[^0-9\+]+/g, ""));',
+            'required' => true,
         ],
         'jsOptions' => [
             'nationalMode' => false,
@@ -33,6 +35,8 @@ use yii\widgets\Pjax;
             'customContainer' => 'intl-tel-input'
         ]
     ])->label(false); ?>
+
+    <?= $form->field($model, 'type')->dropDownList(ClientPhone::getPhoneTypeList()) ?>
 
     <div class="form-group text-center">
         <?= Html::submitButton('Add Phone', ['class' => 'btn btn-warning']) ?>

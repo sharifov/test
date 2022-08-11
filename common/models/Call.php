@@ -6,9 +6,14 @@ use common\components\jobs\CallOutEndedJob;
 use common\components\jobs\CallPriceJob;
 use common\components\jobs\CheckClientCallJoinToConferenceJob;
 use common\components\jobs\LeadPoorProcessingRemoverJob;
+use common\components\jobs\UserTaskCompletionJob;
 use common\components\purifier\Purifier;
 use common\models\query\CallQuery;
+use modules\featureFlag\FFlag;
+use modules\lead\src\services\LeadTaskListService;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\taskList\src\entities\TargetObject;
+use modules\taskList\src\entities\TaskObject;
 use src\behaviors\metric\MetricCallCounterBehavior;
 use src\helpers\app\AppHelper;
 use src\helpers\DuplicateExceptionChecker;
@@ -38,6 +43,8 @@ use src\model\callLog\services\CallLogTransferService;
 use src\model\client\notifications\ClientNotificationCanceler;
 use src\model\callLogFilterGuard\entity\CallLogFilterGuard;
 use src\model\conference\service\ConferenceDataService;
+use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
+use src\model\leadBusinessExtraQueueLog\entity\LeadBusinessExtraQueueLogStatus;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingService;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataQuery;
@@ -1204,6 +1211,13 @@ class Call extends \yii\db\ActiveRecord
                             );
                         }
                     }
+                    /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+                    if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) && $lead && $lead->employee_id && $lead->isProcessing() && $lead->isBusinessType()) {
+                        LeadBusinessExtraQueueService::addLeadBusinessExtraQueueRemoverJob(
+                            $lead->id,
+                            LeadBusinessExtraQueueLogStatus::REASON_INCOMING_CALL
+                        );
+                    }
                 }
 
 
@@ -1508,6 +1522,19 @@ class Call extends \yii\db\ActiveRecord
                     $callOutEndedJob = new CallOutEndedJob($this->c_client_id, $this->c_id);
                     Yii::$app->queue_job->priority(10)->push($callOutEndedJob);
                 }
+
+                if ($this->c_client_id && ($this->isOut() || $this->isIn()) && ($this->getDataCreatorType()->isClient() || $this->getDataCreatorType()->isAgent())) {
+                    if (($lead = $this->cLead) && (new LeadTaskListService($lead))->isProcessAllowed()) {
+                        $job = new UserTaskCompletionJob(
+                            TargetObject::TARGET_OBJ_LEAD,
+                            $lead->id,
+                            TaskObject::OBJ_CALL,
+                            $this->c_id,
+                            $lead->employee_id
+                        );
+                        Yii::$app->queue_job->push($job);
+                    }
+                }
             }
 //            if (($insert || $isChangedTwStatus) && $this->isTwFinishStatus()) {
 //                if (Yii::$app->id === 'app-webapi') {
@@ -1658,7 +1685,8 @@ class Call extends \yii\db\ActiveRecord
                     $call->setConferenceType();
                     $call->update();
                 }
-                $res = \Yii::$app->communication->acceptConferenceCall(
+
+                $res = \Yii::$app->comms->acceptConferenceCall(
                     $call->c_id,
                     $call->c_call_sid,
                     $deviceIdentity,
@@ -1667,7 +1695,10 @@ class Call extends \yii\db\ActiveRecord
                     $call->isRecordingDisable(),
                     $call->getDataPhoneListId(),
                     $call->c_to,
-                    FriendlyName::nextWithSid($call->c_call_sid)
+                    FriendlyName::nextWithSid($call->c_call_sid),
+                    $call->c_project_id ? $call->cProject->name : '',
+                    $call->getSourceName(),
+                    $call->getCallTypeName()
                 );
 
                 if ($res) {
@@ -1687,7 +1718,6 @@ class Call extends \yii\db\ActiveRecord
                                 ]
                             ]);
                         }
-
                         return false;
                     }
                     return true;
@@ -1788,7 +1818,7 @@ class Call extends \yii\db\ActiveRecord
                 $departmentId = $userDepartment['upp_dep_id'];
             }
 
-            $res = \Yii::$app->communication->acceptWarmTransferCall(
+            $res = \Yii::$app->comms->acceptWarmTransferCall(
                 $call->c_id,
                 $call->c_call_sid,
                 $deviceIdentity,
@@ -1800,7 +1830,10 @@ class Call extends \yii\db\ActiveRecord
                 FriendlyName::nextWithSid($call->c_call_sid),
                 $departmentId,
                 $call->c_created_user_id,
-                $call->c_group_id
+                $call->c_group_id,
+                $call->c_project_id ? $call->cProject->name : '',
+                $call->getSourceName(),
+                $call->getCallTypeName()
             );
 
             $isError = (bool)($res['error'] ?? true);
@@ -2066,7 +2099,7 @@ class Call extends \yii\db\ActiveRecord
         }
 
         $region = $state ?: $city ?: '';
-        $timezone = geoip_time_zone_by_country_and_region($country, $region);
+        $timezone = get_time_zone($country, $region);
         $timezone = $timezone ?: self::getTimezoneByCountryCode($country) ?: false;
 
         if (!$timezone) {
@@ -2242,6 +2275,11 @@ class Call extends \yii\db\ActiveRecord
     public function isRedirectCall(): bool
     {
         return $this->c_source_type_id === self::SOURCE_REDIRECT_CALL;
+    }
+
+    public function isGeneralLine(): bool
+    {
+        return $this->c_source_type_id === self::SOURCE_GENERAL_LINE;
     }
 
 
@@ -2510,7 +2548,7 @@ class Call extends \yii\db\ActiveRecord
      */
     public function cancelCall(): bool
     {
-        $communication = \Yii::$app->communication;
+        $communication = \Yii::$app->comms;
         $callbackUrl = Yii::$app->params['url_api'] . '/twilio/cancel-call?id=' . $this->c_id;
         $data = [];
         $data['c_id'] = $this->c_id;
@@ -2558,7 +2596,7 @@ class Call extends \yii\db\ActiveRecord
      */
     public function getRecordingUrl(): string
     {
-        return $this->c_recording_sid ? Yii::$app->communication->getCallRecordingUrl($this->c_call_sid) : '';
+        return $this->c_recording_sid ? Yii::$app->comms->getCallRecordingUrl($this->c_call_sid) : '';
     }
 
     public function isConferenceType(): bool

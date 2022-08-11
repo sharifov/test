@@ -46,6 +46,7 @@ use yii\web\HttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\widgets\ActiveForm;
+use yii\db\Transaction;
 
 /**
  * Class LeadViewController
@@ -922,7 +923,7 @@ class LeadViewController extends FController
             $paxCode = (string)Yii::$app->request->get('paxCode');
             $quote   = Quote::findOne($quoteId);
             if (empty($quote)) {
-                throw new \RuntimeException('Quote not founded');
+                throw new \RuntimeException('Quote not Founded');
             }
             $lead = $quote->lead;
             $isOwner = $lead->employee_id = Auth::id();
@@ -944,9 +945,13 @@ class LeadViewController extends FController
             if (empty($clientCurrency)) {
                 throw new \RuntimeException('Currency not Founded');
             }
-            $quotePrice = QuotePriceRepository::findByQuoteIdAndPaxCode($quoteId, $paxCode)->toArray();
-            $form = new LeadQuoteExtraMarkUpForm($quote->q_client_currency_rate);
-            $form->load($quotePrice);
+            $quotePrice = QuotePriceRepository::findByQuoteIdAndPaxCode($quoteId, $paxCode);
+            $form = new LeadQuoteExtraMarkUpForm(
+                $quote->q_client_currency_rate,
+                $quotePrice->net *
+                (isset($quote->getPricesData()['prices'][mb_strtoupper($paxCode)]) ? $quote->getPricesData()['prices'][mb_strtoupper($paxCode)]['tickets'] : 1)
+            );
+            $form->load($quotePrice->toArray());
             return $this->renderAjax('partial/_quote_edit_extra_mark_up_content', [
                 'quote'                    => $quote,
                 'paxCode'                  => $paxCode,
@@ -974,14 +979,17 @@ class LeadViewController extends FController
     public function actionAjaxEditLeadQuoteExtraMarkUp()
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
+        $transaction = new Transaction(['db' => Yii::$app->db]);
         try {
-            $transaction = \Yii::$app->db->beginTransaction();
             if (!Yii::$app->request->isAjax || !Yii::$app->request->isPost) {
                 throw new \RuntimeException('Wrong method');
             }
             $quoteId = (int)Yii::$app->request->get('quoteId');
             $paxCode = (string)Yii::$app->request->get('paxCode');
-            $quote   = Quote::findOne($quoteId);
+            $quote = Quote::findOne($quoteId);
+            if (empty($quote)) {
+                throw new \RuntimeException('Quote not founded');
+            }
             $lead = $quote->lead;
             $currentUserId = Auth::id();
             $isOwner = $lead->isOwner($currentUserId);
@@ -1003,7 +1011,12 @@ class LeadViewController extends FController
             if (empty($clientCurrency)) {
                 throw new \RuntimeException('Currency not Founded');
             }
-            $form = new LeadQuoteExtraMarkUpForm($quote->q_client_currency_rate);
+            $quotePriceModel = QuotePriceRepository::findByQuoteIdAndPaxCode($quoteId, $paxCode);
+            $form = new LeadQuoteExtraMarkUpForm(
+                $quote->q_client_currency_rate,
+                $quotePriceModel->net *
+                (isset($quote->getPricesData()['prices'][mb_strtoupper($paxCode)]) ? $quote->getPricesData()['prices'][mb_strtoupper($paxCode)]['tickets'] : 1)
+            );
             $form->load(Yii::$app->request->post());
             if (!$form->validate()) {
                 throw new \RuntimeException(implode(', ', $form->getErrorSummary(true)));
@@ -1011,6 +1024,7 @@ class LeadViewController extends FController
             $clientQuotePriceService = new ClientQuotePriceService($quote);
             $priceData = $clientQuotePriceService->getClientPricesData();
             $sellingOld = $priceData['total']['selling'];
+            $transaction->begin();
             foreach ($quotePrices as $quotePrice) {
                 $quotePrice->extra_mark_up = $form->extra_mark_up;
                 $quotePrice->qp_client_extra_mark_up = $form->qp_client_extra_mark_up;

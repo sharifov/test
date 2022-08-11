@@ -7,6 +7,7 @@ use modules\shiftSchedule\src\entities\shiftCategory\ShiftCategory;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
 use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use yii\base\InvalidConfigException;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
@@ -36,6 +37,8 @@ use yii\helpers\Html;
  * @property int $sh_category_id [int]
  * @property ShiftCategory $category
  * @property UserShiftAssign[] $userShiftAssigns
+ * @property UserShiftAssign[] $userShiftAssignsExcludeDeletedUser
+ * @property Employee[] $usaUsers
  */
 class Shift extends ActiveRecord
 {
@@ -115,9 +118,28 @@ class Shift extends ActiveRecord
         return $this->hasOne(ShiftCategory::class, ['sc_id' => 'sh_category_id']);
     }
 
-    public function getUserShiftAssigns(): \yii\db\ActiveQuery
+    public function getUserShiftAssigns(): ActiveQuery
     {
         return $this->hasMany(UserShiftAssign::class, ['usa_sh_id' => 'sh_id']);
+    }
+
+    public function getUserShiftAssignsExcludeDeletedUser(): ActiveQuery
+    {
+        return $this->getUserShiftAssigns()
+            ->innerJoin('employees', 'usa_user_id = employees.id')
+            ->andWhere(['<>', 'employees.status', Employee::STATUS_DELETED]);
+    }
+
+    /**
+     * Gets query for [[UsaUsers]].
+     *
+     * @return ActiveQuery
+     * @throws InvalidConfigException
+     */
+    public function getUsaUsers(): ActiveQuery
+    {
+        return $this->hasMany(Employee::class, ['id' => 'usa_user_id'])
+            ->viaTable('user_shift_assign', ['usa_sh_id' => 'sh_id']);
     }
 
     public function attributeLabels(): array

@@ -2,167 +2,36 @@
 
 namespace modules\shiftSchedule\src\services;
 
+use common\models\Employee;
+use common\models\Notifications;
 use Cron\CronExpression;
 use Exception;
+use frontend\helpers\TimeConverterHelper;
+use modules\featureFlag\FFlag;
 use modules\shiftSchedule\src\entities\shift\Shift;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
+use modules\shiftSchedule\src\entities\shiftScheduleTypeLabelAssign\ShiftScheduleTypeLabelAssign;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleRepository;
+use modules\shiftSchedule\src\forms\ShiftScheduleCreateForm;
+use modules\shiftSchedule\src\forms\ShiftScheduleEditForm;
+use modules\shiftSchedule\src\forms\SingleEventCreateForm;
+use modules\shiftSchedule\src\forms\UserShiftCalendarMultipleUpdateForm;
+use modules\shiftSchedule\src\helpers\UserShiftScheduleHelper;
+use src\auth\Auth;
 use Yii;
 use yii\helpers\VarDumper;
 
 class UserShiftScheduleService
 {
-    /**
-     * @param int $userId
-     * @return int
-     */
-    public static function removeDataByUser(int $userId): int
+    private ShiftScheduleRequestService $requestService;
+
+    public function __construct(ShiftScheduleRequestService $requestService)
     {
-        return UserShiftSchedule::deleteAll(['uss_user_id' => $userId]);
+        $this->requestService = $requestService;
     }
-
-    /**
-     * @param int $userId
-     * @param string $startDt
-     * @param string $endDt
-     * @return array|UserShiftSchedule[]
-     */
-    public static function getTimelineListByUser(int $userId, string $startDt, string $endDt): array
-    {
-        return UserShiftSchedule::find()
-            ->where(['uss_user_id' => $userId])
-            ->andWhere(['AND',
-                ['>=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($startDt))],
-                ['<=', 'uss_start_utc_dt', date('Y-m-d H:i:s', strtotime($endDt))]
-            ])
-            ->all();
-    }
-
-    /**
-     * @param int $userId
-     * @param string $minDate
-     * @param string $maxDate
-     * @param array $statusList
-     * @return array|UserShiftSchedule[]
-     */
-    public static function getUserShiftScheduleDataStats(
-        int $userId,
-        string $minDate,
-        string $maxDate,
-        array $statusList = []
-    ): array {
-        $query = UserShiftSchedule::find()
-            ->select(['uss_sst_id', 'uss_year' => 'YEAR(uss_start_utc_dt)',
-                'uss_month' => 'MONTH(uss_start_utc_dt)',
-                'uss_cnt' => 'COUNT(*)',
-                'uss_duration' => 'SUM(uss_duration)',
-            ])
-            ->where(['uss_user_id' => $userId])
-            ->andWhere(['AND',
-                ['>=', 'uss_start_utc_dt', $minDate],
-                ['<=', 'uss_start_utc_dt', $maxDate]
-            ])
-
-            ->groupBy(['uss_sst_id', 'uss_year', 'uss_month'])
-            ->asArray();
-
-        if ($statusList) {
-            $query->andWhere(['uss_status_id' => $statusList]);
-        }
-
-        return $query->all();
-    }
-
-    /**
-     * @param UserShiftSchedule[] $timelineList
-     * @return array
-     */
-    public static function getCalendarTimelineJsonData(array $timelineList): array
-    {
-        $data = [];
-        if ($timelineList) {
-            foreach ($timelineList as $item) {
-                $dataItem = [
-                    'id' => $item->uss_id,
-                    //groupId: '999',
-                    'title' => $item->getScheduleTypeKey(), // . '-' . $item->uss_id,
-                        //. ' - ' . date('d H:i', strtotime($item->uss_start_utc_dt)),
-                    'description' => $item->getScheduleTypeTitle() . "\r\n" . '(' . $item->uss_id . ')' . ', duration: ' .
-                        Yii::$app->formatter->asDuration($item->uss_duration * 60),
-                    //. "\r\n" . $item->uss_description,
-                    'start' => date('c', strtotime($item->uss_start_utc_dt)),
-                    'end' => date('c', strtotime($item->uss_end_utc_dt)),
-                    'color' => $item->shiftScheduleType ? $item->shiftScheduleType->sst_color : 'gray',
-
-                    'display' => 'block', // 'list-item' , 'background'
-                    //'textColor' => 'black' // an option!
-                    'extendedProps' => [
-                        'icon' => $item->shiftScheduleType->sst_icon_class,
-                    ]
-                ];
-
-                if (
-                    !in_array($item->uss_status_id, [UserShiftSchedule::STATUS_DONE,
-                    UserShiftSchedule::STATUS_APPROVED])
-                ) {
-                    $dataItem['borderColor'] = '#000000';
-                    $dataItem['title'] .= ' (' . $item->getStatusName() . ')';
-                    $dataItem['description'] .= ' (' . $item->getStatusName() . ')';
-                    //$data[$item->uss_id]['extendedProps']['icon'] = 'rgb(255,0,0)';
-                }
-
-                $data[] = $dataItem;
-            }
-        }
-        return $data;
-    }
-
-
-    /**
-     * @param UserShiftSchedule[] $timelineList
-     * @return array
-     */
-    public static function getCalendarEventsJsonData(array $timelineList): array
-    {
-        $data = [];
-        if ($timelineList) {
-            foreach ($timelineList as $item) {
-                $dataItem = [
-                    'id' => $item->uss_id,
-                    //groupId: '999',
-                    'title' => $item->getScheduleTypeKey(), // . '-' . $item->uss_id,
-                    //. ' - ' . date('d H:i', strtotime($item->uss_start_utc_dt)),
-                    'description' => $item->getScheduleTypeTitle() . "\r\n" . '(' . $item->uss_id . ')' . ', duration: ' .
-                        Yii::$app->formatter->asDuration($item->uss_duration * 60),
-                    //. "\r\n" . $item->uss_description,
-                    'start' => date('c', strtotime($item->uss_start_utc_dt)),
-                    'end' => date('c', strtotime($item->uss_end_utc_dt)),
-                    'color' => $item->shiftScheduleType ? $item->shiftScheduleType->sst_color : 'gray',
-
-                    'resource' => 'us-' . $item->uss_user_id, //random_int(1, 1),
-                    //'textColor' => 'black' // an option!
-                    'extendedProps' => [
-                        'icon' => $item->shiftScheduleType->sst_icon_class,
-                    ]
-                ];
-
-                if (
-                    !in_array($item->uss_status_id, [UserShiftSchedule::STATUS_DONE,
-                        UserShiftSchedule::STATUS_APPROVED])
-                ) {
-                    $dataItem['borderColor'] = '#000000';
-                    $dataItem['title'] .= ' (' . $item->getStatusName() . ')';
-                    $dataItem['description'] .= ' (' . $item->getStatusName() . ')';
-                    //$data[$item->uss_id]['extendedProps']['icon'] = 'rgb(255,0,0)';
-                }
-
-                $data[] = $dataItem;
-            }
-        }
-        return $data;
-    }
-
 
     /**
      * @param int $userId
@@ -299,27 +168,63 @@ class UserShiftScheduleService
                             $isDue = false;
                         }
                     }
+
                     if ($isDue) {
                         if ($rule->shift && $rule->shift->sh_enabled) {
                             // echo $rule->shift->sh_id . "\r\n";
-                            if ($rule->shift->userShiftAssigns) {
-                                foreach ($rule->shift->userShiftAssigns as $user) {
+                            if ($rule->shift->userShiftAssignsExcludeDeletedUser) {
+                                foreach ($rule->shift->userShiftAssignsExcludeDeletedUser as $user) {
                                     if (!empty($userList)) {
                                         if (!in_array($user->usa_user_id, $userList)) {
                                             continue;
                                         }
                                     }
 
+                                    $timeStartSec = strtotime($date . ' ' . $rule->ssr_start_time_utc);
+                                    $timeEndSec = strtotime($date . ' ' . $rule->ssr_end_time_utc);
+
+                                    if ($timeStartSec > $timeEndSec) {
+                                        $timeEndSec = $timeEndSec + (24 * 60 * 60);
+                                    }
+
                                     $timeStart = date(
                                         'Y-m-d H:i:s',
-                                        strtotime($date . ' ' . $rule->ssr_start_time_utc)
+                                        $timeStartSec
                                     );
+
+                                    $timeEnd = date(
+                                        'Y-m-d H:i:s',
+                                        $timeEndSec
+                                    );
+
                                     if (isset($timeLineData[$user->usa_user_id][$rule->ssr_id][$timeStart])) {
                                         continue;
                                     }
 
-                                    $data[$date][$user->usa_user_id][$rule->ssr_id] =
-                                        self::createUserTimeLineByRule($rule, $user->usa_user_id, $date);
+                                    $existEvenList = UserShiftScheduleQuery::getUserEventIdList(
+                                        $user->usa_user_id,
+                                        $timeStart,
+                                        $timeEnd,
+                                        [UserShiftSchedule::STATUS_APPROVED,
+                                            UserShiftSchedule::STATUS_DONE, UserShiftSchedule::STATUS_CANCELED],
+                                        [ShiftScheduleType::SUBTYPE_WORK_TIME, ShiftScheduleType::SUBTYPE_HOLIDAY]
+                                    );
+
+                                    if (empty($existEvenList)) {
+                                        $data[$date][$user->usa_user_id][$rule->ssr_id] =
+                                            self::createUserTimeLineByRule($rule, $user->usa_user_id, $date);
+                                    } else {
+                                        $dataInfo = [
+                                            'message' => 'existEvenList',
+                                            'data' => [
+                                                'userId' => $user->usa_user_id,
+                                                'date' => $date,
+                                                'eventListId' => $existEvenList,
+                                                'rule' => $rule->attributes
+                                            ]
+                                        ];
+                                        Yii::info($dataInfo, 'info\UserShiftScheduleService:existEvenList');
+                                    }
                                     //echo  '['.$date.'] Rule: ' . $rule->ssr_id . ' - shId: ' . $rule->shift->sh_id .
                                     // ' - user: ' . $user->usa_user_id . "\r\n";
                                 }
@@ -347,8 +252,19 @@ class UserShiftScheduleService
         $tl->uss_sst_id = $rule->ssr_sst_id;
         $tl->uss_type_id = UserShiftSchedule::TYPE_AUTO;
 
+        if ($rule->ssr_start_time_utc > $rule->ssr_start_time_loc) {
+            $newDate = new \DateTime($date);
+            $newDate->modify('-1 day');
+            $date = $newDate->format('Y-m-d');
+        }
+
         $timeStart = strtotime($date . ' ' . $rule->ssr_start_time_utc);
         $timeEnd = strtotime($date . ' ' . $rule->ssr_end_time_utc);
+
+
+        if ($timeStart > $timeEnd) {
+            $timeEnd = $timeEnd + (24 * 60 * 60);
+        }
 
         $tl->uss_start_utc_dt = date('Y-m-d H:i:s', $timeStart);
         $tl->uss_end_utc_dt = date('Y-m-d H:i:s', $timeEnd);
@@ -368,8 +284,6 @@ class UserShiftScheduleService
         return true;
     }
 
-
-
     /**
      * @param mixed|null $expression
      * @param string $currentTime
@@ -380,7 +294,149 @@ class UserShiftScheduleService
         if ($expression === null) {
             return false;
         }
-        $cron = CronExpression::factory($expression);
-        return $cron->isDue($currentTime);
+        return CronExpression::factory($expression)->isDue($currentTime);
+    }
+
+    public function createManual(ShiftScheduleCreateForm $form, ?string $userTimeZone): array
+    {
+        [$startDateTime, $endDateTime, $diffMinutes] = $this->generateEventTimeValues($form->dateTimeStart, $form->dateTimeEnd, $userTimeZone);
+
+        $userShiftScheduleCreatedList = [];
+        foreach ($form->getUsersBatch() as $user) {
+            $userShiftSchedule = UserShiftSchedule::create(
+                $user,
+                $form->description,
+                $startDateTime->format('Y-m-d H:i:s'),
+                $endDateTime->format('Y-m-d H:i:s'),
+                $diffMinutes,
+                $form->status,
+                UserShiftSchedule::TYPE_MANUAL,
+                $form->scheduleType
+            );
+            (new UserShiftScheduleRepository($userShiftSchedule))->save(true);
+            $userShiftScheduleCreatedList[] = $userShiftSchedule;
+
+            Notifications::createAndPublish(
+                $userShiftSchedule->uss_user_id,
+                'Shift event was created',
+                'New shift event scheduled for: ' . Yii::$app->formatter->asByUserDateTime($userShiftSchedule->uss_start_utc_dt),
+                Notifications::TYPE_INFO,
+                false
+            );
+        }
+        return $userShiftScheduleCreatedList;
+    }
+
+    public function createSingleManual(SingleEventCreateForm $form, ?string $userTimeZone): UserShiftSchedule
+    {
+        [$startDateTime, $endDateTime, $diffMinutes] = $this->generateEventTimeValues($form->dateTimeStart, $form->dateTimeEnd, $userTimeZone);
+
+        $userShiftSchedule = UserShiftSchedule::create(
+            $form->userId,
+            $form->description,
+            $startDateTime->format('Y-m-d H:i:s'),
+            $endDateTime->format('Y-m-d H:i:s'),
+            $diffMinutes,
+            $form->status,
+            UserShiftSchedule::TYPE_MANUAL,
+            $form->scheduleType
+        );
+        (new UserShiftScheduleRepository($userShiftSchedule))->save(true);
+        Notifications::createAndPublish(
+            $userShiftSchedule->uss_user_id,
+            'Shift event was created',
+            'New shift event scheduled for: ' . Yii::$app->formatter->asByUserDateTime($userShiftSchedule->uss_start_utc_dt),
+            Notifications::TYPE_INFO,
+            false
+        );
+        return $userShiftSchedule;
+    }
+
+    public function edit(ShiftScheduleEditForm $form, UserShiftSchedule $event, ?string $timezone): void
+    {
+        [$startDateTime, $endDateTime, $diffMinutes] = $this->generateEventTimeValues($form->dateTimeStart, $form->dateTimeEnd, $timezone);
+
+        $oldEvent = clone $event;
+        $event->editFromCalendar(
+            $form->status,
+            $form->scheduleType,
+            $startDateTime,
+            $endDateTime,
+            $diffMinutes,
+            $form->description
+        );
+        if ($form->isDragNDropScenario() && $form->isChangedUser()) {
+            $event->setNewOwner($form->newUserId);
+        }
+
+        try {
+            $changedAttributes = $event->getDirtyAttributes();
+            $event->recordChangeEvent($oldEvent, $changedAttributes, Auth::id());
+            (new UserShiftScheduleRepository($event))->save(true);
+
+            Notifications::createAndPublish(
+                $event->uss_user_id,
+                'Shift event was updated',
+                'Shift event scheduled for: ' . Yii::$app->formatter->asByUserDateTime($oldEvent->uss_start_utc_dt) . ' was updated',
+                Notifications::TYPE_INFO,
+                false
+            );
+        } catch (\RuntimeException $e) {
+            $form->addError('general', $e->getMessage());
+        }
+    }
+
+    public function editMultiple(UserShiftCalendarMultipleUpdateForm $form, UserShiftSchedule $event, ?string $timezone): void
+    {
+        $oldEvent = clone $event;
+        if (!empty($form->dateTimeStart && $form->dateTimeEnd)) {
+            $start = $form->dateTimeStart;
+            $end = $form->dateTimeEnd;
+            [$startDateTime, $endDateTime, $diffMinutes] = $this->generateEventTimeValues($start, $end, $timezone);
+
+            $event->uss_start_utc_dt = $startDateTime->format('Y-m-d H:i:s');
+            $event->uss_end_utc_dt = $endDateTime->format('Y-m-d H:i:s');
+            $event->uss_duration = $diffMinutes;
+        }
+
+        if (!empty($form->status)) {
+            $event->uss_status_id = $form->status;
+        }
+
+        if (!empty($form->scheduleType)) {
+            $event->uss_sst_id = $form->scheduleType;
+        }
+
+        if (!empty($form->description)) {
+            $event->uss_description = $form->description;
+        }
+        $changedAttributes = $event->getDirtyAttributes();
+        $event->recordChangeEvent($oldEvent, $changedAttributes, Auth::id());
+        (new UserShiftScheduleRepository($event))->save(true);
+
+        Notifications::createAndPublish(
+            $oldEvent->uss_user_id,
+            'Shift event was updated',
+            'Shift event scheduled for: ' . Yii::$app->formatter->asByUserDateTime($oldEvent->uss_start_utc_dt) . ' was updated',
+            Notifications::TYPE_INFO,
+            false
+        );
+    }
+
+    private function generateEventTimeValues(string $startDateTime, string $endDateTime, ?string $timezone): array
+    {
+        $startDateTime = new \DateTimeImmutable($startDateTime, $timezone ? new \DateTimeZone($timezone) : null);
+        $startDateTime = $startDateTime->setTimezone(new \DateTimeZone('UTC'));
+        $endDateTime = new \DateTimeImmutable($endDateTime, $timezone ? new \DateTimeZone($timezone) : null);
+        $endDateTime = $endDateTime->setTimezone(new \DateTimeZone('UTC'));
+        $interval = $startDateTime->diff($endDateTime);
+        $diffMinutes = $interval->days * 24 * 60 + $interval->i + ($interval->h * 60);
+        return [$startDateTime, $endDateTime, $diffMinutes];
+    }
+
+    public static function shiftSummaryReportIsEnable(): bool
+    {
+        /** @fflag FFlag::FF_KET_SHIFT_SUMMARY_REPORT_ENABLE, Enable shift summary report */
+        return Yii::$app->featureFlag->isEnable(FFlag::FF_KET_SHIFT_SUMMARY_REPORT_ENABLE);
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+use frontend\helpers\PasswordHelper;
+use kartik\password\PasswordInput;
 use src\helpers\setting\SettingHelper;
 use yii\grid\ActionColumn;
 /**
@@ -35,10 +37,20 @@ $this->params['breadcrumbs'][] = $this->title;
             <div class="well">
                 <div class="row">
                     <div class="col-sm-6">
-                        <?= $form->field($model, 'username')->textInput(['autocomplete' => "new-user", "readonly" => "readonly"]) ?>
+                        <?= $form->field($userProfileForm, 'username')->textInput(['autocomplete' => "new-user", "readonly" => "readonly"]) ?>
                     </div>
                     <div class="col-sm-6">
-                        <?= $form->field($userProfileForm, 'password')->passwordInput(['autocomplete' => "new-password"]) ?>
+                        <?= $form->field($userProfileForm, 'password', [
+                            'options' => [
+                                'class' => 'form-group'
+                            ]
+                        ])->widget(PasswordInput::class, [
+                            'options' => [
+                                'autocomplete' => 'new-password',
+                            ],
+                        ])->label(
+                            PasswordHelper::getLabelWithTooltip($model, 'password')
+                        ); ?>
                     </div>
                 </div>
                 <div class="row">
@@ -155,13 +167,18 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]) ?>
                 <div class="d-flex" style>
                     <?php foreach ($authChoice->getClients() as $client) : ?>
-                        <?= $authChoice->clientLink(
-                            $client,
-                            '<button type="button" class="login-with-btn login-with-' . $client->getName() . '-btn">Assign ' . $client->getTitle() . '</button>',
-                            [
-                                'style' => 'margin: 0'
-                            ]
-                        ) ?>
+                        <?php
+                        $googleEnabled = SettingHelper::isEnabledGoogleAuthClient();
+                        $microsoftEnabled = SettingHelper::isEnabledMicrosoftAuthClient();
+                        if (($client->getName() == 'google' && $googleEnabled) || ($client->getName() == 'microsoft' && $microsoftEnabled)) : ?>
+                            <?= $authChoice->clientLink(
+                                $client,
+                                '<button type="button" class="login-with-btn login-with-' . $client->getName() . '-btn">Assign ' . $client->getTitle() . '</button>',
+                                [
+                                    'style' => 'margin-left: 5px'
+                                ]
+                            ) ?>
+                        <?php endif; ?>
                     <?php endforeach; ?>
                 </div>
                 <?php AuthChoice::end() ?>

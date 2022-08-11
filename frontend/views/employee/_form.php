@@ -5,8 +5,11 @@ use common\models\EmployeeAcl;
 use common\models\UserParams;
 use common\models\UserProductType;
 use common\models\UserProjectParams;
+use frontend\helpers\PasswordHelper;
 use frontend\models\UserFailedLogin;
+use kartik\password\PasswordInput;
 use kartik\select2\Select2;
+use modules\featureFlag\FFlag;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shift\Shift;
 use modules\user\src\abac\dto\UserAbacDto;
@@ -57,7 +60,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
 
 ?>
 
-<div class="col-sm-5">
+<div class="col-sm-6">
     <?php $form = ActiveForm::begin([
         'successCssClass' => '',
         'id' => sprintf('%s-ID', $model->formName()),
@@ -152,11 +155,18 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     <div class="col-md-6">
                     <?php endif; ?>
                         <?= $form->field($model, 'password', [
-                                'options' => [
-                                    'hidden' => ($edit ? !$edit : !$view),
-                                    'class' => 'form-group'
-                                ]
-                            ])->passwordInput(['autocomplete' => 'new-password', 'readonly' => !$edit])?>
+                            'options' => [
+                                'class' => 'form-group'
+                            ]
+                        ])->widget(PasswordInput::class, [
+                            'options' => [
+                                'autocomplete' => 'new-password',
+                                'hidden' => ($edit ? !$edit : !$view),
+                            ],
+                            'readonly' => !$edit
+                        ])->label(
+                            PasswordHelper::getLabelWithTooltip($model, 'password')
+                        ); ?>
                     <?php if ($view || $edit) :?>
                     </div>
                     <?php endif; ?>
@@ -197,7 +207,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     <?php endif; ?>
 
                     <?= $form->field($model, 'form_roles', ['options' => ($edit ?: $view) ? ['class' => 'form-group'] : $optionsS2])->widget(Select2::class, [
-                        'data' => Employee::getAllRoles(),
+                        'data' => Employee::getAllRoles(Auth::user()),
                         'size' => Select2::SMALL,
                         'options' => ['placeholder' => 'Select user roles', 'multiple' => true],
                         'pluginOptions' => ['allowClear' => true, 'disabled' => !$edit],
@@ -210,7 +220,7 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                     <?php
                     if (!$edit) {
                         echo $form->field($model, 'form_roles', ['options' => $optionsS2])->widget(Select2::class, [
-                            'data' => Employee::getAllRoles(),
+                            'data' => Employee::getAllRoles(Auth::user()),
                             'size' => Select2::SMALL,
                             'options' => ['placeholder' => 'Select user roles', 'multiple' => true],
                             'pluginOptions' => ['allowClear' => true],
@@ -542,6 +552,13 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                             <div class="col-md-3">
                                 <?= $form->field($modelUserParams, 'up_frequency_minutes')->input('number', ['step' => 1, 'max' => 1000, 'min' => 0]) ?>
                             </div>
+
+                            <?php  /** @fflag FFlag::FF_KEY_BUSINESS_QUEUE_LIMIT, Business Queue Limit Enable */
+                            if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BUSINESS_QUEUE_LIMIT)) : ?>
+                                 <div class="col-md-3">
+                                     <?= $form->field($modelUserParams, 'up_business_inbox_show_limit_leads')->input('number', ['step' => 1, 'min' => 0, 'max' => 500]) ?>
+                                 </div>
+                            <?php endif; ?>
                         </div>
                     <?php endif; ?>
 
@@ -870,6 +887,16 @@ JS;
                         'format' => 'raw',
                         'value' => function (\common\models\UserProjectParams $model) {
                             if ($model->upp_allow_general_line) {
+                                return '<i class="fa fa-check-square-o"></i>';
+                            }
+                            return '-';
+                        }
+                    ],
+                    [
+                        'attribute' => 'upp_allow_transfer',
+                        'format' => 'raw',
+                        'value' => function (\common\models\UserProjectParams $model) {
+                            if ($model->upp_allow_transfer) {
                                 return '<i class="fa fa-check-square-o"></i>';
                             }
                             return '-';

@@ -4,15 +4,15 @@
     name: node_exporter
     shell: /usr/sbin/nologin
     state: present
-    system: yes
+    system: true
     home: /
-    create_home: no
+    create_home: false
 
 - name: Create node_exporter group
   user:
     name: node_exporter
     groups: node_exporter
-    append: yes
+    append: true
 
 - name: Check node_exporter installation
   stat:
@@ -34,7 +34,7 @@
     dest: /tmp
     owner: root
     group: root
-    remote_src: yes
+    remote_src: true
     creates: /tmp/node_exporter-1.0.0.linux-amd64/node_exporter
   when: not node_exporter.stat.exists
 
@@ -45,7 +45,7 @@
     mode: 0755
     owner: root
     group: root
-    remote_src: yes
+    remote_src: true
   when: not node_exporter.stat.exists
 
 - name: Create node_exporter service
@@ -59,6 +59,6 @@
 - name: Ensure node_exporter is started
   systemd:
     name: node_exporter
-    daemon_reload: yes
-    enabled: yes
+    daemon_reload: true
+    enabled: true
     state: started

@@ -4,7 +4,7 @@ use kivork\FeatureFlag\Components\FeatureFlagComponent;
 
 return [
     'class' => FeatureFlagComponent::class,
-    'cacheEnable' => true,
+    'cache' => 'cache',
     'scanDirs' => [
         '@root/modules/',
         '@frontend/',
@@ -13,5 +13,7 @@ return [
         '@common/',
         '@root/src/',
     ],
+    'objectListModel' => \modules\featureFlag\FFlag::class,
     'scanExtMask' => ['*.php'],
+    'experimentLogCategory' => 'info\FeatureFlagExperimentLog'
 ];

@@ -2,26 +2,26 @@
 
 namespace frontend\controllers;
 
+use common\components\ChartTools;
 use common\models\ApiLog;
 use common\models\Employee;
 use common\models\search\ApiLogSearch;
 use common\models\search\CallSearch;
-use kartik\export\ExportMenu;
-use modules\user\userFeedback\entity\search\UserFeedbackSearch;
-use src\entities\call\CallGraphsSearch;
 use common\models\search\CommunicationSearch;
 use common\models\search\EmployeeSearch;
 use common\models\search\LeadSearch;
 use common\models\Setting;
 use common\models\Sms;
-use common\models\Email;
+use modules\user\userFeedback\entity\search\UserFeedbackSearch;
+use src\entities\call\CallGraphsSearch;
+use src\entities\email\helpers\EmailStatus;
+use src\repositories\email\EmailRepositoryFactory;
 use src\viewModel\call\ViewModelTotalCallGraph;
 use src\viewModel\userFeedback\ViewModelUserFeedbackGraph;
 use Yii;
 use yii\base\Model;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
-use yii\widgets\ActiveForm;
 
 /**
  * Stats controller
@@ -243,19 +243,137 @@ class StatsController extends FController
             if ($chartOptions['dateRange'] == '') {
                 $date[0] = $date[1] = date('Y-m-d', strtotime('-0 day'));
             }
-            $emailsGraphData = Email::getEmailsStats($date[0], $date[1], $rangeBy, (int)$chartOptions['emailsType']);
+            $emailsGraphData = $this->getEmailsStats($date[0], $date[1], $rangeBy, (int)$chartOptions['emailsType']);
 
             return $this->renderAjax('emails-report', [
                 'emailsGraphData' => $emailsGraphData
             ]);
         } else {
             $currentDate =  date('Y-m-d', strtotime('-0 day'));
-            $emailsGraphData = Email::getEmailsStats($currentDate, $currentDate, null, 0);
+            $emailsGraphData = $this->getEmailsStats($currentDate, $currentDate, null, 0);
 
             return $this->render('emails-report', [
                 'emailsGraphData' => $emailsGraphData
             ]);
         }
+    }
+
+    private function getEmailsStats(string $startDate, string $endDate, ?string $groupingBy, int $emailsType): array
+    {
+        $emailRepository = EmailRepositoryFactory::getRepository();
+        $sDate = $startDate . " 00:00:00";
+        $eDate = $endDate . " 23:59:59";
+        switch ($groupingBy) {
+            case null:
+                if (strtotime($startDate) == strtotime($endDate)) {
+                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate . " 23:59:59", $step = '+1 hour', $format = 'H:i:s');
+                } else {
+                    $daysRange = ChartTools::getDaysRange($startDate, $endDate);
+                }
+                break;
+            case 'hours':
+                if (strtotime($startDate) == strtotime($endDate)) {
+                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate . " 23:59:59", $step = '+1 hour', $format = 'H:i:s');
+                } else {
+                    $hoursRange = ChartTools::getHoursRange($startDate, $endDate . " 23:59:59", $step = '+1 hour', $format = 'Y-m-d H:i:s');
+                }
+                break;
+            case 'days':
+                $daysRange = ChartTools::getDaysRange($startDate, $endDate);
+                break;
+            case 'weeks':
+                $weeksPeriods = ChartTools::getWeeksRange(new \DateTime($startDate), new \DateTime($endDate . ' 23:59'));
+                break;
+            case 'months':
+                $monthsRange = ChartTools::getMonthsRange($startDate, $endDate);
+                $sDate = date("Y-m-01", strtotime($startDate));
+                $eDate = date('Y-m-31', strtotime($endDate));
+                break;
+        }
+        $emails = $emailRepository->getStatsData($sDate, $eDate, $emailsType);
+
+        $emailStats = [];
+        $item = [];
+        if (strtotime($startDate) < strtotime($endDate)) {
+            if (isset($daysRange)) {
+                $timeLine = $daysRange;
+                $item['timeLine'] = 'd M';
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m-d';
+            } elseif (isset($monthsRange)) {
+                $timeLine = $monthsRange;
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m';
+                $item['timeLine'] = 'Y, M';
+            } elseif (isset($weeksPeriods)) {
+                $timeLine = $weeksPeriods;
+                $item['timeLine'] = 'd M';
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m-d';
+            } elseif (isset($hoursRange)) {
+                $timeLine = $hoursRange;
+                $item['timeLine'] = 'H:i';
+                $dateFormat = 'Y-m-d H:i:s';
+                $timeInSeconds = 3600;
+            }
+        } else {
+            if (isset($daysRange)) {
+                $timeLine = $daysRange;
+                $item['timeLine'] = 'd M';
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m-d';
+            } elseif (isset($hoursRange)) {
+                $timeLine = $hoursRange;
+                $item['timeLine'] = 'H:i';
+                $dateFormat = 'H:i:s';
+                $timeInSeconds = 3600;
+            } elseif (isset($monthsRange)) {
+                $timeLine = $monthsRange;
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m';
+                $item['timeLine'] = 'Y, M';
+            } elseif (isset($weeksPeriods)) {
+                $timeLine = $weeksPeriods;
+                $item['timeLine'] = 'd M';
+                $timeInSeconds = 0;
+                $dateFormat = 'Y-m-d';
+            }
+        }
+
+        $done = $error = 0;
+        foreach ($timeLine as $key => $timeSignature) {
+            $weekInterval = explode('/', $timeSignature);
+            if (count($weekInterval) != 2) {
+                $EndPoint = date($dateFormat, strtotime($timeSignature) + $timeInSeconds);
+                if ($EndPoint == '00:00:00') {
+                    $EndPoint = '23:59:59';
+                }
+            } else {
+                $EndPoint = date($dateFormat, strtotime($weekInterval[1]));
+                $timeSignature = date($dateFormat, strtotime($weekInterval[0]));
+            }
+            foreach ($emails as $emailItem) {
+                $smsUpdatedTime = date($dateFormat, strtotime($emailItem->e_created_dt));
+                if ($smsUpdatedTime >= $timeSignature && $smsUpdatedTime <= $EndPoint) {
+                    switch ($emailItem->e_status_id) {
+                        case EmailStatus::DONE:
+                            $done++;
+                            break;
+                        case EmailStatus::ERROR:
+                            $error++;
+                            break;
+                    }
+                }
+            }
+            $item['time'] = $timeSignature;
+            $item['weeksInterval'] = (count($weekInterval) == 2) ? $EndPoint : null;
+            $item['done'] = $done;
+            $item['error'] = $error;
+
+            array_push($emailStats, $item);
+            $done = $error = 0;
+        }
+        return $emailStats;
     }
 
     public function actionApiGraph()

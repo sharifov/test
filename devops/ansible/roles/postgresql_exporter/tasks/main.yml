@@ -4,15 +4,15 @@
     name: postgres_exporter
     shell: /usr/sbin/nologin
     state: present
-    system: yes
+    system: true
     home: /
-    create_home: no
+    create_home: false
 
 - name: Create postgres_exporter group
   user:
     name: postgres_exporter
     groups: postgres_exporter
-    append: yes
+    append: true
 
 - name: Check postgres_exporter installation
   stat:
@@ -34,7 +34,7 @@
     dest: /tmp
     owner: root
     group: root
-    remote_src: yes
+    remote_src: true
     creates: /tmp/postgres_exporter_v0.8.0_linux-amd64/postgres_exporter
   when: not postgres_exporter.stat.exists
 
@@ -45,7 +45,7 @@
     mode: 0755
     owner: root
     group: root
-    remote_src: yes
+    remote_src: true
   when: not postgres_exporter.stat.exists
 
 - name: Create postgres_exporter config dir
@@ -87,6 +87,6 @@
 - name: Ensure postgres_exporter is started
   systemd:
     name: postgres_exporter
-    daemon_reload: yes
-    enabled: yes
+    daemon_reload: true
+    enabled: true
     state: started

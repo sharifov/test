@@ -16,6 +16,7 @@ use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use yii\db\ActiveQuery;
 use yii\db\Expression;
+use yii\helpers\ArrayHelper;
 use yii\validators\DateValidator;
 
 /**
@@ -25,10 +26,13 @@ class HeatMapLeadSearch extends Model
 {
     public $dateRange;
     public $project;
+    public $employee;
     public $department;
     public $userGroup;
     public $source;
     public $cache;
+    public $typeCreate;
+    public $isAnswered;
     public $timeZone;
 
     private ?string $toDT = null;
@@ -65,11 +69,19 @@ class HeatMapLeadSearch extends Model
 
             [['source'], IsArrayValidator::class],
 
+            [['employee'], IsArrayValidator::class],
+            [['employee'], 'each', 'rule' => ['in', 'range' => array_keys(Employee::getActiveUsersList())], 'skipOnError' => true, 'skipOnEmpty' => true],
+
             [['cache'], 'integer'],
             [['cache'], 'default', 'value' => 300],
 
             ['timeZone', 'string'],
             ['timeZone', 'in', 'range' => array_keys(Employee::timezoneList(true))],
+
+            [['typeCreate'], IsArrayValidator::class],
+            [['typeCreate'], 'each', 'rule' => ['in', 'range' => array_keys(Lead::TYPE_CREATE_LIST)], 'skipOnError' => true, 'skipOnEmpty' => true],
+
+            [['isAnswered'], 'in', 'range' => [0, 1]],
         ];
     }
 
@@ -95,6 +107,18 @@ class HeatMapLeadSearch extends Model
                     ->andWhere(['IN', 'ugs_group_id', $this->userGroup])
                     ->groupBy(['ugs_user_id'])
             ], 'userGroupAssign.ugs_user_id = employee_id');
+        }
+
+        if ($this->employee) {
+            $query->andWhere(['IN', 'employee_id', $this->employee]);
+        }
+
+        if ($this->typeCreate) {
+            $query->andWhere(['IN', 'l_type_create', $this->typeCreate]);
+        }
+
+        if (ArrayHelper::isIn($this->isAnswered, ['1', '0'], false)) {
+            $query->andWhere(['l_answered' => (int)$this->isAnswered]);
         }
 
         return $query;

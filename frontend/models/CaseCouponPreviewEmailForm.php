@@ -31,8 +31,10 @@ use yii\base\Model;
  *
  */
 
-class CaseCouponPreviewEmailForm extends Model
+class CaseCouponPreviewEmailForm extends Model implements EmailPreviewFromInterface
 {
+    use EmailPreviewFormTrait;
+
     public $e_case_id;
     public $e_email_from;
     public $e_email_to;
@@ -115,5 +117,10 @@ class CaseCouponPreviewEmailForm extends Model
             'e_language_id'     => 'Language',
             'e_user_id'         => 'Agent ID',
         ];
+    }
+
+    public function countLettersInEmailMessage(): int
+    {
+        return mb_strlen((string) $this->e_email_message);
     }
 }

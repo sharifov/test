@@ -1,5 +1,6 @@
 <?php
 
+use common\models\ClientEmail;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use yii\widgets\Pjax;
@@ -21,7 +22,13 @@ use yii\widgets\Pjax;
         echo $form->errorSummary($model);
     ?>
 
-    <?= $form->field($model, 'email')->input('email', ['maxlength' => true]) ?>
+    <?=
+    $form->field($model, 'email', [
+        'template' => '<div class="input-group"><span class="input-group-addon">@</span>{input}</div>{error}',
+    ])->input('email', ['maxlength' => true, 'required' => true])
+    ?>
+
+    <?= $form->field($model, 'type')->dropDownList(ClientEmail::getEmailTypeList()) ?>
 
     <div class="form-group text-center">
         <?= Html::submitButton('Add Email', ['class' => 'btn btn-warning']) ?>

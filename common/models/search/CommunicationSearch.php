@@ -180,7 +180,7 @@ class CommunicationSearch extends Model
         if (empty($this->created_dt) && isset($params['CommunicationSearch']['date_range'])) {
             $query->andFilterWhere(['>=', 'created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
                 ->andFilterWhere(['<=', 'created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
-        } else {
+        } elseif (!empty($this->created_dt)) {
             //$query->andFilterWhere(['=','DATE(created_dt)', $this->created_dt]);
             $query->andFilterWhere(['>=', 'created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->created_dt))])
                 ->andFilterWhere(['<=', 'created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->created_dt) + 3600 * 24)]);

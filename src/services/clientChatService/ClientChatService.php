@@ -213,6 +213,19 @@ class ClientChatService
 
 //        $key = self::getRedisDistributionLogicKey($clientChat->cch_id);
 //        if ($users) {
+
+        if (SettingHelper::isClientChatDebugEnable() && $clientChat->isTransfer()) {
+            \Yii::info([
+                'message' => 'Users will be assign to chat',
+                'chatId' => $clientChat->cch_id,
+                'chatStatus' => $clientChat->getStatusName(),
+                'users' => ArrayHelper::getColumn($users, 'id'),
+                'countUsers' => count($users),
+                'microTime' => microtime(true),
+                'date' => date('Y-m-d H:i:s'),
+            ], 'info\ClientChatDebug');
+        }
+
         foreach ($users as $user) {
             $this->sendRequestToUser($clientChat, $user->id);
         }
@@ -267,9 +280,17 @@ class ClientChatService
      */
     public function sendRequestToUser(ClientChat $clientChat, int $agentId): void
     {
-        $clientChatUserAccess = ClientChatUserAccess::create($clientChat->cch_id, $agentId);
-        $clientChatUserAccess->pending();
-        $this->clientChatUserAccessRepository->save($clientChatUserAccess, $clientChat);
+        try {
+            $clientChatUserAccess = ClientChatUserAccess::create($clientChat->cch_id, $agentId);
+            $clientChatUserAccess->pending();
+            $this->clientChatUserAccessRepository->save($clientChatUserAccess, $clientChat);
+        } catch (\Throwable $e) {
+            \Yii::error([
+                'agentId' => $agentId,
+                'chatId' => $clientChat->cch_id,
+                'message' => $e->getMessage(),
+            ], 'ClientChatService::sendRequestToUser');
+        }
     }
 
     /**
@@ -412,7 +433,12 @@ class ClientChatService
                 throw new \DomainException('Client already has active chat in this department');
             }
 
-            $clientChat->transfer($user->id, ClientChatStatusLog::ACTION_TRANSFER, $form->reasonId, $form->comment);
+            $clientChat->transfer(
+                $user->id,
+                $form->isAgentTransfer() ? ClientChatStatusLog::ACTION_DIRECT_TRANSFER : ClientChatStatusLog::ACTION_TRANSFER,
+                $form->reasonId,
+                $form->comment
+            );
             $clientChat->cch_channel_id = $clientChatChannel->ccc_id;
             $this->clientChatRepository->save($clientChat);
 

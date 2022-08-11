@@ -2,10 +2,12 @@
 
 namespace src\model\clientChat\useCase\create;
 
+use common\models\Employee;
 use src\dispatchers\EventDispatcher;
 use src\model\clientChat\ClientChatCodeException;
 use src\model\clientChat\entity\ClientChat;
 use src\model\clientChatRequest\entity\ClientChatRequest;
+use src\model\userClientChatData\entity\UserClientChatData;
 use src\repositories\department\DepartmentRepository;
 use src\repositories\NotFoundException;
 use src\repositories\project\ProjectRepository;
@@ -56,6 +58,10 @@ class ClientChatRepository
         return $clientChat;
     }
 
+    /**
+     * @param string $rid
+     * @return ClientChat
+     */
     public function findByRid(string $rid): ClientChat
     {
         if ($clientChat = ClientChat::find()->andWhere(['cch_rid' => $rid])->orderBy(['cch_id' => SORT_DESC])->one()) {
@@ -64,7 +70,11 @@ class ClientChatRepository
         throw new NotFoundException('unable to find client chat by rid: ' . $rid);
     }
 
-    public function findLastByRid(string $rid): ClientChat
+    /**
+     * @param string $rid
+     * @return null|ClientChat
+     */
+    public function findLastByRid(string $rid): ?ClientChat
     {
         if ($clientChat = ClientChat::find()->byRid($rid)->orderBy(['cch_id' => SORT_DESC])->one()) {
             return $clientChat;
@@ -72,6 +82,46 @@ class ClientChatRepository
         throw new NotFoundException('Not find client chat by rid: ' . $rid);
     }
 
+    /**
+     * @param string $rid
+     * @return ClientChat
+     */
+    public function findNotClosed(string $rid): ClientChat
+    {
+        if ($clientChat = ClientChat::find()->byRid($rid)->notClosed()->notArchived()->orderBy(['cch_id' => SORT_DESC])->one()) {
+            return $clientChat;
+        }
+        throw new NotFoundException('unable to find client chat that is not closed by rid: ' . $rid);
+    }
+
+    /**
+     * @param int $id
+     * @return ClientChat[]
+     */
+    public function findByClientId(int $id): array
+    {
+        if ($chats = ClientChat::find()->byClientId($id)->all()) {
+            return $chats;
+        }
+        throw new NotFoundException('Client Chats are not found by client id: ' . $id);
+    }
+
+    /**
+     * @param int $id
+     * @return ClientChat
+     */
+    public function findById(int $id): ClientChat
+    {
+        if ($clientChat = ClientChat::findOne($id)) {
+            return $clientChat;
+        }
+        throw new NotFoundException('Client chat is not found');
+    }
+
+    /**
+     * @param string $rid
+     * @return null|ClientChat
+     */
     public function getLastByRid(string $rid): ?ClientChat
     {
         if ($clientChat = ClientChat::find()->byRid($rid)->orderBy(['cch_id' => SORT_DESC])->one()) {
@@ -80,12 +130,21 @@ class ClientChatRepository
         return null;
     }
 
-    public function findNotClosed(string $rid): ClientChat
+    /**
+     * @param string $rid
+     * @param null|string $ownerUsername
+     * @return null|ClientChat
+     */
+    public function getByRidAndOwnerUsername(string $rid, ?string $ownerUsername): ?ClientChat
     {
-        if ($clientChat = ClientChat::find()->byRid($rid)->notClosed()->notArchived()->orderBy(['cch_id' => SORT_DESC])->one()) {
-            return $clientChat;
+        $query = ClientChat::find()->alias('cc')->andWhere(['cch_rid' => $rid])->orderBy(['cch_id' => SORT_DESC]);
+        if (!is_null($ownerUsername)) {
+            $query->leftJoin(['e' => Employee::tableName()], 'cc.cch_owner_user_id=e.id');
+            $query->leftJoin(['uccd' => UserClientChatData::tableName()], 'uccd.uccd_employee_id=e.id');
+            $query->where('uccd.uccd_username=:username', [':username' => $ownerUsername]);
         }
-        throw new NotFoundException('unable to find client chat that is not closed by rid: ' . $rid);
+
+        return $query->one();
     }
 
     public function save(ClientChat $clientChat): ClientChat
@@ -95,14 +154,6 @@ class ClientChatRepository
         }
         $this->eventDispatcher->dispatchAll($clientChat->releaseEvents());
         return $clientChat;
-    }
-
-    public function findById(int $id): ClientChat
-    {
-        if ($clientChat = ClientChat::findOne($id)) {
-            return $clientChat;
-        }
-        throw new NotFoundException('Client chat is not found');
     }
 
     public function assignOwner(ClientChat $clientChat, int $userId): void
@@ -117,18 +168,6 @@ class ClientChatRepository
     {
         $chat = ClientChat::find()->select(['cch_status_id'])->byId($cchId)->one();
         return ($chat ? $chat->isTransfer() : false);
-    }
-
-    /**
-     * @param int $id
-     * @return ClientChat[]
-     */
-    public function findByClientId(int $id): array
-    {
-        if ($chats = ClientChat::find()->byClientId($id)->all()) {
-            return $chats;
-        }
-        throw new NotFoundException('Client Chats are not found by client id: ' . $id);
     }
 
     public function delete(ClientChat $clientChat): bool

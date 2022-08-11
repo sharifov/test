@@ -69,15 +69,16 @@ class TravelServices extends Component
         return false;
     }
 
-
     /**
      * @param string $action
      * @param array $data
      * @param string $method
      * @param array $headers
      * @param array $options
-     * @return \yii\httpclient\Response
+     * @return Response
      * @throws Exception
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
     protected function sendRequest(string $action = '', array $data = [], string $method = 'post', array $headers = [], array $options = []): Response
     {
@@ -112,14 +113,14 @@ class TravelServices extends Component
         return $response;
     }
 
-
-
     /**
      * @param int $lastUpdate
      * @param int $limit
      * @param string $format
      * @return array
      * @throws Exception
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
      */
     public function airportExport(int $lastUpdate = 0, int $limit = 0, string $format = 'json'): array
     {
@@ -155,13 +156,19 @@ class TravelServices extends Component
         return $out;
     }
 
-    public function airportExportLocalized(
-        int $lastUpdate = 0,
-        int $pageLimit = 99999,
-        int $pageIndex = 0,
-        string $lang = '',
-        string $format = 'json'
-    ): array {
+    /**
+     * @param int $lastUpdate
+     * @param int $pageLimit
+     * @param int $pageIndex
+     * @param string $lang
+     * @param string $format
+     * @return array
+     * @throws Exception
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
+     */
+    public function airportExportLocalized(int $lastUpdate = 0, int $pageLimit = 99999, int $pageIndex = 0, string $lang = '', string $format = 'json'): array
+    {
         $out = ['error' => false, 'data' => []];
 
         $data = [];
@@ -197,6 +204,16 @@ class TravelServices extends Component
         return $out;
     }
 
+    /**
+     * @param int $lastUpdate
+     * @param int $limit
+     * @param bool $ad
+     * @param string $format
+     * @return array
+     * @throws Exception
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\di\NotInstantiableException
+     */
     public function airlineExport(int $lastUpdate = 0, int $limit = 99999, bool $ad = false, string $format = 'json'): array
     {
         $out = ['error' => false, 'data' => []];
@@ -229,5 +246,21 @@ class TravelServices extends Component
             \Yii::error(VarDumper::dumpAsString($out['error'], 10), 'TravelServices:airlineExport');
         }
         return $out;
+    }
+
+    /**
+     * @return bool
+     */
+    public function ping(): bool
+    {
+        $parsedUrl = parse_url($this->url);
+        if (isset($parsedUrl['scheme'], $parsedUrl['host'])) {
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, "{$parsedUrl['scheme']}://{$parsedUrl['host']}/hc");
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_exec($curl);
+            return (bool)!curl_errno($curl);
+        }
+        return false;
     }
 }

@@ -14,7 +14,8 @@ var PhoneWidget = function () {
         'getUserByPhoneUrl': '',
         'ajaxBlackList': '',
         'ajaxCheckUserForCallUrl': '',
-        'ajaxGetPhoneListIdUrl': ''
+        'ajaxGetPhoneListIdUrl': '',
+        'enableAcceptedPanel': false
     };
 
     let callRequester = new window.phoneWidget.requesters.CallRequester();
@@ -39,6 +40,7 @@ var PhoneWidget = function () {
         'active': PhoneWidgetPaneActive,
         'outgoing': PhoneWidgetPaneOutgoing,
         'incoming': PhoneWidgetPaneIncoming,
+        'accepted': PhoneWidgetPaneAccepted,
         'queue': new PhoneWidgetPaneQueue(queues)
     };
 
@@ -122,6 +124,7 @@ var PhoneWidget = function () {
         btnWarmTransferToUserEvent();
         btnTransferNumberEvent();
         btnMakeCallEvent();
+        acceptedCallEvent();
 
         initiated = true;
     }
@@ -295,7 +298,7 @@ var PhoneWidget = function () {
         panes.queue.refresh();
         panes.queue.hide();
 
-        if (queues.active.count() > 0 || queues.outgoing.count() > 0 || panes.incoming.isActive()) {
+        if (queues.active.count() > 0 || queues.outgoing.count() > 0 || panes.incoming.isActive() || panes.accepted.isActive()) {
             addIncomingCallNotification(call, true);
         } else {
             addFirstIncomingCallNotification(call, true);
@@ -405,7 +408,13 @@ var PhoneWidget = function () {
             if (oldConferenceCountParticipant < 3 && newConferenceCountParticipant > 2) {
                 storage.conference.remove(data.conference.sid);
                 conference = storage.conference.add(data.conference);
-                panes.active.init(call, conference);
+                if (panes.accepted.isActive()) {
+                    if (panes.accepted.isEqual(call.data.callSid)) {
+                        panes.active.init(call, conference);
+                    }
+                } else {
+                    panes.active.init(call, conference);
+                }
                 return;
             }
             if (oldConferenceCountParticipant > 2 && newConferenceCountParticipant > 2) {
@@ -415,7 +424,13 @@ var PhoneWidget = function () {
             if (oldConferenceCountParticipant > 2 && newConferenceCountParticipant < 3) {
                 storage.conference.remove(data.conference.sid);
                 storage.conference.add(data.conference);
-                panes.active.init(call);
+                if (panes.accepted.isActive()) {
+                    if (panes.accepted.isEqual(call.data.callSid)) {
+                        panes.active.init(call);
+                    }
+                } else {
+                    panes.active.init(call);
+                }
                 return;
             }
             console.log('not found rule for conference update');
@@ -425,11 +440,23 @@ var PhoneWidget = function () {
         conference = storage.conference.add(data.conference);
 
         if (conference.getCountParticipants() > 2) {
-            panes.active.init(call, conference);
+            if (panes.accepted.isActive()) {
+                if (panes.accepted.isEqual(call.data.callSid)) {
+                    panes.active.init(call, conference);
+                }
+            } else {
+                panes.active.init(call, conference);
+            }
             return;
         }
 
-        panes.active.init(call);
+        if (panes.accepted.isActive()) {
+            if (panes.accepted.isEqual(call.data.callSid)) {
+                panes.active.init(call);
+            }
+        } else {
+            panes.active.init(call);
+        }
     }
 
     function completeCall(callSid)
@@ -474,6 +501,16 @@ var PhoneWidget = function () {
             if (panes.incoming.isActive()) {
                 needRefresh = true;
             }
+        }
+
+        if (panes.accepted.isEqual(callSid)) {
+            panes.accepted.removeCallSid();
+            if (panes.accepted.isActive()) {
+                needRefresh = true;
+            }
+        } else if (panes.accepted.isActive()) {
+            needRefresh = false;
+            incomingDeleted = false;
         }
 
         if (needRefresh || incomingDeleted) {
@@ -651,7 +688,7 @@ var PhoneWidget = function () {
         modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 60px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
         $('#web-phone-redirect-agents-modal-label').html('Transfer Call');
 
-        $.post(settings.ajaxCallRedirectGetAgents, { sid: callSid })
+        $.get(settings.ajaxCallRedirectGetAgents, { sid: callSid })
             .done(function(data) {
                 modal.find('.modal-body').html(data);
             });
@@ -1732,10 +1769,44 @@ var PhoneWidget = function () {
     }
 
     function setActiveCall(call) {
-        localStorage.setItem('activeCall', JSON.stringify({
-            'CallSid': call.parameters.CallSid,
-            'To': call.parameters.To
-        }));
+        let activeCall = {};
+        activeCall['CallSid'] = call.parameters.CallSid;
+        activeCall['To'] = call.parameters.To;
+
+        let data = {};
+        for (let [key, value] of call.customParameters.entries()) {
+            data[key] = value;
+        }
+        if ("acceptType" in data) {
+            data['callSid'] = call.parameters.CallSid;
+            activeCall = Object.assign(activeCall, data);
+            initAcceptedPane(activeCall);
+        }
+
+        localStorage.setItem('activeCall', JSON.stringify(activeCall));
+    }
+
+    function initAcceptedPane(call) {
+        if (!settings.enableAcceptedPanel) {
+            return;
+        }
+        let acceptedCall = {...call}
+        panes.accepted.init(acceptedCall);
+        iconUpdate();
+        panes.queue.hide();
+        openWidget();
+        openCallTab();
+    }
+
+    function acceptedCallEvent() {
+        window.addEventListener('storage', function(event) {
+            if (event.key === 'activeCall') {
+                let call = JSON.parse(event.newValue);
+                if (typeof call.acceptType !== 'undefined') {
+                    initAcceptedPane(call);
+                }
+            }
+        });
     }
 
     function acceptInternalCall(call) {
@@ -2116,7 +2187,8 @@ var PhoneWidget = function () {
         removeTwilioInternalIncomingConnection: removeTwilioInternalIncomingConnection,
         isInitiated: isInitiated,
         addLogError: addLogError,
-        addLogSuccess: addLogSuccess
+        addLogSuccess: addLogSuccess,
+        refreshPanes: refreshPanes
     };
 }();
 

@@ -4,6 +4,7 @@ namespace frontend\controllers;
 
 use common\components\BackOffice;
 use common\models\CaseSale;
+use common\models\Project;
 use common\models\search\SaleSearch;
 use modules\order\src\entities\order\Order;
 use src\auth\Auth;
@@ -97,12 +98,12 @@ class SaleController extends FController
     public function actionView()
     {
         $hash = Yii::$app->request->get('h', '');
-        $withFareRules = (int) Yii::$app->request->get('wfr', 0);
+        $withFareRules = (int)Yii::$app->request->get('wfr', 0);
         $saleData = [];
 
         try {
             $arr = explode('|', base64_decode($hash));
-            $id = (int) ($arr[1] ?? 0);
+            $id = (int)($arr[1] ?? 0);
 
             $saleData = $this->casesSaleService->detailRequestToBackOffice($id, $withFareRules);
         } catch (\Throwable $throwable) {
@@ -179,5 +180,286 @@ class SaleController extends FController
         }
 
         throw new NotFoundHttpException('The requested case does not exist.');
+    }
+
+    public function actionPrepareResendTickets($caseId, $caseSaleId)
+    {
+        try {
+            if (!Yii::$app->request->isAjax) {
+                throw new BadRequestHttpException();
+            }
+            $case = Cases::findOne(['cs_id' => $caseId]);
+            if (!$case) {
+                throw new \DomainException('Not found case. Id (' . $caseId . ')');
+            }
+
+            if (!Auth::can('cases/update', ['case' => $case])) {
+                throw new ForbiddenHttpException('Access denied.');
+            }
+
+            $caseSale = CaseSale::findOne(['css_cs_id' => $caseId, 'css_sale_id' => $caseSaleId]);
+            if (!$caseSale) {
+                throw new \DomainException('Not found case sale. Id (' . $caseSaleId . ')');
+            }
+
+            return $this->renderAjax('/sale/partial/_sale_resend_tickets', [
+                'caseSale' => $caseSale,
+            ]);
+        } catch (\Throwable $throwable) {
+            return $throwable->getMessage();
+        }
+    }
+
+    public function actionResendTickets()
+    {
+        $result = [];
+        \Yii::$app->response->format = Response::FORMAT_JSON;
+
+        try {
+            if (!Yii::$app->request->isAjax) {
+                throw new BadRequestHttpException();
+            }
+            $caseId = \Yii::$app->request->post('caseId');
+            $caseSaleId = \Yii::$app->request->post('caseSaleId');
+            $emails = \Yii::$app->request->post('emails');
+
+            if (!is_array($emails) || count($emails) == 0) {
+                throw new \DomainException('Emails not found');
+            }
+
+            $case = Cases::findOne(['cs_id' => $caseId]);
+            if (!$case) {
+                throw new \DomainException('Not found case. Id (' . $caseId . ')');
+            }
+
+            if (!Auth::can('cases/update', ['case' => $case])) {
+                throw new ForbiddenHttpException('Access denied.');
+            }
+
+            $caseSale = CaseSale::findOne(['css_cs_id' => $caseId, 'css_sale_id' => $caseSaleId]);
+            if (!$caseSale) {
+                throw new \DomainException('Not found case sale. Id (' . $caseSaleId . ')');
+            }
+
+            $projectId = $case->cs_project_id;
+            $project = Project::findOne($projectId);
+            if (!$project) {
+                throw new \DomainException('Not found Project. Id ' . $projectId);
+            }
+            if (!$project->api_key) {
+                throw new \DomainException('Not found API KEY. Project. Id ' . $projectId);
+            }
+
+            $confNumber = ArrayHelper::getValue($caseSale->getSaleDataDecoded(), 'bookingId');
+            $data = [
+                'apiKey' => $project->api_key,
+                'bookingId' => $confNumber !== $caseSale->css_sale_book_id ? $confNumber : $caseSale->css_sale_book_id,
+                'emails' => $emails,
+                'visibilityType' => 'all',
+            ];
+            $host = Yii::$app->params['backOffice']['urlV3'];
+            $responseBO = BackOffice::sendRequest2('flight-request/resend-tickets', $data, 'POST', 120, $host);
+
+            if (!$responseBO->isOk) {
+                Yii::error([
+                    'message' => 'BO response error.',
+                    'response' => VarDumper::dumpAsString($responseBO->content),
+                    'data' => $data,
+                ], 'SaleController:resendTickets');
+                throw new \RuntimeException('Resend tickets BO request error. ' . VarDumper::dumpAsString($responseBO->content));
+            }
+
+            $responseData = $responseBO->data;
+
+            if (empty($responseData['status'])) {
+                Yii::error([
+                    'message' => 'BO response error. Not found Status',
+                    'response' => VarDumper::dumpAsString($responseData),
+                    'data' => $data,
+                ], 'SaleController:resendTickets');
+                throw new \DomainException('Undefined BO response. Not found Status');
+            }
+
+            if (!in_array($responseData['status'], ['Success', 'Failed'], false)) {
+                Yii::error([
+                    'message' => 'BO response undefined status.',
+                    'response' => VarDumper::dumpAsString($responseData),
+                    'data' => $data,
+                ], 'SaleController:resendTickets');
+                throw new \DomainException('Undefined BO response Status');
+            }
+
+            if (!empty($responseData['errors'])) {
+                $errors = '';
+                foreach ($responseData['errors'] as $error) {
+                    if (is_array($error)) {
+                        $errors .= implode('; ', $error);
+                    } else {
+                        $errors .= $error . '; ';
+                    }
+                }
+                Yii::error([
+                    'message' => 'BO response error.',
+                    'error' => $errors,
+                    'response' => VarDumper::dumpAsString($responseData),
+                    'data' => $data,
+                ], 'SaleController:resendTickets');
+                throw new \RuntimeException('Resend tickets BO errors: ' . $errors);
+            }
+
+            if ($responseData['status'] !== 'Success') {
+                Yii::error([
+                    'data' => $data,
+                    'response' => VarDumper::dumpAsString($responseData),
+                ], 'SaleController:resendTickets');
+                throw new \RuntimeException('Resend tickets BO errors. Undefined error.');
+            }
+
+            $result['error'] = false;
+            $result['message'] = 'Tickets resend successfully';
+        } catch (\Throwable $throwable) {
+            $result['error'] = true;
+            $result['message'] = $throwable->getMessage();
+        }
+
+        return $result;
+    }
+
+    public function actionPrepareCancelSale($caseId, $caseSaleId)
+    {
+        try {
+            if (!Yii::$app->request->isAjax) {
+                throw new BadRequestHttpException();
+            }
+            $case = Cases::findOne(['cs_id' => $caseId]);
+            if (!$case) {
+                throw new \DomainException('Not found case. Id (' . $caseId . ')');
+            }
+
+            if (!Auth::can('cases/update', ['case' => $case])) {
+                throw new ForbiddenHttpException('Access denied.');
+            }
+
+            $caseSale = CaseSale::findOne(['css_cs_id' => $caseId, 'css_sale_id' => $caseSaleId]);
+            if (!$caseSale) {
+                throw new \DomainException('Not found case sale. Id (' . $caseSaleId . ')');
+            }
+
+            return $this->renderAjax('/sale/partial/_sale_cancel', [
+                'caseId' => $caseId,
+                'caseSaleId' => $caseSaleId,
+            ]);
+        } catch (\Throwable $throwable) {
+            return $throwable->getMessage();
+        }
+    }
+
+    public function actionCancelSale()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $result = [];
+
+        try {
+            if (!Yii::$app->request->isAjax) {
+                throw new BadRequestHttpException();
+            }
+            $caseId = \Yii::$app->request->post('caseId');
+            $caseSaleId = \Yii::$app->request->post('caseSaleId');
+
+            $case = Cases::findOne(['cs_id' => $caseId]);
+            if (!$case) {
+                throw new \DomainException('Not found case. Id (' . $caseId . ')');
+            }
+
+            if (!Auth::can('cases/update', ['case' => $case])) {
+                throw new ForbiddenHttpException('Access denied.');
+            }
+
+            $caseSale = CaseSale::findOne(['css_cs_id' => $caseId, 'css_sale_id' => $caseSaleId]);
+            if (!$caseSale) {
+                throw new \DomainException('Not found case sale. Id (' . $caseSaleId . ')');
+            }
+
+            $projectId = $case->cs_project_id;
+            $project = Project::findOne($projectId);
+            if (!$project) {
+                throw new \DomainException('Not found Project. Id ' . $projectId);
+            }
+            if (!$project->api_key) {
+                throw new \DomainException('Not found API KEY. Project. Id ' . $projectId);
+            }
+
+            $data = [
+                'apiKey' => $project->api_key,
+                'FlightRequest' => [
+                    'uid' => $caseSale->css_sale_book_id,
+                ]
+            ];
+            $host = Yii::$app->params['backOffice']['urlV2'];
+            $responseBO = BackOffice::sendRequest2('flight-request/cancel', $data, 'POST', 120, $host);
+
+            if (!$responseBO->isOk) {
+                Yii::error([
+                    'message' => 'BO response error.',
+                    'response' => VarDumper::dumpAsString($responseBO->content),
+                    'data' => $data,
+                ], 'SaleController:cancel');
+                throw new \RuntimeException('Flight Cancel BO request error. ' . VarDumper::dumpAsString($responseBO->content));
+            }
+
+            $responseData = $responseBO->data;
+
+            if (empty($responseData['status'])) {
+                Yii::error([
+                    'message' => 'BO response error. Not found Status',
+                    'response' => VarDumper::dumpAsString($responseData),
+                    'data' => $data,
+                ], 'SaleController:cancelSale');
+                throw new \DomainException('Undefined BO response. Not found Status');
+            }
+
+            if (!in_array($responseData['status'], ['Success', 'Failed'], false)) {
+                Yii::error([
+                    'message' => 'BO response undefined status.',
+                    'response' => VarDumper::dumpAsString($responseData),
+                    'data' => $data,
+                ], 'SaleController:cancelSale');
+                throw new \DomainException('Undefined BO response Status');
+            }
+
+            if (!empty($responseData['errors'])) {
+                $errors = '';
+                foreach ($responseData['errors'] as $error) {
+                    if (is_array($error)) {
+                        $errors .= implode('; ', $error);
+                    } else {
+                        $errors .= $error . '; ';
+                    }
+                }
+                Yii::error([
+                    'message' => 'BO response error.',
+                    'error' => $errors,
+                    'response' => VarDumper::dumpAsString($responseData),
+                    'data' => $data,
+                ], 'SaleController:cancelSale');
+                throw new \RuntimeException('Flight Cancel BO errors: ' . $errors);
+            }
+
+            if ($responseData['status'] !== 'Success') {
+                Yii::error([
+                    'data' => $data,
+                    'response' => VarDumper::dumpAsString($responseData),
+                ], 'SaleController:cancelSale');
+                throw new \RuntimeException('Flight Cancel BO errors. Undefined error.');
+            }
+
+            $result['error'] = false;
+            $result['message'] = 'Canceled successfully';
+        } catch (\Throwable $throwable) {
+            $result['error'] = true;
+            $result['message'] = $throwable->getMessage();
+        }
+
+        return $result;
     }
 }

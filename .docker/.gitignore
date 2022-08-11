@@ -1,0 +1,15 @@
+/.env
+/api-nginx/logs
+/mysql/data
+/psql/data
+/centrifugo/logs
+/centrifugo/config.json
+/centrifugo-nginx/logs
+/frontend-nginx/logs
+/ws-nginx/logs
+/console/.composer
+mysql/dump/*
+!mysql/dump/.gitkeep
+psql/dump/*
+!psql/dump/.gitkeep
+clickhouse/data

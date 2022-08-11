@@ -11,6 +11,7 @@ use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "user_status".
@@ -206,7 +207,35 @@ class UserStatus extends ActiveRecord
                             'action' => $action,
                             'id' => $this->us_user_id,
                             'data' => [
-                                'userStatus' => $this->attributes,
+                                'userStatus' => ArrayHelper::toArray($this, [
+                                    UserStatus::class => [
+                                        'user_id' => 'us_user_id',
+                                        'us_user_id',
+                                        'us_gl_call_count',
+                                        'us_call_phone_status',
+                                        'us_is_on_call',
+                                        'us_has_call_access',
+                                        'us_updated_dt',
+                                        'userName' => function (UserStatus $us) {
+                                            return $us->usUser->username ?? '';
+                                        },
+                                        'online' => function (UserStatus $us) {
+                                            return $us->usUser->userOnline->attributes ?? [];
+                                        },
+                                        'status' => function (UserStatus $us) {
+                                            return $us->attributes;
+                                        },
+                                        'userDep' => function (UserStatus $us) {
+                                            $deps = [];
+                                            foreach ($us->usUser->udDeps as $dep) {
+                                                if (isset($dep->dep_id)) {
+                                                    $deps[] = $dep->dep_id;
+                                                }
+                                            }
+                                            return $deps;
+                                        },
+                                    ],
+                                ]),
                             ]
                         ]
                     );

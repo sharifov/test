@@ -20,6 +20,7 @@ use src\entities\cases\Cases;
 use src\helpers\app\AppHelper;
 use src\interfaces\BoWebhookService;
 use src\repositories\cases\CasesRepository;
+use src\services\cases\CasesCommunicationService;
 use src\services\cases\CasesManageService;
 use webapi\src\forms\boWebhook\ReprotectionUpdateForm;
 use Yii;
@@ -35,6 +36,7 @@ use yii\db\Transaction;
  * @property CasesManageService $casesManageService
  * @property CasesRepository $casesRepository
  * @property ProductQuoteChangeRepository$productQuoteChangeRepository
+ * @property CasesCommunicationService $casesCommunicationService
  *
  * @property Cases $case
  * @property ProductQuoteChange $productQuoteChange
@@ -64,6 +66,10 @@ class ProductQuoteService implements BoWebhookService
      */
     private ProductQuoteChangeRepository $productQuoteChangeRepository;
     /**
+     * @var CasesCommunicationService
+     */
+    private CasesCommunicationService $casesCommunicationService;
+    /**
      * @var Cases|null
      */
     private ?Cases $case = null;
@@ -87,19 +93,22 @@ class ProductQuoteService implements BoWebhookService
      * @param CasesRepository $casesRepository
      * @param FlightQuoteFlightRepository $flightQuoteFlightRepository
      * @param ProductQuoteChangeRepository $productQuoteChangeRepository
+     * @param CasesCommunicationService $casesCommunicationService
      */
     public function __construct(
         ProductQuoteRepository $productQuoteRepository,
         CasesManageService $casesManageService,
         CasesRepository $casesRepository,
         FlightQuoteFlightRepository $flightQuoteFlightRepository,
-        ProductQuoteChangeRepository $productQuoteChangeRepository
+        ProductQuoteChangeRepository $productQuoteChangeRepository,
+        CasesCommunicationService $casesCommunicationService
     ) {
         $this->productQuoteRepository = $productQuoteRepository;
         $this->casesManageService = $casesManageService;
         $this->casesRepository = $casesRepository;
         $this->flightQuoteFlightRepository = $flightQuoteFlightRepository;
         $this->productQuoteChangeRepository = $productQuoteChangeRepository;
+        $this->casesCommunicationService = $casesCommunicationService;
     }
 
     /**
@@ -140,6 +149,11 @@ class ProductQuoteService implements BoWebhookService
                     $this->handleCanceled();
                 } elseif ($form->isExchanged()) {
                     $this->handleExchanged();
+                    if ($this->case->project->getParams()->object->case->sendFeedback ?? null) {
+                        $this->casesCommunicationService
+                            ->sendAutoFeedbackEmail($this->case, CaseEventLog::RE_PROTECTION_EXCHANGE)
+                        ;
+                    }
                 } elseif ($form->isProcessing()) {
                     $this->productQuoteChange->statusToProcessing();
                     $this->productQuoteChangeRepository->save($this->productQuoteChange);

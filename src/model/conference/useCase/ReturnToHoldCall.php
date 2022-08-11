@@ -22,7 +22,7 @@ class ReturnToHoldCall
 
     public function __construct()
     {
-        $this->communication = \Yii::$app->communication;
+        $this->communication = \Yii::$app->comms;
     }
 
     public function return(Call $call, int $userId, string $deviceIdentity): bool
@@ -85,7 +85,10 @@ class ReturnToHoldCall
                 $conference->isRecordingDisabled(),
                 $call->getDataPhoneListId(),
                 $call->c_to,
-                $call->c_from
+                $call->c_from,
+                $call->c_project_id ? $call->cProject->name : '',
+                $call->getSourceName(),
+                Call::TYPE_LIST[Call::CALL_TYPE_RETURN],
             );
             $isError = (bool)($result['error'] ?? true);
             if ($isError) {

@@ -2,7 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-use src\helpers\email\MaskEmailHelper;
+use yii\helpers\Url;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\Email */
@@ -30,10 +30,10 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="col-md-7">
 
             <hr>
-            <h4>Subject: <?=Html::encode($model->e_email_subject)?></h4>
+            <h4>Subject: <?= Html::encode($model->emailSubject)?></h4>
             <hr>
             <h4>Email preview:</h4>
-            <object width="100%" height="1000" data="<?=\yii\helpers\Url::to(['email/view', 'id' => $model->e_id, 'preview' => 1])?>"></object>
+            <object width="100%" height="1000" data="<?= Url::to(['view', 'id' => $model->e_id, 'preview' => 1])?>"></object>
 
     </div>
 
@@ -46,40 +46,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 'e_lead_id',
                 'e_case_id',
                 'e_project_id',
-                //'e_email_from:email',
-                [
-                    'attribute' => 'e_email_from',
-                    'value' => static function (\common\models\Email $model) {
-                        if ($model->e_type_id == $model::TYPE_INBOX) {
-                            return MaskEmailHelper::masking($model->e_email_from);
-                        }
-                        return $model->e_email_from;
-                    },
-                    'format' => 'email'
-                ],
-                'e_email_from_name',
-                //'e_email_to:email',
-                [
-                    'attribute' => 'e_email_to',
-                    'value' => static function (\common\models\Email $model) {
-                        if ($model->e_type_id == $model::TYPE_OUTBOX) {
-                            return MaskEmailHelper::masking($model->e_email_to);
-                        }
-                        return $model->e_email_to;
-                    },
-                    'format' => 'email'
-                ],
-                'e_email_to_name',
+                'emailFrom',
+                'emailFromName',
+                'emailTo',
+                'emailToName',
                 'e_email_cc:email',
                 'e_email_bc:email',
-                'e_email_subject:email',
-                //'e_email_body_text:ntext',
+                'e_email_subject',
                 'e_attach',
                 'e_email_data:ntext',
                 'e_type_id',
-                'e_template_type_id',
-                'e_language_id',
-                'e_communication_id',
+                'templateTypeId',
+                'languageId',
+                'communicationId',
                 'e_is_deleted',
                 'e_is_new',
                 'e_delay',
@@ -99,7 +78,4 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]) ?>
     </div>
-
-
-
 </div>

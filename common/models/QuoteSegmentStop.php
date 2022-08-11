@@ -62,14 +62,14 @@ class QuoteSegmentStop extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'qss_id' => 'Qss ID',
-            'qss_location_code' => 'Qss Location Code',
-            'qss_departure_dt' => 'Qss Departure Dt',
-            'qss_arrival_dt' => 'Qss Arrival Dt',
-            'qss_duration' => 'Qss Duration',
-            'qss_elapsed_time' => 'Qss Elapsed Time',
-            'qss_equipment' => 'Qss Equipment',
-            'qss_segment_id' => 'Qss Segment ID',
+            'qss_id' => 'ID',
+            'qss_location_code' => 'Location Code',
+            'qss_departure_dt' => 'Departure Dt',
+            'qss_arrival_dt' => 'Arrival Dt',
+            'qss_duration' => 'Duration',
+            'qss_elapsed_time' => 'Elapsed Time',
+            'qss_equipment' => 'Equipment',
+            'qss_segment_id' => 'Segment ID',
         ];
     }
 

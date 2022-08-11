@@ -228,8 +228,17 @@ class Project extends \yii\db\ActiveRecord
      */
     public static function getList(): array
     {
-        $data = self::find()->orderBy(['name' => SORT_ASC])->asArray()->all();
+        $data = self::find()->select(['id', 'name'])->orderBy(['name' => SORT_ASC])->asArray()->all();
         return ArrayHelper::map($data, 'id', 'name');
+    }
+
+    /**
+     * @return array
+     */
+    public static function getKeyList(): array
+    {
+        $data = self::find()->select(['project_key', 'name'])->orderBy(['name' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data, 'project_key', 'name');
     }
 
     public static function getListExcludeIds(array $ids): array
@@ -285,6 +294,11 @@ class Project extends \yii\db\ActiveRecord
     public function getVoluntaryChangeEmailConfig(): array
     {
         return ArrayHelper::getValue($this->p_params_json, 'object.case.voluntary_exchange', []);
+    }
+
+    public function getScheduleChangeNotificationIntervals(): array
+    {
+        return ArrayHelper::getValue($this->p_params_json, 'object.case.schedule_change', []);
     }
 
     public static function getListByUserWithProjectKeys(int $user_id = 0): array
@@ -388,7 +402,7 @@ class Project extends \yii\db\ActiveRecord
         $out['data'] = false;
         $out['error'] = false;
 
-        $uri = Yii::$app->params['backOffice']['serverUrl'] . '/default/projects';
+        $uri = Yii::$app->params['backOffice']['url'] . '/default/projects';
         $signature = self::getSignatureBO(
             Yii::$app->params['backOffice']['apiKey'],
             Yii::$app->params['backOffice']['ver']

@@ -24,6 +24,7 @@ use modules\product\src\entities\productQuote\ProductQuote;
 use src\helpers\app\AppHelper;
 use src\helpers\product\ProductQuoteHelper;
 use src\helpers\setting\SettingHelper;
+use modules\flight\src\helpers\SettingHelper as FlightSettingHelper;
 use Yii;
 use yii\base\ErrorException;
 use yii\data\ActiveDataProvider;
@@ -496,6 +497,12 @@ class FlightQuoteHelper
                         $dateFormat = 'Y' . $dateFormat;
                         $depDateTime = DateTime::createFromFormat($dateFormat, $date);
                     }
+
+                    $depCity = Airports::findByIata($depAirport);
+                    $depTimezone = $depCity ? new \DateTimeZone($depCity->timezone) : null;
+                    $depDateTimeWithTimezone = \DateTime::createFromFormat($dateFormat, $date, $depTimezone);
+
+
                     $date = $arrDate . ' ' . $matches[1][1];
                     if ($matches[2][1] != '') {
                         $date = $date . strtolower(str_replace('N', 'P', $matches[2][1])) . 'm';
@@ -519,14 +526,18 @@ class FlightQuoteHelper
                         }
                         $arrDateTime->add(\DateInterval::createFromDateString($matches[3][1] . ' day'));
                     }
+
+                    $arrCity = Airports::findByIata($arrAirport);
+                    $arrTimezone = $arrCity ? new \DateTimeZone($arrCity->timezone) : null;
+                    $arrDateTimeWithTimezone = \DateTime::createFromFormat($dateFormat, $date, $arrTimezone);
+
                     /*if ($depDateTime > $arrDateTime) {
                         $arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
                     }*/
-                    $depCity = Airports::findByIata($depAirport);
+
                     /*$timezone = ($depCity !== null && !empty($depCity->timezone))
                     ? new \DateTimeZone($depCity->timezone)
                     : new \DateTimeZone("UTC");*/
-                    $arrCity = Airports::findByIata($arrAirport);
                     /*$timezone = ($arrCity !== null && !empty($arrCity->timezone))
                         ? new \DateTimeZone($arrCity->timezone)
                         : new \DateTimeZone("UTC");*/
@@ -534,9 +545,8 @@ class FlightQuoteHelper
 
                 $rowExpl = explode($depDate, $rowFl);
                 $cabin = trim(str_replace($flightNumber, '', trim($rowExpl[0])));
-                if ($depCity !== null && $arrCity !== null && $depCity->dst != $arrCity->dst) {
-                    $flightDuration = ($arrDateTime->getTimestamp() - $depDateTime->getTimestamp()) / 60;
-                    $flightDuration = (int)$flightDuration + ((int)$depCity->dst * 60) - ((int)$arrCity->dst * 60);
+                if ($depCity !== null && $arrCity !== null && isset($depDateTimeWithTimezone) && isset($arrDateTimeWithTimezone)) {
+                    $flightDuration = intval(($arrDateTimeWithTimezone->getTimestamp() - $depDateTimeWithTimezone->getTimestamp()) / 60);
                 } else {
                     $flightDuration = ($arrDateTime->getTimestamp() - $depDateTime->getTimestamp()) / 60;
                 }
@@ -950,6 +960,12 @@ class FlightQuoteHelper
                     $dateFormat = 'Y' . $dateFormat;
                     $depDateTime = DateTime::createFromFormat($dateFormat, $date);
                 }
+
+                $depCity = Airports::findByIata($depAirport);
+                $depTimezone = $depCity ? new \DateTimeZone($depCity->timezone) : null;
+                $depDateTimeWithTimezone = \DateTime::createFromFormat($dateFormat, $date, $depTimezone);
+
+
                 $date = $arrDate . ' ' . $matches[1][1];
                 if ($matches[2][1] != '') {
                     $date = $date . strtolower(str_replace('N', 'P', $matches[2][1])) . 'm';
@@ -966,6 +982,12 @@ class FlightQuoteHelper
                     $dateFormat = 'Y' . $dateFormat;
                     $arrDateTime = DateTime::createFromFormat($dateFormat, $date);
                 }
+
+                $arrCity = Airports::findByIata($arrAirport);
+                $arrTimezone = $arrCity ? new \DateTimeZone($arrCity->timezone) : null;
+                $arrDateTimeWithTimezone = \DateTime::createFromFormat($dateFormat, $date, $arrTimezone);
+
+
                 $arrDepDiff = $depDateTime->diff($arrDateTime);
                 if ($arrDepDiff->d == 0 && !$arrDateInRow && !empty($matches[3][1])) {
                     if ($matches[3][1] == "+") {
@@ -976,21 +998,17 @@ class FlightQuoteHelper
                 /*if ($depDateTime > $arrDateTime) {
                     $arrDateTime->add(\DateInterval::createFromDateString('+1 year'));
                 }*/
-                $depCity = Airports::findByIata($depAirport);
                 /*$timezone = ($depCity !== null && !empty($depCity->timezone))
                 ? new \DateTimeZone($depCity->timezone)
                 : new \DateTimeZone("UTC");*/
-                $arrCity = Airports::findByIata($arrAirport);
                 /*$timezone = ($arrCity !== null && !empty($arrCity->timezone))
                     ? new \DateTimeZone($arrCity->timezone)
                     : new \DateTimeZone("UTC");*/
             }
 
-            $rowExpl = explode($depDate, $rowFl);
             $cabin = trim(str_replace($flightNumber, '', trim($rowExpl[0])));
-            if ($depCity !== null && $arrCity !== null && $depCity->dst != $arrCity->dst) {
-                $flightDuration = ($arrDateTime->getTimestamp() - $depDateTime->getTimestamp()) / 60;
-                $flightDuration = (int)$flightDuration + ((int)$depCity->dst * 60) - ((int)$arrCity->dst * 60);
+            if ($depCity !== null && $arrCity !== null && isset($depDateTimeWithTimezone) && isset($arrDateTimeWithTimezone)) {
+                $flightDuration = intval(($arrDateTimeWithTimezone->getTimestamp() - $depDateTimeWithTimezone->getTimestamp()) / 60);
             } else {
                 $flightDuration = ($arrDateTime->getTimestamp() - $depDateTime->getTimestamp()) / 60;
             }
@@ -1029,8 +1047,7 @@ class FlightQuoteHelper
             if ($tripType !== Flight::TRIP_TYPE_ONE_WAY) {
                 if ($key != 0) {
                     $lastSegment = $segments[$key - 1] ?? $segments[$key];
-                    $isMoreOneDay = self::isMoreOneDay($lastSegment['arrivalDateTime'], $segment['departureDateTime']);
-                    if ($isMoreOneDay) {
+                    if (self::isNextTrip($lastSegment, $segment)) {
                         ++$tripIndex;
                     }
                 }
@@ -1049,9 +1066,14 @@ class FlightQuoteHelper
             $arrivalTime = $lastSegment['arrivalDateTime'];
             $departureTime = $firstSegment['departureDateTime'];
 
-            if ($depCity !== null && $arrCity !== null && $depCity->dst != $arrCity->dst) {
-                $flightDuration = ($arrivalTime->getTimestamp() - $departureTime->getTimestamp()) / 60;
-                $trips[$key]['duration'] = (int)$flightDuration + ((int)$depCity->dst * 60) - ((int)$arrCity->dst * 60);
+            $depTimezone = $depCity ? new \DateTimeZone($depCity->timezone) : null;
+            $depDateTimeWithTimezone = new \DateTime($departureTime, $depTimezone);
+
+            $arrTimezone = $arrCity ? new \DateTimeZone($arrCity->timezone) : null;
+            $arrDateTimeWithTimezone = new \DateTime($arrivalTime, $arrTimezone);
+
+            if ($depCity !== null && $arrCity !== null) {
+                $trips[$key]['duration'] = intval(($arrDateTimeWithTimezone->getTimestamp() - $depDateTimeWithTimezone->getTimestamp()) / 60);
             } else {
                 $trips[$key]['duration'] = ($arrivalTime->getTimestamp() - $departureTime->getTimestamp()) / 60;
             }
@@ -1249,30 +1271,46 @@ class FlightQuoteHelper
         if ((!$departureDateTime = $curSegment['departureDateTime'] ?? null) || !($departureDateTime instanceof DateTime)) {
             throw new \RuntimeException('DepartureDateTime is corrupted');
         }
-        if (self::isMoreOneDay($prevArrivalDateTime, $departureDateTime)) {
-            return true;
-        }
 
-        if ((!$prevArrivalAirport = $prevSegment['arrivalAirport'] ?? null) || !is_string($prevArrivalAirport)) {
-            throw new \RuntimeException('ArrivalAirport is corrupted');
+        return $departureDateTime->diff($prevArrivalDateTime)->days >= FlightSettingHelper::getDaysDiffForNextTrip();
+    }
+
+    /**
+     * @param FlightQuote $flightQuote
+     * @return DateTime
+     */
+    public static function getLastDepartureDate(FlightQuote $flightQuote): DateTime
+    {
+        try {
+            $flightQuoteSegments = $flightQuote->flightQuoteSegments;
+            return new DateTime(end($flightQuoteSegments)->fqs_departure_dt);
+        } catch (\Throwable $throwable) {
+            Yii::error(
+                AppHelper::throwableFormatter($throwable),
+                'FlightQuoteHelper:getLastFlightDate:failed'
+            );
+            return new DateTime();
         }
-        if ((!$departureAirport = $curSegment['departureAirport'] ?? null) || !is_string($departureAirport)) {
-            throw new \RuntimeException('DepartureAirport is corrupted');
-        }
-        if (!self::isEqualLocation($prevArrivalAirport, $departureAirport)) {
-            return true;
-        }
-        return false;
+    }
+
+
+    /**
+     * Returns the expiration date for a new quote (exchange, refund)
+     *
+     * @param FlightQuote $flightQuote
+     * @return string
+     */
+    public static function getExpirationDate(FlightQuote $flightQuote): string
+    {
+        $maxDate = self::getLastDepartureDate($flightQuote);
+        $maxDate = $maxDate->modify(sprintf('-%d hours', FlightSettingHelper::getMinHoursDifferenceOffers()));
+        $date = (new DateTime())->modify(sprintf('+%d days', FlightSettingHelper::getExpirationDaysOfNewOffers()));
+
+        return ($date > $maxDate) ? $maxDate->format('Y-m-d') : $date->format('Y-m-d');
     }
 
     private static function isEqualLocation(string $prevArrivalAirport, string $departureAirport): bool
     {
         return $prevArrivalAirport === $departureAirport;
-    }
-
-    private static function isMoreOneDay(DateTime $departureDateTime, DateTime $arrivalDateTime): bool
-    {
-        $diff = $departureDateTime->diff($arrivalDateTime);
-        return (int) sprintf('%d%d%d', $diff->y, $diff->m, $diff->d) >= 1;
     }
 }

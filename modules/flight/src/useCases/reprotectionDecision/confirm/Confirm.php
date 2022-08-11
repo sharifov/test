@@ -9,6 +9,8 @@ use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeDecisionType;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
+use modules\product\src\entities\productQuoteData\ProductQuoteData;
+use modules\product\src\entities\productQuoteData\ProductQuoteDataRepository;
 use src\entities\cases\CaseEventLog;
 use src\helpers\setting\SettingHelper;
 use src\repositories\product\ProductQuoteRepository;
@@ -27,18 +29,21 @@ class Confirm
     private ProductQuoteRepository $productQuoteRepository;
     private TransactionManager $transactionManager;
     private ProductQuoteChangeRepository $productQuoteChangeRepository;
+    private ProductQuoteDataRepository $productQuoteDataRepository;
     private CancelOtherReprotectionQuotes $cancelOtherReprotectionQuotes;
 
     public function __construct(
         ProductQuoteRepository $productQuoteRepository,
         TransactionManager $transactionManager,
         ProductQuoteChangeRepository $productQuoteChangeRepository,
-        CancelOtherReprotectionQuotes $cancelOtherReprotectionQuotes
+        CancelOtherReprotectionQuotes $cancelOtherReprotectionQuotes,
+        ProductQuoteDataRepository $productQuoteDataRepository
     ) {
         $this->productQuoteRepository = $productQuoteRepository;
         $this->transactionManager = $transactionManager;
         $this->productQuoteChangeRepository = $productQuoteChangeRepository;
         $this->cancelOtherReprotectionQuotes = $cancelOtherReprotectionQuotes;
+        $this->productQuoteDataRepository = $productQuoteDataRepository;
     }
 
     public function handle(string $reprotectionQuoteGid, ?int $userId): void
@@ -69,6 +74,11 @@ class Confirm
         });
 
         $this->createBoRequestJob($reprotectionQuote, $userId);
+
+        if (!empty($reprotectionQuote->pq_id)) {
+            $productQuoteData = ProductQuoteData::createConfirmed($reprotectionQuote->pq_id);
+            $this->productQuoteDataRepository->save($productQuoteData);
+        }
     }
 
     private function processingProductQuoteChange(ProductQuoteChange $change, ?int $userId, $reprotectionQuote): void

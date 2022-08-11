@@ -8,6 +8,7 @@
 use common\models\Employee;
 use kartik\editable\Editable;
 use common\models\UserParams;
+use yii\helpers\Url;
 
 $taskList = \common\models\LeadTask::find()->where(['lt_lead_id' => $lead->id])->orderBy(['lt_date' => SORT_ASC])->all();
 

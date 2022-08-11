@@ -2,6 +2,7 @@
 
 namespace src\services\system;
 
+use common\models\DbDataSensitiveView;
 use src\helpers\setting\SettingHelper;
 use yii\db\Connection;
 
@@ -18,6 +19,8 @@ use yii\db\Connection;
  */
 class DbViewCryptService
 {
+    public const VIEW_SEPARATOR = '_';
+
     private ?string $settingBlockEncryptionMode;
     private ?string $settingKeyStr;
     private ?string $settingInitVector;
@@ -32,12 +35,12 @@ class DbViewCryptService
      * @param string $tableName
      * @param array $cryptColumns
      */
-    public function __construct(Connection $db, string $tableName, array $cryptColumns)
+    public function __construct(Connection $db, string $tableName, string $postFix, array $cryptColumns)
     {
         $this->db = $db;
         $this->tableName = $tableName;
         $this->cryptColumns = $cryptColumns;
-        $this->viewName = $this->tableName . DbViewCryptDictionary::VIEW_POST_FIX;
+        $this->viewName = $this->tableName . self::VIEW_SEPARATOR . $postFix;
         $this->settingBlockEncryptionMode = SettingHelper::getDbCryptBlockEncryptionMode();
         $this->settingKeyStr = hash('sha256', SettingHelper::getDbCryptKeyStr());
         $this->settingInitVector = SettingHelper::getDbCryptInitVector();
@@ -56,6 +59,7 @@ class DbViewCryptService
 
     public function getDropSql(): string
     {
+        DbDataSensitiveView::deleteAll(['ddv_view_name' => $this->getViewName()]);
         return "DROP VIEW IF EXISTS {$this->viewName}; ";
     }
 
@@ -73,7 +77,7 @@ class DbViewCryptService
     {
         $columns = $this->getNonCryptColumns();
         foreach ($this->cryptColumns as $columnName) {
-            $columns[] = "TO_BASE64(AES_ENCRYPT({$columnName}, '" . $this->settingKeyStr . "', '" . $this->settingInitVector . "')) AS {$columnName}";
+            $columns[] = "TO_BASE64(AES_ENCRYPT(LOWER({$columnName}), '" . $this->settingKeyStr . "', '" . $this->settingInitVector . "')) AS {$columnName}";
         }
         return implode(',', $columns);
     }

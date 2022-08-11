@@ -4,16 +4,25 @@ namespace console\controllers;
 
 use common\models\Call;
 use common\models\ClientEmail;
+use common\models\Employee;
 use common\models\Lead;
 use common\models\LeadFlow;
 use common\models\LeadQcall;
 use common\models\Project;
 use common\models\Task;
 use modules\featureFlag\FFlag;
+use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacDto;
+use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
+use modules\smartLeadDistribution\src\services\SmartLeadDistributionService;
 use src\exception\BoResponseException;
 use src\helpers\app\AppHelper;
 use src\helpers\DateHelper;
 use src\helpers\setting\SettingHelper;
+use src\model\leadBusinessExtraQueue\entity\LeadBusinessExtraQueue;
+use src\model\leadBusinessExtraQueue\service\LeadBusinessExtraQueueService;
+use src\model\leadBusinessExtraQueue\service\LeadToBusinessExtraQueueService;
+use src\model\leadBusinessExtraQueue\service\LeadToClosedFromBusinessExtraQueueService;
+use src\model\leadBusinessExtraQueueRule\entity\LeadBusinessExtraQueueRule;
 use src\model\leadPoorProcessing\entity\LeadPoorProcessing;
 use src\model\leadPoorProcessing\service\LeadFromExtraQueueToClosedService;
 use src\model\leadPoorProcessing\service\LeadPoorProcessingChecker;
@@ -27,6 +36,7 @@ use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLog;
 use src\model\leadUserData\entity\LeadUserData;
 use src\model\leadUserData\entity\LeadUserDataDictionary;
 use src\model\leadUserData\repository\LeadUserDataRepository;
+use src\repositories\lead\LeadBadgesRepository;
 use src\repositories\lead\LeadRepository;
 use src\services\cases\CasesSaleService;
 use Yii;
@@ -176,6 +186,17 @@ class LeadController extends Controller
                     echo $lead->id . ' -  offset_gmt: ' . $lead->offset_gmt . ' -  ip: ' . $lead->request_ip . ' - OK - ';
                     if (isset($out['data']['timeZone'])) {
                         VarDumper::dump($out['data']['timeZone']);
+                    }
+                }
+                /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue enable */
+                if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE) && $lead->isBusinessType() && $lead->isProcessing()) {
+                    $leadBusinessExtraQueueObjectDto = new LeadBusinessExtraQueueAbacDto($lead);
+                    if (!$employee = Employee::find()->where(['id' => $lead])->limit(1)->one()) {
+                        throw new \RuntimeException('LeadOwner not found by ID(' . $lead->employee_id . ')');
+                    }
+                    /** @abac LeadBusinessExtraQueueAbacDto, LeadBusinessExtraQueueAbacObject::ACTION_PROCESS, LeadBusinessExtraQueueAbacObject::ACTION_PROCESS, Access to processing in business Extra Queue */
+                    if (Yii::$app->abac->can($leadBusinessExtraQueueObjectDto, LeadBusinessExtraQueueAbacObject::ACTION_PROCESS, LeadBusinessExtraQueueAbacObject::ACTION_PROCESS, $employee)) {
+                        LeadBusinessExtraQueueService::addLeadBusinessExtraQueueJob($lead, 'Added new Business Extra Queue Countdown', true);
                     }
                 }
                 echo "\r\n";
@@ -492,7 +513,7 @@ class LeadController extends Controller
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
         /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
-        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_LPP_ENABLE)) {
             echo Console::renderColoredString('%y --- Feature Flag (' . FFlag::FF_KEY_LPP_ENABLE . ') not enabled %n'), PHP_EOL;
             exit();
         }
@@ -530,7 +551,7 @@ class LeadController extends Controller
                 Console::updateProgress($processed, $count);
             } catch (\RuntimeException | \DomainException $throwable) {
                 /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
-                if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG)) {
                     $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $item);
                     \Yii::warning($message, 'LeadController:actionToExtraQueue:Exception');
                 }
@@ -558,7 +579,7 @@ class LeadController extends Controller
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
 
         /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
-        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_LPP_ENABLE)) {
             echo Console::renderColoredString('%y --- Feature Flag (' . FFlag::FF_KEY_LPP_ENABLE . ') not enabled %n'), PHP_EOL;
             exit();
         }
@@ -579,7 +600,7 @@ class LeadController extends Controller
         $dateRule = $currentDT->modify('-' . $scheduledCommunicationRuleService->getIntervalHour() . ' hours');
         $startDate = '2022-02-22 08:00:00';
 
-        if (($leadCreatedDT = Yii::$app->ff->val(FFlag::FF_KEY_LPP_LEAD_CREATED)) && DateHelper::checkDateTime($leadCreatedDT)) {
+        if (($leadCreatedDT = Yii::$app->featureFlag->getValue(FFlag::FF_KEY_LPP_LEAD_CREATED)) && DateHelper::checkDateTime($leadCreatedDT)) {
             $startDate = $leadCreatedDT;
         }
 
@@ -691,7 +712,7 @@ class LeadController extends Controller
                 Console::updateProgress($processed, $count);
             } catch (\RuntimeException | \DomainException $throwable) {
                 /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
-                if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG)) {
                     $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
                     \Yii::info($message, 'LeadController:actionLppScheduledCommunication:Exception');
                 }
@@ -725,7 +746,7 @@ class LeadController extends Controller
     public function actionToLastActionLpp()
     {
         /** @fflag FFlag::FF_LPP_ENABLE, Lead Poor Processing Enable/Disable */
-        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_ENABLE)) {
+        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_LPP_ENABLE)) {
             echo Console::renderColoredString('%y --- Feature Flag (' . FFlag::FF_KEY_LPP_ENABLE . ') not enabled %n'), PHP_EOL;
             exit();
         }
@@ -740,7 +761,7 @@ class LeadController extends Controller
                                               ') not enabled %n'), PHP_EOL;
             exit();
         }
-        if (!($leadCreatedDT = Yii::$app->ff->val(FFlag::FF_KEY_LPP_LEAD_CREATED)) || !DateHelper::checkDateTime($leadCreatedDT)) {
+        if (!($leadCreatedDT = Yii::$app->featureFlag->getValue(FFlag::FF_KEY_LPP_LEAD_CREATED)) || !DateHelper::checkDateTime($leadCreatedDT)) {
             echo Console::renderColoredString('Last Created DT is not set'), PHP_EOL;
             exit();
         }
@@ -766,7 +787,7 @@ class LeadController extends Controller
                 Console::updateProgress($processed, $count);
             } catch (\RuntimeException | \DomainException $throwable) {
                 /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
-                if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG)) {
                     $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
                     \Yii::info($message, 'LeadController:actionToLastActionLpp:Exception');
                 }
@@ -787,13 +808,13 @@ class LeadController extends Controller
     public function actionToClosedFromExtra()
     {
         /** @fflag FFlag::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT, Lead Poor Processing to Closing transferring enable/Disable */
-        if (!Yii::$app->ff->can(FFlag::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT)) {
+        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT)) {
             echo Console::renderColoredString('%y --- Feature Flag (' . FFlag::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT . ') not enabled %n'), PHP_EOL;
             exit();
         }
         $time_start     = microtime(true);
 
-        $maxDaysInExtraQueue =  Yii::$app->ff->val(FFlag::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT);
+        $maxDaysInExtraQueue =  Yii::$app->featureFlag->getValue(FFlag::FF_KEY_LPP_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT);
         $thresholdDate = new \DateTimeImmutable(date('Y-m-d H:i:s'));
         $thresholdDate = $thresholdDate->modify('-' . $maxDaysInExtraQueue . ' days');
         $leads = Lead::find()
@@ -810,7 +831,7 @@ class LeadController extends Controller
                 Console::updateProgress($processed, $count);
             } catch (\RuntimeException | \DomainException $throwable) {
                 /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
-                if (Yii::$app->ff->can(FFlag::FF_KEY_DEBUG)) {
+                if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG)) {
                     $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
                     \Yii::info($message, 'LeadController:actionToClosedFromExtra:Exception');
                 }
@@ -828,8 +849,134 @@ class LeadController extends Controller
                                           self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
     }
 
+    public function actionToBusinessExtraQueue(): void
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
+                                          self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+
+        /** @fflag FFlag::FF_KEY_BEQ_ENABLE, Business Extra Queue Enable/Disable */
+        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_ENABLE)) {
+            echo Console::renderColoredString('%y --- Feature Flag (' . FFlag::FF_KEY_BEQ_ENABLE . ') not enabled %n'), PHP_EOL;
+            exit();
+        }
+
+        $time_start = microtime(true);
+        $currentDT = new \DateTimeImmutable();
+        $leadsExpiration = LeadBusinessExtraQueue
+            ::find()
+            ->select([
+                'lbeq_lead_id AS leadId',
+                'lbeqr_id',
+                'MAX(lbeq_expiration_dt) AS max_expiration',
+            ])
+            ->innerJoin(LeadBusinessExtraQueueRule::tableName() . ' AS lead_business_extra_queue_rule', 'lbeq_lbeqr_id = lbeqr_id')
+            ->innerJoin(
+                Lead::tableName() . ' AS leads',
+                'leads.id = lbeq_lead_id AND leads.status = :status',
+                ['status' => Lead::STATUS_PROCESSING]
+            )
+            ->andWhere(['<=', 'lbeq_expiration_dt', $currentDT->format('Y-m-d H:i:s')])
+            ->indexBy('leadId')
+            ->orderBy(['max_expiration' => SORT_ASC])
+            ->groupBy(['lbeq_lead_id', 'lbeqr_id'])
+            ->asArray()
+            ->all()
+        ;
+
+        $count = count($leadsExpiration);
+        $processed = 0;
+        Console::startProgress($processed, $count);
+
+        foreach ($leadsExpiration as $leadId => $item) {
+            try {
+                (new LeadToBusinessExtraQueueService($leadId, $item['lbeqr_id'], $this->leadRepository))->handle();
+                $processed++;
+                Console::updateProgress($processed, $count);
+            } catch (\RuntimeException | \DomainException $throwable) {
+                /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
+                if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG)) {
+                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $item);
+                    \Yii::warning($message, 'LeadController:actionToBusinessExtraQueue:Exception');
+                }
+            } catch (\Throwable $throwable) {
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $item);
+                \Yii::error($message, 'LeadController:actionToBusinessExtraQueue:Throwable');
+            }
+            Console::updateProgress($processed, $count);
+        }
+
+        LeadBusinessExtraQueue::deleteAll(['IN', 'lbeq_lead_id', array_keys($leadsExpiration)]);
+        Console::endProgress(false);
+
+        $time_end = microtime(true);
+        $time = number_format(round($time_end - $time_start, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- Processed: %w[' . $processed . '/' . $count . '] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+                                          self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+    }
+
+    public function actionToClosedFromBusinessExtra()
+    {
+        /** @fflag FFlag::FF_KEY_BEQ_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT, Business Extra Queue to Closing transferring enable/Disable */
+        if (!Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BEQ_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT)) {
+            echo Console::renderColoredString('%y --- Feature Flag (' . FFlag::FF_KEY_BEQ_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT . ') not enabled %n'), PHP_EOL;
+            exit();
+        }
+        $time_start     = microtime(true);
+
+        $maxDaysInExtraQueue =  Yii::$app->featureFlag->getValue(FFlag::FF_KEY_BEQ_TO_CLOSED_QUEUE_TRANSFERRING_DAYS_COUNT);
+        $thresholdDate = new \DateTimeImmutable(date('Y-m-d H:i:s'));
+        $thresholdDate = $thresholdDate->modify('-' . $maxDaysInExtraQueue . ' days');
+        $leads = Lead
+            ::find()
+            ->where(['status' => Lead::STATUS_BUSINESS_EXTRA_QUEUE])
+            ->andWhere(['<=', 'l_status_dt', $thresholdDate->format('Y-m-d H:i:s')])
+            ->all();
+        $processed = 0;
+        $count     = count($leads);
+        $service = \Yii::createObject(LeadToClosedFromBusinessExtraQueueService::class);
+        foreach ($leads as $lead) {
+            $logData = ['leadId' => $lead->id];
+            try {
+                $service->transferLeadFromBusinessExtraToClosed($lead);
+                $processed++;
+                Console::updateProgress($processed, $count);
+            } catch (\RuntimeException | \DomainException $throwable) {
+                /** @fflag FFlag::FF_KEY_DEBUG, Info log enable */
+                if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG)) {
+                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+                    \Yii::info($message, 'LeadController:actionToClosedFromBusinessExtra:Exception');
+                }
+            } catch (\Throwable $throwable) {
+                $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+                \Yii::error($message, 'LeadController:actionToClosedFromBusinessExtra:Throwable');
+            }
+        }
+        Console::endProgress(false);
+        $time_end = microtime(true);
+        $time     = number_format(round($time_end - $time_start, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- Processed: %w[' . $processed . '/' . $count . '] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' .
+                                          self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+    }
+
     private function validateDate(\DateTime $dateObject, string $date, string $format = 'Y-m-d H:i:s'): bool
     {
         return $dateObject->format($format) === $date;
+    }
+
+    public function actionRecalculateRatingBusinessLeads()
+    {
+        $leadBadgeRepository = new LeadBadgesRepository();
+        $leads = $leadBadgeRepository->getBusinessInboxQuery()
+            ->all();
+
+        if (count($leads) > 0) {
+            foreach ($leads as $lead) {
+                SmartLeadDistributionService::recalculateRatingForLead($lead);
+            }
+        }
     }
 }

@@ -7,7 +7,7 @@ use Yii;
 use common\models\search\AgentActivitySearch;
 use common\models\Call;
 use common\models\Sms;
-use common\models\Email;
+use src\entities\email\helpers\EmailType;
 
 /**
  * AgentActivityController.
@@ -79,7 +79,7 @@ class AgentReportController extends FController
 
         $dataProvider = $searchModel->searchEmail($params);
 
-        $title = (isset($params['AgentActivitySearch']['e_type_id']) && $params['AgentActivitySearch']['e_type_id'] == Email::TYPE_OUTBOX) ? 'Emails Sent' : 'Emails Received';
+        $title = (isset($params['AgentActivitySearch']['e_type_id']) && $params['AgentActivitySearch']['e_type_id'] == EmailType::OUTBOX) ? 'Emails Sent' : 'Emails Received';
 
         return $this->render('_email', [
             'title' => $title,

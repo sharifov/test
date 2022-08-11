@@ -3,11 +3,15 @@
 use common\components\grid\DateTimeColumn;
 use common\models\Employee;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
+use modules\shiftSchedule\src\entities\shiftScheduleRequest\search\ShiftScheduleRequestSearch;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
+use modules\shiftSchedule\src\entities\shiftScheduleTypeLabel\ShiftScheduleTypeLabel;
 use modules\shiftSchedule\src\entities\userShiftAssign\UserShiftAssign;
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\SearchUserShiftSchedule;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use src\helpers\setting\SettingHelper;
+use yii\bootstrap4\Tabs;
+use yii\data\ActiveDataProvider;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
@@ -16,18 +20,29 @@ use yii\widgets\Pjax;
 
 /* @var $monthList array */
 /* @var $scheduleTypeList ShiftScheduleType[] */
+/* @var $scheduleTypeLabelList ShiftScheduleTypeLabel[] */
+
 /* @var $scheduleSumData array */
+/* @var $scheduleLabelSumData array */
+
+/* @var $subtypeList array */
 /* @var $userTimeZone string */
 /* @var $user Employee */
 /* @var $searchModel SearchUserShiftSchedule */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /* @var $assignedShifts UserShiftAssign[] */
 
+/**
+ * @var ShiftScheduleRequestSearch $searchModelPendingRequests
+ * @var ActiveDataProvider $dataProviderPendingRequests
+ */
+
 $this->title = 'My Shift Schedule' . ' (' . $user->username . ')';
 $this->params['breadcrumbs'][] = $this->title;
 
 $bundle = \frontend\assets\FullCalendarAsset::register($this);
 $scheduleTotalData = [];
+$subtypeTotalData = [];
 ?>
 <div class="shift-schedule-index">
 
@@ -35,29 +50,49 @@ $scheduleTotalData = [];
 
     <p>
         <?php
-            /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS, Access to actions shift-schedule/* */
-        if (\Yii::$app->abac->can(null, ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_ACCESS)) :
+        /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_GENERATE_EXAMPLE_DATA, Access to generate-example shift-schedule/* */
+        if (\Yii::$app->abac->can(null, ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_GENERATE_EXAMPLE_DATA)) :
             ?>
             <?= Html::a(
                 '<i class="fa fa-plus-circle"></i> Generate Example Data',
                 ['generate-example'],
                 ['class' => 'btn btn-warning']
             ) ?>
+        <?php endif; ?>
+        <?php
+        /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_GENERATE_USER_SCHEDULE, Access to generate-user-schedule shift-schedule/* */
+        if (\Yii::$app->abac->can(null, ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_GENERATE_USER_SCHEDULE)) :
+            ?>
             <?= Html::a(
                 '<i class="fa fa-play-circle"></i> Generate User Schedule (' .
                 SettingHelper::getShiftScheduleDaysLimit() . ' days' . ')',
                 ['generate-user-schedule'],
                 ['class' => 'btn btn-success'],
             ) ?>
+        <?php endif; ?>
 
+        <?php
+        /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_REMOVE_ALL_USER_SCHEDULE, Access to remove-user-data shift-schedule/* */
+        if (\Yii::$app->abac->can(null, ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_REMOVE_ALL_USER_SCHEDULE)) :
+            ?>
             <?= Html::a('<i class="fa fa-remove"></i> Remove All User Schedule Data', ['remove-user-data'], [
             'class' => 'btn btn-danger',
             'data' => [
-            'confirm' => 'Are you sure you want to delete all User Timelines?',
-            'method' => 'post',
+                'confirm' => 'Are you sure you want to delete all User Timelines?',
+                'method' => 'post',
             ],
-            ]) ?>
+        ]) ?>
         <?php endif; ?>
+        <?= Html::a(
+            '<i class="fa fa-plus-circle"></i> Schedule Request',
+            ['schedule-request-ajax'],
+            ['class' => 'btn btn-success', 'id' => 'btn-schedule-request']
+        ) ?>
+        <?= Html::a(
+            '<i class="fa fa-th-list"></i> Schedule Request History',
+            ['schedule-request-history-ajax'],
+            ['class' => 'btn btn-warning', 'id' => 'btn-schedule-request-history']
+        ) ?>
         <?= Html::a(
             '<i class="fa fa-info-circle"></i> Legend',
             ['legend-ajax'],
@@ -86,6 +121,12 @@ $scheduleTotalData = [];
                     </div>
                 </div>
             </div>
+
+            <?= $this->render('partial/_pending_requests', [
+                'dataProviderPendingRequests' => $dataProviderPendingRequests ?? null,
+                    'searchModelPendingRequests' => $searchModelPendingRequests ?? null,
+            ])?>
+
         </div>
         <div class="col-md-6">
 
@@ -185,140 +226,50 @@ $scheduleTotalData = [];
             <div class="x_panel">
                 <div class="x_title">
                     <h2><i class="fa fa-bar-chart"></i> My Monthly scheduling statistics</h2>
-                    <!--            <ul class="nav navbar-right panel_toolbox" style="min-width: initial;">-->
-                    <!--                <li>-->
-                    <!--                    <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>-->
-                    <!--                </li>-->
-                    <!--            </ul>-->
                     <div class="clearfix"></div>
                 </div>
                 <div class="x_content" style="display: block">
 
-                    <div class="col-md-12">
-                        <i class="fa fa-info-circle"></i> TimeLine statistics consists of statuses (
-                        <?= Html::encode(UserShiftSchedule::getStatusNameById(UserShiftSchedule::STATUS_APPROVED))?>,
-                        <?= Html::encode(UserShiftSchedule::getStatusNameById(UserShiftSchedule::STATUS_DONE))?>
-                        )</>
+                    <div class="row">
+                        <div class="col-md-12">
+
+                            <div class="text-right">
+                            <i class="fa fa-info-circle"></i> TimeLine statistics consists of statuses (
+                                <?= Html::encode(UserShiftSchedule::getStatusNameById(UserShiftSchedule::STATUS_APPROVED))?>,
+                                <?= Html::encode(UserShiftSchedule::getStatusNameById(UserShiftSchedule::STATUS_DONE))?>
+                            )
+                            </div>
+
+                        <?php
+                        try {
+                            echo Tabs::widget([
+                                'items' => [
+                                    [
+                                        'label' => 'Group by Types',
+                                        'content' => $this->render('partial/_tab_types', [
+                                            'monthList' => $monthList,
+                                            'scheduleTypeList' => $scheduleTypeList,
+                                            'scheduleSumData' => $scheduleSumData,
+                                        ]),
+                                        'active' => true
+                                    ],
+                                    [
+                                        'label' => 'Group by Labels',
+                                        'content' => $this->render('partial/_tab_labels', [
+                                            'monthList' => $monthList,
+                                            'scheduleTypeLabelList' => $scheduleTypeLabelList,
+                                            'scheduleLabelSumData' => $scheduleLabelSumData,
+                                        ]),
+                                    ]
+                                ]
+                            ]);
+                        } catch (Exception $e) {
+                            echo 'Error: ' . $e->getMessage();
+                        }
+                        ?>
+
+                        </div>
                     </div>
-
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr class="text-center bg-info">
-                                <th>Key</th>
-                                <th>Type</th>
-                                <th title="Work Time">WT</th>
-                                <?php foreach ($monthList as $month) : ?>
-                                    <th style="font-size: 16px"><?= Html::encode($month)?></th>
-                                <?php endforeach; ?>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        <?php if ($scheduleTypeList) : ?>
-                            <?php foreach ($scheduleTypeList as $item) : ?>
-                            <tr class="text-center" title="<?= Html::encode($item->sst_title)?>">
-                                <td title="Type Id: <?= $item->sst_id?>">
-                                    <span class="label label-default"><?= Html::encode($item->sst_key)?></span>
-                                </td>
-                                <td class="text-left">
-                                    <?= $item->getColorLabel()?> &nbsp;
-                                    <?= $item->getIconLabel()?> &nbsp;
-                                    <?= Html::encode($item->sst_name)?>
-                                </td>
-                                <td>
-                                    <?php if ($item->sst_work_time) :?>
-                                        <i class="fa fa-check-circle"></i>
-                                    <?php endif; ?>
-                                </td>
-                                <?php foreach ($monthList as $monthId => $month) : ?>
-                                    <?php /*echo $monthId; \yii\helpers\VarDumper::dump($scheduleSumData[$item->sst_id], 10, true)*/ ?>
-                                    <td>
-                                    <?php if (!empty($scheduleSumData[$item->sst_id][$monthId])) :
-                                        $dataItem = $scheduleSumData[$item->sst_id][$monthId];
-
-                                        if ($item->sst_work_time) {
-                                            if (isset($scheduleTotalData[$monthId]['twh'])) {
-                                                $scheduleTotalData[$monthId]['twh'] += $dataItem['uss_duration'];
-                                                $scheduleTotalData[$monthId]['twh_cnt'] += $dataItem['uss_cnt'];
-                                            } else {
-                                                $scheduleTotalData[$monthId]['twh'] = $dataItem['uss_duration'];
-                                                $scheduleTotalData[$monthId]['twh_cnt'] = $dataItem['uss_cnt'];
-                                            }
-                                        } else {
-                                            if (isset($scheduleTotalData[$monthId]['toh'])) {
-                                                $scheduleTotalData[$monthId]['toh'] += $dataItem['uss_duration'];
-                                                $scheduleTotalData[$monthId]['toh_cnt'] += $dataItem['uss_cnt'];
-                                            } else {
-                                                $scheduleTotalData[$monthId]['toh'] = $dataItem['uss_duration'];
-                                                $scheduleTotalData[$monthId]['toh_cnt'] = $dataItem['uss_cnt'];
-                                            }
-                                        }
-
-                                        if (isset($scheduleTotalData[$monthId]['th'])) {
-                                            $scheduleTotalData[$monthId]['th'] += $dataItem['uss_duration'];
-                                            $scheduleTotalData[$monthId]['th_cnt'] += $dataItem['uss_cnt'];
-                                        } else {
-                                            $scheduleTotalData[$monthId]['th'] = $dataItem['uss_duration'];
-                                            $scheduleTotalData[$monthId]['th_cnt'] = $dataItem['uss_cnt'];
-                                        }
-
-
-                                        ?>
-
-                                            <?= round($dataItem['uss_duration'] / 60, 1)?>h
-                                            / <?= Html::encode($dataItem['uss_cnt'])?>
-
-                                    <?php else : ?>
-                                        -
-                                    <?php endif; ?>
-                                    </td>
-                                <?php endforeach; ?>
-                            </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td colspan="6"></td>
-                            </tr>
-                            <tr class="text-center">
-                                <th></th>
-                                <th class="text-center">Work Hours:</th>
-                                <th></th>
-                                <?php foreach ($monthList as $monthId => $month) : ?>
-                                    <th>
-                                        <?= isset($scheduleTotalData[$monthId]['twh']) ? round($scheduleTotalData[$monthId]['twh'] / 60, 1) . 'h' : '-'?> /
-                                        <?= isset($scheduleTotalData[$monthId]['twh_cnt']) ? ($scheduleTotalData[$monthId]['twh_cnt']) : '-'?>
-                                    </th>
-                                <?php endforeach; ?>
-                            </tr>
-
-                            <tr class="text-center">
-                                <th></th>
-                                <th class="text-center">Other Hours:</th>
-                                <th></th>
-                                <?php foreach ($monthList as $monthId => $month) : ?>
-                                    <th>
-                                        <?= isset($scheduleTotalData[$monthId]['toh']) ? round($scheduleTotalData[$monthId]['toh'] / 60, 1) . 'h' : '-'?> /
-                                        <?= isset($scheduleTotalData[$monthId]['toh_cnt']) ? ($scheduleTotalData[$monthId]['toh_cnt']) : '-'?>
-                                    </th>
-                                <?php endforeach; ?>
-                            </tr>
-
-                            <tr class="text-center">
-                                <th></th>
-                                <th class="text-center">Total Hours:</th>
-                                <th></th>
-                                <?php foreach ($monthList as $monthId => $month) : ?>
-                                    <th>
-                                        <?= isset($scheduleTotalData[$monthId]['th']) ? round($scheduleTotalData[$monthId]['th'] / 60, 1) . 'h' : '-'?> /
-                                        <?= isset($scheduleTotalData[$monthId]['th_cnt']) ? ($scheduleTotalData[$monthId]['th_cnt']) : '-'?>
-                                    </th>
-                                <?php endforeach; ?>
-                            </tr>
-
-                        </tfoot>
-                    </table>
-
 
                 </div>
             </div>
@@ -480,14 +431,14 @@ $scheduleTotalData = [];
 <?php
 
 $ajaxUrl = \yii\helpers\Url::to(['shift-schedule/my-data-ajax']);
-$openModalEventUrl = \yii\helpers\Url::to(['shift-schedule/get-event']);
+$openModalEventUrl = \yii\helpers\Url::to(['shift-schedule/ajax-event-details']);
 // 'https://fullcalendar.io/api/demo-feeds/events.json?overload-day',
 
 $js = <<<JS
     var shiftScheduleDataUrl = '$ajaxUrl';
     var openModalEventUrl = '$openModalEventUrl';
     var calendarEl = document.getElementById('calendar');
-
+    var selectedRange = null;
     var calendar = new FullCalendar.Calendar(calendarEl, {
         //initialView: 'dayGridWeek',
         initialView: 'dayGridMonth',
@@ -600,7 +551,7 @@ $js = <<<JS
       
       //plugins: [ 'dayGridPlugin' ],
         timeZone: '$userTimeZone',
-        locale: 'en',
+        locale: 'en-GB',
         dayMaxEvents: true, // allow "more" link when too many events
         //events: shiftScheduleDataUrl,
          eventSources: [
@@ -656,6 +607,10 @@ $js = <<<JS
             updateTimeLineList(info.startStr, info.endStr);
             // console.log(info);
             // console.log('selected ' + info.startStr + ' to ' + info.endStr);
+            selectedRange = {
+                start: info.startStr,
+                end: info.endStr
+            }
           }
     });
 
@@ -686,20 +641,73 @@ $js = <<<JS
         let modal = $('#modal-md');
         let url = $(this).attr('href');
         $('#modal-md-label').html('<i class="fa fa-info-circle"></i> Schedule Legend');
-        modal.find('.modal-body').html('');
-        modal.find('.modal-body').load(url, function( response, status, xhr ) {
-            if (status === 'error') {
-                alert(response);
-            } else {
-                modal.modal('show');
-            }   
-        });
+        getRequest(modal, url);
     });
     
+    $(document).on('click', '#btn-schedule-request', function(e) {
+        e.preventDefault();
+        let modal = $('#modal-md');
+        let url = processingUrlWithQueryParam($(this).attr('href'));
+        $('#modal-md-label').html('<i class="fa fa-plus-circle"></i> Schedule Request');
+        getRequest(modal, url);
+        selectedRange = null;
+    });
+    
+    $(document).on('click', '#btn-schedule-request-history', function(e) {
+        e.preventDefault();
+        let modal = $('#modal-md');
+        let url = $(this).attr('href');
+        $('#modal-md-label').html('<i class="fa fa-th-list"></i> Schedule Request History');
+        getRequest(modal, url);
+    });
+    
+    function getRequest(modal, url) {
+        modal.find('.modal-body').html(loaderTemplate);
+        modal.modal('show');
+        modal.find('.modal-body').load(url, function( response, status, xhr ) {
+            if (status === 'error') {
+                modal.modal('hide');
+                alert(response);
+            }   
+        });
+    }
+    
+    function loaderTemplate(modal) {
+        return '<div class="text-center"> \
+                    <div class="spinner-border m-5" role="status"> \
+                        <span class="sr-only">Loading...</span> \
+                    </div> \
+                </div>';
+    }
+    
+    function processingUrlWithQueryParam(url) {
+        if (!selectedRange) {
+            return url;
+        }
+
+        var end = new Date(selectedRange.end);
+        end.setDate(end.getDate() - 1);
+        end.setHours(23, 59);
+        var data = {
+            start: selectedRange.start,            
+            end: end.getFullYear() + '-' + ('0' + (end.getMonth() + 1)).slice(-2) + '-' + ('0' + end.getDate()).slice(-2) + ' ' + end.getHours() + ':' + end.getMinutes()           
+        };
+        
+        var prefix = '?';
+        if (url.indexOf('?') !== -1) {
+            prefix = '&';
+        }
+        return url + prefix + $.param(data);
+    }
 
     function updateTimeLineList(startDate, endDate) 
     {
         $.pjax.reload({container: '#pjax-user-timeline', push: false, replace: false, timeout: 5000, data: {startDate: startDate, endDate: endDate}});
+    }
+    
+    function updateTimeLinePendingList() 
+    {
+        $.pjax.reload({container: '#pjax-schedule-pending-request', push: false, replace: false, timeout: 5000});
     }
     
     $('body').off('click', '.btn-open-timeline').on('click', '.btn-open-timeline', function (e) {
@@ -708,7 +716,30 @@ $js = <<<JS
         openModalEventId(id);
     });
     
+    $(document).on('ScheduleRequest:response', function (e, params) {
+        if (params.requestStatus) {
+            calendar.refetchEvents();
+            updateTimeLinePendingList();
+            $('#modal-md').modal('hide');
+        }
+    });
     
+    $(document).on('RequestDecision:response', function (e, params) {
+        if (params.requestStatus) {
+            calendar.refetchEvents();
+            updateTimeLineList();
+            updateTimeLinePendingList();
+            $('#modal-md').modal('hide');
+        }
+    });
+    
+    $(document).on('reloadShitScheduleRequest', function (e, params) {
+          calendar.refetchEvents();
+    });
+    
+     $(document).on('pjax:end', function() {
+         $('[data-toggle="tooltip"]').tooltip();
+    });
 JS;
 
 $this->registerJs($js);

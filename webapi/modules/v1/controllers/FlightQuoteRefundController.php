@@ -4,6 +4,7 @@ namespace webapi\modules\v1\controllers;
 
 use common\components\BackOffice;
 use frontend\helpers\JsonHelper;
+use modules\flight\src\useCases\api\voluntaryRefundExpired\VoluntaryRefundExpiredJob;
 use modules\flight\models\FlightRequest;
 use modules\flight\models\query\FlightRequestQuery;
 use modules\flight\src\repositories\flightRequest\FlightRequestRepository;
@@ -15,6 +16,9 @@ use modules\flight\src\useCases\api\voluntaryRefundCreate\VoluntaryRefundCodeExc
 use modules\flight\src\useCases\api\voluntaryRefundCreate\VoluntaryRefundService;
 use modules\flight\src\useCases\voluntaryRefundInfo\form\VoluntaryRefundInfoForm;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeQuery;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeRepository;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use modules\product\src\entities\productQuoteObjectRefund\ProductQuoteObjectRefund;
 use modules\product\src\entities\productQuoteOptionRefund\ProductQuoteOptionRefund;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundQuery;
@@ -24,7 +28,9 @@ use src\entities\cases\CaseEventLog;
 use src\exception\BoResponseException;
 use src\helpers\app\AppHelper;
 use src\helpers\app\HttpStatusCodeHelper;
+use src\helpers\product\ProductQuoteRefundHelper;
 use src\helpers\setting\SettingHelper;
+use src\repositories\product\ProductQuoteRepository;
 use src\services\CurrencyHelper;
 use webapi\src\ApiCodeException;
 use webapi\src\logger\behaviors\filters\creditCard\CreditCardFilter;
@@ -58,6 +64,8 @@ class FlightQuoteRefundController extends ApiBaseController
     private FlightRequestRepository $flightRequestRepository;
     private VoluntaryRefundService $voluntaryRefundService;
     private ProductQuoteRefundRepository $productQuoteRefundRepository;
+    private ProductQuoteChangeRepository $productQuoteChangeRepository;
+    private ProductQuoteRepository $productQuoteRepository;
 
     public function __construct(
         $id,
@@ -65,12 +73,16 @@ class FlightQuoteRefundController extends ApiBaseController
         FlightRequestRepository $flightRequestRepository,
         VoluntaryRefundService $voluntaryRefundService,
         ProductQuoteRefundRepository $productQuoteRefundRepository,
+        ProductQuoteChangeRepository $productQuoteChangeRepository,
+        ProductQuoteRepository $productQuoteRepository,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
         $this->flightRequestRepository = $flightRequestRepository;
         $this->voluntaryRefundService = $voluntaryRefundService;
         $this->productQuoteRefundRepository = $productQuoteRefundRepository;
+        $this->productQuoteChangeRepository = $productQuoteChangeRepository;
+        $this->productQuoteRepository = $productQuoteRepository;
     }
 
     public function behaviors()
@@ -552,11 +564,11 @@ class FlightQuoteRefundController extends ApiBaseController
 
             if ($productQuote = ProductQuoteQuery::getProductQuoteByBookingId($voluntaryRefundCreateForm->bookingId)) {
                 if ($productQuote->isChangeable()) {
-                    if ($productQuote->productQuoteRefundsActive || $productQuote->productQuoteChangesActive) {
+                    if ($productQuote->productQuoteRefundsActive || $productQuote->isProductQuoteChangeAccepted()) {
                         throw new \DomainException('Quote not available for refund due to exists active refund or change', VoluntaryRefundCodeException::PRODUCT_QUOTE_NOT_AVAILABLE);
                     }
                 } else {
-                    throw new \DomainException('Quote not available for refund due to status of product quote not in changeable list', VoluntaryRefundCodeException::PRODUCT_QUOTE_NOT_AVAILABLE_CHG_LIST);
+                    throw new \DomainException('Quote not available for refund due to status of product quote not in changeable list. BookingId [' . $voluntaryRefundCreateForm->bookingId . ']', VoluntaryRefundCodeException::PRODUCT_QUOTE_NOT_AVAILABLE_CHG_LIST);
                 }
                 $refundResult = $this->voluntaryRefundService
                     ->processProductQuote($productQuote)
@@ -722,6 +734,18 @@ class FlightQuoteRefundController extends ApiBaseController
      *      "errors": []
      *  }
      *
+     * @apiErrorExample {json} Error-Response:
+     * HTTP/1.1 410 Gone
+     * {
+     *        "status": 410,
+     *        "message": "Date 2022-05-20 23:59:59 has past",
+     *        "errors": [],
+     *        "code": "13115",
+     *        "technical": {
+     *           ...
+     *        }
+     * }
+     *
      * @apiErrorExample {json} Error-Response Validation:
      * HTTP/1.1 200 OK
      * {
@@ -754,6 +778,7 @@ class FlightQuoteRefundController extends ApiBaseController
      *      13107 - Validation Failed
      *      13112 - Not found refund in pending status by booking and gid
      *      13113 - Flight Request already processing; This feature helps to handle duplicate requests
+     *      13115 - Date is expired
      *      15411 - Request to BO failed; See tab "Error From BO"
      *      15412 - BO endpoint is not set; This is system crm error
      *      150001 - Flight Request saving failed; This is system crm error
@@ -827,11 +852,31 @@ class FlightQuoteRefundController extends ApiBaseController
             $flightRequest->statusToPending();
             $flightRequest = $this->flightRequestRepository->save($flightRequest);
 
-            $productQuoteRefund = ProductQuoteRefundQuery::getByBookingIdGidStatuses($voluntaryRefundConfirmForm->bookingId, $voluntaryRefundConfirmForm->refundGid, [ProductQuoteRefundStatus::PENDING]);
+            $productQuoteRefund = ProductQuoteRefundQuery::getByBookingIdGidStatuses(
+                $voluntaryRefundConfirmForm->bookingId,
+                $voluntaryRefundConfirmForm->refundGid,
+                [ProductQuoteRefundStatus::PENDING]
+            );
             if (!$productQuoteRefund) {
                 throw new \RuntimeException(
                     'Not found pending product quote refund by bookingId(' . $voluntaryRefundConfirmForm->bookingId . ') and refund gid (' . $voluntaryRefundConfirmForm->refundGid . ')',
                     ApiCodeException::DATA_NOT_FOUND
+                );
+            }
+
+            if (!ProductQuoteRefundHelper::checkingExpirationDate($productQuoteRefund)) {
+                $flightRequest->fr_job_id = \Yii::$app->queue_job
+                    ->priority(10)
+                    ->push(new VoluntaryRefundExpiredJob(
+                        $flightRequest->fr_id,
+                        $productQuoteRefund->pqr_id
+                    ));
+                $this->flightRequestRepository->save($flightRequest);
+
+                return new ErrorResponse(
+                    new StatusCodeMessage(HttpStatusCodeHelper::GONE),
+                    new MessageMessage(sprintf('Date %s has past', $productQuoteRefund->pqr_expiration_dt)),
+                    new CodeMessage(ApiCodeException::DATA_EXPIRED)
                 );
             }
 
@@ -842,6 +887,25 @@ class FlightQuoteRefundController extends ApiBaseController
             $productQuoteRefund->inProgress();
             $productQuoteRefund->detachBehavior('user');
             $this->productQuoteRefundRepository->save($productQuoteRefund);
+
+            $productChangeQuotes = $this->productQuoteChangeRepository->findAllByBookingId(
+                $voluntaryRefundConfirmForm->bookingId,
+                [ProductQuoteChangeStatus::PENDING, ProductQuoteChangeStatus::NEW]
+            );
+            foreach ($productChangeQuotes as $productChangeQuote) {
+                $productChangeQuote->detachBehavior('user');
+                $productChangeQuote->cancel();
+                $this->productQuoteChangeRepository->save($productChangeQuote);
+
+
+                foreach ($productChangeQuote->productQuoteChangeRelations ?? [] as $changeRelation) {
+                    $relatedProductQuote = $changeRelation->pqcrPq;
+                    if ($relatedProductQuote->isNew() || $relatedProductQuote->isPending()) {
+                        $relatedProductQuote->cancelled(null, 'Voluntary Refund Confirm via api processing');
+                        $this->productQuoteRepository->save($relatedProductQuote);
+                    }
+                }
+            }
 
             $boDataRequest = BoRequestDataHelper::getDataForVoluntaryRefundConfirm($project->api_key, $voluntaryRefundConfirmForm, $productQuoteRefund);
             $result = BackOffice::voluntaryRefund($boDataRequest, $boRequestEndpoint);

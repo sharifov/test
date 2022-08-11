@@ -12,6 +12,7 @@ namespace modules\abac\components;
 use Casbin\CoreEnforcer;
 use common\models\Employee;
 use modules\abac\src\entities\AbacPolicy;
+use modules\featureFlag\FFlag;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use stdClass;
@@ -43,6 +44,8 @@ class AbacComponent extends Component
 {
     public array $modules = [];
     public bool $cacheEnable = true;
+    public bool $cacheEnforceEnable = true;
+    public int $cacheEnforceDuration = 3600 * 24;
     public string $cacheKey = 'abac-policy';
     public string $cacheTagDependency = 'abac-tag-dependency';
     public string $abacModelPath = '@common/config/casbin/abac_model.conf';
@@ -50,7 +53,6 @@ class AbacComponent extends Component
         '/modules/',
         '/frontend/',
         '/common/',
-        '/sales/',
         '/src/',
     ];
     public array $scanExtMask = ['*.php'];
@@ -96,10 +98,17 @@ class AbacComponent extends Component
         $user = new \stdClass();
         $user->id = $me->id;
         $user->username = $me->username;
+
         $user->roles =  $me->getRoles(true);
+
         $user->projects = $me->access->getAllProjects('key'); //getProjects();
         $user->groups = $me->access->getAllGroups();
         $user->departments = $me->access->getAllDepartments();
+
+        /** @fflag FFlag::FF_KEY_USER_SKILL_IN_ABAC_ENABLE, User Skill in abac parameters enable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_USER_SKILL_IN_ABAC_ENABLE)) {
+            $user->skill = $me->access->getSkill();
+        }
 
         $request = new \stdClass();
         $request->controller = Yii::$app->controller->uniqueId;
@@ -145,28 +154,66 @@ class AbacComponent extends Component
             $subject = new \stdClass();
         }
         try {
-//            if (!$user && (Yii::$app instanceof \yii\web\Application) && Yii::$app->id === 'app-frontend') {
-//                $user = Auth::user();
-//            }
             if (!$user) {
                 $user = Auth::user();
             }
 
             $subject->env = $this->getEnv($user);
-            //$sub->data = $subject;
+            $enforserObj = $this->enforser;
 
-            if ($this->enforser->enforce($subject, $object, $action) === true) {
-                return true;
+            if ($this->cacheEnforceEnable) {
+                $preparedSubject = self::prepareSubject($subject);
+                $keyCache = self::cacheCanGenerate($preparedSubject, $object, $action);
+                $data = Yii::$app->cache->get($keyCache);
+
+                if ($data === false) {
+                    $data = (int) self::canEnforce($enforserObj, $subject, $object, $action);
+                    $dependency = new TagDependency([
+                        'tags' => [AbacPolicy::CACHE_KEY . $object, AbacPolicy::CACHE_KEY],
+                    ]);
+                    Yii::$app->cache->set($keyCache, $data, $this->cacheEnforceDuration, $dependency);
+                    unset($dependency);
+                }
+                return (bool) $data;
             }
+
+            return self::canEnforce($enforserObj, $subject, $object, $action);
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableLog($throwable, true), 'AbacComponent::can');
-            //VarDumper::dump(AppHelper::throwableLog($throwable), 10, true);
             return null;
         }
-
-        return false;
     }
 
+    private static function prepareSubject(\stdClass $origSubject): \stdClass
+    {
+        $subject = clone $origSubject;
+        if ($subject->env->dt->time ?? null) {
+            unset($subject->env->dt->time);
+        }
+        if ($subject->env->dt->hour ?? null) {
+            unset($subject->env->dt->hour);
+        }
+        if ($subject->env->dt->min ?? null) {
+            unset($subject->env->dt->min);
+        }
+        return $subject;
+    }
+
+    /**
+     * @throws \Casbin\Exceptions\CasbinException
+     */
+    private static function canEnforce(Enforcer $enforserObj, \stdClass $subject, string $object, string $action): bool
+    {
+        return $enforserObj->enforce($subject, $object, $action) === true;
+    }
+
+    private static function cacheCanGenerate(\stdClass $subject, string $object, string $action, string $algo = 'md4'): string
+    {
+        return hash(
+            $algo,
+            \src\helpers\text\HashHelper::generateHashFromObject($subject) . $object . $action
+        );
+    }
 
     /**
      * @return array
@@ -300,7 +347,7 @@ class AbacComponent extends Component
 
                 $row = [];
                 $row[] = $policy->ap_rule_type;
-                $row[] = $policy->ap_subject;
+                $row[] = empty($policy->ap_subject) ? 'true' : $policy->ap_subject;
                 $row[] = $policy->ap_object;
                 $row[] = $policy->ap_action;
                 $row[] = $policy->getEffectName();
@@ -386,6 +433,7 @@ class AbacComponent extends Component
             TagDependency::invalidate(Yii::$app->cache, $cacheTagDependency);
             return true;
         }
+        TagDependency::invalidate(Yii::$app->cache, [AbacPolicy::CACHE_KEY]);
         return false;
     }
 }

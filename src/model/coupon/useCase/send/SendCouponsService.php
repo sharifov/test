@@ -45,7 +45,7 @@ class SendCouponsService
         $emailData['coupons'] = $this->getEmailData($form->couponIds);
 
         /** @var CommunicationService $communication */
-        $communication = Yii::$app->communication;
+        $communication = Yii::$app->comms;
 
         $emailFrom = $this->getEmailFrom($case, $user);
 

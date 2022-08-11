@@ -11,6 +11,7 @@ namespace common\components\jobs;
 use common\components\Metrics;
 use common\models\Call;
 use common\models\Client;
+use common\models\DepartmentPhoneProject;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Notifications;
@@ -30,7 +31,9 @@ use src\services\cases\CasesCreateService;
 use src\services\cases\CasesSaleService;
 use src\services\client\ClientCreateForm;
 use src\services\client\ClientManageService;
+use src\services\departmentPhoneProject\DepartmentPhoneProjectParamsService;
 use src\services\lead\LeadManageService;
+use modules\experiment\models\ExperimentTarget;
 use yii\base\Exception;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -109,8 +112,12 @@ class CallQueueJob extends BaseJob implements JobInterface
 
                                 if (
                                     !$lead &&
-                                    $departmentParams->object->lead->createOnCall &&
                                     $projectParams->object->lead->allow_auto_lead_create &&
+                                    (
+                                        $departmentParams->object->lead->createOnCall->createOnDirectCall && $call->isDirect() ||
+                                        $departmentParams->object->lead->createOnCall->createOnRedirectCall && $call->isRedirectCall() ||
+                                        $departmentParams->object->lead->createOnCall->createOnGeneralLineCall && $call->isGeneralLine()
+                                    ) &&
                                     !ContactPhoneListService::isAutoCreateLeadOff($call->c_from)
                                 ) {
                                     if ($call->isDirect() || $call->isRedirectCall()) {
@@ -127,7 +134,6 @@ class CallQueueJob extends BaseJob implements JobInterface
                                             ], 'CallQueueJob:defaultSourceCidDetecting');
                                         }
                                     }
-
                                     $lead = (Yii::createObject(LeadManageService::class))
                                         ->createByIncomingCall(
                                             $call->c_from,
@@ -140,6 +146,14 @@ class CallQueueJob extends BaseJob implements JobInterface
                                 }
 
                                 $call->c_lead_id = $lead->id ?? null;
+
+                                if ($call->isGeneralLine()) {
+                                    $departmentPhone = DepartmentPhoneProject::find()->byPhone($call->c_to, false)->enabled()->limit(1)->one();
+                                    if ($departmentPhone) {
+                                        $departmentPhoneProjectParamsService = new DepartmentPhoneProjectParamsService($departmentPhone);
+                                        $departmentPhoneProjectParamsService->processExperiments(ExperimentTarget::EXT_TYPE_LEAD, $call->c_lead_id);
+                                    }
+                                }
 
                                 if (
                                     !$departmentParams->object->lead->createOnCall &&
@@ -182,13 +196,19 @@ class CallQueueJob extends BaseJob implements JobInterface
                             $allowAutoCreateByProject = $projectParams->object->case->allow_auto_case_create;
                             $createCaseOnIncoming = (
                                 $allowAutoCreateByProject &&
-                                $departmentParams->object->case->createOnCall &&
+                                (
+                                    $departmentParams->object->case->createOnCall->createOnDirectCall && $call->isDirect() ||
+                                    $departmentParams->object->case->createOnCall->createOnRedirectCall && $call->isRedirectCall() ||
+                                    $departmentParams->object->case->createOnCall->createOnGeneralLineCall && $call->isGeneralLine()
+                                ) &&
                                 !ContactPhoneListService::isAutoCreateCaseOff($call->c_from)
                             );
 
                             $case = $this->casesCreateService->getOrCreateByCall(
                                 [new PhoneCreateForm(['phone' => $call->c_from])],
                                 $call->c_id,
+                                $call->c_to,
+                                $call->isGeneralLine(),
                                 $call->c_project_id,
                                 (int)$call->c_dep_id,
                                 $createCaseOnIncoming,
@@ -221,6 +241,7 @@ class CallQueueJob extends BaseJob implements JobInterface
                                     $job = new CreateSaleFromBOJob();
                                     $job->case_id = $case->cs_id;
                                     $job->phone = $call->c_from;
+                                    $job->project_key = $case->project->api_key ?? null;
                                     Yii::$app->queue_job->priority(100)->push($job);
                                 } catch (\Throwable $throwable) {
                                     Yii::error(

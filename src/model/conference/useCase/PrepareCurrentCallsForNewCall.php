@@ -27,7 +27,7 @@ class PrepareCurrentCallsForNewCall
     public function __construct(int $userId)
     {
         $this->userId = $userId;
-        $this->communication = \Yii::$app->communication;
+        $this->communication = \Yii::$app->comms;
     }
 
     public function prepare(?string $holdAnnounce = null): bool

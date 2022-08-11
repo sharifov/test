@@ -37,7 +37,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'sst_title',
             'sst_enabled:boolean',
             'sst_readonly:boolean',
-            'sst_work_time:boolean',
+            [
+                'attribute' => 'sst_subtype_id',
+                'value' => static function (ShiftScheduleType $model) {
+                    return $model->getSubtypeName();
+                }
+            ],
             'sst_color',
             'sst_icon_class',
             [
@@ -46,7 +51,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $model->sst_icon_class ? Html::tag(
                         'i',
                         '',
-                        ['class' => $model->sst_icon_class] // , 'style' => 'color: ' . $model->sst_color
+                        ['class' => $model->sst_icon_class]
                     ) : '-';
                 },
                 'format' => 'raw',
@@ -62,13 +67,24 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw',
             ],
+            [
+                'label' => 'Labels',
+                'value' => static function (ShiftScheduleType $model) {
+                    $labelList = $model->getLabelList();
+                    return $labelList ? implode(', ', $labelList) : '-';
+                },
+            ],
             'sst_css_class',
-            'sst_params_json',
+            //'sst_params_json',
             'sst_sort_order',
             'sst_updated_dt:datetime',
             'sst_updated_user_id:username',
         ],
     ]) ?>
+    </div>
+    <div class="col-md-6">
+        <h5><?php echo $model->getAttributeLabel('sst_params_json') ?></h5>
+        <pre><?php echo \yii\helpers\VarDumper::dump($model->sst_params_json, 10, true); ?></pre>
     </div>
 
 </div>

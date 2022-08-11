@@ -3,6 +3,7 @@
 use common\models\CaseSale;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Url;
 use yii\widgets\Pjax;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
@@ -23,15 +24,25 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(['timeout' => 5000, 'scrollTo' => 0]); ?>
+
     <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+
+    <?php  echo $this->render('_pagination', ['model' => $searchModel]);?>
+
+    <?= $searchModel->filterCount ? 'Find <b>' . $searchModel->filterCount . '</b> items' : null ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
+        'filterUrl' => Url::to(['case-sale/index']),
+        'layout' => "{items}",
         'columns' => [
             //['class' => 'yii\grid\SerialColumn'],
 
-            'css_cs_id',
+            [
+                'attribute' => 'css_cs_id',
+                'enableSorting' => false,
+            ],
             'css_sale_id',
             'css_sale_book_id',
             'css_sale_pnr',
@@ -141,6 +152,8 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\ActionColumn'],
         ],
     ]); ?>
+
+    <?php  echo $this->render('_pagination', ['model' => $searchModel]); ?>
 
     <?php Pjax::end(); ?>
 
