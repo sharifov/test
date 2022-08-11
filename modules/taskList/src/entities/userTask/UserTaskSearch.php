@@ -20,6 +20,8 @@ class UserTaskSearch extends UserTask
     public string $createTimeStart = '';
     public string $createTimeEnd = '';
 
+    public string $taskName = '';
+
     public string $clientStartDate = '';
     public string $clientEndDate = '';
 //    public string $startedDateRange = '';
@@ -71,6 +73,8 @@ class UserTaskSearch extends UserTask
 
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['createTimeStart', 'createTimeEnd'], 'safe'],
+
+            ['taskName', 'string'],
         ];
     }
 
@@ -234,6 +238,11 @@ class UserTaskSearch extends UserTask
                 $message['model'] = ArrayHelper::toArray($this);
                 \Yii::error($message, 'UserTaskSearch:search:Throwable');
             }
+        }
+
+        if (!empty($this->taskName)) {
+            $query->innerJoin('task_list', 'task_list.tl_id = user_task.ut_task_list_id');
+            $query->andFilterWhere(['like', 'tl_title', $this->taskName]);
         }
 
         // grid filtering conditions
