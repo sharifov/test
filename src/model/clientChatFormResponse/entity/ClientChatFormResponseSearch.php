@@ -42,19 +42,12 @@ class ClientChatFormResponseSearch extends ClientChatFormResponse
             'ccfr_id' => $this->ccfr_id,
             'ccfr_client_chat_id' => $this->ccfr_client_chat_id,
             'ccfr_form_id' => $this->ccfr_form_id,
+            'DATE(ccfr_rc_created_dt)' => $this->ccfr_rc_created_dt,
+            'DATE(ccfr_created_dt)' => $this->ccfr_created_dt,
         ]);
 
         $query->andFilterWhere(['like', 'ccfr_value', $this->ccfr_value]);
         $query->andFilterWhere(['like', 'ccfr_uid', $this->ccfr_uid]);
-
-        if ($this->ccfr_rc_created_dt) {
-            $query->andFilterWhere(['>=', 'ccfr_rc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ccfr_rc_created_dt))])
-                ->andFilterWhere(['<=', 'ccfr_rc_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ccfr_rc_created_dt) + 3600 * 24)]);
-        }
-        if ($this->ccfr_created_dt) {
-            $query->andFilterWhere(['>=', 'ccfr_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ccfr_created_dt))])
-                ->andFilterWhere(['<=', 'ccfr_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->ccfr_created_dt) + 3600 * 24)]);
-        }
 
         return $dataProvider;
     }

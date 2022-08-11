@@ -33,7 +33,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'attributes' => [
                 'ccfr_id',
                 'ccfr_uid',
-                'ccfr_client_chat_id',
+                [
+                    'attribute' => 'ccfr_client_chat_id',
+                    'format' => 'clientChat',
+                    'value' => static function (ClientChatFormResponse $model) {
+                        return $model->clientChat;
+                    }
+                ],
                 [
                     'attribute' => 'ccfr_form_id',
                     'value' => static function (ClientChatFormResponse $model) {
