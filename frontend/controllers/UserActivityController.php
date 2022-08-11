@@ -2,11 +2,18 @@
 
 namespace frontend\controllers;
 
+use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
+use modules\taskList\src\entities\userTask\UserTaskSearch;
+use modules\user\src\events\UserEvents;
 use modules\user\userActivity\entity\UserActivity;
 use modules\user\userActivity\entity\search\UserActivitySearch;
+use modules\user\userActivity\service\UserActivityService;
+use src\auth\Auth;
 use Yii;
 use yii\db\StaleObjectException;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -47,6 +54,144 @@ class UserActivityController extends FController
             ],
         ];
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
+    }
+
+
+    /**
+     * Lists all UserActivity models.
+     *
+     * @return string
+     */
+    public function actionDashboard(): string
+    {
+        $user = Auth::user();
+//        $userTimeZone = $user->timezone ?: 'UTC';
+
+        $startDateTime = date('Y-m-d H:i', strtotime('-24 hours'));
+        $endDateTime = date('Y-m-d H:i', strtotime('+34 hours'));
+
+        $scheduleEventList = UserShiftScheduleQuery::getExistEventList(
+            $user->id,
+            $startDateTime,
+            $endDateTime,
+            null,
+            [ShiftScheduleType::SUBTYPE_WORK_TIME]
+        );
+
+
+        $userOnlineEvents = UserActivityService::getUniteEventsByUserId(
+            $user->id,
+            date('Y-m-d H:i:s', strtotime($startDateTime)),
+            date('Y-m-d H:i:s'),
+            UserEvents::EVENT_ONLINE,
+            5,
+            3
+        );
+
+
+        $beforeMin = 60;
+        $afterMin = 60;
+        $userOnlineData = [];
+
+        if ($scheduleEventList) {
+            foreach ($scheduleEventList as $item) {
+                $startDateTimeUTC = $item['uss_start_utc_dt'];
+                $endDateTimeUTC = $item['uss_end_utc_dt'];
+
+                $lateArrivalStartDateTime = date('Y-m-d H:i:s', strtotime($startDateTimeUTC) - $beforeMin * 60);
+                $overtimeEndDateTime = date('Y-m-d H:i:s', strtotime($endDateTimeUTC) + $afterMin * 60);
+
+                $lateArrival = UserActivityService::getUniteEventsByUserId(
+                    $user->id,
+                    $lateArrivalStartDateTime,
+                    $startDateTimeUTC,
+                    UserEvents::EVENT_ONLINE,
+                    5,
+                    3
+                );
+
+                $overtime = UserActivityService::getUniteEventsByUserId(
+                    $user->id,
+                    $endDateTimeUTC,
+                    $overtimeEndDateTime,
+                    UserEvents::EVENT_ONLINE,
+                    5,
+                    3
+                );
+
+                $shift = UserActivityService::getUniteEventsByUserId(
+                    $user->id,
+                    $startDateTimeUTC,
+                    $endDateTimeUTC,
+                    UserEvents::EVENT_ONLINE,
+                    5,
+                    3
+                );
+
+                $earlyLeave = [];
+                if ($shift && !empty($shift[0])) {
+                    $firstEvent = $shift[0];
+                    $earlyLeave = [
+                      [
+                          'start' => $startDateTimeUTC,
+                          'end' => $firstEvent['start'],
+                          'duration' => (int) (strtotime($firstEvent['start']) - strtotime($startDateTimeUTC)) / 60
+                      ]
+                    ];
+                }
+
+                $earlyArrival = [];
+                if ($shift) {
+                    $lastEvent = end($shift);
+                    $earlyArrival = [
+                        [
+                            'start' => $lastEvent['end'],
+                            'end' => $endDateTimeUTC,
+                            'duration' => (int) (strtotime($endDateTimeUTC) - strtotime($lastEvent['end'])) / 60
+                        ]
+                    ];
+                }
+
+
+                $userOnlineData[$item['uss_id']] = [
+                    'lateArrival' => $lateArrival,
+                    'overtime' => $overtime,
+                    'shift' => $shift,
+                    'earlyLeave' => $earlyLeave,
+                    'earlyArrival' => $earlyArrival,
+                ];
+            }
+        }
+
+       // VarDumper::dump($userOnlineData, 10, true);
+
+
+        $userActiveEvents = UserActivityService::getUniteEventsByUserId(
+            $user->id,
+            date('Y-m-d H:i:s', strtotime($startDateTime)),
+            date('Y-m-d H:i:s'),
+            UserEvents::EVENT_ACTIVE,
+            3,
+            3
+        );
+
+
+
+
+
+        return $this->render(
+            '/user/user-activity/dashboard',
+            [
+                // 'userTimeZone' => $userTimeZone,
+                'user' => $user,
+                'startDateTime' => $startDateTime,
+                'endDateTime' => $endDateTime,
+                'scheduleEventList' => $scheduleEventList,
+                'userActiveEvents' => $userActiveEvents,
+                'userOnlineEvents' => $userOnlineEvents,
+                'userOnlineData' => $userOnlineData,
+            ]
+        );
     }
 
     /**
