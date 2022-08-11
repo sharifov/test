@@ -26,13 +26,15 @@ $this->params['breadcrumbs'][] = $this->title;
     ['builder','id' => $model->ccf_id],
     ['class' => 'btn btn-secondary']
 )?>
-            <?= Html::a('Delete', ['delete', 'id' => $model->ccf_id], [
-                'class' => 'btn btn-danger',
-                'data' => [
-                    'confirm' => 'Are you sure you want to delete this item?',
-                    'method' => 'post',
-                ],
-            ]) ?>
+            <?php if (!$model->ccf_is_system) : ?>
+                <?= Html::a('Delete', ['delete', 'id' => $model->ccf_id], [
+                    'class' => 'btn btn-danger',
+                    'data' => [
+                        'confirm' => 'Are you sure you want to delete this item?',
+                        'method' => 'post',
+                    ],
+                ]) ?>
+            <?php endif ?>
         </p>
 
         <?= DetailView::widget([
@@ -46,6 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'ccf_created_user_id:userName',
                 'ccf_updated_user_id:userName',
                 'ccf_created_dt:byUserDateTime',
+                'ccf_is_system:booleanByLabel',
                 'ccf_updated_dt:byUserDateTime',
                 [
                     'attribute' => 'ccf_dataform_json',

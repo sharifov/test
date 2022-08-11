@@ -55,6 +55,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'options' => ['style' => 'width:140px']
             ],
             [
+                'attribute' => 'ccf_is_system',
+                'format' => 'booleanByLabel',
+                'filter' =>  [1 => 'Yes', 0 => 'No']
+            ],
+            [
                 'attribute' => 'ccf_created_dt',
                 'value' => static function (ClientChatForm $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->ccf_created_dt));
@@ -81,6 +86,11 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => ActionColumn::class,
                 'template' => '{view} {update} {form_builder} {delete}',
+                'visibleButtons' => [
+                    'delete' => static function (ClientChatForm $model) {
+                        return !$model->ccf_is_system;
+                    },
+                ],
                 'buttons' => [
                     'form_builder' => static function ($url, ClientChatForm $model) {
                         return Html::a(

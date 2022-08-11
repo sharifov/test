@@ -7,6 +7,7 @@ use src\model\clientChatForm\entity\ClientChatForm;
 use src\model\clientChatForm\entity\ClientChatFormSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -123,7 +124,13 @@ class ClientChatFormCrudController extends FController
      */
     public function actionDelete($id): Response
     {
-        $this->findModel($id)->delete();
+        $model = $this->findModel($id);
+
+        if ($model->ccf_is_system) {
+            throw new ForbiddenHttpException('System key cannot be deleted.');
+        }
+
+        $model->delete();
 
         return $this->redirect(['index']);
     }

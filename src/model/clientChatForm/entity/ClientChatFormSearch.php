@@ -18,6 +18,7 @@ class ClientChatFormSearch extends ClientChatForm
             ['ccf_dataform_json', 'string', 'max' => 200],
 
             ['ccf_enabled', 'boolean'],
+            ['ccf_is_system', 'boolean'],
 
             ['ccf_id', 'integer'],
 
@@ -57,6 +58,7 @@ class ClientChatFormSearch extends ClientChatForm
             'ccf_enabled' => $this->ccf_enabled,
             'ccf_created_user_id' => $this->ccf_created_user_id,
             'ccf_updated_user_id' => $this->ccf_updated_user_id,
+            'ccf_is_system' => $this->ccf_is_system,
         ]);
 
         $query->andFilterWhere(['like', 'ccf_key', $this->ccf_key])
