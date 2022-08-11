@@ -65,6 +65,16 @@ use kartik\select2\Select2;
             ])->label('Shift') ?>
         </div>
         <div class="col-md-2">
+            <?= $form->field($model, 'department', [
+                'options' => ['class' => 'form-group']
+            ])->widget(Select2::class, [
+                'data' => $departments,
+                'size' => Select2::SMALL,
+                'options' => ['placeholder' => 'Select Department', 'multiple' => true],
+                'pluginOptions' => ['allowClear' => true],
+            ])->label('Department') ?>
+        </div>
+        <div class="col-md-2">
             <?= $form->field($model, 'userGroup', [
                 'options' => ['class' => 'form-group']
             ])->widget(Select2::class, [
