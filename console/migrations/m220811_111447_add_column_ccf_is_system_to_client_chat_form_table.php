@@ -29,19 +29,4 @@ class m220811_111447_add_column_ccf_is_system_to_client_chat_form_table extends 
     {
         $this->dropColumn('{{%client_chat_form}}', 'ccf_is_system');
     }
-
-    /*
-    // Use up()/down() to run migration code without a transaction.
-    public function up()
-    {
-
-    }
-
-    public function down()
-    {
-        echo "m220811_111447_add_column_ccf_is_system_to_client_chat_form_table cannot be reverted.\n";
-
-        return false;
-    }
-    */
 }
