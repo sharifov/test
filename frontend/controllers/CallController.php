@@ -25,6 +25,7 @@ use common\models\UserProfile;
 use common\models\UserProjectParams;
 use frontend\widgets\newWebPhone\call\socket\MissedCallMessage;
 use http\Exception\InvalidArgumentException;
+use modules\featureFlag\FFlag;
 use src\auth\Auth;
 use src\entities\cases\Cases;
 use src\guards\call\CallDisplayGuard;
@@ -1370,7 +1371,14 @@ class CallController extends FController
         $call = $this->findCallModel($callSid);
 
         $callGuard = new CallDisplayGuard();
-        return $this->renderAjax('monitor/_call_info', [
+
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_REFACTORING_INCOMING_CALL_ENABLE)) {
+            $view = 'monitor/_call_info_jquery';
+        } else {
+            $view = 'monitor/_call_info';
+        }
+
+        return $this->renderAjax($view, [
             'call' => $call,
             'callGuard' => $callGuard
         ]);
