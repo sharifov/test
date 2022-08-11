@@ -111,7 +111,7 @@ class ClientChatForm extends ActiveRecord
      */
     public static function getList(): array
     {
-        return self::find()->select(['ccf_name', 'ccf_id'])->orderBy(['ccf_name' => SORT_ASC])->indexBy('ccf_id')->cache(600)->asArray()->column();
+        return self::find()->select(['ccf_name', 'ccf_id'])->orderBy(['ccf_name' => SORT_ASC])->indexBy('ccf_id')->asArray()->column();
     }
 
     public function attributeLabels(): array
