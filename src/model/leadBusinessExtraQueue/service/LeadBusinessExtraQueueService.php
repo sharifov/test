@@ -77,13 +77,14 @@ class LeadBusinessExtraQueueService
                     $lead,
                     LeadBusinessExtraQueueLogStatus::REASON_REMOVE_FROM_LEAD_DUE_TO_SYNCING_OFFSET_GMT
                 );
-            } else {
-                $businessExtraQ = LeadBusinessExtraQueueQuery::getByLeadAndKey($lead->id, $lbeqr->lbeqr_id);
-                if (isset($businessExtraQ)) {
-                    return;
-                }
             }
             if (isset($lbeqr)) {
+                if (!$isStrictFirstTime) {
+                    $businessExtraQ = LeadBusinessExtraQueueQuery::getByLeadAndKey($lead->id, $lbeqr->lbeqr_id);
+                    if (isset($businessExtraQ)) {
+                        return;
+                    }
+                }
                 $leadBusinessExtraQueue = LeadBusinessExtraQueue::create(
                     $lead->id,
                     $lbeqr->lbeqr_id,
