@@ -154,12 +154,12 @@ class EmailReviewQueue extends \yii\db\ActiveRecord
 
     public function getEmailLead(): ?Lead
     {
-        return $this->email->lead ?? null;
+        return $this->email->lead;
     }
 
     public function getEmailCase(): ?Cases
     {
-        return $this->email->case ?? null;
+        return $this->email->case;
     }
 
     /**
