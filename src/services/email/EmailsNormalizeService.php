@@ -489,6 +489,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
 
     public function createFromDTO(EmailDTO $emailDTO, $autoDetectEmpty = true): Email
     {
+        $clientId = null;
         if ($autoDetectEmpty) {
             $clientId = $emailDTO->clientId ?? $this->helper->detectClientId($emailDTO->emailFrom);
             $leadId =  $emailDTO->leadId ?? $this->helper->detectLeadId($emailDTO->emailSubject, $emailDTO->refMessageId);
