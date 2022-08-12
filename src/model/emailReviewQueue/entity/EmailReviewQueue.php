@@ -159,7 +159,7 @@ class EmailReviewQueue extends \yii\db\ActiveRecord
 
     public function getEmailCase(): ?Cases
     {
-        return $this->email->case  ?? null;
+        return $this->email->case ?? null;
     }
 
     /**
