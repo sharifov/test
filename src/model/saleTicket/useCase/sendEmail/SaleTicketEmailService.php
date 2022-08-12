@@ -50,7 +50,7 @@ class SaleTicketEmailService
                 'caseId' => $caseId,
                 'emailSubject' => $this->generateEmailSubject($emailSettings['subject'], $saleTickets[0], $bookingId),
                 'bodyHtml' => $emailBody,
-                'emailFrom' => $this->getEmailFrom($mail->e_project_id, $user),
+                'emailFrom' => $this->getEmailFrom($caseSale->cssCs->cs_project_id ?? null, $user),
                 'emailTo' => $emailSettings['sendTo'][0],
                 'createdUserId' => $user->id,
                 'emailCc' => $this->getEmailCC($emailSettings, $saleTickets[0], SaleTicketHelper::isRecallCommissionChanged($saleTickets, $caseSale->getSaleDataDecoded()))
