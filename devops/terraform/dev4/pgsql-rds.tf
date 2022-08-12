@@ -64,7 +64,7 @@ resource "aws_security_group" "pgsql" {
   }
 
   tags = {
-    Name        = "mysql-${var.PROJECT}-${var.ENV}"
+    Name        = "pgsql-${var.PROJECT}-${var.ENV}"
     Environment = var.ENV
     Project     = var.PROJECT
     Ns          = var.NAMESPACE
