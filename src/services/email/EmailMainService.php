@@ -435,7 +435,7 @@ class EmailMainService implements EmailServiceInterface
                     'error' => 'File not exist : ' . $path,
                 ]), 'EmailMainService:getAttachmentsArray');
             } else {
-                array_push($emailDataAttachments['files'], $file);
+                $emailDataAttachments['files'][] = $file;
             }
         }
 
