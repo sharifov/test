@@ -62,14 +62,7 @@ resource "aws_security_group" "pgsql" {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = [var.VPC_CIDR]
-  }
-
-  ingress {
-    from_port   = 3306
-    to_port     = 3306
-    protocol    = "tcp"
-    cidr_blocks = [var.INFRA_CIDR]
+    cidr_blocks = [var.VPC_CIDR, var.INFRA_CIDR]
   }
 
   egress {
