@@ -212,8 +212,12 @@ class CasesCommunicationService
         $content_data['case'] = [
             'id'  => $case->cs_id,
             'gid' => $case->cs_gid,
-            'order_uid' => $case->cs_order_uid
+            'order_uid' => $case->cs_order_uid,
         ];
+
+        if ($case->category) {
+            $content_data['case']['type'] = $case->category->cc_key;
+        }
 
         if ($case->caseSale) {
             $content_data['sales'] = array_column($case->caseSale, 'css_sale_book_id', 'css_sale_id');
