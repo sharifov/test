@@ -173,6 +173,9 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
                 'e_departament_id' => $form->depId,
                 'e_created_user_id' => $form->getUserId() ?? $this->userId,
                 'e_id' => $form->emailId ?? null,
+                'e_created_dt' => $form->createdDt ?? date('Y-m-d H:i:s'),
+                'e_updated_dt' => $form->updatedDt ?? date('Y-m-d H:i:s'),
+                'e_is_deleted' => $form->isDeleted ?? 0,
             ];
             $email = Email::create($emailData);
             //=!Email
