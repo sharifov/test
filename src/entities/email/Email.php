@@ -31,7 +31,7 @@ use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
  * @property int|null $e_project_id
  * @property int|null $e_departament_id
  * @property int $e_type_id
- * @property int $e_is_deleted
+ * @property bool $e_is_deleted
  * @property int $e_status_id
  * @property int|null $e_created_user_id
  * @property int|null $e_updated_user_id
@@ -86,6 +86,8 @@ use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
  * @property string|null $statusDoneDt
  * @property string $statusName
  * @property string $typeName
+ * @property bool $isNew
+ * @property bool $isDeleted
  *
  */
 class Email extends BaseActiveRecord implements EmailInterface
@@ -97,6 +99,7 @@ class Email extends BaseActiveRecord implements EmailInterface
         return [
             ['e_created_dt', 'safe'],
             [['e_body_id', 'e_project_id', 'e_status_id', 'e_type_id', 'e_is_deleted', 'e_created_user_id', 'e_updated_user_id', 'e_departament_id'], 'integer'],
+            ['e_is_deleted', 'boolean'],
             ['e_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_created_user_id' => 'id']],
             ['e_updated_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_updated_user_id' => 'id']],
             ['e_departament_id', 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['e_departament_id' => 'dep_id']],
@@ -327,12 +330,12 @@ class Email extends BaseActiveRecord implements EmailInterface
         }
     }
 
-    public function isDeleted()
+    public function isDeleted(): bool
     {
         return $this->e_is_deleted;
     }
 
-    public function isNew()
+    public function isNew(): bool
     {
         return $this->emailLog->el_is_new ?? false;
     }
