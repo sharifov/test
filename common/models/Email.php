@@ -117,6 +117,8 @@ use src\entities\email\helpers\EmailStatus;
  * @property string|null $statusDoneDt
  * @property string $statusName
  * @property string $typeName
+ * @property bool $isNew
+ * @property bool $isDeleted
  *
  */
 class Email extends \yii\db\ActiveRecord implements EmailInterface
@@ -1096,12 +1098,12 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
         return $this->e_email_subject;
     }
 
-    public function isDeleted()
+    public function isDeleted(): bool
     {
         return $this->e_is_deleted;
     }
 
-    public function isNew()
+    public function isNew(): bool
     {
         return $this->e_is_new ?? false;
     }
