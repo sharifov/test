@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use common\components\BackOffice;
+use common\helpers\LogHelper;
 use common\models\CaseSale;
 use common\models\Project;
 use common\models\search\SaleSearch;
@@ -259,6 +260,7 @@ class SaleController extends FController
             ];
             $host = Yii::$app->params['backOffice']['urlV3'];
             $responseBO = BackOffice::sendRequest2('flight-request/resend-tickets', $data, 'POST', 120, $host);
+            $data = LogHelper::hidePersonalData($data, ['apiKey']);
 
             if (!$responseBO->isOk) {
                 Yii::error([
@@ -397,6 +399,7 @@ class SaleController extends FController
             ];
             $host = Yii::$app->params['backOffice']['urlV2'];
             $responseBO = BackOffice::sendRequest2('flight-request/cancel', $data, 'POST', 120, $host);
+            $data = LogHelper::hidePersonalData($data, ['apiKey']);
 
             if (!$responseBO->isOk) {
                 Yii::error([
