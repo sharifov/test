@@ -39,6 +39,7 @@ use src\helpers\email\MaskEmailHelper;
 use src\services\email\EmailServiceHelper;
 use src\entities\email\EmailInterface;
 use src\entities\EventTrait;
+use src\entities\email\helpers\EmailStatus;
 
 /**
  * This is the model class for table "email".
@@ -85,32 +86,27 @@ use src\entities\EventTrait;
  * @property string $body_html
  *
  * @property Employee $createdUser
+ * @property Employee $updatedUser
+ * @property Client $client
  * @property Cases $case
  * @property Language $language
  * @property Lead $lead
  * @property Project $project
  * @property EmailTemplateType $templateType
- * @property mixed $emailData
- * @property string|mixed $statusName
- * @property array $usersIdByEmail
- * @property string|mixed $typeName
- * @property string $emailBodyHtml
- * @property string|mixed $priorityName
- * @property Employee $updatedUser
- * @property Client $client
  *
+ * @property array $usersIdByEmail
+ * @property string|mixed $priorityName
  * @property int|null $leadId
  * @property int|null $caseId
  * @property int|null $clientId
  * @property int|null $projectId
  * @property int|null $templateTypeId
  * @property string|null $templateTypeName
- * @property string $emailFrom
+ * @property string|null $emailFrom
  * @property string|null $emailFromName
  * @property string|null $emailTo
  * @property string|null $emailToName
  * @property string|null $templateTypeName
- * @property string|null $statusName
  * @property string|null $emailSubject
  * @property int|null $communicationId
  * @property string|null $languageId
@@ -118,10 +114,9 @@ use src\entities\EventTrait;
  * @property string|null $emailBodyHtml
  * @property array|null $emailData
  * @property string|null $errorMessage
- * @property string|null $hash
- * @property string|null $messageId
  * @property string|null $statusDoneDt
- * @property string|null $statusName
+ * @property string $statusName
+ * @property string $typeName
  *
  */
 class Email extends \yii\db\ActiveRecord implements EmailInterface
@@ -299,28 +294,19 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
         return $this->e_type_id === self::TYPE_OUTBOX;
     }
 
-    /**
-     * @return mixed|string
-     */
-    public function getStatusName()
+    public function getStatusName(): string
     {
-        return self::STATUS_LIST[$this->e_status_id] ?? '-';
+        return EmailStatus::getName($this->e_status_id) ?? '-';
     }
 
-    /**
-     * @return mixed|string
-     */
-    public function getPriorityName()
+    public function getPriorityName(): string
     {
         return self::PRIORITY_LIST[$this->e_priority] ?? '-';
     }
 
-    /**
-     * @return mixed|string
-     */
-    public function getTypeName()
+    public function getTypeName(): string
     {
-        return self::TYPE_LIST[$this->e_type_id] ?? '-';
+        return EmailType::getName($this->e_type_id) ?? '-';
     }
 
     /**
