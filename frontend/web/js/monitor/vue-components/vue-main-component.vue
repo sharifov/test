@@ -293,6 +293,9 @@ export default {
           return item.user_id;
         });
       }
+      if (userId) {
+        userId = userId.toString();
+      }
       return this.userListData.indexOf(userId);
     },
     deleteUserData(data) {
