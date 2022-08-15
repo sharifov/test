@@ -290,7 +290,7 @@ class CasesCommunicationService
                     'caseId' => $case->cs_id,
                     'depId' => $case->cs_dep_id,
                     'clientId' => $case->cs_client_id,
-                    'templateKey' => $params->object->case->feedbackTemplateTypeKey,
+                    'templateKey' => $params->object->case->feedbackTemplateTypeKey ?? null,
                     'emailSubject' => $mailPreview['data']['email_subject'],
                     'emailFrom' => $params->object->case->feedbackEmailFrom,
                     'emailFromName' => $params->object->case->feedbackNameFrom ?: ($user->nickname ?? ''),
