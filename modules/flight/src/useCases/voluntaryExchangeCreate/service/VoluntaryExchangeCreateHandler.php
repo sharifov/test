@@ -186,6 +186,11 @@ class VoluntaryExchangeCreateHandler
             $this->order = $this->originProductQuote->pqOrder;
 
             $this->objectCollection->getOrderCreateFromSaleService()->caseOrderRelation($this->order->or_id, $this->case->cs_id);
+
+            $this->addCaseEventLog(
+                'Api Create. Order assigned successfully',
+                ['order_gid' => $this->order->or_gid]
+            );
         }
     }
 
