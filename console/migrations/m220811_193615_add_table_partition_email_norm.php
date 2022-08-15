@@ -39,6 +39,7 @@ class m220811_193615_add_table_partition_email_norm extends Migration
             PARTITION y20 VALUES LESS THAN (2021),
             PARTITION y21 VALUES LESS THAN (2022),
             PARTITION y22 VALUES LESS THAN (2023),
+            PARTITION y23 VALUES LESS THAN (2024),
             PARTITION y VALUES LESS THAN MAXVALUE
              );
         ")->execute();
