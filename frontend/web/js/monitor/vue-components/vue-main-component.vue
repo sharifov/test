@@ -290,7 +290,7 @@ export default {
     userDataIndex(userId) {
       if (!this.userListData.length) {
         this.userListData = this.usersData.map(function (item) {
-          return item.user_id;
+          return item.user_id && item.user_id.toString();
         });
       }
       if (userId) {
@@ -318,7 +318,7 @@ export default {
       }
 
       this.usersData.push(data);
-      this.userListData.push(data.user_id);
+      this.userListData.push(data.user_id && data.user_id.toString());
       this.addFilteredUserData(data);
     },
     updateUserData(data, updateType) {
@@ -437,7 +437,7 @@ export default {
           return item.userDep.indexOf(this.selectedDep) !== -1;
         });
         this.filteredUserListData = this.filteredUserData.map(function (item) {
-          return item.user_id;
+          return item.user_id && item.user_id.toString();
         });
 
         this.filteredCallData = this.callList.filter((item) => {
@@ -457,8 +457,11 @@ export default {
     filteredUserDataIndex(userId) {
       if (!this.filteredUserListData.length) {
         this.filteredUserListData = this.filteredUserData.map(function (item) {
-          return item.user_id;
+          return item.user_id && item.user_id.toString();
         });
+      }
+      if (userId) {
+        userId = userId.toString();
       }
       return this.filteredUserListData.indexOf(userId);
     },
@@ -479,7 +482,7 @@ export default {
     addFilteredUserData(data) {
       if (this.isFilterEnabled() && this.matchesTheFilterCriteria(data)) {
         this.filteredUserData.push(data);
-        this.filteredUserListData.push(data.user_id);
+        this.filteredUserListData.push(data.user_id && data.user_id.toString());
       }
     },
     deleteFilteredUserData(data) {
