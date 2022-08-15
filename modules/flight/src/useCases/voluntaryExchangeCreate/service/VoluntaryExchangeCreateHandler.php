@@ -167,6 +167,10 @@ class VoluntaryExchangeCreateHandler
                 throw new \RuntimeException('Case Sale creation failed', VoluntaryExchangeCodeException::CASE_SALE_CREATION_FAILED);
             }
 
+            $this->addCaseEventLog(
+                'Api Create. CaseSale created.'
+            );
+
             try {
                 $client = $this->voluntaryExchangeService->getOrCreateClient(
                     $this->flightRequest->fr_project_id,
