@@ -37,7 +37,7 @@ class QuoteHelper
 
             if ($penalties) {
                 foreach ($penalties['list'] as $item) {
-                    $out .= '<ul>';
+                    $out .= "<ul class='list-unstyled'>";
                     if (isset($item['permitted']) && $item['permitted']) {
                         if (!empty($item['type'])) {
                             $out .= '<li>Type : <strong>' . self::getPenaltyTypeName($item['type']) . '</strong></li>';
@@ -54,7 +54,7 @@ class QuoteHelper
             }
 
             if ($fee) {
-                $out .= '<ul>';
+                $out .= "<ul class='list-unstyled'>";
                 $out .= '<li>Service Fee : <strong>' . $fee['amount'] . ' ' . ($fee['currency'] ?? '') . '</strong></li>';
                 $out .= '</ul>';
             }
@@ -211,6 +211,43 @@ class QuoteHelper
         return '<span class="' . $class . ' quote__badge--disabled" data-toggle="tooltip" title="" data-original-title="No free baggage">
                 <i class="fa fa-suitcase"></i>
             </span>';
+    }
+
+    public static function formattedBaggage(?array $keys, string $class = 'quote__badge quote__badge--amenities'): string
+    {
+        if (!empty($keys['baggage'])) {
+            return '<span class="' . $class . '"
+                data-toggle="tooltip" data-html="true" title="' . self::innerBaggage($keys['baggage']) . '">
+                <i class="fa fa-suitcase"></i>
+                <span class="inside_icon">' . ($keys['baggage']['allowPieces'] ?: '-') . '</span>
+            </span>';
+        }
+        return '<span class="' . $class . ' quote__badge--disabled" data-toggle="tooltip" title="" data-original-title="No baggage">
+                <i class="fa fa-suitcase"></i>
+            </span>';
+    }
+
+    public static function innerBaggage($baggage): string
+    {
+        $out = '';
+        if ($baggage) {
+            $out .= "<div class='tooltip_quote_info_box'>";
+            $out .= '<p>Baggage: </p>';
+            $out .= "<ul class='list-unstyled'>";
+            if ($baggage['carryOn']) {
+                $out .= '<li>Carry-on - <strong>x1</strong></li>';
+            } else {
+                $out .= '<li>No carry-on baggage</li>';
+            }
+            if (!empty($baggage['allowPieces']) && $baggage['allowPieces'] > 0) {
+                $out .= '<li>Checked Baggage - <strong>x' . (int)$baggage['allowPieces'] . '</strong></li>';
+            } else {
+                $out .= '<li>No Checked Baggage</li>';
+            }
+            $out .= '</ul>';
+            $out .= '</div>';
+        }
+        return $out;
     }
 
     public static function formattedMetaRank(?array $meta): string
