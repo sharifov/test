@@ -364,6 +364,7 @@ class EmailMainService implements EmailServiceInterface
         $email = $this->oldService->createFromDTO($emailDTO, true);
         $email->refresh();
         $this->setEmailObj($email);
+        $emailDTO->emailId = $email->e_id;
 
         if (!$email->hasLead() && !$email->hasCase() && EmailServiceHelper::isNotInternalEmail($emailDTO->emailFrom)) {
             $process = $this->processIncoming($email);
