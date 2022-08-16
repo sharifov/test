@@ -46,16 +46,6 @@ class EmailOldRepository implements EmailRepositoryInterface
         ]);
     }
 
-    public function read($email): void
-    {
-        if ($email->isNew()) {
-            $email->updateAttributes([
-                'e_is_new' => false,
-                'e_read_dt' => date('Y-m-d H:i:s')
-            ]);
-        }
-    }
-
     public function delete($email): int
     {
         $id = $email->e_id;

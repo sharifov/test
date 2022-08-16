@@ -12,8 +12,6 @@ interface EmailRepositoryInterface
 
     public function save(EmailInterface $email);
 
-    public function read(EmailInterface $email): void;
-
     public function delete(EmailInterface $email): int;
 
     public function deleteByIds($id): array;

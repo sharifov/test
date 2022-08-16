@@ -478,6 +478,16 @@ class Email extends BaseActiveRecord implements EmailInterface
         return $this;
     }
 
+    public function read(): void
+    {
+        if ($this->emailLog && $this->isNew()) {
+            $this->saveEmailLog([
+                'el_is_new' => false,
+                'el_read_dt' => date('Y-m-d H:i:s')
+            ]);
+        }
+    }
+
     /**
      * @return string
      */

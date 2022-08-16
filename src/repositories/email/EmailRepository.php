@@ -43,16 +43,6 @@ class EmailRepository implements EmailRepositoryInterface
         return $email->e_id;
     }
 
-    public function read($email): void
-    {
-        if ($email->emailLog && $email->isNew()) {
-            $email->saveEmailLog([
-                'el_is_new' => false,
-                'el_read_dt' => date('Y-m-d H:i:s')
-            ]);
-        }
-    }
-
     public function delete($email): int
     {
         $id = $email->e_id;
