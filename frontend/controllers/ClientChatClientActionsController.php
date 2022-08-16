@@ -3,8 +3,13 @@
 namespace frontend\controllers;
 
 use frontend\widgets\clientChat\ClientChatClientInfoWidget;
+use frontend\widgets\clientChat\ClientChatFormBookingIdWidget;
+use src\forms\clientChat\BookingIdCreateForm;
 use src\forms\lead\EmailCreateForm;
 use src\forms\lead\PhoneCreateForm;
+use src\model\clientChat\entity\abac\ClientChatAbacObject;
+use src\model\clientChatForm\entity\ClientChatForm;
+use src\model\clientChatRequest\useCase\api\create\ClientChatFormResponseService;
 use src\services\client\ClientManageService;
 use Yii;
 use src\auth\Auth;
@@ -27,10 +32,13 @@ class ClientChatClientActionsController extends FController
 {
     private ClientManageService $clientManageService;
 
-    public function __construct($id, $module, ClientManageService $clientManageService, $config = [])
+    private ClientChatFormResponseService $clientChatFormResponseService;
+
+    public function __construct($id, $module, ClientManageService $clientManageService, ClientChatFormResponseService $clientChatFormResponseService, $config = [])
     {
         parent::__construct($id, $module, $config);
         $this->clientManageService = $clientManageService;
+        $this->clientChatFormResponseService = $clientChatFormResponseService;
     }
 
     public function behaviors(): array
@@ -45,6 +53,8 @@ class ClientChatClientActionsController extends FController
                     'ajax-add-client-email-validation' => ['POST'],
                     'ajax-add-client-phone' => ['POST'],
                     'ajax-add-client-phone-validation' => ['POST'],
+                    'ajax-add-booking-id-validation' => ['POST'],
+                    'ajax-add-booking-id' => ['POST'],
                 ],
             ],
             'access' => [
@@ -58,6 +68,9 @@ class ClientChatClientActionsController extends FController
                     'ajax-add-client-phone-modal-content',
                     'ajax-add-client-phone-validation',
                     'ajax-add-client-phone',
+                    'ajax-add-booking-id-modal-content',
+                    'ajax-add-booking-id',
+                    'ajax-add-booking-id-validation',
                 ],
             ],
         ];
@@ -285,5 +298,82 @@ class ClientChatClientActionsController extends FController
         }
 
         throw new BadRequestHttpException();
+    }
+
+    public function actionAjaxAddBookingIdModalContent(): string
+    {
+        /** @abac ClientChatAbacObject::UI_CLIENT_CHAT_FORM, ClientChatAbacObject::ACTION_CREATE, Access To create Client Chat Form Response */
+        if (!Yii::$app->abac->can(null, ClientChatAbacObject::UI_CLIENT_CHAT_FORM, ClientChatAbacObject::ACTION_CREATE)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
+        $chat = $this->getChatFromRequest();
+
+        $form = new BookingIdCreateForm();
+
+        return $this->renderAjax('_client_add_booking_id_modal_content', [
+            'addBookingId' => $form,
+            'chatId' => $chat->cch_id,
+        ]);
+    }
+
+    public function actionAjaxAddBookingIdValidation(): array
+    {
+        /** @abac ClientChatAbacObject::UI_CLIENT_CHAT_FORM, ClientChatAbacObject::ACTION_CREATE, Access To create Client Chat Form Response */
+        if (!Yii::$app->abac->can(null, ClientChatAbacObject::UI_CLIENT_CHAT_FORM, ClientChatAbacObject::ACTION_CREATE)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
+        $chat = $this->getChatFromRequest();
+
+        $form = new BookingIdCreateForm();
+
+        $isLoaded = $form->load(Yii::$app->request->post());
+
+        if (Yii::$app->request->isAjax && $isLoaded) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            return ActiveForm::validate($form);
+        }
+
+        throw new BadRequestHttpException();
+    }
+
+    public function actionAjaxAddBookingId()
+    {
+        /** @abac ClientChatAbacObject::UI_CLIENT_CHAT_FORM, ClientChatAbacObject::ACTION_CREATE, Access To create Client Chat Form Response */
+        if (!Yii::$app->abac->can(null, ClientChatAbacObject::UI_CLIENT_CHAT_FORM, ClientChatAbacObject::ACTION_CREATE)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
+        $chat = $this->getChatFromRequest();
+
+        $form = new BookingIdCreateForm();
+
+        $response[] = [
+            'error' => false,
+            'message' => '',
+            'html' => '',
+        ];
+
+        try {
+            $isLoaded = $form->load(Yii::$app->request->post());
+
+            if ($isLoaded && $form->validate()) {
+                $createdAt = date('Y-m-d H:i:s');
+                $this->clientChatFormResponseService->createFormResponse($chat->cch_rid, ClientChatForm::KEY_BOOKING_ID, $form->bookingId, $createdAt);
+
+                $response['error'] = false;
+                $response['message'] = 'New booking id was successfully added: ' . $form->bookingId;
+                $response['html'] = ClientChatFormBookingIdWidget::widget(['bookingId' => $form->bookingId]);
+            } else {
+                $response['error'] = true;
+                $response['message'] = $this->getParsedErrors($form->getErrors());
+            }
+        } catch (\Throwable $e) {
+            $response['error'] = true;
+            $response['message'] = $e->getMessage();
+        }
+
+        return $this->asJson($response);
     }
 }
