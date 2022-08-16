@@ -531,12 +531,12 @@ class EmailMainService implements EmailServiceInterface
     public function saveInboxId(string $messageId, string $emailTo, int $inboxId)
     {
         if ($emailOld = $this->emailOldRepository->findReceived($messageId, $emailTo)->limit(1)->one()) {
-            $this->emailOldRepository->saveInboxId($emailOld, $inboxId);
+            $emailOld->saveInboxId($inboxId);
         }
         $emailNorm = null;
         if ($this->normalizedService !== null) {
             if ($emailNorm = $this->emailRepository->findReceived($messageId, $emailTo)->limit(1)->one()) {
-                $this->emailRepository->saveInboxId($emailNorm, $inboxId);
+                $emailNorm->saveInboxId($inboxId);
             }
         }
 
