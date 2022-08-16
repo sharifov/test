@@ -10,6 +10,7 @@ use common\models\LeadFlightSegment;
 use common\models\LeadFlow;
 use common\models\query\LeadQuery;
 use common\models\Sms;
+use src\helpers\query\QueryHelper;
 use src\model\callLog\entity\callLog\CallLog;
 use src\model\callLog\entity\callLog\CallLogStatus;
 use src\model\callLog\entity\callLog\CallLogType;
@@ -53,6 +54,9 @@ use yii\db\Query;
  */
 class SalesSearch extends Model
 {
+    public const DEFAULT_TIMEZONE = 'America/New_York';
+
+    public $timeZone;
     public $startDt;
     public $endDt;
     public $dateRange;
@@ -83,6 +87,7 @@ class SalesSearch extends Model
         $this->currentUser = $currentUser;
         $this->minDate = date('Y-m-d', strtotime('first day of previous month'));
         $this->maxDate = date("Y-m-d");
+        $this->timeZone = self::DEFAULT_TIMEZONE;
 
         $this->defaultMinDate = date("Y-m-01");
         $this->defaultDateRange = $this->defaultMinDate . ' - ' . $this->maxDate;
@@ -109,6 +114,9 @@ class SalesSearch extends Model
             [['luc_created_dt'], 'date', 'format' => 'php:Y-m-d'],
             [['luc_description'], 'string', 'max' => 100],
             ['status_id', 'safe'],
+
+            ['timeZone', 'string'],
+            ['timeZone', 'in', 'range' => array_keys(Employee::timezoneList(true))],
         ];
     }
 
@@ -132,6 +140,11 @@ class SalesSearch extends Model
             $from = $this->defaultMinDate;
             $to = $this->maxDate;
         }
+        /** @fflag FFlag::FF_KEY_CONVERSION_BY_TIMEZONE, Conversion Filter by Timezone */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CONVERSION_BY_TIMEZONE)) {
+            $from = QueryHelper::getDateFromUserTZToUtc($from . ' 00:00', $this->timeZone)->format('Y-m-d H:i');
+            $to = QueryHelper::getDateFromUserTZToUtc($to . ' 23:59', $this->timeZone)->format('Y-m-d H:i');
+        }
 
         $query = new Query();
         $query->select([
@@ -145,18 +158,32 @@ class SalesSearch extends Model
         $query->from(Lead::tableName());
         $query->innerJoin('profit_split', 'ps_lead_id = id and ps_user_id = ' . $this->currentUser->getId());
         $query->where(['status' => Lead::STATUS_SOLD]);
-        $query->andWhere(['BETWEEN', 'DATE(l_status_dt)', $from, $to]);
+        $query->andWhere(['BETWEEN', 'l_status_dt', $from, $to]);
 
         if ($this->id) {
             $query->andWhere(['=', 'id', $this->id]);
         }
 
         if ($this->l_status_dt) {
-            $query->andWhere(['=', 'DATE(l_status_dt)', $this->l_status_dt]);
+            /** @fflag FFlag::FF_KEY_CONVERSION_BY_TIMEZONE, Conversion Filter by Timezone */
+            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CONVERSION_BY_TIMEZONE)) {
+                $l_status_dt_from = QueryHelper::getDateFromUserTZToUtc($this->l_status_dt, $this->timeZone)->format('Y-m-d H:i:s');
+                $l_status_dt_to = QueryHelper::getDateFromUserTZToUtc($this->l_status_dt . ' 23:59:59', $this->timeZone)->format('Y-m-d H:i:s');
+                $query->andWhere(['BETWEEN', 'l_status_dt', $l_status_dt_from, $l_status_dt_to]);
+            } else {
+                $query->andWhere(['=', 'DATE(l_status_dt)', $this->l_status_dt]);
+            }
         }
 
         if ($this->created) {
-            $query->andWhere(['=', 'DATE(created)', $this->created]);
+            /** @fflag FFlag::FF_KEY_CONVERSION_BY_TIMEZONE, Conversion Filter by Timezone */
+            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CONVERSION_BY_TIMEZONE)) {
+                $created_from = QueryHelper::getDateFromUserTZToUtc($this->created, $this->timeZone)->format('Y-m-d H:i:s');
+                $created_to = QueryHelper::getDateFromUserTZToUtc($this->created . ' 23:59:59', $this->timeZone)->format('Y-m-d H:i:s');
+                $query->andWhere(['BETWEEN', 'created', $created_from, $created_to]);
+            } else {
+                $query->andWhere(['=', 'DATE(created)', $this->created]);
+            }
         }
 
         if ($this->final_profit) {
@@ -215,14 +242,32 @@ class SalesSearch extends Model
         }
 
         if ($this->dateFrom && $this->dateTo) {
-            $query->andWhere(['>=', 'luc_created_dt', $this->dateFrom]);
-            $query->andWhere(['<=', 'luc_created_dt', $this->dateTo]);
+            /** @fflag FFlag::FF_KEY_CONVERSION_BY_TIMEZONE, Conversion Filter by Timezone */
+            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CONVERSION_BY_TIMEZONE)) {
+                $from = QueryHelper::getDateFromUserTZToUtc($this->dateFrom . ' 00:00', $this->timeZone)->format('Y-m-d H:i');
+                $to = QueryHelper::getDateFromUserTZToUtc($this->dateTo . ' 23:59', $this->timeZone)->format('Y-m-d H:i');
+                $query->andWhere(['>=', 'luc_created_dt', $from]);
+                $query->andWhere(['<=', 'luc_created_dt', $to]);
+            } else {
+                $query->andWhere(['>=', 'luc_created_dt', $this->dateFrom]);
+                $query->andWhere(['<=', 'luc_created_dt', $this->dateTo]);
+            }
         }
 
         $query->andFilterWhere([
-            Lead::tableName() . '.id' => $this->id,
-            'DATE(luc_created_dt)' => $this->luc_created_dt,
+            Lead::tableName() . '.id' => $this->id
         ]);
+
+        if ($this->luc_created_dt) {
+            /** @fflag FFlag::FF_KEY_CONVERSION_BY_TIMEZONE, Conversion Filter by Timezone */
+            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CONVERSION_BY_TIMEZONE)) {
+                $luc_created_dt_from = QueryHelper::getDateFromUserTZToUtc($this->luc_created_dt, $this->timeZone)->format('Y-m-d H:i:s');
+                $luc_created_dt_to = QueryHelper::getDateFromUserTZToUtc($this->luc_created_dt . ' 23:59:59', $this->timeZone)->format('Y-m-d H:i:s');
+                $query->andWhere(['BETWEEN', 'luc_created_dt', $luc_created_dt_from, $luc_created_dt_to]);
+            } else {
+                $query->andWhere(['=', 'DATE(luc_created_dt)', $this->luc_created_dt]);
+            }
+        }
 
         $query->andFilterWhere(['like', 'luc_description', $this->luc_description]);
 
@@ -268,5 +313,13 @@ class SalesSearch extends Model
     public function getMaxDate(): string
     {
         return $this->maxDate;
+    }
+
+    public function getTimezone(): string
+    {
+        if (!$this->timeZone) {
+            return "UTC";
+        }
+        return $this->timeZone;
     }
 }
