@@ -89,13 +89,13 @@ class EmailController extends Controller
                 $email = EmailsNormalizeService::newInstance()->createEmailFromOld($emailOld);
                 Console::updateProgress(++$n, $total);
             } catch (\Throwable $e) {
-                $errorMessage = ($e instanceof CreateModelException) ? VarDumper::dumpAsString($e->getErrorSummary(true)) : $e->getMessage(). "\n" . $e->getTraceAsString();
+                $errorMessage = ($e instanceof CreateModelException) ? VarDumper::dumpAsString($e->getErrorSummary(true)) : $e->getMessage() . "\n" . $e->getTraceAsString();
                 $errors[] = [
                     'emailId' => $emailOld->e_id,
                     'error' => $errorMessage,
                 ];
                 if ($debug) {
-                    echo "\nemailId:" . $emailOld->e_id."\nerror:\n" . $errorMessage;
+                    echo "\nemailId:" . $emailOld->e_id . "\nerror:\n" . $errorMessage;
                 }
             }
         }
