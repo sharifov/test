@@ -206,7 +206,7 @@ class EmailNormalizedController extends FController
                 $emailForm = EmailForm::replyFromModel($email, $user);
             } elseif ($selectedId) {
                 $modelEmailView = $this->findModel($selectedId);
-                $this->emailRepository->read($modelEmailView);
+                $this->emailService->read($modelEmailView);
             }
         }
 

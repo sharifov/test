@@ -543,6 +543,20 @@ class EmailMainService implements EmailServiceInterface
         return $emailOld || $emailNorm;
     }
 
+    public function read($email)
+    {
+        $calledFrom = $this->getCalledFrom($email);
+        $emailOld = ($calledFrom == self::FROM_NORM) ? $this->setEmailObjById($email->e_id) : $email;
+        $emailOld->read();
+
+        if ($this->normalizedService !== null) {
+            $emailNorm = ($calledFrom == self::FROM_OLD) ? $this->setEmailNormObjById($email->e_id) : $email;
+            if (isset($emailNorm)) {
+                $emailNorm->read();
+            }
+        }
+    }
+
     /**
      *
      * @param EmailInterface $email
