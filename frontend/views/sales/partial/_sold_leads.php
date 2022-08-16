@@ -12,7 +12,41 @@ use yii\widgets\Pjax;
 ?>
 
 <?php Pjax::begin(['id' => 'pjax-sold-leads', 'timeout' => 5000, 'enablePushState' => false]); ?>
+<?php
+$l_status_dt_column = [
+    'attribute' => 'l_status_dt',
+    'class' => DateColumn::class,
+    'label' => 'Sold Date',
+];
 
+$created = [
+    'attribute' => 'created',
+    'class' => DateColumn::class,
+];
+
+/** @fflag FFlag::FF_KEY_CONVERSION_BY_TIMEZONE, Conversion Filter by Timezone */
+if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CONVERSION_BY_TIMEZONE)) {
+    $l_status_dt_column = [
+        'attribute' => 'l_status_dt',
+        'class' => DateColumn::class,
+        'label' => 'Sold Date',
+        'format' => 'raw',
+        'value' => function ($model) use ($searchModel) {
+            $l_status_dt = ((new \DateTimeImmutable($model['l_status_dt'], new \DateTimeZone($searchModel->getTimezone())))->format('d-M-Y'));
+            return Html::tag('i', '', ['class' => 'fa fa-calendar']) . ' ' . $l_status_dt;
+        }
+    ];
+    $created = [
+        'attribute' => 'created',
+        'class' => DateColumn::class,
+        'format' => 'raw',
+        'value' => function ($model) use ($searchModel) {
+            $created = ((new \DateTimeImmutable($model['created'], new \DateTimeZone($searchModel->getTimezone())))->format('d-M-Y'));
+            return Html::tag('i', '', ['class' => 'fa fa-calendar']) . ' ' . $created;
+        }
+    ];
+}
+?>
 <?php echo GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
@@ -52,15 +86,8 @@ use yii\widgets\Pjax;
                     'class' => 'text-center'
                 ],
             ],
-            [
-                'attribute' => 'l_status_dt',
-                'class' => DateColumn::class,
-                'label' => 'Sold Date',
-            ],
-            [
-                'attribute' => 'created',
-                'class' => DateColumn::class,
-            ],
+            $l_status_dt_column,
+            $created,
         ],
     ]) ?>
 

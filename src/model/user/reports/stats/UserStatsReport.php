@@ -53,6 +53,8 @@ class UserStatsReport extends Model
         self::GROUP_BY_USER_ROLE => 'User Role',
     ];
 
+    public const DEFAULT_TIMEZONE = 'America/New_York';
+
     public $timeZone;
 
     public $dateRange;

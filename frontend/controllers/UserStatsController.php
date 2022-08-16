@@ -36,9 +36,14 @@ class UserStatsController extends FController
     public function actionReport()
     {
         $user = Auth::user();
+        $timeZone = \Yii::$app->user->identity->timezone;
+        /** @fflag FFlag::FF_KEY_CONVERSION_BY_TIMEZONE, Conversion Filter by Timezone */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CONVERSION_BY_TIMEZONE)) {
+            $timeZone = UserStatsReport::DEFAULT_TIMEZONE;
+        }
 
         $searchModel = new UserStatsReport(
-            \Yii::$app->user->identity->timezone,
+            $timeZone,
             date('Y-m') . '-01 00:00 - ' . date('Y-m-d') . ' 23:59',
             (new Access($user))
         );
