@@ -35,7 +35,7 @@ use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
  * @property int $e_status_id
  * @property int|null $e_created_user_id
  * @property int|null $e_updated_user_id
- * @property string|null $e_created_dt
+ * @property string $e_created_dt
  * @property string|null $e_updated_dt
  * @property int|null $e_body_id
  *
@@ -98,6 +98,7 @@ class Email extends BaseActiveRecord implements EmailInterface
     {
         return [
             ['e_created_dt', 'safe'],
+            ['e_created_dt', 'required'],
             [['e_body_id', 'e_project_id', 'e_status_id', 'e_type_id', 'e_is_deleted', 'e_created_user_id', 'e_updated_user_id', 'e_departament_id'], 'integer'],
             ['e_is_deleted', 'boolean'],
             ['e_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_created_user_id' => 'id']],
@@ -326,7 +327,7 @@ class Email extends BaseActiveRecord implements EmailInterface
     {
         $emailBody = $this->emailBody;
         if (parent::delete()) {
-            $this->recordEvent(new EmailDeletedEvent($emailBody));
+            $this->recordEvent(new EmailDeletedEvent($emailBody, $this->e_id));
         }
     }
 
@@ -580,5 +581,19 @@ class Email extends BaseActiveRecord implements EmailInterface
         if (isset($data['e_id'])) {
             $this->e_id = $data['e_id'];
         }
+        if (isset($data['e_created_dt'])) {
+            $this->e_created_dt = $data['e_created_dt'];
+            $this->detachBehavior('timestamp');
+        }
+        if (isset($data['e_updated_dt'])) {
+            $this->e_updated_dt = $data['e_updated_dt'];
+            $this->detachBehavior('timestamp');
+        }
+
+    }
+
+    public function getId()
+    {
+        return $this->e_id;
     }
 }
