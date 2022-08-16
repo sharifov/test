@@ -43,6 +43,7 @@ use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\model\leadUserRating\entity\LeadUserRating;
 use src\model\leadUserRating\entity\LeadUserRatingQuery;
 use src\model\quoteLabel\entity\QuoteLabel;
+use src\model\user\entity\sales\SalesSearch;
 use src\repositories\lead\LeadBadgesRepository;
 use src\services\caseSale\PnrPreparingService;
 use Yii;
@@ -93,8 +94,6 @@ use src\repositories\email\EmailRepositoryFactory;
  */
 class LeadSearch extends Lead
 {
-    private const DEFAULT_CONVERSION_TIMEZONE = 'America/New_York';
-
     public $client_name;
     public $client_email;
     public $client_phone;
@@ -201,7 +200,7 @@ class LeadSearch extends Lead
         $this->defaultMinDate = date("Y-m-01 00:00");
         $this->defaultMaxDate = date("Y-m-d 23:59");
         $this->defaultDateRange = $this->defaultMinDate . ' - ' . $this->defaultMaxDate;
-        $this->conversionTimezone = self::DEFAULT_CONVERSION_TIMEZONE;
+        $this->conversionTimezone = SalesSearch::DEFAULT_TIMEZONE;
         parent::__construct($config);
     }
 

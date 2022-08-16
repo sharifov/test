@@ -54,7 +54,7 @@ use yii\db\Query;
  */
 class SalesSearch extends Model
 {
-    private const DEFAULT_TIMEZONE = 'America/New_York';
+    public const DEFAULT_TIMEZONE = 'America/New_York';
 
     public $timeZone;
     public $startDt;
