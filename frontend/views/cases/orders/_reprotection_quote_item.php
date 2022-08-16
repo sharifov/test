@@ -222,13 +222,12 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                                 <small><?=$changeItem->pqc_decision_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($changeItem->pqc_decision_dt)) : '-'?></small>
                             </td>
                             <td>
-
                         <?php if ($changeItem->isTypeVoluntary()) : ?>
                             <?php /** @abac new $pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_VOLUNTARY_QUOTE, Flight Create Voluntary quote from dump*/ ?>
-                            <?php if (
-                                    Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_VOLUNTARY_QUOTE) ||
-                                    Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_SEND_OFFER_EXCHANGE_EMAIL)
-) : ?>
+                            <?php
+                            $canCreateVolQuote = Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_VOLUNTARY_QUOTE);
+                            $canSendOfferExchangeEmail = Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_SEND_OFFER_EXCHANGE_EMAIL);
+                            if ($canCreateVolQuote || $canSendOfferExchangeEmail) : ?>
                                 <div class="btn-group">
 
                                     <button type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
