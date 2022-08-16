@@ -162,6 +162,6 @@ class EmailQuery extends ActiveQuery
         return $this
             ->leftJoin(\src\entities\email\Email::tableName() . ' AS en', 'en.e_id = email.e_id')
             ->where('en.e_id IS NULL')
-            ->orderBy('email.e_id DESC');
+            ->orderBy(['email.e_id' => SORT_DESC]);
     }
 }
