@@ -1117,4 +1117,10 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
             ]);
         }
     }
+    public function saveInboxId(int $inboxId): void
+    {
+        $this->updateAttributes([
+            'e_inbox_email_id' => $inboxId
+        ]);
+    }
 }

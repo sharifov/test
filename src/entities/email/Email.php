@@ -488,6 +488,13 @@ class Email extends BaseActiveRecord implements EmailInterface
         }
     }
 
+    public function saveInboxId(int $inboxId): void
+    {
+        $this->saveEmailLog([
+            'el_inbox_email_id' => $inboxId
+        ]);
+    }
+
     /**
      * @return string
      */
