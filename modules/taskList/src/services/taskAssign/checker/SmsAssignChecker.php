@@ -39,11 +39,9 @@ class SmsAssignChecker implements TaskAssignCheckerInterface
             return false;
         }
 
-        $excludeProjectsAssigning = (new TaskListParamService($this->taskList))->getExcludeProjectsAssigning();
-        $projectKey = $this->lead->project->project_key ?? '';
-        if (in_array($projectKey, $excludeProjectsAssigning, true)) {
+        if (!$this->lead->project->getParams()->sms->isEnabled()) {
             TaskListHelper::debug(
-                'Project not allowed. Project[' . $projectKey . '], LeadID[' . $this->lead->id . ']',
+                'Project SMS not allowed. LeadID[' . $this->lead->id . ']',
                 'info\UserTaskAssign:SmsAssignChecker:ProjectNotAllowed'
             );
             return false;
