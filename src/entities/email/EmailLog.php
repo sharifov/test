@@ -18,7 +18,7 @@ use src\model\BaseActiveRecord;
  * @property string|null $el_inbox_created_dt
  * @property int|null $el_inbox_email_id
  * @property int|null $el_communication_id
- * @property int|null $el_is_new
+ * @property bool $el_is_new
  *
  * @property Email $email
  */
@@ -38,7 +38,7 @@ class EmailLog extends BaseActiveRecord
 
             ['el_inbox_email_id', 'integer'],
 
-            ['el_is_new', 'integer'],
+            ['el_is_new', 'boolean'],
 
             ['el_message_id', 'string', 'max' => 500],
 
