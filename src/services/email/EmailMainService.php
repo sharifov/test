@@ -517,11 +517,11 @@ class EmailMainService implements EmailServiceInterface
             throw \RuntimeException('Email status not valid.');
         }
         if ($emailOld = $this->emailOldRepository->findByCommunicationId($communicationId)) {
-            $this->emailOldRepository->changeStatus($emailOld, $statusId);
+            $this->oldService->changeStatus($emailOld, $statusId);
         }
         if ($this->normalizedService !== null) {
             if ($emailNorm = $this->emailRepository->findByCommunicationId($communicationId)) {
-                $this->emailRepository->changeStatus($emailNorm, $statusId);
+                $this->normalizedService->changeStatus($emailNorm, $statusId);
             }
         }
 
