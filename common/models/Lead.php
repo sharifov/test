@@ -4642,11 +4642,21 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     public function getQuoteSendInfo()
     {
         $query = new Query();
-        $query->select(['SUM(CASE WHEN status IN (2, 4, 5) THEN 1 ELSE 0 END) AS send_q',
-            'SUM(CASE WHEN status NOT IN (2, 4, 5) THEN 1 ELSE 0 END) AS not_send_q'])
+        $query->select([
+            'SUM(CASE WHEN statusCount > 0 THEN 1 ELSE 0 END) AS send_q',
+            'SUM(CASE WHEN statusCount IS NULL OR statusCount = 0 THEN 1 ELSE 0 END) AS not_send_q'
+        ])
+            ->leftJoin(
+                [
+                    'quote_status_log' => QuoteStatusLog::find()
+                        ->select(['quote_id', 'COUNT(quote_id) as statusCount'])
+                        ->where(['status' => [Quote::STATUS_SENT, Quote::STATUS_OPENED, Quote::STATUS_APPLIED]])
+                        ->groupBy(['quote_id'])
+                ],
+                'quote_status_log.quote_id = q.id'
+            )
             ->from(Quote::tableName() . ' q')
             ->where(['lead_id' => $this->id]);
-        //->groupBy('lead_id');
 
         return $query->createCommand()->queryOne();
     }

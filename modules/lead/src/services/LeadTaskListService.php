@@ -54,7 +54,7 @@ class LeadTaskListService
                 foreach ($taskLists as $taskList) {
                     try {
                         $assignChecker = (new TaskListAssignCheckerFactory(
-                            $taskList->tl_object,
+                            $taskList,
                             $this->lead
                         ))->create();
 
