@@ -52,6 +52,7 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_DEBUG_ASSIGN_USER_TASK = 'debugAssignUserTaskEnable';
 
     public const FF_KEY_USER_TASK_COMPLETION_DEBUG = 'userTaskCompletionDebug';
+    public const FF_KEY_CONVERSION_BY_TIMEZONE = 'conversionByTimezone';
 
     public const FF_KEY_LIST = [
         self::FF_KEY_LPP_ENABLE,
@@ -94,6 +95,7 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE,
         self::FF_KEY_DEBUG_ASSIGN_USER_TASK,
         self::FF_KEY_USER_TASK_COMPLETION_DEBUG,
+        self::FF_KEY_CONVERSION_BY_TIMEZONE,
     ];
 
     public const FF_OBJECT_LIST = [
