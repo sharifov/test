@@ -62,13 +62,6 @@ class EmailRepository implements EmailRepositoryInterface
         return $removedIds;
     }
 
-    public function saveInboxId($email, int $inboxId): void
-    {
-        $email->saveEmailLog([
-            'el_inbox_email_id' => $inboxId
-        ]);
-    }
-
     /**
      *
      * @param Email $email

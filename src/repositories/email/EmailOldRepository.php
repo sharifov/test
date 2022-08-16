@@ -39,13 +39,6 @@ class EmailOldRepository implements EmailRepositoryInterface
         return $email->e_id;
     }
 
-    public function saveInboxId($email, int $inboxId): void
-    {
-        $email->updateAttributes([
-            'e_inbox_email_id' => $inboxId
-        ]);
-    }
-
     public function delete($email): int
     {
         $id = $email->e_id;

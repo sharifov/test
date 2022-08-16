@@ -24,8 +24,6 @@ interface EmailRepositoryInterface
 
     public function findReceived(string $messageId, string $emailTo): ActiveQuery;
 
-    public function saveInboxId(EmailInterface $email, int $inboxId): void;
-
     public function getLastInboxId(): ?int;
 
     public function getEmailCountByLead(int $leadId, $cache = 0): int;
