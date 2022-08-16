@@ -257,6 +257,17 @@ class SideBarMenu extends \yii\bootstrap\Widget
         }
 
 
+        $menuItems[] = [
+            'label' => 'My Activity <sup style="color: red">NEW</sup>',
+            'url' => ['/user-activity/dashboard'],
+            'icon' => 'clock-o',
+//            'abac'  => [
+//                'dto'    => null,
+//                'object' => TaskListAbacObject::ACT_MY_TASK_LIST,
+//                'action' => TaskListAbacObject::ACTION_ACCESS,
+//            ],
+        ];
+
         /** @abac TaskListAbacObject::ACT_MY_TASK_LIST, TaskListAbacObject::ACTION_ACCESS, Access menu My Task List */
         $menuItems[] = [
             'label' => 'My Task List <sup style="color: red">NEW</sup>',

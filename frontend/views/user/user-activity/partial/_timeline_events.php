@@ -7,8 +7,12 @@ use yii\helpers\Html;
 /* @var $this yii\web\View */
 
 /* @var $user Employee */
+
 /* @var $startDateTime string */
 /* @var $endDateTime string */
+/* @var $startDateTimeCalendar string */
+/* @var $endDateTimeCalendar string */
+
 /* @var $scheduleEventList array|UserShiftSchedule[] */
 /* @var $userActiveEvents array */
 /* @var $userOnlineEvents array */
@@ -19,7 +23,7 @@ use yii\helpers\Html;
 
 
 <?php
-    \yii\helpers\VarDumper::dump($userOnlineData, 10, true);
+   // \yii\helpers\VarDumper::dump($userOnlineData, 10, true);
 ?>
 <div id="myTimeline">
     <ul class="timeline-events">
@@ -181,51 +185,81 @@ use yii\helpers\Html;
 
         <?php if (!empty($userOnlineData)) : ?>
             <?php
-            foreach ($userOnlineData as $key => $item) :?>
+            foreach ($userOnlineData as $shiftId => $typeData) :?>
                 <?php
-                $tlData = [];
-                $tlData['id'] = $key;
-                $tlData['row'] = 2;
+                foreach ($typeData as $type => $data) :?>
+                    <?php
+                    foreach ($data as $item) :?>
+                        <?php
+                        if (!$item) {
+                            continue;
+                        }
+                    // \yii\helpers\VarDumper::dump($item, 10, true); exit;
+                        $tlData = [];
+                        $tlData['id'] = $shiftId . '-' . md5($item['start']);
+                        $tlData['row'] = 3;
 
-                $tlData['extend'] = [
-                    'toggle' => 'popover',
-                    'trigger' => 'hover',
-                    'html' => true
-                ];
+                        $tlData['extend'] = [
+                        'toggle' => 'popover',
+                        'trigger' => 'hover',
+                        'html' => true
+                        ];
 
-                $tlData['start'] = \common\models\Employee::convertTimeFromUtcToUserTime(
-                    $user->getTimezone(),
-                    strtotime($item['start'])
-                );
-                if ($item['end']) {
-                    $tlData['end'] = \common\models\Employee::convertTimeFromUtcToUserTime(
-                        $user->getTimezone(),
-                        strtotime($item['end'])
-                    );
-                } else {
-                    $tlData['size'] = 'small';
-                }
+                        $tlData['start'] = \common\models\Employee::convertTimeFromUtcToUserTime(
+                            $user->getTimezone(),
+                            strtotime($item['start'])
+                        );
+                        if ($item['end']) {
+                            $tlData['end'] = \common\models\Employee::convertTimeFromUtcToUserTime(
+                                $user->getTimezone(),
+                                strtotime($item['end'])
+                            );
+                        } else {
+                            $tlData['size'] = 'small';
+                        }
 
-                $tlData['bgColor'] = '#51ad62';
-                $tlData['color'] = '#51ad62';
-                //$tlData['height'] = 30;
-                $tlData['content'] = Yii::$app->formatter->asDuration($item['duration'] * 60);
-                ?>
+                        $tlData['bgColor'] = '#51ad62';
+                        switch ($type) {
+                            case 'earlyStart':
+                                $tlData['bgColor'] = '#ffc33b';
+                                break;
+                            case 'earlyFinish':
+                                $tlData['bgColor'] = 'red';
+                                break;
+                            case 'lateStart':
+                                $tlData['bgColor'] = 'red';
+                                break;
+                            case 'lateFinish':
+                                $tlData['bgColor'] = '#ffc33b';
+                                break;
+                            case 'usefulTime':
+                                $tlData['bgColor'] = '#c4e1ae';
+                                break;
+                        }
+
+
+
+                        $tlData['color'] = 'white';
+                    //$tlData['height'] = 30;
+                        $tlData['content'] = Yii::$app->formatter->asDuration($item['duration'] * 60);
+                        ?>
 
                 <li data-timeline-node='<?= \yii\helpers\Json::encode($tlData, JSON_THROW_ON_ERROR) ?>'>
-                    <small> Activity:
+                    <small> <?= Html::encode($type) ?>:
                         <?php echo Html::encode(Yii::$app->formatter->asDateTime(
                             strtotime($item['start']),
                             'php: H:i'
                         )) ?>
                         -
 
-                        <?php echo Html::encode(Yii::$app->formatter->asDateTime(
-                            strtotime($item['end']),
-                            'php: H:i'
-                        )) ?>
+                            <?php echo Html::encode(Yii::$app->formatter->asDateTime(
+                                strtotime($item['end']),
+                                'php: H:i'
+                            )) ?>
                     </small>
                 </li>
+                    <?php endforeach; ?>
+                <?php endforeach; ?>
             <?php endforeach; ?>
         <?php endif; ?>
 
@@ -240,7 +274,7 @@ use yii\helpers\Html;
     </ul>
 </div>
 <!-- Timeline Event Detail View Area (optional) -->
-<div class="timeline-event-view" style="color: #f8e7ab"></div>
+<div class="timeline-event-view"></div>
 
 <?php
 
@@ -255,23 +289,36 @@ use yii\helpers\Html;
 //$userListStr = implode(', ', $userList);
 
 
-if (Yii::$app->user->identity->timezone) {
-    $timeZone = Yii::$app->user->identity->timezone;
+if ($user->getTimezone()) {
+    $timeZone = $user->getTimezone();
 } else {
     $timeZone = 'UTC';
 }
+ //'UTC';
+//echo $timeZone;
+//$timeZone = 'Europe/Chisinau';
+//$timeZone = 'America/Denver';
+//$timeZone = 'Etc/GMT-6';
 
-//$startDateTime = date('Y-m-d H:i', strtotime('-10 hours'));
-//$endDateTime = date('Y-m-d H:i', strtotime('+34 hours'));
+
+$labelList[] = '\'<div style="margin: 0 10px 0 10px"><i class="fa fa-calendar"></i> Shift Schedule  </div>\'';
+$labelList[] = '\'<div style="margin: 0 10px 0 10px"><i class="fa fa-clock-o"></i> Online, Activity </div>\'';
+$labelList[] = '\'<div style="margin: 0 10px 0 10px"><i class="fa fa-clock-o"></i> Early, Late </div>\'';
+$labelListStr = implode(', ', $labelList);
+
+
+$startDateTimeFormat = date('d-M [H:i]', strtotime($startDateTimeCalendar));
+$endDateTimeFormat = date('d-M [H:i]', strtotime($endDateTimeCalendar));
 
 $js = <<<JS
 
 function renderUserTimeline(){
     const dt = new Date()
     // const userListStr = [userListStr];
-    let startDateTime = '$startDateTime';
-    let endDatetime = '$endDateTime';
+    let startDateTime = '$startDateTimeCalendar';
+    let endDatetime = '$endDateTimeCalendar';
     let timeZone = '$timeZone';
+    const labelListStr = [$labelListStr];
     
     
     $("#myTimeline").Timeline({
@@ -283,19 +330,19 @@ function renderUserTimeline(){
        // range: 2,
        // shift: true,
        zoom: true,
-       minGridSize: 50,
-       // sidebar: {
-       //     sticky:true,
-       //      list: userListStr
-       //      },
+       minGridSize: 100,
+       sidebar: {
+            sticky:true,
+            list: labelListStr
+        },
        ruler: {
             truncateLowers: false,
             top: {
                 lines:      ["day", "hour"], //"month",, "minute"],
                 height:     26,
-                fontSize:   11,
+                fontSize:   12,
                 color:      "#333",
-                background: "transparent",
+                //background: "transparent",
                 locale:     "en-US",
                 format:     {
                     timeZone: timeZone, weekday: "short", year: "numeric", month: "long", hour: "2-digit", minute: "2-digit"
@@ -304,9 +351,9 @@ function renderUserTimeline(){
             bottom: {
                 lines:      [ "hour", "weekday" ],
                 height:     26,
-                fontSize:   10,
+                fontSize:   11,
                 color:      "#534",
-                background: "transparent",
+                //background: "transparent",
                 locale:     "en-US",
                 format:     {
                     timeZone: timeZone, weekday: "long", day: "numeric", hour: "2-digit"
@@ -315,7 +362,7 @@ function renderUserTimeline(){
        },    
        headline: {
             display: true,
-            title:   "My Shift Schedule Timeline and Activity",
+            title:   "My Shift Schedule Timeline and Activity ($startDateTimeFormat - $endDateTimeFormat)",
             range:   true,
             locale:  "en-US",
             format:  {

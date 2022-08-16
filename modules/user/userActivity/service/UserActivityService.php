@@ -129,10 +129,11 @@ class UserActivityService
     /**
      * @param int $userId
      * @param string $fromDateTime
-     * @param string $endDateTime
+     * @param string $toDateTime
      * @param string|null $eventName
      * @param int $delayMin
      * @param int $minimumDuration
+     * @param string|null $type
      * @return array
      */
     public static function getUniteEventsByUserId(
@@ -141,7 +142,8 @@ class UserActivityService
         string $toDateTime,
         ?string $eventName = null,
         int $delayMin = 3,
-        int $minimumDuration = 3
+        int $minimumDuration = 3,
+        ?string $type = null
     ): array {
 
         $data = [];
@@ -174,7 +176,7 @@ class UserActivityService
         }
 
         if ($data) {
-            $data = self::implodePeriodEventList($data, $minimumDuration);
+            $data = self::implodePeriodEventList($data, $minimumDuration, $type);
         }
         unset($eventList);
 
@@ -184,9 +186,10 @@ class UserActivityService
     /**
      * @param array $eventList
      * @param int $minimumDuration
+     * @param string|null $type
      * @return array
      */
-    public static function implodePeriodEventList(array $eventList, int $minimumDuration = 1): array
+    public static function implodePeriodEventList(array $eventList, int $minimumDuration = 1, ?string $type = null): array
     {
         $data = [];
         if ($eventList) {
@@ -200,7 +203,8 @@ class UserActivityService
                         'start' => $start,
                         'end' => $end,
                         'duration' => $duration,
-                        'list' => $list
+                        'list' => $list,
+                        'type' => $type
                     ];
                 }
             }
