@@ -82,7 +82,6 @@ use src\model\coupon\entity\couponCase\CouponCase;
 use src\model\coupon\useCase\send\SendCouponsForm;
 use src\model\department\department\Params;
 use src\model\email\useCase\send\fromCase\AbacEmailList;
-use src\model\emailReviewQueue\EmailReviewQueueManageService;
 use src\model\saleTicket\useCase\create\SaleTicketService;
 use src\model\sms\useCase\send\fromCase\AbacSmsFromNumberList;
 use src\repositories\cases\CaseCategoryRepository;
@@ -141,7 +140,6 @@ use src\services\email\EmailServiceHelper;
  * @property PaymentRepository $paymentRepository
  * @property OrderCreateFromSaleService $orderCreateFromSaleService
  * @property FlightFromSaleService $flightFromSaleService
- * @property EmailReviewQueueManageService $emailReviewQueueManageService
  * @property EmailMainService $emailService
  */
 class CasesController extends FController
@@ -165,7 +163,6 @@ class CasesController extends FController
     private PaymentRepository $paymentRepository;
     private OrderCreateFromSaleService $orderCreateFromSaleService;
     private FlightFromSaleService $flightFromSaleService;
-    private EmailReviewQueueManageService $emailReviewQueueManageService;
     private EmailMainService $emailService;
 
     public const DIFFERENT_PROJECT = 'different-project';
@@ -192,7 +189,6 @@ class CasesController extends FController
         PaymentRepository $paymentRepository,
         OrderCreateFromSaleService $orderCreateFromSaleService,
         FlightFromSaleService $flightFromSaleService,
-        EmailReviewQueueManageService $emailReviewQueueManageService,
         EmailMainService $emailService,
         $config = []
     ) {
@@ -216,7 +212,6 @@ class CasesController extends FController
         $this->paymentRepository = $paymentRepository;
         $this->orderCreateFromSaleService = $orderCreateFromSaleService;
         $this->flightFromSaleService = $flightFromSaleService;
-        $this->emailReviewQueueManageService = $emailReviewQueueManageService;
         $this->emailService = $emailService;
     }
 
@@ -378,8 +373,7 @@ class CasesController extends FController
 
                             $this->refresh(); //'#communication-form'
                         } else {
-                            $mail->statusToReview();
-                            $this->emailReviewQueueManageService->createByEmail($mail, $model->cs_dep_id);
+                            $this->emailService->moveToReview($mail, $model->cs_dep_id);
 
                             Yii::$app->session->setFlash('send-warning', '<strong>Email Message</strong> has been sent for review');
                             $this->refresh();

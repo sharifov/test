@@ -7,8 +7,6 @@
 
 use yii\widgets\DetailView;
 use src\entities\email\Email;
-use src\entities\email\helpers\EmailType;
-use src\entities\email\helpers\EmailStatus;
 
 ?>
 <?= DetailView::widget([

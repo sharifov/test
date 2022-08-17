@@ -41,7 +41,7 @@ use dosamigos\datepicker\DatePicker;
             [
                 'class' => \common\components\grid\project\ProjectColumn::class,
                 'attribute' => 'e_project_id',
-                'relation' => 'eProject',
+                'relation' => 'project',
             ],
 //            [
 //                'attribute' => 'e_project_id',

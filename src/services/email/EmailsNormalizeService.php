@@ -409,7 +409,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             'status'        =>  EmailStatus::PENDING,
             'createdDt'     =>  date('Y-m-d H:i:s'),
             'params'        => [
-                'templateType'  =>  $previewEmailForm->getEmailTemplateId() ?: null,
+                'templateType'  =>  $previewEmailForm->getEmailTemplateId(),
                 'language'      =>  $previewEmailForm->getLanguageId() ?? null,
             ],
             'body'          =>  [
@@ -489,9 +489,12 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
 
     public function createFromDTO(EmailDTO $emailDTO, $autoDetectEmpty = true): Email
     {
-        $clientId = null;
-        $leadId = null;
-        $caseId = null;
+        $clientId = $emailDTO->clientId ?? null;
+        $leadId = $emailDTO->leadId ?? null;
+        $caseId = $emailDTO->caseId ?? null;
+        if ($emailDTO->createdUserId) {
+            $this->userId = $emailDTO->createdUserId;
+        }
         if ($autoDetectEmpty) {
             $clientId = $emailDTO->clientId ?? $this->helper->detectClientId($emailDTO->emailFrom);
             $leadId =  $emailDTO->leadId ?? $this->helper->detectLeadId($emailDTO->emailSubject, $emailDTO->refMessageId);

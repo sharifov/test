@@ -53,4 +53,12 @@ interface EmailInterface
     public function isCreatedUser(int $userId): bool;
 
     public function hasCreatedUser(): bool;
+
+    public function getStatusName(): string;
+
+    public function getTypeName(): string;
+
+    public function isNew(): bool;
+
+    public function isDeleted(): bool;
 }

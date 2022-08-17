@@ -45,7 +45,7 @@ class EmailRepository implements EmailRepositoryInterface
 
     public function read($email): void
     {
-        if ($email->emailLog && $email->emailLog->el_is_new === true) {
+        if ($email->emailLog && $email->isNew()) {
             $email->saveEmailLog([
                 'el_is_new' => false,
                 'el_read_dt' => date('Y-m-d H:i:s')

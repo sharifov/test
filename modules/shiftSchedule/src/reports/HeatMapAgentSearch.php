@@ -3,7 +3,9 @@
 namespace modules\shiftSchedule\src\reports;
 
 use common\components\validators\IsArrayValidator;
+use common\models\Department;
 use common\models\Employee;
+use common\models\UserDepartment;
 use common\models\UserGroup;
 use common\models\UserGroupAssign;
 use modules\shiftSchedule\src\entities\shift\ShiftQuery;
@@ -24,6 +26,7 @@ class HeatMapAgentSearch extends Model
     public $shifts;
     public $roles;
     public $cache;
+    public $department;
     public $timeZone;
 
     private ?string $toDT = null;
@@ -54,6 +57,9 @@ class HeatMapAgentSearch extends Model
 
             [['shifts'], IsArrayValidator::class],
             [['shifts'], 'each', 'rule' => ['in', 'range' => array_keys(ShiftQuery::getList())], 'skipOnError' => true, 'skipOnEmpty' => true],
+
+            [['department'], IsArrayValidator::class],
+            [['department'], 'each', 'rule' => ['in', 'range' => array_keys(Department::getList())], 'skipOnError' => true, 'skipOnEmpty' => true],
 
             [['roles'], IsArrayValidator::class],
 
@@ -184,6 +190,11 @@ class HeatMapAgentSearch extends Model
 
         if ($this->roles) {
             $query->andWhere(['IN', 'uss_user_id', array_keys(Employee::getListByRole($this->roles))]);
+        }
+
+        if ($this->department) {
+            $subQuery = UserDepartment::find()->usersByDep($this->department);
+            $query->andWhere(['IN', 'uss_user_id', $subQuery]);
         }
     }
 

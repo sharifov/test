@@ -7,8 +7,6 @@
 
 use yii\widgets\DetailView;
 use common\models\Email;
-use src\entities\email\helpers\EmailType;
-use src\entities\email\helpers\EmailStatus;
 
 ?>
 <?= DetailView::widget([
@@ -16,35 +14,18 @@ use src\entities\email\helpers\EmailStatus;
       'attributes' => [
           'e_id',
           'e_reply_id',
-          'eLead:lead',
-          'eCase:case',
+          'lead:lead',
+          'case:case',
           'e_project_id:projectName',
-          [
-              'attribute' => 'e_email_from',
-              'value' => static function (Email $model) {
-                  return $model->emailFrom;
-              },
-              'format' => 'email'
-          ],
-          'e_email_from_name',
-          [
-              'attribute' => 'e_email_to',
-              'value' => static function (Email $model) {
-                  return $model->emailTo;
-              },
-              'format' => 'email'
-          ],
-          'e_email_to_name',
+          'emailFrom:email',
+          'emalFromName',
+          'emailTo:email',
+          'emailToName',
           'e_email_cc:email',
           'e_email_bc:email',
           'e_email_subject:email',
           'e_email_data:ntext',
-          [
-              'attribute' => 'e_type_id',
-              'value' => static function (Email $model) {
-                return EmailType::getName($model->e_type_id);
-              },
-          ],
+          'typeName',
           'e_template_type_id',
           'e_language_id',
           'e_communication_id',
@@ -52,12 +33,7 @@ use src\entities\email\helpers\EmailStatus;
           'e_is_new',
           'e_delay',
           'e_priority',
-          [
-              'attribute' => 'e_status_id',
-              'value' => static function (Email $model) {
-                return EmailStatus::getName($model->e_status_id);
-              },
-          ],
+          'statusName',
           'e_status_done_dt',
           'e_read_dt',
           'e_error_message',
