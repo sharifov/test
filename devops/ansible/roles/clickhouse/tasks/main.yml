@@ -1,0 +1,59 @@
+---
+- name: Install GPG Key clickhouse repo
+  apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: 8919F6BD2B48D754
+    state: present
+
+- name: Create clickhouse repo
+  apt_repository:
+    repo: deb https://packages.clickhouse.com/deb stable main
+    state: present
+    filename: clickhouse.list
+
+- name: Install clickhouse server
+  apt:
+    pkg: clickhouse-server
+    state: present
+
+- name: Install clickhouse client
+  apt:
+    pkg: clickhouse-client
+    state: present
+
+- name: Ensure clickhouse is started
+  service:
+    name: clickhouse-server
+    state: started
+    enabled: true
+
+- name: Configure clickhouse server
+  template:
+    src: config.xml.j2
+    dest: /etc/clickhouse-server/config.xml
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart clickhouse-server
+
+- name: Configure clickhouse users
+  template:
+    src: users.xml.j2
+    dest: /etc/clickhouse-server/users.xml
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart clickhouse-server
+
+- name: Set clickhouse connection string
+  set_fact:
+    clickhouse_cli: "clickhouse-client -h 127.0.0.1 -u default --password {{ common_config_main_components_dbclickhouse_password  }}"
+
+- name: Gather list of clickhouse databases
+  command: "{{ clickhouse_cli }} -q 'show databases'"
+  changed_when: false
+  register: clickhouse_databases
+
+- name: Create clickhouse database
+  command: "{{ clickhouse_cli }} -q 'CREATE DATABASE IF NOT EXISTS `{{ project }}`'"
+  when: project not in clickhouse_databases.stdout_lines
