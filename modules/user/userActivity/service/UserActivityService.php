@@ -154,7 +154,7 @@ class UserActivityService
             $query->andWhere(['ua_object_event' => $eventName]);
         }
         $eventList = $query->orderBy(['ua_start_dt' => SORT_ASC])->asArray()->all();
-       // VarDumper::dump($eventList, 10, true); echo '<hr>';
+//       VarDumper::dump($eventList, 10, true); echo '<hr>';       exit;
         if ($eventList) {
             $nr = 0;
             foreach ($eventList as $n => $event) {
@@ -175,10 +175,13 @@ class UserActivityService
             }
         }
 
+
         if ($data) {
             $data = self::implodePeriodEventList($data, $minimumDuration, $type);
         }
+        //VarDumper::dump($data, 10, true); echo '<hr>';       exit;
         unset($eventList);
+
 
         return $data;
     }
@@ -194,14 +197,23 @@ class UserActivityService
         $data = [];
         if ($eventList) {
             foreach ($eventList as $list) {
+                //VarDumper::dump($list, 10, true); echo '<hr>';       //exit;
                 $start = $list[0];
                 $end = end($list);
-                $duration = (int) (strtotime($end) - strtotime($start)) / 60;
+
+                $endTime = strtotime($end);
+                $startTime = strtotime($start);
+
+                if ($endTime - $startTime < 60) {
+                    $endTime = $startTime + 60;
+                }
+
+                $duration = (int) ($endTime - $startTime) / 60;
                 if ($duration >= $minimumDuration) {
                     //VarDumper::dump($list, 10, true);
                     $data[] = [
-                        'start' => $start,
-                        'end' => $end,
+                        'start' => date('Y-m-d H:i', $startTime),
+                        'end' => date('Y-m-d H:i', $endTime),
                         'duration' => $duration,
                         'list' => $list,
                         'type' => $type

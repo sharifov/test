@@ -181,6 +181,57 @@ use yii\helpers\Html;
             <?php endforeach; ?>
         <?php endif; ?>
 
+        <?php if (!empty($userOnCallEvents)) : ?>
+            <?php
+            foreach ($userOnCallEvents as $key => $item) :?>
+                <?php
+                $tlData = [];
+                $tlData['id'] = $key;
+                $tlData['row'] = 2;
+
+                $tlData['extend'] = [
+                    'toggle' => 'popover',
+                    'trigger' => 'hover',
+                    'html' => true
+                ];
+
+                $tlData['start'] = \common\models\Employee::convertTimeFromUtcToUserTime(
+                    $user->getTimezone(),
+                    strtotime($item['start'])
+                );
+                if ($item['end']) {
+                    $tlData['end'] = \common\models\Employee::convertTimeFromUtcToUserTime(
+                        $user->getTimezone(),
+                        strtotime($item['end'])
+                    );
+                } else {
+                    $tlData['size'] = 'small';
+                }
+
+                $tlData['bgColor'] = '#fd6a02';
+                $tlData['color'] = '#fd6a02';
+                $tlData['height'] = 20;
+                $tlData['content'] = Yii::$app->formatter->asDuration($item['duration'] * 60);
+                ?>
+
+                <li data-timeline-node='<?= \yii\helpers\Json::encode($tlData, JSON_THROW_ON_ERROR) ?>'>
+                    <small> On Call:
+                        <?php echo Html::encode(Yii::$app->formatter->asDateTime(
+                            strtotime($item['start']),
+                            'php: H:i'
+                        )) ?>
+                        -
+                        <?php echo Html::encode(Yii::$app->formatter->asDateTime(
+                            strtotime($item['end']),
+                            'php: H:i'
+                        )) ?>
+                    </small>
+                </li>
+            <?php endforeach; ?>
+        <?php endif; ?>
+
+
+
 
 
         <?php if (!empty($userOnlineData)) : ?>
@@ -307,8 +358,8 @@ $labelList[] = '\'<div style="margin: 0 10px 0 10px"><i class="fa fa-clock-o"></
 $labelListStr = implode(', ', $labelList);
 
 
-$startDateTimeFormat = date('d-M [H:i]', strtotime($startDateTimeCalendar));
-$endDateTimeFormat = date('d-M [H:i]', strtotime($endDateTimeCalendar));
+//$startDateTimeFormat = date('d-M [H:i]', strtotime($startDateTimeCalendar));
+//$endDateTimeFormat = date('d-M [H:i]', strtotime($endDateTimeCalendar));
 
 $js = <<<JS
 
@@ -362,7 +413,7 @@ function renderUserTimeline(){
        },    
        headline: {
             display: true,
-            title:   "My Shift Schedule Timeline and Activity ($startDateTimeFormat - $endDateTimeFormat)",
+            title:   "My Shift Schedule Timeline and Activity",
             range:   true,
             locale:  "en-US",
             format:  {

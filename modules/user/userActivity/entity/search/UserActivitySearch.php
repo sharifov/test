@@ -13,6 +13,7 @@ use yii\data\ActiveDataProvider;
 use modules\user\userActivity\entity\UserActivity;
 use yii\data\ArrayDataProvider;
 use yii\db\Query;
+use yii\helpers\VarDumper;
 
 /**
  * UserActivitySearch represents the model behind the search form of `modules\user\userActivity\entity\UserActivity`.
@@ -146,10 +147,27 @@ class UserActivitySearch extends UserActivity
         return $dataProvider;
     }
 
-    public function searchUserActivity($params, $user): array
-    {
+    /**
+     * @param $params
+     * @param Employee $user
+     * @param string|null $defaultStartTime
+     * @param string|null $defaultEndTime
+     * @return array
+     */
+    public function searchUserActivity(
+        $params,
+        Employee $user,
+        ?string $defaultStartTime = null,
+        ?string $defaultEndTime = null
+    ): array {
 
+        if (empty($defaultStartTime)) {
+            $defaultStartTime = strtotime('-1 days');
+        }
 
+        if (empty($defaultEndTime)) {
+            $defaultEndTime = time();
+        }
 
         $this->load($params);
         $timezone = $user->timezone;
@@ -160,16 +178,6 @@ class UserActivitySearch extends UserActivity
             $timezone = $this->reportTimezone;
             $this->defaultUserTz = $this->reportTimezone;
         }
-
-        /*if ($this->timeTo == ""){
-            $differenceTimeToFrom  = "24:00";
-        } else {
-            if((strtotime($this->timeTo) - strtotime($this->timeFrom)) <= 0){
-                $differenceTimeToFrom = sprintf("%02d:00",(strtotime("24:00") - strtotime(sprintf("%02d:00", abs((strtotime($this->timeTo) - strtotime($this->timeFrom)) ) / 3600))) / 3600);
-            } else {
-                $differenceTimeToFrom =  sprintf("%02d:00", (strtotime($this->timeTo) - strtotime($this->timeFrom)) / 3600);
-            }
-        }*/
 
         if ($this->dateTimeRange != null) {
             $dates = explode(' - ', $this->dateTimeRange);
@@ -190,11 +198,14 @@ class UserActivitySearch extends UserActivity
         } else {
             //$timeSub = date('G', strtotime(date('00:00')));
 
-            $startDateTime = date('Y-m-d H:i', strtotime('-5 days'));
-            $endDateTime = date('Y-m-d H:i', strtotime('+24 hours'));
+            $startDateTime = date('Y-m-d H:i', $defaultStartTime);
+            $endDateTime = date('Y-m-d H:i', $defaultEndTime);
 
-            $startDateTimeCalendar = date('Y-m-d H:i', strtotime($startDateTime));
-            $endDateTimeCalendar = date('Y-m-d H:i', strtotime($endDateTime));
+//            $startDateTime = Employee::convertToUTC($defaultStartTime, $this->defaultUserTz); //- ($hourSub * 3600)
+//            $endDateTime = Employee::convertToUTC($defaultEndTime, $this->defaultUserTz);
+
+            $startDateTimeCalendar = Employee::convertTimeFromUtcToUserTime($this->defaultUserTz, strtotime($startDateTime));
+            $endDateTimeCalendar = Employee::convertTimeFromUtcToUserTime($this->defaultUserTz, strtotime($endDateTime));
 
             //$date_from = Employee::convertToUTC(strtotime(date('Y-m-d 00:00') . ' -2 days'), $this->defaultUserTz);
             //$date_to = Employee::convertToUTC(strtotime(date('Y-m-d 23:59')), $this->defaultUserTz);
@@ -202,7 +213,17 @@ class UserActivitySearch extends UserActivity
             //$utcOffsetDST = Employee::getUtcOffsetDst($timezone, $date_from) ?? date('P');
         }
 
+        $userOnCallEvents = UserActivityService::getUniteEventsByUserId(
+            $user->id,
+            date('Y-m-d H:i:s', strtotime($startDateTime)),
+            date('Y-m-d H:i:s', strtotime($endDateTime)),
+            UserEvents::EVENT_ON_CALL,
+            1,
+            1,
+            'on_call'
+        );
 
+        //VarDumper::dump($userOnCallEvents, 10, true); exit;
 
         $scheduleEventList = UserShiftScheduleQuery::getExistEventList(
             $user->id,
@@ -216,7 +237,7 @@ class UserActivitySearch extends UserActivity
         $userOnlineEvents = UserActivityService::getUniteEventsByUserId(
             $user->id,
             date('Y-m-d H:i:s', strtotime($startDateTime)),
-            date('Y-m-d H:i:s'),
+            date('Y-m-d H:i:s', strtotime($endDateTime)),
             UserEvents::EVENT_ONLINE,
             5,
             3,
@@ -295,7 +316,6 @@ class UserActivitySearch extends UserActivity
                     ];
                 }
 
-
                 //$userOnlineData2[] = array_merge($earlyStart, $overtime, $earlyLeave, $earlyArrival);
 
                 $userOnlineData[$item['uss_id']] = [
@@ -314,23 +334,16 @@ class UserActivitySearch extends UserActivity
         if ($summaryData) {
             foreach ($summaryData as $events) {
                 foreach ($events as $event) {
-                    //echo 123;
-                    //VarDumper::dump($event['duration'], 10, true);
-                    //continue;
                     if (isset($summary[$event['type']])) {
                         $summary[$event['type']] += $event['duration'];
                     } else {
                         $summary[$event['type']] = $event['duration'];
                     }
-
-                    // VarDumper::dump($event['type']);
                 }
             }
         }
-        //exit;
 
         // VarDumper::dump($summary, 10, true); exit;
-
 
         $userActiveEvents = UserActivityService::getUniteEventsByUserId(
             $user->id,
@@ -341,7 +354,6 @@ class UserActivitySearch extends UserActivity
             3,
             'activity'
         );
-
 
         if ($userOnlineEvents) {
             //foreach ($userOnlineEvents as $events) {
@@ -358,19 +370,26 @@ class UserActivitySearch extends UserActivity
 
         if ($userActiveEvents) {
             foreach ($userActiveEvents as $event) {
-                //  foreach ($events as $event) {
                 if (isset($summary[$event['type']])) {
                     $summary[$event['type']] += $event['duration'];
                 } else {
                     $summary[$event['type']] = $event['duration'];
                 }
-                //    }
+            }
+        }
+
+        if ($userOnCallEvents) {
+            foreach ($userOnCallEvents as $event) {
+                if (isset($summary[$event['type']])) {
+                    $summary[$event['type']] += $event['duration'];
+                } else {
+                    $summary[$event['type']] = $event['duration'];
+                }
             }
         }
 
 
         $data = [
-            // 'userTimeZone' => $userTimeZone,
             'startDateTime' => $startDateTime,
             'endDateTime' => $endDateTime,
             'startDateTimeCalendar' => $startDateTimeCalendar,
@@ -378,6 +397,7 @@ class UserActivitySearch extends UserActivity
             'scheduleEventList' => $scheduleEventList,
             'userActiveEvents' => $userActiveEvents,
             'userOnlineEvents' => $userOnlineEvents,
+            'userOnCallEvents' => $userOnCallEvents,
             'userOnlineData' => $userOnlineData,
             'summary' => $summary,
         ];

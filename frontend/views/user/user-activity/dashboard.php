@@ -17,6 +17,7 @@ use yii\widgets\Pjax;
 /* @var $scheduleEventList array|UserShiftSchedule[] */
 /* @var $userActiveEvents array */
 /* @var $userOnlineEvents array */
+/* @var $userOnCallEvents array */
 /* @var $userOnlineData array */
 /* @var $summary array */
 /* @var $searchModel UserActivitySearch */
@@ -27,6 +28,10 @@ $this->params['breadcrumbs'][] = $this->title;
 
 \frontend\assets\FullCalendarAsset::register($this);
 \frontend\assets\TimerAsset::register($this);
+
+$startDateTimeFormat = date('d-M [H:i]', strtotime($startDateTimeCalendar));
+$endDateTimeFormat = date('d-M [H:i]', strtotime($endDateTimeCalendar));
+
 ?>
 <div class="task-list-index">
     <h1><i class="fa fa-clock-o"></i> <?= Html::encode($this->title) ?></h1>
@@ -39,7 +44,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <div class="row">
         <div class="col-md-6">
-            <h5>Summary Information: </h5>
+            <h5>Summary from <?=$startDateTimeFormat?> to <?=$endDateTimeFormat?>: </h5>
         </div>
         <div class="col-md-6 text-right">
             <button class="btn btn-info" id="btn-show-help"><i class="fa fa-info-circle"></i> Help Info</button>
@@ -150,6 +155,15 @@ $this->params['breadcrumbs'][] = $this->title;
                         </div>
                         <span class="count_bottom"> on Shift</span>
                     </div>
+
+                    <div class="col-md-1 col-sm-4  tile_stats_count dev-tile-adjust">
+                        <span class="count_top"><i class="fa fa-clock-o"></i> On Call Time </span>
+                        <div class="count" style="color: #fd6a02" title="<?= empty($summary['on_call']) ? 0 : Yii::$app->formatter->asDuration($summary['on_call'] * 60)?>">
+                            <?= empty($summary['on_call']) ? 0 : Yii::$app->formatter->asHoursDuration($summary['on_call'], '%02d:%02d') ?>
+                        </div>
+                        <span class="count_bottom"> Selected time</span>
+                    </div>
+
                 </div>
             </div>
 
@@ -182,6 +196,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     'user' => $user,
                     'scheduleEventList' => $scheduleEventList,
                     'userOnlineEvents' => $userOnlineEvents,
+                    'userOnCallEvents' => $userOnCallEvents,
                     'userActiveEvents' => $userActiveEvents,
                     'startDateTime' => $startDateTime,
                     'endDateTime' => $endDateTime,

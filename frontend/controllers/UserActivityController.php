@@ -66,47 +66,23 @@ class UserActivityController extends FController
     public function actionDashboard(): string
     {
         $user = Auth::user();
-//        $userTimeZone = $user->timezone ?: 'UTC';
-
         $searchModel = new UserActivitySearch();
+        $defaultStartTime = strtotime('-24 hours');
+        $defaultEndTime = strtotime('+8 hours');
 
-//
-//        $startDateTime = date('Y-m-d H:i', strtotime('-15 days'));
-//        $endDateTime = date('Y-m-d H:i', strtotime('+34 hours'));
-
-        $data = $searchModel->searchUserActivity(Yii::$app->request->queryParams, $user);
+        $data = $searchModel->searchUserActivity(
+            Yii::$app->request->queryParams,
+            $user,
+            $defaultStartTime,
+            $defaultEndTime
+        );
 
         $data['user'] = $user;
         $data['searchModel'] = $searchModel;
 
-
-        $metricData = [
-            'EarlyStart' => [],
-            'EarlyFinish' => [],
-            'LateStart' => [],
-            'LateFinish' => [],
-            'UsefulTime' => [],
-            'online' => [],
-            'activity' => [],
-        ];
-
-        $data['metricData'] = $metricData;
-
         return $this->render(
             '/user/user-activity/dashboard',
             $data
-            /*[
-            // 'userTimeZone' => $userTimeZone,
-            'user' => $user,
-            'startDateTime' => $startDateTime,
-            'endDateTime' => $endDateTime,
-            'scheduleEventList' => $scheduleEventList,
-            'userActiveEvents' => $userActiveEvents,
-            'userOnlineEvents' => $userOnlineEvents,
-            'userOnlineData' => $userOnlineData,
-            'summary' => $summary,
-            'searchModel' => $searchModel
-            ]*/
         );
     }
 
