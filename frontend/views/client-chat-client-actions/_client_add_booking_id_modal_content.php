@@ -31,7 +31,7 @@ use yii\widgets\ActiveForm;
     <?= $form->field($addBookingId, 'bookingId')->textInput() ?>
     <div class="text-center">
         <?= Html::submitButton('<i class="fa fa-plus"> </i> Add booking id', [
-            'class' => 'btn btn-success'
+            'class' => 'btn btn-success js-add-booking-id-form-submit'
         ]) ?>
     </div>
     <?php ActiveForm::end(); ?>
@@ -41,7 +41,11 @@ use yii\widgets\ActiveForm;
 $js = <<<JS
 $('#client-add-booking-id-form').on('beforeSubmit', function (e) {
     e.preventDefault();
-    
+   let btnSave = $('.js-add-booking-id-form-submit');
+    let btnContent = btnSave.html();
+    btnSave.html('<i class="fa fa-cog fa-spin"></i> Processing')
+        .addClass('btn-default')
+        .prop('disabled', true);
     $.ajax({
        type: $(this).attr('method'),
        url: $(this).attr('action'),
@@ -57,7 +61,11 @@ $('#client-add-booking-id-form').on('beforeSubmit', function (e) {
                     text: data.message,
                     type: 'success'
                 });
+                
             }
+            setTimeout(function () {
+                btnSave.html(btnContent).removeClass('btn-default').prop('disabled', false);  
+            }, 1000);
        },
        error: function (error) {
             createNotifyByObject({
@@ -65,6 +73,9 @@ $('#client-add-booking-id-form').on('beforeSubmit', function (e) {
                 text: 'Internal Server Error. Try again letter.',
                 type: 'error'                
             });
+            setTimeout(function () {
+                btnSave.html(btnContent).removeClass('btn-default').prop('disabled', false);  
+            }, 1000);
        }
     })
     return false;

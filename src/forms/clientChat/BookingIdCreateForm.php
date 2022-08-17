@@ -19,6 +19,7 @@ class BookingIdCreateForm extends Model
     public function rules(): array
     {
         return [
+            ['bookingId', 'filter', 'filter' => 'trim'],
             ['bookingId', 'required'],
             ['bookingId', 'string', 'min' => 7, 'max' => 20],
         ];
