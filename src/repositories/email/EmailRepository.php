@@ -43,16 +43,6 @@ class EmailRepository implements EmailRepositoryInterface
         return $email->e_id;
     }
 
-    public function read($email): void
-    {
-        if ($email->emailLog && $email->isNew()) {
-            $email->saveEmailLog([
-                'el_is_new' => false,
-                'el_read_dt' => date('Y-m-d H:i:s')
-            ]);
-        }
-    }
-
     public function delete($email): int
     {
         $id = $email->e_id;
@@ -70,22 +60,6 @@ class EmailRepository implements EmailRepositoryInterface
             $removedIds[] = $this->delete($model);
         }
         return $removedIds;
-    }
-
-    public function changeStatus($email, int $statusId): void
-    {
-        if (EmailStatus::isDone($statusId)) {
-            $email->saveEmailLog(['el_status_done_dt' => date('Y-m-d H:i:s')]);
-        }
-        $email->e_status_id = $statusId;
-        $this->save($email);
-    }
-
-    public function saveInboxId($email, int $inboxId): void
-    {
-        $email->saveEmailLog([
-            'el_inbox_email_id' => $inboxId
-        ]);
     }
 
     /**

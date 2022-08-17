@@ -348,4 +348,13 @@ class EmailService extends SendMail implements EmailServiceInterface
 
         return $email;
     }
+
+    public function changeStatus($email, int $statusId): void
+    {
+        if (EmailStatus::isDone($statusId)) {
+            $email->e_status_done_dt = date('Y-m-d H:i:s');
+        }
+        $email->e_status_id = $statusId;
+        $email->save(false);
+    }
 }

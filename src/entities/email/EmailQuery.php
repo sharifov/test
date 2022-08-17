@@ -22,7 +22,7 @@ class EmailQuery extends ActiveQuery
 
     /**
      *
-     * @param int|arrat $status
+     * @param int|array $status
      * @return EmailQuery
      */
     public function byStatus($status)
