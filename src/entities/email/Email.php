@@ -101,8 +101,8 @@ class Email extends BaseActiveRecord implements EmailInterface
             ['e_created_dt', 'required'],
             [['e_body_id', 'e_project_id', 'e_status_id', 'e_type_id', 'e_is_deleted', 'e_created_user_id', 'e_updated_user_id', 'e_departament_id'], 'integer'],
             ['e_is_deleted', 'boolean'],
-            ['e_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_created_user_id' => 'id']],
-            ['e_updated_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_updated_user_id' => 'id']],
+           // ['e_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_created_user_id' => 'id']],
+          //  ['e_updated_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_updated_user_id' => 'id']],
             ['e_departament_id', 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['e_departament_id' => 'dep_id']],
             ['e_project_id', 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['e_project_id' => 'id']],
             ['e_updated_dt', 'safe'],
@@ -476,6 +476,23 @@ class Email extends BaseActiveRecord implements EmailInterface
     {
         $this->emailBody->updateAttributes(['embd_email_data' => json_encode($emailData)]);
         return $this;
+    }
+
+    public function read(): void
+    {
+        if ($this->emailLog && $this->isNew()) {
+            $this->saveEmailLog([
+                'el_is_new' => false,
+                'el_read_dt' => date('Y-m-d H:i:s')
+            ]);
+        }
+    }
+
+    public function saveInboxId(int $inboxId): void
+    {
+        $this->saveEmailLog([
+            'el_inbox_email_id' => $inboxId
+        ]);
     }
 
     /**

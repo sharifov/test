@@ -74,7 +74,7 @@ class EmailQuery extends ActiveQuery
 
     /**
      *
-     * @param int|arrat $status
+     * @param int|array $status
      * @return EmailQuery
      */
     public function byStatus($status)
@@ -155,5 +155,13 @@ class EmailQuery extends ActiveQuery
             ['e_email_to' => $mailList],
             ['e_email_from' => $mailList],
         ]);
+    }
+
+    public function notNormalized()
+    {
+        return $this
+            ->leftJoin(\src\entities\email\Email::tableName() . ' AS en', 'en.e_id = email.e_id')
+            ->where('en.e_id IS NULL')
+            ->orderBy(['email.e_id' => SORT_DESC]);
     }
 }

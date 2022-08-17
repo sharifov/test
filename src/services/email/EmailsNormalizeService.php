@@ -550,4 +550,13 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
 
         return $this->create(EmailForm::fromArray($data));
     }
+
+    public function changeStatus(Email $email, int $statusId): void
+    {
+        if (EmailStatus::isDone($statusId)) {
+            $email->saveEmailLog(['el_status_done_dt' => date('Y-m-d H:i:s')]);
+        }
+        $email->e_status_id = $statusId;
+        $email->save(false);
+    }
 }

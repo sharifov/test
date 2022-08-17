@@ -79,8 +79,8 @@ $user = Yii::$app->user->identity;
             'e_id',
             [   'class' => 'yii\grid\ActionColumn',
                 'template' => '{view} {delete}',
-                'urlCreator' => function($action, $model, $key, $index){
-                    return [$action, 'id'=> $model->id];
+                'urlCreator' => function ($action, $model, $key, $index) {
+                    return [$action, 'id' => $model->id];
                 },
             ],
             [

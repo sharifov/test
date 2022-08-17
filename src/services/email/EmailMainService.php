@@ -517,11 +517,11 @@ class EmailMainService implements EmailServiceInterface
             throw \RuntimeException('Email status not valid.');
         }
         if ($emailOld = $this->emailOldRepository->findByCommunicationId($communicationId)) {
-            $this->emailOldRepository->changeStatus($emailOld, $statusId);
+            $this->oldService->changeStatus($emailOld, $statusId);
         }
         if ($this->normalizedService !== null) {
             if ($emailNorm = $this->emailRepository->findByCommunicationId($communicationId)) {
-                $this->emailRepository->changeStatus($emailNorm, $statusId);
+                $this->normalizedService->changeStatus($emailNorm, $statusId);
             }
         }
 
@@ -531,16 +531,30 @@ class EmailMainService implements EmailServiceInterface
     public function saveInboxId(string $messageId, string $emailTo, int $inboxId)
     {
         if ($emailOld = $this->emailOldRepository->findReceived($messageId, $emailTo)->limit(1)->one()) {
-            $this->emailOldRepository->saveInboxId($emailOld, $inboxId);
+            $emailOld->saveInboxId($inboxId);
         }
         $emailNorm = null;
         if ($this->normalizedService !== null) {
             if ($emailNorm = $this->emailRepository->findReceived($messageId, $emailTo)->limit(1)->one()) {
-                $this->emailRepository->saveInboxId($emailNorm, $inboxId);
+                $emailNorm->saveInboxId($inboxId);
             }
         }
 
         return $emailOld || $emailNorm;
+    }
+
+    public function read($email)
+    {
+        $calledFrom = $this->getCalledFrom($email);
+        $emailOld = ($calledFrom == self::FROM_NORM) ? $this->setEmailObjById($email->e_id) : $email;
+        $emailOld->read();
+
+        if ($this->normalizedService !== null) {
+            $emailNorm = ($calledFrom == self::FROM_OLD) ? $this->setEmailNormObjById($email->e_id) : $email;
+            if (isset($emailNorm)) {
+                $emailNorm->read();
+            }
+        }
     }
 
     /**
