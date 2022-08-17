@@ -139,6 +139,11 @@ class EmailQuery extends ActiveQuery
         return $this->andWhere(['e_case_id' => $caseId]);
     }
 
+    public function client(int $clientId)
+    {
+        return $this->andWhere(['e_client_id' => $clientId]);
+    }
+
     public function orderByLastInbox()
     {
         return $this->andWhere(['>', 'e_inbox_email_id', 0])->orderBy(['e_inbox_email_id' => SORT_DESC]);
