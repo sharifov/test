@@ -26,10 +26,11 @@ class ClientChatFormAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_CREATE  = 'create';
     public const ACTION_UPDATE  = 'update';
     public const ACTION_DELETE  = 'delete';
+    public const ACTION_BUILDER  = 'builder';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
-        self::UI_CRUD => [self::ACTION_DELETE, self::ACTION_UPDATE],
+        self::UI_CRUD => [self::ACTION_DELETE, self::ACTION_UPDATE, self::ACTION_BUILDER],
     ];
 
     /** --------------- ATTRIBUTE LIST --------------------------- */

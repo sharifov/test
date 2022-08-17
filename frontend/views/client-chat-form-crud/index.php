@@ -84,16 +84,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 'template' => '{view} {update} {form_builder} {delete}',
                 'visibleButtons' => [
                     'delete' => static function (ClientChatForm $model) {
-                          /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_DELETE, Delete to button take */
+                          /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_DELETE,  Access to delete client chat form */
                          return Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_DELETE);
                     },
                     'update' => static function (ClientChatForm $model) {
-                        /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE, Update to button take */
+                        /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE,  Access to update client chat form */
                         return Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE);
                     },
                     'form_builder' => static function (ClientChatForm $model) {
-                        /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE, Update to button take */
-                        return Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE);
+                        /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_BUILDER, Access to builder client chat form */
+                        return Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_BUILDER);
                     },
                 ],
                 'buttons' => [

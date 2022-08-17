@@ -87,7 +87,7 @@ class ClientChatFormCrudController extends FController
      */
     public function actionUpdate($id)
     {
-        /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE, Update to button take */
+        /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE, Access to update client chat form */
         if (!Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE)) {
             throw new ForbiddenHttpException('Access denied.');
         }
@@ -110,8 +110,8 @@ class ClientChatFormCrudController extends FController
      */
     public function actionBuilder($id)
     {
-        /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE, Update to button take */
-        if (!Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE)) {
+        /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_BUILDER, Access to builder client chat form */
+        if (!Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_BUILDER)) {
             throw new ForbiddenHttpException('Access denied.');
         }
 
@@ -135,7 +135,7 @@ class ClientChatFormCrudController extends FController
      */
     public function actionDelete($id): Response
     {
-        /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_DELETE, Delete to button take */
+        /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_DELETE,  Access to delete client chat form */
         if (!Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_DELETE)) {
             throw new ForbiddenHttpException('Access denied.');
         }
