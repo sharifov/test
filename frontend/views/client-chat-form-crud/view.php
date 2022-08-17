@@ -1,5 +1,6 @@
 <?php
 
+use src\model\clientChatForm\entity\abac\ClientChatFormAbacObject;
 use src\model\clientChatForm\entity\ClientChatForm;
 use yii\bootstrap4\Html;
 use yii\helpers\VarDumper;
@@ -20,13 +21,18 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="col-md-6">
 
         <p>
-            <?= Html::a('Update', ['update', 'id' => $model->ccf_id], ['class' => 'btn btn-primary']) ?>
-<?php echo Html::a(
-    Html::tag('i', ' Builder', ['class' => 'fa fa-cog']),
-    ['builder','id' => $model->ccf_id],
-    ['class' => 'btn btn-secondary']
-)?>
-            <?php if (!$model->ccf_is_system) : ?>
+            <?php /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE, Update to button take */ ?>
+            <?php if (Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE)) : ?>
+                <?= Html::a('Update', ['update', 'id' => $model->ccf_id], ['class' => 'btn btn-primary']) ?>
+
+                <?php echo Html::a(
+                    Html::tag('i', ' Builder', ['class' => 'fa fa-cog']),
+                    ['builder','id' => $model->ccf_id],
+                    ['class' => 'btn btn-secondary']
+                )?>
+            <?php endif ?>
+            <?php /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_DELETE, Delete to button take */ ?>
+            <?php if (Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_DELETE)) : ?>
                 <?= Html::a('Delete', ['delete', 'id' => $model->ccf_id], [
                     'class' => 'btn btn-danger',
                     'data' => [
@@ -48,7 +54,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'ccf_created_user_id:userName',
                 'ccf_updated_user_id:userName',
                 'ccf_created_dt:byUserDateTime',
-                'ccf_is_system:booleanByLabel',
                 'ccf_updated_dt:byUserDateTime',
                 [
                     'attribute' => 'ccf_dataform_json',

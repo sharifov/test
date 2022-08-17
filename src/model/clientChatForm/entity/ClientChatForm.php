@@ -24,7 +24,6 @@ use yii\helpers\ArrayHelper;
  * @property int|null $ccf_updated_user_id
  * @property string|null $ccf_created_dt
  * @property string|null $ccf_updated_dt
- * @property bool $ccf_is_system
  *
  * @property Employee $createdUser
  * @property Project $project
@@ -61,8 +60,6 @@ class ClientChatForm extends ActiveRecord
 
             ['ccf_updated_dt', 'safe'],
 
-            ['ccf_is_system', 'boolean'],
-            ['ccf_is_system', 'default', 'value' => false],
             ['ccf_updated_user_id', 'integer'],
             ['ccf_updated_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['ccf_updated_user_id' => 'id']],
         ];
@@ -120,7 +117,6 @@ class ClientChatForm extends ActiveRecord
             'ccf_enabled' => 'Enabled',
             'ccf_created_user_id' => 'Created User',
             'ccf_updated_user_id' => 'Updated User',
-            'ccf_is_system' => 'Is system',
             'ccf_created_dt' => 'Created',
             'ccf_updated_dt' => 'Updated',
         ];

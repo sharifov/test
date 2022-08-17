@@ -1,6 +1,7 @@
 <?php
 
 use common\components\grid\project\ProjectColumn;
+use src\model\clientChatForm\entity\abac\ClientChatFormAbacObject;
 use src\model\clientChatForm\entity\ClientChatForm;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
@@ -55,11 +56,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 'options' => ['style' => 'width:140px']
             ],
             [
-                'attribute' => 'ccf_is_system',
-                'format' => 'booleanByLabel',
-                'filter' =>  [1 => 'Yes', 0 => 'No']
-            ],
-            [
                 'attribute' => 'ccf_created_dt',
                 'value' => static function (ClientChatForm $model) {
                     return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->ccf_created_dt));
@@ -88,7 +84,16 @@ $this->params['breadcrumbs'][] = $this->title;
                 'template' => '{view} {update} {form_builder} {delete}',
                 'visibleButtons' => [
                     'delete' => static function (ClientChatForm $model) {
-                        return !$model->ccf_is_system;
+                          /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_DELETE, Delete to button take */
+                         return Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_DELETE);
+                    },
+                    'update' => static function (ClientChatForm $model) {
+                        /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE, Update to button take */
+                        return Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE);
+                    },
+                    'form_builder' => static function (ClientChatForm $model) {
+                        /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE, Update to button take */
+                        return Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE);
                     },
                 ],
                 'buttons' => [

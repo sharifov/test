@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use src\model\clientChatForm\entity\abac\ClientChatFormAbacObject;
 use Yii;
 use src\model\clientChatForm\entity\ClientChatForm;
 use src\model\clientChatForm\entity\ClientChatFormSearch;
@@ -86,6 +87,11 @@ class ClientChatFormCrudController extends FController
      */
     public function actionUpdate($id)
     {
+        /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE, Update to button take */
+        if (!Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
@@ -104,6 +110,11 @@ class ClientChatFormCrudController extends FController
      */
     public function actionBuilder($id)
     {
+        /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE, Update to button take */
+        if (!Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
@@ -124,11 +135,12 @@ class ClientChatFormCrudController extends FController
      */
     public function actionDelete($id): Response
     {
-        $model = $this->findModel($id);
-
-        if ($model->ccf_is_system) {
-            throw new ForbiddenHttpException('System key cannot be deleted.');
+        /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_DELETE, Delete to button take */
+        if (!Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_DELETE)) {
+            throw new ForbiddenHttpException('Access denied.');
         }
+
+        $model = $this->findModel($id);
 
         $model->delete();
 
