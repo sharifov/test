@@ -23,7 +23,7 @@ class m220816_150420_add_cron_job_email_normalize extends Migration
                 $cronScheduler->cs_cron_command,
                 $cronScheduler->cs_cron_params
             );
-            $cronScheduler->cs_enabled = true;
+            $cronScheduler->cs_enabled = false;
 
             if (!$cronScheduler->save()) {
                 throw new \RuntimeException(\src\helpers\ErrorsToStringHelper::extractFromModel($cronScheduler, ' '));
