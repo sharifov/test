@@ -4085,18 +4085,22 @@ Reason: {reason}',
         return $result;
     }
 
+
     /**
      * @param array $quoteIds
      * @param $projectContactInfo
      * @param string|null $lang
+     * @param array $agent
+     * @param Employee|null $employee
      * @return array
      * @throws \Exception
      */
-    public function getEmailData2(array $quoteIds, $projectContactInfo, ?string $lang = null, array $agent = []): array
+    public function getEmailData2(array $quoteIds, $projectContactInfo, ?string $lang = null, array $agent = [], ?Employee $employee = null): array
     {
+        $employee = $employee ?? Yii::$app->user->identity;
         $project = $this->project;
 
-        $uppQuery = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->withPhoneList();
+        $uppQuery = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => $employee->id])->withEmailList()->withPhoneList();
         $upp = $this->project ? $uppQuery->one() : null;
 
         if ($quoteIds && is_array($quoteIds)) {
@@ -4148,9 +4152,9 @@ Reason: {reason}',
         ];
 
         $content_data['agent'] = [
-            'name'  => array_key_exists('full_name', $agent) ? $agent['full_name'] : Yii::$app->user->identity->full_name,
-            'username'  => array_key_exists('username', $agent) ? $agent['username'] : Yii::$app->user->identity->username,
-            'nickname' => array_key_exists('nickname', $agent) ? $agent['nickname'] : Yii::$app->user->identity->nickname,
+            'name'  => array_key_exists('full_name', $agent) ? $agent['full_name'] : $employee->full_name,
+            'username'  => array_key_exists('username', $agent) ? $agent['username'] : $employee->username,
+            'nickname' => array_key_exists('nickname', $agent) ? $agent['nickname'] : $employee->nickname,
             'phone' => $upp && $upp->getPhone() ? $upp->getPhone() : '',
             'email' => $upp && $upp->getEmail() ? $upp->getEmail() : '',
         ];
