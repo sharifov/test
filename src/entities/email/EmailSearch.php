@@ -144,9 +144,7 @@ class EmailSearch extends Email
         ]);
 
         if ($this->e_communication_id) {
-            $query->joinWith(['emailLog' => function ($q) {
-                $q->andFilterWhere(['like', 'el_communication_id', $this->e_communication_id]);
-            }]);
+            $query->byCommunicationId($this->e_communication_id);
         }
 
         if ($this->e_lead_id) {
