@@ -26,9 +26,7 @@ FormBuilderAsset::register($this);
 
         <?php echo $form->errorSummary($model) ?>
 
-        <?php if (!$model->ccf_is_system) : ?>
-            <?php echo $form->field($model, 'ccf_key')->textInput(['maxlength' => true]) ?>
-        <?php endif ?>
+        <?php echo $form->field($model, 'ccf_key')->textInput(['maxlength' => true]) ?>
         <?php echo $form->field($model, 'ccf_name')->textInput(['maxlength' => true]) ?>
         <?php echo $form->field($model, 'ccf_project_id')->dropDownList(Project::getList()) ?>
         <?php echo $form->field($model, 'ccf_enabled')->checkbox() ?>

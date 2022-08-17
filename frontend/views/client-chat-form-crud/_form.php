@@ -19,9 +19,7 @@ use yii\widgets\ActiveForm;
 
         <?php $form = ActiveForm::begin(); ?>
 
-        <?php if (!$model->ccf_is_system) : ?>
-            <?php echo $form->field($model, 'ccf_key')->textInput(['maxlength' => true]) ?>
-        <?php endif ?>
+        <?php echo $form->field($model, 'ccf_key')->textInput(['maxlength' => true]) ?>
 
         <?php echo $form->field($model, 'ccf_name')->textInput(['maxlength' => true]) ?>
 
