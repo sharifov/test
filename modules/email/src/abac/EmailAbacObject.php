@@ -23,11 +23,13 @@ class EmailAbacObject extends AbacBaseModel implements AbacInterface
     /** UI PERMISSION */
     public const OBJ_PREVIEW_EMAIL = self::NS . 'obj/preview-email';
     public const OBJ_REVIEW_EMAIL = self::NS . 'obj/review-email';
+    public const OBJ_EMAIL_TEMPLATE_TYPE = self::NS . 'obj/email-template-type';
 
     public const OBJECT_LIST = [
         self::ACT_VIEW => self::ACT_VIEW,
         self::OBJ_PREVIEW_EMAIL => self::OBJ_PREVIEW_EMAIL,
-        self::OBJ_REVIEW_EMAIL => self::OBJ_REVIEW_EMAIL
+        self::OBJ_REVIEW_EMAIL => self::OBJ_REVIEW_EMAIL,
+        self::OBJ_EMAIL_TEMPLATE_TYPE => self::OBJ_EMAIL_TEMPLATE_TYPE,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -68,7 +70,8 @@ class EmailAbacObject extends AbacBaseModel implements AbacInterface
             self::ACTION_VIEW_REVIEW_DATA,
             self::ACTION_VIEW_REVIEW_EMAIL_DATA,
             self::ACTION_VIEW_REVIEW_EMAIL_ATTACHED_FILES
-        ]
+        ],
+        self::OBJ_EMAIL_TEMPLATE_TYPE  => [self::ACTION_ACCESS],
     ];
 
     protected const ATTR_IS_EMAIL_OWNER = [
@@ -151,6 +154,17 @@ class EmailAbacObject extends AbacBaseModel implements AbacInterface
         'type' => self::ATTR_TYPE_INTEGER,
         'input' => self::ATTR_INPUT_SELECT,
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN],
+        'icon' => 'fa fa-list',
+    ];
+
+    protected const ATTR_TEMPLATE_TYPE_KEY = [
+        'optgroup' => 'EMAIL TEMPLATE',
+        'id' => self::NS . 'template_key',
+        'field' => 'template_key',
+        'label' => 'Template',
+        'type' => self::ATTR_TYPE_STRING,
+        'input' => self::ATTR_INPUT_SELECT,
+        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2],
         'icon' => 'fa fa-list',
     ];
 
@@ -262,6 +276,9 @@ class EmailAbacObject extends AbacBaseModel implements AbacInterface
         $templateKey = self::ATTR_TEMPLATE_KEY;
         $templateKey['values'] = EmailTemplateType::getList(false, null);
 
+        $templateTypeKey = self::ATTR_TEMPLATE_TYPE_KEY;
+        $templateTypeKey['values'] = EmailTemplateType::getKeyList(false, null);
+
         $project = self::ATTR_PROJECT_ID;
         $project['values'] = Project::getList();
 
@@ -270,6 +287,7 @@ class EmailAbacObject extends AbacBaseModel implements AbacInterface
 
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
         $attributeList[self::OBJ_PREVIEW_EMAIL][] = $templateKey;
+        $attributeList[self::OBJ_EMAIL_TEMPLATE_TYPE][] = $templateTypeKey;
         $attributeList[self::OBJ_PREVIEW_EMAIL][] = $project;
         $attributeList[self::OBJ_PREVIEW_EMAIL][] = $department;
         return $attributeList;
