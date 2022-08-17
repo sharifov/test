@@ -15,7 +15,7 @@ class m220816_150420_add_cron_job_email_normalize extends Migration
     {
         try {
             $cronScheduler = new \kivork\VirtualCron\Models\CronScheduler();
-            $cronScheduler->cs_cron_expression = '* * * * *';
+            $cronScheduler->cs_cron_expression = '0 * * * *';
             $cronScheduler->cs_cron_command = self::COMMAND;
             $cronScheduler->cs_description = 'Sync old email data into normalized form';
             $cronScheduler->cs_hash = \kivork\VirtualCron\Services\Hasher::generate(

@@ -74,7 +74,7 @@ class EmailController extends Controller
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
 
-    public function actionSyncNormalized(bool $debug = false, int $limit = 200)
+    public function actionSyncNormalized(bool $debug = false, int $limit = 500)
     {
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
         $time_start = microtime(true);
