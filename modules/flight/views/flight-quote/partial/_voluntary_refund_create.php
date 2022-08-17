@@ -41,7 +41,7 @@ use dosamigos\datepicker\DatePicker;
         '<span style="color:blue;">Check manually</span>';
     ?>
     <?php
-    /** @abac new ProductQuoteAbacDto($model), ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_VIEW_VOL_REFUND_ORIGIN_DATA_FROM_BO, View Origin Data From BO (Voluntary Refund) */
+    /** @abac null, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_VIEW_VOL_REFUND_ORIGIN_DATA_FROM_BO, View Origin Data From BO (Voluntary Refund) */
     $viewOriginDataFromBO = \Yii::$app->abac->can(null, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_VIEW_VOL_REFUND_ORIGIN_DATA_FROM_BO);
     ?>
     <?php Pjax::begin([
