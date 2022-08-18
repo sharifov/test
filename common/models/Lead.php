@@ -4648,10 +4648,11 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
                 ->select(
                     [
                         'total' => 'COUNT(*)',
-                        'send_q' => "SUM((SELECT SUM(CASE WHEN status IN (4) THEN 1 ELSE 0 END)
-                            FROM `quote_status_log` WHERE `q`.id = `quote_status_log`.quote_id))"
+                        'send_q' => "SUM((SELECT SUM(CASE WHEN (status = :status) THEN 1 ELSE 0 END)
+                         FROM `quote_status_log` WHERE `q`.id = `quote_status_log`.quote_id))"
                     ]
                 )
+                ->addParams([':status' => Quote::STATUS_SENT])
                 ->from(Quote::tableName() . ' q')
                 ->where(['lead_id' => $this->id]);
 
