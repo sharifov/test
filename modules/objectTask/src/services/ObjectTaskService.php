@@ -6,7 +6,9 @@ use common\models\Lead;
 use modules\objectTask\src\commands\SendEmailWithQuotes;
 use modules\objectTask\src\entities\ObjectTask;
 use modules\objectTask\src\entities\ObjectTaskScenario;
+use modules\objectTask\src\entities\repositories\ObjectTaskRepository;
 use modules\objectTask\src\scenarios\NoAnswer;
+use src\helpers\app\AppHelper;
 use Yii;
 
 class ObjectTaskService
@@ -55,14 +57,14 @@ class ObjectTaskService
                     $objectTask->ot_q_id
                 );
 
-                $objectTask->ot_q_id = null;
-                $objectTask->setCanceledStatus();
-                if ($objectTask->save() === false) {
+                try {
+                    $objectTask->ot_q_id = null;
+                    $objectTask->setCanceledStatus();
+
+                    (new ObjectTaskRepository($objectTask))->save();
+                } catch (\Throwable $e) {
                     \Yii::error(
-                        \yii\helpers\VarDumper::dumpAsString([
-                            'objectTaskUuid' => $objectTask->ot_uuid,
-                            $objectTask->getErrors()
-                        ]),
+                        AppHelper::throwableLog($e),
                         'ObjectTaskService::cancelJobs::objectTask::save'
                     );
                 }
