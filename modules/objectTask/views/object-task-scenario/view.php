@@ -35,6 +35,7 @@ if (!empty($model->ots_data_json)) {
         'model' => $model,
         'attributes' => [
             'ots_id',
+            'ots_enable:booleanByLabel',
             'ots_key',
             'ots_data_json',
             'ots_updated_dt',

@@ -36,6 +36,11 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => DateTimeColumn::class, 'attribute' => 'ots_updated_dt'],
             'ots_updated_user_id',
             [
+                'attribute' => 'ots_enable',
+                'format' => 'booleanByLabel',
+                'filter' => [1 => 'Enable', 0 => 'Disable'],
+            ],
+            [
                 'class' => ActionColumn::class,
                 'template' => '{view} {update}',
                 'urlCreator' => function ($action, ObjectTaskScenario $model, $key, $index, $column) {

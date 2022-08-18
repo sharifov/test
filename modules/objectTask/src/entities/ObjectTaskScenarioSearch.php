@@ -16,7 +16,7 @@ class ObjectTaskScenarioSearch extends ObjectTaskScenario
     public function rules()
     {
         return [
-            [['ots_id', 'ots_updated_user_id'], 'integer'],
+            [['ots_id', 'ots_updated_user_id', 'ots_enable'], 'integer'],
             [['ots_key', 'ots_data_json', 'ots_updated_dt'], 'safe'],
         ];
     }
@@ -57,6 +57,7 @@ class ObjectTaskScenarioSearch extends ObjectTaskScenario
         $query->andFilterWhere([
             'ots_id' => $this->ots_id,
             'ots_updated_user_id' => $this->ots_updated_user_id,
+            'ots_enable' => $this->ots_enable,
         ]);
 
         $query->andFilterWhere(['like', 'ots_key', $this->ots_key])
