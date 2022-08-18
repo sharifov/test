@@ -14,7 +14,6 @@ use yii\widgets\Pjax;
 
 $this->title = 'Object Task Scenarios';
 $this->params['breadcrumbs'][] = $this->title;
-$statusEnableList = [1 => 'Enable', 0 => 'Disable'];
 ?>
 <div class="object-task-scenario-index">
 
@@ -39,7 +38,7 @@ $statusEnableList = [1 => 'Enable', 0 => 'Disable'];
             [
                 'attribute' => 'ots_enable',
                 'format' => 'booleanByLabel',
-                'filter' => $statusEnableList,
+                'filter' => [1 => 'Enable', 0 => 'Disable'],
             ],
             [
                 'class' => ActionColumn::class,
