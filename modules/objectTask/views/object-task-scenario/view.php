@@ -15,6 +15,7 @@ $this->params['breadcrumbs'][] = $this->title;
 if (!empty($model->ots_data_json)) {
     $model->ots_data_json = Json::encode($model->ots_data_json);
 }
+$statusEnableList = [1 => 'Enable', 0 => 'Disable'];
 ?>
 <div class="object-task-scenario-view col-6">
 
@@ -35,6 +36,7 @@ if (!empty($model->ots_data_json)) {
         'model' => $model,
         'attributes' => [
             'ots_id',
+            'ots_enable:booleanByLabel',
             'ots_key',
             'ots_data_json',
             'ots_updated_dt',

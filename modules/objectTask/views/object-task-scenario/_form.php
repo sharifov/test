@@ -19,6 +19,8 @@ if (!empty($model->ots_data_json)) {
 
     <?php $form = ActiveForm::begin(['options' => ['class' => 'col-6']]); ?>
 
+    <?= $form->field($model, 'ots_enable')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '']) ?>
+
     <?= $form->field($model, 'ots_key')->dropDownList(ObjectTaskService::SCENARIO_LIST) ?>
 
     <?php
