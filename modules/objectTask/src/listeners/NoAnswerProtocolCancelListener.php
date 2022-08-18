@@ -5,6 +5,7 @@ namespace modules\objectTask\src\listeners;
 use modules\objectTask\src\scenarios\NoAnswer;
 use modules\objectTask\src\services\ObjectTaskService;
 use src\events\lead\LeadableEventInterface;
+use src\helpers\app\AppHelper;
 use Yii;
 
 class NoAnswerProtocolCancelListener
@@ -25,7 +26,10 @@ class NoAnswerProtocolCancelListener
                     $lead->id
                 );
             } catch (\Throwable $e) {
-                Yii::error($e, 'NoAnswerProtocolCancelListener:handle');
+                Yii::error(
+                    AppHelper::throwableLog($e),
+                    'NoAnswerProtocolCancelListener:handle'
+                );
             }
         }
     }
