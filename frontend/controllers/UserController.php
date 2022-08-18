@@ -24,6 +24,7 @@ use yii\helpers\VarDumper;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use modules\featureFlag\FFlag;
 
 /**
  * UserController implements the CRUD actions for UserCallStatus model.
@@ -234,7 +235,7 @@ class UserController extends FController
 
         $callsInfoGraph = $callLogSearchModel->searchCallsGraph($params, $id);
 
-        $emailSearchModel = new EmailSearch();
+        $emailSearchModel = \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_EMAIL_NORMALIZED_FORM_ENABLE) ? new \src\entities\email\EmailSearch() : new EmailSearch();
         $emailSearchModel->datetime_start = $datePickerModel->dateStart;
         $emailSearchModel->datetime_end = $datePickerModel->dateEnd;
         $params['EmailSearch']['e_created_user_id'] = $id;

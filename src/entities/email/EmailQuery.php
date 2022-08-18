@@ -129,6 +129,11 @@ class EmailQuery extends ActiveQuery
         return $this->leftJoin('email_case', 'email_case.ec_email_id = e_id')->andWhere(['email_case.ec_case_id' => $caseId]);
     }
 
+    public function client(int $clientId)
+    {
+        return $this->leftJoin('email_client', 'email_client.ecl_email_id = e_id')->andWhere(['email_client.ecl_client_id' => $clientId]);
+    }
+
     public function byMessageId(string $messageId)
     {
         return $this->leftJoin(['el' => EmailLog::tableName()], 'el.el_email_id = e_id')->andWhere(['el.el_message_id' => $messageId]);
