@@ -8,6 +8,7 @@ use modules\objectTask\src\entities\ObjectTask;
 use modules\objectTask\src\entities\repositories\ObjectTaskRepository;
 use modules\objectTask\src\jobs\CommandExecutorJob;
 use modules\objectTask\src\services\ObjectTaskService;
+use src\helpers\app\AppHelper;
 use src\helpers\DateHelper;
 use src\repositories\lead\LeadRepository;
 use thamtech\uuid\helpers\UuidHelper;
@@ -48,11 +49,11 @@ class NoAnswer extends BaseScenario
                 }
 
                 $leadDt = clone $leadCurrentDt;
-                $nextEmailDateByLeadTime = $leadDt->modify("+{$day} seconds");
-//                    ->setTime(
-//                        $this->getConfigParameter('allowedTime.hour', 10),
-//                        $this->getConfigParameter('allowedTime.minute', 0)
-//                    );
+                $nextEmailDateByLeadTime = $leadDt->modify("+{$day} days")
+                    ->setTime(
+                        $this->getConfigParameter('allowedTime.hour', 10),
+                        $this->getConfigParameter('allowedTime.minute', 0)
+                    );
                 $utcDatetime = $nextEmailDateByLeadTime->setTimezone(new \DateTimeZone('UTC'))
                     ->format('Y-m-d H:i:s');
                 $delaySeconds = DateHelper::getDifferentInSecondsByDatesUTC(
@@ -172,7 +173,10 @@ class NoAnswer extends BaseScenario
                 $leadRepository->save($lead);
             }
         } catch (\Throwable $e) {
-            Yii::error($e, 'NoAnswer:removeJobsForLead');
+            Yii::error(
+                AppHelper::throwableLog($e),
+                'NoAnswer:removeJobsForLead'
+            );
         }
     }
 }
