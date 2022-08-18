@@ -435,11 +435,11 @@ $canShowEmailData = Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_PREVIEW_
                             <div class="col-sm-3 form-group message-field-phone" style="display: block;">
                                 <?= Html::button('<i class="fa fa-phone-square"></i> Make Call', ['class' => 'btn btn-sm btn-success', 'id' => 'btn-make-call-case-communication-block', 'style' => 'margin-top: 28px'])?>
                             </div>
-                        </div>
+
                             <?=Html::hiddenInput('call-case-id', $model->cs_id, ['id' => 'call-case-id'])?>
                             <?=Html::hiddenInput('call-client-name', ($model->cs_client_id ? $model->client->getShortName() : ''), ['id' => 'call-client-name'])?>
-
                         </div>
+
                         <div id="sms-input-box" class="message-field-sms">
                             <div class="form-group" id="sms-textarea-div">
                                 <?= $communicationActiveForm->field($comForm, 'c_sms_message')->textarea(['rows' => 4, 'class' => 'form-control', 'id' => 'sms-message']) ?>

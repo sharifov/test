@@ -228,7 +228,7 @@ class EmailController extends FController
                 $emailForm = EmailForm::fromArray($formData);
             } elseif ($selectedId) {
                 $modelEmailView = $this->findModel($selectedId);
-                $this->emailRepository->read($modelEmailView);
+                $this->emailService->read($modelEmailView);
             }
         }
 

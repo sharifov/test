@@ -39,33 +39,6 @@ class EmailOldRepository implements EmailRepositoryInterface
         return $email->e_id;
     }
 
-    public function changeStatus($email, int $statusId): void
-    {
-        $attributes = ['e_status_id' => $statusId];
-        if (EmailStatus::isDone($statusId)) {
-            $attributes['e_status_done_dt'] = date('Y-m-d H:i:s');
-        }
-        $email->e_status_id = $statusId;
-        $this->save($email);
-    }
-
-    public function saveInboxId($email, int $inboxId): void
-    {
-        $email->updateAttributes([
-            'e_inbox_email_id' => $inboxId
-        ]);
-    }
-
-    public function read($email): void
-    {
-        if ($email->e_is_new === true) {
-            $email->updateAttributes([
-                'e_is_new' => false,
-                'e_read_dt' => date('Y-m-d H:i:s')
-            ]);
-        }
-    }
-
     public function delete($email): int
     {
         $id = $email->e_id;

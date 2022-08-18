@@ -4646,13 +4646,32 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     public function getQuoteSendInfo()
     {
         $query = new Query();
-        $query->select(['SUM(CASE WHEN status IN (2, 4, 5) THEN 1 ELSE 0 END) AS send_q',
-            'SUM(CASE WHEN status NOT IN (2, 4, 5) THEN 1 ELSE 0 END) AS not_send_q'])
-            ->from(Quote::tableName() . ' q')
-            ->where(['lead_id' => $this->id]);
-        //->groupBy('lead_id');
+        /** @fflag FFlag::FF_KEY_CHANGE_QUERY_GET_SEND_QUOTE, Change query get send Quote in PQ, FollowUpQ */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CHANGE_QUERY_GET_SEND_QUOTE)) {
+            $query
+                ->select(
+                    [
+                        'total' => 'COUNT(*)',
+                        'send_q' => "SUM((SELECT SUM(CASE WHEN (status = :status) THEN 1 ELSE 0 END)
+                         FROM `quote_status_log` WHERE `q`.id = `quote_status_log`.quote_id))"
+                    ]
+                )
+                ->addParams([':status' => Quote::STATUS_SENT])
+                ->from(Quote::tableName() . ' q')
+                ->where(['lead_id' => $this->id]);
 
-        return $query->createCommand()->queryOne();
+            $result = $query->createCommand()->queryOne();
+            $result['not_send_q'] = ((int)$result['total'] - (int)$result['send_q']);
+
+            return $result;
+        } else {
+            $query->select(['SUM(CASE WHEN status IN (2, 4, 5) THEN 1 ELSE 0 END) AS send_q',
+                'SUM(CASE WHEN status NOT IN (2, 4, 5) THEN 1 ELSE 0 END) AS not_send_q'])
+                ->from(Quote::tableName() . ' q')
+                ->where(['lead_id' => $this->id]);
+
+            return $query->createCommand()->queryOne();
+        }
     }
 
     public function getLastActivityByNote()

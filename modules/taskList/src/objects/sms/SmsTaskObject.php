@@ -7,6 +7,7 @@ use common\models\SmsTemplateType;
 use modules\taskList\src\objects\BaseTaskObject;
 use modules\taskList\src\objects\TargetObjectList;
 use modules\taskList\src\objects\TaskObjectInterface;
+use modules\taskList\src\services\TaskListService;
 
 class SmsTaskObject extends BaseTaskObject implements TaskObjectInterface
 {
@@ -23,10 +24,15 @@ class SmsTaskObject extends BaseTaskObject implements TaskObjectInterface
     public const FIELD_IS_OFFER_TEMPLATE = self::OBJ_SMS . '.' . 'is_offer_template';
 
     public const OBJECT_OPTION_LIST = [
+        TaskListService::PARAM_KEY_SMS_EXCLUDE_PROJECTS => [
+            'label' => 'Exclude Projects Assigning',
+            'type' => self::ATTR_TYPE_STRING,
+            'value' => 'priceline,kayak',
+        ],
     ];
 
     public const TARGET_OBJECT_LIST = [
-        TargetObjectList::TARGET_OBJ_LEAD
+        TargetObjectList::TARGET_OBJ_LEAD,
     ];
 
     protected const ATTR_PROJECT_KEY = [

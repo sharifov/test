@@ -77,8 +77,11 @@ $user = Yii::$app->user->identity;
         'filterModel' => $searchModel,
         'columns' => [
             'e_id',
-            ['class' => 'yii\grid\ActionColumn',
+            [   'class' => 'yii\grid\ActionColumn',
                 'template' => '{view} {delete}',
+                'urlCreator' => function ($action, $model, $key, $index) {
+                    return [$action, 'id' => $model->id];
+                },
             ],
             [
                 'class' => \common\components\grid\project\ProjectColumn::class,

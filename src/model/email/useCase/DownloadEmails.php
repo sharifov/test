@@ -42,7 +42,12 @@ class DownloadEmails
         $cycleCount = 1;
         $countTotal = 0;
 
-        $lastEmailId = EmailRepositoryFactory::getRepository()->getLastInboxId() ?? 1;
+        // $lastEmailId = EmailRepositoryFactory::getRepository()->getLastInboxId() ?? 1;
+        // TODO EmailRepositoryFactory
+        $lastEmailId = (int) Email::find()->select(['e_inbox_email_id'])->where(['>', 'e_inbox_email_id', 0])->orderBy(['e_inbox_email_id' => SORT_DESC])->scalar();
+        if ($lastEmailId === 0) {
+            $lastEmailId = 1;
+        }
 
         $filter = [
             'last_id' => $lastEmailId,

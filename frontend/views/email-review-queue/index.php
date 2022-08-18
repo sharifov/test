@@ -66,39 +66,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => Department::getList(),
                 'format' => 'departmentName'
             ],
-            [
-                'label' => 'Email Subject',
-                'value' => static function (EmailReviewQueue $model) {
-                    return $model->emailSubject;
-                }
-            ],
-            [
-                'label' => 'Email Template Name',
-                'value' => static function (EmailReviewQueue $model) {
-                    return $model->emailTemplateName;
-                }
-            ],
-            [
-                'label' => 'Email Lead',
-                'value' => static function (EmailReviewQueue $model) {
-                    return $model->emailLead;
-                },
-                'format' => 'lead',
-            ],
-            [
-                'label' => 'Email Case',
-                'value' => static function (EmailReviewQueue $model) {
-                    return $model->emailCase;
-                },
-                'format' => 'case',
-            ],
-            [
-                'label' => 'Email Status',
-                'value' => static function (EmailReviewQueue $model) {
-                    return $model->emailStatusName;
-                },
-                'format' => 'raw'
-            ],
+            'emailSubject',
+            'emailTemplateName',
+            'emailLead:lead',
+            'emailCase:case',
+            'emailStatusName',
             [
                 'class' => UserSelect2Column::class,
                 'attribute' => 'erq_owner_id',

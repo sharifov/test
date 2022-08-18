@@ -30,6 +30,7 @@ $enableFFInfoBlock = \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_INFO_BLOCK_
 $shifts = ShiftQuery::getList();
 $userGroups = UserGroup::getList();
 $roles =  Employee::getAllRoles(Auth::user());
+$departments = \common\models\Department::getList();
 ?>
 
 <div class="heat-map-agent-index">
@@ -72,6 +73,7 @@ $roles =  Employee::getAllRoles(Auth::user());
                 'shifts' => $shifts,
                 'userGroups' => $userGroups,
                 'roles' => $roles,
+                'departments' => $departments
             ]);
             ?>
         </div>
@@ -82,6 +84,7 @@ $roles =  Employee::getAllRoles(Auth::user());
         'shifts' => $shifts,
         'userGroups' => $userGroups,
         'roles' => $roles,
+        'departments' => $departments,
     ]);
     ?>
 

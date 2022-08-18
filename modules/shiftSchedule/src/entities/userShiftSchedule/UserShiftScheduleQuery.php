@@ -97,8 +97,8 @@ class UserShiftScheduleQuery
                 $query->andWhere(['<=', 'uss_start_utc_dt', date('Y-m-d 23:59:59', strtotime($form->endDate))]);
             }
         } else {
-            $startDateTime = date('Y-m-d H:i', strtotime($form->startDate));
-            $endDateTime = date('Y-m-d H:i', strtotime($form->endDate));
+            $startDateTime = date('Y-m-d 00:00:00', strtotime($form->startDate));
+            $endDateTime = date('Y-m-d 23:59:59', strtotime($form->endDate));
 
             $query->andWhere([
                 'OR',
