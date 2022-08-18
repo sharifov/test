@@ -162,6 +162,11 @@ class UserShiftScheduleQuery
         return UserShiftSchedule::deleteAll(['uss_user_id' => $userId]);
     }
 
+    public static function removeFutureDataByUser(int $userId): int
+    {
+        return UserShiftSchedule::deleteAll(['AND', ['uss_user_id' => $userId], ['>', 'uss_start_utc_dt', date('Y-m-d H:i:s')]]);
+    }
+
     /**
      * @param int $userId
      * @param string $minDate
