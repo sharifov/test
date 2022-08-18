@@ -22,7 +22,7 @@ class EmailQuery extends ActiveQuery
 
     /**
      *
-     * @param int|arrat $status
+     * @param int|array $status
      * @return EmailQuery
      */
     public function byStatus($status)
@@ -127,6 +127,11 @@ class EmailQuery extends ActiveQuery
     public function case(int $caseId)
     {
         return $this->leftJoin('email_case', 'email_case.ec_email_id = e_id')->andWhere(['email_case.ec_case_id' => $caseId]);
+    }
+
+    public function client(int $clientId)
+    {
+        return $this->leftJoin('email_client', 'email_client.ecl_email_id = e_id')->andWhere(['email_client.ecl_client_id' => $clientId]);
     }
 
     public function byMessageId(string $messageId)

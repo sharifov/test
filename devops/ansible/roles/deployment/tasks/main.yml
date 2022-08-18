@@ -133,6 +133,7 @@
     - queue-system-services.log
     - queue-virtual-cron-worker.log
     - socket-server.log
+    - queue-db.log
 
 - name: Restart supervisord service
   service:

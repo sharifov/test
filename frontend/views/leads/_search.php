@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use common\models\Quote;
 use kartik\select2\Select2;
 use modules\featureFlag\FFlag;
@@ -348,6 +349,22 @@ use frontend\extensions\DatePicker;
                                     'pluginOptions' => ['allowClear' => true],
                                 ])->label('Conversion - Employee'); ?>
                             </div>
+                            <?php
+                            /** @fflag FFlag::FF_KEY_CONVERSION_BY_TIMEZONE, Conversion Filter by Timezone */
+                            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CONVERSION_BY_TIMEZONE)) :?>
+                                <div class="col-md-2">
+                                    <?= $form->field($model, 'conversionTimezone')->widget(\kartik\select2\Select2::class, [
+                                        'data' => Employee::timezoneList(true),
+                                        'size' => \kartik\select2\Select2::SMALL,
+                                        'options' => [
+                                            'placeholder' => 'Select TimeZone',
+                                            'multiple' => false,
+                                            'value' => $model->conversionTimezone,
+                                        ],
+                                        'pluginOptions' => ['allowClear' => true],
+                                    ]) ?>
+                                </div>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </div>
                 </div>

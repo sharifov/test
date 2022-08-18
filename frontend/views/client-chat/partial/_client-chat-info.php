@@ -456,13 +456,25 @@ $formResponses = $clientChat->formResponses;
         'timeout' => 5000,
         'enablePushState' => false,
     ]); */ ?>
-    <?php /** @abac ClientChatAbacObject::UI_CLIENT_CHAT_FORM, ClientChatAbacObject::ACTION_ACCESS, Access To show|add|send Client Chat Form Response */ ?>
+    <?php /** @abac ClientChatAbacObject::UI_CLIENT_CHAT_FORM, ClientChatAbacObject::ACTION_ACCESS, Access To show Client Chat Form Response */ ?>
     <?php  if (Yii::$app->abac->can(null, ClientChatAbacObject::UI_CLIENT_CHAT_FORM, ClientChatAbacObject::ACTION_ACCESS)) : ?>
         <div class="_rc-block-wrapper">
             <div class="x_panel">
                 <div class="x_title">
                     <h2>Client Chat Form </h2>
                     <ul class="nav navbar-right panel_toolbox">
+                        <?php /** @abac ClientChatAbacObject::UI_CLIENT_CHAT_FORM, ClientChatAbacObject::ACTION_CREATE, Access To create Client Chat Form Response */ ?>
+                        <?php if (Yii::$app->abac->can(null, ClientChatAbacObject::UI_CLIENT_CHAT_FORM, ClientChatAbacObject::ACTION_CREATE)) : ?>
+                            <li class="">
+                                <?php echo Html::a('<i class="fa fa-plus"> </i> New booking id', null, [
+                                    'class' => 'dropdown-item showModalButton',
+                                    'title' => 'Add booking id',
+                                    'style' => 'color: #0073ce;',
+                                    'data-modal_id' => "client-manage-info",
+                                    'data-content-url' => Url::to(['/client-chat-client-actions/ajax-add-booking-id-modal-content', 'id' => $clientChat->cch_id])
+                                ]) ?>
+                            </li>
+                        <?php endif ?>
                         <li>
                             <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                         </li>
@@ -470,7 +482,7 @@ $formResponses = $clientChat->formResponses;
                     <div class="clearfix"></div>
                 </div>
 
-                <div class="x_content">
+                <div class="x_content client-chat-client-form">
                     <?php foreach ($formResponses as $formResponse) : ?>
                         <div class="_cc-addition-data-item">
                             <span><?= $formResponse->clientChatForm->ccf_name ?></span>

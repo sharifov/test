@@ -47,6 +47,7 @@ return [
                 'modules\abac\migrations',
                 'modules\requestControl\migrations',
                 'kivork\FeatureFlag\Migrations',
+                'yii\queue\db\migrations',
             ],
         ],
 

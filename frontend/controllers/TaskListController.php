@@ -79,6 +79,10 @@ class TaskListController extends FController
         $searchModel = new UserTaskSearch();
         $startDate = Yii::$app->request->get('startDate', date('Y-m-d'));
         $endDate = Yii::$app->request->get('endDate', date('Y-m-d', strtotime('+1 day')));
+
+        $startDate = new \DateTime($startDate);
+        $endDate = (new \DateTime($endDate))->setTime(23, 59, 59);
+
         $dataProvider = $searchModel->searchByUserId(Yii::$app->request->queryParams, $user->id, $startDate, $endDate);
 
         $startDateTime = date('Y-m-d H:i', strtotime('-24 hours'));

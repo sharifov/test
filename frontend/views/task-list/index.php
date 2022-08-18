@@ -150,7 +150,7 @@ $subtypeTotalData = [];
                                 'format' => 'raw',
                             ],
                             [
-                                'attribute' => 'ut_task_list_id',
+                                'attribute' => 'taskName',
                                 'label' => 'Task Name',
                                 'value' => static function (UserTask $model) {
                                     if (!$model->ut_task_list_id) {
@@ -161,14 +161,6 @@ $subtypeTotalData = [];
                                         $model->taskList->tl_title ?: '-',
                                         ['title' => 'Task List ID: ' . $model->ut_task_list_id]
                                     );
-//                                    return Html::a(
-//                                        $model->taskList->tl_title ?? '-',
-//                                        [
-//                                            'task-list/view',
-//                                            'tl_id' => $model->ut_task_list_id
-//                                        ],
-//                                        ['target' => '_blank', 'data-pjax' => 0, 'title' => 'Task List ID: ' . $model->ut_task_list_id]
-//                                    );
                                 },
                                 'format' => 'raw',
                             ],

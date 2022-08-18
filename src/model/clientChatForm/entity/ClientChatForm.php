@@ -106,6 +106,14 @@ class ClientChatForm extends ActiveRecord
         return $this->hasOne(Employee::class, ['id' => 'ccf_updated_user_id']);
     }
 
+    /**
+     * @return array
+     */
+    public static function getList(): array
+    {
+        return self::find()->select(['ccf_name', 'ccf_id'])->orderBy(['ccf_name' => SORT_ASC])->indexBy('ccf_id')->asArray()->column();
+    }
+
     public function attributeLabels(): array
     {
         return [

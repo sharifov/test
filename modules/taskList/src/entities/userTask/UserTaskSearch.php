@@ -20,6 +20,8 @@ class UserTaskSearch extends UserTask
     public string $createTimeStart = '';
     public string $createTimeEnd = '';
 
+    public string $taskName = '';
+
     public string $clientStartDate = '';
     public string $clientEndDate = '';
 //    public string $startedDateRange = '';
@@ -71,6 +73,8 @@ class UserTaskSearch extends UserTask
 
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['createTimeStart', 'createTimeEnd'], 'safe'],
+
+            ['taskName', 'string'],
         ];
     }
 
@@ -162,15 +166,15 @@ class UserTaskSearch extends UserTask
      *
      * @param array $params
      * @param int $userId
-     * @param string|null $startDate
-     * @param string|null $endDate
+     * @param \DateTime|null $startDate
+     * @param \DateTime|null $endDate
      * @return ActiveDataProvider
      */
     public function searchByUserId(
         array $params,
         int $userId,
-        ?string $startDate = null,
-        ?string $endDate = null
+        ?\DateTime $startDate = null,
+        ?\DateTime $endDate = null
     ): ActiveDataProvider {
         $query = UserTask::find();
 
@@ -191,12 +195,11 @@ class UserTaskSearch extends UserTask
         $query->andWhere(['ut_user_id' => $userId]);
 
         if (!empty($startDate) && !empty($endDate)) {
-            $this->clientStartDate = $startDate;
-            $this->clientEndDate = $endDate;
+            $this->clientStartDate = $startDate->format('Y-m-d');
+            $this->clientEndDate = $endDate->format('Y-m-d');
 
-            $startDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($startDate));
-            $endDateTime = Employee::convertTimeFromUserDtToUTC(strtotime($endDate));
-
+            $startDateTime = Employee::convertTimeFromUserDtToUTC($startDate->getTimestamp());
+            $endDateTime = Employee::convertTimeFromUserDtToUTC($endDate->getTimestamp());
             $query->andWhere([
                 'OR',
                 ['between', 'ut_start_dt', $startDateTime, $endDateTime],
@@ -235,6 +238,11 @@ class UserTaskSearch extends UserTask
                 $message['model'] = ArrayHelper::toArray($this);
                 \Yii::error($message, 'UserTaskSearch:search:Throwable');
             }
+        }
+
+        if (!empty($this->taskName)) {
+            $query->innerJoin('task_list', 'task_list.tl_id = user_task.ut_task_list_id');
+            $query->andFilterWhere(['like', 'tl_title', $this->taskName]);
         }
 
         // grid filtering conditions

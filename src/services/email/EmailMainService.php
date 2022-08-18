@@ -3,6 +3,7 @@
 namespace src\services\email;
 
 use modules\featureFlag\FFlag;
+use modules\objectTask\src\scenarios\NoAnswer;
 use Yii;
 use frontend\models\EmailPreviewFromInterface;
 use common\models\Lead;
@@ -40,6 +41,8 @@ use modules\taskList\src\entities\TaskObject;
 use src\entities\email\form\EmailForm;
 use src\repositories\email\EmailOldRepository;
 use src\services\cases\CasesCommunicationService;
+use src\model\emailReviewQueue\EmailReviewQueueManageService;
+use src\model\emailReviewQueue\entity\EmailReviewQueue;
 
 /**
  *
@@ -173,7 +176,6 @@ class EmailMainService implements EmailServiceInterface
             $this->addToABTesting($email);
             $tplType = $email->templateType ? $email->templateType->etp_key : null;
             $this->leadProcessAfterEmailSending($email->e_id, $tplType, $email->lead);
-            $this->leadTaskJob($email->e_id, $email->lead);
         } catch (\Throwable $exception) {
             $error = VarDumper::dumpAsString($exception->getMessage());
             \Yii::error($error, 'EmailMainService:sendMail:exception');
@@ -188,7 +190,7 @@ class EmailMainService implements EmailServiceInterface
         }
     }
 
-    private function leadTaskJob(int $emailId, ?Lead $lead)
+    public function leadTaskJob(int $emailId, ?Lead $lead, bool $useOwner = false)
     {
         if ($emailId && $lead && (new LeadTaskListService($lead))->isProcessAllowed()) {
             $job = new UserTaskCompletionJob(
@@ -196,7 +198,7 @@ class EmailMainService implements EmailServiceInterface
                 $lead->id,
                 TaskObject::OBJ_EMAIL,
                 $emailId,
-                Auth::id()
+                ($useOwner && $lead->employee_id) ? $lead->employee_id : Auth::id()
             );
             \Yii::$app->queue_job->push($job);
         }
@@ -363,6 +365,7 @@ class EmailMainService implements EmailServiceInterface
         $email = $this->oldService->createFromDTO($emailDTO, true);
         $email->refresh();
         $this->setEmailObj($email);
+        $emailDTO->emailId = $email->e_id;
 
         if (!$email->hasLead() && !$email->hasCase() && EmailServiceHelper::isNotInternalEmail($emailDTO->emailFrom)) {
             $process = $this->processIncoming($email);
@@ -388,6 +391,11 @@ class EmailMainService implements EmailServiceInterface
 
         $lead = $email->lead ?? null;
         if ($lead) {
+            /** @fflag FFlag::FF_KEY_NO_ANSWER_PROTOCOL_ENABLE, No Answer protocol enable */
+            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_NO_ANSWER_PROTOCOL_ENABLE) === true) {
+                NoAnswer::clientResponseLogicInit($lead);
+            }
+
             if ($userID) {
                 $notifyData = [
                     'user' => $userID,
@@ -434,7 +442,7 @@ class EmailMainService implements EmailServiceInterface
                     'error' => 'File not exist : ' . $path,
                 ]), 'EmailMainService:getAttachmentsArray');
             } else {
-                array_push($emailDataAttachments['files'], $file);
+                $emailDataAttachments['files'][] = $file;
             }
         }
 
@@ -515,11 +523,11 @@ class EmailMainService implements EmailServiceInterface
             throw \RuntimeException('Email status not valid.');
         }
         if ($emailOld = $this->emailOldRepository->findByCommunicationId($communicationId)) {
-            $this->emailOldRepository->changeStatus($emailOld, $statusId);
+            $this->oldService->changeStatus($emailOld, $statusId);
         }
         if ($this->normalizedService !== null) {
             if ($emailNorm = $this->emailRepository->findByCommunicationId($communicationId)) {
-                $this->emailRepository->changeStatus($emailNorm, $statusId);
+                $this->normalizedService->changeStatus($emailNorm, $statusId);
             }
         }
 
@@ -529,14 +537,88 @@ class EmailMainService implements EmailServiceInterface
     public function saveInboxId(string $messageId, string $emailTo, int $inboxId)
     {
         if ($emailOld = $this->emailOldRepository->findReceived($messageId, $emailTo)->limit(1)->one()) {
-            $this->emailOldRepository->saveInboxId($emailOld, $inboxId);
+            $emailOld->saveInboxId($inboxId);
         }
+        $emailNorm = null;
         if ($this->normalizedService !== null) {
             if ($emailNorm = $this->emailRepository->findReceived($messageId, $emailTo)->limit(1)->one()) {
-                $this->emailRepository->saveInboxId($emailNorm, $inboxId);
+                $emailNorm->saveInboxId($inboxId);
             }
         }
 
         return $emailOld || $emailNorm;
+    }
+
+    public function read($email)
+    {
+        $calledFrom = $this->getCalledFrom($email);
+        $emailOld = ($calledFrom == self::FROM_NORM) ? $this->setEmailObjById($email->e_id) : $email;
+        $emailOld->read();
+
+        if ($this->normalizedService !== null) {
+            $emailNorm = ($calledFrom == self::FROM_OLD) ? $this->setEmailNormObjById($email->e_id) : $email;
+            if (isset($emailNorm)) {
+                $emailNorm->read();
+            }
+        }
+    }
+
+    /**
+     *
+     * @param EmailInterface $email
+     * @param int|null $departmentId
+     *
+     * return EmailReviewQueue
+     */
+    public function moveToReview($email, ?int $departmentId = null)
+    {
+        $calledFrom = $this->getCalledFrom($email);
+        $emailOld = ($calledFrom == self::FROM_NORM) ? $this->setEmailObjById($email->e_id) : $email;
+
+        $emailOld->statusToReview();
+        $emailOld->refresh();
+        $this->setEmailObj($emailOld);
+
+        if ($this->normalizedService !== null) {
+            $emailNorm = ($calledFrom == self::FROM_OLD) ? $this->setEmailNormObjById($email->e_id) : $email;
+            if (isset($emailNorm)) {
+                $emailNorm->statusToReview();
+                $emailNorm->refresh();
+                $this->setEmailNormObj($emailNorm);
+            }
+        }
+
+        $emailToReview = ($calledFrom == self::FROM_OLD) ? $emailOld : $emailNorm ?? $email;
+
+        $emailReviewQueueManageService = Yii::createObject(EmailReviewQueueManageService::class);
+        return $emailReviewQueueManageService->createByEmail($emailToReview, $departmentId);
+    }
+
+    /**
+     *
+     * @param EmailInterface $email
+     * @param string $message
+     *
+     * return EmailInterface
+     */
+    public function moveToCancel($email, string $message)
+    {
+        $calledFrom = $this->getCalledFrom($email);
+        $emailOld = ($calledFrom == self::FROM_NORM) ? $this->setEmailObjById($email->e_id) : $email;
+
+        $emailOld->statusToCancel($message);
+        $emailOld->refresh();
+        $this->setEmailObj($emailOld);
+
+        if ($this->normalizedService !== null) {
+            $emailNorm = ($calledFrom == self::FROM_OLD) ? $this->setEmailNormObjById($email->e_id) : $email;
+            if (isset($emailNorm)) {
+                $emailNorm->statusToCancel($message);
+                $emailNorm->refresh();
+                $this->setEmailNormObj($emailNorm);
+            }
+        }
+
+        return ($calledFrom == self::FROM_OLD) ? $emailOld : $emailNorm ?? $email;
     }
 }

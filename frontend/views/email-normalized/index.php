@@ -77,8 +77,11 @@ $user = Yii::$app->user->identity;
         'filterModel' => $searchModel,
         'columns' => [
             'e_id',
-            ['class' => 'yii\grid\ActionColumn',
+            [   'class' => 'yii\grid\ActionColumn',
                 'template' => '{view} {delete}',
+                'urlCreator' => function ($action, $model, $key, $index) {
+                    return [$action, 'id' => $model->id];
+                },
             ],
             [
                 'class' => \common\components\grid\project\ProjectColumn::class,
@@ -86,45 +89,51 @@ $user = Yii::$app->user->identity;
                 'relation' => 'project',
             ],
             [
-                'attribute' => 'email_from',
+                'attribute' => 'e_email_from',
                 'value' => 'emailFrom'
             ],
             [
-                'attribute' => 'email_to',
+                'attribute' => 'e_email_to',
                 'value' => 'emailTo'
             ],
-            'leads:leads',
-            'cases:cases',
+            [
+                'attribute' => 'e_lead_id',
+                'value' => 'leads',
+                'format' => 'leads',
+            ],
+            [
+                'attribute' => 'e_case_id',
+                'value' => 'cases',
+                'format' => 'cases',
+            ],
             [
                 'attribute' => 'e_type_id',
-                'value' => static function (Email $model) {
-                    return EmailType::getName($model->e_type_id);
-                },
+                'value' => 'typeName',
                 'filter' => EmailType::getList()
             ],
             [
-                'attribute' => 'template_type_name',
-                'value' => 'templateType.etp_name'
+                'attribute' => 'e_template_type_name',
+                'value' => 'templateTypeName'
             ],
             [
-                'attribute' => 'language_id',
-                'value' => static function (Email $model) {
-                    return $model->params->ep_language_id ?? null;
-                },
+                'attribute' => 'e_language_id',
+                'value' => 'languageId',
                 'filter' => Language::getLanguages(true)
             ],
             [
-                'attribute' => 'communication_id',
-                'value' => 'emailLog.el_communication_id'
+                'attribute' => 'e_communication_id',
+                'value' => 'communicationId'
             ],
             [
                 'attribute' => 'e_status_id',
-                'value' => static function (Email $model) {
-                    return EmailStatus::getName($model->e_status_id);
-                },
+                'value' => 'statusName',
                 'filter' => EmailStatus::getList()
             ],
-            'clientsIds:clients',
+            [
+                'attribute' => 'e_client_id',
+                'value' => 'clientsIds',
+                'format' => 'clients'
+            ],
             [
                 'class' => UserSelect2Column::class,
                 'attribute' => 'e_created_user_id',

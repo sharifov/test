@@ -43,13 +43,14 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'erq_email_id',
                 'value' => static function (EmailReviewQueue $model) {
-                    return Html::a('<i class="fa fa-link"></i> ' . $model->erq_email_id, ['/email/view', 'id' => $model->erq_email_id], ['target' => '_blank', 'data-pjax' => 0]);
+                    $url = ($model->erq_email_is_norm) ? '/email-normalized/view' : '/email/view';
+                    return Html::a('<i class="fa fa-link"></i> ' . $model->erq_email_id, [$url, 'id' => $model->erq_email_id], ['target' => '_blank', 'data-pjax' => 0]);
                 },
                 'format' => 'raw',
                 'options' => [
                     'width' => '110px'
                 ]
-            ],
+                ],
             [
                 'attribute' => 'erq_project_id',
                 'value' => static function (EmailReviewQueue $model) {
@@ -65,39 +66,11 @@ $this->params['breadcrumbs'][] = $this->title;
                 'filter' => Department::getList(),
                 'format' => 'departmentName'
             ],
-            [
-                'label' => 'Email Subject',
-                'value' => static function (EmailReviewQueue $model) {
-                    return $model->emailSubject;
-                }
-            ],
-            [
-                'label' => 'Email Template Name',
-                'value' => static function (EmailReviewQueue $model) {
-                    return $model->emailTemplateName;
-                }
-            ],
-            [
-                'label' => 'Email Lead',
-                'value' => static function (EmailReviewQueue $model) {
-                    return $model->emailLead;
-                },
-                'format' => 'lead',
-            ],
-            [
-                'label' => 'Email Case',
-                'value' => static function (EmailReviewQueue $model) {
-                    return $model->emailCase;
-                },
-                'format' => 'case',
-            ],
-            [
-                'label' => 'Email Status',
-                'value' => static function (EmailReviewQueue $model) {
-                    return $model->emailStatusName;
-                },
-                'format' => 'raw'
-            ],
+            'emailSubject',
+            'emailTemplateName',
+            'emailLead:lead',
+            'emailCase:case',
+            'emailStatusName',
             [
                 'class' => UserSelect2Column::class,
                 'attribute' => 'erq_owner_id',

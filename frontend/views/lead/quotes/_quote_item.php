@@ -365,7 +365,9 @@ if ($model->isDeclined()) {
 
                         <div style="width: 30px"></div>
 
-                        <?php echo QuoteHelper::formattedFreeBaggage($model->getMetaInfo()) ?>
+                        <?php //echo QuoteHelper::formattedFreeBaggage($model->getMetaInfo()) ?>
+
+                        <?php echo QuoteHelper::formattedBaggage($model->getKeysInfo()) ?>
 
                         <span class="quote__badge quote__badge--warning <?php if (!$needRecheck) :
                             ?>quote__badge--disabled<?php
