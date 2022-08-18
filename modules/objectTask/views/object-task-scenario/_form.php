@@ -21,14 +21,20 @@ if (!empty($model->ots_data_json)) {
 
     <?= $form->field($model, 'ots_key')->dropDownList(ObjectTaskService::SCENARIO_LIST) ?>
 
-    <?= $form->field($model, 'ots_data_json')->widget(JsonEditor::class, [
-        'expandAll' => ['tree', 'form'],
-        'clientOptions' => [
-            'modes' => ['code', 'form', 'tree', 'view'],
-            'mode' => 'tree',
-            'allowSchemaSuggestions' => true,
-        ],
-    ]); ?>
+    <?php
+    try {
+        echo $form->field($model, 'ots_data_json')->widget(JsonEditor::class, [
+            'expandAll' => ['tree', 'form'],
+            'clientOptions' => [
+                'modes' => ['code', 'form', 'tree', 'view'],
+                'mode' => 'tree',
+                'allowSchemaSuggestions' => true,
+            ],
+        ]);
+    } catch (\Throwable $exception) {
+        echo $form->field($model, 'ots_data_json')->textarea();
+    }
+    ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
