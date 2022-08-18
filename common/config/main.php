@@ -242,7 +242,6 @@ return [
             'db' => 'db',
             'tableName' => '{{%queue}}',
             'channel' => 'default',
-            'mutex' => \yii\mutex\MysqlMutex::class,
         ],
         'telegram' => [
             'class' => \aki\telegram\Telegram::class,
