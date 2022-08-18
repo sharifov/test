@@ -30,7 +30,7 @@ class NoAnswer extends BaseScenario
 
     public function process(): void
     {
-        if (NoAnswer::leadIsAvailableForProcess($this->lead) === false) {
+        if ($this->isEnable() === false || NoAnswer::leadIsAvailableForProcess($this->lead) === false) {
             return;
         }
 

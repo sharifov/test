@@ -13,6 +13,7 @@ abstract class BaseScenario
         $this->objectTaskScenario = ObjectTaskScenario::find()
             ->where([
                 'ots_key' => static::KEY,
+                'ots_enable' => 1,
             ])
             ->limit(1)
             ->one();
@@ -32,5 +33,10 @@ abstract class BaseScenario
             $key,
             $defaultValue
         );
+    }
+
+    protected function isEnable(): bool
+    {
+        return ($this->objectTaskScenario !== null);
     }
 }
