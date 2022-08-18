@@ -9,6 +9,7 @@ use src\forms\lead\EmailCreateForm;
 use src\forms\lead\PhoneCreateForm;
 use src\model\clientChat\entity\abac\ClientChatAbacObject;
 use src\model\clientChatForm\entity\ClientChatForm;
+use src\model\clientChatForm\entity\ClientChatFormQuery;
 use src\model\clientChatRequest\useCase\api\create\ClientChatFormResponseService;
 use src\services\client\ClientManageService;
 use Yii;
@@ -309,7 +310,9 @@ class ClientChatClientActionsController extends FController
 
         $chat = $this->getChatFromRequest();
 
-        $form = new BookingIdCreateForm($chat);
+        $clientChatForm = $this->getClientChatForm();
+
+        $form = new BookingIdCreateForm($chat, $clientChatForm);
 
         return $this->renderAjax('_client_add_booking_id_modal_content', [
             'addBookingId' => $form,
@@ -326,7 +329,9 @@ class ClientChatClientActionsController extends FController
 
         $chat = $this->getChatFromRequest();
 
-        $form = new BookingIdCreateForm($chat);
+        $clientChatForm = $this->getClientChatForm();
+
+        $form = new BookingIdCreateForm($chat, $clientChatForm);
 
         $isLoaded = $form->load(Yii::$app->request->post());
 
@@ -347,7 +352,9 @@ class ClientChatClientActionsController extends FController
 
         $chat = $this->getChatFromRequest();
 
-        $form = new BookingIdCreateForm($chat);
+        $clientChatForm = $this->getClientChatForm();
+
+        $form = new BookingIdCreateForm($chat, $clientChatForm);
 
         $response[] = [
             'error' => false,
@@ -375,5 +382,19 @@ class ClientChatClientActionsController extends FController
         }
 
         return $this->asJson($response);
+    }
+
+    /**
+     * @throws NotFoundHttpException
+     */
+    private function getClientChatForm(): ClientChatForm
+    {
+        $clientChatForm = ClientChatFormQuery::getByKey(ClientChatForm::KEY_BOOKING_ID);
+
+        if (is_null($clientChatForm)) {
+            throw new NotFoundHttpException("client chat form with key  " . ClientChatForm::KEY_BOOKING_ID . " not found");
+        }
+
+        return $clientChatForm;
     }
 }

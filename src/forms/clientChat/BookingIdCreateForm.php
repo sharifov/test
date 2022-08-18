@@ -19,15 +19,19 @@ class BookingIdCreateForm extends Model
 
     private $clientChatId;
 
+    private $clientChatFormId;
+
     /**
      * SubscribeForm constructor.
-     * @param int $project_id
+     * @param ClientChat $clientChat
+     * @param ClientChatForm $clientChatForm
      * @param array $config
      */
-    public function __construct(ClientChat $clientChat, $config = [])
+    public function __construct(ClientChat $clientChat, ClientChatForm $clientChatForm, $config = [])
     {
         parent::__construct($config);
         $this->clientChatId = $clientChat->cch_id;
+        $this->clientChatFormId = $clientChatForm->ccf_id;
     }
     /**
      * @return array
@@ -58,15 +62,9 @@ class BookingIdCreateForm extends Model
 
     public function validateUniqueBookingId($attribute)
     {
-        $clientChatForm = ClientChatFormQuery::getByKey(ClientChatForm::KEY_BOOKING_ID);
-
-        if (is_null($clientChatForm)) {
-            throw new \RuntimeException("client chat form with room id  " . ClientChatForm::KEY_BOOKING_ID . " not found");
-        }
-
         if (
             ClientChatFormResponseQuery::checkDuplicateValue(
-                $clientChatForm->ccf_id,
+                $this->clientChatFormId,
                 $this->clientChatId,
                 $this->bookingId
             )
