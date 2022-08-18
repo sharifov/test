@@ -1,6 +1,7 @@
 <?php
 
 use common\components\grid\project\ProjectColumn;
+use src\model\clientChatForm\entity\abac\ClientChatFormAbacObject;
 use src\model\clientChatForm\entity\ClientChatForm;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
@@ -81,6 +82,20 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => ActionColumn::class,
                 'template' => '{view} {update} {form_builder} {delete}',
+                'visibleButtons' => [
+                    'delete' => static function (ClientChatForm $model) {
+                          /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_DELETE,  Access to delete client chat form */
+                         return Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_DELETE);
+                    },
+                    'update' => static function (ClientChatForm $model) {
+                        /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE,  Access to update client chat form */
+                        return Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE);
+                    },
+                    'form_builder' => static function (ClientChatForm $model) {
+                        /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_BUILDER, Access to builder client chat form */
+                        return Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_BUILDER);
+                    },
+                ],
                 'buttons' => [
                     'form_builder' => static function ($url, ClientChatForm $model) {
                         return Html::a(
