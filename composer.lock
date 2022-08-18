@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4405fd13d8c2f48da16b0b584d0b8bf9",
+    "content-hash": "7676baf597beeeb4759a79cbab50a0a5",
     "packages": [
         {
             "name": "2amigos/yii2-arrayquery-component",
@@ -584,16 +584,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.232.4",
+            "version": "3.233.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "c23943f845b4418d82b8a804ebc2b961de9f9eea"
+                "reference": "4f29c8f14e7833f6e9885d0d82ea98525f1bac1e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/c23943f845b4418d82b8a804ebc2b961de9f9eea",
-                "reference": "c23943f845b4418d82b8a804ebc2b961de9f9eea",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/4f29c8f14e7833f6e9885d0d82ea98525f1bac1e",
+                "reference": "4f29c8f14e7833f6e9885d0d82ea98525f1bac1e",
                 "shasum": ""
             },
             "require": {
@@ -670,9 +670,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.232.4"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.233.4"
             },
-            "time": "2022-08-09T18:20:29+00:00"
+            "time": "2022-08-17T18:17:58+00:00"
         },
         {
             "name": "bacon/bacon-qr-code",
@@ -782,7 +782,7 @@
             "version": "v3.4.1",
             "source": {
                 "type": "git",
-                "url": "git@github.com:twbs/bootstrap.git",
+                "url": "https://github.com/twbs/bootstrap.git",
                 "reference": "68b0d231a13201eb14acd3dc84e51543d16e5f7e"
             },
             "dist": {
@@ -824,7 +824,7 @@
             "version": "v0.9.15",
             "source": {
                 "type": "git",
-                "url": "https://github.com/davidstutz/bootstrap-multiselect.git",
+                "url": "git@github.com:davidstutz/bootstrap-multiselect.git",
                 "reference": "4749da211e6d39644ef164cd709cfeae5ccba579"
             },
             "dist": {
@@ -863,7 +863,7 @@
             "version": "3.3.11",
             "source": {
                 "type": "git",
-                "url": "https://github.com/RobinHerbots/Inputmask.git",
+                "url": "git@github.com:RobinHerbots/Inputmask.git",
                 "reference": "5e670ad62f50c738388d4dcec78d2888505ad77b"
             },
             "dist": {
@@ -1025,16 +1025,16 @@
         },
         {
             "name": "brick/math",
-            "version": "0.10.1",
+            "version": "0.10.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/brick/math.git",
-                "reference": "de846578401f4e58f911b3afeb62ced56365ed87"
+                "reference": "459f2781e1a08d52ee56b0b1444086e038561e3f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/brick/math/zipball/de846578401f4e58f911b3afeb62ced56365ed87",
-                "reference": "de846578401f4e58f911b3afeb62ced56365ed87",
+                "url": "https://api.github.com/repos/brick/math/zipball/459f2781e1a08d52ee56b0b1444086e038561e3f",
+                "reference": "459f2781e1a08d52ee56b0b1444086e038561e3f",
                 "shasum": ""
             },
             "require": {
@@ -1069,7 +1069,7 @@
             ],
             "support": {
                 "issues": "https://github.com/brick/math/issues",
-                "source": "https://github.com/brick/math/tree/0.10.1"
+                "source": "https://github.com/brick/math/tree/0.10.2"
             },
             "funding": [
                 {
@@ -1077,7 +1077,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-08-01T22:54:31+00:00"
+            "time": "2022-08-10T22:54:19+00:00"
         },
         {
             "name": "casbin/casbin",
@@ -1212,12 +1212,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/centrifugal/phpcent.git",
-                "reference": "ec62c7de589c650cf7ae6741561633f91815bcc8"
+                "reference": "929d29444078cc92acf49494f5df3a82f02f893e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/centrifugal/phpcent/zipball/ec62c7de589c650cf7ae6741561633f91815bcc8",
-                "reference": "ec62c7de589c650cf7ae6741561633f91815bcc8",
+                "url": "https://api.github.com/repos/centrifugal/phpcent/zipball/929d29444078cc92acf49494f5df3a82f02f893e",
+                "reference": "929d29444078cc92acf49494f5df3a82f02f893e",
                 "shasum": ""
             },
             "require": {
@@ -1257,7 +1257,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2022-02-11T08:21:29+00:00"
+            "time": "2022-08-11T15:28:03+00:00"
         },
         {
             "name": "christian-riesen/base32",
@@ -2903,25 +2903,27 @@
         },
         {
             "name": "kak/clickhouse",
-            "version": "1.1.0",
+            "version": "1.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sanchezzzhak/kak-clickhouse.git",
-                "reference": "20f71031aebc484a20acd537bb63392df9f1c135"
+                "reference": "29a317fc60da43b38408f9ecddfd6f7f9faa9810"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sanchezzzhak/kak-clickhouse/zipball/20f71031aebc484a20acd537bb63392df9f1c135",
-                "reference": "20f71031aebc484a20acd537bb63392df9f1c135",
+                "url": "https://api.github.com/repos/sanchezzzhak/kak-clickhouse/zipball/29a317fc60da43b38408f9ecddfd6f7f9faa9810",
+                "reference": "29a317fc60da43b38408f9ecddfd6f7f9faa9810",
                 "shasum": ""
             },
             "require": {
                 "yiisoft/yii2": "*",
-                "yiisoft/yii2-httpclient": "~2.0.3"
+                "yiisoft/yii2-httpclient": "^2.0.14"
             },
             "require-dev": {
-                "codeception/base": "^2.5",
-                "guzzlehttp/guzzle": "^6.3"
+                "codeception/codeception": "4.1.22",
+                "codeception/module-asserts": "^2.0",
+                "codeception/module-yii2": "^1.1",
+                "symfony/event-dispatcher-contracts": "2.2.0"
             },
             "type": "yii2-extension",
             "autoload": {
@@ -2949,26 +2951,26 @@
                 "issues": "https://github.com/sanchezzzhak/kak-clickhouse/issues?state=open",
                 "source": "https://github.com/sanchezzzhak/kak-clickhouse"
             },
-            "time": "2021-09-17T18:14:40+00:00"
+            "time": "2022-08-11T13:50:15+00:00"
         },
         {
             "name": "kartik-v/bootstrap-fileinput",
-            "version": "v5.5.0",
+            "version": "v5.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/kartik-v/bootstrap-fileinput.git",
-                "reference": "c233160befa815aab3f00c3a88f1d9984567b886"
+                "reference": "213e0887d254a9c6fb028ff817abd8af7e734e78"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kartik-v/bootstrap-fileinput/zipball/c233160befa815aab3f00c3a88f1d9984567b886",
-                "reference": "c233160befa815aab3f00c3a88f1d9984567b886",
+                "url": "https://api.github.com/repos/kartik-v/bootstrap-fileinput/zipball/213e0887d254a9c6fb028ff817abd8af7e734e78",
+                "reference": "213e0887d254a9c6fb028ff817abd8af7e734e78",
                 "shasum": ""
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "5.2.x-dev"
+                    "dev-master": "5.5.x-dev"
                 }
             },
             "autoload": {
@@ -3004,7 +3006,7 @@
             ],
             "support": {
                 "issues": "https://github.com/kartik-v/bootstrap-fileinput/issues",
-                "source": "https://github.com/kartik-v/bootstrap-fileinput/tree/v5.5.0"
+                "source": "https://github.com/kartik-v/bootstrap-fileinput/tree/v5.5.1"
             },
             "funding": [
                 {
@@ -3012,7 +3014,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2022-06-29T07:07:53+00:00"
+            "time": "2022-08-17T07:53:35+00:00"
         },
         {
             "name": "kartik-v/bootstrap-popover-x",
@@ -4465,11 +4467,11 @@
         },
         {
             "name": "kivork/yii2-search-module",
-            "version": "v1.12.0",
+            "version": "v1.13.0",
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:techork/yii2-search-module.git",
-                "reference": "b4b6f45108739741d4ad7daf95a8da233c9ec3a7"
+                "reference": "1d21d22f0fdee3cb21adbe177c65a89291420f62"
             },
             "require": {
                 "kovalenkojuls/yii2-widget-combodate": "*",
@@ -5035,16 +5037,16 @@
         },
         {
             "name": "mpdf/mpdf",
-            "version": "v8.1.1",
+            "version": "v8.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mpdf/mpdf.git",
-                "reference": "e511e89a66bdb066e3fbf352f00f4734d5064cbf"
+                "reference": "a8a22f4874157e490d41b486053a20bec42e182c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mpdf/mpdf/zipball/e511e89a66bdb066e3fbf352f00f4734d5064cbf",
-                "reference": "e511e89a66bdb066e3fbf352f00f4734d5064cbf",
+                "url": "https://api.github.com/repos/mpdf/mpdf/zipball/a8a22f4874157e490d41b486053a20bec42e182c",
+                "reference": "a8a22f4874157e490d41b486053a20bec42e182c",
                 "shasum": ""
             },
             "require": {
@@ -5108,7 +5110,7 @@
                     "type": "custom"
                 }
             ],
-            "time": "2022-04-18T11:50:28+00:00"
+            "time": "2022-08-15T08:15:09+00:00"
         },
         {
             "name": "mtdowling/cron-expression",
@@ -5344,10 +5346,10 @@
         },
         {
             "name": "npm-asset/ace-builds",
-            "version": "1.9.3",
+            "version": "1.9.5",
             "dist": {
                 "type": "tar",
-                "url": "https://registry.npmjs.org/ace-builds/-/ace-builds-1.9.3.tgz"
+                "url": "https://registry.npmjs.org/ace-builds/-/ace-builds-1.9.5.tgz"
             },
             "type": "npm-asset",
             "license": [
@@ -10668,16 +10670,16 @@
         },
         {
             "name": "codeception/codeception",
-            "version": "4.2.1",
+            "version": "4.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Codeception/Codeception.git",
-                "reference": "77b3e2003fd4446b35826cb9dc397129c521c888"
+                "reference": "b88014f3348c93f3df99dc6d0967b0dbfa804474"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Codeception/Codeception/zipball/77b3e2003fd4446b35826cb9dc397129c521c888",
-                "reference": "77b3e2003fd4446b35826cb9dc397129c521c888",
+                "url": "https://api.github.com/repos/Codeception/Codeception/zipball/b88014f3348c93f3df99dc6d0967b0dbfa804474",
+                "reference": "b88014f3348c93f3df99dc6d0967b0dbfa804474",
                 "shasum": ""
             },
             "require": {
@@ -10754,7 +10756,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Codeception/Codeception/issues",
-                "source": "https://github.com/Codeception/Codeception/tree/4.2.1"
+                "source": "https://github.com/Codeception/Codeception/tree/4.2.2"
             },
             "funding": [
                 {
@@ -10762,7 +10764,7 @@
                     "type": "open_collective"
                 }
             ],
-            "time": "2022-06-22T06:18:59+00:00"
+            "time": "2022-08-13T13:28:25+00:00"
         },
         {
             "name": "codeception/lib-asserts",
