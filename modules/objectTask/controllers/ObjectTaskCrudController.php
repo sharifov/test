@@ -2,17 +2,23 @@
 
 namespace modules\objectTask\controllers;
 
+use frontend\controllers\FController;
 use modules\objectTask\src\entities\ObjectTask;
 use modules\objectTask\src\entities\ObjectTaskSearch;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
  * ObjectTaskCrudController implements the CRUD actions for ObjectTask model.
  */
-class ObjectTaskCrudController extends Controller
+class ObjectTaskCrudController extends FController
 {
+    public function init(): void
+    {
+        parent::init();
+        $this->layoutCrud();
+    }
+
     /**
      * @inheritDoc
      */

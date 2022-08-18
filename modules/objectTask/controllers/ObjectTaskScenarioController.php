@@ -2,17 +2,23 @@
 
 namespace modules\objectTask\controllers;
 
+use frontend\controllers\FController;
 use modules\objectTask\src\entities\ObjectTaskScenario;
 use modules\objectTask\src\entities\ObjectTaskScenarioSearch;
-use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
  * ObjectTaskScenarioController implements the CRUD actions for ObjectTaskScenario model.
  */
-class ObjectTaskScenarioController extends Controller
+class ObjectTaskScenarioController extends FController
 {
+    public function init(): void
+    {
+        parent::init();
+        $this->layoutCrud();
+    }
+
     /**
      * @inheritDoc
      */
