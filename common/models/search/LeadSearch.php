@@ -631,30 +631,34 @@ class LeadSearch extends Lead
             $query->andFilterWhere(['<>', 'leads.status', Lead::STATUS_EXTRA_QUEUE]);
         }
 
-        if ($this->supervision_id > 0) {
-            if (
-                $this->id
-                || $this->uid
-                || $this->client_id
-                || $this->client_email
-                || $this->client_phone
-                || $this->status == Lead::STATUS_FOLLOW_UP
-                || $this->status == Lead::STATUS_PENDING
-                || $this->request_ip
-                || $this->discount_id
-                || $this->gid
-                || $this->bo_flight_id
-            ) {
-            } else {
-                if ($this->statuses && in_array(Lead::STATUS_FOLLOW_UP, $this->statuses) && count($this->statuses) == 1) {
-                } elseif ($this->statuses && in_array(Lead::STATUS_PENDING, $this->statuses) && count($this->statuses) == 1) {
+        /** @fflag FFlag::FF_KEY_REMOVE_LIMITATION_SUPERVISION_IN_LEAD_SEARCH, Remove User Group limitation for Search Leads for Sale Supervisor role */
+        if (!\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_REMOVE_LIMITATION_SUPERVISION_IN_LEAD_SEARCH)) {
+            if ($this->supervision_id > 0) {
+                if (
+                    $this->id
+                    || $this->uid
+                    || $this->client_id
+                    || $this->client_email
+                    || $this->client_phone
+                    || $this->status == Lead::STATUS_FOLLOW_UP
+                    || $this->status == Lead::STATUS_PENDING
+                    || $this->request_ip
+                    || $this->discount_id
+                    || $this->gid
+                    || $this->bo_flight_id
+                ) {
                 } else {
-                    $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
-                    $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
-                    $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
+                    if ($this->statuses && in_array(Lead::STATUS_FOLLOW_UP, $this->statuses) && count($this->statuses) == 1) {
+                    } elseif ($this->statuses && in_array(Lead::STATUS_PENDING, $this->statuses) && count($this->statuses) == 1) {
+                    } else {
+                        $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
+                        $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+                        $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
+                    }
                 }
             }
         }
+
 
         $query->andFilterWhere(['like', 'uid', $this->uid])
             ->andFilterWhere(['like', 'trip_type', $this->trip_type])
@@ -1178,26 +1182,29 @@ class LeadSearch extends Lead
             $query->andWhere(['LIKE','leads.additional_information', new Expression('\'%"pnr":%"' . $this->quote_pnr . '"%\'')]);
         }
 
-        if ($this->supervision_id > 0) {
-            if (
-                $this->id
-                || $this->uid
-                || $this->client_id
-                || $this->client_email
-                || $this->client_phone
-                || $this->status == Lead::STATUS_FOLLOW_UP
-                || $this->request_ip
-                || $this->discount_id
-                || $this->gid
-                || $this->bo_flight_id
-            ) {
-            } else {
-                if ($this->statuses && in_array(Lead::STATUS_FOLLOW_UP, $this->statuses) && count($this->statuses) == 1) {
-                } elseif ($this->statuses && in_array(Lead::STATUS_PENDING, $this->statuses) && count($this->statuses) == 1) {
+        /** @fflag FFlag::FF_KEY_REMOVE_LIMITATION_SUPERVISION_IN_LEAD_SEARCH, Remove User Group limitation for Search Leads for Sale Supervisor role */
+        if (!\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_REMOVE_LIMITATION_SUPERVISION_IN_LEAD_SEARCH)) {
+            if ($this->supervision_id > 0) {
+                if (
+                    $this->id
+                    || $this->uid
+                    || $this->client_id
+                    || $this->client_email
+                    || $this->client_phone
+                    || $this->status == Lead::STATUS_FOLLOW_UP
+                    || $this->request_ip
+                    || $this->discount_id
+                    || $this->gid
+                    || $this->bo_flight_id
+                ) {
                 } else {
-                    $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
-                    $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
-                    $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
+                    if ($this->statuses && in_array(Lead::STATUS_FOLLOW_UP, $this->statuses) && count($this->statuses) == 1) {
+                    } elseif ($this->statuses && in_array(Lead::STATUS_PENDING, $this->statuses) && count($this->statuses) == 1) {
+                    } else {
+                        $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
+                        $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+                        $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
+                    }
                 }
             }
         }
@@ -1480,26 +1487,29 @@ class LeadSearch extends Lead
             $query->andWhere(['LIKE','leads.additional_information', new Expression('\'%"pnr":%"' . $this->quote_pnr . '"%\'')]);
         }
 
-        if ($this->supervision_id > 0) {
-            if (
-                $this->id
-                || $this->uid
-                || $this->client_id
-                || $this->client_email
-                || $this->client_phone
-                || $this->status == Lead::STATUS_FOLLOW_UP
-                || $this->request_ip
-                || $this->discount_id
-                || $this->gid
-                || $this->bo_flight_id
-            ) {
-            } else {
-                if ($this->statuses && in_array(Lead::STATUS_FOLLOW_UP, $this->statuses) && count($this->statuses) == 1) {
-                } elseif ($this->statuses && in_array(Lead::STATUS_PENDING, $this->statuses) && count($this->statuses) == 1) {
+        /** @fflag FFlag::FF_KEY_REMOVE_LIMITATION_SUPERVISION_IN_LEAD_SEARCH, Remove User Group limitation for Search Leads for Sale Supervisor role */
+        if (!\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_REMOVE_LIMITATION_SUPERVISION_IN_LEAD_SEARCH)) {
+            if ($this->supervision_id > 0) {
+                if (
+                    $this->id
+                    || $this->uid
+                    || $this->client_id
+                    || $this->client_email
+                    || $this->client_phone
+                    || $this->status == Lead::STATUS_FOLLOW_UP
+                    || $this->request_ip
+                    || $this->discount_id
+                    || $this->gid
+                    || $this->bo_flight_id
+                ) {
                 } else {
-                    $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
-                    $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
-                    $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
+                    if ($this->statuses && in_array(Lead::STATUS_FOLLOW_UP, $this->statuses) && count($this->statuses) == 1) {
+                    } elseif ($this->statuses && in_array(Lead::STATUS_PENDING, $this->statuses) && count($this->statuses) == 1) {
+                    } else {
+                        $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
+                        $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
+                        $query->andWhere(['IN', 'leads.employee_id', $subQuery]);
+                    }
                 }
             }
         }
