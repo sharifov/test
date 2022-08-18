@@ -1,5 +1,7 @@
 <?php
 
+use modules\objectTask\src\listeners\NoAnswerProtocolCancelListener;
+use modules\objectTask\src\listeners\NoAnswerProtocolListener;
 use modules\shiftSchedule\src\events\ShiftScheduleEventChangedEvent;
 use modules\shiftSchedule\src\listeners\ShiftScheduleEventChangedListener;
 use modules\smartLeadDistribution\src\listeners\LeadRatingCalculationListener;
@@ -28,6 +30,7 @@ use src\events\lead\LeadPoorProcessingEvent;
 use src\events\lead\LeadPreferencesUpdateCurrencyEvent;
 use src\events\lead\LeadProcessingEvent;
 use src\events\lead\LeadQuoteCloneEvent;
+use src\events\lead\LeadReceiveEmailEvent;
 use src\events\lead\LeadRejectEvent;
 use src\events\lead\LeadSnoozeEvent;
 use src\events\lead\LeadSoldEvent;
@@ -157,6 +160,7 @@ return [
     LeadFollowUpEvent::class => [
         LeadFollowUpEventLogListener::class,
         LeadFollowUpNotificationsListener::class,
+        NoAnswerProtocolListener::class,
     ],
     LeadSoldEvent::class => [
         LeadSoldEventLogListener::class,
@@ -165,7 +169,8 @@ return [
         LeadTipsSplitListener::class,
         LeadPhoneTrustListener::class,
         LeadSoldWebEngageListener::class,
-        LeadSoldClientReturnIndicationListener::class
+        LeadSoldClientReturnIndicationListener::class,
+        NoAnswerProtocolCancelListener::class,
     ],
     LeadTrashEvent::class => [
         LeadTrashEventLogListener::class,
@@ -176,6 +181,7 @@ return [
         LeadBookedNotificationsListener::class,
         LeadPhoneTrustListener::class,
         LeadBookedWebEngageListener::class,
+        NoAnswerProtocolCancelListener::class,
     ],
     LeadSnoozeEvent::class => [
         LeadSnoozeEventLogListener::class,

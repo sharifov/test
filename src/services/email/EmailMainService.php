@@ -3,6 +3,7 @@
 namespace src\services\email;
 
 use modules\featureFlag\FFlag;
+use modules\objectTask\src\scenarios\NoAnswer;
 use Yii;
 use frontend\models\EmailPreviewFromInterface;
 use common\models\Lead;
@@ -390,6 +391,11 @@ class EmailMainService implements EmailServiceInterface
 
         $lead = $email->lead ?? null;
         if ($lead) {
+            /** @fflag FFlag::FF_KEY_NO_ANSWER_PROTOCOL_ENABLE, No Answer protocol enable */
+            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_NO_ANSWER_PROTOCOL_ENABLE) === true) {
+                NoAnswer::clientResponseLogicInit($lead);
+            }
+
             if ($userID) {
                 $notifyData = [
                     'user' => $userID,

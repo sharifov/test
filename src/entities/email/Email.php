@@ -606,7 +606,6 @@ class Email extends BaseActiveRecord implements EmailInterface
             $this->e_updated_dt = $data['e_updated_dt'];
             $this->detachBehavior('timestamp');
         }
-
     }
 
     public function getId()
