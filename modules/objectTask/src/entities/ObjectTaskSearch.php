@@ -2,6 +2,7 @@
 
 namespace modules\objectTask\src\entities;
 
+use common\models\Employee;
 use yii\data\ActiveDataProvider;
 
 /**
@@ -15,7 +16,7 @@ class ObjectTaskSearch extends ObjectTask
     public function rules(): array
     {
         return [
-            [['ot_uuid', 'ot_object', 'execution_dt', 'ot_command', 'ot_created_dt'], 'safe'],
+            [['ot_uuid', 'ot_object', 'ot_execution_dt', 'ot_command', 'ot_created_dt'], 'safe'],
             [['ot_q_id', 'ot_object_id', 'ot_status'], 'integer'],
         ];
     }
@@ -36,6 +37,7 @@ class ObjectTaskSearch extends ObjectTask
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'pagination' => ['pageSize' => 30],
         ]);
 
         $this->load($params);
@@ -46,13 +48,18 @@ class ObjectTaskSearch extends ObjectTask
             return $dataProvider;
         }
 
+        if ($this->ot_execution_dt) {
+            $query->andFilterWhere(['>=', 'ot_execution_dt',
+                Employee::convertTimeFromUserDtToUTC(strtotime($this->ot_execution_dt))])
+                ->andFilterWhere(['<=', 'ot_execution_dt',
+                    Employee::convertTimeFromUserDtToUTC(strtotime($this->ot_execution_dt) + 3600 * 24)]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'ot_q_id' => $this->ot_q_id,
             'ot_object_id' => $this->ot_object_id,
-            'ot_execution_dt' => $this->ot_execution_dt,
             'ot_status' => $this->ot_status,
-            'ot_created_dt' => $this->ot_created_dt,
         ]);
 
         $query->andFilterWhere(['like', 'ot_uuid', $this->ot_uuid])

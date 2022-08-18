@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\DateTimeColumn;
 use modules\objectTask\src\entities\ObjectTaskScenario;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -23,7 +24,6 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -33,7 +33,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             'ots_id',
             'ots_key',
-            'ots_updated_dt',
+            ['class' => DateTimeColumn::class, 'attribute' => 'ots_updated_dt'],
             'ots_updated_user_id',
             [
                 'class' => ActionColumn::class,

@@ -2,6 +2,7 @@
 
 namespace modules\objectTask\src\entities;
 
+use common\models\Employee;
 use yii\data\ActiveDataProvider;
 
 /**
@@ -33,6 +34,8 @@ class ObjectTaskScenarioSearch extends ObjectTaskScenario
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['ots_id' => SORT_DESC]],
+            'pagination' => ['pageSize' => 30],
         ]);
 
         $this->load($params);
@@ -43,10 +46,16 @@ class ObjectTaskScenarioSearch extends ObjectTaskScenario
             return $dataProvider;
         }
 
+        if ($this->ots_updated_dt) {
+            $query->andFilterWhere(['>=', 'ots_updated_dt',
+                Employee::convertTimeFromUserDtToUTC(strtotime($this->ots_updated_dt))])
+                ->andFilterWhere(['<=', 'ots_updated_dt',
+                    Employee::convertTimeFromUserDtToUTC(strtotime($this->ots_updated_dt) + 3600 * 24)]);
+        }
+
         // grid filtering conditions
         $query->andFilterWhere([
             'ots_id' => $this->ots_id,
-            'ots_updated_dt' => $this->ots_updated_dt,
             'ots_updated_user_id' => $this->ots_updated_user_id,
         ]);
 

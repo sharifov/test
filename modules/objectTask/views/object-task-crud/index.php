@@ -1,5 +1,6 @@
 <?php
 
+use common\components\grid\DateTimeColumn;
 use modules\objectTask\src\entities\ObjectTask;
 use modules\objectTask\src\services\ObjectTaskService;
 use yii\helpers\Html;
@@ -24,7 +25,6 @@ $this->params['breadcrumbs'][] = $this->title;
     </p>
 
     <?php Pjax::begin(); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -72,9 +72,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'filter' => ObjectTask::STATUS_LIST,
             ],
-            'ot_execution_dt',
+            ['class' => DateTimeColumn::class, 'attribute' => 'ot_execution_dt'],
             [
-                'class' => ActionColumn::className(),
+                'class' => ActionColumn::class,
                 'urlCreator' => function ($action, ObjectTask $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'ot_uuid' => $model->ot_uuid]);
                 }
