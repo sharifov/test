@@ -16,6 +16,9 @@ use yii\helpers\Json;
  * @property string|null $ots_data_json
  * @property string|null $ots_updated_dt
  * @property int|null $ots_updated_user_id
+ * @property int|null $ots_enable
+ *
+ * @property ObjectTask[] $objectTasks
  */
 class ObjectTaskScenario extends \yii\db\ActiveRecord
 {
@@ -53,9 +56,9 @@ class ObjectTaskScenario extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['ots_key'], 'required'],
+            [['ots_key', 'ots_enable'], 'required'],
             [['ots_data_json', 'ots_updated_dt'], 'safe'],
-            [['ots_updated_user_id'], 'integer'],
+            [['ots_updated_user_id', 'ots_enable'], 'integer'],
             [['ots_key'], 'string', 'max' => 255],
         ];
     }
@@ -71,6 +74,7 @@ class ObjectTaskScenario extends \yii\db\ActiveRecord
             'ots_data_json' => 'Data Json',
             'ots_updated_dt' => 'Updated Dt',
             'ots_updated_user_id' => 'Updated User ID',
+            'ots_enable' => 'Enable',
         ];
     }
 
@@ -85,6 +89,16 @@ class ObjectTaskScenario extends \yii\db\ActiveRecord
         }
 
         return true;
+    }
+
+    /**
+     * Gets query for [[ObjectTasks]].
+     *
+     * @return \yii\db\ActiveQuery|ObjectTaskScopes
+     */
+    public function getObjectTasks()
+    {
+        return $this->hasMany(ObjectTask::class, ['ot_ots_id' => 'ots_id']);
     }
 
     /**
