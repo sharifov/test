@@ -22,7 +22,7 @@ abstract class BaseScenario
 
     public function getConfig(): array
     {
-        return $this->objectTaskScenario->ots_data_json;
+        return $this->objectTaskScenario->ots_data_json ?? [];
     }
 
     public function getConfigParameter(string $key, mixed $defaultValue = null): mixed
