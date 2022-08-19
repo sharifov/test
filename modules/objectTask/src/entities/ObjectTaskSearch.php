@@ -16,7 +16,7 @@ class ObjectTaskSearch extends ObjectTask
     public function rules(): array
     {
         return [
-            [['ot_uuid', 'ot_object', 'ot_execution_dt', 'ot_command', 'ot_created_dt'], 'safe'],
+            [['ot_uuid', 'ot_object', 'ot_execution_dt', 'ot_command', 'ot_created_dt', 'ot_group_hash'], 'safe'],
             [['ot_q_id', 'ot_object_id', 'ot_status'], 'integer'],
         ];
     }
@@ -64,6 +64,7 @@ class ObjectTaskSearch extends ObjectTask
 
         $query->andFilterWhere(['like', 'ot_uuid', $this->ot_uuid])
             ->andFilterWhere(['like', 'ot_object', $this->ot_object])
+            ->andFilterWhere(['ot_group_hash' => $this->ot_group_hash])
             ->andFilterWhere(['like', 'ot_command', $this->ot_command]);
 
         return $dataProvider;
