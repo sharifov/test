@@ -23,7 +23,7 @@ use modules\taskList\src\entities\userTask\UserTask;
 use modules\taskList\src\entities\userTask\UserTaskQuery;
 use modules\taskList\src\exceptions\TaskListAssignException;
 use modules\taskList\src\services\taskAssign\checker\TaskListAssignCheckerFactory;
-use modules\taskList\src\services\TaskListParamService;
+use modules\taskList\src\entities\taskList\TaskListParamService;
 use src\helpers\app\AppHelper;
 use src\helpers\DateHelper;
 use src\helpers\ErrorsToStringHelper;

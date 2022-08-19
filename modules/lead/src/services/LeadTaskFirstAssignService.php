@@ -8,7 +8,7 @@ use modules\taskList\src\entities\taskList\TaskList;
 use modules\taskList\src\entities\userTask\repository\UserTaskRepository;
 use modules\taskList\src\entities\userTask\UserTask;
 use modules\taskList\src\entities\userTask\UserTaskQuery;
-use modules\taskList\src\services\TaskListParamService;
+use modules\taskList\src\entities\taskList\TaskListParamService;
 use src\helpers\ErrorsToStringHelper;
 
 class LeadTaskFirstAssignService extends LeadTaskAssignService
