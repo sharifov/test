@@ -9,6 +9,7 @@ use modules\fileStorage\src\services\url\QueryParams;
 use modules\fileStorage\src\services\url\UrlGenerator;
 use src\auth\Auth;
 use yii\base\Widget;
+use modules\fileStorage\src\entity\fileStorage\FileStorageQuery;
 
 /**
  * Class FileStorageListWidget
@@ -57,5 +58,24 @@ class FileStorageListWidget extends Widget
             'uploadWidget' => $withUpload ? FileStorageUploadWidget::byCase($id) : '',
             'queryParams' => QueryParams::byCase(),
         ]);
+    }
+
+    public static function byEmail(int $id, ?array $emailData): string
+    {
+        $uids = [];
+        if (isset($emailData['files']) && !empty($emailData['files'])) {
+            foreach ($emailData['files'] as $key => $val) {
+                if (isset($val['uid'])) {
+                    $uids[] = $val['uid'];
+                }
+            }
+        }
+
+        return self::widget([
+            'files' => FileStorageQuery::getListByUids($uids),
+            'uploadWidget' => '',
+            'queryParams' => QueryParams::byEmpty(),
+        ]);
+
     }
 }
