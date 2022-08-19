@@ -26,9 +26,11 @@ $i = 1;
 
 <div class="x_panel">
     <div class="x_title">
+    	<?php Pjax::begin(['id' => 'pjax-file-count']); ?>
         <h2 class="file-storage-list-counter" data-count="<?php echo $countFiles ?>">
             Files (<span id="file-count-value"><?php echo $countFiles ?></span>)
         </h2>
+         <?php Pjax::end() ?>
         <ul class="nav navbar-right panel_toolbox">
             <li>
                 <?php echo $uploadWidget ?>
