@@ -1,6 +1,7 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
+use common\components\grid\UserSelect2Column;
 use modules\objectTask\src\entities\ObjectTaskScenario;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -34,7 +35,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'ots_id',
             'ots_key',
             ['class' => DateTimeColumn::class, 'attribute' => 'ots_updated_dt'],
-            'ots_updated_user_id',
+            ['class' => UserSelect2Column::class, 'attribute' => 'ots_updated_user_id', 'relation' => 'otsUpdatedUser'],
             [
                 'attribute' => 'ots_enable',
                 'format' => 'booleanByLabel',
@@ -42,7 +43,6 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'class' => ActionColumn::class,
-                'template' => '{view} {update}',
                 'urlCreator' => function ($action, ObjectTaskScenario $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'ots_id' => $model->ots_id]);
                 }
