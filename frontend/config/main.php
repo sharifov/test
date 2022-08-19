@@ -477,7 +477,7 @@ return [
                 ]
             ],
             'storage' => [
-                'class' => kivork\TwoFactorAuth\Storage\FileStorage::class
+                'class' => common\implementations\twoFactorAuth\AuthStorage::class
             ],
             'layout' => '@frontend/themes/gentelella_v2/views/layouts/login_2fa.php'
         ],
