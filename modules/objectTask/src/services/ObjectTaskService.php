@@ -11,6 +11,9 @@ use modules\objectTask\src\scenarios\BaseScenario;
 use modules\objectTask\src\scenarios\NoAnswer;
 use modules\objectTask\src\scenarios\statements\BaseObject;
 use src\helpers\app\AppHelper;
+use src\model\leadData\entity\LeadData;
+use src\model\leadData\repository\LeadDataRepository;
+use src\model\leadDataKey\services\LeadDataKeyDictionary;
 use Yii;
 
 class ObjectTaskService
@@ -66,6 +69,22 @@ class ObjectTaskService
             );
 
             if ($scenario->canProcess()) {
+                if ($object instanceof Lead) {
+                    try {
+                        $leadDataRepository = \Yii::createObject(LeadDataRepository::class);
+                        $leadDataFollowUp = LeadData::create($object->id, LeadDataKeyDictionary::KEY_AUTO_FOLLOW_UP, $key);
+
+                        $leadDataRepository->save($leadDataFollowUp);
+                    } catch (\Throwable $e) {
+                        \Yii::error([
+                            'message' => $e->getMessage(),
+                            'leadId' => $object->id,
+                            'scenarioName' => $key,
+                            'scenarioId' => $objectTaskScenario->ots_id,
+                        ], 'ObjectTaskService::runScenario');
+                    }
+                }
+
                 $scenario->process();
             }
         }

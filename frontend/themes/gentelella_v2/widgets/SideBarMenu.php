@@ -1101,6 +1101,19 @@ class SideBarMenu extends \yii\bootstrap\Widget
             ];
         }
 
+        /** @fflag FFlag::FF_KEY_NO_ANSWER_PROTOCOL_ENABLE, FollowUp enable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_NO_ANSWER_PROTOCOL_ENABLE)) {
+            $menuModuleItems[] =  [
+                'label' => 'Object Task',
+                'url' => 'javascript:',
+                'icon' => 'tasks',
+                'items' => [
+                    ['label' => 'Object Task List', 'url' => ['/object-task/object-task-crud/index']],
+                    ['label' => 'Object Task Scenarios', 'url' => ['/object-task/object-task-scenario/index']],
+                ],
+            ];
+        }
+
         if ($menuModuleItems) {
             $menuItems[] = [
                 'label' => 'Modules',
