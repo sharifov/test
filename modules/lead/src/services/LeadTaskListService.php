@@ -11,6 +11,7 @@ use modules\objectSegment\src\contracts\ObjectSegmentKeyContract;
 use modules\objectSegment\src\entities\ObjectSegmentList;
 use modules\objectSegment\src\entities\ObjectSegmentTask;
 use modules\objectSegment\src\entities\ObjectSegmentType;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
 use modules\taskList\src\entities\shiftScheduleEventTask\repository\ShiftScheduleEventTaskRepository;
 use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTask;
@@ -49,7 +50,7 @@ class LeadTaskListService
     public function assign(): void
     {
         try {
-            $dtNow = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')));
+            $dtStart = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')));
             if ($taskLists = TaskListQuery::getTaskListByLeadId($this->lead->id)) {
                 foreach ($taskLists as $taskList) {
                     try {
@@ -66,23 +67,27 @@ class LeadTaskListService
                             continue;
                         }
 
-                        $dtNowWithDelay = $dtNow->modify(sprintf('+%d hour', $taskList->getDelayHoursParam()));
+                        if ($taskList->getDelayHoursParam() === 0 && $taskList->getDelayShiftParam() > 0) {
+                            $dtStart = $this->getStartDateByShiftDelay($dtStart, $taskList);
+                        }
+
+                        $dtWithDelay = $dtStart->modify(sprintf('+%d hour', $taskList->getDelayHoursParam()));
 
                         $taskListEndDt = null;
                         if ((int)$taskList->tl_duration_min > 0) {
-                            $taskListEndDt = $dtNowWithDelay->modify(sprintf('+%d minutes', $taskList->tl_duration_min));
+                            $taskListEndDt = $dtWithDelay->modify(sprintf('+%d minutes', $taskList->tl_duration_min));
                         }
 
                         $userShiftSchedules = UserShiftScheduleQuery::getAllFromStartDateByUserId(
                             $this->lead->employee_id,
-                            $dtNowWithDelay,
+                            $dtWithDelay,
                             $taskListEndDt
                         );
 
                         if (empty($userShiftSchedules)) {
                             $this->canceledUserTask($taskList->tl_id);
                             throw new TaskListAssignException('UserShiftSchedules not found by EmployeeId (' .
-                                $this->lead->employee_id . ') and StartDateTime:' . $dtNowWithDelay->format('Y-m-d H:i:s')
+                                $this->lead->employee_id . ') and StartDateTime:' . $dtWithDelay->format('Y-m-d H:i:s')
                                 . ' and EndTime:' . ($taskListEndDt ? $taskListEndDt->format('Y-m-d H:i:s') : 'null'));
                         }
 
@@ -90,14 +95,14 @@ class LeadTaskListService
                             $assignService = new LeadTaskFirstAssignService(
                                 $this->lead,
                                 $taskList,
-                                $dtNow,
+                                $dtStart,
                                 $userShiftSchedules
                             );
                         } else {
                             $assignService = new LeadTaskReAssignService(
                                 $this->lead,
                                 $taskList,
-                                $dtNow,
+                                $dtStart,
                                 $userShiftSchedules,
                                 $this->oldOwnerId
                             );
@@ -263,5 +268,29 @@ class LeadTaskListService
             $userTask->setStatusCancel();
             (new UserTaskRepository($userTask))->save();
         }
+    }
+
+    private function getStartDateByShiftDelay(\DateTimeImmutable $dtStart, TaskList $taskList): \DateTimeImmutable
+    {
+        $firstShiftScheduleStartDate = UserShiftScheduleQuery::getQueryForNextShiftsByUserId(
+            $this->lead->employee_id,
+            $dtStart
+        )
+            ->select('user_shift_schedule.uss_start_utc_dt')
+            ->offset($taskList->getDelayShiftParam())
+            ->limit(1)
+            ->scalar();
+
+        if (empty($firstShiftScheduleStartDate)) {
+            $this->canceledUserTask($taskList->tl_id);
+            throw new TaskListAssignException('UserShiftSchedules not found by EmployeeId (' .
+                $this->lead->employee_id . ') and StartDateTime:' . $dtStart->format('Y-m-d H:i:s') . ' and ShiftDelay:' . $taskList->getDelayShiftParam());
+        }
+
+        if (strtotime($firstShiftScheduleStartDate) > time()) {
+            $dtStart = (new \DateTimeImmutable($firstShiftScheduleStartDate, new \DateTimeZone('UTC')));
+        }
+
+        return $dtStart;
     }
 }
