@@ -474,7 +474,7 @@ class Email extends BaseActiveRecord implements EmailInterface
 
     public function updateEmailData($emailData)
     {
-        $this->emailBody->updateAttributes(['embd_email_data' => json_encode($emailData)]);
+        $this->emailBody->updateAttributes(['embd_email_data' => $emailData]);
         return $this;
     }
 
