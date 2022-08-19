@@ -13,7 +13,7 @@ class ObjectTaskScenarioSearch extends ObjectTaskScenario
     /**
      * {@inheritdoc}
      */
-    public function rules()
+    public function rules(): array
     {
         return [
             [['ots_id', 'ots_updated_user_id', 'ots_enable'], 'integer'],
@@ -28,7 +28,7 @@ class ObjectTaskScenarioSearch extends ObjectTaskScenario
      *
      * @return ActiveDataProvider
      */
-    public function search($params)
+    public function search($params): ActiveDataProvider
     {
         $query = ObjectTaskScenario::find();
 

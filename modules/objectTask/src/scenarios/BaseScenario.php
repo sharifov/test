@@ -3,23 +3,39 @@
 namespace modules\objectTask\src\scenarios;
 
 use modules\objectTask\src\entities\ObjectTaskScenario;
+use modules\objectTask\src\scenarios\statements\BaseObject;
+use src\access\ConditionExpressionService;
 
 abstract class BaseScenario
 {
-    protected ?ObjectTaskScenario $objectTaskScenario = null;
+    protected ObjectTaskScenario $objectTaskScenario;
+    protected mixed $object;
 
-    public function __construct()
+    public function __construct(ObjectTaskScenario $objectTaskScenario, mixed $object)
     {
-        $this->objectTaskScenario = ObjectTaskScenario::find()
-            ->where([
-                'ots_key' => static::KEY,
-                'ots_enable' => 1,
-            ])
-            ->limit(1)
-            ->one();
+        $this->objectTaskScenario = $objectTaskScenario;
+        $this->object = $object;
     }
 
+    abstract public function getStatementDTO();
+
+    abstract public static function getStatementObject(): BaseObject;
+
     abstract public function process(): void;
+
+    abstract public function getObject();
+
+    abstract public static function getTemplate(): array;
+
+    public function canProcess(): bool
+    {
+        return ConditionExpressionService::isValidCondition(
+            $this->objectTaskScenario->ots_condition,
+            [
+                static::OBJECT => static::getStatementDTO()
+            ]
+        );
+    }
 
     public function getConfig(): array
     {
@@ -37,6 +53,6 @@ abstract class BaseScenario
 
     protected function isEnable(): bool
     {
-        return ($this->objectTaskScenario !== null);
+        return (bool)$this->objectTaskScenario->ots_enable;
     }
 }

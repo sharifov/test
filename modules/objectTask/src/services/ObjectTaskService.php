@@ -7,7 +7,9 @@ use modules\objectTask\src\commands\SendEmailWithQuotes;
 use modules\objectTask\src\entities\ObjectTask;
 use modules\objectTask\src\entities\ObjectTaskScenario;
 use modules\objectTask\src\entities\repositories\ObjectTaskRepository;
+use modules\objectTask\src\scenarios\BaseScenario;
 use modules\objectTask\src\scenarios\NoAnswer;
+use modules\objectTask\src\scenarios\statements\BaseObject;
 use src\helpers\app\AppHelper;
 use Yii;
 
@@ -17,6 +19,10 @@ class ObjectTaskService
 
     public const SCENARIO_LIST = [
         self::SCENARIO_NO_ANSWER => 'No answer',
+    ];
+
+    public const SCENARIO_CLASS_LIST = [
+        NoAnswer::KEY => NoAnswer::class,
     ];
 
     public const COMMAND_LIST = [
@@ -29,9 +35,41 @@ class ObjectTaskService
 
     public const OBJECT_LEAD = 'lead';
 
-    public const OBJECT_MODEL_LIST = [
-        self::OBJECT_LEAD => Lead::class,
-    ];
+    public static function runScenario(string $key, mixed $object, ?int $scenarioId = null): void
+    {
+        $otsQuery = ObjectTaskScenario::find()
+            ->where([
+                'ots_key' => $key,
+                'ots_enable' => 1,
+            ]);
+
+        if ($scenarioId !== null) {
+            $otsQuery->andWhere([
+                'ots_id' => $scenarioId,
+            ]);
+        }
+
+        $objectTaskScenarios = $otsQuery->all();
+
+        if (empty($objectTaskScenarios)) {
+            return;
+        }
+
+        foreach ($objectTaskScenarios as $objectTaskScenario) {
+                /** @var BaseScenario $scenario */
+            $scenario = Yii::createObject(
+                self::SCENARIO_CLASS_LIST[$key],
+                [
+                    'objectTaskScenario' => $objectTaskScenario,
+                    'object' => $object,
+                ]
+            );
+
+            if ($scenario->canProcess()) {
+                $scenario->process();
+            }
+        }
+    }
 
     public static function cancelJobs(string $scenarioKey, string $object, int $objectId): void
     {
@@ -70,5 +108,44 @@ class ObjectTaskService
                 }
             }
         }
+    }
+
+    public static function getStatementObjectForScenario(string $key): ?BaseObject
+    {
+        /** @var BaseScenario $class */
+        $class = self::SCENARIO_CLASS_LIST[$key] ?? null;
+
+        if ($class !== null) {
+            try {
+                return $class::getStatementObject();
+            } catch (\Throwable $e) {
+                Yii::error(
+                    AppHelper::throwableLog($e),
+                    'ObjectTaskService:getStatementObjectForScenario'
+                );
+            }
+        }
+
+        return null;
+    }
+
+    public static function getTemplateForScenario(string $key): array
+    {
+        $data = [];
+        /** @var BaseScenario $class */
+        $class = self::SCENARIO_CLASS_LIST[$key] ?? null;
+
+        if ($class !== null) {
+            try {
+                $data = $class::getTemplate();
+            } catch (\Throwable $e) {
+                Yii::error(
+                    AppHelper::throwableLog($e),
+                    'ObjectTaskService:getTemplateForScenario'
+                );
+            }
+        }
+
+        return $data;
     }
 }

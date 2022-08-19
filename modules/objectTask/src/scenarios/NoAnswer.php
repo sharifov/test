@@ -7,6 +7,8 @@ use common\models\query\LeadFlowQuery;
 use modules\objectTask\src\entities\ObjectTask;
 use modules\objectTask\src\entities\repositories\ObjectTaskRepository;
 use modules\objectTask\src\jobs\CommandExecutorJob;
+use modules\objectTask\src\scenarios\statements\NoAnswerDto;
+use modules\objectTask\src\scenarios\statements\NoAnswerObject;
 use modules\objectTask\src\services\ObjectTaskService;
 use src\helpers\app\AppHelper;
 use src\helpers\DateHelper;
@@ -18,19 +20,13 @@ use yii\helpers\Json;
 class NoAnswer extends BaseScenario
 {
     public const KEY = 'noAnswer';
-
-    private Lead $lead;
-
-    public function __construct(Lead $lead)
-    {
-        $this->lead = $lead;
-
-        parent::__construct();
-    }
+    public const OBJECT = ObjectTaskService::OBJECT_LEAD;
 
     public function process(): void
     {
-        if ($this->isEnable() === false || NoAnswer::leadIsAvailableForProcess($this->lead) === false) {
+        $lead = $this->getObject();
+
+        if ($this->isEnable() === false || NoAnswer::leadIsAvailableForProcess($lead) === false) {
             return;
         }
 
@@ -41,7 +37,7 @@ class NoAnswer extends BaseScenario
         $daysLeft = $this->getDaysIntervalForDistribution();
 
         if ($daysLeft > $firstDay) {
-            $leadCurrentDt = $this->lead->clientTime2;
+            $leadCurrentDt = $lead->clientTime2;
 
             foreach ($daysList as $day => $objects) {
                 if ($day >= $daysLeft) {
@@ -62,7 +58,7 @@ class NoAnswer extends BaseScenario
                 );
 
                 if (!empty($objects)) {
-                    $groupHash = md5(time() . $this->lead->id);
+                    $groupHash = md5(time() . $lead->id);
 
                     foreach ($objects as $object) {
                         $uuid = UuidHelper::uuid();
@@ -83,7 +79,7 @@ class NoAnswer extends BaseScenario
                                 $queueID,
                                 $this->objectTaskScenario->ots_id,
                                 ObjectTaskService::OBJECT_LEAD,
-                                $this->lead->id,
+                                $lead->id,
                                 $object['command'],
                                 $utcDatetime,
                                 $groupHash
@@ -101,9 +97,21 @@ class NoAnswer extends BaseScenario
         }
     }
 
-    public static function getTemplate(): string
+    public function getStatementDTO(): NoAnswerDto
     {
-        return Json::encode([
+        return new NoAnswerDto(
+            self::getObject()
+        );
+    }
+
+    public static function getStatementObject(): NoAnswerObject
+    {
+        return new NoAnswerObject();
+    }
+
+    public static function getTemplate(): array
+    {
+        return [
             'allowedTime' => [
                 'hour' => 12,
                 'minute' => 0,
@@ -124,16 +132,17 @@ class NoAnswer extends BaseScenario
                     ],
                 ]
             ],
-        ]);
+        ];
     }
 
     private function getDaysIntervalForDistribution(): int
     {
         $days = 0;
+        $lead = $this->getObject();
 
-        if ($this->lead->firstFlightSegment !== null) {
+        if ($lead->firstFlightSegment !== null) {
             /** @var \common\models\LeadFlightSegment $segment */
-            $segment = $this->lead->firstFlightSegment;
+            $segment = $lead->firstFlightSegment;
             $days = DateHelper::getDifferentInDaysByDatesUTC(
                 date('Y-m-d H:i:s'),
                 $segment->departure
@@ -178,5 +187,10 @@ class NoAnswer extends BaseScenario
                 'NoAnswer:removeJobsForLead'
             );
         }
+    }
+
+    public function getObject(): Lead
+    {
+        return $this->object;
     }
 }

@@ -5,6 +5,7 @@ namespace modules\objectTask\controllers;
 use frontend\controllers\FController;
 use modules\objectTask\src\entities\ObjectTaskScenario;
 use modules\objectTask\src\entities\ObjectTaskScenarioSearch;
+use yii\helpers\Json;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -71,9 +72,14 @@ class ObjectTaskScenarioController extends FController
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
      */
-    public function actionCreate()
+    public function actionCreate(?string $key = null)
     {
         $model = new ObjectTaskScenario();
+
+        if ($key !== null) {
+            $model->ots_key = $key;
+            $model->ots_data_json = $model->getScenarioTemplate();
+        }
 
         if ($this->request->isPost) {
             if ($model->load($this->request->post()) && $model->save()) {
@@ -95,9 +101,14 @@ class ObjectTaskScenarioController extends FController
      * @return string|\yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($ots_id)
+    public function actionUpdate($ots_id, ?string $key = null)
     {
         $model = $this->findModel($ots_id);
+
+        if ($key !== null) {
+            $model->ots_key = $key;
+            $model->ots_data_json = $model->getScenarioTemplate();
+        }
 
         if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
             return $this->redirect(['view', 'ots_id' => $model->ots_id]);
