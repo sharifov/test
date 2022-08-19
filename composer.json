@@ -156,7 +156,6 @@
 		],
 		"exclude-from-classmap": [
 			"docker/",
-			"vagrant/",
 			"node_modules/"
 		]
 	},
