@@ -11,6 +11,7 @@ use modules\shiftSchedule\src\entities\userShiftSchedule\search\TimelineCalendar
 use Yii;
 use yii\base\DynamicModel;
 use yii\db\Expression;
+use yii\db\Query;
 
 class UserShiftScheduleQuery
 {
@@ -493,7 +494,7 @@ class UserShiftScheduleQuery
             ->all();
     }
 
-    private static function getQueryForNextShiftsByUserId(
+    public static function getQueryForNextShiftsByUserId(
         int $userId,
         \DateTimeImmutable $startDt,
         ?\DateTimeImmutable $userTaskEndDt = null,
@@ -504,12 +505,15 @@ class UserShiftScheduleQuery
             ->alias('user_shift_schedule')
             ->select('user_shift_schedule.*')
             ->innerJoin(
-                ShiftScheduleType::tableName() . ' AS shift_schedule_type',
-                'shift_schedule_type.sst_id = user_shift_schedule.uss_sst_id',
+                [
+                    'shift_schedule_type_query' => ShiftScheduleType::find()
+                        ->select('sst_id')
+                        ->andWhere(['IN', 'shift_schedule_type.sst_subtype_id', $shiftScheduleType])
+                ],
+                'shift_schedule_type_query.sst_id = user_shift_schedule.uss_sst_id',
             )
             ->where(['uss_user_id' => $userId])
             ->andWhere(['IN', 'uss_status_id', $status])
-            ->andWhere(['IN', 'shift_schedule_type.sst_subtype_id', $shiftScheduleType])
         ;
 
         if ($userTaskEndDt) {
