@@ -23,8 +23,8 @@ class BookingIdCreateForm extends Model
 
     /**
      * SubscribeForm constructor.
-     * @param ClientChat $clientChat
-     * @param ClientChatForm $clientChatForm
+     * @param int $clientChatId
+     * @param int $clientChatFormId
      * @param array $config
      */
     public function __construct(int $clientChatId, int $clientChatFormId, $config = [])
