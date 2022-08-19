@@ -304,18 +304,6 @@ class TaskList extends ActiveRecord
         ]));
     }
 
-    public function getDelayHoursParam(): int
-    {
-        $params = JsonHelper::decode($this->tl_params_json);
-        return (int) ($params['delayHours'] ?? 0);
-    }
-
-    public function getDelayShiftParam(): int
-    {
-        $params = JsonHelper::decode($this->tl_params_json);
-        return (int) ($params['delayShift'] ?? 0);
-    }
-
     public static function create(
         string $title,
         string $object,
