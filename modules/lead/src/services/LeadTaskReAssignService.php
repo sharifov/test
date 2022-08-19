@@ -9,23 +9,24 @@ use modules\taskList\src\entities\taskList\TaskList;
 use modules\taskList\src\entities\userTask\repository\UserTaskRepository;
 use modules\taskList\src\entities\userTask\UserTask;
 use modules\taskList\src\entities\userTask\UserTaskQuery;
+use modules\taskList\src\services\TaskListParamService;
 use src\helpers\ErrorsToStringHelper;
 
 class LeadTaskReAssignService extends LeadTaskAssignService
 {
     private Lead $lead;
     private TaskList $taskList;
-    private \DateTimeImmutable $dtNow;
-    private \DateTimeImmutable $dtNowWithDelay;
+    private \DateTimeImmutable $dtStart;
+    private \DateTimeImmutable $dtStartWithDelay;
     private array $userShiftSchedules;
     private int $oldOwnerId;
 
-    public function __construct(Lead $lead, TaskList $taskList, \DateTimeImmutable $dtNow, array $userShiftSchedules, int $oldOwnerId)
+    public function __construct(Lead $lead, TaskList $taskList, \DateTimeImmutable $dtStart, array $userShiftSchedules, int $oldOwnerId)
     {
         $this->lead = $lead;
         $this->taskList = $taskList;
-        $this->dtNow = $dtNow;
-        $this->dtNowWithDelay = $dtNow->modify(sprintf('+%d hour', $taskList->getDelayHoursParam()));
+        $this->dtStart = $dtStart;
+        $this->dtStartWithDelay = $dtStart->modify(sprintf('+%d hour', (new TaskListParamService($taskList))->getDelayHoursParam()));
         $this->userShiftSchedules = $userShiftSchedules;
         $this->oldOwnerId = $oldOwnerId;
     }
@@ -44,7 +45,7 @@ class LeadTaskReAssignService extends LeadTaskAssignService
             (new LeadTaskFirstAssignService(
                 $this->lead,
                 $this->taskList,
-                $this->dtNow,
+                $this->dtStart,
                 $this->userShiftSchedules
             ))->assign();
             return;
@@ -60,10 +61,10 @@ class LeadTaskReAssignService extends LeadTaskAssignService
 
         $userTask = $oldUserTask
             ->setOwner($this->lead->employee_id)
-            ->setStartDate($this->dtNowWithDelay->format('Y-m-d H:i:s'));
+            ->setStartDate($this->dtStartWithDelay->format('Y-m-d H:i:s'));
 
         if ((int) $this->taskList->tl_duration_min > 0) {
-            $taskListEndDt = $this->dtNowWithDelay->modify(sprintf('+%d minutes', (int) $this->taskList->tl_duration_min));
+            $taskListEndDt = $this->dtStartWithDelay->modify(sprintf('+%d minutes', (int) $this->taskList->tl_duration_min));
             $userTask->setEndDate($taskListEndDt->format('Y-m-d H:i:s'));
         }
 
@@ -77,6 +78,6 @@ class LeadTaskReAssignService extends LeadTaskAssignService
             'sset_user_task_id' => $userTask->ut_id
         ]);
 
-        $this->createShiftScheduleEventTask($this->userShiftSchedules, $userTask, $this->dtNowWithDelay, $this->taskList->tl_duration_min);
+        $this->createShiftScheduleEventTask($this->userShiftSchedules, $userTask, $this->dtStartWithDelay, $this->taskList->tl_duration_min);
     }
 }

@@ -8,22 +8,21 @@ use modules\taskList\src\entities\taskList\TaskList;
 use modules\taskList\src\entities\userTask\repository\UserTaskRepository;
 use modules\taskList\src\entities\userTask\UserTask;
 use modules\taskList\src\entities\userTask\UserTaskQuery;
+use modules\taskList\src\services\TaskListParamService;
 use src\helpers\ErrorsToStringHelper;
 
 class LeadTaskFirstAssignService extends LeadTaskAssignService
 {
     private Lead $lead;
     private TaskList $taskList;
-    private \DateTimeImmutable $dtNow;
-    private \DateTimeImmutable $dtNowWithDelay;
+    private \DateTimeImmutable $dtStartWithDelay;
     private array $userShiftSchedules;
 
     public function __construct(Lead $lead, TaskList $taskList, \DateTimeImmutable $dtNow, array $userShiftSchedules)
     {
         $this->lead = $lead;
         $this->taskList = $taskList;
-        $this->dtNow = $dtNow;
-        $this->dtNowWithDelay = $dtNow->modify(sprintf('+%d hour', $taskList->getDelayHoursParam()));
+        $this->dtStartWithDelay = $dtNow->modify(sprintf('+%d hour', (new TaskListParamService($taskList))->getDelayHoursParam()));
         $this->userShiftSchedules = $userShiftSchedules;
     }
 
@@ -48,7 +47,7 @@ class LeadTaskFirstAssignService extends LeadTaskAssignService
 
         $taskListEndDt = null;
         if ((int) $this->taskList->tl_duration_min > 0) {
-            $taskListEndDt = $this->dtNowWithDelay->modify(sprintf('+%d minutes', (int) $this->taskList->tl_duration_min));
+            $taskListEndDt = $this->dtStartWithDelay->modify(sprintf('+%d minutes', (int) $this->taskList->tl_duration_min));
         }
 
         $userTask = UserTask::create(
@@ -56,7 +55,7 @@ class LeadTaskFirstAssignService extends LeadTaskAssignService
             TargetObject::TARGET_OBJ_LEAD,
             $this->lead->id,
             $this->taskList->tl_id,
-            $this->dtNowWithDelay->format('Y-m-d H:i:s'),
+            $this->dtStartWithDelay->format('Y-m-d H:i:s'),
             $taskListEndDt ? $taskListEndDt->format('Y-m-d H:i:s') : null
         );
 
@@ -68,6 +67,6 @@ class LeadTaskFirstAssignService extends LeadTaskAssignService
 
         (new UserTaskRepository($userTask))->save();
 
-        $this->createShiftScheduleEventTask($this->userShiftSchedules, $userTask, $this->dtNowWithDelay, $this->taskList->tl_duration_min);
+        $this->createShiftScheduleEventTask($this->userShiftSchedules, $userTask, $this->dtStartWithDelay, $this->taskList->tl_duration_min);
     }
 }

@@ -23,6 +23,7 @@ use modules\taskList\src\entities\userTask\UserTask;
 use modules\taskList\src\entities\userTask\UserTaskQuery;
 use modules\taskList\src\exceptions\TaskListAssignException;
 use modules\taskList\src\services\taskAssign\checker\TaskListAssignCheckerFactory;
+use modules\taskList\src\services\TaskListParamService;
 use src\helpers\app\AppHelper;
 use src\helpers\DateHelper;
 use src\helpers\ErrorsToStringHelper;
@@ -50,7 +51,7 @@ class LeadTaskListService
     public function assign(): void
     {
         try {
-            $dtStart = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')));
+            $dtNow = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')));
             if ($taskLists = TaskListQuery::getTaskListByLeadId($this->lead->id)) {
                 foreach ($taskLists as $taskList) {
                     try {
@@ -67,11 +68,10 @@ class LeadTaskListService
                             continue;
                         }
 
-                        if ($taskList->getDelayHoursParam() === 0 && $taskList->getDelayShiftParam() > 0) {
-                            $dtStart = $this->getStartDateByShiftDelay($dtStart, $taskList);
-                        }
+                        $taskListParams = new TaskListParamService($taskList);
+                        $dtStart = $this->getStartDate($dtNow, $taskList, $taskListParams);
 
-                        $dtWithDelay = $dtStart->modify(sprintf('+%d hour', $taskList->getDelayHoursParam()));
+                        $dtWithDelay = $dtStart->modify(sprintf('+%d hour', $taskListParams->getDelayHoursParam()));
 
                         $taskListEndDt = null;
                         if ((int)$taskList->tl_duration_min > 0) {
@@ -270,27 +270,28 @@ class LeadTaskListService
         }
     }
 
-    private function getStartDateByShiftDelay(\DateTimeImmutable $dtStart, TaskList $taskList): \DateTimeImmutable
+    private function getStartDate(\DateTimeImmutable $dtStart, TaskList $taskList, TaskListParamService $taskListParams): \DateTimeImmutable
     {
-        $firstShiftScheduleStartDate = UserShiftScheduleQuery::getQueryForNextShiftsByUserId(
-            $this->lead->employee_id,
-            $dtStart
-        )
-            ->select('user_shift_schedule.uss_start_utc_dt')
-            ->offset($taskList->getDelayShiftParam())
-            ->limit(1)
-            ->scalar();
+        if ($taskListParams->getDelayHoursParam() === 0 && $taskListParams->getDelayShiftParam() > 0) {
+            $firstShiftScheduleStartDate = UserShiftScheduleQuery::getQueryForNextShiftsByUserId(
+                $this->lead->employee_id,
+                $dtStart
+            )
+                ->select('user_shift_schedule.uss_start_utc_dt')
+                ->offset($taskListParams->getDelayShiftParam())
+                ->limit(1)
+                ->scalar();
 
-        if (empty($firstShiftScheduleStartDate)) {
-            $this->canceledUserTask($taskList->tl_id);
-            throw new TaskListAssignException('UserShiftSchedules not found by EmployeeId (' .
-                $this->lead->employee_id . ') and StartDateTime:' . $dtStart->format('Y-m-d H:i:s') . ' and ShiftDelay:' . $taskList->getDelayShiftParam());
+            if (empty($firstShiftScheduleStartDate)) {
+                $this->canceledUserTask($taskList->tl_id);
+                throw new TaskListAssignException('UserShiftSchedules not found by EmployeeId (' .
+                    $this->lead->employee_id . ') and StartDateTime:' . $dtStart->format('Y-m-d H:i:s') . ' and ShiftDelay:' . $taskListParams->getDelayShiftParam());
+            }
+
+            if (strtotime($firstShiftScheduleStartDate) > time()) {
+                $dtStart = (new \DateTimeImmutable($firstShiftScheduleStartDate, new \DateTimeZone('UTC')));
+            }
         }
-
-        if (strtotime($firstShiftScheduleStartDate) > time()) {
-            $dtStart = (new \DateTimeImmutable($firstShiftScheduleStartDate, new \DateTimeZone('UTC')));
-        }
-
         return $dtStart;
     }
 }
