@@ -10,6 +10,7 @@ use modules\fileStorage\src\services\url\UrlGenerator;
 use src\auth\Auth;
 use yii\base\Widget;
 use modules\fileStorage\src\entity\fileStorage\FileStorageQuery;
+use modules\fileStorage\src\services\access\FileStorageAccessService;
 
 /**
  * Class FileStorageListWidget
@@ -24,6 +25,7 @@ class FileStorageListWidget extends Widget
     public string $uploadWidget;
     public ?UrlGenerator $urlGenerator = null;
     public QueryParams $queryParams;
+    public $canDelete = null;
 
     public function init()
     {
@@ -38,7 +40,8 @@ class FileStorageListWidget extends Widget
             'uploadWidget' => $this->uploadWidget,
             'urlGenerator' => $this->urlGenerator,
             'queryParams' => $this->queryParams,
-            'canView' => FileStorageSettings::canDownload() && Auth::can('file-storage/view')
+            'canView' => FileStorageSettings::canDownload() && Auth::can('file-storage/view'),
+            'canDelete' => $this->canDelete ?? FileStorageAccessService::canDeleteFile(),
         ]);
     }
 
@@ -75,6 +78,7 @@ class FileStorageListWidget extends Widget
             'files' => FileStorageQuery::getListByUids($uids),
             'uploadWidget' => '',
             'queryParams' => QueryParams::byEmpty(),
+            'canDelete' => false,
         ]);
 
     }
