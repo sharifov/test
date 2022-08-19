@@ -158,7 +158,10 @@ class SiteController extends FController
 
         $model = new LoginForm();
 
-        if ($model->load(Yii::$app->request->post()) && $user = $model->checkedUser() && $model->login()) {
+        if ($model->load(Yii::$app->request->post()) && $model->checkedUser() && $model->login()) {
+            /** @var Employee $user */
+            $user = \Yii::$app->user->identity;
+
             if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_TWO_FACTOR_AUTH_MODULE)) {
                 if (SettingHelper::isTwoFactorAuthEnabled() && $this->get2FAAbacAccess($user) && $user->userProfile) {
                     $module = \Yii::$app->getModule('two-factor-auth');
