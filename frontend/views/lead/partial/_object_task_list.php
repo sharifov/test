@@ -10,7 +10,7 @@ use yii\widgets\Pjax;
 /* @var $searchModel modules\objectTask\src\entities\ObjectTaskSearch */
 /* @var $dataProvider yii\data\ActiveDataProvider */
 
-Pjax::begin(['id' => 'pjax-user-task-list', 'timeout' => 5000, 'enablePushState' => false]);
+Pjax::begin(['id' => 'pjax-object-task-list', 'timeout' => 5000, 'enablePushState' => false]);
 ?>
 
 <?= GridView::widget([
