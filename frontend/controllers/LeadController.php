@@ -46,6 +46,8 @@ use modules\lead\src\abac\LeadAbacObject;
 use modules\lead\src\abac\LeadExpertCallObject;
 use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\lead\src\abac\services\AbacLeadExpertCallService;
+use modules\objectTask\src\entities\ObjectTaskSearch;
+use modules\objectTask\src\services\ObjectTaskService;
 use modules\offer\src\entities\offer\search\OfferSearch;
 use modules\offer\src\entities\offerSendLog\CreateDto;
 use modules\offer\src\entities\offerSendLog\OfferSendLogType;
@@ -2865,6 +2867,22 @@ class LeadController extends FController
             'dataProvider' => $dataProvider,
             'leadID' => $leadID,
         ]);
+    }
+
+    public function actionGetObjectTaskList(int $leadId)
+    {
+        if (Yii::$app->request->isAjax) {
+            $searchModel = new ObjectTaskSearch();
+            $params = Yii::$app->request->queryParams;
+            $params['ObjectTaskSearch']['ot_object'] = ObjectTaskService::OBJECT_LEAD;
+            $params['ObjectTaskSearch']['ot_object_id'] = $leadId;
+            $dataProvider = $searchModel->search($params);
+
+            return $this->renderAjax('partial/_object_task_list', [
+                'dataProvider' => $dataProvider,
+                'searchModel' => $searchModel,
+            ]);
+        }
     }
 
     /**
