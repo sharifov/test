@@ -21,4 +21,14 @@ class TaskListParamService
         $excludeProjectsAssigning = $this->paramsJson[TaskListService::PARAM_KEY_SMS_EXCLUDE_PROJECTS] ?? null;
         return $asArray ? explode(',', $excludeProjectsAssigning) : $excludeProjectsAssigning;
     }
+
+    public function getDelayHoursParam(): int
+    {
+        return (int)($this->paramsJson['delayHours'] ?? 0);
+    }
+
+    public function getDelayShiftParam(): int
+    {
+        return (int)($this->paramsJson['delayShift'] ?? 0);
+    }
 }
