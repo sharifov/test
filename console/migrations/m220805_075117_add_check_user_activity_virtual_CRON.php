@@ -22,7 +22,7 @@ class m220805_075117_add_check_user_activity_virtual_CRON extends Migration
                 $cs->cs_cron_command,
                 $cs->cs_cron_params
             );
-            $cs->cs_enabled = true;
+            $cs->cs_enabled = false;
             if ($cs->save()) {
                 echo ' - Hash: ' . $cs->cs_hash;
             } else {

@@ -2,11 +2,9 @@
 
 namespace console\controllers;
 
-use modules\abac\src\services\AbacDocService;
 use modules\user\src\events\UserEvents;
 use modules\user\userActivity\entity\UserActivity;
 use modules\user\userActivity\service\UserActivityService;
-use src\helpers\app\AppHelper;
 use Yii;
 use yii\console\Controller;
 use yii\console\ExitCode;
@@ -22,10 +20,6 @@ class UserActivityController extends Controller
     {
         echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' .
             self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
-
-
-
-        //echo $userId; exit;
 
         $timeStart = microtime(true);
 
@@ -89,40 +83,18 @@ class UserActivityController extends Controller
         $processed = count($data);
         $timeEnd = microtime(true);
         $time = number_format(round($timeEnd - $timeStart, 2), 2);
-        self::outputResult($processed, $time, 'actionGenerateRand:result');
+        self::outputResult($processed, $time);
         return ExitCode::OK;
     }
 
-    /**
-     * @param \Throwable $throwable
-     * @param string $category
-     * @param string $categoryPrefix
-     */
-    private static function throwableHandler(
-        \Throwable $throwable,
-        string $category,
-        string $categoryPrefix = 'UserActivityController:'
-    ): void {
-        Yii::error(
-            AppHelper::throwableLog($throwable),
-            $categoryPrefix . $category
-        );
-        echo Console::renderColoredString(
-            '%r --- %RError: %n%r' . $throwable->getMessage()
-        ), PHP_EOL;
-    }
 
     /**
      * @param $processed
      * @param $time
-     * @param string $category
-     * @param string $categoryPrefix
      */
     private static function outputResult(
         $processed,
-        $time,
-        string $category,
-        string $categoryPrefix = 'UserActivityController:'
+        $time
     ): void {
         echo Console::renderColoredString('%g --- Execute Time: %w[' . $time .
             ' s] %g Processed: %w[' . $processed . '] %g %n'), PHP_EOL;
@@ -132,6 +104,6 @@ class UserActivityController extends Controller
             'Processed' => $processed,
             'Execute Time' => $time . ' sec',
             'End Time' => date('Y-m-d H:i:s'),
-        ]), 'info\\' . $categoryPrefix . $category);
+        ]), 'info\\UserActivityController:actionGenerateRand:result');
     }
 }
