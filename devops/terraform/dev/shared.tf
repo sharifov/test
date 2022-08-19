@@ -48,6 +48,22 @@ resource "aws_security_group" "shared" {
   }
 
   ingress {
+    description = "Clickhouse http"
+    from_port   = 8123
+    to_port     = 8123
+    protocol    = "tcp"
+    cidr_blocks = [var.VPC_CIDR, var.INFRA_CIDR]
+  }
+
+  ingress {
+    description = "Clickhouse binary"
+    from_port   = 9000
+    to_port     = 9009
+    protocol    = "tcp"
+    cidr_blocks = [var.VPC_CIDR, var.INFRA_CIDR]
+  }
+
+  ingress {
     description = "Beanstalkd"
     from_port   = 11300
     to_port     = 11300
@@ -115,6 +131,14 @@ resource "aws_security_group" "shared" {
     description = "Redis Exporter"
     from_port   = 9121
     to_port     = 9121
+    protocol    = "tcp"
+    cidr_blocks = [var.VPC_CIDR, var.INFRA_CIDR]
+  }
+
+  ingress {
+    description = "Clickhouse Exporter"
+    from_port   = 9363
+    to_port     = 9363
     protocol    = "tcp"
     cidr_blocks = [var.VPC_CIDR, var.INFRA_CIDR]
   }

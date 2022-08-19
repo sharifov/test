@@ -156,7 +156,41 @@ class VoluntaryExchangeCreateHandler
                 \Yii::warning(AppHelper::throwableLog($throwable), 'VoluntaryExchangeCreateJob:setCaseDeadline');
             }
         } else {
+            try {
+                $saleData = $this->objectCollection
+                    ->getBoRequestVoluntaryExchangeService()
+                    ->getSaleData($this->flightRequest->fr_booking_id, $this->case, CaseEventLog::VOLUNTARY_EXCHANGE_CREATE);
+                $this->voluntaryExchangeService->createCaseSale($saleData, $this->case);
+            } catch (\Throwable $throwable) {
+                $this->caseHandler->caseToPendingManual('Case sale not created');
+                \Yii::warning(AppHelper::throwableLog($throwable), 'VoluntaryExchangeCreateHandler:processing:case');
+                throw new \RuntimeException('Case Sale creation failed', VoluntaryExchangeCodeException::CASE_SALE_CREATION_FAILED);
+            }
+
+            $this->addCaseEventLog(
+                'Api Create. CaseSale created.'
+            );
+
+            try {
+                $client = $this->voluntaryExchangeService->getOrCreateClient(
+                    $this->flightRequest->fr_project_id,
+                    $this->objectCollection->getBoRequestVoluntaryExchangeService()->getOrderContactForm()
+                );
+                $this->caseHandler->addClient($client->id);
+            } catch (\Throwable $throwable) {
+                $this->caseHandler->caseToPendingManual('Client not created');
+                \Yii::warning(AppHelper::throwableLog($throwable), 'VoluntaryExchangeCreateHandler:processing:client');
+                throw new \RuntimeException('Client creation failed', VoluntaryExchangeCodeException::CLIENT_CREATION_FAILED);
+            }
+
             $this->order = $this->originProductQuote->pqOrder;
+
+            $this->objectCollection->getOrderCreateFromSaleService()->caseOrderRelation($this->order->or_id, $this->case->cs_id);
+
+            $this->addCaseEventLog(
+                'Api Create. Order assigned successfully',
+                ['order_gid' => $this->order->or_gid]
+            );
         }
     }
 

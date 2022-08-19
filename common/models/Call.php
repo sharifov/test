@@ -1521,7 +1521,9 @@ class Call extends \yii\db\ActiveRecord
                 if ($this->c_client_id && $this->isOut() && $this->getDataCreatorType()->isClient()) {
                     $callOutEndedJob = new CallOutEndedJob($this->c_client_id, $this->c_id);
                     Yii::$app->queue_job->priority(10)->push($callOutEndedJob);
+                }
 
+                if ($this->c_client_id && ($this->isOut() || $this->isIn()) && ($this->getDataCreatorType()->isClient() || $this->getDataCreatorType()->isAgent())) {
                     if (($lead = $this->cLead) && (new LeadTaskListService($lead))->isProcessAllowed()) {
                         $job = new UserTaskCompletionJob(
                             TargetObject::TARGET_OBJ_LEAD,

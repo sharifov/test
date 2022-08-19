@@ -2,6 +2,7 @@
 
 namespace src\services\email;
 
+use src\helpers\app\AppHelper;
 use Yii;
 use modules\fileStorage\src\entity\fileStorage\FileStorageRepository;
 use modules\fileStorage\src\entity\fileClient\FileClientRepository;
@@ -16,6 +17,7 @@ use modules\fileStorage\src\entity\fileCase\FileCaseRepository;
 use modules\fileStorage\src\services\url\UrlGenerator;
 use modules\fileStorage\src\entity\fileStorage\FileStorage;
 use modules\fileStorage\src\services\CreateByApiDto;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class AttachmentsService
@@ -33,6 +35,7 @@ class AttachmentsService
     public $clientId;
     public $attachments = [];
 
+    private $email;
     private FileSystem $fileSystem;
     private FileStorageRepository $fileStorageRepository;
     private FileClientRepository $fileClientRepository;
@@ -46,6 +49,7 @@ class AttachmentsService
      */
     public function __construct($email)
     {
+        $this->email = $email;
         $lead = $email->lead;
         $this->leadId = $lead->id ?? null;
         $case = $email->case;
@@ -67,16 +71,23 @@ class AttachmentsService
             return null;
         }
 
-        $fileStorageId = $this->fileStorage($path);
+        try {
+            $fileStorage = $this->fileStorage($path);
+        } catch (\Throwable $throwable) {
+            $message = AppHelper::throwableLog($throwable);
+            $message['email'] = ArrayHelper::toArray($this->email);
+            \Yii::error($message, 'AttachmentsService:processingFile:fileStorage');
+            return null;
+        }
 
         if ($this->clientId) {
-            $this->fileToClient($fileStorageId);
+            $this->fileToClient($fileStorage->fs_id);
         }
         if ($this->caseId) {
-            $this->fileToCase($fileStorageId);
+            $this->fileToCase($fileStorage->fs_id);
         }
         if ($this->leadId) {
-            $this->fileToLead($fileStorageId);
+            $this->fileToLead($fileStorage->fs_id);
         }
 
         return [
@@ -86,13 +97,13 @@ class AttachmentsService
         ];
     }
 
-    public function fileStorage($path)
+    public function fileStorage(string $path): FileStorage
     {
-        $createByApiDto = new CreateByApiDto($path, $this->fileSystem);
+        $createByApiDto = CreateByApiDto::createWithFile($path, $this->fileSystem);
         $fileStorage = FileStorage::createByEmail($createByApiDto);
         $this->fileStorageRepository->save($fileStorage);
 
-        return $fileStorage->fs_id;
+        return $fileStorage;
     }
 
     public function fileToClient(int $fileStorageId): void

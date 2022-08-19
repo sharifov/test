@@ -112,9 +112,12 @@ class ProductPreviewEmailForm extends \yii\base\Model implements EmailPreviewFro
         return $this->email_message;
     }
 
-    public function getEmailTemplateId(): int
+    /**
+     * @return int|null
+     */
+    public function getEmailTemplateId(): ?int
     {
-        return $this->email_tpl_id ?: 0;
+        return $this->email_tpl_id ?: null;
     }
 
     public function getLanguageId(): ?string

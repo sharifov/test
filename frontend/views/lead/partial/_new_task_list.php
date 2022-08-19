@@ -19,7 +19,7 @@ $userShiftSchedules = [];
 foreach ($shiftScheduleEventTasks as $shiftScheduleEvent) {
     $userShiftSchedules[$shiftScheduleEvent['sset_event_id']] = UserShiftScheduleHelper::getDataForTaskList($shiftScheduleEvent['userShiftSchedule'], Auth::user()->timezone);
 }
-
+$userTimeZone = Auth::user()->timezone ?: 'UTC';
 
 $shiftScheduleEventTasks = \yii\helpers\ArrayHelper::map($shiftScheduleEventTasks, 'sset_user_task_id', function ($item) {
     return $item;
@@ -94,12 +94,27 @@ $shiftScheduleEventTasks = \yii\helpers\ArrayHelper::map($shiftScheduleEventTask
                                             <?= UserTaskHelper::renderStatus((int)$userTask['ut_status_id']) ?>
                                         </td>
                                         <td><?= $userTask['tl_title'] ?? '' ?></td>
-                                        <td><?= \src\helpers\DateHelper::getDateTimeImmutableUTC($userTask['ut_start_dt'])->format('d.m.y [H:i]') ?></td>
+                                        <td><?=
+                                            Yii::$app->formatter->asDateTimeByUserTimezone(
+                                                strtotime($userTask['ut_start_dt']),
+                                                $userTimeZone,
+                                                'd.m.y [H:i]'
+                                            ); ?>
+                                        </td>
                                         <td>
-                                            <?= !empty($userTask['ut_end_dt']) ? \src\helpers\DateHelper::getDateTimeImmutableUTC($userTask['ut_end_dt'])->format('d.m.y [H:i]') : '' ?>
+                                            <?= !empty($userTask['ut_end_dt']) ?
+                                                (Yii::$app->formatter->asDateTimeByUserTimezone(
+                                                    strtotime($userTask['ut_end_dt']),
+                                                    $userTimeZone,
+                                                    'd.m.y [H:i]'
+                                                )) : '' ?>
                                         </td>
                                         <td><?php if (!empty($userTask['complete_time']) && (int)$userTask['ut_status_id'] === UserTask::STATUS_COMPLETE) {
-                                                echo \src\helpers\DateHelper::getDateTimeImmutableUTC($userTask['complete_time'])->format('d.m.y [H:i]');
+                                                echo Yii::$app->formatter->asDateTimeByUserTimezone(
+                                                    strtotime($userTask['complete_time']),
+                                                    $userTimeZone,
+                                                    'd.m.y [H:i]'
+                                                );
                                             }
                                             ?>
                                         </td>

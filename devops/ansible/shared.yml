@@ -32,6 +32,10 @@
         antispam_ver: latest
       become: true
 
+    - role: clickhouse
+      tags: clickhouse
+      become: true
+
     - role: filebeat
       tags: filebeat
       become: true

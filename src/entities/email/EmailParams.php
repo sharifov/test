@@ -34,7 +34,7 @@ class EmailParams extends BaseActiveRecord
             ['ep_priority', 'integer'],
 
             ['ep_template_type_id', 'integer'],
-            //['ep_template_type_id', 'exist', 'skipOnError' => true, 'targetClass' => EmailTemplateType::class, 'targetAttribute' => ['ep_template_type_id' => 'etp_id']],
+            ['ep_template_type_id', 'exist', 'skipOnError' => true, 'targetClass' => EmailTemplateType::class, 'targetAttribute' => ['ep_template_type_id' => 'etp_id']],
         ];
     }
 

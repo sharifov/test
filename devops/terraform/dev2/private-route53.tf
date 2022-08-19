@@ -120,3 +120,12 @@ resource "aws_route53_record" "private_antispam" {
   ttl     = "300"
   records = [aws_instance.shared.private_ip]
 }
+
+# ClickHouse
+resource "aws_route53_record" "private_clickhouse" {
+  zone_id = aws_route53_zone.private.zone_id
+  name    = "clickhouse"
+  type    = "A"
+  ttl     = "300"
+  records = [aws_instance.shared.private_ip]
+}

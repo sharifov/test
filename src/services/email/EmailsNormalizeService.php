@@ -173,6 +173,9 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
                 'e_departament_id' => $form->depId,
                 'e_created_user_id' => $form->getUserId() ?? $this->userId,
                 'e_id' => $form->emailId ?? null,
+                'e_created_dt' => $form->createdDt ?? date('Y-m-d H:i:s'),
+                'e_updated_dt' => $form->updatedDt ?? date('Y-m-d H:i:s'),
+                'e_is_deleted' => $form->isDeleted ?? 0,
             ];
             $email = Email::create($emailData);
             //=!Email
@@ -409,7 +412,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             'status'        =>  EmailStatus::PENDING,
             'createdDt'     =>  date('Y-m-d H:i:s'),
             'params'        => [
-                'templateType'  =>  $previewEmailForm->getEmailTemplateId() ?: null,
+                'templateType'  =>  $previewEmailForm->getEmailTemplateId(),
                 'language'      =>  $previewEmailForm->getLanguageId() ?? null,
             ],
             'body'          =>  [
@@ -489,6 +492,12 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
 
     public function createFromDTO(EmailDTO $emailDTO, $autoDetectEmpty = true): Email
     {
+        $clientId = $emailDTO->clientId ?? null;
+        $leadId = $emailDTO->leadId ?? null;
+        $caseId = $emailDTO->caseId ?? null;
+        if ($emailDTO->createdUserId) {
+            $this->userId = $emailDTO->createdUserId;
+        }
         if ($autoDetectEmpty) {
             $clientId = $emailDTO->clientId ?? $this->helper->detectClientId($emailDTO->emailFrom);
             $leadId =  $emailDTO->leadId ?? $this->helper->detectLeadId($emailDTO->emailSubject, $emailDTO->refMessageId);
@@ -540,5 +549,14 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
         $data['casesIds'] = $caseId ? [$caseId] : null;
 
         return $this->create(EmailForm::fromArray($data));
+    }
+
+    public function changeStatus(Email $email, int $statusId): void
+    {
+        if (EmailStatus::isDone($statusId)) {
+            $email->saveEmailLog(['el_status_done_dt' => date('Y-m-d H:i:s')]);
+        }
+        $email->e_status_id = $statusId;
+        $email->save(false);
     }
 }

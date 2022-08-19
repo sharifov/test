@@ -4085,18 +4085,22 @@ Reason: {reason}',
         return $result;
     }
 
+
     /**
      * @param array $quoteIds
      * @param $projectContactInfo
      * @param string|null $lang
+     * @param array $agent
+     * @param Employee|null $employee
      * @return array
      * @throws \Exception
      */
-    public function getEmailData2(array $quoteIds, $projectContactInfo, ?string $lang = null, array $agent = []): array
+    public function getEmailData2(array $quoteIds, $projectContactInfo, ?string $lang = null, array $agent = [], ?Employee $employee = null): array
     {
+        $employee = $employee ?? Yii::$app->user->identity;
         $project = $this->project;
 
-        $uppQuery = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->withPhoneList();
+        $uppQuery = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => $employee->id])->withEmailList()->withPhoneList();
         $upp = $this->project ? $uppQuery->one() : null;
 
         if ($quoteIds && is_array($quoteIds)) {
@@ -4148,9 +4152,9 @@ Reason: {reason}',
         ];
 
         $content_data['agent'] = [
-            'name'  => array_key_exists('full_name', $agent) ? $agent['full_name'] : Yii::$app->user->identity->full_name,
-            'username'  => array_key_exists('username', $agent) ? $agent['username'] : Yii::$app->user->identity->username,
-            'nickname' => array_key_exists('nickname', $agent) ? $agent['nickname'] : Yii::$app->user->identity->nickname,
+            'name'  => array_key_exists('full_name', $agent) ? $agent['full_name'] : $employee->full_name,
+            'username'  => array_key_exists('username', $agent) ? $agent['username'] : $employee->username,
+            'nickname' => array_key_exists('nickname', $agent) ? $agent['nickname'] : $employee->nickname,
             'phone' => $upp && $upp->getPhone() ? $upp->getPhone() : '',
             'email' => $upp && $upp->getEmail() ? $upp->getEmail() : '',
         ];
@@ -4642,13 +4646,32 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
     public function getQuoteSendInfo()
     {
         $query = new Query();
-        $query->select(['SUM(CASE WHEN status IN (2, 4, 5) THEN 1 ELSE 0 END) AS send_q',
-            'SUM(CASE WHEN status NOT IN (2, 4, 5) THEN 1 ELSE 0 END) AS not_send_q'])
-            ->from(Quote::tableName() . ' q')
-            ->where(['lead_id' => $this->id]);
-        //->groupBy('lead_id');
+        /** @fflag FFlag::FF_KEY_CHANGE_QUERY_GET_SEND_QUOTE, Change query get send Quote in PQ, FollowUpQ */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CHANGE_QUERY_GET_SEND_QUOTE)) {
+            $query
+                ->select(
+                    [
+                        'total' => 'COUNT(*)',
+                        'send_q' => "SUM((SELECT SUM(CASE WHEN (status = :status) THEN 1 ELSE 0 END)
+                         FROM `quote_status_log` WHERE `q`.id = `quote_status_log`.quote_id))"
+                    ]
+                )
+                ->addParams([':status' => Quote::STATUS_SENT])
+                ->from(Quote::tableName() . ' q')
+                ->where(['lead_id' => $this->id]);
 
-        return $query->createCommand()->queryOne();
+            $result = $query->createCommand()->queryOne();
+            $result['not_send_q'] = ((int)$result['total'] - (int)$result['send_q']);
+
+            return $result;
+        } else {
+            $query->select(['SUM(CASE WHEN status IN (2, 4, 5) THEN 1 ELSE 0 END) AS send_q',
+                'SUM(CASE WHEN status NOT IN (2, 4, 5) THEN 1 ELSE 0 END) AS not_send_q'])
+                ->from(Quote::tableName() . ' q')
+                ->where(['lead_id' => $this->id]);
+
+            return $query->createCommand()->queryOne();
+        }
     }
 
     public function getLastActivityByNote()

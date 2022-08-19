@@ -12,6 +12,7 @@ use frontend\helpers\JsonHelper;
 use kartik\form\ActiveForm;
 use modules\flight\src\useCases\voluntaryRefund\manualCreate\AuxiliaryOptionForm;
 use modules\flight\src\useCases\voluntaryRefund\manualCreate\TicketForm;
+use modules\product\src\abac\ProductQuoteAbacObject;
 use yii\bootstrap4\Alert;
 use yii\grid\SerialColumn;
 use yii\helpers\Html;
@@ -33,6 +34,16 @@ use dosamigos\datepicker\DatePicker;
       pjaxOffFormSubmit('#voluntary_refund_create_pjax');
   </script>
     <?php $currency = (CurrencyQuery::getCurrencySymbolByCode($refundForm->getRefundForm()->currency) ?: $refundForm->getRefundForm()->currency); ?>
+    <?php
+      $infoText = 'Refundable amount: ';
+      $infoText .= $refundForm->originData['allow'] ?
+        '<span style="color: green">Successfully identified</span>' :
+        '<span style="color:blue;">Check manually</span>';
+    ?>
+    <?php
+    /** @abac null, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_VIEW_VOL_REFUND_ORIGIN_DATA_FROM_BO, View Origin Data From BO (Voluntary Refund) */
+    $viewOriginDataFromBO = \Yii::$app->abac->can(null, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_VIEW_VOL_REFUND_ORIGIN_DATA_FROM_BO);
+    ?>
     <?php Pjax::begin([
     'id' => 'voluntary_refund_create_pjax',
         'timeout' => 5000,
@@ -79,16 +90,21 @@ use dosamigos\datepicker\DatePicker;
     <div class="col-md-12">
         <div class="d-flex justify-content-between align-items-center">
           <h6><b>Tickets</b></h6>
-          <span data-toggle="collapse" href="#collapseResponseBO" role="button" aria-expanded="false" aria-controls="collapseExample">
-            <i class="fas fa-info-circle"></i> Origin Data From BO
-          </span>
+          <h6><b><?= $infoText ?></b></h6>
+          <?php if ($viewOriginDataFromBO) : ?>
+            <span data-toggle="collapse" href="#collapseResponseBO" role="button" aria-expanded="false" aria-controls="collapseExample">
+              <i class="fas fa-info-circle"></i> Origin Data From BO
+            </span>
+          <?php endif; ?>
         </div>
-        <div id="collapseResponseBO" class="collapse">
-          <div class="card-body card">
-            <h4>Search Query Params</h4>
-            <pre><?= Html::encode(VarDumper::dumpAsString($refundForm->originData)) ?></pre>
+        <?php if ($viewOriginDataFromBO) : ?>
+          <div id="collapseResponseBO" class="collapse">
+            <div class="card-body card">
+              <h4>Search Query Params</h4>
+              <pre><?= Html::encode(VarDumper::dumpAsString($refundForm->originData)) ?></pre>
+            </div>
           </div>
-        </div>
+        <?php endif; ?>
         <?php $dataProvider = new \yii\data\ArrayDataProvider([
             'allModels' => $refundForm->getRefundForm()->getTicketForms(),
             'totalCount' => 0,

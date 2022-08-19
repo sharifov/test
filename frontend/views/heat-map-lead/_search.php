@@ -92,6 +92,30 @@ use kartik\select2\Select2;
                 'pluginOptions' => ['allowClear' => true],
             ])->label('User Group') ?>
         </div>
+
+        <div class="col-md-2">
+            <?php echo $form->field($model, 'employee')->widget(Select2::class, [
+                'data' => Employee::getActiveUsersList(),
+                'size' => Select2::SMALL,
+                'options' => ['placeholder' => 'Select user', 'multiple' => true],
+                'pluginOptions' => ['allowClear' => true],
+            ])->label('Owner'); ?>
+        </div>
+
+        <div class="col-md-2">
+            <?php echo $form->field($model, 'typeCreate')->widget(Select2::class, [
+                'data' => \common\models\Lead::TYPE_CREATE_LIST,
+                'size' => Select2::SMALL,
+                'options' => ['placeholder' => 'Select type', 'multiple' => true],
+                'pluginOptions' => ['allowClear' => true],
+            ])->label('Type Create'); ?>
+        </div>
+
+        <div class="col-md-2">
+            <?= $form->field($model, 'isAnswered')->dropDownList([1 => 'Yes', 0 => 'No'], ['prompt' => '-'])->label() ?>
+        </div>
+
+
         <div class="col-md-2">
             <?= $form->field($model, 'timeZone')->widget(\kartik\select2\Select2::class, [
                 'data' => Employee::timezoneList(true),

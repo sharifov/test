@@ -1,5 +1,6 @@
 <?php
 
+use common\models\Employee;
 use src\model\user\entity\sales\SalesSearch;
 use yii\helpers\Html;
 use yii\web\View;
@@ -53,6 +54,22 @@ use yii\widgets\ActiveForm;
                 ])->label('Sold Date');
                 ?>
         </div>
+        <?php
+        /** @fflag FFlag::FF_KEY_CONVERSION_BY_TIMEZONE, Conversion Filter by Timezone */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CONVERSION_BY_TIMEZONE)) :?>
+            <div class="col-md-3">
+                <?= $form->field($model, 'timeZone')->widget(\kartik\select2\Select2::class, [
+                    'data' => Employee::timezoneList(true),
+                    'size' => \kartik\select2\Select2::SMALL,
+                    'options' => [
+                        'placeholder' => 'Select TimeZone',
+                        'multiple' => false,
+                        'value' => $model->timeZone,
+                    ],
+                    'pluginOptions' => ['allowClear' => true],
+                ]) ?>
+            </div>
+        <?php endif; ?>
     </div>
 
     <div class="row">

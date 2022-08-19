@@ -91,6 +91,11 @@ class LeadFlowQuery extends ActiveQuery
         return LeadFlow::find()->byLeadId($leadId)->notEmptyOwner()->orderBy(['id' => SORT_ASC])->one();
     }
 
+    public static function getLastOwnerOfLead(int $leadId): ?LeadFlow
+    {
+        return LeadFlow::find()->byLeadId($leadId)->notEmptyOwner()->orderBy(['id' => SORT_DESC])->one();
+    }
+
     /**
      * @param int $clientId
      * @return LeadFlow[]

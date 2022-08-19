@@ -40,6 +40,7 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_CREATE_CHANGE = 'createChange';
     public const ACTION_CREATE_VOL_REFUND = 'createVoluntaryRefundQuote';
     public const ACTION_SHOW_STATUS_LOG = 'showStatusLog';
+    public const ACTION_VIEW_VOL_REFUND_ORIGIN_DATA_FROM_BO = 'viewVoluntaryRefundOriginDataFromBo';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
@@ -48,7 +49,8 @@ class ProductQuoteAbacObject extends AbacBaseModel implements AbacInterface
             self::ACTION_CREATE_CHANGE,
             self::ACTION_CREATE_VOL_REFUND,
             self::ACTION_DELETE,
-            self::ACTION_SHOW_STATUS_LOG
+            self::ACTION_SHOW_STATUS_LOG,
+            self::ACTION_VIEW_VOL_REFUND_ORIGIN_DATA_FROM_BO,
         ]
     ];
 
