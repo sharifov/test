@@ -83,7 +83,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             'subject'   =>  $emailOld->e_email_subject,
             'text'      =>  $emailOld->e_email_body_text,
             'bodyHtml'  =>  $emailOld->e_email_body_blob ? TextConvertingHelper::unCompress($emailOld->e_email_body_blob) : $emailOld->body_html,
-            'data'      =>  !empty($emailOld->e_email_data) ? $emailOld->e_email_data : null,
+            'data'      =>  !empty($emailOld->e_email_data) ? json_decode($emailOld->e_email_data, true) : null,
         ];
 
         $data['log'] = [
