@@ -34,7 +34,17 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             'cel_id',
-            'cel_case_id',
+            [
+                'attribute' => 'cel_case_id',
+                'value' => static function (CaseEventLog $model) {
+                    return $model->cel_case_id ? Html::a(
+                        $model->cel_case_id  . ' <span class="glyphicon glyphicon-eye-open"></span>',
+                        ['/cases/view', 'gid' => $model->celCase->cs_gid],
+                        ['target' => '_blank', 'data-pjax' => 0, 'title' => 'View']
+                    ) : '-';
+                },
+                'format' => 'raw',
+            ],
             'cel_description',
             [
                 'attribute' => 'cel_type_id',
