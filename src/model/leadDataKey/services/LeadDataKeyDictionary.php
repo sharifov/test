@@ -17,6 +17,7 @@ class LeadDataKeyDictionary
     public const KEY_LEAD_RATING_POINTS_DYNAMIC = 'lead_rating_points_dynamic';
     public const KEY_LEAD_RATING_CATEGORY = 'lead_rating_category';
     public const KEY_LEAD_RATING_CATEGORY_DYNAMIC = 'lead_rating_category_dynamic';
+    public const KEY_AUTO_FOLLOW_UP = 'auto_follow_up';
 
     public const KEY_LIST = [
         self::KEY_CROSS_SYSTEM_XP => self::KEY_CROSS_SYSTEM_XP,
@@ -29,5 +30,6 @@ class LeadDataKeyDictionary
         self::KEY_LEAD_RATING_POINTS_DYNAMIC => self::KEY_LEAD_RATING_POINTS_DYNAMIC,
         self::KEY_LEAD_RATING_CATEGORY => self::KEY_LEAD_RATING_CATEGORY,
         self::KEY_LEAD_RATING_CATEGORY_DYNAMIC => self::KEY_LEAD_RATING_CATEGORY_DYNAMIC,
+        self::KEY_AUTO_FOLLOW_UP => self::KEY_AUTO_FOLLOW_UP,
     ];
 }
