@@ -257,6 +257,17 @@ class SideBarMenu extends \yii\bootstrap\Widget
         }
 
 
+        $menuItems[] = [
+            'label' => 'My Activity <sup style="color: red">NEW</sup>',
+            'url' => ['/user-activity/dashboard'],
+            'icon' => 'clock-o',
+//            'abac'  => [
+//                'dto'    => null,
+//                'object' => TaskListAbacObject::ACT_MY_TASK_LIST,
+//                'action' => TaskListAbacObject::ACTION_ACCESS,
+//            ],
+        ];
+
         /** @abac TaskListAbacObject::ACT_MY_TASK_LIST, TaskListAbacObject::ACTION_ACCESS, Access menu My Task List */
         $menuItems[] = [
             'label' => 'My Task List <sup style="color: red">NEW</sup>',
@@ -946,21 +957,23 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'url' => 'javascript:',
             'icon' => 'folder',
             'items' => [
-                ['label' => 'User Monitor', 'url' => ['/user-monitor/index'], 'icon' => 'list'],
-                ['label' => 'User Monitor Stats', 'url' => ['/user-monitor/stats'], 'icon' => 'list'],
+                ['label' => 'User Activity', 'url' => ['/user-activity/index'],
+                    'label' => 'User Activity Events'],
+                ['label' => 'User Monitor', 'url' => ['/user-monitor/index']],
+                ['label' => 'User Monitor Stats', 'url' => ['/user-monitor/stats']],
                 [
                     'label' => 'User model setting crud',
                     'url' => ['/user-model-setting-crud/index'],
                     'icon' => 'list',
                 ],
-                ['label' => 'User Groups Assignments', 'url' => ['/user-group-assign/index'], 'icon' => 'list'],
-                ['label' => 'User Commission Rules', 'url' => ['/user-commission-rules-crud/index'], 'icon' => 'list'],
-                ['label' => 'User Bonus Rules', 'url' => ['/user-bonus-rules-crud/index'], 'icon' => 'list'],
-                ['label' => 'User Failed Login', 'url' => ['/user-failed-login/index'], 'icon' => 'list'],
+                ['label' => 'User Groups Assignments', 'url' => ['/user-group-assign/index']],
+                ['label' => 'User Commission Rules', 'url' => ['/user-commission-rules-crud/index']],
+                ['label' => 'User Bonus Rules', 'url' => ['/user-bonus-rules-crud/index']],
+                ['label' => 'User Failed Login', 'url' => ['/user-failed-login/index']],
 
-                ['label' => 'User Stat Day', 'url' => ['/user-stat-day-crud/index'], 'icon' => 'list'],
-                ['label' => 'User Data', 'url' => ['/user-data-crud/index'], 'icon' => 'list'],
-                ['label' => 'User Auth Client', 'url' => ['/auth-client-crud/index'], 'icon' => 'list'],
+                ['label' => 'User Stat Day', 'url' => ['/user-stat-day-crud/index']],
+                ['label' => 'User Data', 'url' => ['/user-data-crud/index']],
+                ['label' => 'User Auth Client', 'url' => ['/auth-client-crud/index']],
                 ['label' => 'User Feedback', 'url' => ['/user-feedback-crud/index'], 'icon' => 'comments',
                     'title' => 'User Feedback CRUD'],
                 ['label' => 'User Feedback Files', 'url' => ['/user-feedback-file-crud/index'], 'icon' => 'list',
