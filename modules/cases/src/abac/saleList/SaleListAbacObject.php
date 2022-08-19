@@ -31,12 +31,14 @@ class SaleListAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_ADD_CREDIT_CARD = 'Add Credit Card';
     public const ACTION_SEND_CC_INFO = 'Send CC Info';
     public const ACTION_READ = 'read';
+    public const ACTION_VIEW_FARE_RULES = 'viewFareRules';
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
         self::UI_BLOCK_SALE_LIST => [
             self::ACTION_ADD_CREDIT_CARD,
             self::ACTION_SEND_CC_INFO,
+            self::ACTION_VIEW_FARE_RULES,
         ],
         self::UI_SALE_ID => [self::ACTION_READ],
     ];
