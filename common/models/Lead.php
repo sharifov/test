@@ -19,6 +19,8 @@ use modules\lead\src\abac\LeadAbacObject;
 use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacDto;
 use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\objectSegment\src\contracts\ObjectSegmentListContract;
+use modules\objectTask\src\entities\ObjectTask;
+use modules\objectTask\src\services\ObjectTaskService;
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\product\Product;
@@ -5390,6 +5392,26 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             ->getLeadData()
             ->where(['ld_field_key' => LeadDataKeyDictionary::KEY_LEAD_OBJECT_SEGMENT])
             ->andWhere(['ld_field_value' => ObjectSegmentListContract::OBJECT_SEGMENT_LIST_KEY_LEAD_TYPE_BUSINESS])
+            ->count();
+    }
+
+    public function hasObjectTasks(): bool
+    {
+        return ObjectTask::find()
+            ->where([
+                'ot_object' => ObjectTaskService::OBJECT_LEAD,
+                'ot_object_id' => $this->id,
+            ])
+            ->exists();
+    }
+
+    public function countObjectTask(): int
+    {
+        return (int) ObjectTask::find()
+            ->where([
+                'ot_object' => ObjectTaskService::OBJECT_LEAD,
+                'ot_object_id' => $this->id,
+            ])
             ->count();
     }
 }
