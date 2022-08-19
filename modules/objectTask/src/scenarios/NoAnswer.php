@@ -22,6 +22,18 @@ class NoAnswer extends BaseScenario
     public const KEY = 'noAnswer';
     public const OBJECT = ObjectTaskService::OBJECT_LEAD;
 
+    public const INTERVAL_TYPE_DAYS = 'days';
+    public const INTERVAL_TYPE_HOURS = 'hours';
+    public const INTERVAL_TYPE_MINUTES = 'minutes';
+    public const INTERVAL_TYPE_SECONDS = 'seconds';
+
+    public const INTERVAL_TYPE_LIST = [
+        self::INTERVAL_TYPE_DAYS,
+        self::INTERVAL_TYPE_HOURS,
+        self::INTERVAL_TYPE_MINUTES,
+        self::INTERVAL_TYPE_SECONDS,
+    ];
+
     public function process(): void
     {
         $lead = $this->getObject();
@@ -30,26 +42,43 @@ class NoAnswer extends BaseScenario
             return;
         }
 
-        $daysList = $this->getConfigParameter('days');
-        $firstDay = array_key_first(
-            $daysList
-        );
-        $daysLeft = $this->getDaysIntervalForDistribution();
+        $groupHash = md5(time() . $lead->id);
 
-        if ($daysLeft > $firstDay) {
+        foreach (self::INTERVAL_TYPE_LIST as $intervalType) {
+            $intervalData = $this->getConfigParameter($intervalType, []);
+
+            if (empty($intervalData)) {
+                continue;
+            }
+
             $leadCurrentDt = $lead->clientTime2;
 
-            foreach ($daysList as $day => $objects) {
-                if ($day >= $daysLeft) {
-                    break;
-                }
+            if ($intervalType === self::INTERVAL_TYPE_DAYS) {
+                $firstDay = array_key_first(
+                    $intervalData
+                );
+                $daysLeft = $this->getDaysIntervalForDistribution();
 
+                if ($daysLeft <= $firstDay) {
+                    continue;
+                }
+            }
+
+            foreach ($intervalData as $interval => $objects) {
                 $leadDt = clone $leadCurrentDt;
-                $nextEmailDateByLeadTime = $leadDt->modify("+{$day} days")
-                    ->setTime(
+                $nextEmailDateByLeadTime = $leadDt->modify("+{$interval} {$intervalType}");
+
+                if ($intervalType === self::INTERVAL_TYPE_DAYS) {
+                    if ($interval >= $daysLeft) {
+                        break;
+                    }
+
+                    $nextEmailDateByLeadTime->setTime(
                         $this->getConfigParameter('allowedTime.hour', 10),
                         $this->getConfigParameter('allowedTime.minute', 0)
                     );
+                }
+
                 $utcDatetime = $nextEmailDateByLeadTime->setTimezone(new \DateTimeZone('UTC'))
                     ->format('Y-m-d H:i:s');
                 $delaySeconds = DateHelper::getDifferentInSecondsByDatesUTC(
@@ -58,8 +87,6 @@ class NoAnswer extends BaseScenario
                 );
 
                 if (!empty($objects)) {
-                    $groupHash = md5(time() . $lead->id);
-
                     foreach ($objects as $object) {
                         $uuid = UuidHelper::uuid();
                         $job = new CommandExecutorJob(
@@ -111,12 +138,15 @@ class NoAnswer extends BaseScenario
 
     public static function getTemplate(): array
     {
-        return [
+        $template = [
             'allowedTime' => [
                 'hour' => 12,
                 'minute' => 0,
             ],
-            'days' => [
+        ];
+
+        foreach (self::INTERVAL_TYPE_LIST as $interval) {
+            $template[$interval] = [
                 3 => [
                     [
                         'command' => 'name',
@@ -131,8 +161,10 @@ class NoAnswer extends BaseScenario
                         ],
                     ],
                 ]
-            ],
-        ];
+            ];
+        }
+
+        return $template;
     }
 
     private function getDaysIntervalForDistribution(): int
