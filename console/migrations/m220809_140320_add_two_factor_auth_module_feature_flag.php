@@ -8,7 +8,7 @@ use kivork\FeatureFlag\Services\FeatureFlagService;
  */
 class m220809_140320_add_two_factor_auth_module_feature_flag extends Migration
 {
-    const TWO_FACTOR_AUTH_MODULE = 'two-factor-auth-module';
+    const TWO_FACTOR_AUTH_MODULE = 'twoFactorAuthModule';
 
     /**
      * @return bool
