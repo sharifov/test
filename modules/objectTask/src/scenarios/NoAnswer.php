@@ -38,10 +38,6 @@ class NoAnswer extends BaseScenario
     {
         $lead = $this->getObject();
 
-        if ($this->isEnable() === false || NoAnswer::leadIsAvailableForProcess($lead) === false) {
-            return;
-        }
-
         $groupHash = md5(time() . $lead->id);
 
         foreach (self::INTERVAL_TYPE_LIST as $intervalType) {
@@ -189,12 +185,21 @@ class NoAnswer extends BaseScenario
         $virtualAgentList = \Yii::$app->params['settings']['virtual_agent_list'] ?? [];
         $project = $lead->project;
 
-        return ($project !== null && isset($virtualAgentList[$project->project_key]));
+        return ($project !== null && isset($virtualAgentList[$project->project_key]) && !empty($virtualAgentList[$project->project_key]));
+    }
+
+    public function canProcess(): bool
+    {
+        if (parent::canProcess() === true) {
+            return NoAnswer::leadIsAvailableForProcess($this->getObject());
+        }
+
+        return false;
     }
 
     public static function clientResponseLogicInit(Lead $lead): void
     {
-        if (NoAnswer::leadIsAvailableForProcess($lead) === false || $lead->status !== Lead::STATUS_FOLLOW_UP) {
+        if ($lead->status !== Lead::STATUS_FOLLOW_UP) {
             return;
         }
 
