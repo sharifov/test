@@ -312,7 +312,7 @@ class ClientChatClientActionsController extends FController
 
         $clientChatForm = $this->getClientChatForm();
 
-        $form = new BookingIdCreateForm($chat, $clientChatForm);
+        $form = new BookingIdCreateForm($chat->cch_id, $clientChatForm->ccf_id);
 
         return $this->renderAjax('_client_add_booking_id_modal_content', [
             'addBookingId' => $form,
@@ -331,7 +331,7 @@ class ClientChatClientActionsController extends FController
 
         $clientChatForm = $this->getClientChatForm();
 
-        $form = new BookingIdCreateForm($chat, $clientChatForm);
+        $form = new BookingIdCreateForm($chat->cch_id, $clientChatForm->ccf_id);
 
         $isLoaded = $form->load(Yii::$app->request->post());
 
@@ -354,7 +354,7 @@ class ClientChatClientActionsController extends FController
 
         $clientChatForm = $this->getClientChatForm();
 
-        $form = new BookingIdCreateForm($chat, $clientChatForm);
+        $form = new BookingIdCreateForm($chat->cch_id, $clientChatForm->ccf_id);
 
         $response[] = [
             'error' => false,

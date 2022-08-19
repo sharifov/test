@@ -27,11 +27,11 @@ class BookingIdCreateForm extends Model
      * @param ClientChatForm $clientChatForm
      * @param array $config
      */
-    public function __construct(ClientChat $clientChat, ClientChatForm $clientChatForm, $config = [])
+    public function __construct(int $clientChatId, int $clientChatFormId, $config = [])
     {
         parent::__construct($config);
-        $this->clientChatId = $clientChat->cch_id;
-        $this->clientChatFormId = $clientChatForm->ccf_id;
+        $this->clientChatId = $clientChatId;
+        $this->clientChatFormId = $clientChatFormId;
     }
     /**
      * @return array
@@ -45,8 +45,8 @@ class BookingIdCreateForm extends Model
                 'message' => 'BookingId can only contain alphanumeric characters'
             ],
             ['bookingId', 'required'],
-            ['bookingId', 'validateUniqueBookingId'],
             ['bookingId', 'string', 'min' => 5, 'max' => 20],
+            ['bookingId', 'validateUniqueBookingId'],
         ];
     }
 
