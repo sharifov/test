@@ -29,7 +29,8 @@ class m220819_032935_add_columns_to_object_task_scenario extends Migration
             '{{%object_task_scenario}}',
             'ots_created_user_id',
             'employees',
-            'id'
+            'id',
+            'SET NULL'
         );
 
         $this->addForeignKey(
@@ -37,7 +38,8 @@ class m220819_032935_add_columns_to_object_task_scenario extends Migration
             '{{%object_task_scenario}}',
             'ots_updated_user_id',
             'employees',
-            'id'
+            'id',
+            'SET NULL'
         );
     }
 
