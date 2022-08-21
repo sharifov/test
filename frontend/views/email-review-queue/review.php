@@ -19,6 +19,7 @@ use src\model\emailReviewQueue\entity\EmailReviewQueueStatus;
 use yii\grid\GridView;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
+use modules\fileStorage\src\services\url\FileInfo;
 
 $this->title = $model->emailSubject . ' (' . $model->erq_email_id . ')';
 $this->params['breadcrumbs'][] = ['label' => 'Email Review Queues', 'url' => ['index']];
@@ -113,7 +114,7 @@ $files = JsonHelper::decode($email->e_email_data ?? $email->emailData);
                                     } else if ($email->e_case_id ?? $email->case) {
                                         $queryParams = QueryParams::byCase();
                                     }
-                                    $linkView = $urlGenerator->generate(new \modules\fileStorage\src\services\url\FileInfo($file->fs_name, $file->fs_path, $file->fs_uid, $file->fs_title, $queryParams));
+                                    $linkView = $urlGenerator->generate(FileInfo::byFileStorage($file, $queryParams));
                                     return Html::a('<i class="fa fa-eye"></i>', $linkView, ['target' => '_blank']);
                                 }
                                 return '';
