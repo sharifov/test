@@ -65,17 +65,18 @@ class FileStorageListWidget extends Widget
 
     public static function byEmail(int $id, ?array $emailData): string
     {
-        $uids = [];
+        $files = [];
         if (isset($emailData['files']) && !empty($emailData['files'])) {
-            foreach ($emailData['files'] as $key => $val) {
-                if (isset($val['uid'])) {
-                    $uids[] = $val['uid'];
+            foreach ($emailData['files'] as $val) {
+                $file = (isset($val['uid'])) ? FileStorageQuery::getOneByUid($val['uid']) : FileStorageQuery::getOneByPath($val['value']);
+                if (!empty($file)) {
+                    $files[] = $file;
                 }
             }
         }
 
         return self::widget([
-            'files' => FileStorageQuery::getListByUids($uids),
+            'files' => $files,
             'uploadWidget' => '',
             'queryParams' => QueryParams::byEmpty(),
             'canDelete' => false,
