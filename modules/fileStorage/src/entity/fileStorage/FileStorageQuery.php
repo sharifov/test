@@ -35,26 +35,45 @@ class FileStorageQuery
         return FileStorage::find()->byUid($uid)->one();
     }
 
-    public static function getListByUids(array $uids): array
+    public static function getOneByPath(string $path): ?array
     {
         return FileStorage::find()
-        ->select([
-            'fs_name as name',
-            'fs_path as path',
-            'fs_title as title',
-            'fs_uid as uid',
-            'fs_created_dt as created_dt',
-            'fs_size as size',
-            'fs_id as id',
-            'fus_user_id as user_id',
-        ])
-        ->leftJoin(FileUser::tableName() . ' as user', 'fus_fs_id = fs_id')
-        ->andWhere(['fs_status' => FileStorageStatus::UPLOADED])
-        ->andWhere(['fs_uid' => $uids])
-        ->orderBy(['id' => SORT_DESC])
-        ->indexBy('id')
-        ->asArray()
-        ->all();
+            ->select([
+                'fs_name as name',
+                'fs_path as path',
+                'fs_title as title',
+                'fs_uid as uid',
+                'fs_created_dt as created_dt',
+                'fs_size as size',
+                'fs_id as id',
+                'fus_user_id as user_id',
+            ])
+            ->leftJoin(FileUser::tableName() . ' as user', 'fus_fs_id = fs_id')
+            ->byPath($path)
+            ->success()
+            ->asArray()
+            ->limit(1)
+            ->one();
+    }
 
+    public static function getOneByUid(string $uid): ?array
+    {
+        return FileStorage::find()
+            ->select([
+                'fs_name as name',
+                'fs_path as path',
+                'fs_title as title',
+                'fs_uid as uid',
+                'fs_created_dt as created_dt',
+                'fs_size as size',
+                'fs_id as id',
+                'fus_user_id as user_id',
+            ])
+            ->leftJoin(FileUser::tableName() . ' as user', 'fus_fs_id = fs_id')
+            ->byUid($uid)
+            ->success()
+            ->asArray()
+            ->limit(1)
+            ->one();
     }
 }
