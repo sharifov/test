@@ -242,7 +242,7 @@ class EmailController extends FController
 
         $mailList = UserProjectParams::find()
             ->select(['el_email', 'upp_email_list_id'])
-            ->where(['upp_user_id' => Yii::$app->user->id])
+            ->where(['upp_user_id' => $user->id])
             ->joinWith('emailList', false, 'INNER JOIN')
             ->indexBy('el_email')
             ->column();
