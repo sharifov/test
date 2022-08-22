@@ -6,6 +6,7 @@ use common\models\Lead;
 use common\models\Queue;
 use src\entities\EventTrait;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "object_task".
@@ -196,5 +197,26 @@ class ObjectTask extends \yii\db\ActiveRecord
         }
 
         return $statusList;
+    }
+
+    public static function countByStatus(string $object, int $objectID): array
+    {
+        $query = self::find()
+            ->where([
+                'ot_object' => $object,
+                'ot_object_id' => $objectID,
+            ])
+            ->select([
+                'ot_status',
+                'COUNT(ot_uuid) as amount',
+            ])
+            ->asArray()
+            ->groupBy([
+                'ot_status',
+            ]);
+
+        return ArrayHelper::map($query->all(), 'ot_status', static function ($data) {
+            return (int) $data['amount'];
+        });
     }
 }
