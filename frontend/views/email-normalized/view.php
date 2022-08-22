@@ -4,6 +4,8 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 use src\helpers\email\MaskEmailHelper;
 use src\entities\email\Email;
+use modules\fileStorage\FileStorageSettings;
+use modules\fileStorage\src\widgets\FileStorageListWidget;
 
 /* @var $this yii\web\View */
 /* @var $model src\entities\email\Email */
@@ -28,15 +30,18 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
     <div class="col-md-7">
-
-            <hr>
-            <h4>Subject: <?=Html::encode($model->emailBody->embd_email_subject)?></h4>
-            <hr>
-            <h4>Email preview:</h4>
-            <object width="100%" height="1000" data="<?=\yii\helpers\Url::to(['email-normalized/view', 'id' => $model->e_id, 'preview' => 1])?>"></object>
-
+        <hr>
+        <h4>Subject: <?=Html::encode($model->emailBody->embd_email_subject)?></h4>
+        <hr>
+        <h4>Email preview:</h4>
+        <object width="100%" height="1000" data="<?=\yii\helpers\Url::to(['email-normalized/view', 'id' => $model->e_id, 'preview' => 1])?>"></object>
+        <?php if (FileStorageSettings::isEnabled()) : ?>
+            <?= FileStorageListWidget::byEmail(
+                    $model->e_id,
+                    $model->emailData
+                ) ?>
+        <?php endif; ?>
     </div>
-
     <div class="col-md-5">
         <?= DetailView::widget([
             'model' => $model,
@@ -76,7 +81,4 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
         ]) ?>
     </div>
-
-
-
 </div>
