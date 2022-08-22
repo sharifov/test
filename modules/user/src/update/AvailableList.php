@@ -45,7 +45,7 @@ class AvailableList
 
     public function getProjects(): array
     {
-        return \common\models\Project::getList(true);
+        return \common\models\Project::getEnabledList();
     }
 
     public function getDepartments(): array
@@ -56,7 +56,7 @@ class AvailableList
 
     public function getUserGroups(): array
     {
-        return \common\models\UserGroup::getList(true);
+        return \common\models\UserGroup::getEnabledList();
     }
 
     public function getTimezones(): array
