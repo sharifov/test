@@ -5,6 +5,7 @@ namespace modules\objectTask\src\entities;
 use common\models\Lead;
 use common\models\Queue;
 use src\entities\EventTrait;
+use Yii;
 
 /**
  * This is the model class for table "object_task".
@@ -64,6 +65,24 @@ class ObjectTask extends \yii\db\ActiveRecord
             [['ot_q_id'], 'exist', 'skipOnError' => true, 'skipOnEmpty' => true, 'targetClass' => Queue::class, 'targetAttribute' => ['ot_q_id' => 'id']],
             [['ot_q_id'], 'exist', 'skipOnError' => false, 'targetClass' => ObjectTaskScenario::class, 'targetAttribute' => ['ot_ots_id' => 'ots_id']],
         ];
+    }
+
+    public function beforeSave($insert): bool
+    {
+        if ($insert === false) {
+            if (!empty($this->ot_q_id)) {
+                $oldStatus = $this->oldAttributes['ot_status'] ?? null;
+
+                if ($oldStatus !== $this->ot_status) {
+                    Yii::$app->queue_db->remove(
+                        $this->ot_q_id
+                    );
+                    $this->ot_q_id = null;
+                }
+            }
+        }
+
+        return parent::beforeSave($insert);
     }
 
     /**
@@ -164,5 +183,18 @@ class ObjectTask extends \yii\db\ActiveRecord
     public function setFailedStatus(): void
     {
         $this->ot_status = self::STATUS_FAILED;
+    }
+
+    public static function getStatusList(array $excludeStatusList = []): array
+    {
+        $statusList = self::STATUS_LIST;
+
+        foreach ($excludeStatusList as $excludeStatus) {
+            if (isset($statusList[$excludeStatus])) {
+                unset($statusList[$excludeStatus]);
+            }
+        }
+
+        return $statusList;
     }
 }
