@@ -9,6 +9,9 @@ use yii\console\Controller;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\Console;
+use src\services\email\EmailsNormalizeService;
+use src\exception\CreateModelException;
+use yii\helpers\VarDumper;
 
 class EmailController extends Controller
 {
@@ -64,6 +67,42 @@ class EmailController extends Controller
 
         $download = \Yii::createObject(DownloadEmails::class);
         $download->download($debug, $limit);
+
+        $time_end = microtime(true);
+        $time = number_format(round($time_end - $time_start, 2), 2);
+        printf("\nExecute Time: %s ", $this->ansiFormat($time . ' s', Console::FG_RED));
+        printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+    }
+
+    public function actionSyncNormalized(bool $debug = false, int $limit = 500)
+    {
+        printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
+        $time_start = microtime(true);
+
+        $notNormalized = Email::find()->notNormalized()->limit($limit)->all();
+        $total = count($notNormalized);
+        $n = 0;
+        Console::startProgress(0, $total, 'Sync Email data to normalized form: ', false);
+        $errors = [];
+        foreach ($notNormalized as $emailOld) {
+            try {
+                $email = EmailsNormalizeService::newInstance()->createEmailFromOld($emailOld);
+                Console::updateProgress(++$n, $total);
+            } catch (\Throwable $e) {
+                $errorMessage = ($e instanceof CreateModelException) ? VarDumper::dumpAsString($e->getErrorSummary(true)) : $e->getMessage() . "\n" . $e->getTraceAsString();
+                $errors[] = [
+                    'emailId' => $emailOld->e_id,
+                    'error' => $errorMessage,
+                ];
+                if ($debug) {
+                    echo "\nemailId:" . $emailOld->e_id . "\nerror:\n" . $errorMessage;
+                }
+            }
+        }
+        if (!empty($errors)) {
+            \Yii::error(VarDumper::dumpAsString($errors), 'EmailController:actionSyncNormalized');
+        }
+        Console::endProgress("done." . PHP_EOL);
 
         $time_end = microtime(true);
         $time = number_format(round($time_end - $time_start, 2), 2);

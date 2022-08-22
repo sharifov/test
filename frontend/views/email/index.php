@@ -132,56 +132,40 @@ $user = Yii::$app->user->identity;
                     },
                 ],
             ],
-            //'e_reply_id',
-
-            //'e_project_id',
             [
                 'class' => \common\components\grid\project\ProjectColumn::class,
                 'attribute' => 'e_project_id',
                 'relation' => 'project',
             ],
-//            [
-//                'attribute' => 'e_project_id',
-//                'value' => static function (\common\models\Email $model) {
-//                    return $model->project ? '<span class="badge badge-info">' . Html::encode($model->project->name) . '</span>' : '-';
-//                },
-//                'format' => 'raw',
-//                'filter' => $projectList
-//            ],
-            //'e_email_from',
             [
                 'attribute' => 'e_email_from',
                 'value' => 'emailFrom'
             ],
-            //'e_email_to',
             [
                 'attribute' => 'e_email_to',
                 'value' => 'emailTo'
             ],
-            'e_lead_id',
-            'e_case_id',
-            //'e_email_cc:email',
-            //'e_email_bc:email',
-            //'e_email_subject:email',
-            //'e_email_body_text:ntext',
-            //'e_attach',
-            //'e_email_data:ntext',
-            //'e_type_id',
+            [
+                'attribute' => 'e_lead_id',
+                'value' => 'lead',
+                'format' => 'lead',
+            ],
+            [
+                'attribute' => 'e_case_id',
+                'value' => 'case',
+                'format' => 'case',
+            ],
             [
                 'attribute' => 'e_type_id',
-                'value' => static function (EmailInterface $model) {
-                    return EmailType::getName($model->e_type_id);
-                },
+                'value' => 'typeName',
                 'filter' => EmailType::getList()
             ],
-            //'e_template_type_id',
             [
                 'attribute' => 'e_template_type_name',
-                'value' => 'templateType.etp_name',
+                'value' => 'templateTypeName',
                 'label' => 'Template Name'
                 //'filter' =>
             ],
-            //'e_language_id',
             [
                 'attribute' => 'e_language_id',
                 'value' => 'languageId',
@@ -191,85 +175,26 @@ $user = Yii::$app->user->identity;
                 'attribute' => 'e_communication_id',
                 'value' => 'communicationId',
             ],
-            //'e_is_deleted',
-            //'e_is_new:boolean',
-            //'e_delay',
-            //'e_priority',
-            //'e_status_id',
             [
                 'attribute' => 'e_status_id',
-                'value' => static function (EmailInterface $model) {
-                    return EmailStatus::getName($model->e_status_id);
-                },
+                'value' => 'statusName',
                 'filter' => EmailStatus::getList()
             ],
-            'attribute' => 'e_client_id:client',
-            //'e_status_done_dt',
-            //'e_read_dt',
-            //'e_error_message',
-            /*[
-                'attribute' => 'e_updated_user_id',
-                'value' => static function (\common\models\Email $model) {
-                    return ($model->updatedUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->updatedUser->username) : $model->e_updated_user_id);
-                },
-                'filter' => $userList,
-                'format' => 'raw'
-            ],*/
-
+            [
+                'attribute' => 'e_client_id',
+                'value' => 'clientId',
+                'format' => 'client'
+            ],
             [
                 'class' => UserSelect2Column::class,
                 'attribute' => 'e_created_user_id',
                 'relation' => 'createdUser',
                 'placeholder' => ''
             ],
-
-//            [
-//                'attribute' => 'e_created_user_id',
-//                'value' => static function (\common\models\Email $model) {
-//                    return ($model->createdUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->createdUser->username) : $model->e_created_user_id);
-//                },
-//                'filter' => $userList,
-//                'format' => 'raw'
-//            ],
-            /*[
-                'attribute' => 'e_updated_dt',
-                'value' => static function (\common\models\Email $model) {
-                    return '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->e_updated_dt));
-                },
-                'format' => 'raw'
-            ],*/
-
-            /*[
-                'attribute' => 'e_created_user_id',
-                'value' => static function (\common\models\Email $model) {
-                    return  ($model->createdUser ? '<i class="fa fa-user"></i> ' .Html::encode($model->createdUser->username) : $model->e_created_user_id);
-                'format' => 'raw'
-                },
-            ],*/
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'e_created_dt'
             ],
-            /*[
-                'attribute' => 'e_created_dt',
-                'value' => static function (\common\models\Email $model) {
-                    return $model->e_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->e_created_dt), 'php: Y-m-d [H:i:s]')  : '-';
-                },
-                'format' => 'raw',
-                'filter' => DatePicker::widget([
-                    'model' => $searchModel,
-                    'attribute' => 'e_created_dt',
-                    'clientOptions' => [
-                        'autoclose' => true,
-                        'format' => 'yyyy-mm-dd',
-                    ],
-                    'options' => [
-                        'autocomplete' => 'off'
-                    ],
-                ]),
-            ],*/
-
-
         ],
     ]); ?>
     <?php Pjax::end(); ?>

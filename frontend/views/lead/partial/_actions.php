@@ -361,6 +361,17 @@ $leadAbacDto = new LeadAbacDto($leadModel, $userId);
                         ]) ?>
                     <?php endif; ?>
 
+                    <?php /** @fflag FFlag::FF_KEY_NO_ANSWER_PROTOCOL_ENABLE, No Answer protocol enable */ ?>
+                    <?php if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_NO_ANSWER_PROTOCOL_ENABLE) === true) : ?>
+                        <?= Html::a('<i class="fa fa-tasks"> </i> Object Task list', null, [
+                            'id' => 'btn-general-lead-object-task-list',
+                            'class' => 'dropdown-item showModalButton',
+                            'data-modal_id' => 'lg',
+                            'title' => 'Object Task list',
+                            'data-content-url' => Url::to(['get-object-task-list', 'leadId' => $leadForm->lead->id])
+                        ]) ?>
+                    <?php endif; ?>
+
                     <?php if ($canVisitorLogs) : ?>
                         <?= Html::a('<i class="fa fa-list"> </i> Visitor Logs', ['/visitor-log/index', 'VisitorLogSearch[vl_lead_id]' => $leadForm->lead->id], [
                             'class' => 'dropdown-item',

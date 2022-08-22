@@ -44,6 +44,7 @@ abstract class BaseApplication extends yii\base\Application
  * @property \yii\queue\beanstalk\Queue $queue_phone_check The beanstalk Queue. This property is read-only. Extended component.
  * @property \yii\queue\beanstalk\Queue $queue_client_chat_job The beanstalk Queue. This property is read-only. Extended component.
  * @property \yii\queue\beanstalk\Queue $queue_lead_redial The beanstalk Queue. This property is read-only. Extended component.
+ * @property \yii\queue\db\Queue $queue_db The database queue. This property is read-only. Extended component.
  * @property \yii\caching\Cache $cacheFile FileCache.
  * @property \yii\caching\Cache $webApiCache FileCache.
  * @property \yii\caching\Cache $consoleCache FileCache.
@@ -64,6 +65,7 @@ abstract class BaseApplication extends yii\base\Application
  * @property \modules\eventManager\components\EventManagerComponent $event Event component
  * @property \common\components\ApplicationStatus $applicationStatus application status component
  * @property \common\components\email\EmailComponent $email application status component
+ * @property \kak\clickhouse\Connection $clickhouse DB Connection component
  */
 class WebApplication extends yii\web\Application
 {

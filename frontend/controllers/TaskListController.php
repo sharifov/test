@@ -12,6 +12,8 @@ use modules\taskList\src\entities\userTask\repository\UserTaskRepository;
 use modules\taskList\src\entities\userTask\UserTask;
 use modules\taskList\src\entities\userTask\UserTaskQuery;
 use modules\taskList\src\entities\userTask\UserTaskSearch;
+use modules\user\src\events\UserEvents;
+use modules\user\userActivity\service\UserActivityService;
 use modules\taskList\src\forms\UserTaskNoteForm;
 use src\auth\Auth;
 use Yii;
@@ -77,9 +79,13 @@ class TaskListController extends FController
         $searchModel = new UserTaskSearch();
         $startDate = Yii::$app->request->get('startDate', date('Y-m-d'));
         $endDate = Yii::$app->request->get('endDate', date('Y-m-d', strtotime('+1 day')));
+
+        $startDate = new \DateTime($startDate);
+        $endDate = (new \DateTime($endDate))->setTime(23, 59, 59);
+
         $dataProvider = $searchModel->searchByUserId(Yii::$app->request->queryParams, $user->id, $startDate, $endDate);
 
-        $startDateTime = date('Y-m-d H:i', strtotime('-10 hours'));
+        $startDateTime = date('Y-m-d H:i', strtotime('-24 hours'));
         $endDateTime = date('Y-m-d H:i', strtotime('+34 hours'));
 
         $scheduleEventList = UserShiftScheduleQuery::getExistEventList(
@@ -89,6 +95,27 @@ class TaskListController extends FController
             null,
             [ShiftScheduleType::SUBTYPE_WORK_TIME]
         );
+
+
+        $userActiveEvents = UserActivityService::getUniteEventsByUserId(
+            $user->id,
+            date('Y-m-d H:i:s', strtotime($startDateTime)),
+            date('Y-m-d H:i:s'),
+            UserEvents::EVENT_ACTIVE,
+            3,
+            3
+        );
+
+        $userOnlineEvents = UserActivityService::getUniteEventsByUserId(
+            $user->id,
+            date('Y-m-d H:i:s', strtotime($startDateTime)),
+            date('Y-m-d H:i:s'),
+            UserEvents::EVENT_ONLINE,
+            5,
+            3
+        );
+
+
 
         return $this->render(
             'index',
@@ -100,6 +127,8 @@ class TaskListController extends FController
                 'startDateTime' => $startDateTime,
                 'endDateTime' => $endDateTime,
                 'scheduleEventList' => $scheduleEventList,
+                'userActiveEvents' => $userActiveEvents,
+                'userOnlineEvents' => $userOnlineEvents,
             ]
         );
     }
@@ -125,7 +154,7 @@ class TaskListController extends FController
         $taskListData = UserTaskQuery::getCalendarTaskJsonData($taskList, $userTimeZone);
 
         $data = array_merge($timeLineData, $taskListData);
-        unset($timeLineData, $taskListData);
+        unset($timeLineData, $taskListData, $userEventData);
         return $data;
     }
 

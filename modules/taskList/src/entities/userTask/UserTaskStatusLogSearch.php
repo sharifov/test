@@ -35,10 +35,10 @@ class UserTaskStatusLogSearch extends UserTaskStatusLog
     {
         $query = UserTaskStatusLog::find();
 
-        // add conditions that should always apply here
-
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['utsl_id' => SORT_DESC]],
+            'pagination' => ['pageSize' => 30],
         ]);
 
         $this->load($params);
@@ -51,7 +51,7 @@ class UserTaskStatusLogSearch extends UserTaskStatusLog
 
         if ($this->utsl_created_dt) {
             $query->andFilterWhere(['>=', 'utsl_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->utsl_created_dt))])
-                ->andFilterWhere(['<=', 'utsl_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->utsl_created_dt))]);
+                ->andFilterWhere(['<=', 'utsl_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->utsl_created_dt) + 3600 * 24)]);
         }
 
         // grid filtering conditions

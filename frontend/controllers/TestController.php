@@ -19,6 +19,7 @@ use common\models\Lead;
 use common\models\Notifications;
 use common\models\Project;
 use common\models\Quote;
+use common\models\QuoteStatusLog;
 use common\models\UserProfile;
 use common\models\UserProjectParams;
 use DateInterval;
@@ -27,6 +28,7 @@ use DateTime;
 use frontend\helpers\JsonHelper;
 use frontend\models\CommunicationForm;
 use frontend\models\form\CreditCardForm;
+use kak\clickhouse\Query;
 use kivork\FeatureFlag\Models\flags\dateTime\DateTimeFeatureFlag;
 use kivork\FeatureFlag\Models\flags\dateTime\DateTimeFeatureFlagDTO;
 use modules\attraction\models\AttractionQuote;
@@ -57,6 +59,9 @@ use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\rentCar\src\services\RentCarQuotePdfService;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
+use modules\user\src\events\UserEvents;
+use modules\user\userActivity\entity\UserActivity;
+use modules\user\userActivity\service\UserActivityService;
 use modules\webEngage\form\WebEngageEventForm;
 use modules\webEngage\settings\WebEngageDictionary;
 use modules\webEngage\src\service\webEngageEventData\lead\LeadEventDataService;
@@ -2066,13 +2071,10 @@ class TestController extends FController
 
 
         try {
-            $a = 3 / 0;
+//            $a = 3 / 0;
         } catch (\Throwable $throwable) {
             Yii::error(AppHelper::throwableLog($throwable, true), 'error\TestController:actionErrors:Throwable');
         }
-
-
-
 
         echo 'Test Error, Warning, Info - ' . date('Y-m-d H:i:s');
     }
@@ -2334,7 +2336,7 @@ class TestController extends FController
 //        exit;
 
         try {
-            $a = 3 / 0;
+//            $a = 3 / 0;
         } catch (\Throwable $throwable) {
             //VarDumper::dump(get_object_vars($throwable), 10, true);
             //VarDumper::dump(AppHelper::throwableLog($throwable, true), 10, true);
@@ -2625,6 +2627,122 @@ class TestController extends FController
         for ($i = 0; $i <= 1000; $i++) {
             Yii::$app->abac->can(null, SaleListAbacObject::UI_BLOCK_SALE_LIST, SaleListAbacObject::ACTION_READ);
             //Yii::$app->abac->can(null, SaleListAbacObject::UI_SALE_ID, SaleListAbacObject::ACTION_READ);
+        }
+        $time_end = microtime(true);
+        echo 'Time: ' . round($time_end - $time_start, 6) . '';
+    }
+
+
+    public function actionClickhouse()
+    {
+
+        $db = \Yii::$app->clickhouse;
+        $query = new Query();
+        // first argument scalar var or Query object
+        //$query->withQuery($db->quoteValue('2021-10-05'), 'date1');
+        $query->select('1');
+        //$query->from('stat');
+        //$query->where('event_stat < date1');
+        $query->all();
+
+        $command = $query->createCommand();
+        $data = $query->all();
+        $result  = $command->queryAll();
+        $total   = $command->getTotals();
+
+        VarDumper::dump(['result' => $result, 'total' => $total, 'data' => $data]);
+    }
+
+    public function actionUserActivityUnite()
+    {
+
+        $data = UserActivityService::getUniteEventsByUserId(
+            Auth::id(),
+            date('Y-m-08 00:00:00'),
+            date('Y-m-d 20:00:00'),
+            UserEvents::EVENT_ACTIVE
+        );
+        VarDumper::dump($data, 10, true);
+        /*$db = \Yii::$app->clickhouse;
+        $query = new Query();
+        // first argument scalar var or Query object
+        //$query->withQuery($db->quoteValue('2021-10-05'), 'date1');
+        $query->select('1');
+        //$query->from('stat');
+        //$query->where('event_stat < date1');
+        $query->all();
+
+        $command = $query->createCommand();
+        $data = $query->all();
+        $result  = $command->queryAll();
+        $total   = $command->getTotals();
+
+        VarDumper::dump(['result' => $result, 'total' => $total, 'data' => $data]);*/
+    }
+
+
+    public function actionTestSendQuote()
+    {
+        $leads = Lead::find()->andWhere(['status' => Lead::STATUS_PROCESSING])->limit(1000)->orderBy('id DESC')->all();
+        $time_start = microtime(true);
+        foreach ($leads as $lead) {
+            $query = new Query();
+            $query->select(['SUM(CASE WHEN status IN (2, 4, 5) THEN 1 ELSE 0 END) AS send_q',
+                'SUM(CASE WHEN status NOT IN (2, 4, 5) THEN 1 ELSE 0 END) AS not_send_q'])
+                ->from(Quote::tableName() . ' q')
+                ->where(['lead_id' => $lead->id]);
+
+            $query->createCommand()->queryOne();
+        }
+        $time_end = microtime(true);
+        echo 'Time: ' . round($time_end - $time_start, 6) . '';
+    }
+
+    public function actionTestSendQuoteNew()
+    {
+        $leads = Lead::find()->andWhere(['status' => Lead::STATUS_PROCESSING])->limit(1000)->orderBy('id DESC')->all();
+        $time_start = microtime(true);
+        foreach ($leads as $lead) {
+            $query = new Query();
+            $query
+                ->select(
+                    [
+                        'total' => 'COUNT(*)',
+                        'send_q' => "SUM((SELECT SUM(CASE WHEN (status = :status) THEN 1 ELSE 0 END)
+                         FROM `quote_status_log` WHERE `q`.id = `quote_status_log`.quote_id))"
+                    ]
+                )
+                ->addParams([':status' => Quote::STATUS_SENT])
+                ->from(Quote::tableName() . ' q')
+                ->where(['lead_id' => $lead->id]);
+            $query->createCommand()->queryOne();
+        }
+        $time_end = microtime(true);
+        echo 'Time: ' . round($time_end - $time_start, 6) . '';
+    }
+
+    public function actionTestSendQuoteMiddle()
+    {
+        $leads = Lead::find()->andWhere(['status' => Lead::STATUS_PROCESSING])->limit(1000)->orderBy('id DESC')->all();
+        $time_start = microtime(true);
+        foreach ($leads as $lead) {
+            $query = new Query();
+            $query->select([
+                'SUM(CASE WHEN statusCount > 0 THEN 1 ELSE 0 END) AS send_q',
+                'SUM(CASE WHEN statusCount IS NULL OR statusCount = 0 THEN 1 ELSE 0 END) AS not_send_q'
+            ])
+                ->leftJoin(
+                    [
+                        'quote_status_log' => QuoteStatusLog::find()
+                            ->select(['quote_id', 'COUNT(quote_id) as statusCount'])
+                            ->where(['status' => [Quote::STATUS_SENT, Quote::STATUS_OPENED, Quote::STATUS_APPLIED]])
+                            ->groupBy(['quote_id'])
+                    ],
+                    'quote_status_log.quote_id = q.id'
+                )
+                ->from(Quote::tableName() . ' q')
+                ->where(['lead_id' => $lead->id]);
+            $query->createCommand()->queryOne();
         }
         $time_end = microtime(true);
         echo 'Time: ' . round($time_end - $time_start, 6) . '';

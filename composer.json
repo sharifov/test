@@ -109,12 +109,13 @@
 		"textalk/websocket": "^1.5",
         "ext-fileinfo": "*",
         "ext-pgsql": "*",
-		"kivork/yii2-search-module": "1.12.*",
+		"kivork/yii2-search-module": "1.13.*",
 		"geoip/geoip": "~1.16",
 		"endroid/qr-code": "4.4.9",
 		"jp3cki/totp": "2.0.0",
 		"kartik-v/yii2-password": "1.5.7",
-		"kivork/yii2-feature-flag": "2.0.0"
+		"kivork/yii2-feature-flag": "2.0.0",
+		"kak/clickhouse": "~1.1"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",
@@ -156,7 +157,6 @@
 		],
 		"exclude-from-classmap": [
 			"docker/",
-			"vagrant/",
 			"node_modules/"
 		]
 	},

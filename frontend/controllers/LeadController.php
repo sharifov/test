@@ -46,20 +46,21 @@ use modules\lead\src\abac\LeadAbacObject;
 use modules\lead\src\abac\LeadExpertCallObject;
 use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\lead\src\abac\services\AbacLeadExpertCallService;
+use modules\objectTask\src\entities\ObjectTaskSearch;
+use modules\objectTask\src\services\ObjectTaskService;
 use modules\offer\src\entities\offer\search\OfferSearch;
 use modules\offer\src\entities\offerSendLog\CreateDto;
 use modules\offer\src\entities\offerSendLog\OfferSendLogType;
 use modules\offer\src\services\OfferSendLogService;
 use modules\order\src\entities\order\search\OrderSearch;
+use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTaskQuery;
 use modules\taskList\src\entities\TargetObject;
 use modules\taskList\src\entities\userTask\UserTaskSearch;
-use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTaskQuery;
-use modules\twilio\components\TwilioCommunicationService;
 use PHPUnit\Framework\Warning;
 use src\auth\Auth;
 use src\entities\cases\Cases;
-use src\exception\EmailNotSentException;
 use src\exception\CreateModelException;
+use src\exception\EmailNotSentException;
 use src\forms\CompositeFormHelper;
 use src\forms\lead\CloneReasonForm;
 use src\forms\lead\ItineraryEditForm;
@@ -79,7 +80,6 @@ use src\model\clientChatLead\entity\ClientChatLead;
 use src\model\clientChatLead\entity\ClientChatLeadRepository;
 use src\model\contactPhoneList\service\ContactPhoneListService;
 use src\model\email\useCase\send\fromLead\AbacEmailList;
-use src\model\emailReviewQueue\EmailReviewQueueManageService;
 use src\model\lead\useCases\lead\create\CreateLeadByChatDTO;
 use src\model\lead\useCases\lead\create\LeadCreateByChatForm;
 use src\model\lead\useCases\lead\create\LeadManageForm;
@@ -99,12 +99,14 @@ use src\model\leadUserRating\service\LeadUserRatingService;
 use src\model\sms\useCase\send\fromLead\AbacSmsFromNumberList;
 use src\quoteCommunication\Repo;
 use src\repositories\cases\CasesRepository;
+use src\repositories\email\EmailRepositoryFactory;
 use src\repositories\lead\LeadRepository;
 use src\repositories\NotFoundException;
 use src\repositories\quote\QuoteRepository;
 use src\services\client\ClientManageService;
 use src\services\email\EmailMainService;
 use src\services\email\EmailService;
+use src\services\email\EmailServiceHelper;
 use src\services\lead\LeadAssignService;
 use src\services\lead\LeadBusinessExtraQueueService;
 use src\services\lead\LeadCloneService;
@@ -128,8 +130,6 @@ use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
 use yii\web\UploadedFile;
 use yii\widgets\ActiveForm;
-use src\repositories\email\EmailRepositoryFactory;
-use src\services\email\EmailServiceHelper;
 
 /**
  * Class LeadController
@@ -145,7 +145,6 @@ use src\services\email\EmailServiceHelper;
  * @property ClientChatActionPermission $chatActionPermission
  * @property UrlGenerator $fileStorageUrlGenerator
  * @property UseCaseLeadManageService $useCaseLeadManageService
- * @property EmailReviewQueueManageService $emailReviewQueueManageService
  * @property EmailMainService $emailService
  */
 class LeadController extends FController
@@ -162,7 +161,6 @@ class LeadController extends FController
     private $chatActionPermission;
     private UrlGenerator $fileStorageUrlGenerator;
     private UseCaseLeadManageService $useCaseLeadManageService;
-    private EmailReviewQueueManageService $emailReviewQueueManageService;
     private EmailMainService $emailService;
 
     public function __construct(
@@ -180,7 +178,6 @@ class LeadController extends FController
         ClientChatActionPermission $chatActionPermission,
         UrlGenerator $fileStorageUrlGenerator,
         UseCaseLeadManageService $useCaseLeadManageService,
-        EmailReviewQueueManageService $emailReviewQueueManageService,
         EmailMainService $emailService,
         $config = []
     ) {
@@ -197,7 +194,6 @@ class LeadController extends FController
         $this->chatActionPermission = $chatActionPermission;
         $this->fileStorageUrlGenerator = $fileStorageUrlGenerator;
         $this->useCaseLeadManageService = $useCaseLeadManageService;
-        $this->emailReviewQueueManageService = $emailReviewQueueManageService;
         $this->emailService = $emailService;
     }
 
@@ -543,8 +539,7 @@ class LeadController extends FController
 
                             $this->refresh('#communication-form');
                         } else {
-                            $mail->statusToReview();
-                            $this->emailReviewQueueManageService->createByEmail($mail, $lead->l_dep_id);
+                            $this->emailService->moveToReview($mail, $lead->l_dep_id);
                             /** @var string[] $quoteIds */
                             $quoteIds = Json::decode($previewEmailForm->e_quote_list);
                             /** @var Quote[] $quoteObjects */
@@ -2872,6 +2867,22 @@ class LeadController extends FController
             'dataProvider' => $dataProvider,
             'leadID' => $leadID,
         ]);
+    }
+
+    public function actionGetObjectTaskList(int $leadId)
+    {
+        if (Yii::$app->request->isAjax) {
+            $searchModel = new ObjectTaskSearch();
+            $params = Yii::$app->request->queryParams;
+            $params['ObjectTaskSearch']['ot_object'] = ObjectTaskService::OBJECT_LEAD;
+            $params['ObjectTaskSearch']['ot_object_id'] = $leadId;
+            $dataProvider = $searchModel->search($params);
+
+            return $this->renderAjax('partial/_object_task_list', [
+                'dataProvider' => $dataProvider,
+                'searchModel' => $searchModel,
+            ]);
+        }
     }
 
     /**

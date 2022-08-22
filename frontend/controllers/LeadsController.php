@@ -120,9 +120,13 @@ class LeadsController extends FController
         /** @abac null, LeadSearchAbacObject::ADVANCED_SEARCH, LeadSearchAbacObject::ACTION_ACCESS, Access to Advanced Search Lead  */
         $accessAdvancedSearch = Yii::$app->abac->can(null, LeadSearchAbacObject::ADVANCED_SEARCH, LeadSearchAbacObject::ACTION_ACCESS);
 
-        if ($user->isSupervision()) {
-            $params['LeadSearch']['supervision_id'] = $user->id;
+        /** @fflag FFlag::FF_KEY_REMOVE_LIMITATION_SUPERVISION_IN_LEAD_SEARCH, Remove User Group limitation for Search Leads for Sale Supervisor role */
+        if (!\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_REMOVE_LIMITATION_SUPERVISION_IN_LEAD_SEARCH)) {
+            if ($user->isSupervision()) {
+                $params['LeadSearch']['supervision_id'] = $user->id;
+            }
         }
+
 
         if (!$params && !$accessAdvancedSearch) {
             $params['LeadSearch']['employee_id'] = $user->id;
@@ -179,8 +183,11 @@ class LeadsController extends FController
 
         $params = Yii::$app->request->queryParams;
 
-        if (Yii::$app->user->identity->canRole('supervision')) {
-            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        /** @fflag FFlag::FF_KEY_REMOVE_LIMITATION_SUPERVISION_IN_LEAD_SEARCH, Remove User Group limitation for Search Leads for Sale Supervisor role */
+        if (!\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_REMOVE_LIMITATION_SUPERVISION_IN_LEAD_SEARCH)) {
+            if (Yii::$app->user->identity->canRole('supervision')) {
+                $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+            }
         }
 
         $dataProvider = $searchModel->searchExport($params);
@@ -195,8 +202,11 @@ class LeadsController extends FController
     {
         $searchModel = new LeadSearch();
         $params = Yii::$app->request->queryParams;
-        if (Yii::$app->user->identity->canRole('supervision')) {
-            $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+        /** @fflag FFlag::FF_KEY_REMOVE_LIMITATION_SUPERVISION_IN_LEAD_SEARCH, Remove User Group limitation for Search Leads for Sale Supervisor role */
+        if (!\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_REMOVE_LIMITATION_SUPERVISION_IN_LEAD_SEARCH)) {
+            if (Yii::$app->user->identity->canRole('supervision')) {
+                $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
+            }
         }
 
         $dataProvider = $searchModel->searchExport($params);

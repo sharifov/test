@@ -31,7 +31,7 @@ class ClientChatAbacObject extends AbacBaseModel implements AbacInterface
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
         self::ACT_CREATE_SEND_QUOTE => [self::ACTION_CREATE],
-        self::UI_CLIENT_CHAT_FORM => [self::ACTION_ACCESS]
+        self::UI_CLIENT_CHAT_FORM => [self::ACTION_ACCESS, self::ACTION_CREATE]
     ];
 
     /** --------------- ATTRIBUTE LIST --------------------------- */

@@ -10,6 +10,7 @@ use yii\widgets\Pjax;
 use yii\bootstrap4\Modal;
 use common\components\grid\DateTimeColumn;
 use yii\grid\ActionColumn;
+use common\components\i18n\Formatter;
 
 /* @var $this yii\web\View */
 /* @var $searchModel src\entities\cases\CaseEventLogSearch */
@@ -37,13 +38,9 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'cel_case_id',
                 'value' => static function (CaseEventLog $model) {
-                    return $model->cel_case_id ? Html::a(
-                        $model->cel_case_id  . ' <span class="glyphicon glyphicon-eye-open"></span>',
-                        ['/cases/view', 'gid' => $model->celCase->cs_gid],
-                        ['target' => '_blank', 'data-pjax' => 0, 'title' => 'View']
-                    ) : '-';
+                    return (new Formatter())->asCase($model->celCase);
                 },
-                'format' => 'raw',
+                'format' => 'raw'
             ],
             'cel_description',
             [

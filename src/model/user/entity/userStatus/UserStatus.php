@@ -250,4 +250,12 @@ class UserStatus extends ActiveRecord
     {
         $this->us_phone_ready_time = time();
     }
+
+    /**
+     * @return bool
+     */
+    public function isOnCall(): bool
+    {
+        return (bool) $this->us_is_on_call;
+    }
 }

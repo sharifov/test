@@ -35,14 +35,7 @@ class MonitorController extends FController
             throw new InvalidConfigException('The "wsConnectionUrl" property must be set in config params.');
         }
 
-        /** @fflag FFlag::FF_KEY_REFACTORING_INCOMING_CALL_ENABLE, Switch incoming monitor page to new version */
-        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_REFACTORING_INCOMING_CALL_ENABLE)) {
-            $view = 'vue-call-incoming';
-        } else {
-            $view = 'call-incoming';
-        }
-
-        return $this->render($view, [
+        return $this->render('vue-call-incoming', [
             'cfChannelName' => Call::CHANNEL_REALTIME_MAP,
             'cfUserOnlineChannel' => Call::CHANNEL_USER_ONLINE,
             'cfConnectionUrl' => $centrifugoWsConnectionUrl,

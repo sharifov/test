@@ -114,6 +114,18 @@ $timerExtraCss = 'vertical-align: 3px;font-size: 12px; margin-left: 5px;';
                         </div>
                     <?php endif ?>
 
+                    <?php /** @fflag FFlag::FF_KEY_NO_ANSWER_PROTOCOL_ENABLE, No Answer protocol enable */ ?>
+                    <?php if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_NO_ANSWER_PROTOCOL_ENABLE) === true) : ?>
+                        <?php if ($lead->hasObjectTasks()) : ?>
+                            <div class="page-header__general-item" data-toggle="tooltip" data-placement="top" title="Auto Follow Up jobs">
+                                <strong><i class="fa fa-tasks" aria-hidden="true"></i></strong>
+                                <span>
+                                <?= $lead->countObjectTask() ?>
+                            </span>
+                            </div>
+                        <?php endif; ?>
+                    <?php endif; ?>
+
 <!--                    <div class="page-header__general-item">-->
 <!--                        --><?php //= $this->render('_rating', [
 //                            'lead' => $lead

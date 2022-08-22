@@ -13,7 +13,6 @@ parameters:
   excludes_analyse:
     - webapi/tests/*
     - docker/*
-    - vagrant/*
     - node_modules/*
   yii2:
     config_path: %rootDir%/../../../common/config/boostrap.php

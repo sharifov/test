@@ -3,15 +3,19 @@
 namespace frontend\controllers;
 
 use common\components\BackOffice;
+use common\helpers\LogHelper;
 use common\models\CaseSale;
 use common\models\Project;
 use common\models\search\SaleSearch;
+use modules\cases\src\abac\saleList\SaleListAbacObject;
 use modules\order\src\entities\order\Order;
 use src\auth\Auth;
 use src\entities\cases\Cases;
+use src\exception\BoResponseException;
 use src\helpers\app\AppHelper;
 use src\model\caseOrder\entity\CaseOrder;
 use src\services\cases\CasesSaleService;
+use src\services\caseSale\FareRulesService;
 use Yii;
 use yii\base\Exception;
 use yii\data\ArrayDataProvider;
@@ -30,22 +34,26 @@ use yii\web\Response;
 class SaleController extends FController
 {
     private $casesSaleService;
+    private FareRulesService $fareRulesService;
 
     /**
      * SaleController constructor.
      * @param $id
      * @param $module
      * @param CasesSaleService $casesSaleService
+     * @param FareRulesService $fareRulesService
      * @param array $config
      */
     public function __construct(
         $id,
         $module,
         CasesSaleService $casesSaleService,
+        FareRulesService $fareRulesService,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
         $this->casesSaleService = $casesSaleService;
+        $this->fareRulesService = $fareRulesService;
     }
 
     /**
@@ -259,6 +267,7 @@ class SaleController extends FController
             ];
             $host = Yii::$app->params['backOffice']['urlV3'];
             $responseBO = BackOffice::sendRequest2('flight-request/resend-tickets', $data, 'POST', 120, $host);
+            $data['emails'] = LogHelper::hidePersonalData($emails, ['emails']);
 
             if (!$responseBO->isOk) {
                 Yii::error([
@@ -461,5 +470,44 @@ class SaleController extends FController
         }
 
         return $result;
+    }
+
+    /**
+     * @param int $caseSaleId
+     * @return string
+     */
+    public function actionViewFareRules(int $caseSaleId): string
+    {
+        $fareRules = [];
+        try {
+            if (!Yii::$app->request->isAjax) {
+                throw new BadRequestHttpException();
+            }
+
+            /** @abac null, SaleListAbacObject::UI_BLOCK_SALE_LIST, SaleListAbacObject::ACTION_VIEW_FARE_RULES, View Fare Rules */
+            if (!Yii::$app->abac->can(null, SaleListAbacObject::UI_BLOCK_SALE_LIST, SaleListAbacObject::ACTION_VIEW_FARE_RULES)) {
+                throw new ForbiddenHttpException('Access denied');
+            }
+
+            $caseSale = CaseSale::findOne(['css_sale_id' => $caseSaleId]);
+            if (!$caseSale) {
+                throw new NotFoundHttpException('Not found case sale. Id (' . $caseSaleId . ')');
+            }
+
+            $saleWithFareRules = [];
+            try {
+                $saleWithFareRules = $this->casesSaleService->detailRequestToBackOffice($caseSale->css_sale_id, 1);
+            } catch (\DomainException | \RuntimeException | BoResponseException $e) {
+                \Yii::warning(AppHelper::throwableLog($e), 'SaleController:actionViewFareRules:DomainException|RuntimeException|BoResponseException');
+            }
+
+            $fareRules = $this->fareRulesService->parseResponse($saleWithFareRules);
+        } catch (\Throwable $throwable) {
+            \Yii::warning(AppHelper::throwableLog($throwable), 'SaleController:actionViewFareRules:DomainException|RuntimeException|BoResponseException');
+        }
+
+        return $this->renderAjax('/sale/partial/_sale_fare_rules', [
+            'fareRules' => $fareRules
+        ]);
     }
 }

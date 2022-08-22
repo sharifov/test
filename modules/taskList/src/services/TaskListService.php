@@ -10,6 +10,8 @@ use yii\helpers\VarDumper;
 
 class TaskListService
 {
+    public const PARAM_KEY_SMS_EXCLUDE_PROJECTS = 'excludeProjectsAssigning';
+
     public static function getObjectAttributeList(string $object)
     {
         //$object

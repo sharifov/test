@@ -57,6 +57,7 @@ return [
             'common/config/supervisor/queue-virtual-cron.conf',
             'common/config/supervisor/socket-server.conf',
             'common/config/supervisor/queue-lead-redial.conf',
+            'common/config/supervisor/queue-db.conf',
         ],
     ],
     'Development' => [
@@ -81,6 +82,7 @@ return [
             'common/config/supervisor/queue-virtual-cron.conf',
             'common/config/supervisor/socket-server.conf',
             'common/config/supervisor/queue-lead-redial.conf',
+            'common/config/supervisor/queue-db.conf',
         ],
     ],
     'Stage' => [
@@ -104,6 +106,7 @@ return [
             'common/config/supervisor/queue-virtual-cron.conf',
             'common/config/supervisor/socket-server.conf',
             'common/config/supervisor/queue-lead-redial.conf',
+            'common/config/supervisor/queue-db.conf',
         ],
     ],
     'Production' => [
@@ -127,6 +130,7 @@ return [
             'common/config/supervisor/queue-virtual-cron.conf',
             'common/config/supervisor/socket-server.conf',
             'common/config/supervisor/queue-lead-redial.conf',
+            'common/config/supervisor/queue-db.conf',
         ],
     ],
 ];
