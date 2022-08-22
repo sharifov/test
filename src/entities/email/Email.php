@@ -612,4 +612,70 @@ class Email extends BaseActiveRecord implements EmailInterface
     {
         return $this->e_id;
     }
+
+    /**
+     *
+     * @param array $leadsIds
+     * @return array
+     */
+    public function linkLeads(array $leadsIds): array
+    {
+        $linked = [];
+        foreach ($leadsIds as $id) {
+            if ($lead = Lead::findOne($id)) {
+                $this->link('leads', $lead);
+                $linked[] = $id;
+            }
+        }
+        return $linked;
+    }
+
+    /**
+     *
+     * @param array $casesIds
+     * @return array
+     */
+    public function linkCases(array $casesIds): array
+    {
+        $linked = [];
+        foreach ($casesIds as $id) {
+            if ($case = Cases::findOne($id)) {
+                $this->link('cases', $case);
+                $linked[] = $id;
+            }
+        }
+        return $linked;
+    }
+
+    /**
+     *
+     * @param array $clientsIds
+     * @return array
+     */
+    public function linkClients(array $clientsIds): array
+    {
+        $linked = [];
+        foreach ($clientsIds as $id) {
+            if ($client = Client::findOne($id)) {
+                $this->link('clients', $client);
+                $linked[] = $id;
+            }
+        }
+        return $linked;
+    }
+
+    /**
+     *
+     * @param int $replyId
+     * @return bool
+     */
+    public function linkReply(int $replyId): bool
+    {
+        $reply = self::findOne($replyId);
+        if ($reply) {
+            $this->link('reply', $reply);
+            return true;
+        }
+        return false;
+    }
 }

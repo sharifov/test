@@ -481,10 +481,10 @@ class EmailMainService implements EmailServiceInterface
             $email->updateAttributes(['e_lead_id' => $leadId, 'e_case_id' => $caseId]);
         } else {
             if ($leadId) {
-                $this->emailRepository->linkLeads($email, [$leadId]);
+                $email->linkLeads([$leadId]);
             }
             if ($caseId) {
-                $this->emailRepository->linkCases($email, [$caseId]);
+                $email->linkCases([$caseId]);
             }
         }
 
