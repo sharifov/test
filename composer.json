@@ -91,7 +91,6 @@
 		"yiisoft/yii2-redis": "~2.0.0",
 		"kivork/yii2-bootstrap4-glyphicons": "*",
 		"2amigos/yii2-multi-select-widget": "*",
-		"kivork/yii2-mattermost-log-target": "@dev",
 		"kivork/yii2-virtual-cron": "@dev",
 		"kivork/yii2-prometheus-client": "@dev",
 		"sorokinmedia/yii2-centrifugo": "*",
