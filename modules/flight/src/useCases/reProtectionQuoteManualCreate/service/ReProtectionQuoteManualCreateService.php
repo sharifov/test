@@ -20,6 +20,7 @@ use modules\flight\models\FlightQuoteTrip;
 use modules\flight\models\FlightSegment;
 use modules\flight\src\dto\flightSegment\SegmentDTO;
 use modules\flight\src\dto\itineraryDump\ItineraryDumpDTO;
+use modules\flight\src\helpers\FlightQuoteHelper;
 use modules\flight\src\repositories\flightQuoteBooking\FlightQuoteBookingRepository;
 use modules\flight\src\repositories\flightQuoteFlight\FlightQuoteFlightRepository;
 use modules\flight\src\repositories\flightQuotePaxPriceRepository\FlightQuotePaxPriceRepository;
@@ -373,7 +374,7 @@ class ReProtectionQuoteManualCreateService
             'validatingCarrier' => $form->validatingCarrier,
             'fareType' => $form->fareType,
             'key' => md5(serialize($form->toArray())),
-            'trips' => [], /* TODO::  */
+            'trips' => FlightQuoteHelper::getTripsSegmentsData($form->reservationDump, $form->cabin, (int)$form->tripType),
         ];
     }
 }
