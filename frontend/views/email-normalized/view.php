@@ -2,7 +2,6 @@
 
 use yii\helpers\Html;
 use yii\widgets\DetailView;
-use src\helpers\email\MaskEmailHelper;
 use src\entities\email\Email;
 use modules\fileStorage\FileStorageSettings;
 use modules\fileStorage\src\widgets\FileStorageListWidget;
@@ -19,6 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
+    	<?= Html::a('Update', ['update', 'id' => $model->e_id], ['class' => 'btn btn-primary']) ?>
         <?= Html::a('Delete', ['delete', 'id' => $model->e_id], [
             'class' => 'btn btn-danger',
             'data' => [
@@ -50,6 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'reply.e_id',
                 'leads:leads',
                 'cases:cases',
+                'clientsIds:clients',
                 'e_project_id',
                 'emailFrom',
                 'emailFromName',
