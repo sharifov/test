@@ -264,7 +264,7 @@ class SendEmailWithQuotes extends BaseCommand
                 'leadId' => $lead->id,
                 'projectId' => $preview['project_id'] ?? null,
                 'emailFrom' => $preview['email_from'] ?? null,
-                'emailFromName' => $agent->full_name,
+                'emailFromName' => $agent->nickname,
                 'emailTo' => $preview['email_to'] ?? null,
                 'emailSubject' => $preview['email_subject'] ?? null,
                 'bodyHtml' => $preview['email_body_html'] ?? null,
