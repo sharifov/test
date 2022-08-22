@@ -620,14 +620,30 @@ class Email extends BaseActiveRecord implements EmailInterface
      */
     public function linkLeads(array $leadsIds): array
     {
+        $toUnlink = $this->leadsIds;
         $linked = [];
         foreach ($leadsIds as $id) {
-            if ($lead = Lead::findOne($id)) {
+            $key = array_search($id, $this->leadsIds);
+            if ($key !== false) {
+                unset($toUnlink[$key]);
+            } elseif ($lead = Lead::findOne($id)) {
                 $this->link('leads', $lead);
                 $linked[] = $id;
             }
         }
+        if (!empty($toUnlink)) {
+            $this->unlinkLeads($toUnlink);
+        }
         return $linked;
+    }
+
+    public function unlinkLeads(array $leadsIds): void
+    {
+        foreach ($leadsIds as $id) {
+            if ($lead = Lead::findOne($id)) {
+                $this->unlink('leads', $lead, true);
+            }
+        }
     }
 
     /**
@@ -637,14 +653,30 @@ class Email extends BaseActiveRecord implements EmailInterface
      */
     public function linkCases(array $casesIds): array
     {
+        $toUnlink = $this->casesIds;
         $linked = [];
         foreach ($casesIds as $id) {
-            if ($case = Cases::findOne($id)) {
+            $key = array_search($id, $this->casesIds);
+            if ($key !== false) {
+                unset($toUnlink[$key]);
+            } elseif ($case = Cases::findOne($id)) {
                 $this->link('cases', $case);
                 $linked[] = $id;
             }
         }
+        if (!empty($toUnlink)) {
+            $this->unlinkCases($toUnlink);
+        }
         return $linked;
+    }
+
+    public function unlinkCases(array $casesIds): void
+    {
+        foreach ($casesIds as $id) {
+            if ($case = Cases::findOne($id)) {
+                $this->unlink('cases', $case, true);
+            }
+        }
     }
 
     /**
@@ -654,14 +686,30 @@ class Email extends BaseActiveRecord implements EmailInterface
      */
     public function linkClients(array $clientsIds): array
     {
+        $toUnlink = $this->clientsIds;
         $linked = [];
         foreach ($clientsIds as $id) {
-            if ($client = Client::findOne($id)) {
+            $key = array_search($id, $this->clientsIds);
+            if ($key !== false) {
+                unset($toUnlink[$key]);
+            } elseif ($client = Client::findOne($id)) {
                 $this->link('clients', $client);
                 $linked[] = $id;
             }
         }
+        if (!empty($toUnlink)) {
+            $this->unlinkClients($toUnlink);
+        }
         return $linked;
+    }
+
+    public function unlinkClients(array $clientsIds): void
+    {
+        foreach ($clientsIds as $id) {
+            if ($client = Client::findOne($id)) {
+                $this->unlink('clients', $client, true);
+            }
+        }
     }
 
     /**
@@ -669,13 +717,14 @@ class Email extends BaseActiveRecord implements EmailInterface
      * @param int $replyId
      * @return bool
      */
-    public function linkReply(int $replyId): bool
+    public function linkReply(?int $replyId): void
     {
-        $reply = self::findOne($replyId);
-        if ($reply) {
+        $linkedToReply = $this->reply;
+        if ($reply = self::findOne($replyId)) {
             $this->link('reply', $reply);
-            return true;
         }
-        return false;
+        if ($replyId == null || ($linkedToReply != null && !$linkedToReply->equals($reply))) {
+            $this->unlink('reply', $linkedToReply, true);
+        }
     }
 }
