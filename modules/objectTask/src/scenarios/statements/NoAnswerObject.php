@@ -7,6 +7,7 @@ use common\models\Project;
 use src\forms\leadflow\FollowUpReasonForm;
 use src\forms\leadflow\ProcessingReasonForm;
 use src\forms\leadflow\RejectReasonForm;
+use src\model\leadStatusReason\entity\LeadStatusReasonQuery;
 
 class NoAnswerObject extends BaseObject
 {
@@ -95,10 +96,12 @@ class NoAnswerObject extends BaseObject
         $p['values'] = Project::getList();
         $s['values'] = Lead::STATUS_LIST;
         $c['values'] = Lead::CABIN_LIST;
+
         $statusReasonList = [
             Lead::STATUS_PROCESSING => ProcessingReasonForm::REASON_LIST,
             Lead::STATUS_FOLLOW_UP => FollowUpReasonForm::REASON_LIST,
             Lead::STATUS_REJECT => RejectReasonForm::REASON_LIST,
+            Lead::STATUS_CLOSED => LeadStatusReasonQuery::getList('lsr_name'),
         ];
 
         foreach ($statusReasonList as $status => $reasons) {
