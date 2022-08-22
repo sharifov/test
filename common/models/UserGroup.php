@@ -229,6 +229,15 @@ class UserGroup extends ActiveRecord
     /**
      * @return array
      */
+    public static function getEnabledList(): array
+    {
+        $data = self::find()->where('ug_disable=0')->orderBy(['ug_name' => SORT_ASC])->asArray()->all();
+        return ArrayHelper::map($data, 'ug_id', 'ug_name');
+    }
+
+    /**
+     * @return array
+     */
     public static function getEnvListWOCache(): array
     {
         $data = self::find()->orderBy(['ug_name' => SORT_ASC])->asArray()->all();
