@@ -41,7 +41,7 @@ class NoAnswerObject extends BaseObject
         'label' => 'Status',
         'type' => self::ATTR_TYPE_INTEGER,
         'input' => self::ATTR_INPUT_SELECT,
-        'multiple' => false,
+        'multiple' => true,
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN],
     ];
 
@@ -52,7 +52,7 @@ class NoAnswerObject extends BaseObject
         'label' => 'Reason',
         'type' => self::ATTR_TYPE_STRING,
         'input' => self::ATTR_INPUT_SELECT,
-        'multiple' => false,
+        'multiple' => true,
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN],
     ];
 

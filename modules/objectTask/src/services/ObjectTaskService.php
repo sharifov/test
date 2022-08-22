@@ -110,12 +110,7 @@ class ObjectTaskService
 
         if (!empty($pendingObjectTaskList)) {
             foreach ($pendingObjectTaskList as $objectTask) {
-                Yii::$app->queue_db->remove(
-                    $objectTask->ot_q_id
-                );
-
                 try {
-                    $objectTask->ot_q_id = null;
                     $objectTask->setCanceledStatus();
 
                     (new ObjectTaskRepository($objectTask))->save();

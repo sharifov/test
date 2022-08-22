@@ -272,7 +272,7 @@ class LeadTaskListService
 
     private function getStartDate(\DateTimeImmutable $dtStart, TaskList $taskList, TaskListParamService $taskListParams): \DateTimeImmutable
     {
-        if ($taskListParams->getDelayHoursParam() === 0 && $taskListParams->getDelayShiftParam() > 0) {
+        if ($taskListParams->getDelayHoursParam() === 0) {
             $firstShiftScheduleStartDate = UserShiftScheduleQuery::getQueryForNextShiftsByUserId(
                 $this->lead->employee_id,
                 $dtStart

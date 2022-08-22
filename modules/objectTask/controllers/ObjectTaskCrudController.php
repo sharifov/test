@@ -5,6 +5,9 @@ namespace modules\objectTask\controllers;
 use frontend\controllers\FController;
 use modules\objectTask\src\entities\ObjectTask;
 use modules\objectTask\src\entities\ObjectTaskSearch;
+use modules\objectTask\src\entities\repositories\ObjectTaskRepository;
+use modules\objectTask\src\forms\ObjectTaskMultipleUpdateForm;
+use Yii;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -37,19 +40,49 @@ class ObjectTaskCrudController extends FController
         );
     }
 
-    /**
-     * Lists all ObjectTask models.
-     *
-     * @return string
-     */
-    public function actionIndex()
+    public function actionIndex(?string $act = null)
     {
+        $multipleUpdateForm = new ObjectTaskMultipleUpdateForm();
+        $multipleErrors = [];
         $searchModel = new ObjectTaskSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
+
+        if ($multipleUpdateForm->load(Yii::$app->request->post()) && $multipleUpdateForm->validate()) {
+            foreach ($multipleUpdateForm->element_list as $uuid) {
+                $needSaveObjectTask = false;
+                $objectTask = ObjectTask::find()
+                    ->where([
+                        'ot_uuid' => $uuid
+                    ])
+                    ->limit(1)
+                    ->one();
+
+                if (!empty($multipleUpdateForm->statusId) && $multipleUpdateForm->statusId !== $objectTask->ot_status) {
+                    $needSaveObjectTask = true;
+                    $objectTask->ot_status = $multipleUpdateForm->statusId;
+                }
+
+                if ($needSaveObjectTask === true) {
+                    try {
+                        (new ObjectTaskRepository($objectTask))->save();
+                    } catch (\Throwable $e) {
+                        $multipleErrors[$uuid] = $objectTask->getErrors();
+                    }
+                }
+            }
+        }
+
+        if ($act === 'select-all') {
+            $data = $searchModel->searchIds(Yii::$app->request->queryParams);
+
+            return $this->asJson($data);
+        }
 
         return $this->render('index', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
+            'multipleUpdateForm' => $multipleUpdateForm,
+            'multipleErrors' => $multipleErrors,
         ]);
     }
 
