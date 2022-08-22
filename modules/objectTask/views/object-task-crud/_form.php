@@ -24,7 +24,7 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'ot_command')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'ot_status')->textInput() ?>
+    <?= $form->field($model, 'ot_status')->dropDownList(\modules\objectTask\src\entities\ObjectTask::STATUS_LIST) ?>
 
     <?= $form->field($model, 'ot_created_dt')->textInput() ?>
 
