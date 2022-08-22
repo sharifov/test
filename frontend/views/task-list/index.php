@@ -218,13 +218,16 @@ $subtypeTotalData = [];
                             [
                                 'label' => 'Deadline',
                                 'value' => static function (UserTask $model) {
-                                    return $model->isDeadline() ? Html::tag(
-                                        'span',
-                                        'Deadline',
-                                        ['title' => \Yii::$app->formatter->asRelativeTime(strtotime($model->ut_end_dt)),
-                                            'class' => 'badge badge-danger']
-                                    ) :
-                                        UserTaskHelper::getDeadlineTimer($model->ut_start_dt, $model->ut_end_dt);
+                                    if ($model->isProcessing()) {
+                                        return $model->isDeadline() ? Html::tag(
+                                            'span',
+                                            'Deadline',
+                                            ['title' => \Yii::$app->formatter->asRelativeTime(strtotime($model->ut_end_dt)),
+                                                'class' => 'badge badge-danger']
+                                        ) :
+                                            UserTaskHelper::getDeadlineTimer($model->ut_start_dt, $model->ut_end_dt);
+                                    }
+                                    return '-';
                                 },
                                 'format' => 'raw',
                             ],
