@@ -45,15 +45,7 @@ class AvailableList
 
     public function getProjects(): array
     {
-        if ($this->user->isAdmin() || $this->user->isSuperAdmin() || $this->user->isUserManager()) {
-            return \common\models\Project::getList();
-        }
-
-        if ($this->user->isSupervision()) {
-            return \yii\helpers\ArrayHelper::map($this->user->projects, 'id', 'name');
-        }
-
-        return [];
+        return \common\models\Project::getEnabledList();
     }
 
     public function getDepartments(): array
@@ -64,15 +56,7 @@ class AvailableList
 
     public function getUserGroups(): array
     {
-        if ($this->user->isAdmin() || $this->user->isSuperAdmin() || $this->user->isUserManager()) {
-            return \common\models\UserGroup::getList();
-        }
-
-        if ($this->user->isSupervision()) {
-            return $this->user->getUserGroupList();
-        }
-
-        return [];
+        return \common\models\UserGroup::getEnabledList();
     }
 
     public function getTimezones(): array
