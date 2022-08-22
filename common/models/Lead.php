@@ -454,6 +454,7 @@ class Lead extends ActiveRecord implements Objectable
     public $quoteType;
 
     private $oldAdditionalInformation;
+    private ?array $objectTaskOrderByStatus = null;
 
     /**
      * {@inheritdoc}
@@ -5395,23 +5396,37 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             ->count();
     }
 
+    private function getNumberObjectTasksOrderByStatus(): array
+    {
+        if ($this->objectTaskOrderByStatus === null) {
+            $this->objectTaskOrderByStatus = ObjectTask::countByStatus(
+                ObjectTaskService::OBJECT_LEAD,
+                $this->id
+            );
+        }
+
+        return $this->objectTaskOrderByStatus;
+    }
+
     public function hasObjectTasks(): bool
     {
-        return ObjectTask::find()
-            ->where([
-                'ot_object' => ObjectTaskService::OBJECT_LEAD,
-                'ot_object_id' => $this->id,
-            ])
-            ->exists();
+        return !empty($this->getNumberObjectTasksOrderByStatus());
+    }
+
+    public function hasObjectTasksWithPendingStatus(): bool
+    {
+        return array_key_exists(ObjectTask::STATUS_PENDING, $this->getNumberObjectTasksOrderByStatus());
+    }
+
+    public function countObjectTaskWithPendingStatus(): int
+    {
+        return (int) ($this->getNumberObjectTasksOrderByStatus()[ObjectTask::STATUS_PENDING] ?? 0);
     }
 
     public function countObjectTask(): int
     {
-        return (int) ObjectTask::find()
-            ->where([
-                'ot_object' => ObjectTaskService::OBJECT_LEAD,
-                'ot_object_id' => $this->id,
-            ])
-            ->count();
+        return array_sum(
+            $this->getNumberObjectTasksOrderByStatus()
+        );
     }
 }

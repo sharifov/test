@@ -120,6 +120,9 @@ $timerExtraCss = 'vertical-align: 3px;font-size: 12px; margin-left: 5px;';
                             <div class="page-header__general-item" data-toggle="tooltip" data-placement="top" title="Auto Follow Up jobs">
                                 <strong><i class="fa fa-tasks" aria-hidden="true"></i></strong>
                                 <span>
+                                <?php if ($lead->hasObjectTasksWithPendingStatus() === true) : ?>
+                                    <?= $lead->countObjectTaskWithPendingStatus() ?> /
+                                <?php endif; ?>
                                 <?= $lead->countObjectTask() ?>
                             </span>
                             </div>
