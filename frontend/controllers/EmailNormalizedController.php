@@ -166,7 +166,7 @@ class EmailNormalizedController extends FController
                         $flashMessage = 'Email was updated.<br/>';
                     }
 
-                    $this->emailService->sendMail($email);
+                    $this->emailService->sendMail($email, $email->emailData ?? []);
                     Yii::$app->session->setFlash('success', $flashMessage . '<strong>Email Message</strong> was successfully sent to <strong>' . $email->getEmailTo() . '</strong>');
 
                     return $this->redirect(['inbox', 'id' => $email->e_id]);
