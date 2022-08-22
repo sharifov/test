@@ -224,11 +224,16 @@ class Project extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param bool $enabled
      * @return array
      */
-    public static function getList(): array
+    public static function getList(bool $enabled = false): array
     {
-        $data = self::find()->select(['id', 'name'])->orderBy(['name' => SORT_ASC])->asArray()->all();
+        if ($enabled) {
+            $data = self::find()->select(['id', 'name'])->where('!closed')->orderBy(['name' => SORT_ASC])->asArray()->all();
+        } else {
+            $data = self::find()->select(['id', 'name'])->orderBy(['name' => SORT_ASC])->asArray()->all();
+        }
         return ArrayHelper::map($data, 'id', 'name');
     }
 
