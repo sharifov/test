@@ -78,7 +78,15 @@ $user = Yii::$app->user->identity;
         'columns' => [
             'e_id',
             [   'class' => 'yii\grid\ActionColumn',
-                'template' => '{view} {delete}',
+                'template' => '{view}  {update} {delete}',
+                'visibleButtons' => [
+                    'update' => static function ($model, $key, $index) use ($user) {
+                        return $user->isAdmin();
+                     },
+                    'delete' => static function ($model, $key, $index) use ($user) {
+                        return $user->isAdmin();
+                     },
+                ],
                 'urlCreator' => function ($action, $model, $key, $index) {
                     return [$action, 'id' => $model->id];
                 },
