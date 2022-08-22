@@ -102,9 +102,9 @@ $is_admin = $user->isAdmin();
                             <?php if ($modelEmailView) : ?>
                                 <?= $this->render('_view_mail', ['model' => $modelEmailView])?>
                             <?php elseif ($action) : ?>
-                                <?= $this->render('_new_mail', ['emailForm' => $emailForm ,'mailList' => $mailList, 'action' => $action])?>
+                                <?= $this->render('/email/_new_mail', ['emailForm' => $emailForm ,'mailList' => $mailList, 'action' => $action])?>
                             <?php else : ?>
-                                <?= $this->render('_stats', ['stats' => $stats, 'mailList' => $mailList])?>
+                                <?= $this->render('/email/_stats', ['stats' => $stats, 'mailList' => $mailList])?>
                             <?php endif; ?>
                         </div>
                         <!-- /CONTENT MAIL -->
