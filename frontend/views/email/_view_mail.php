@@ -78,8 +78,8 @@ use modules\fileStorage\src\widgets\FileStorageListWidget;
     </div>
     <?php if (FileStorageSettings::isEnabled()) : ?>
         <?= FileStorageListWidget::byEmail(
-                $model->e_id,
-                $model->emailData
-            ) ?>
+            $model->e_id,
+            $model->emailData
+        ) ?>
     <?php endif; ?>
 </div>
