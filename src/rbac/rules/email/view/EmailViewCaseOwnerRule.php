@@ -2,8 +2,8 @@
 
 namespace src\rbac\rules\email\view;
 
-use common\models\Email;
 use yii\rbac\Rule;
+use src\entities\email\EmailInterface;
 
 class EmailViewCaseOwnerRule extends Rule
 {
@@ -11,14 +11,14 @@ class EmailViewCaseOwnerRule extends Rule
 
     public function execute($userId, $item, $params): bool
     {
-        if (!isset($params['email']) || !$params['email'] instanceof Email) {
+        if (!isset($params['email']) || !$params['email'] instanceof EmailInterface) {
             return false;
         }
 
         /** @var Email $email */
         $email = $params['email'];
 
-        if (!$email->e_case_id) {
+        if (!$email->hasCase()) {
             return false;
         }
 
