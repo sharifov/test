@@ -92,6 +92,7 @@ use src\services\TransactionManager;
 use Twilio\TwiML\VoiceResponse;
 use Yii;
 use yii\base\Event;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
