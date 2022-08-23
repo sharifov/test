@@ -16,8 +16,8 @@ class LeadStatusReasonQuery
         return LeadStatusReason::find()->enabled()->asArray()->all();
     }
 
-    public static function getList(): array
+    public static function getList(string $key = 'lsr_key', string $value = 'lsr_name'): array
     {
-        return ArrayHelper::map(self::getAllEnabledAsArray(), 'lsr_key', 'lsr_name');
+        return ArrayHelper::map(self::getAllEnabledAsArray(), $key, $value);
     }
 }
