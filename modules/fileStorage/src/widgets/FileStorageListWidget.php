@@ -9,6 +9,8 @@ use modules\fileStorage\src\services\url\QueryParams;
 use modules\fileStorage\src\services\url\UrlGenerator;
 use src\auth\Auth;
 use yii\base\Widget;
+use modules\fileStorage\src\entity\fileStorage\FileStorageQuery;
+use modules\fileStorage\src\services\access\FileStorageAccessService;
 
 /**
  * Class FileStorageListWidget
@@ -23,6 +25,7 @@ class FileStorageListWidget extends Widget
     public string $uploadWidget;
     public ?UrlGenerator $urlGenerator = null;
     public QueryParams $queryParams;
+    public $canDelete = null;
 
     public function init()
     {
@@ -37,7 +40,8 @@ class FileStorageListWidget extends Widget
             'uploadWidget' => $this->uploadWidget,
             'urlGenerator' => $this->urlGenerator,
             'queryParams' => $this->queryParams,
-            'canView' => FileStorageSettings::canDownload() && Auth::can('file-storage/view')
+            'canView' => FileStorageSettings::canDownload() && Auth::can('file-storage/view'),
+            'canDelete' => $this->canDelete ?? FileStorageAccessService::canDeleteFile(),
         ]);
     }
 
@@ -57,5 +61,26 @@ class FileStorageListWidget extends Widget
             'uploadWidget' => $withUpload ? FileStorageUploadWidget::byCase($id) : '',
             'queryParams' => QueryParams::byCase(),
         ]);
+    }
+
+    public static function byEmail(int $id, ?array $emailData): string
+    {
+        $files = [];
+        if (isset($emailData['files']) && !empty($emailData['files'])) {
+            foreach ($emailData['files'] as $val) {
+                $file = (isset($val['uid'])) ? FileStorageQuery::getOneByUid($val['uid']) : FileStorageQuery::getOneByPath($val['value']);
+                if (!empty($file)) {
+                    $files[] = $file;
+                }
+            }
+        }
+
+        return self::widget([
+            'files' => $files,
+            'uploadWidget' => '',
+            'queryParams' => QueryParams::byEmpty(),
+            'canDelete' => false,
+        ]);
+
     }
 }
