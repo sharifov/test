@@ -215,40 +215,6 @@ class GmailService
         }
     }
 
-    private function processEmail(Email $email): void
-    {
-        if ($email->e_lead_id === null && $email->e_case_id === null && EmailServiceHelper::isNotInternalEmail($email->e_email_from)) {
-            try {
-                $process = (Yii::createObject(EmailIncomingService::class))->create(
-                    $email->e_id,
-                    $email->e_email_from,
-                    $email->e_email_to,
-                    $email->e_project_id
-                );
-                $email->e_lead_id = $process->leadId;
-                $email->e_case_id = $process->caseId;
-                $email->save(false);
-            } catch (\DomainException $e) {
-                Yii::info(['category' => 'processEmail', 'error' => $e->getMessage()]);
-            } catch (\Throwable $e) {
-                self::error(['category' => 'processEmail', 'error' => $e->getMessage()]);
-            }
-        }
-
-        if ($email->e_case_id) {
-            try {
-                (Yii::createObject(CasesManageService::class))->needAction($email->e_case_id);
-                $job = new CreateSaleFromBOJob();
-                $job->case_id = $email->e_case_id;
-                $job->email = $email->e_email_from;
-                $job->project_key = $email->project->api_key ?? null;
-                Yii::$app->queue_job->priority(100)->push($job);
-            } catch (\Throwable $throwable) {
-                self::error(['category' => 'addToJobFailed', 'error' => AppHelper::throwableFormatter($throwable)]);
-            }
-        }
-    }
-
     private function processProcessedEmails(string $command, array $processedEmailsIds): void
     {
         if (!$processedEmailsIds) {
