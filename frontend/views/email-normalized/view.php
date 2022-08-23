@@ -18,7 +18,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <h1><?= Html::encode($this->title) ?></h1>
 
     <p>
-    	<?= Html::a('Update', ['update', 'id' => $model->e_id], ['class' => 'btn btn-primary']) ?>
+        <?= Html::a('Update', ['update', 'id' => $model->e_id], ['class' => 'btn btn-primary']) ?>
         <?= Html::a('Delete', ['delete', 'id' => $model->e_id], [
             'class' => 'btn btn-danger',
             'data' => [
@@ -31,15 +31,16 @@ $this->params['breadcrumbs'][] = $this->title;
 
     <div class="col-md-7">
         <hr>
-        <h4>Subject: <?=Html::encode($model->emailBody->embd_email_subject)?></h4>
+        <h4>Subject: <?= Html::encode($model->emailBody->embd_email_subject) ?></h4>
         <hr>
         <h4>Email preview:</h4>
-        <object width="100%" height="1000" data="<?=\yii\helpers\Url::to(['email-normalized/view', 'id' => $model->e_id, 'preview' => 1])?>"></object>
+        <object width="100%" height="1000"
+                data="<?= \yii\helpers\Url::to(['email-normalized/view', 'id' => $model->e_id, 'preview' => 1]) ?>"></object>
         <?php if (FileStorageSettings::isEnabled()) : ?>
             <?= FileStorageListWidget::byEmail(
-                    $model->e_id,
-                    $model->emailData
-                ) ?>
+                $model->e_id,
+                $model->emailData
+            ) ?>
         <?php endif; ?>
     </div>
     <div class="col-md-5">

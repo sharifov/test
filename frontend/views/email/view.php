@@ -36,9 +36,9 @@ $this->params['breadcrumbs'][] = $this->title;
         <object width="100%" height="1000" data="<?= Url::to(['view', 'id' => $model->e_id, 'preview' => 1])?>"></object>
         <?php if (FileStorageSettings::isEnabled()) : ?>
             <?= FileStorageListWidget::byEmail(
-                    $model->e_id,
-                    $model->emailData
-                ) ?>
+                $model->e_id,
+                $model->emailData
+            ) ?>
         <?php endif; ?>
     </div>
 
