@@ -45,6 +45,7 @@ return [
         'two-factor' => \src\useCase\login\twoFactorAuth\abac\TwoFactorAuthAbacObject::class,
         'lead-sale' => modules\lead\src\abac\sale\LeadSaleAbacObject::class,
         'business-extra-queue' => \modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject::class,
+        'object-task' => \modules\objectTask\src\abac\ObjectTaskObject::class,
     ],
     'scanDirs' => [
         '/modules/',
