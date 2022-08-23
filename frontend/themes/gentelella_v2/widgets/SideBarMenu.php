@@ -11,6 +11,7 @@ use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
+use modules\objectTask\src\abac\ObjectTaskObject;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\services\UserShiftScheduleService;
@@ -1121,8 +1122,26 @@ class SideBarMenu extends \yii\bootstrap\Widget
                 'url' => 'javascript:',
                 'icon' => 'tasks',
                 'items' => [
-                    ['label' => 'Object Task List', 'url' => ['/object-task/object-task-crud/index']],
-                    ['label' => 'Object Task Scenarios', 'url' => ['/object-task/object-task-scenario/index']],
+                    [
+                        'label' => 'Object Task List',
+                        'url' => ['/object-task/object-task-crud/index'],
+                        /** @abac ObjectTaskObject::ACT_OBJECT_TASK_LIST, ObjectTaskObject::ACTION_ACCESS, Access to page object-task/object-task-crud/index */
+                        'abac' => [
+                            'dto' => null,
+                            'object' => ObjectTaskObject::ACT_OBJECT_TASK_LIST,
+                            'action' => LeadAbacObject::ACTION_ACCESS
+                        ],
+                    ],
+                    [
+                        'label' => 'Object Task Scenarios',
+                        'url' => ['/object-task/object-task-scenario/index'],
+                        /** @abac ObjectTaskObject::ACT_OBJECT_TASK_SCENARIO, ObjectTaskObject::ACTION_ACCESS, Access to page /object-task/object-task-scenario/index */
+                        'abac' => [
+                            'dto' => null,
+                            'object' => ObjectTaskObject::ACT_OBJECT_TASK_SCENARIO,
+                            'action' => LeadAbacObject::ACTION_ACCESS
+                        ],
+                    ],
                 ],
             ];
         }
