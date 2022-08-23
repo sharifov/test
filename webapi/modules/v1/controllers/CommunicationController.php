@@ -511,11 +511,10 @@ class CommunicationController extends ApiBaseController
                                 }
 
                                 if (isset($result['data']['is_error']) && $result['data']['is_error'] === true) {
-                                    Yii::error([
+                                    Yii::warning([
                                         'callId' => $callModel->c_id,
                                         'rate' => $callLogFilterGuard->clfg_sd_rate,
                                         'type' => $callLogFilterGuard->getTypeName(),
-                                        'phone' => $callModel->c_from,
                                         'message' => $result['data']['message']
                                     ], 'CallSpamFilter:DepartmentCall:CommunicationError');
                                 } elseif (

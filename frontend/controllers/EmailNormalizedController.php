@@ -166,7 +166,7 @@ class EmailNormalizedController extends FController
                         $flashMessage = 'Email was updated.<br/>';
                     }
 
-                    $this->emailService->sendMail($email);
+                    $this->emailService->sendMail($email, $email->emailData ?? []);
                     Yii::$app->session->setFlash('success', $flashMessage . '<strong>Email Message</strong> was successfully sent to <strong>' . $email->getEmailTo() . '</strong>');
 
                     return $this->redirect(['inbox', 'id' => $email->e_id]);
@@ -254,6 +254,38 @@ class EmailNormalizedController extends FController
             'selectedId'        => $selectedId,
             'action'            => $action,
             'stats'             => $stats,
+        ]);
+    }
+
+    public function actionUpdate($id)
+    {
+        $user = Yii::$app->user->identity;
+        $email = $this->findModel($id);
+
+        if (Yii::$app->request->isPost) {
+            $emailForm = new EmailForm($user->id);
+            if ($emailForm->load(Yii::$app->request->post()) && $emailForm->validate()) {
+                try {
+                    $email = $this->emailService->update($email, $emailForm);
+                    Yii::$app->session->setFlash('success', 'Email was updated');
+
+                    return $this->redirect(['view', 'id' => $id]);
+                } catch (CreateModelException $e) {
+                    $errorsMessage = VarDumper::dumpAsString($e->getErrors());
+                    Yii::$app->session->setFlash('error', $e->getMessage() . '<br/>' . $errorsMessage);
+                } catch (\Throwable $e) {
+                    Yii::$app->session->setFlash('error', $e->getMessage() . '<br/>' . $e->getTraceAsString());
+                }
+            } else {
+                Yii::$app->session->setFlash('error', $emailForm->getErrorSummary(true));
+            }
+        } else {
+            $emailForm = EmailForm::fromModel($email, $user->id);
+        }
+
+        return $this->render('update', [
+            'emailForm' => $emailForm,
+            'id' => $id,
         ]);
     }
 

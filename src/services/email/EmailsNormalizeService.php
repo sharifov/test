@@ -83,7 +83,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             'subject'   =>  $emailOld->e_email_subject,
             'text'      =>  $emailOld->e_email_body_text,
             'bodyHtml'  =>  $emailOld->e_email_body_blob ? TextConvertingHelper::unCompress($emailOld->e_email_body_blob) : $emailOld->body_html,
-            'data'      =>  !empty($emailOld->e_email_data) ? $emailOld->e_email_data : null,
+            'data'      =>  !empty($emailOld->e_email_data) ? json_decode($emailOld->e_email_data, true) : null,
         ];
 
         $data['log'] = [
@@ -227,25 +227,25 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             //=link Clients
             $clientsIds = $form->clients ?? [$this->helper->detectClientId($email->getEmailTo(false))];
             if (!empty($clientsIds)) {
-                $this->emailRepository->linkClients($email, $clientsIds);
+                $email->linkClients($clientsIds);
             }
             //=!link Clients
 
             //=link Cases
             if (!empty($form->cases)) {
-                $this->emailRepository->linkCases($email, $form->cases);
+                $email->linkCases($form->cases);
             }
             //=!link Cases
 
             //=link Leads
             if (!empty($form->leads)) {
-                $this->emailRepository->linkLeads($email, $form->leads);
+                $email->linkLeads($form->leads);
             }
             //=!link Leads
 
             //=link Reply
             if (!empty($form->replyId)) {
-                $this->emailRepository->linkReply($email, $form->replyId);
+                $email->linkReply($form->replyId);
             }
             //=!link Reply
 
@@ -330,25 +330,25 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             //=link Clients
             $clientsIds = $form->clients;
             if (!empty($clientsIds)) {
-                $this->emailRepository->linkClients($email, $clientsIds);
+                $email->linkClients($clientsIds);
             }
             //=!link Clients
 
             //=link Cases
             if (!empty($form->cases)) {
-                $this->emailRepository->linkCases($email, $form->cases);
+                $email->linkCases($form->cases);
             }
             //=!link Cases
 
             //=link Leads
             if (!empty($form->leads)) {
-                $this->emailRepository->linkLeads($email, $form->leads);
+                $email->linkLeads($form->leads);
             }
             //=!link Leads
 
             //=link Reply
             if (!empty($form->replyId)) {
-                $this->emailRepository->linkReply($email, $form->replyId);
+                $email->linkReply($form->replyId);
             }
             //=!link Reply
 

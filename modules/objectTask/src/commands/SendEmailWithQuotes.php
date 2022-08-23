@@ -21,6 +21,7 @@ use src\services\metrics\MetricsService;
 use src\services\quote\addQuote\AddQuoteService;
 use src\services\quote\quotePriceService\ClientQuotePriceService;
 use Yii;
+use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
 
 class SendEmailWithQuotes extends BaseCommand
@@ -244,7 +245,8 @@ class SendEmailWithQuotes extends BaseCommand
             throw new \Exception("Not found email for lead {$lead->id}");
         }
 
-        $dataForPreview = $lead->getEmailData2($quotes, $projectContactInfo, 'en-US', [], $agent);
+        $quoteIdList = ArrayHelper::getColumn($quotes, 'id');
+        $dataForPreview = $lead->getEmailData2($quoteIdList, $projectContactInfo, 'en-US', [], $agent);
         $dataForPreview['quotes'] = array_map(function ($quoteArray) use ($uid) {
             $quoteArray['qc'] = $uid;
             return $quoteArray;
@@ -264,7 +266,7 @@ class SendEmailWithQuotes extends BaseCommand
                 'leadId' => $lead->id,
                 'projectId' => $preview['project_id'] ?? null,
                 'emailFrom' => $preview['email_from'] ?? null,
-                'emailFromName' => $agent->full_name,
+                'emailFromName' => $agent->nickname,
                 'emailTo' => $preview['email_to'] ?? null,
                 'emailSubject' => $preview['email_subject'] ?? null,
                 'bodyHtml' => $preview['email_body_html'] ?? null,

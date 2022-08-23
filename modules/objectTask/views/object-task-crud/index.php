@@ -1,6 +1,7 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
+use modules\objectTask\src\abac\ObjectTaskObject;
 use modules\objectTask\src\entities\ObjectTask;
 use modules\objectTask\src\services\ObjectTaskService;
 use yii\bootstrap\ActiveForm;
@@ -125,7 +126,25 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => ActionColumn::class,
                 'urlCreator' => function ($action, ObjectTask $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'ot_uuid' => $model->ot_uuid]);
-                }
+                },
+                'visibleButtons' => [
+                    'update' => static function (ObjectTask $model, $key, $index) {
+                        /** @abac ObjectTaskObject::ACT_OBJECT_TASK_LIST, ObjectTaskObject::ACTION_UPDATE, Access to page object-task/object-task-crud/update */
+                        return \Yii::$app->abac->can(
+                            null,
+                            ObjectTaskObject::ACT_OBJECT_TASK_LIST,
+                            ObjectTaskObject::ACTION_UPDATE
+                        );
+                    },
+                    'delete' => static function (ObjectTask $model, $key, $index) {
+                        /** @abac ObjectTaskObject::ACT_OBJECT_TASK_LIST, ObjectTaskObject::ACTION_UPDATE, Access to page object-task/object-task-crud/delete */
+                        return \Yii::$app->abac->can(
+                            null,
+                            ObjectTaskObject::ACT_OBJECT_TASK_LIST,
+                            ObjectTaskObject::ACTION_DELETE
+                        );
+                    },
+                ],
             ],
         ],
     ]); ?>
