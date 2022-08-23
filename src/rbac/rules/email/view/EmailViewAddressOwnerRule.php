@@ -2,9 +2,9 @@
 
 namespace src\rbac\rules\email\view;
 
-use common\models\Email;
 use common\models\UserProjectParams;
 use yii\rbac\Rule;
+use src\entities\email\EmailInterface;
 
 class EmailViewAddressOwnerRule extends Rule
 {
@@ -12,16 +12,16 @@ class EmailViewAddressOwnerRule extends Rule
 
     public function execute($userId, $item, $params): bool
     {
-        if (!isset($params['email']) || !$params['email'] instanceof Email) {
+        if (!isset($params['email']) || !$params['email'] instanceof EmailInterface) {
             return false;
         }
 
-        /** @var Email $email */
+        /** @var EmailInterface $email */
         $email = $params['email'];
 
         return UserProjectParams::find()
             ->byUserId((int)$userId)
-            ->byEmail([$email->e_email_from, $email->e_email_to], false)
+            ->byEmail([$email->getEmailFrom(false), $email->getEmailTo(false)], false)
             ->exists();
     }
 }
