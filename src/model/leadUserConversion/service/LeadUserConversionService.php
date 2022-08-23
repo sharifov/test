@@ -75,6 +75,14 @@ class LeadUserConversionService
     public static function leadIsExcludeFromConversionByDescription(int $leadId, string $description): bool
     {
         if (in_array($description, LeadUserConversionDictionary::DESCRIPTION_LIST) === true) {
+
+            /** @fflag FFlag::FF_KEY_USER_CONVERSION_EXCLUDE_ALTERNATIVE_LEAD_ENABLE, Exclude alternative Lead in user conversion */
+            if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_USER_CONVERSION_EXCLUDE_ALTERNATIVE_LEAD_ENABLE)) {
+                if (Lead::find()->select('id')->where(['id' => $leadId, 'l_type' => Lead::TYPE_ALTERNATIVE])->exists()) {
+                    return true;
+                }
+            }
+
             /** @fflag FFlag::FF_KEY_EXCLUDE_TAKE_CREATE_FROM_LEAD_USER_CONVERSION_BY_SOURCE_ENABLED, Exclude add lead to LeadUserConversion table by source */
             if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_EXCLUDE_TAKE_CREATE_FROM_LEAD_USER_CONVERSION_BY_SOURCE_ENABLED)) {
                 $sources = Yii::$app->params['settings']['exclude_take_create_from_lead_user_conversion_by_source'] ?? [];
