@@ -4,6 +4,8 @@ use yii\helpers\Html;
 use src\entities\email\helpers\EmailType;
 use yii\helpers\Url;
 use src\entities\email\helpers\EmailStatus;
+use modules\fileStorage\FileStorageSettings;
+use modules\fileStorage\src\widgets\FileStorageListWidget;
 
 /* @var $this yii\web\View */
 /* @var $model src\entities\email\Email */
@@ -75,4 +77,10 @@ use src\entities\email\helpers\EmailStatus;
     <div class="view-mail">
         <object width="100%" height="800" data="<?= Url::to(['view', 'id' => $model->e_id, 'preview' => 1])?>"></object>
     </div>
+    <?php if (FileStorageSettings::isEnabled()) : ?>
+        <?= FileStorageListWidget::byEmail(
+            $model->e_id,
+            $model->emailData
+        ) ?>
+    <?php endif; ?>
 </div>

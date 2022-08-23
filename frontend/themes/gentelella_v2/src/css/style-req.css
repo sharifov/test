@@ -556,7 +556,7 @@ pre {
 }
 
 .x_panel .dropdown-menu{
-  z-index: 999;
+  z-index: 1040;
 }
 
 .dropdown-menu p {

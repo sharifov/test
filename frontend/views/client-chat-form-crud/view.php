@@ -1,5 +1,6 @@
 <?php
 
+use src\model\clientChatForm\entity\abac\ClientChatFormAbacObject;
 use src\model\clientChatForm\entity\ClientChatForm;
 use yii\bootstrap4\Html;
 use yii\helpers\VarDumper;
@@ -20,19 +21,28 @@ $this->params['breadcrumbs'][] = $this->title;
     <div class="col-md-6">
 
         <p>
-            <?= Html::a('Update', ['update', 'id' => $model->ccf_id], ['class' => 'btn btn-primary']) ?>
-<?php echo Html::a(
-    Html::tag('i', ' Builder', ['class' => 'fa fa-cog']),
-    ['builder','id' => $model->ccf_id],
-    ['class' => 'btn btn-secondary']
-)?>
-            <?= Html::a('Delete', ['delete', 'id' => $model->ccf_id], [
-                'class' => 'btn btn-danger',
-                'data' => [
-                    'confirm' => 'Are you sure you want to delete this item?',
-                    'method' => 'post',
-                ],
-            ]) ?>
+            <?php /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE, Access to update client chat form  */ ?>
+            <?php if (Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE)) : ?>
+                <?= Html::a('Update', ['update', 'id' => $model->ccf_id], ['class' => 'btn btn-primary']) ?>
+            <?php endif ?>
+            <?php /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_BUILDER, Access to builder client chat form  */ ?>
+            <?php if (Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_BUILDER)) : ?>
+                <?php echo Html::a(
+                    Html::tag('i', ' Builder', ['class' => 'fa fa-cog']),
+                    ['builder','id' => $model->ccf_id],
+                    ['class' => 'btn btn-secondary']
+                )?>
+            <?php endif ?>
+            <?php /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_DELETE, Access to delete client chat form */ ?>
+            <?php if (Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_DELETE)) : ?>
+                <?= Html::a('Delete', ['delete', 'id' => $model->ccf_id], [
+                    'class' => 'btn btn-danger',
+                    'data' => [
+                        'confirm' => 'Are you sure you want to delete this item?',
+                        'method' => 'post',
+                    ],
+                ]) ?>
+            <?php endif ?>
         </p>
 
         <?= DetailView::widget([

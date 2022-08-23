@@ -18,6 +18,7 @@ use src\exception\EmailNotSentException;
  * @package src\model\saleTicket\useCase\sendEmail
  *
  * @property CasesSaleRepository $casesSaleRepository
+ * @property EmailMainService $emailService
  */
 class SaleTicketEmailService
 {
@@ -25,10 +26,15 @@ class SaleTicketEmailService
      * @var CasesSaleRepository
      */
     private $casesSaleRepository;
+    /**
+     * @var EmailMainService
+     */
+    private $emailService;
 
-    public function __construct(CasesSaleRepository $casesSaleRepository)
+    public function __construct(CasesSaleRepository $casesSaleRepository, EmailMainService $emailService)
     {
         $this->casesSaleRepository = $casesSaleRepository;
+        $this->emailService = $emailService;
     }
 
     /**
@@ -56,12 +62,11 @@ class SaleTicketEmailService
                 'emailCc' => $this->getEmailCC($emailSettings, $saleTickets[0], SaleTicketHelper::isRecallCommissionChanged($saleTickets, $caseSale->getSaleDataDecoded()))
             ]);
 
-            $emailService = EmailMainService::newInstance();
-            $mail = $emailService->createFromDTO($emailDTO, false);
+            $mail = $this->emailService->createFromDTO($emailDTO, false);
 
             $this->casesSaleRepository->setSendEmailDt(date('Y-m-d H:i:s'), $caseSale);
 
-            $emailService->sendMail($mail);
+            $this->emailService->sendMail($mail);
         } catch (CreateModelException $e) {
             throw new \RuntimeException($e->getErrorSummary(false)[0]);
         } catch (EmailNotSentException $e) {

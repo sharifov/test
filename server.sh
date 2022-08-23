@@ -112,6 +112,7 @@ tmpDirs=(
 tmpDatabasesDirs=(
   "$dockerFolder/mysql/data"
   "$dockerFolder/psql/data"
+  "$dockerFolder/clickhouse/data"
 )
 
 logoutRoot() {
@@ -216,6 +217,8 @@ start () {
     cp "$dirToCert/devcert.crt" "$dirToCert/mkcert/devcert.crt"
     cp "$dirToCert/devcert.key" "$dirToCert/mkcert/devcert.key"
   fi
+
+  createTemporallyDirectories
 
   docker-compose -f "$dockerComposeFile" up -d --remove-orphans
   runMigrate

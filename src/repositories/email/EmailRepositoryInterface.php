@@ -12,8 +12,6 @@ interface EmailRepositoryInterface
 
     public function save(EmailInterface $email);
 
-    public function read(EmailInterface $email): void;
-
     public function delete(EmailInterface $email): int;
 
     public function deleteByIds($id): array;
@@ -26,8 +24,6 @@ interface EmailRepositoryInterface
 
     public function findReceived(string $messageId, string $emailTo): ActiveQuery;
 
-    public function saveInboxId(EmailInterface $email, int $inboxId): void;
-
     public function getLastInboxId(): ?int;
 
     public function getEmailCountByLead(int $leadId, $cache = 0): int;
@@ -39,8 +35,6 @@ interface EmailRepositoryInterface
     public function getModelQuery(): ActiveQuery;
 
     public function getTableName(): string;
-
-    public function changeStatus(Email $email, int $statusId): void;
 
     public function getRawSqlCountGroupedByLead(): string;
 

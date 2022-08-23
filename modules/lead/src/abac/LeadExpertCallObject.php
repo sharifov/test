@@ -5,6 +5,7 @@ namespace modules\lead\src\abac;
 use common\models\Lead;
 use modules\abac\components\AbacBaseModel;
 use modules\abac\src\entities\AbacInterface;
+use yii\helpers\ArrayHelper;
 
 class LeadExpertCallObject extends AbacBaseModel implements AbacInterface
 {
@@ -86,6 +87,18 @@ class LeadExpertCallObject extends AbacBaseModel implements AbacInterface
         'operators' => [self::OP_EQUAL2]
     ];
 
+    protected const ATTR_LEAD_TYPE_ID = [
+        'optgroup' => 'Lead',
+        'id' => self::NS . 'leadTypeId',
+        'field' => 'leadTypeId',
+        'label' => 'Type',
+        'type' => self::ATTR_TYPE_INTEGER,
+        'input' => self::ATTR_INPUT_SELECT,
+        'values' => [],
+        'multiple' => true,
+        'operators' =>  [self::OP_IN, self::OP_NOT_IN]
+    ];
+
     /** --------------- ATTRIBUTE LIST --------------------------- */
     public const OBJECT_ATTRIBUTE_LIST = [
         self::ACT_CALL   => [
@@ -114,6 +127,10 @@ class LeadExpertCallObject extends AbacBaseModel implements AbacInterface
 
         $attributeList = self::OBJECT_ATTRIBUTE_LIST;
         $attributeList[self::ACT_CALL][] = $attrStatus;
+
+        $attrLeadType = self::ATTR_LEAD_TYPE_ID;
+        $attrLeadType['values'] = ArrayHelper::merge(Lead::TYPE_LIST, [Lead::TYPE_BASIC => 'Basic']);
+        $attributeList[self::ACT_CALL][] = $attrLeadType;
 
         return $attributeList;
     }

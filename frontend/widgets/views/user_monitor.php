@@ -125,7 +125,6 @@ JS;
 if ($isIdleMonitorEnabled) {
     $idleMs = UserConnection::idleSeconds() * 1000;
     $js = <<<JS
-
 function setIdle() {
     let objDiv = $('#user-monitor-indicator div');
     objDiv.attr('class', 'text-warning');
@@ -142,13 +141,17 @@ function setActive() {
     //console.log('Hey, I\'m active!');
 }
 
+var timerIdleId = '';
+
 $(document).idle({
     onIdle: function(){
         socketSend('idle', 'set', { val: true });
+        timerIdleId = setInterval(() => socketSend('idle', 'set', { val: true }), 60000);
         setIdle();
     },
     onActive: function(){
         socketSend('idle', 'set', { val: false });
+        clearInterval(timerIdleId);
         setActive();
     },
     onHide: function(){

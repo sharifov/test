@@ -1372,13 +1372,7 @@ class CallController extends FController
 
         $callGuard = new CallDisplayGuard();
 
-        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_REFACTORING_INCOMING_CALL_ENABLE)) {
-            $view = 'monitor/_call_info_jquery';
-        } else {
-            $view = 'monitor/_call_info';
-        }
-
-        return $this->renderAjax($view, [
+        return $this->renderAjax('monitor/_call_info_jquery', [
             'call' => $call,
             'callGuard' => $callGuard
         ]);

@@ -57,14 +57,32 @@ $subtypeTotalData = [];
                 ['generate-user-schedule', 'userId' => $user->id],
                 ['class' => 'btn btn-success'],
             ) ?>
-
-            <?= Html::a('<i class="fa fa-remove"></i> Remove All User Schedule Data', ['remove-user-data', 'userId' => $user->id], [
-            'class' => 'btn btn-danger',
-            'data' => [
-            'confirm' => 'Are you sure you want to delete all User Timelines?',
-            'method' => 'post',
-            ],
+            <?php
+            /** @abac ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_REMOVE_ALL_USER_SCHEDULE, Access to remove-user-data shift-schedule/* */
+            if (\Yii::$app->abac->can(null, ShiftAbacObject::ACT_MY_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_REMOVE_ALL_USER_SCHEDULE)) :
+                ?>
+                <?= Html::a('<i class="fa fa-remove"></i> Remove All User Schedule Data', ['remove-user-data', 'userId' => $user->id], [
+                'class' => 'btn btn-danger',
+                'data' => [
+                    'confirm' => 'Are you sure you want to delete all User Timelines?',
+                    'method' => 'post',
+                ],
             ]) ?>
+            <?php endif; ?>
+
+            <?php
+            /** @abac ShiftAbacObject::ACT_USER_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_REMOVE_FUTURE_USER_SCHEDULE, Access to remove-future-user-data shift-schedule */
+            if (\Yii::$app->abac->can(null, ShiftAbacObject::ACT_USER_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_REMOVE_FUTURE_USER_SCHEDULE)) :
+                ?>
+                <?= Html::a('<i class="fa fa-remove"></i> Remove Future User Schedule Data', ['remove-future-user-data', 'userId' => $user->id], [
+                'class' => 'btn btn-danger',
+                'data' => [
+                    'confirm' => 'Are you sure you want to delete future User Timelines?',
+                    'method' => 'post',
+                ],
+            ]) ?>
+            <?php endif; ?>
+
         <?php endif; ?>
         <?= Html::a(
             '<i class="fa fa-info-circle"></i> Legend',

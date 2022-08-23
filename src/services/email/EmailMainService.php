@@ -3,6 +3,7 @@
 namespace src\services\email;
 
 use modules\featureFlag\FFlag;
+use modules\objectTask\src\scenarios\NoAnswer;
 use Yii;
 use frontend\models\EmailPreviewFromInterface;
 use common\models\Lead;
@@ -73,12 +74,16 @@ class EmailMainService implements EmailServiceInterface
 
     private $calledFrom;
 
-    public function __construct()
-    {
-        $this->helper = Yii::createObject(EmailServiceHelper::class);
-        $this->emailRepository = Yii::createObject(EmailRepository::class);
-        $this->emailOldRepository = Yii::createObject(EmailOldRepository::class);
-        $this->oldService = Yii::createObject(EmailService::class);
+    public function __construct(
+        EmailServiceHelper $helper,
+        EmailRepository $emailRepository,
+        EmailOldRepository $emailOldRepo,
+        EmailService $emailService
+    ) {
+        $this->helper = $helper;
+        $this->emailRepository = $emailRepository;
+        $this->emailOldRepository = $emailOldRepo;
+        $this->oldService = $emailService;
         $this->normalizedService = Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_EMAIL_NORMALIZED_FORM_ENABLE) ?
             EmailsNormalizeService::newInstance() :
             null
@@ -87,7 +92,12 @@ class EmailMainService implements EmailServiceInterface
 
     public static function newInstance()
     {
-        return new static();
+        $helper = Yii::createObject(EmailServiceHelper::class);
+        $emailRepository = Yii::createObject(EmailRepository::class);
+        $emailOldRepository = Yii::createObject(EmailOldRepository::class);
+        $oldService = Yii::createObject(EmailService::class);
+
+        return new static($helper, $emailRepository, $emailOldRepository, $oldService);
     }
 
     private function setEmailObjById(int $emailId)
@@ -390,6 +400,11 @@ class EmailMainService implements EmailServiceInterface
 
         $lead = $email->lead ?? null;
         if ($lead) {
+            /** @fflag FFlag::FF_KEY_NO_ANSWER_PROTOCOL_ENABLE, No Answer protocol enable */
+            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_NO_ANSWER_PROTOCOL_ENABLE) === true) {
+                NoAnswer::clientResponseLogicInit($lead);
+            }
+
             if ($userID) {
                 $notifyData = [
                     'user' => $userID,
@@ -475,10 +490,10 @@ class EmailMainService implements EmailServiceInterface
             $email->updateAttributes(['e_lead_id' => $leadId, 'e_case_id' => $caseId]);
         } else {
             if ($leadId) {
-                $this->emailRepository->linkLeads($email, [$leadId]);
+                $email->linkLeads([$leadId]);
             }
             if ($caseId) {
-                $this->emailRepository->linkCases($email, [$caseId]);
+                $email->linkCases([$caseId]);
             }
         }
 
@@ -517,11 +532,11 @@ class EmailMainService implements EmailServiceInterface
             throw \RuntimeException('Email status not valid.');
         }
         if ($emailOld = $this->emailOldRepository->findByCommunicationId($communicationId)) {
-            $this->emailOldRepository->changeStatus($emailOld, $statusId);
+            $this->oldService->changeStatus($emailOld, $statusId);
         }
         if ($this->normalizedService !== null) {
             if ($emailNorm = $this->emailRepository->findByCommunicationId($communicationId)) {
-                $this->emailRepository->changeStatus($emailNorm, $statusId);
+                $this->normalizedService->changeStatus($emailNorm, $statusId);
             }
         }
 
@@ -531,16 +546,30 @@ class EmailMainService implements EmailServiceInterface
     public function saveInboxId(string $messageId, string $emailTo, int $inboxId)
     {
         if ($emailOld = $this->emailOldRepository->findReceived($messageId, $emailTo)->limit(1)->one()) {
-            $this->emailOldRepository->saveInboxId($emailOld, $inboxId);
+            $emailOld->saveInboxId($inboxId);
         }
         $emailNorm = null;
         if ($this->normalizedService !== null) {
             if ($emailNorm = $this->emailRepository->findReceived($messageId, $emailTo)->limit(1)->one()) {
-                $this->emailRepository->saveInboxId($emailNorm, $inboxId);
+                $emailNorm->saveInboxId($inboxId);
             }
         }
 
         return $emailOld || $emailNorm;
+    }
+
+    public function read($email)
+    {
+        $calledFrom = $this->getCalledFrom($email);
+        $emailOld = ($calledFrom == self::FROM_NORM) ? $this->setEmailObjById($email->e_id) : $email;
+        $emailOld->read();
+
+        if ($this->normalizedService !== null) {
+            $emailNorm = ($calledFrom == self::FROM_OLD) ? $this->setEmailNormObjById($email->e_id) : $email;
+            if (isset($emailNorm)) {
+                $emailNorm->read();
+            }
+        }
     }
 
     /**

@@ -63,6 +63,16 @@ use common\components\widgets\BaseForm;
             <div class="col-md-8">
                 <?= $form->field($emailForm->body, 'subject')->textInput(['maxlength' => true]) ?>
             </div>
+            <?php if (isset($emailForm->body->data['files'])) : ?>
+            <div class="col-md-12 form-group">
+                <label class="control-label">Attached files</label>
+                <div class="form-group">
+                    <?= implode(', ', array_map(static function ($file) {
+                        return $file['name'];
+                    }, $emailForm->body->data['files'])) ?>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
         <div class="clearfix"></div>
 

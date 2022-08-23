@@ -2,11 +2,13 @@
 
 namespace frontend\controllers;
 
+use src\model\clientChatForm\entity\abac\ClientChatFormAbacObject;
 use Yii;
 use src\model\clientChatForm\entity\ClientChatForm;
 use src\model\clientChatForm\entity\ClientChatFormSearch;
 use yii\helpers\ArrayHelper;
 use yii\web\Controller;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use yii\web\Response;
@@ -85,6 +87,11 @@ class ClientChatFormCrudController extends FController
      */
     public function actionUpdate($id)
     {
+        /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE, Access to update client chat form */
+        if (!Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_UPDATE)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
@@ -103,6 +110,11 @@ class ClientChatFormCrudController extends FController
      */
     public function actionBuilder($id)
     {
+        /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_BUILDER, Access to builder client chat form */
+        if (!Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_BUILDER)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
@@ -123,7 +135,14 @@ class ClientChatFormCrudController extends FController
      */
     public function actionDelete($id): Response
     {
-        $this->findModel($id)->delete();
+        /** @abac ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_DELETE,  Access to delete client chat form */
+        if (!Yii::$app->abac->can(null, ClientChatFormAbacObject::UI_CRUD, ClientChatFormAbacObject::ACTION_DELETE)) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
+        $model = $this->findModel($id);
+
+        $model->delete();
 
         return $this->redirect(['index']);
     }

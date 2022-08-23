@@ -39,6 +39,8 @@ use yii\widgets\Pjax;
                     ],
                     'clientOptions' => [
                         'format' => 'yyyy-mm-dd',
+                        'clearBtn' => true,
+                        'autoclose' => true,
                     ]
                 ])->label(false) ?>
             </div>

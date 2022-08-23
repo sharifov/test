@@ -74,6 +74,7 @@ class BaseTaskObject
 
     public const DEFAULT_OBJECT_OPTION_LIST = [
         'delayHours' => ['label' => 'Delay hours', 'type' => self::ATTR_TYPE_INTEGER, 'value' => 0],
+        'delayShift' => ['label' => 'Delay shift', 'type' => self::ATTR_TYPE_INTEGER, 'value' => 0],
     ];
 
     protected const ATTR_OBJ_AVAILABLE = [

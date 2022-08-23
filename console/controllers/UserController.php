@@ -7,6 +7,8 @@ use common\models\query\EmployeeQuery;
 use common\models\UserConnection;
 use common\models\UserOnline;
 use common\models\UserParams;
+use modules\user\userActivity\entity\UserActivity;
+use modules\user\userActivity\service\UserActivityService;
 use src\helpers\setting\SettingHelper;
 use src\model\leadRedial\priorityLevel\ConversionFetcher;
 use src\model\leadRedial\priorityLevel\PriorityLevelCalculator;
@@ -228,6 +230,27 @@ class UserController extends Controller
 
         if ($userDataErrors) {
             \Yii::error('Saving user_data row failed while calculating users conversion: ' . PHP_EOL . VarDumper::dumpAsString($userDataErrors), 'console:UserController:actionCalculatePriorityLevel:userData:save');
+        }
+
+        $timeEnd = microtime(true);
+        $time = number_format(round($timeEnd - $timeStart, 2), 2);
+        echo Console::renderColoredString('%g --- Execute Time: %w[' . $time . ' s] %g %n'), PHP_EOL;
+        echo Console::renderColoredString('%g --- End : %w[' . date('Y-m-d H:i:s') . '] %g' . self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+    }
+
+    /**
+     * @return void
+     */
+    public function actionCheckActivity(): void
+    {
+        echo Console::renderColoredString('%g --- Start %w[' . date('Y-m-d H:i:s') . '] %g' . self::class . ':' . __FUNCTION__ . ' %n'), PHP_EOL;
+        $timeStart = microtime(true);
+
+        $userList = UserActivityService::checkUserActivity();
+        if ($userList) {
+            foreach ($userList as $userId) {
+                echo Console::renderColoredString('%g --- User Id: %w' . $userId . ' %g %n'), PHP_EOL;
+            }
         }
 
         $timeEnd = microtime(true);

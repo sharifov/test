@@ -1107,4 +1107,20 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
     {
         return $this->e_is_new ?? false;
     }
+
+    public function read(): void
+    {
+        if ($this->isNew()) {
+            $this->updateAttributes([
+                'e_is_new' => false,
+                'e_read_dt' => date('Y-m-d H:i:s')
+            ]);
+        }
+    }
+    public function saveInboxId(int $inboxId): void
+    {
+        $this->updateAttributes([
+            'e_inbox_email_id' => $inboxId
+        ]);
+    }
 }
