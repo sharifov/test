@@ -2888,6 +2888,16 @@ class LeadController extends FController
 
     public function actionGetLeadNotes(int $leadId)
     {
+        $lead = Lead::findOne($leadId);
+
+        if (!$lead) {
+            throw new NotFoundHttpException('Not found lead ID: ' . $leadId);
+        }
+
+        if (!Auth::can('lead-view/notes/view', ['lead' => $lead])) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
         if (Yii::$app->request->isAjax) {
             $notes = Note::find()->where(['lead_id' => $leadId])->orderBy(['id' => SORT_ASC])->all();
 
