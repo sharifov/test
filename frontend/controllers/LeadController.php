@@ -125,6 +125,7 @@ use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\Cookie;
 use yii\web\ForbiddenHttpException;
+use yii\web\MethodNotAllowedHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
@@ -2894,6 +2895,7 @@ class LeadController extends FController
                 'notes' => $notes
             ]);
         }
+        throw new MethodNotAllowedHttpException('Method not allowed');
     }
 
     /**
