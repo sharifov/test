@@ -15,7 +15,6 @@ use src\entities\email\EmailBody;
 use src\entities\email\EmailContact;
 use src\entities\email\EmailInterface;
 use src\entities\email\EmailLog;
-use src\repositories\email\EmailRepository;
 use src\entities\email\form\EmailForm;
 use src\entities\email\helpers\EmailContactType;
 use src\entities\email\helpers\EmailStatus;
@@ -30,7 +29,6 @@ use yii\helpers\ArrayHelper;
  * Class EmailsNormalizeService
  *
  * @property EmailServiceHelper $helper
- * @property EmailRepository $emailRepository
  *
  */
 class EmailsNormalizeService extends SendMail implements EmailServiceInterface
@@ -40,19 +38,16 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
      * @var EmailServiceHelper
      */
     private $helper;
-    /**
-     * @var EmailRepository
-     */
-    private $emailRepository;
 
+    public function __construct(EmailServiceHelper $helper)
+    {
+        $this->userId = Auth::id();
+        $this->helper = $helper;
+    }
 
     public static function newInstance()
     {
-        $instance = new static();
-        $instance->userId = Auth::id();
-        $instance->helper = Yii::createObject(EmailServiceHelper::class);
-        $instance->emailRepository = Yii::createObject(EmailRepository::class);
-        return $instance;
+        return new static(Yii::createObject(EmailServiceHelper::class));
     }
 
     public static function getDataArrayFromOld(EmailOld $emailOld)
