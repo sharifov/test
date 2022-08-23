@@ -1,0 +1,39 @@
+<?php
+
+namespace modules\abac\migrations;
+
+use modules\abac\src\AbacService;
+use yii\db\Migration;
+
+/**
+ * Class m220823_064642_add_object_task_to_abac
+ */
+class m220823_064642_add_object_task_to_abac extends Migration
+{
+    private const DUMPS = [
+        'objectTask/act/object_task_list - (access)|(update)|(delete)' => 'eyJhcF9pZCI6NDIwLCJhcF9ydWxlX3R5cGUiOiJwIiwiYXBfc3ViamVjdCI6IihcImFkbWluXCIgaW4gci5zdWIuZW52LnVzZXIucm9sZXMpIHx8IChcInNhbGVzX21hbmFnZXJcIiBpbiByLnN1Yi5lbnYudXNlci5yb2xlcykiLCJhcF9zdWJqZWN0X2pzb24iOiJ7XCJjb25kaXRpb25cIjpcIk9SXCIsXCJydWxlc1wiOlt7XCJpZFwiOlwiZW52X3VzZXJfcm9sZXNcIixcImZpZWxkXCI6XCJlbnYudXNlci5yb2xlc1wiLFwidHlwZVwiOlwic3RyaW5nXCIsXCJpbnB1dFwiOlwic2VsZWN0XCIsXCJvcGVyYXRvclwiOlwiaW5fYXJyYXlcIixcInZhbHVlXCI6XCJhZG1pblwifSx7XCJpZFwiOlwiZW52X3VzZXJfcm9sZXNcIixcImZpZWxkXCI6XCJlbnYudXNlci5yb2xlc1wiLFwidHlwZVwiOlwic3RyaW5nXCIsXCJpbnB1dFwiOlwic2VsZWN0XCIsXCJvcGVyYXRvclwiOlwiaW5fYXJyYXlcIixcInZhbHVlXCI6XCJzYWxlc19tYW5hZ2VyXCJ9XSxcIm5vdFwiOmZhbHNlLFwidmFsaWRcIjp0cnVlfSIsImFwX29iamVjdCI6Im9iamVjdFRhc2svYWN0L29iamVjdF90YXNrX2xpc3QiLCJhcF9hY3Rpb24iOiIoYWNjZXNzKXwodXBkYXRlKXwoZGVsZXRlKSIsImFwX2FjdGlvbl9qc29uIjoiW1wiYWNjZXNzXCIsXCJ1cGRhdGVcIixcImRlbGV0ZVwiXSIsImFwX2VmZmVjdCI6MSwiYXBfdGl0bGUiOiIiLCJhcF9zb3J0X29yZGVyIjo1MCwiYXBfY3JlYXRlZF9kdCI6IjIwMjItMDgtMjMgMDc6NDM6NDciLCJhcF91cGRhdGVkX2R0IjoiMjAyMi0wOC0yMyAwNzo0Mzo0NyIsImFwX2NyZWF0ZWRfdXNlcl9pZCI6MSwiYXBfdXBkYXRlZF91c2VyX2lkIjoxLCJhcF9lbmFibGVkIjoxLCJhcF9oYXNoX2NvZGUiOiIxNDlmODg4M2Q3In0=',
+        'objectTask/act/object_task_scenario - (access)|(create)|(update)|(delete)' => 'eyJhcF9pZCI6NDIxLCJhcF9ydWxlX3R5cGUiOiJwIiwiYXBfc3ViamVjdCI6IihcImFkbWluXCIgaW4gci5zdWIuZW52LnVzZXIucm9sZXMpIHx8IChcInNhbGVzX21hbmFnZXJcIiBpbiByLnN1Yi5lbnYudXNlci5yb2xlcykiLCJhcF9zdWJqZWN0X2pzb24iOiJ7XCJjb25kaXRpb25cIjpcIk9SXCIsXCJydWxlc1wiOlt7XCJpZFwiOlwiZW52X3VzZXJfcm9sZXNcIixcImZpZWxkXCI6XCJlbnYudXNlci5yb2xlc1wiLFwidHlwZVwiOlwic3RyaW5nXCIsXCJpbnB1dFwiOlwic2VsZWN0XCIsXCJvcGVyYXRvclwiOlwiaW5fYXJyYXlcIixcInZhbHVlXCI6XCJhZG1pblwifSx7XCJpZFwiOlwiZW52X3VzZXJfcm9sZXNcIixcImZpZWxkXCI6XCJlbnYudXNlci5yb2xlc1wiLFwidHlwZVwiOlwic3RyaW5nXCIsXCJpbnB1dFwiOlwic2VsZWN0XCIsXCJvcGVyYXRvclwiOlwiaW5fYXJyYXlcIixcInZhbHVlXCI6XCJzYWxlc19tYW5hZ2VyXCJ9XSxcIm5vdFwiOmZhbHNlLFwidmFsaWRcIjp0cnVlfSIsImFwX29iamVjdCI6Im9iamVjdFRhc2svYWN0L29iamVjdF90YXNrX3NjZW5hcmlvIiwiYXBfYWN0aW9uIjoiKGFjY2Vzcyl8KGNyZWF0ZSl8KHVwZGF0ZSl8KGRlbGV0ZSkiLCJhcF9hY3Rpb25fanNvbiI6IltcImFjY2Vzc1wiLFwiY3JlYXRlXCIsXCJ1cGRhdGVcIixcImRlbGV0ZVwiXSIsImFwX2VmZmVjdCI6MSwiYXBfdGl0bGUiOiIiLCJhcF9zb3J0X29yZGVyIjo1MCwiYXBfY3JlYXRlZF9kdCI6IjIwMjItMDgtMjMgMDc6NDQ6MTQiLCJhcF91cGRhdGVkX2R0IjoiMjAyMi0wOC0yMyAwNzo0NDoxNCIsImFwX2NyZWF0ZWRfdXNlcl9pZCI6MSwiYXBfdXBkYXRlZF91c2VyX2lkIjoxLCJhcF9lbmFibGVkIjoxLCJhcF9oYXNoX2NvZGUiOiIwMTdmYjIwMjBkIn0=',
+        'lead/lead/obj/object_task - (access)' => 'eyJhcF9pZCI6NDIzLCJhcF9ydWxlX3R5cGUiOiJwIiwiYXBfc3ViamVjdCI6IihcImFkbWluXCIgaW4gci5zdWIuZW52LnVzZXIucm9sZXMpIHx8IChcInNhbGVzX21hbmFnZXJcIiBpbiByLnN1Yi5lbnYudXNlci5yb2xlcykiLCJhcF9zdWJqZWN0X2pzb24iOiJ7XCJjb25kaXRpb25cIjpcIk9SXCIsXCJydWxlc1wiOlt7XCJpZFwiOlwiZW52X3VzZXJfcm9sZXNcIixcImZpZWxkXCI6XCJlbnYudXNlci5yb2xlc1wiLFwidHlwZVwiOlwic3RyaW5nXCIsXCJpbnB1dFwiOlwic2VsZWN0XCIsXCJvcGVyYXRvclwiOlwiaW5fYXJyYXlcIixcInZhbHVlXCI6XCJhZG1pblwifSx7XCJpZFwiOlwiZW52X3VzZXJfcm9sZXNcIixcImZpZWxkXCI6XCJlbnYudXNlci5yb2xlc1wiLFwidHlwZVwiOlwic3RyaW5nXCIsXCJpbnB1dFwiOlwic2VsZWN0XCIsXCJvcGVyYXRvclwiOlwiaW5fYXJyYXlcIixcInZhbHVlXCI6XCJzYWxlc19tYW5hZ2VyXCJ9XSxcIm5vdFwiOmZhbHNlLFwidmFsaWRcIjp0cnVlfSIsImFwX29iamVjdCI6ImxlYWQvbGVhZC9vYmovb2JqZWN0X3Rhc2siLCJhcF9hY3Rpb24iOiIoYWNjZXNzKSIsImFwX2FjdGlvbl9qc29uIjoiW1wiYWNjZXNzXCJdIiwiYXBfZWZmZWN0IjoxLCJhcF90aXRsZSI6IiIsImFwX3NvcnRfb3JkZXIiOjUwLCJhcF9jcmVhdGVkX2R0IjoiMjAyMi0wOC0yMyAwODoxMToyMCIsImFwX3VwZGF0ZWRfZHQiOiIyMDIyLTA4LTIzIDA4OjExOjIwIiwiYXBfY3JlYXRlZF91c2VyX2lkIjoxLCJhcF91cGRhdGVkX3VzZXJfaWQiOjEsImFwX2VuYWJsZWQiOjEsImFwX2hhc2hfY29kZSI6IjY2OThkZGY4OGEifQ==',
+    ];
+    /**
+     * @return void
+     */
+    public function safeUp(): void
+    {
+        foreach (self::DUMPS as $object => $dump) {
+            echo AbacService::importPolicyFromDump($dump, true) ? "{$object} - OK: added" : "{$object} - Error: not added";
+            echo PHP_EOL;
+        }
+    }
+
+    /**
+     * @return void
+     */
+    public function safeDown(): void
+    {
+        foreach (self::DUMPS as $object => $dump) {
+            echo AbacService::removePolicyFromDump($dump) ? "{$object} - OK: removed" : "{$object} - Error: not removed";
+            echo PHP_EOL;
+        }
+    }
+}

@@ -15,10 +15,12 @@ class NoAnswerProtocolListener
     {
         /** @fflag FFlag::FF_KEY_NO_ANSWER_PROTOCOL_ENABLE, No Answer protocol enable */
         if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_NO_ANSWER_PROTOCOL_ENABLE) === true) {
-            ObjectTaskService::runScenario(
-                NoAnswer::KEY,
-                $event->lead
-            );
+            if ($event->lead->hasObjectTasksWithPendingStatus() === false) {
+                ObjectTaskService::runScenario(
+                    NoAnswer::KEY,
+                    $event->lead
+                );
+            }
         }
     }
 }

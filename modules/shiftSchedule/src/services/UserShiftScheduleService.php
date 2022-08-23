@@ -174,14 +174,21 @@ class UserShiftScheduleService
                             // echo $rule->shift->sh_id . "\r\n";
                             if ($rule->shift->userShiftAssignsExcludeDeletedUser) {
                                 foreach ($rule->shift->userShiftAssignsExcludeDeletedUser as $user) {
+                                    $newDate = $date;
                                     if (!empty($userList)) {
                                         if (!in_array($user->usa_user_id, $userList)) {
                                             continue;
                                         }
                                     }
 
-                                    $timeStartSec = strtotime($date . ' ' . $rule->ssr_start_time_utc);
-                                    $timeEndSec = strtotime($date . ' ' . $rule->ssr_end_time_utc);
+                                    if ($rule->ssr_start_time_utc > $rule->ssr_start_time_loc) {
+                                        $newDate = (new \DateTime($date))
+                                            ->modify('-1 day')
+                                            ->format('Y-m-d');
+                                    }
+
+                                    $timeStartSec = strtotime($newDate . ' ' . $rule->ssr_start_time_utc);
+                                    $timeEndSec = strtotime($newDate . ' ' . $rule->ssr_end_time_utc);
 
                                     if ($timeStartSec > $timeEndSec) {
                                         $timeEndSec = $timeEndSec + (24 * 60 * 60);
@@ -211,14 +218,14 @@ class UserShiftScheduleService
                                     );
 
                                     if (empty($existEvenList)) {
-                                        $data[$date][$user->usa_user_id][$rule->ssr_id] =
-                                            self::createUserTimeLineByRule($rule, $user->usa_user_id, $date);
+                                        $data[$newDate][$user->usa_user_id][$rule->ssr_id] =
+                                            self::createUserTimeLineByRule($rule, $user->usa_user_id, $newDate);
                                     } else {
                                         $dataInfo = [
                                             'message' => 'existEvenList',
                                             'data' => [
                                                 'userId' => $user->usa_user_id,
-                                                'date' => $date,
+                                                'date' => $newDate,
                                                 'eventListId' => $existEvenList,
                                                 'rule' => $rule->attributes
                                             ]
@@ -251,12 +258,6 @@ class UserShiftScheduleService
         $tl->uss_user_id = $userId;
         $tl->uss_sst_id = $rule->ssr_sst_id;
         $tl->uss_type_id = UserShiftSchedule::TYPE_AUTO;
-
-        if ($rule->ssr_start_time_utc > $rule->ssr_start_time_loc) {
-            $newDate = new \DateTime($date);
-            $newDate->modify('-1 day');
-            $date = $newDate->format('Y-m-d');
-        }
 
         $timeStart = strtotime($date . ' ' . $rule->ssr_start_time_utc);
         $timeEnd = strtotime($date . ' ' . $rule->ssr_end_time_utc);

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7676baf597beeeb4759a79cbab50a0a5",
+    "content-hash": "77b1df899ead2827b4b5f1cf8757e545",
     "packages": [
         {
             "name": "2amigos/yii2-arrayquery-component",
@@ -2072,59 +2072,6 @@
                 "source": "https://github.com/giggsey/Locale/tree/2.2"
             },
             "time": "2022-04-06T07:33:59+00:00"
-        },
-        {
-            "name": "gnello/php-mattermost-driver",
-            "version": "v2.16.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/gnello/php-mattermost-driver.git",
-                "reference": "afb8dcca78ccca07d6d721b6a32eccfac8d78f7b"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/gnello/php-mattermost-driver/zipball/afb8dcca78ccca07d6d721b6a32eccfac8d78f7b",
-                "reference": "afb8dcca78ccca07d6d721b6a32eccfac8d78f7b",
-                "shasum": ""
-            },
-            "require": {
-                "ext-json": "*",
-                "guzzlehttp/guzzle": "^6.2|^7.2",
-                "php": ">=5.5.0",
-                "pimple/pimple": "~3.0",
-                "psr/http-message": "^1.0"
-            },
-            "require-dev": {
-                "symfony/var-dumper": "^3.1"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Gnello\\Mattermost\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Luca Agnello",
-                    "email": "luca@gnello.com"
-                }
-            ],
-            "description": "The Php Driver to interact with the Mattermost Web Service API",
-            "homepage": "https://github.com/gnello/php-mattermost-driver",
-            "keywords": [
-                "Mattermost",
-                "chat"
-            ],
-            "support": {
-                "email": "luca@gnello.com",
-                "issues": "https://github.com/gnello/php-mattermost-driver/issues",
-                "source": "https://github.com/gnello/php-mattermost-driver/tree/v2.16.1"
-            },
-            "time": "2022-01-19T15:36:12+00:00"
         },
         {
             "name": "goetas-webservices/xsd2php-runtime",
@@ -4340,47 +4287,6 @@
             "time": "2022-07-21T00:00:00+00:00"
         },
         {
-            "name": "kivork/yii2-mattermost-log-target",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "git@bitbucket.org:techork/yii2-mattermost-log-target.git",
-                "reference": "149531dae450df7b13a526e66af7a854f0153721"
-            },
-            "require": {
-                "gnello/php-mattermost-driver": "^2.3",
-                "yiisoft/yii2": "~2.0.0"
-            },
-            "default-branch": true,
-            "type": "yii2-extension",
-            "autoload": {
-                "psr-4": {
-                    "kivork\\mattermostLogTarget\\": "src\\"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Serge Murphy",
-                    "email": "serge.murphy@techork.com"
-                }
-            ],
-            "description": "Yii2 mattermost log target",
-            "keywords": [
-                "extension",
-                "log",
-                "mattermost",
-                "target",
-                "yii2"
-            ],
-            "support": {
-                "source": "https://stash.travelinsides.com/scm/lib/yii2-bootstrap4-glyphicons.git"
-            },
-            "time": "2020-10-29T10:10:37+00:00"
-        },
-        {
             "name": "kivork/yii2-prometheus-client",
             "version": "dev-master",
             "source": {
@@ -5952,59 +5858,6 @@
                 "source": "https://github.com/phpstan/phpdoc-parser/tree/1.7.0"
             },
             "time": "2022-08-09T12:23:23+00:00"
-        },
-        {
-            "name": "pimple/pimple",
-            "version": "v3.5.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/silexphp/Pimple.git",
-                "reference": "a94b3a4db7fb774b3d78dad2315ddc07629e1bed"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/silexphp/Pimple/zipball/a94b3a4db7fb774b3d78dad2315ddc07629e1bed",
-                "reference": "a94b3a4db7fb774b3d78dad2315ddc07629e1bed",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.2.5",
-                "psr/container": "^1.1 || ^2.0"
-            },
-            "require-dev": {
-                "symfony/phpunit-bridge": "^5.4@dev"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "3.4.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-0": {
-                    "Pimple": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Fabien Potencier",
-                    "email": "fabien@symfony.com"
-                }
-            ],
-            "description": "Pimple, a simple Dependency Injection Container",
-            "homepage": "https://pimple.symfony.com",
-            "keywords": [
-                "container",
-                "dependency injection"
-            ],
-            "support": {
-                "source": "https://github.com/silexphp/Pimple/tree/v3.5.0"
-            },
-            "time": "2021-10-28T11:13:42+00:00"
         },
         {
             "name": "pixel418/markdownify",
@@ -16283,7 +16136,6 @@
         "kartik-v/yii2-widget-datepicker": 20,
         "kartik-v/yii2-bootstrap4-dropdown": 20,
         "kivork/yii2-rbac-export-import": 20,
-        "kivork/yii2-mattermost-log-target": 20,
         "kivork/yii2-virtual-cron": 20,
         "kivork/yii2-prometheus-client": 20,
         "kartik-v/yii2-widget-fileinput": 20,

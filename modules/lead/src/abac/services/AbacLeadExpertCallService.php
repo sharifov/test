@@ -51,7 +51,8 @@ class AbacLeadExpertCallService
             $hasFlightSegment,
             $quoteCount,
             $callCount,
-            $canMakeCall
+            $canMakeCall,
+            $lead->l_type
         );
     }
 }
