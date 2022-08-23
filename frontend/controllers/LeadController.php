@@ -213,6 +213,7 @@ class LeadController extends FController
                     'closed',
                     'create',
                     'business-extra-queue',
+                    'get-object-task-list',
                 ],
             ],
         ];
@@ -2871,6 +2872,13 @@ class LeadController extends FController
 
     public function actionGetObjectTaskList(int $leadId)
     {
+        $lead = $this->findLeadById($leadId);
+
+        /** @abac $abacDto, LeadAbacObject::OBJ_OBJECT_TASK, LeadAbacObject::ACTION_ACCESS, Show modal with Object Task list */
+        if (!Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_OBJECT_TASK, LeadAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access Denied.');
+        }
+
         if (Yii::$app->request->isAjax) {
             $searchModel = new ObjectTaskSearch();
             $params = Yii::$app->request->queryParams;

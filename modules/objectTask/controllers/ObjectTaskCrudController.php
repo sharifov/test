@@ -3,11 +3,13 @@
 namespace modules\objectTask\controllers;
 
 use frontend\controllers\FController;
+use modules\objectTask\src\abac\ObjectTaskObject;
 use modules\objectTask\src\entities\ObjectTask;
 use modules\objectTask\src\entities\ObjectTaskSearch;
 use modules\objectTask\src\entities\repositories\ObjectTaskRepository;
 use modules\objectTask\src\forms\ObjectTaskMultipleUpdateForm;
 use Yii;
+use yii\filters\AccessControl;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -31,9 +33,44 @@ class ObjectTaskCrudController extends FController
             parent::behaviors(),
             [
                 'verbs' => [
-                    'class' => VerbFilter::className(),
+                    'class' => VerbFilter::class,
                     'actions' => [
                         'delete' => ['POST'],
+                    ],
+                ],
+                'access' => [
+                    'class' => AccessControl::class,
+                    'rules' => [
+                        /** @abac ObjectTaskObject::ACT_OBJECT_TASK_LIST, ObjectTaskObject::ACTION_ACCESS, Access to page object-task/object-task-crud/(index|view) */
+                        [
+                            'actions' => ['index', 'view'],
+                            'allow' => \Yii::$app->abac->can(
+                                null,
+                                ObjectTaskObject::ACT_OBJECT_TASK_LIST,
+                                ObjectTaskObject::ACTION_ACCESS
+                            ),
+                            'roles' => ['@'],
+                        ],
+                        /** @abac ObjectTaskObject::ACT_OBJECT_TASK_LIST, ObjectTaskObject::ACTION_UPDATE, Access to page object-task/object-task-crud/update */
+                        [
+                            'actions' => ['update'],
+                            'allow' => \Yii::$app->abac->can(
+                                null,
+                                ObjectTaskObject::ACT_OBJECT_TASK_LIST,
+                                ObjectTaskObject::ACTION_UPDATE
+                            ),
+                            'roles' => ['@'],
+                        ],
+                        /** @abac ObjectTaskObject::ACT_OBJECT_TASK_LIST, ObjectTaskObject::ACTION_UPDATE, Access to page object-task/object-task-crud/delete */
+                        [
+                            'actions' => ['delete'],
+                            'allow' => \Yii::$app->abac->can(
+                                null,
+                                ObjectTaskObject::ACT_OBJECT_TASK_LIST,
+                                ObjectTaskObject::ACTION_DELETE
+                            ),
+                            'roles' => ['@'],
+                        ],
                     ],
                 ],
             ]
