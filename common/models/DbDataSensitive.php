@@ -75,7 +75,7 @@ class DbDataSensitive extends \yii\db\ActiveRecord
                 $this->addError($attribute, $tableName . " table columns must be array");
             } else {
                 foreach ($fields as $field) {
-                    if (!isset($schema->columns[$field])) {
+                    if(is_array($field) && !isset($schema->columns[$field['column']])){
                         $this->addError($attribute, $tableName . " table doesn't have " . $field . " field.");
                     }
                 }
