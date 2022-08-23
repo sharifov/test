@@ -23,6 +23,7 @@ use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
+use src\entities\email\helpers\EmailPriority;
 
 /**
  * This is the model class for table "email_norm".
@@ -69,6 +70,7 @@ use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
  * @property int|null $clientId
  * @property int|null $projectId
  * @property int|null $templateTypeId
+ * @property int|null $priority
  * @property string|null $templateTypeName
  * @property string|null $emailFrom
  * @property string|null $emailFromName
@@ -101,8 +103,8 @@ class Email extends BaseActiveRecord implements EmailInterface
             ['e_created_dt', 'required'],
             [['e_body_id', 'e_project_id', 'e_status_id', 'e_type_id', 'e_is_deleted', 'e_created_user_id', 'e_updated_user_id', 'e_departament_id'], 'integer'],
             ['e_is_deleted', 'boolean'],
-           // ['e_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_created_user_id' => 'id']],
-          //  ['e_updated_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_updated_user_id' => 'id']],
+            ['e_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_created_user_id' => 'id']],
+            ['e_updated_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_updated_user_id' => 'id']],
             ['e_departament_id', 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['e_departament_id' => 'dep_id']],
             ['e_project_id', 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['e_project_id' => 'id']],
             ['e_updated_dt', 'safe'],
@@ -569,6 +571,11 @@ class Email extends BaseActiveRecord implements EmailInterface
     public function getLanguageId(): ?string
     {
         return $this->params->ep_language_id ?? null;
+    }
+
+    public function getPriority(): ?int
+    {
+        return $this->params->ep_priority ?? EmailPriority::NORMAL;
     }
 
     public function getStatusDoneDt(): ?string
