@@ -169,7 +169,7 @@ class EmailDTO
         $instance->clientId = $data['clientId'] ?? null;
         $instance->typeId = $data['typeId'] ?? EmailType::OUTBOX;
         $instance->statusId = $data['statusId'] ?? EmailStatus::PENDING;
-        $instance->isNew = true;
+        $instance->isNew = $data['isNew'] ?? true;
         $instance->emailTo = $data['emailTo'] ?? null;
         $instance->emailToName = $data['emailToName'] ?? null;
         $instance->emailFrom = $data['emailFrom'] ?? null;
