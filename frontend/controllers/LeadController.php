@@ -2885,6 +2885,17 @@ class LeadController extends FController
         }
     }
 
+    public function actionGetLeadNotes(int $leadId)
+    {
+        if (Yii::$app->request->isAjax) {
+            $notes = Note::find()->where(['lead_id' => $leadId])->orderBy(['id' => SORT_ASC])->all();
+
+            return $this->renderAjax('notes/notes_list', [
+                'notes' => $notes
+            ]);
+        }
+    }
+
     /**
      * @param $id
      * @return Lead the loaded model
