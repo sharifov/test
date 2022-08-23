@@ -81,6 +81,5 @@ class FileStorageListWidget extends Widget
             'queryParams' => QueryParams::byEmpty(),
             'canDelete' => false,
         ]);
-
     }
 }
