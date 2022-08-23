@@ -28,7 +28,6 @@ use DateTime;
 use frontend\helpers\JsonHelper;
 use frontend\models\CommunicationForm;
 use frontend\models\form\CreditCardForm;
-use kak\clickhouse\Query;
 use kivork\FeatureFlag\Models\flags\dateTime\DateTimeFeatureFlag;
 use kivork\FeatureFlag\Models\flags\dateTime\DateTimeFeatureFlagDTO;
 use modules\attraction\models\AttractionQuote;
@@ -2637,7 +2636,7 @@ class TestController extends FController
     {
 
         $db = \Yii::$app->clickhouse;
-        $query = new Query();
+        $query = new \kak\clickhouse\Query();
         // first argument scalar var or Query object
         //$query->withQuery($db->quoteValue('2021-10-05'), 'date1');
         $query->select('1');
