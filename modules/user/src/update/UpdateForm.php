@@ -10,6 +10,7 @@ use common\models\UserGroup;
 use common\models\Department;
 use common\models\Project;
 use kartik\password\StrengthValidator;
+use modules\featureFlag\FFlag;
 use src\model\clientChatChannel\entity\ClientChatChannel;
 use modules\shiftSchedule\src\entities\shift\Shift;
 use yii\base\Model;
@@ -289,8 +290,6 @@ class UpdateForm extends Model
             'user_departments',
             'client_chat_user_channel',
             'user_shift_assigns',
-            'up_work_start_tm',
-            'up_work_minutes',
             'up_timezone',
             'up_base_amount',
             'up_commission_percent',
@@ -316,6 +315,10 @@ class UpdateForm extends Model
             'up_show_in_contact_list',
             'up_call_recording_disabled',
         ];
+        /** @fflag FFlag::FF_KEY_SWITCH_NEW_SHIFT_ENABLE, Switch new Shift Enable */
+        if (!\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SWITCH_NEW_SHIFT_ENABLE)) {
+            $attributes = array_merge($attributes, ['up_work_start_tm', 'up_work_minutes']);
+        }
         $accessAttributes = [];
         foreach ($attributes as $attribute) {
             $accessAttributes[$attribute] = $this->fieldAccess->canEdit($attribute);
@@ -325,6 +328,8 @@ class UpdateForm extends Model
 
     public function rules(): array
     {
+        /** @fflag FFlag::FF_KEY_SWITCH_NEW_SHIFT_ENABLE, Switch new Shift Enable */
+        $canNewShift = \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SWITCH_NEW_SHIFT_ENABLE);
         return [
             ['username', 'required', 'when' => fn () => $this->fieldAccess->canEdit('username')],
             ['username', 'trim'],
@@ -390,12 +395,12 @@ class UpdateForm extends Model
             ['user_shift_assigns', 'each', 'rule' => ['in', 'range' => array_keys($this->availableList->getUserShiftAssign())]],
 
             ['up_work_start_tm', 'default', 'value' => null],
-            ['up_work_start_tm', 'required', 'when' => fn () => $this->fieldAccess->canEdit('up_work_start_tm')],
-            ['up_work_start_tm', 'time', 'format' => 'php:H:i'],
+            ['up_work_start_tm', 'required', 'when' => fn () => $this->fieldAccess->canEdit('up_work_start_tm') && !$canNewShift],
+            ['up_work_start_tm', 'time', 'format' => 'php:H:i', 'when' => fn () => !$canNewShift],
             ['up_work_start_tm', 'filter', 'filter' => fn ($v) => $v . ':00', 'skipOnError' => true, 'skipOnEmpty' => true],
 
             ['up_work_minutes', 'default', 'value' => null],
-            ['up_work_minutes', 'required', 'when' => fn () => $this->fieldAccess->canEdit('up_work_minutes')],
+            ['up_work_minutes', 'required', 'when' => fn () => $this->fieldAccess->canEdit('up_work_minutes') && !$canNewShift],
             ['up_work_minutes', 'integer'],
             ['up_work_minutes', 'filter', 'filter' => 'intval', 'skipOnEmpty' => true, 'skipOnError' => true],
 

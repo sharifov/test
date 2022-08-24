@@ -652,23 +652,27 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
                                         </div>
                                     </div>
                                 <?php endif; ?>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <?= $form->field($multipleForm, 'up_work_start_tm')->widget(
-                                            \kartik\time\TimePicker::class,
-                                            [
-                                                'readonly' => true,
-                                                'pluginOptions' => [
-                                                    'defaultTime' => false,
-                                                    'showSeconds' => false,
-                                                    'showMeridian' => false,
-                                                ]]
-                                        ) ?>
+                                <?php
+                                /** @fflag FFlag::FF_KEY_SWITCH_NEW_SHIFT_ENABLE, Switch new Shift Enable */
+                                if (!\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SWITCH_NEW_SHIFT_ENABLE)) : ?>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <?= $form->field($multipleForm, 'up_work_start_tm')->widget(
+                                                \kartik\time\TimePicker::class,
+                                                [
+                                                    'readonly' => true,
+                                                    'pluginOptions' => [
+                                                        'defaultTime' => false,
+                                                        'showSeconds' => false,
+                                                        'showMeridian' => false,
+                                                    ]]
+                                            ) ?>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <?= $form->field($multipleForm, 'up_work_minutes')->input('number', ['step' => 10, 'min' => 0]) ?>
+                                        </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <?= $form->field($multipleForm, 'up_work_minutes')->input('number', ['step' => 10, 'min' => 0]) ?>
-                                    </div>
-                                </div>
+                                <?php endif; ?>
                                 <div class="row">
                                     <div class="col-md-12">
                                         <?= $form->field($multipleForm, 'up_timezone')->widget(\kartik\select2\Select2::class, [

@@ -8,7 +8,9 @@ use common\models\query\EmployeeQuery;
 use common\models\search\EmployeeSearch;
 use frontend\models\UserFailedLogin;
 use kartik\password\StrengthValidator;
+use modules\featureFlag\FFlag;
 use modules\product\src\entities\productType\ProductType;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
 use src\access\EmployeeGroupAccess;
 use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
@@ -2157,58 +2159,35 @@ class Employee extends \yii\db\ActiveRecord implements IdentityInterface
             return $this->shiftTime;
         }
 
-        if ($this->userParams) {
-            $this->userParams->up_work_minutes = $this->userParams->up_work_minutes ?: 480;
-            $startTime = $this->userParams->up_work_start_tm;
-            $workSeconds = (int)$this->userParams->up_work_minutes * 60;
+        /** @fflag FFlag::FF_KEY_SWITCH_NEW_SHIFT_ENABLE, Switch new Shift Enable */
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SWITCH_NEW_SHIFT_ENABLE)) {
+            $firstUserShiftSchedule = UserShiftScheduleQuery::getQueryForNextShiftsByUserId(
+                $this->id,
+                (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))
+            )
+                ->select(['user_shift_schedule.uss_start_utc_dt', 'user_shift_schedule.uss_end_utc_dt'])
+                ->limit(1)
+                ->asArray()
+                ->one();
 
-            if ($startTime && $workSeconds) {
-                $this->shiftTime = new ShiftTime(
-                    new StartTime($startTime),
-                    $workSeconds,
-                    ($this->userParams->up_timezone ?: 'UTC')
-                );
+            if ($firstUserShiftSchedule) {
+                $this->shiftTime = new ShiftTime();
+                $this->shiftTime->setParam($firstUserShiftSchedule['uss_start_utc_dt'], $firstUserShiftSchedule['uss_end_utc_dt']);
             }
+        } else {
+            if ($this->userParams) {
+                $this->userParams->up_work_minutes = $this->userParams->up_work_minutes ?: 480;
+                $startTime = $this->userParams->up_work_start_tm;
+                $workSeconds = (int)$this->userParams->up_work_minutes * 60;
 
-//            if ($startTime && $workHours) {
-//                $currentTimeUTC = new \DateTime();
-//                $currentTimeUTC->setTimezone(new \DateTimeZone('UTC'));
-//
-//                $startShiftTimeUTC = new \DateTime(date('Y-m-d') . ' ' . $startTime, new \DateTimeZone($timeZone));
-//                $startShiftTimeUTC->setTimezone(new \DateTimeZone('UTC'));
-//
-//                $endShiftTimeUTC = clone $startShiftTimeUTC;
-//                $endShiftTimeUTC->add(new \DateInterval('PT' . $workHours . 'S'));
-//
-//                $endShiftMinutes = $endShiftTimeUTC->format('H')*60 + $endShiftTimeUTC->format('i');
-//                $currentMinutes = $currentTimeUTC->format('H')*60 + $currentTimeUTC->format('i');
-//
-//                if($startShiftTimeUTC->format('d') != $endShiftTimeUTC->format('d')){
-//                    //var_dump($currentMinutes, $endShiftMinutes, ($currentMinutes >= 0 && $endShiftMinutes >= $currentMinutes));
-//                    if($currentMinutes >= 0 && $endShiftMinutes >= $currentMinutes){
-//                        $startShiftTimeUTC->modify('-1 day');
-//                        $endShiftTimeUTC->modify('-1 day');
-//                    }
-//
-//                }
-//                // $startShiftTimeDt = $startShiftTimeUTC->format('Y-m-d H:i:s');
-//                // $endShiftTimeDt = $endShiftTimeUTC->format('Y-m-d H:i:s');
-//                // echo $startShiftTimeUTC.' - '.$endShiftTimeUTC; exit;
-//
-//                $startTS = $startShiftTimeUTC->getTimestamp();
-//                $endTS = $endShiftTimeUTC->getTimestamp();
-//
-//                $shiftData['start_utc_ts'] = $startTS;
-//                $shiftData['end_utc_ts'] = $endTS;
-//
-//                $shiftData['start_period_utc_ts'] = $endTS - (24 * 60 * 60);
-//
-//                $shiftData['start_utc_dt'] = $startShiftTimeUTC->format('Y-m-d H:i:s');
-//                $shiftData['end_utc_dt'] = $endShiftTimeUTC->format('Y-m-d H:i:s');
-//
-//                $shiftData['start_period_utc_dt'] = date('Y-m-d H:i:s', $shiftData['start_period_utc_ts']);
-//            }
-//            $this->shiftData = $shiftData;
+                if ($startTime && $workSeconds) {
+                    $this->shiftTime = new ShiftTime(
+                        new StartTime($startTime),
+                        $workSeconds,
+                        ($this->userParams->up_timezone ?: 'UTC')
+                    );
+                }
+            }
         }
 
         if ($this->shiftTime === null) {
