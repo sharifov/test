@@ -92,8 +92,6 @@ use src\entities\email\helpers\EmailPriority;
  * @property string|null $statusDoneDt
  * @property string $statusName
  * @property string $typeName
- * @property bool $isNew
- * @property bool $isDeleted
  *
  */
 class Email extends BaseActiveRecord implements EmailInterface
