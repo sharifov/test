@@ -84,7 +84,7 @@ class ObjectTaskScenario extends \yii\db\ActiveRecord
         return [
             'ots_id' => 'ID',
             'ots_key' => 'Key',
-            'ots_data_json' => 'Data Json',
+            'ots_data_json' => 'Parameters',
             'ots_created_user_id' => 'Created User ID',
             'ots_created_dt' => 'Created Dt',
             'ots_updated_dt' => 'Updated Dt',
