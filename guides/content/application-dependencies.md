@@ -48,7 +48,6 @@
 |45|guzzlehttp/guzzle|library|7.4.1|MIT|https://github.com/guzzle/guzzle.git|Graham Campbell, Michael Dowling, Jeremy Lindblom, George Mponos, Tobias Nyholm, Márk Sági-Kazár, Tobias Schultze|Guzzle is a PHP HTTP client library|
 |46|guzzlehttp/promises|library|1.5.1|MIT|https://github.com/guzzle/promises.git|Graham Campbell, Michael Dowling, Tobias Nyholm, Tobias Schultze|Guzzle promises library|
 |47|guzzlehttp/psr7|library|2.1.0|MIT|https://github.com/guzzle/psr7.git|Graham Campbell, Michael Dowling, George Mponos, Tobias Nyholm, Márk Sági-Kazár, Tobias Schultze, Márk Sági-Kazár|PSR-7 message implementation that also provides common utility methods|
-|48|ikimea/browser|library|1.12.0|MIT|https://github.com/Ikimea/Browser.git|Ikimea, Gary White, Chris Schuld|Detecting the user’s browser|
 |49|index0h/yii2-log|yii2-extension|0.0.3|MIT|https://github.com/index0h/yii2-log.git|Roman Levishchenko|Many Yii2 log targets|
 |50|jms/metadata|library|2.6.1|MIT|https://github.com/schmittjoh/metadata.git|Johannes M. Schmitt, Asmir Mustafic|Class/method/property metadata management in PHP|
 |51|jms/serializer|library|3.17.1|MIT|https://github.com/schmittjoh/serializer.git|Johannes M. Schmitt, Asmir Mustafic|Library for (de-)serializing data of any complexity; supports XML, JSON, and YAML.|
@@ -163,14 +162,6 @@
 |160|vova07/yii2-imperavi-widget|yii2-extension|2.0.11|BSD-3-Clause|https://github.com/vova07/yii2-imperavi-widget.git|Crudu Vasile|The imperavi redactor widget for Yii 2 framework.|
 |161|webmozart/assert|library|1.9.1|MIT|https://github.com/webmozarts/assert.git|Bernhard Schussek|Assertions to validate method input/output with nice error messages.|
 |162|webonyx/graphql-php|library|v14.11.5|MIT|https://github.com/webonyx/graphql-php.git||A PHP port of GraphQL reference implementation|
-|163|webvimark/bootstrap-switch|library|1.0.0||https://github.com/webvimark/bootstrap-switch.git||BootstrapSwitch extension for yii 2|
-|164|webvimark/components|library|1.0.3||https://github.com/webvimark/components.git||Components for yii 2|
-|165|webvimark/date-range-picker|library|1.0.2||https://github.com/webvimark/date-range-picker.git||dangrossman daterangepicker yii 2 gridview|
-|166|webvimark/grid-bulk-actions|library|1.0.2||https://github.com/webvimark/grid-bulk-actions.git||Bulk actions extension for yii 2 gridview|
-|167|webvimark/grid-page-size|library|1.0.2||https://github.com/webvimark/grid-page-size.git||Grid page size extension for yii 2 gridview|
-|168|webvimark/helpers|library|1.1.0||https://github.com/webvimark/helpers.git||Helpers for yii 2|
-|169|webvimark/image|library|1.0.0||https://github.com/webvimark/image.git||Kohana image lib wrapper for yii 2|
-|170|webvimark/module-user-management|library|1.0.13||https://github.com/webvimark/user-management.git||User with improved RBAC|
 |172|yii2mod/yii2-rbac|yii2-extension|2.3|MIT|https://github.com/yii2mod/yii2-rbac.git|Dmitry Semenov, Igor Chepurnoi|RBAC management module for Yii2|
 |173|yii2tech/csv-grid|yii2-extension|1.0.5|BSD-3-Clause|https://github.com/yii2tech/csv-grid.git|Paul Klimov|Yii2 extension data export to CSV file|
 |174|yiisoft/yii2|library|2.0.45|BSD-3-Clause|https://github.com/yiisoft/yii2-framework.git|Qiang Xue, Alexander Makarov, Maurizio Domba, Carsten Brandt, Timur Ruziev, Paul Klimov, Dmitry Naumenko, Boudewijn Vahrmeijer|Yii PHP Framework Version 2|

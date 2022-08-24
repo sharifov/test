@@ -62,7 +62,6 @@
 		"ext-zlib": "*",
 		"ext-openssl": "*",
 		"lajax/yii2-translate-manager" : "^1.8",
-		"webvimark/module-user-management" : "^1.0",
 		"kartik-v/yii2-export" : ">=1.4",
 		"kartik-v/yii2-grid" : "dev-master",
 		"kartik-v/yii2-editable" : "dev-master",

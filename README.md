@@ -262,7 +262,6 @@ Documentation is at [docs/guide/README.md](docs/guide/README.md).
 ```
 Migrate command:
 ```sh
-./yii_test migrate --migrationPath=vendor/webvimark/module-user-management/migrations/
 ./yii_test migrate/up --migrationPath=@vendor/lajax/yii2-translate-manager/migrations
 ./yii_test migrate --migrationPath=@yii/log/migrations/
 ```

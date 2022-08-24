@@ -106,7 +106,6 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
         <div class="btn-group">
             <?php echo Html::button('<span class="fa fa-square-o"></span> Check All', ['class' => 'btn btn-default', 'id' => 'btn-check-all']); ?>
 
-            <?php // if (\webvimark\modules\UserManagement\models\User::canRoute('/email-layout/delete-selected')): ?>
             <button type="button" class="btn btn-default dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"
                     aria-haspopup="true" aria-expanded="false">
                 <span class="sr-only">Toggle Dropdown</span>
