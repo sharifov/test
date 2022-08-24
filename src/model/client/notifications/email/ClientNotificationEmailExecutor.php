@@ -7,7 +7,6 @@ use common\models\Email;
 use common\models\EmailTemplateType;
 use modules\product\src\entities\productQuote\ProductQuote;
 use src\entities\cases\Cases;
-use src\helpers\ErrorsToStringHelper;
 use src\helpers\ProjectHashGenerator;
 use src\model\client\notifications\client\entity\ClientNotificationRepository;
 use src\model\client\notifications\email\entity\ClientNotificationEmailList;
@@ -16,30 +15,38 @@ use src\model\client\notifications\email\entity\Status;
 use src\model\emailList\entity\EmailList;
 use yii\helpers\ArrayHelper;
 use src\services\cases\CasesCommunicationService;
+use src\dto\email\EmailDTO;
+use src\services\email\EmailMainService;
+use src\exception\CreateModelException;
+use yii\helpers\VarDumper;
 
 /**
  * Class ClientNotificationEmailExecutor
  *
  * @property ClientNotificationEmailListRepository $clientNotificationEmailListRepository
  * @property ClientNotificationRepository $clientNotificationRepository
+ * @property CasesCommunicationService $casesCommunicationService
+ * @property EmailMainService $emailService
  */
 class ClientNotificationEmailExecutor
 {
     private ClientNotificationEmailListRepository $clientNotificationEmailListRepository;
     private ClientNotificationRepository $clientNotificationRepository;
     private CasesCommunicationService $casesCommunicationService;
+    private EmailMainService $emailService;
 
     public function __construct(
         ClientNotificationRepository $clientNotificationRepository,
         ClientNotificationEmailListRepository $clientNotificationEmailListRepository,
-        CasesCommunicationService $casesCommunicationService
+        CasesCommunicationService $casesCommunicationService,
+        EmailMainService $emailService
     ) {
         $this->clientNotificationEmailListRepository = $clientNotificationEmailListRepository;
         $this->clientNotificationRepository = $clientNotificationRepository;
         $this->casesCommunicationService = $casesCommunicationService;
+        $this->emailService = $emailService;
     }
 
-    //TODO: refactor using EmailMainService
     public function execute(ClientNotificationEmailList $notification): void
     {
         if (!$notification->isNew()) {
@@ -106,42 +113,29 @@ class ClientNotificationEmailExecutor
                 $languageId
             );
 
-            $mail = new Email();
-            $mail->e_project_id = $notification->getData()->projectId;
-            $mail->e_case_id = $notification->getData()->caseId;
-            $mail->e_template_type_id = $emailTemplateTypeId;
-            $mail->e_type_id = Email::TYPE_OUTBOX;
-            $mail->e_status_id = Email::STATUS_PENDING;
-            $mail->e_email_subject = $previewEmail['email_subject'] ?? null;
-            $mail->body_html = $previewEmail['email_body_html'] ?? null;
-            $mail->e_email_from = $fromEmail;
-            $mail->e_email_from_name = $notification->cnel_name_from;
-            $mail->e_language_id = $languageId;
-            $mail->e_email_to = $toEmail;
-            //$mail->email_data = [];
-            $mail->e_created_dt = date('Y-m-d H:i:s');
+            $emailDTO = EmailDTO::fromArray([
+                'projectId' => $notification->getData()->projectId,
+                'caseId' => $notification->getData()->caseId,
+                'templateTypeId' => $emailTemplateTypeId,
+                'emailSubject' => $previewEmail['email_subject'] ?? null,
+                'bodyHtml' => $previewEmail['email_body_html'] ?? null,
+                'emailFrom' => $fromEmail,
+                'emailFromName' => $notification->cnel_name_from,
+                'languageId' => $languageId,
+                'emailTo' => $toEmail,
+            ]);
 
-
-            if (!$mail->save()) {
-                throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($mail));
-            }
-
-            $mail->e_message_id = $mail->generateMessageId();
-            $mail->update();
+            $mail = $this->emailService->createFromDTO($emailDTO, false);
 
             $notification->processing($mail->e_id, new \DateTimeImmutable());
             $this->clientNotificationEmailListRepository->save($notification);
 
-            $result = $mail->sendMail();
-
-            if ($result['error']) {
-                $notification->error(new \DateTimeImmutable());
-                $this->clientNotificationEmailListRepository->save($notification);
-                return;
-            }
+            $this->emailService->sendMail($mail);
 
             $notification->done(new \DateTimeImmutable());
             $this->clientNotificationEmailListRepository->save($notification);
+        } catch (CreateModelException $e) {
+            throw new \RuntimeException(VarDumper::dumpAsString($e->getErrors()));
         } catch (\Throwable $e) {
             $notification->error(new \DateTimeImmutable());
             $this->clientNotificationEmailListRepository->save($notification);
@@ -157,7 +151,7 @@ class ClientNotificationEmailExecutor
             $fromEmail,
             $toEmail,
             $contentData,
-            $languageId,
+            $languageId
         );
 
         if ($result['error'] !== false) {
