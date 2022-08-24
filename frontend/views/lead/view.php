@@ -511,7 +511,7 @@ $this->registerJs($jsCommBlockChatView);
 
 $css = <<<CSS
     .datepicker {
-        z-index: 1040!important;
+        z-index: 1051!important;
     }
 CSS;
 $this->registerCss($css);
