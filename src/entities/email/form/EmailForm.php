@@ -66,6 +66,8 @@ class EmailForm extends CompositeForm
         $this->contacts = [
             'from' => new EmailContactForm(EmailContactType::FROM),
             'to' => new EmailContactForm(EmailContactType::TO),
+            'cc' => new EmailContactForm(EmailContactType::CC),
+            'bcc' => new EmailContactForm(EmailContactType::BCC),
         ];
 
         parent::__construct($config);
@@ -94,15 +96,14 @@ class EmailForm extends CompositeForm
 
         $from = (isset($data['contacts']['from'])) ? EmailContactForm::fromArray($data['contacts']['from']) : new EmailContactForm(EmailContactType::FROM);
         $to = (isset($data['contacts']['to'])) ? EmailContactForm::fromArray($data['contacts']['to']) : new EmailContactForm(EmailContactType::TO);
+        $cc = (isset($data['contacts']['cc'])) ? EmailContactForm::fromArray($data['contacts']['cc']) : new EmailContactForm(EmailContactType::CC);
+        $bcc = (isset($data['contacts']['bcc'])) ? EmailContactForm::fromArray($data['contacts']['bcc']) : new EmailContactForm(EmailContactType::BCC);
         $contactsForm = [
             'from' => $from,
             'to' => $to,
+            'cc' => $cc,
+            'bcc' => $bcc,
         ];
-       /*  if (isset($data['contacts']['cc'])) {
-            foreach ($data['contacts']['cc'] as $key => $ccData) {
-                $contactsForm['cc' . ($key+1) ] = EmailContactForm::fromArray($ccData);
-            }
-        } */
         $instance->contacts = $contactsForm;
 
         return $instance;
