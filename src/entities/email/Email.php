@@ -56,6 +56,8 @@ use src\entities\email\helpers\EmailPriority;
  * @property EmailAddress[] $contacts
  * @property EmailAddress $contactFrom
  * @property EmailAddress $contactTo
+ * @property EmailAddress[] $contactsCC
+ * @property EmailAddress[] $contactsBCC
  * @property EmailContact $emailContactFrom
  * @property EmailContact $emailContactTo
  * @property EmailContact[] $emailContacts
@@ -76,6 +78,8 @@ use src\entities\email\helpers\EmailPriority;
  * @property string|null $emailFromName
  * @property string|null $emailTo
  * @property string|null $emailToName
+ * @property array $emailsCC
+ * @property array $emailsBCC
  * @property string|null $emailSubject
  * @property int|null $communicationId
  * @property string|null $languageId
@@ -224,12 +228,12 @@ class Email extends BaseActiveRecord implements EmailInterface
         return $this->hasMany(EmailContact::class, ['ec_email_id' => 'e_id']);
     }
 
-    public function getEmailContactFrom()
+    public function getEmailContactFrom(): \yii\db\ActiveQuery
     {
         return $this->hasOne(EmailContact::class, ['ec_email_id' => 'e_id'])->onCondition(['ec_type_id' => EmailContactType::FROM]);
     }
 
-    public function getEmailContactTo()
+    public function getEmailContactTo(): \yii\db\ActiveQuery
     {
         return $this->hasOne(EmailContact::class, ['ec_email_id' => 'e_id'])->onCondition(['ec_type_id' => EmailContactType::TO]);
     }
@@ -249,13 +253,37 @@ class Email extends BaseActiveRecord implements EmailInterface
     public function getContactTo(): \yii\db\ActiveQuery
     {
         return $this->hasOne(EmailAddress::class, ['ea_id' => 'ec_address_id'])
-        ->viaTable(
-            'email_contact',
-            ['ec_email_id' => 'e_id'],
-            function ($query) {
-                $query->onCondition(['ec_type_id' => EmailContactType::TO]);
-            }
-        );
+            ->viaTable(
+                'email_contact',
+                ['ec_email_id' => 'e_id'],
+                function ($query) {
+                    $query->onCondition(['ec_type_id' => EmailContactType::TO]);
+                }
+            );
+    }
+
+    public function getContactsCC(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(EmailAddress::class, ['ea_id' => 'ec_address_id'])
+            ->viaTable(
+                'email_contact',
+                ['ec_email_id' => 'e_id'],
+                function ($query) {
+                    $query->onCondition(['ec_type_id' => EmailContactType::CC]);
+                }
+            );
+    }
+
+    public function getContactsBCC(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(EmailAddress::class, ['ea_id' => 'ec_address_id'])
+            ->viaTable(
+                'email_contact',
+                ['ec_email_id' => 'e_id'],
+                function ($query) {
+                    $query->onCondition(['ec_type_id' => EmailContactType::BCC]);
+                }
+            );
     }
 
     public function getEmailFrom($masking = true): string
@@ -270,6 +298,30 @@ class Email extends BaseActiveRecord implements EmailInterface
         }
 
         return null;
+    }
+
+    public function getEmailsCC()
+    {
+        $emails = [];
+        if ($this->contactsCC) {
+            foreach ($this->contactsCC as $contact) {
+                $emails[] = $contact->getEmail(false);
+            }
+        }
+
+        return $emails;
+    }
+
+    public function getEmailsBCC()
+    {
+        $emails = [];
+        if ($this->contactsBCC) {
+            foreach ($this->contactsBCC as $contact) {
+                $emails[] = $contact->getEmail(false);
+            }
+        }
+
+        return $emails;
     }
 
     public function getEmailFromName(): ?string
