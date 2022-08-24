@@ -93,7 +93,7 @@ class NoAnswerObject extends BaseObject
         $r = self::ATTR_REASON;
         $c = self::ATTR_CABIN;
 
-        $p['values'] = Project::getList();
+        $p['values'] = Project::getKeyList();
         $s['values'] = Lead::STATUS_LIST;
         $c['values'] = Lead::CABIN_LIST;
 
