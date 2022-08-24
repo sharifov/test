@@ -63,6 +63,7 @@ $operators = json_encode(\modules\objectTask\src\scenarios\statements\BaseObject
             <?= $form->field($model, 'ots_condition_json')->hiddenInput(['id' => 'ots_condition_json', 'maxlength' => true])->label(false) ?>
         </div>
         <div class="col-6">
+            <label class="control-label">Statement condition</label>
             <div id="builder" class="w-100" style="width: 100%"></div>
             <?php
             $rules = $model->ots_condition_json ?? "null";
