@@ -192,7 +192,6 @@
 |168|webvimark/helpers|library|1.1.0||https://github.com/webvimark/helpers.git||Helpers for yii 2|
 |169|webvimark/image|library|1.0.0||https://github.com/webvimark/image.git||Kohana image lib wrapper for yii 2|
 |170|webvimark/module-user-management|library|1.0.13||https://github.com/webvimark/user-management.git||User with improved RBAC|
-|171|workerman/workerman|library|v3.5.31|MIT|https://github.com/walkor/Workerman.git|walkor|An asynchronous event driven PHP framework for easily building fast, scalable network applications.|
 |172|yii2mod/yii2-rbac|yii2-extension|2.3|MIT|https://github.com/yii2mod/yii2-rbac.git|Dmitry Semenov, Igor Chepurnoi|RBAC management module for Yii2|
 |173|yii2tech/csv-grid|yii2-extension|1.0.5|BSD-3-Clause|https://github.com/yii2tech/csv-grid.git|Paul Klimov|Yii2 extension data export to CSV file|
 |174|yiisoft/yii2|library|2.0.45|BSD-3-Clause|https://github.com/yiisoft/yii2-framework.git|Qiang Xue, Alexander Makarov, Maurizio Domba, Carsten Brandt, Timur Ruziev, Paul Klimov, Dmitry Naumenko, Boudewijn Vahrmeijer|Yii PHP Framework Version 2|

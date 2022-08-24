@@ -279,14 +279,6 @@ Migrate command:
 * Download & install - [http://phantomjs.org/download.html](http://phantomjs.org/download.html)
 * Run  ```phantomjs --webdriver=4444```
 
-
-WebSocket Server (https://github.com/walkor/Workerman):
-```sh
-sudo php console/socket-server.php start
-sudo php console/socket-server.php stop
-sudo php console/socket-server.php restart
-sudo php console/socket-server.php reload
-```
 Check process by PORT
 ```sh
 sudo netstat -tulpn| grep :8080

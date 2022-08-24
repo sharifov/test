@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "77b1df899ead2827b4b5f1cf8757e545",
+    "content-hash": "92cbe57ece56deec7d346f0cd77eeb11",
     "packages": [
         {
             "name": "2amigos/yii2-arrayquery-component",
@@ -9151,59 +9151,6 @@
                 "source": "https://github.com/webvimark/user-management/tree/master"
             },
             "time": "2016-10-14T10:53:00+00:00"
-        },
-        {
-            "name": "workerman/workerman",
-            "version": "v3.5.31",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/walkor/Workerman.git",
-                "reference": "b73ddc45b3c7299f330923a2bde23ca6e974fd96"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/walkor/Workerman/zipball/b73ddc45b3c7299f330923a2bde23ca6e974fd96",
-                "reference": "b73ddc45b3c7299f330923a2bde23ca6e974fd96",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3"
-            },
-            "suggest": {
-                "ext-event": "For better performance. "
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Workerman\\": "./"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "walkor",
-                    "email": "walkor@workerman.net",
-                    "homepage": "http://www.workerman.net",
-                    "role": "Developer"
-                }
-            ],
-            "description": "An asynchronous event driven PHP framework for easily building fast, scalable network applications.",
-            "homepage": "http://www.workerman.net",
-            "keywords": [
-                "asynchronous",
-                "event-loop"
-            ],
-            "support": {
-                "email": "walkor@workerman.net",
-                "forum": "http://wenda.workerman.net/",
-                "issues": "https://github.com/walkor/workerman/issues",
-                "source": "https://github.com/walkor/workerman",
-                "wiki": "http://doc.workerman.net/"
-            },
-            "time": "2020-08-24T03:49:23+00:00"
         },
         {
             "name": "yii2mod/yii2-rbac",

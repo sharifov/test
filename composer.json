@@ -71,7 +71,6 @@
 		"kartik-v/yii2-widget-timepicker" : "dev-master",
 		"vova07/yii2-imperavi-widget" : "*",
 		"kdn/yii2-json-editor" : "*",
-		"workerman/workerman" : "^3.5",
 		"yiisoft/yii2-queue": "^2.3",
 		"pda/pheanstalk": "^3.2",
 		"index0h/yii2-log": "0.0.3",
