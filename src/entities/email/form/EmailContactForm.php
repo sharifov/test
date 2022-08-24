@@ -10,6 +10,7 @@ class EmailContactForm extends Model
 {
     public $id;
     public $email;
+    public $emails;
     public $name;
     public $type;
 
@@ -39,8 +40,15 @@ class EmailContactForm extends Model
     public function rules(): array
     {
         return [
-            [['email', 'type'], 'required'],
+            [['type'], 'required'],
             [['email', 'name'], 'string'],
+            ['emails', 'safe'],
+            ['email', 'required', 'when' => function ($model) {
+                return (empty($model->emails)) && EmailContactType::isRequired($model->type);
+            }],
+            ['emails', 'required', 'when' => function ($model) {
+                return (empty($model->email)) && EmailContactType::isRequired($model->type);
+            }],
             [['type', 'id'], 'integer'],
         ];
     }
