@@ -104,7 +104,12 @@ class EmailService extends SendMail implements EmailServiceInterface
             $email->e_email_to_name = $form->contacts['to']->name;
             $email->e_email_from = $form->contacts['from']->email;
             $email->e_email_from_name = $form->contacts['from']->name;
-            //$email->e_email_cc = TODO: CC, BCC
+            if (isset($form->contacts['cc']) && !empty($form->contacts['cc']->emails)) {
+                $email->e_email_cc = join(', ', $form->contacts['cc']->emails);
+            }
+            if (isset($form->contacts['bcc']) && !empty($form->contacts['bcc']->emails)) {
+                $email->e_email_bcc = join(', ', $form->contacts['bcc']->emails);
+            }
             $email->e_email_subject = $form->body->subject;
             $email->e_project_id = $form->projectId;
             $email->body_html = $form->body->bodyHtml;
@@ -174,7 +179,12 @@ class EmailService extends SendMail implements EmailServiceInterface
             $email->e_email_to_name = $form->contacts['to']->name;
             $email->e_email_from = $form->contacts['from']->email;
             $email->e_email_from_name = $form->contacts['from']->name;
-            //$email->e_email_cc = TODO: CC, BCC
+            if (isset($form->contacts['cc']) && !empty($form->contacts['cc']->emails)) {
+                $email->e_email_cc = join(', ', $form->contacts['cc']->emails);
+            }
+            if (isset($form->contacts['bcc']) && !empty($form->contacts['bcc']->emails)) {
+                $email->e_email_bcc = join(', ', $form->contacts['bcc']->emails);
+            }
             $email->e_email_subject = $form->body->subject;
             $email->e_project_id = $form->projectId;
             $email->body_html = $form->body->bodyHtml;
