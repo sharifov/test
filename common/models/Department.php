@@ -37,6 +37,7 @@ class Department extends \yii\db\ActiveRecord
     public const DEPARTMENT_SCHEDULE_CHANGE = 4;
     public const DEPARTMENT_FRAUD_PREVENTION = 5;
     public const DEPARTMENT_CHAT = 6;
+    public const DEPARTMENT_CROSS_SELL = 7;
 
     public const DEPARTMENT_LIST = [
         self::DEPARTMENT_SALES      => 'Sales',
@@ -44,7 +45,8 @@ class Department extends \yii\db\ActiveRecord
         self::DEPARTMENT_SUPPORT    => 'Support',
         self::DEPARTMENT_SCHEDULE_CHANGE    => 'Schedule Change',
         self::DEPARTMENT_FRAUD_PREVENTION => 'Fraud prevention',
-        self::DEPARTMENT_CHAT => 'Chat'
+        self::DEPARTMENT_CHAT => 'Chat',
+        self::DEPARTMENT_CROSS_SELL => 'Cross Sell',
     ];
 
     private const CSS_CLASS_LIST = [
@@ -54,6 +56,7 @@ class Department extends \yii\db\ActiveRecord
         self::DEPARTMENT_SCHEDULE_CHANGE    => 'primary',
         self::DEPARTMENT_FRAUD_PREVENTION    => 'secondary',
         self::DEPARTMENT_CHAT    => 'primary',
+        self::DEPARTMENT_CROSS_SELL    => 'info',
     ];
 
     public const CACHE_KEY = 'department';
