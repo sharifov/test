@@ -57,6 +57,8 @@ class SendEmailWithQuotes extends BaseCommand
                 'defaultValue' => 100,
             ],
             'quotes' => 1,
+            'uniqueQuotes' => false,
+            'cid' => '',
             'templateKey' => 'templateKey',
         ];
     }
@@ -296,18 +298,24 @@ class SendEmailWithQuotes extends BaseCommand
 
         if (isset($availableQuotes['count'], $availableQuotes['results']) && $availableQuotes['count'] > 0) {
             foreach ($availableQuotes['results'] as $quote) {
-                $quoteExists = Quote::find()
-                    ->where([
-                        'AND',
-                        ['lead_id' => $this->objectTask->lead->id],
-                        ['<>', 'status', Quote::STATUS_DECLINED],
-                        ['LIKE', 'origin_search_data', $quote['key']]
-                    ])
-                    ->limit(1)
-                    ->exists();
+                if ($quote['meta']['best'] === true) {
+                    if ($this->getNeedUniqueQuotes() === true) {
+                        $quoteExists = Quote::find()
+                            ->where([
+                                'AND',
+                                ['lead_id' => $this->objectTask->lead->id],
+                                ['<>', 'status', Quote::STATUS_DECLINED],
+                                ['LIKE', 'origin_search_data', $quote['key']]
+                            ])
+                            ->limit(1)
+                            ->exists();
 
-                if ($quoteExists === false) {
-                    $quotes[] = $quote;
+                        if ($quoteExists === false) {
+                            $quotes[] = $quote;
+                        }
+                    } else {
+                        $quotes[] = $quote;
+                    }
 
                     if (count($quotes) >= $amount) {
                         break;
@@ -322,9 +330,15 @@ class SendEmailWithQuotes extends BaseCommand
     protected function getQuotesFromApi(): array
     {
         $lead = $this->getLead();
-        $keyCache = sprintf('command-quotes-search-%d-%s-%s', $lead->id, '', $lead->generateLeadKey());
+        $keyCache = sprintf('commfgfand-quotes-search-%d-%s-%s-%s', $lead->id, '', $lead->generateLeadKey(), $this->getCid());
         $quotes = \Yii::$app->cacheFile->get($keyCache);
         $dto = new SearchServiceQuoteDTO($lead);
+
+        if (!empty($this->getCid())) {
+            $dto->setCid(
+                $this->getCid()
+            );
+        }
 
         if ($quotes === false) {
             $timeStart = microtime(true);
@@ -386,5 +400,15 @@ class SendEmailWithQuotes extends BaseCommand
     public function getTemplateKey(): string
     {
         return $this->config['templateKey'] ?? '';
+    }
+
+    public function getNeedUniqueQuotes(): bool
+    {
+        return (bool) ($this->config['uniqueQuotes'] ?? false);
+    }
+
+    public function getCid(): ?string
+    {
+        return $this->config['cid'] ?? '';
     }
 }
