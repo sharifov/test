@@ -249,15 +249,8 @@ $projectList = EmployeeProjectAccess::getProjects($user->id);
                 <div class="row">
                     <div class="col-sm-12">
                         <?php
-                        if ($user->isAdmin() || $user->isSuperAdmin() || $user->isUserManager()) {
-                            $data = \common\models\UserGroup::getList();
-                            $dataProjects = \common\models\Project::getList();
-                        }
-
-                        if ($user->isSupervision()) {
-                            $data = $user->getUserGroupList();
-                            $dataProjects = \yii\helpers\ArrayHelper::map($user->projects, 'id', 'name');
-                        }
+                        $data = \common\models\UserGroup::getEnabledList();
+                        $dataProjects = \common\models\Project::getEnabledList();
 
                         $userAbacDto = new UserAbacDto('user_groups');
                         $userAbacDto->isNewRecord = $model->isNewRecord;
