@@ -3,6 +3,7 @@
 namespace src\entities\email\helpers;
 
 use src\entities\email\Email;
+use modules\order\src\processManager\BookableQuoteChecker;
 
 /**
  * Class EmailContactType
@@ -50,5 +51,10 @@ class EmailContactType
     public static function isBcc(int $type): bool
     {
         return $type === self::BCC;
+    }
+
+    public static function isRequired(int $type): bool
+    {
+        return in_array($type, [self::FROM, self::TO]);
     }
 }
