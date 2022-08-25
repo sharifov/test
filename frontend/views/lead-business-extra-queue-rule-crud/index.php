@@ -28,7 +28,10 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-            'lbeqr_key',
+            [
+                'attribute' => 'lbeqr_key',
+                'contentOptions' => ['style' => 'width: 8%;'],
+            ],
             'lbeqr_name',
             'lbeqr_description:text',
             [
@@ -37,7 +40,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'relation' => 'lbeqrUpdatedUser',
                 'placeholder' => 'Updated User'
             ],
-            'lbeqr_duration',
+            [
+                'attribute' => 'lbeqr_duration',
+                'contentOptions' => ['style' => 'width: 5%;'],
+            ],
             'lbeqr_start_time',
             'lbeqr_end_time',
             [
@@ -56,16 +62,3 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
 </div>
-
-<?php
-$css = <<<CSS
-    .lead-business-extra-queue-rule-index .table-responsive thead tr:first-child th:nth-child(2) {
-      width: 8%;
-    }
-    
-    .lead-business-extra-queue-rule-index .table-responsive thead tr:first-child th:nth-child(6) {
-      width: 5%;
-    }
-CSS;
-
-$this->registerCss($css);
