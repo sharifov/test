@@ -30,7 +30,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
             [
                 'attribute' => 'lbeqr_key',
-                'contentOptions' => ['style' => 'width: 8%;'],
+                'contentOptions' => ['style' => 'width: 150px;'],
             ],
             'lbeqr_name',
             'lbeqr_description:text',
@@ -42,7 +42,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             [
                 'attribute' => 'lbeqr_duration',
-                'contentOptions' => ['style' => 'width: 5%;'],
+                'contentOptions' => ['style' => 'width: 85px;'],
             ],
             'lbeqr_start_time',
             'lbeqr_end_time',
