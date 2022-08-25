@@ -83,6 +83,9 @@ class SendEmailWithQuotes extends BaseCommand
                 self::QUOTE_TYPE_ANY_ASC,
                 self::QUOTE_TYPE_ANY_DESC,
             ],
+            'communicationData' => [
+                'day' => 1,
+            ]
         ];
     }
 
@@ -292,6 +295,7 @@ class SendEmailWithQuotes extends BaseCommand
             $quoteArray['qc'] = $uid;
             return $quoteArray;
         }, $dataForPreview['quotes'] ?? []);
+        $dataForPreview['communicationData'] = $this->getCommunicationData();
 
         $preview = Yii::$app->comms->mailPreview(
             $lead->project_id,
@@ -316,7 +320,13 @@ class SendEmailWithQuotes extends BaseCommand
             ]);
 
             $mail = $this->emailMainService->createFromDTO($mailDTO);
-            $this->emailMainService->sendMail($mail);
+
+            $this->emailMainService->sendMail(
+                $mail,
+                [
+                    'communicationData' => $this->getCommunicationData(),
+                ]
+            );
 
             foreach ($quotes as $quote) {
                 Repo::createForEmail($mail->e_id, $quote->id, $uid);
@@ -494,5 +504,10 @@ class SendEmailWithQuotes extends BaseCommand
         }
 
         return $quoteTypes;
+    }
+
+    public function getCommunicationData(): array
+    {
+        return (array) ($this->config['communicationData'] ?? []);
     }
 }
