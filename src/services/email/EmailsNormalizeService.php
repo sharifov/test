@@ -380,9 +380,8 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
         $content_data['email_body_text'] = $email->emailBody->embd_email_body_text;
         $content_data['email_subject'] = $email->emailBody->embd_email_subject;
         $content_data['email_reply_to'] = $email->emailFrom;
-        //TODO: to write cc bcc logic
-        //$content_data['email_cc'] = $this->e_email_cc;
-        //$content_data['email_bcc'] = $this->e_email_bc;
+        $content_data['email_cc'] = !empty($email->emailsCc) ? join(', ', $email->emailsCc) : null;
+        $content_data['email_bcc'] = !empty($email->emailsBcc) ? join(', ', $email->emailsBcc) : null;
         if ($email->contactFrom->ea_name) {
             $content_data['email_from_name'] = $email->contactFrom->ea_name;
         }
