@@ -298,7 +298,18 @@ class Email extends BaseActiveRecord implements EmailInterface
         return null;
     }
 
-    public function getEmailsCC()
+    public function getEmailsByType(int $type): array //TODO: if `from` and `to` can be multiple, complete it
+    {
+        if (EmailContactType::isCc($type)) {
+            return $this->emailsCC;
+        }
+        if (EmailContactType::isBcc($type)) {
+            return $this->emailsBCC;
+        }
+        return [];
+    }
+
+    public function getEmailsCC(): array
     {
         $emails = [];
         if ($this->contactsCC) {
@@ -310,7 +321,7 @@ class Email extends BaseActiveRecord implements EmailInterface
         return $emails;
     }
 
-    public function getEmailsBCC()
+    public function getEmailsBCC(): array
     {
         $emails = [];
         if ($this->contactsBCC) {
@@ -783,5 +794,16 @@ class Email extends BaseActiveRecord implements EmailInterface
         if ($replyId == null || ($linkedToReply != null && !$linkedToReply->equals($reply))) {
             $this->unlink('reply', $linkedToReply, true);
         }
+    }
+
+    public function getEmailsContactsIndexedByEmail(int $type)
+    {
+        $emailContacts = EmailContact::find()
+            ->joinWith('address')
+            ->byType($type)
+            ->byEmail($this->e_id)
+            ->all();
+
+        return ArrayHelper::index($emailContacts, 'address.ea_email');
     }
 }
