@@ -6065,11 +6065,6 @@ td.selected-cell {
   }
 }
 
-.main_container .user-stats-index .sales-stats-box {
-  width: auto;
-  display: inline-block;
-}
-
 .panel_toolbox {
     min-width: 0px;
 }

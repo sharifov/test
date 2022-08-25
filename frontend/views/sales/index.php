@@ -120,6 +120,9 @@ $tabs[] = [
 <?php
 $css = <<<CSS
     .sales-stats-box {
+        width: auto;
+        display: inline-block;
+      
         margin-bottom: 0!important;
         padding-bottom: 0!important;
     }
