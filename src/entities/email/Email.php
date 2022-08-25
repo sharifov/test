@@ -796,7 +796,7 @@ class Email extends BaseActiveRecord implements EmailInterface
         }
     }
 
-    public function getEmailsContactsIndexedByEmail(int $type)
+    public function getEmailsContactsIndexedByEmail(int $type): array
     {
         $emailContacts = EmailContact::find()
             ->joinWith('address')
@@ -805,5 +805,26 @@ class Email extends BaseActiveRecord implements EmailInterface
             ->all();
 
         return ArrayHelper::index($emailContacts, 'address.ea_email');
+    }
+
+    public function addContact(int $type, string $email, ?string $name = null): void
+    {
+        $emails = $this->getEmailsByType($type);
+        if (!in_array($email, $emails)) {
+            $address = EmailAddress::findOrNew($email, $name, !empty($name));
+            EmailContact::create([
+                'ec_address_id' => $address->ea_id,
+                'ec_email_id' => $this->e_id,
+                'ec_type_id' => $type
+            ]);
+        }
+    }
+
+    public function removeContact(int $type, string $email): void
+    {
+        $emailContacts = $this->getEmailsContactsIndexedByEmail($type);
+        if ($contact = $emailContacts[$email]) {
+            $contact->delete();
+        }
     }
 }
