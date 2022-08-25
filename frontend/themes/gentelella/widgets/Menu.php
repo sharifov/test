@@ -11,8 +11,10 @@ namespace frontend\themes\gentelella\widgets;
 use rmrevin\yii\fontawesome\component\Icon;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
-use webvimark\modules\UserManagement\models\User;
 
+/**
+ * @deprecated 
+ */
 class Menu extends \yii\widgets\Menu
 {
     /**
