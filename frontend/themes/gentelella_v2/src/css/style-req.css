@@ -6176,11 +6176,3 @@ li.select2-selection__choice:first-of-type {
 li.select2-selection__choice {
   white-space: pre-line;
 }
-
-.lead-business-extra-queue-rule-index .table-responsive thead tr:first-child th:nth-child(2) {
-  width: 8%;
-}
-
-.lead-business-extra-queue-rule-index .table-responsive thead tr:first-child th:nth-child(6) {
-  width: 5%;
-}

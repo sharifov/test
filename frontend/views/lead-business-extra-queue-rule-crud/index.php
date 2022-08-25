@@ -56,3 +56,16 @@ $this->params['breadcrumbs'][] = $this->title;
 
 
 </div>
+
+<?php
+$css = <<<CSS
+    .lead-business-extra-queue-rule-index .table-responsive thead tr:first-child th:nth-child(2) {
+      width: 8%;
+    }
+    
+    .lead-business-extra-queue-rule-index .table-responsive thead tr:first-child th:nth-child(6) {
+      width: 5%;
+    }
+CSS;
+
+$this->registerCss($css);
