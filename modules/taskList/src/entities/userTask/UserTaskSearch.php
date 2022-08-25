@@ -102,60 +102,7 @@ class UserTaskSearch extends UserTask
             return $dataProvider;
         }
 
-        if ($this->createTimeRange) {
-            try {
-                $dTStart = new \DateTimeImmutable(date('Y-m-d 00:00:00', $this->createTimeStart));
-                $dTEnd = new \DateTime(date('Y-m-d 23:59:59', $this->createTimeEnd));
-                $sqlDTRestriction = DBHelper::yearMonthRestrictionQuery(
-                    $dTStart,
-                    $dTEnd,
-                    'ut_year',
-                    'ut_month'
-                );
-                $query->where($sqlDTRestriction);
-            } catch (\RuntimeException | \DomainException $throwable) {
-                $message = AppHelper::throwableLog($throwable);
-                $message['model'] = ArrayHelper::toArray($this);
-                \Yii::warning($message, 'UserTaskSearch:search:Exception');
-            } catch (\Throwable $throwable) {
-                $message = AppHelper::throwableLog($throwable);
-                $message['model'] = ArrayHelper::toArray($this);
-                \Yii::error($message, 'UserTaskSearch:search:Throwable');
-            }
-        }
-
-        // grid filtering conditions
-        $query->andFilterWhere([
-            'ut_id' => $this->ut_id,
-            'ut_user_id' => $this->ut_user_id,
-            'ut_target_object_id' => $this->ut_target_object_id,
-            'ut_task_list_id' => $this->ut_task_list_id,
-            'ut_priority' => $this->ut_priority,
-            'ut_status_id' => $this->ut_status_id,
-            'ut_year' => $this->ut_year,
-            'ut_month' => $this->ut_month,
-        ]);
-
-        if ($this->ut_start_dt) {
-            $query->andFilterWhere(['>=', 'ut_start_dt',
-                Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_start_dt))])
-                ->andFilterWhere(['<=', 'ut_start_dt',
-                    Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_start_dt) + 3600 * 24)]);
-        }
-        if ($this->ut_end_dt) {
-            $query->andFilterWhere(['>=', 'ut_end_dt',
-                Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_end_dt))])
-                ->andFilterWhere(['<=', 'ut_end_dt',
-                    Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_end_dt) + 3600 * 24)]);
-        }
-        if ($this->ut_created_dt) {
-            $query->andFilterWhere(['>=', 'ut_created_dt',
-                Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_created_dt))])
-                ->andFilterWhere(['<=', 'ut_created_dt',
-                    Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_created_dt) + 3600 * 24)]);
-        }
-
-        $query->andFilterWhere(['like', 'ut_target_object', $this->ut_target_object]);
+        $this->filterSearchQuery($query);
 
         return $dataProvider;
     }
@@ -378,5 +325,80 @@ class UserTaskSearch extends UserTask
         }
 
         return $dataProvider;
+    }
+
+    public function searchIds($params): array
+    {
+        $query = static::find()->select('ut_id');
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            $query->where('0=1');
+
+            return [];
+        }
+
+        $this->filterSearchQuery($query);
+
+        return ArrayHelper::map($query->asArray()->all(), 'ut_id', 'ut_id');
+    }
+
+    private function filterSearchQuery(UserTaskScopes $query)
+    {
+        if ($this->createTimeRange) {
+            try {
+                $dTStart = new \DateTimeImmutable(date('Y-m-d 00:00:00', $this->createTimeStart));
+                $dTEnd = new \DateTime(date('Y-m-d 23:59:59', $this->createTimeEnd));
+                $sqlDTRestriction = DBHelper::yearMonthRestrictionQuery(
+                    $dTStart,
+                    $dTEnd,
+                    'ut_year',
+                    'ut_month'
+                );
+                $query->where($sqlDTRestriction);
+            } catch (\RuntimeException | \DomainException $throwable) {
+                $message = AppHelper::throwableLog($throwable);
+                $message['model'] = ArrayHelper::toArray($this);
+                \Yii::warning($message, 'UserTaskSearch:search:Exception');
+            } catch (\Throwable $throwable) {
+                $message = AppHelper::throwableLog($throwable);
+                $message['model'] = ArrayHelper::toArray($this);
+                \Yii::error($message, 'UserTaskSearch:search:Throwable');
+            }
+        }
+
+        // grid filtering conditions
+        $query->andFilterWhere([
+            'ut_id' => $this->ut_id,
+            'ut_user_id' => $this->ut_user_id,
+            'ut_target_object_id' => $this->ut_target_object_id,
+            'ut_task_list_id' => $this->ut_task_list_id,
+            'ut_priority' => $this->ut_priority,
+            'ut_status_id' => $this->ut_status_id,
+            'ut_year' => $this->ut_year,
+            'ut_month' => $this->ut_month,
+        ]);
+
+        if ($this->ut_start_dt) {
+            $query->andFilterWhere(['>=', 'ut_start_dt',
+                Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_start_dt))])
+                ->andFilterWhere(['<=', 'ut_start_dt',
+                    Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_start_dt) + 3600 * 24)]);
+        }
+        if ($this->ut_end_dt) {
+            $query->andFilterWhere(['>=', 'ut_end_dt',
+                Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_end_dt))])
+                ->andFilterWhere(['<=', 'ut_end_dt',
+                    Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_end_dt) + 3600 * 24)]);
+        }
+        if ($this->ut_created_dt) {
+            $query->andFilterWhere(['>=', 'ut_created_dt',
+                Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_created_dt))])
+                ->andFilterWhere(['<=', 'ut_created_dt',
+                    Employee::convertTimeFromUserDtToUTC(strtotime($this->ut_created_dt) + 3600 * 24)]);
+        }
+
+        $query->andFilterWhere(['like', 'ut_target_object', $this->ut_target_object]);
     }
 }

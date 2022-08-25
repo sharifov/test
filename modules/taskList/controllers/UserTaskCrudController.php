@@ -8,6 +8,7 @@ use modules\taskList\src\entities\userTask\UserTask;
 use modules\taskList\src\entities\userTask\UserTaskSearch;
 use src\helpers\app\AppHelper;
 use src\helpers\ErrorsToStringHelper;
+use Yii;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
@@ -43,12 +44,17 @@ class UserTaskCrudController extends FController
     /**
      * Lists all UserTask models.
      *
-     * @return string
      */
     public function actionIndex()
     {
         $searchModel = new UserTaskSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
+
+        if (Yii::$app->request->get('act') === 'select-all') {
+            $data = $searchModel->searchIds(Yii::$app->request->queryParams);
+
+            return $this->asJson($data);
+        }
 
         return $this->render('index', [
             'searchModel' => $searchModel,
@@ -139,6 +145,21 @@ class UserTaskCrudController extends FController
     {
         $this->findModel($ut_id, $ut_year, $ut_month)->delete();
 
+        return $this->redirect(['index']);
+    }
+
+    /**
+     * @return \yii\web\Response
+     */
+    public function actionMultipleDelete()
+    {
+        try {
+            $userTaskIds = Yii::$app->request->post('selectedUserTask', []);
+            $deleteCount = UserTask::deleteAll(['ut_id' => $userTaskIds]);
+            Yii::$app->session->setFlash('success', 'Successfully: UserTasks were removed (Count: ' . $deleteCount . ')');
+        } catch (\Throwable $throwable) {
+            Yii::error(AppHelper::throwableLog($throwable), 'UserTaskCrudController:actionMultipleDelete:Throwable');
+        }
         return $this->redirect(['index']);
     }
 
