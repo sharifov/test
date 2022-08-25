@@ -26,4 +26,14 @@ class EmailContactQuery extends ActiveQuery
     {
         return $this->andOnCondition(['ec_type_id' => EmailContactType::BCC]);
     }
+
+    public function byType(int $type)
+    {
+        return $this->andOnCondition(['ec_type_id' => $type]);
+    }
+
+    public function byEmail(int $emailId)
+    {
+        return $this->andWhere(['ec_email_id' => $emailId]);
+    }
 }
