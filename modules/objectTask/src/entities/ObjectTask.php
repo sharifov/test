@@ -6,6 +6,9 @@ use common\models\Lead;
 use common\models\Queue;
 use src\entities\EventTrait;
 use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
+use yii\db\BaseActiveRecord;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -50,6 +53,19 @@ class ObjectTask extends \yii\db\ActiveRecord
     public static function tableName(): string
     {
         return 'object_task';
+    }
+
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    BaseActiveRecord::EVENT_BEFORE_INSERT => ['ot_created_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s'),
+            ],
+        ];
     }
 
     /**
