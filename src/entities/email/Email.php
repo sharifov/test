@@ -56,8 +56,9 @@ use src\entities\email\helpers\EmailPriority;
  * @property EmailAddress[] $contacts
  * @property EmailAddress $contactFrom
  * @property EmailAddress $contactTo
- * @property EmailAddress[] $contactsCC
- * @property EmailAddress[] $contactsBCC
+ * @property EmailAddress[] $contactsTo
+ * @property EmailAddress[] $contactsCc
+ * @property EmailAddress[] $contactsBcc
  * @property EmailContact $emailContactFrom
  * @property EmailContact $emailContactTo
  * @property EmailContact[] $emailContacts
@@ -78,8 +79,9 @@ use src\entities\email\helpers\EmailPriority;
  * @property string|null $emailFromName
  * @property string|null $emailTo
  * @property string|null $emailToName
- * @property array $emailsCC
- * @property array $emailsBCC
+ * @property array $emailsTo
+ * @property array $emailsCc
+ * @property array $emailsBcc
  * @property string|null $emailSubject
  * @property int|null $communicationId
  * @property string|null $languageId
@@ -260,7 +262,19 @@ class Email extends BaseActiveRecord implements EmailInterface
             );
     }
 
-    public function getContactsCC(): \yii\db\ActiveQuery
+    public function getContactsTo(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(EmailAddress::class, ['ea_id' => 'ec_address_id'])
+            ->viaTable(
+                'email_contact',
+                ['ec_email_id' => 'e_id'],
+                function ($query) {
+                    $query->onCondition(['ec_type_id' => EmailContactType::TO]);
+                }
+            );
+    }
+
+    public function getContactsCc(): \yii\db\ActiveQuery
     {
         return $this->hasMany(EmailAddress::class, ['ea_id' => 'ec_address_id'])
             ->viaTable(
@@ -272,7 +286,7 @@ class Email extends BaseActiveRecord implements EmailInterface
             );
     }
 
-    public function getContactsBCC(): \yii\db\ActiveQuery
+    public function getContactsBcc(): \yii\db\ActiveQuery
     {
         return $this->hasMany(EmailAddress::class, ['ea_id' => 'ec_address_id'])
             ->viaTable(
@@ -284,9 +298,12 @@ class Email extends BaseActiveRecord implements EmailInterface
             );
     }
 
-    public function getEmailFrom($masking = true): string
+    public function getEmailFrom($masking = true): ?string
     {
-        return $this->contactFrom->getEmail(EmailType::isInbox($this->e_type_id) && $masking);
+        if ($this->contactFrom) {
+            return $this->contactFrom->getEmail(EmailType::isInbox($this->e_type_id) && $masking) ?? null;
+        }
+        return null;
     }
 
     public function getEmailTo($masking = true): ?string
@@ -294,26 +311,30 @@ class Email extends BaseActiveRecord implements EmailInterface
         if ($this->contactTo) {
             return $this->contactTo->getEmail(EmailType::isOutbox($this->e_type_id) && $masking) ?? null;
         }
-
         return null;
     }
 
-    public function getEmailsByType(int $type): array //TODO: if `from` and `to` can be multiple, complete it
+    public function getEmailsByType(int $type): array
     {
-        if (EmailContactType::isCc($type)) {
-            return $this->emailsCC;
-        }
-        if (EmailContactType::isBcc($type)) {
-            return $this->emailsBCC;
+       switch ($type) {
+            case EmailContactType::CC:
+                return $this->emailsCc;
+            case EmailContactType::BCC:
+                return $this->emailsBcc;
+            case EmailContactType::TO:
+                return $this->emailsTo;
+            case EmailContactType::FROM:
+                $emailFrom = $this->getEmailFrom(false);
+                return ($emailFrom !== null) ? [$emailFrom] : [];
         }
         return [];
     }
 
-    public function getEmailsCC(): array
+    public function getEmailsTo(): array
     {
         $emails = [];
-        if ($this->contactsCC) {
-            foreach ($this->contactsCC as $contact) {
+        if ($this->contactsTo) {
+            foreach ($this->contactsTo as $contact) {
                 $emails[] = $contact->getEmail(false);
             }
         }
@@ -321,11 +342,23 @@ class Email extends BaseActiveRecord implements EmailInterface
         return $emails;
     }
 
-    public function getEmailsBCC(): array
+    public function getEmailsCc(): array
     {
         $emails = [];
-        if ($this->contactsBCC) {
-            foreach ($this->contactsBCC as $contact) {
+        if ($this->contactsCc) {
+            foreach ($this->contactsCc as $contact) {
+                $emails[] = $contact->getEmail(false);
+            }
+        }
+
+        return $emails;
+    }
+
+    public function getEmailsBcc(): array
+    {
+        $emails = [];
+        if ($this->contactsBcc) {
+            foreach ($this->contactsBcc as $contact) {
                 $emails[] = $contact->getEmail(false);
             }
         }
@@ -810,7 +843,7 @@ class Email extends BaseActiveRecord implements EmailInterface
     public function addContact(int $type, string $email, ?string $name = null): void
     {
         $emails = $this->getEmailsByType($type);
-        if (!in_array($email, $emails)) {
+        if (empty($emails) || !in_array($email, $emails)) {
             $address = EmailAddress::findOrNew($email, $name, !empty($name));
             EmailContact::create([
                 'ec_address_id' => $address->ea_id,
