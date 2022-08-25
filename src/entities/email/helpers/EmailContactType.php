@@ -3,7 +3,6 @@
 namespace src\entities\email\helpers;
 
 use src\entities\email\Email;
-use modules\order\src\processManager\BookableQuoteChecker;
 
 /**
  * Class EmailContactType
