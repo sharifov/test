@@ -50,6 +50,8 @@ class SendEmailWithQuotes extends BaseCommand
     private ?Lead $lead = null;
     private ?string $agentEmail = null;
 
+    private const COMMUNICATION_DATA_KEY = 'communicationData';
+
     public function __construct(
         ObjectTask $objectTask,
         AddQuoteService $addQuoteService,
@@ -83,6 +85,9 @@ class SendEmailWithQuotes extends BaseCommand
                 self::QUOTE_TYPE_ANY_ASC,
                 self::QUOTE_TYPE_ANY_DESC,
             ],
+            self::COMMUNICATION_DATA_KEY => [
+                'day' => 1,
+            ]
         ];
     }
 
@@ -292,6 +297,7 @@ class SendEmailWithQuotes extends BaseCommand
             $quoteArray['qc'] = $uid;
             return $quoteArray;
         }, $dataForPreview['quotes'] ?? []);
+        $dataForPreview[self::COMMUNICATION_DATA_KEY] = $this->getCommunicationData();
 
         $preview = Yii::$app->comms->mailPreview(
             $lead->project_id,
@@ -316,7 +322,13 @@ class SendEmailWithQuotes extends BaseCommand
             ]);
 
             $mail = $this->emailMainService->createFromDTO($mailDTO);
-            $this->emailMainService->sendMail($mail);
+
+            $this->emailMainService->sendMail(
+                $mail,
+                [
+                    self::COMMUNICATION_DATA_KEY => $this->getCommunicationData(),
+                ]
+            );
 
             foreach ($quotes as $quote) {
                 Repo::createForEmail($mail->e_id, $quote->id, $uid);
@@ -403,7 +415,7 @@ class SendEmailWithQuotes extends BaseCommand
     protected function getQuotesFromApi(): array
     {
         $lead = $this->getLead();
-        $keyCache = sprintf('commfgfand-quotes-search-%d-%s-%s-%s', $lead->id, '', $lead->generateLeadKey(), $this->getCid());
+        $keyCache = sprintf('command-quotes-search-%d-%s-%s-%s', $lead->id, '', $lead->generateLeadKey(), $this->getCid());
         $quotes = \Yii::$app->cacheFile->get($keyCache);
         $dto = new SearchServiceQuoteDTO($lead);
 
@@ -494,5 +506,10 @@ class SendEmailWithQuotes extends BaseCommand
         }
 
         return $quoteTypes;
+    }
+
+    public function getCommunicationData(): array
+    {
+        return (array) ($this->config['communicationData'] ?? []);
     }
 }
