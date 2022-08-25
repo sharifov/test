@@ -105,11 +105,11 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
                 'type' => EmailContactType::TO,
             ],
             'cc' => [
-                'emails' => explode(', ', $emailOld->e_email_cc),
+                'emails' => !empty($emailOld->e_email_cc) ? explode(', ', $emailOld->e_email_cc) : [],
                 'type' => EmailContactType::CC,
             ],
             'bcc' => [
-                'emails' => explode(', ', $emailOld->e_email_bc),
+                'emails' => !empty($emailOld->e_email_bc) ? explode(', ', $emailOld->e_email_bc) : [],
                 'type' => EmailContactType::BCC,
             ],
         ];
@@ -209,21 +209,9 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             //=EmailContacts
             foreach ($form->contacts as $contactForm) {
                 if (!empty($contactForm->email)) {
-                    /* $address = EmailAddress::findOrNew($contactForm->email, $contactForm->name, true);
-                    EmailContact::create([
-                        'ec_address_id' => $address->ea_id,
-                        'ec_email_id' => $email->e_id,
-                        'ec_type_id' => $contactForm->type
-                    ]); */
                     $email->addContact($contactForm->type, $contactForm->email, $contactForm->name);
                 } elseif (!empty($contactForm->emails) && is_array($contactForm->emails)) {
                     foreach ($contactForm->emails as $contEmail) {
-                        /* $address = EmailAddress::findOrNew($contEmail);
-                        EmailContact::create([
-                            'ec_address_id' => $address->ea_id,
-                            'ec_email_id' => $email->e_id,
-                            'ec_type_id' => $contactForm->type
-                        ]); */
                         $email->addContact($contactForm->type, $contEmail);
                     }
                 }
