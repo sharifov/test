@@ -56,4 +56,19 @@ class EmailAddress extends BaseActiveRecord
     {
         return 'email_address';
     }
+
+    public static function findOrNew(string $email, ?string $name = null, $update = false): EmailAddress
+    {
+        $attributes = [
+            'ea_email' => $email,
+            'ea_name' => preg_replace('~\"(.*)\"~iU', "$1", $name),
+        ];
+        $address = self::findOneOrNew(['ea_email' => $email]);
+        if ($address->isNewRecord || $update) {
+            $address->attributes = $attributes;
+            $address->save();
+        }
+
+        return $address;
+    }
 }
