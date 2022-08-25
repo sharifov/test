@@ -320,14 +320,17 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
                             'ec_address_id' => $address->ea_id,
                         ]);
                     }
-                } elseif (isset($contactForm->emails) && !empty($contactForm->emails)) {
+                } else {
                     $emailContacts = $email->getEmailsByType($contactForm->type);
-                    $remove = array_diff($emailContacts, $contactForm->emails);
-                    foreach ($contactForm->emails as $contEmail) {
-                        $email->addContact($contactForm->type, $contEmail);
+                    $remove = array_diff($emailContacts, $contactForm->emails ?? []);
+
+                    if ($contactForm->emails) {
+                        foreach ($contactForm->emails as $contEmail) {
+                            $email->addContact($contactForm->type, $contEmail);
+                        }
                     }
                     foreach ($remove as $remEmail) {
-                        $email->removeContact($contactForm->type, $contEmail);
+                        $email->removeContact($contactForm->type, $remEmail);
                     }
                 }
             }
