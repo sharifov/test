@@ -31,13 +31,11 @@ class ObjectTaskSearch extends ObjectTask
      */
     public function search($params): ActiveDataProvider
     {
-        $query = ObjectTask::find()
-            ->orderBy([
-                'ot_execution_dt' => SORT_ASC,
-            ]);
+        $query = ObjectTask::find();
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort' => ['defaultOrder' => ['ot_created_dt' => SORT_DESC]],
             'pagination' => ['pageSize' => 30],
         ]);
 
@@ -78,7 +76,10 @@ class ObjectTaskSearch extends ObjectTask
 
     public function searchIds($params): array
     {
-        $query = ObjectTask::find();
+        $query = ObjectTask::find()
+            ->orderBy([
+                'ot_created_dt' => SORT_DESC,
+            ]);
 
         $this->load($params);
 
