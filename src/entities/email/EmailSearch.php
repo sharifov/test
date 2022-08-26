@@ -85,7 +85,7 @@ class EmailSearch extends Email
 
     public function search($params)
     {
-        $query = self::find()->joinWith(['contactFrom', 'contactTo', 'params']);
+        $query = self::find();
 
         $query->addSelect([
             'e_id',
@@ -119,8 +119,7 @@ class EmailSearch extends Email
         }
 
         if ($this->datetime_start && $this->datetime_end) {
-            $query->andFilterWhere(['>=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
-            ->andFilterWhere(['<=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
+            $query->createdBetween(Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start)), Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end)));
         }
 
         if (!empty($this->e_created_dt)) {
