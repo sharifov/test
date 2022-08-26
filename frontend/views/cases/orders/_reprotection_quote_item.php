@@ -223,9 +223,10 @@ $productQuoteAbacDto->mapOrderAttributes($order);
                             </td>
                             <td>
                         <?php if ($changeItem->isTypeVoluntary()) : ?>
-                            <?php /** @abac new $pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_VOLUNTARY_QUOTE, Flight Create Voluntary quote from dump*/ ?>
                             <?php
+                            /** @abac new $pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_VOLUNTARY_QUOTE, Flight Create Voluntary quote from dump */
                             $canCreateVolQuote = Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_CREATE_VOLUNTARY_QUOTE);
+                            /** @abac new $pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_SEND_OFFER_EXCHANGE_EMAIL, Send offer exchange email */
                             $canSendOfferExchangeEmail = Yii::$app->abac->can($pqcAbacDto, ProductQuoteChangeAbacObject::OBJ_PRODUCT_QUOTE_CHANGE, ProductQuoteChangeAbacObject::ACTION_SEND_OFFER_EXCHANGE_EMAIL);
                             if ($canCreateVolQuote || $canSendOfferExchangeEmail) : ?>
                                 <div class="btn-group">
