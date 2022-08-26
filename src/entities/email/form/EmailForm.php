@@ -130,9 +130,13 @@ class EmailForm extends CompositeForm
 
         $from = EmailContactForm::fromModel($email->emailContactFrom);
         $to = EmailContactForm::fromModel($email->emailContactTo);
+        $cc = EmailContactForm::fromArray(['type' => EmailContactType::CC, 'emails' => $email->emailsCc]);
+        $bcc = EmailContactForm::fromArray(['type' => EmailContactType::BCC, 'emails' => $email->emailsBcc]);
         $contactsForm = [
             'from' => $from,
             'to' => $to,
+            'cc' => $cc,
+            'bcc' => $bcc,
         ];
         $instance->contacts = $contactsForm;
 
@@ -163,6 +167,8 @@ class EmailForm extends CompositeForm
         $contactsForm = [
             'from' => $from,
             'to' => $to,
+            'cc' => new EmailContactForm(EmailContactType::CC),
+            'bcc' => new EmailContactForm(EmailContactType::BCC),
         ];
         $instance->contacts = $contactsForm;
 
