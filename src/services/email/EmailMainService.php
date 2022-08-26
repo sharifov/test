@@ -187,7 +187,10 @@ class EmailMainService implements EmailServiceInterface
             $this->leadProcessAfterEmailSending($email->e_id, $tplType, $email->lead);
         } catch (\Throwable $exception) {
             $error = VarDumper::dumpAsString($exception->getMessage());
-            \Yii::error($error, 'EmailMainService:sendMail:exception');
+            \Yii::error([
+                    'emailId' => $email->e_id,
+                    'message' => $error
+                ], 'EmailMainService:sendMail:exception');
 
             if ($this->getEmailObj()) {
                 $this->getEmailObj()->statusToError('Communication error: ' . $error);
@@ -447,6 +450,7 @@ class EmailMainService implements EmailServiceInterface
             $file = $attachmentsService->processingFile($path);
             if ($file === null) {
                 Yii::warning(VarDumper::dumpAsString([
+                    'emailId' => $email->e_id,
                     'communicationId' => $communicationId,
                     'error' => 'File not exist : ' . $path,
                 ]), 'EmailMainService:getAttachmentsArray');
