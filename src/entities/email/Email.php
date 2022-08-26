@@ -65,6 +65,7 @@ use src\entities\email\helpers\EmailPriority;
  * @property Email $reply
  * @property EmailTemplateType $templateType
  *
+ * @property int $id
  * @property array $leadsIds
  * @property array $casesIds
  * @property array $clientsIds
