@@ -283,7 +283,7 @@ class SendEmailWithQuotes extends BaseCommand
             $projectContactInfo = Json::decode($project->contact_info);
         }
 
-        $clientEmail = ClientEmail::getGeneralEmail(
+        $clientEmail = ClientEmail::getFirstEmailByAllowedTypes(
             $lead->client_id
         );
 

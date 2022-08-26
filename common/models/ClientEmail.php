@@ -269,6 +269,31 @@ class ClientEmail extends \yii\db\ActiveRecord
         return null;
     }
 
+    public static function getFirstEmailByAllowedTypes(int $clientId, array $allowedTypes = [self::EMAIL_FAVORITE, self::EMAIL_VALID, self::EMAIL_NOT_SET, null]): ?string
+    {
+        $email = null;
+        $clientEmailList = self::find()
+            ->where([
+                'AND',
+                ['client_id' => $clientId],
+                ['IN', 'type', $allowedTypes]
+            ])
+            ->all();
+
+        if (count($clientEmailList) > 0 && count($allowedTypes) > 0) {
+            foreach ($allowedTypes as $allowedType) {
+                foreach ($clientEmailList as $clientEmail) {
+                    if ($clientEmail->type === $allowedType) {
+                        $email = $clientEmail->email;
+                        break(2);
+                    }
+                }
+            }
+        }
+
+        return $email;
+    }
+
     public function setType(?int $type)
     {
         if ($this->type != $type) {
