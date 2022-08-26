@@ -98,7 +98,7 @@ $shiftScheduleEventTasks = \yii\helpers\ArrayHelper::map($shiftScheduleEventTask
                                             Yii::$app->formatter->asDateTimeByUserTimezone(
                                                 strtotime($userTask['ut_start_dt']),
                                                 $userTimeZone,
-                                                'd.m.y [H:i]'
+                                                'php:d.m.y [H:i]'
                                             ); ?>
                                         </td>
                                         <td>
@@ -106,14 +106,14 @@ $shiftScheduleEventTasks = \yii\helpers\ArrayHelper::map($shiftScheduleEventTask
                                                 (Yii::$app->formatter->asDateTimeByUserTimezone(
                                                     strtotime($userTask['ut_end_dt']),
                                                     $userTimeZone,
-                                                    'd.m.y [H:i]'
+                                                    'php:d.m.y [H:i]'
                                                 )) : '' ?>
                                         </td>
                                         <td><?php if (!empty($userTask['complete_time']) && (int)$userTask['ut_status_id'] === UserTask::STATUS_COMPLETE) {
                                                 echo Yii::$app->formatter->asDateTimeByUserTimezone(
                                                     strtotime($userTask['complete_time']),
                                                     $userTimeZone,
-                                                    'd.m.y [H:i]'
+                                                    'php:d.m.y [H:i]'
                                                 );
                                             }
                                             ?>

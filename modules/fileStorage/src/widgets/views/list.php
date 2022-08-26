@@ -18,6 +18,7 @@ use yii\widgets\Pjax;
 /** @var UrlGenerator $urlGenerator */
 /** @var QueryParams $queryParams  */
 /** @var bool $canView  */
+/** @var bool $canDelete  */
 
 $countFiles = count($files);
 $i = 1;
@@ -25,9 +26,11 @@ $i = 1;
 
 <div class="x_panel">
     <div class="x_title">
+        <?php Pjax::begin(['id' => 'pjax-file-count']); ?>
         <h2 class="file-storage-list-counter" data-count="<?php echo $countFiles ?>">
             Files (<span id="file-count-value"><?php echo $countFiles ?></span>)
         </h2>
+         <?php Pjax::end() ?>
         <ul class="nav navbar-right panel_toolbox">
             <li>
                 <?php echo $uploadWidget ?>
@@ -96,8 +99,8 @@ $i = 1;
                                 'inputType' => Editable::INPUT_TEXT,
                                 'buttonsTemplate' => '{submit}',
                                 'pluginEvents' => [
-                                    'editableSuccess' => "function(event, val, form, data) {                                        
-                                        $(this).parent('td').attr('title', val);                                        
+                                    'editableSuccess' => "function(event, val, form, data) {
+                                        $(this).parent('td').attr('title', val);
                                     }",
                                 ],
                                 'inlineSettings' => [
@@ -151,7 +154,7 @@ $i = 1;
                                             ],
                                         ]) ?>
                                     <?php endif ?>
-                                    <?php if (FileStorageAccessService::canDeleteFile()) : ?>
+                                    <?php if ($canDelete) : ?>
                                         <div class="dropdown-divider"></div>
                                         <?= Html::a('<i class="fa fa-times"></i> Delete', null, [
                                             'class' => 'dropdown-item text-danger js-delete-file-btn',
@@ -179,24 +182,24 @@ $js = <<<JS
 
 $(document).on('click', '.js-delete-file-btn', function(e){
     e.preventDefault();
-    
+
     if(!confirm('Are you sure you want to delete the file?')) {
         return false;
     }
-    
+
     let btn = $(this);
-    
+
     $.ajax({
         url: '{$urlDeleteFile}',
         type: 'POST',
         data: {file_id: btn.data('file_id')},
-        dataType: 'json'   
+        dataType: 'json'
     })
     .done(function(dataResponse) {
         if (dataResponse.status === 1) {
-            pjaxReload({container: '#pjax-file-list'});  
+            pjaxReload({container: '#pjax-file-list'});
             createNotify('Success', dataResponse.message, 'success');
-            
+
             let counter = $('#file-count-value');
             let count = parseInt(counter.text());
             count--;
@@ -208,16 +211,16 @@ $(document).on('click', '.js-delete-file-btn', function(e){
         }
     })
     .fail(function(jqXHR, textStatus, errorThrown) {
-        console.log({jqXHR : jqXHR, textStatus : textStatus, errorThrown : errorThrown}); 
-        createNotify('Error', 'Server error. Try again later.', 'error');      
+        console.log({jqXHR : jqXHR, textStatus : textStatus, errorThrown : errorThrown});
+        createNotify('Error', 'Server error. Try again later.', 'error');
     })
     .always(function(jqXHR, textStatus, errorThrown) {});
 });
 
 function addFileToFileStorageList() {
-    pjaxReload({container: '#pjax-file-list'}); 
+    pjaxReload({container: '#pjax-file-list'});
     $(".modal-backdrop").remove();
-    
+
     let counter = $('#file-count-value');
     let count = parseInt(counter.text());
     count++;

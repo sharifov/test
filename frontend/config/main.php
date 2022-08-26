@@ -73,15 +73,6 @@ return [
             }
         ],
 
-
-        /*'user2' => [
-            'class' => 'webvimark\modules\UserManagement\components\UserConfig',
-            'on afterLogin' => function($event) {
-                \webvimark\modules\UserManagement\models\UserVisitLog::newVisitor($event->identity->id);
-            },
-            'identityCookie' => ['name' => '_identity-frontend', 'httpOnly' => false],
-        ],*/
-
         'session' => [
             'name' => 'advanced-crm',
         ],

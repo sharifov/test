@@ -38,7 +38,8 @@ use yii\bootstrap4\Html;
                 </div>
 
                 <div class="col-md-2">
-                    <?= $form->field($model, 'uss_user_id')->widget(UserSelect2Widget::class) ?>
+                    <?= $form->field($model, 'uss_user_id')->widget(UserSelect2Widget::class, [
+                        'options' => ['id' => 'main_filter_uss_id']]) ?>
                 </div>
 
                 <div class="col-md-2">

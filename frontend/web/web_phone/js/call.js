@@ -14,8 +14,7 @@ var PhoneWidget = function () {
         'getUserByPhoneUrl': '',
         'ajaxBlackList': '',
         'ajaxCheckUserForCallUrl': '',
-        'ajaxGetPhoneListIdUrl': '',
-        'enableAcceptedPanel': false
+        'ajaxGetPhoneListIdUrl': ''
     };
 
     let callRequester = new window.phoneWidget.requesters.CallRequester();
@@ -1787,9 +1786,6 @@ var PhoneWidget = function () {
     }
 
     function initAcceptedPane(call) {
-        if (!settings.enableAcceptedPanel) {
-            return;
-        }
         let acceptedCall = {...call}
         panes.accepted.init(acceptedCall);
         iconUpdate();

@@ -4,10 +4,12 @@ namespace common\models;
 
 use common\models\query\UserOnlineQuery;
 use src\helpers\app\AppHelper;
+use src\model\user\entity\monitor\UserMonitor;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
+use yii\db\StaleObjectException;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 
@@ -166,5 +168,39 @@ class UserOnline extends ActiveRecord
     public static function find(): UserOnlineQuery
     {
         return new UserOnlineQuery(static::class);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isActive(): bool
+    {
+        return ((bool) $this->uo_idle_state) ? false : true;
+    }
+
+    /**
+     * @throws StaleObjectException
+     * @throws \Throwable
+     */
+    public static function updateIdleState(string $connectionId, bool $val)
+    {
+        $connection = UserConnection::find()->select(['uc_user_id'])
+            ->where(['uc_connection_id' => $connectionId])->limit(1)->asArray()->one();
+        // , 'uc_app_instance' => \Yii::$app->params['appInstance']
+        if ($connection && !empty($connection['uc_user_id'])) {
+//            if ($val) {
+//                UserMonitor::setUserIdle($uc->uc_user_id);
+//            } else {
+//                UserMonitor::setUserActive($uc->uc_user_id);
+//            }
+
+            UserMonitor::updateGlobalIdle($connection['uc_user_id']);
+
+            //print_r($uc->attributes);
+//            $uc->uc_idle_state = $val;
+//            $uc->uc_idle_state_dt = date('Y-m-d H:i:s');
+//            $uc->save();
+        }
+        unset($connection);
     }
 }

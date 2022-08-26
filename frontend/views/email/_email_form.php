@@ -24,6 +24,17 @@ use src\entities\email\form\EmailForm;
 
     <?= $form->field($emailForm->body, 'subject')->textInput(['maxlength' => true]) ?>
 
+    <?php if (isset($emailForm->body->data['files'])) : ?>
+    <div class="col-md-12 form-group">
+        <label class="control-label">Attached files</label>
+        <div class="form-group">
+            <?= implode(', ', array_map(static function ($file) {
+                return $file['name'];
+            }, $emailForm->body->data['files'])) ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <?= $form->field($emailForm->body, 'bodyHtml')->widget(CKEditor::class, [
         'options' => [
             'rows' => 6,

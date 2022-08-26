@@ -283,7 +283,6 @@ $csrf_token = Yii::$app->request->csrfToken;
 
 DeviceAsset::register($this);
 $phoneDeviceRemoteLogsEnabled = SettingHelper::phoneDeviceLogsEnabled() ? 'true' : 'false';
-$enableAcceptedPanel = Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_PHONE_WIDGET_ACCEPTED_PANEL_ENABLED) ? 'true' : 'false';
 
 $js = <<<JS
 
@@ -339,8 +338,7 @@ window.phoneWidget.initParams = {
     'ajaxCheckUserForCallUrl': '$ajaxCheckUserForCallUrl',
     'phoneNumbers': toSelect($('.custom-phone-select'),  JSON.parse('{$formattedPhoneProject}')),
     'createCallUrl': '$createCallUrl',
-    'userId': $userId,
-    'enableAcceptedPanel': $enableAcceptedPanel
+    'userId': $userId
 };
 PhoneWidget.init(window.phoneWidget.initParams);
 JS;

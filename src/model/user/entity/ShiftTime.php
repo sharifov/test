@@ -4,6 +4,8 @@ namespace src\model\user\entity;
 
 use common\models\Employee;
 use kartik\select2\ThemeDefaultAsset;
+use modules\featureFlag\FFlag;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
 
 /**
  * Class ShiftTime
@@ -83,17 +85,50 @@ class ShiftTime
      */
     public static function getByUser(Employee $user): ShiftTime
     {
-        $user->userParams->up_work_minutes = $user->userParams->up_work_minutes ?: 480;
-        $startTime = $user->userParams->up_work_start_tm;
-        $workSeconds = (int) $user->userParams->up_work_minutes * 60;
+        /** @fflag FFlag::FF_KEY_SWITCH_NEW_SHIFT_ENABLE, Switch new Shift Enable */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SWITCH_NEW_SHIFT_ENABLE)) {
+            $firstUserShiftSchedule = UserShiftScheduleQuery::getQueryForNextShiftsByUserId(
+                $user->id,
+                (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))
+            )
+                ->select(['user_shift_schedule.uss_start_utc_dt', 'user_shift_schedule.uss_end_utc_dt'])
+                ->limit(1)
+                ->asArray()
+                ->one();
 
-        if ($startTime && $workSeconds) {
-            return new self(
-                new StartTime($startTime),
-                $workSeconds,
-                ($user->userParams->up_timezone ?: 'UTC')
-            );
+            if ($firstUserShiftSchedule) {
+                $shiftTime = new ShiftTime();
+                $shiftTime->setParam($firstUserShiftSchedule['uss_start_utc_dt'], $firstUserShiftSchedule['uss_end_utc_dt']);
+                return $shiftTime;
+            }
+            throw new \DomainException('User id (' . $user->getId() . ') not found NextUserShiftSchedule');
+        } else {
+            $user->userParams->up_work_minutes = $user->userParams->up_work_minutes ?: 480;
+            $startTime = $user->userParams->up_work_start_tm;
+            $workSeconds = (int)$user->userParams->up_work_minutes * 60;
+
+            if ($startTime && $workSeconds) {
+                return new self(
+                    new StartTime($startTime),
+                    $workSeconds,
+                    ($user->userParams->up_timezone ?: 'UTC')
+                );
+            }
+            throw new \DomainException('User id (' . $user->getId() . ') has no parameters (startTime,workSeconds) set');
         }
-        throw new \DomainException('User id (' . $user->getId() . ') has no parameters (startTime,workSeconds) set');
+    }
+
+    public function setParam(string $startDate, string $endDate, string $resultFormat = 'Y-m-d H:i:s')
+    {
+        $startShiftTimeUTC = (new \DateTimeImmutable($startDate, new \DateTimeZone('UTC')));
+        $endShiftTimeUTC = (new \DateTimeImmutable($endDate, new \DateTimeZone('UTC')));
+
+        $this->startUtcTs = $startShiftTimeUTC->getTimestamp();
+        $this->endUtcTs = $endShiftTimeUTC->getTimestamp();
+        $this->endLastPeriodTs = $this->startUtcTs;
+
+        $this->startUtcDt = $startShiftTimeUTC->format($resultFormat);
+        $this->endUtcDt = $endShiftTimeUTC->format($resultFormat);
+        $this->endLastPeriodDt = $startShiftTimeUTC->format($resultFormat);
     }
 }

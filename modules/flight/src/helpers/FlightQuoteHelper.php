@@ -1067,10 +1067,10 @@ class FlightQuoteHelper
             $departureTime = $firstSegment['departureDateTime'];
 
             $depTimezone = $depCity ? new \DateTimeZone($depCity->timezone) : null;
-            $depDateTimeWithTimezone = new \DateTime($departureTime, $depTimezone);
+            $depDateTimeWithTimezone = $departureTime instanceof DateTime ? $departureTime->setTimezone($depTimezone) : new \DateTime($departureTime, $depTimezone);
 
             $arrTimezone = $arrCity ? new \DateTimeZone($arrCity->timezone) : null;
-            $arrDateTimeWithTimezone = new \DateTime($arrivalTime, $arrTimezone);
+            $arrDateTimeWithTimezone = $arrivalTime instanceof DateTime ? $arrivalTime->setTimezone($arrTimezone) : new \DateTime($arrivalTime, $arrTimezone);
 
             if ($depCity !== null && $arrCity !== null) {
                 $trips[$key]['duration'] = intval(($arrDateTimeWithTimezone->getTimestamp() - $depDateTimeWithTimezone->getTimestamp()) / 60);

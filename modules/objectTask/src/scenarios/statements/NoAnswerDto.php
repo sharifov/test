@@ -8,14 +8,16 @@ class NoAnswerDto
 {
     public ?int $status = null;
     public ?string $reason = '';
-    public ?int $project = null;
+    public ?string $project = null;
     public ?string $cabin = null;
 
     public function __construct(Lead $lead)
     {
         $this->status = $lead->status;
         $this->reason = $lead->getLastReasonFromLeadFlow();
-        $this->project = $lead->project_id;
+        if ($lead->project !== null) {
+            $this->project = $lead->project->project_key;
+        }
         $this->cabin = $lead->cabin;
     }
 }

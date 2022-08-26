@@ -7,6 +7,7 @@ use common\models\Project;
 use src\forms\leadflow\FollowUpReasonForm;
 use src\forms\leadflow\ProcessingReasonForm;
 use src\forms\leadflow\RejectReasonForm;
+use src\model\leadStatusReason\entity\LeadStatusReasonQuery;
 
 class NoAnswerObject extends BaseObject
 {
@@ -41,7 +42,7 @@ class NoAnswerObject extends BaseObject
         'label' => 'Status',
         'type' => self::ATTR_TYPE_INTEGER,
         'input' => self::ATTR_INPUT_SELECT,
-        'multiple' => false,
+        'multiple' => true,
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN],
     ];
 
@@ -52,7 +53,7 @@ class NoAnswerObject extends BaseObject
         'label' => 'Reason',
         'type' => self::ATTR_TYPE_STRING,
         'input' => self::ATTR_INPUT_SELECT,
-        'multiple' => false,
+        'multiple' => true,
         'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2, self::OP_IN, self::OP_NOT_IN],
     ];
 
@@ -92,13 +93,15 @@ class NoAnswerObject extends BaseObject
         $r = self::ATTR_REASON;
         $c = self::ATTR_CABIN;
 
-        $p['values'] = Project::getList();
+        $p['values'] = Project::getKeyList();
         $s['values'] = Lead::STATUS_LIST;
         $c['values'] = Lead::CABIN_LIST;
+
         $statusReasonList = [
             Lead::STATUS_PROCESSING => ProcessingReasonForm::REASON_LIST,
             Lead::STATUS_FOLLOW_UP => FollowUpReasonForm::REASON_LIST,
             Lead::STATUS_REJECT => RejectReasonForm::REASON_LIST,
+            Lead::STATUS_CLOSED => LeadStatusReasonQuery::getList('lsr_name'),
         ];
 
         foreach ($statusReasonList as $status => $reasons) {

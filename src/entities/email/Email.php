@@ -23,6 +23,7 @@ use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
+use src\entities\email\helpers\EmailPriority;
 
 /**
  * This is the model class for table "email_norm".
@@ -69,6 +70,7 @@ use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
  * @property int|null $clientId
  * @property int|null $projectId
  * @property int|null $templateTypeId
+ * @property int|null $priority
  * @property string|null $templateTypeName
  * @property string|null $emailFrom
  * @property string|null $emailFromName
@@ -101,8 +103,8 @@ class Email extends BaseActiveRecord implements EmailInterface
             ['e_created_dt', 'required'],
             [['e_body_id', 'e_project_id', 'e_status_id', 'e_type_id', 'e_is_deleted', 'e_created_user_id', 'e_updated_user_id', 'e_departament_id'], 'integer'],
             ['e_is_deleted', 'boolean'],
-           // ['e_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_created_user_id' => 'id']],
-          //  ['e_updated_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_updated_user_id' => 'id']],
+            ['e_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_created_user_id' => 'id']],
+            ['e_updated_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_updated_user_id' => 'id']],
             ['e_departament_id', 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['e_departament_id' => 'dep_id']],
             ['e_project_id', 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['e_project_id' => 'id']],
             ['e_updated_dt', 'safe'],
@@ -474,7 +476,7 @@ class Email extends BaseActiveRecord implements EmailInterface
 
     public function updateEmailData($emailData)
     {
-        $this->emailBody->updateAttributes(['embd_email_data' => json_encode($emailData)]);
+        $this->emailBody->updateAttributes(['embd_email_data' => $emailData]);
         return $this;
     }
 
@@ -571,6 +573,11 @@ class Email extends BaseActiveRecord implements EmailInterface
         return $this->params->ep_language_id ?? null;
     }
 
+    public function getPriority(): ?int
+    {
+        return $this->params->ep_priority ?? EmailPriority::NORMAL;
+    }
+
     public function getStatusDoneDt(): ?string
     {
         return $this->emailLog->el_status_done_dt ?? null;
@@ -611,5 +618,120 @@ class Email extends BaseActiveRecord implements EmailInterface
     public function getId()
     {
         return $this->e_id;
+    }
+
+    /**
+     *
+     * @param array $leadsIds
+     * @return array
+     */
+    public function linkLeads(array $leadsIds): array
+    {
+        $toUnlink = $this->leadsIds;
+        $linked = [];
+        foreach ($leadsIds as $id) {
+            $key = array_search($id, $this->leadsIds);
+            if ($key !== false) {
+                unset($toUnlink[$key]);
+            } elseif ($lead = Lead::findOne($id)) {
+                $this->link('leads', $lead);
+                $linked[] = $id;
+            }
+        }
+        if (!empty($toUnlink)) {
+            $this->unlinkLeads($toUnlink);
+        }
+        return $linked;
+    }
+
+    public function unlinkLeads(array $leadsIds): void
+    {
+        foreach ($leadsIds as $id) {
+            if ($lead = Lead::findOne($id)) {
+                $this->unlink('leads', $lead, true);
+            }
+        }
+    }
+
+    /**
+     *
+     * @param array $casesIds
+     * @return array
+     */
+    public function linkCases(array $casesIds): array
+    {
+        $toUnlink = $this->casesIds;
+        $linked = [];
+        foreach ($casesIds as $id) {
+            $key = array_search($id, $this->casesIds);
+            if ($key !== false) {
+                unset($toUnlink[$key]);
+            } elseif ($case = Cases::findOne($id)) {
+                $this->link('cases', $case);
+                $linked[] = $id;
+            }
+        }
+        if (!empty($toUnlink)) {
+            $this->unlinkCases($toUnlink);
+        }
+        return $linked;
+    }
+
+    public function unlinkCases(array $casesIds): void
+    {
+        foreach ($casesIds as $id) {
+            if ($case = Cases::findOne($id)) {
+                $this->unlink('cases', $case, true);
+            }
+        }
+    }
+
+    /**
+     *
+     * @param array $clientsIds
+     * @return array
+     */
+    public function linkClients(array $clientsIds): array
+    {
+        $toUnlink = $this->clientsIds;
+        $linked = [];
+        foreach ($clientsIds as $id) {
+            $key = array_search($id, $this->clientsIds);
+            if ($key !== false) {
+                unset($toUnlink[$key]);
+            } elseif ($client = Client::findOne($id)) {
+                $this->link('clients', $client);
+                $linked[] = $id;
+            }
+        }
+        if (!empty($toUnlink)) {
+            $this->unlinkClients($toUnlink);
+        }
+        return $linked;
+    }
+
+    public function unlinkClients(array $clientsIds): void
+    {
+        foreach ($clientsIds as $id) {
+            if ($client = Client::findOne($id)) {
+                $this->unlink('clients', $client, true);
+            }
+        }
+    }
+
+    /**
+     *
+     * @param int $replyId
+     * @return bool
+     */
+    public function linkReply(?int $replyId): void
+    {
+        $linkedToReply = $this->reply;
+        if ($reply = self::findOne($replyId)) {
+            $this->link('reply', $reply);
+        }
+        if ($replyId == null || ($linkedToReply != null && !$linkedToReply->equals($reply))) {
+            $this->unlink('reply', $linkedToReply, true);
+        }
     }
 }

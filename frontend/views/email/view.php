@@ -3,6 +3,8 @@
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 use yii\helpers\Url;
+use modules\fileStorage\FileStorageSettings;
+use modules\fileStorage\src\widgets\FileStorageListWidget;
 
 /* @var $this yii\web\View */
 /* @var $model common\models\Email */
@@ -26,15 +28,18 @@ $this->params['breadcrumbs'][] = $this->title;
         ]) ?>
     </p>
 
-
     <div class="col-md-7">
-
-            <hr>
-            <h4>Subject: <?= Html::encode($model->emailSubject)?></h4>
-            <hr>
-            <h4>Email preview:</h4>
-            <object width="100%" height="1000" data="<?= Url::to(['view', 'id' => $model->e_id, 'preview' => 1])?>"></object>
-
+        <hr>
+        <h4>Subject: <?= Html::encode($model->emailSubject)?></h4>
+        <hr>
+        <h4>Email preview:</h4>
+        <object width="100%" height="1000" data="<?= Url::to(['view', 'id' => $model->e_id, 'preview' => 1])?>"></object>
+        <?php if (FileStorageSettings::isEnabled()) : ?>
+            <?= FileStorageListWidget::byEmail(
+                $model->e_id,
+                $model->emailData
+            ) ?>
+        <?php endif; ?>
     </div>
 
     <div class="col-md-5">

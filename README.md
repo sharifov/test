@@ -262,7 +262,6 @@ Documentation is at [docs/guide/README.md](docs/guide/README.md).
 ```
 Migrate command:
 ```sh
-./yii_test migrate --migrationPath=vendor/webvimark/module-user-management/migrations/
 ./yii_test migrate/up --migrationPath=@vendor/lajax/yii2-translate-manager/migrations
 ./yii_test migrate --migrationPath=@yii/log/migrations/
 ```
@@ -279,14 +278,6 @@ Migrate command:
 * Download & install - [http://phantomjs.org/download.html](http://phantomjs.org/download.html)
 * Run  ```phantomjs --webdriver=4444```
 
-
-WebSocket Server (https://github.com/walkor/Workerman):
-```sh
-sudo php console/socket-server.php start
-sudo php console/socket-server.php stop
-sudo php console/socket-server.php restart
-sudo php console/socket-server.php reload
-```
 Check process by PORT
 ```sh
 sudo netstat -tulpn| grep :8080

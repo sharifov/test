@@ -62,7 +62,6 @@
 		"ext-zlib": "*",
 		"ext-openssl": "*",
 		"lajax/yii2-translate-manager" : "^1.8",
-		"webvimark/module-user-management" : "^1.0",
 		"kartik-v/yii2-export" : ">=1.4",
 		"kartik-v/yii2-grid" : "dev-master",
 		"kartik-v/yii2-editable" : "dev-master",
@@ -71,7 +70,6 @@
 		"kartik-v/yii2-widget-timepicker" : "dev-master",
 		"vova07/yii2-imperavi-widget" : "*",
 		"kdn/yii2-json-editor" : "*",
-		"workerman/workerman" : "^3.5",
 		"yiisoft/yii2-queue": "^2.3",
 		"pda/pheanstalk": "^3.2",
 		"index0h/yii2-log": "0.0.3",
@@ -91,7 +89,6 @@
 		"yiisoft/yii2-redis": "~2.0.0",
 		"kivork/yii2-bootstrap4-glyphicons": "*",
 		"2amigos/yii2-multi-select-widget": "*",
-		"kivork/yii2-mattermost-log-target": "@dev",
 		"kivork/yii2-virtual-cron": "@dev",
 		"kivork/yii2-prometheus-client": "@dev",
 		"sorokinmedia/yii2-centrifugo": "*",
@@ -115,6 +112,7 @@
 		"jp3cki/totp": "2.0.0",
 		"kartik-v/yii2-password": "1.5.7",
 		"kivork/yii2-feature-flag": "2.0.0",
+		"kak/clickhouse": "~1.1",
 		"kivork/yii2-two-factor-auth": "1.2.1"
 	},
 	"require-dev" : {
@@ -157,7 +155,6 @@
 		],
 		"exclude-from-classmap": [
 			"docker/",
-			"vagrant/",
 			"node_modules/"
 		]
 	},

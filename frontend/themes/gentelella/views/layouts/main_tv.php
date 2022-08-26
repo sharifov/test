@@ -51,20 +51,7 @@ use yii\helpers\Html;
                         <?php /*<img src="http://placehold.it/128x128" alt="">*/ ?>
 
                         <?php //=Html::img($grav_url, ['alt' => 'avatar'])?>
-
-                        <?php /*php
-                            $myRolesModel = \webvimark\modules\UserManagement\models\rbacDB\Role::getUserRoles(Yii::$app->user->id);
-                            $myRoles = [];
-                            if($myRolesModel) {
-                                foreach ($myRolesModel as $role) {
-                                    if ($role->name == 'guest') continue;
-                                    $myRoles[] = $role->name;
-                                }
-                            }
-
-                        ?>
-                        <b><?=implode(', ', $myRoles) ; ?></b>:
-                        <?php /*=Html::encode(Yii::$app->user->identity->username)*/?>
+                        
                         Menu
 
                         <span class=" fa fa-angle-down"></span>

@@ -19,6 +19,8 @@ use modules\lead\src\abac\LeadAbacObject;
 use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacDto;
 use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\objectSegment\src\contracts\ObjectSegmentListContract;
+use modules\objectTask\src\entities\ObjectTask;
+use modules\objectTask\src\services\ObjectTaskService;
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\product\Product;
@@ -452,6 +454,7 @@ class Lead extends ActiveRecord implements Objectable
     public $quoteType;
 
     private $oldAdditionalInformation;
+    private ?array $objectTaskOrderByStatus = null;
 
     /**
      * {@inheritdoc}
@@ -5391,5 +5394,39 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             ->where(['ld_field_key' => LeadDataKeyDictionary::KEY_LEAD_OBJECT_SEGMENT])
             ->andWhere(['ld_field_value' => ObjectSegmentListContract::OBJECT_SEGMENT_LIST_KEY_LEAD_TYPE_BUSINESS])
             ->count();
+    }
+
+    private function getNumberObjectTasksOrderByStatus(): array
+    {
+        if ($this->objectTaskOrderByStatus === null) {
+            $this->objectTaskOrderByStatus = ObjectTask::countByStatus(
+                ObjectTaskService::OBJECT_LEAD,
+                $this->id
+            );
+        }
+
+        return $this->objectTaskOrderByStatus;
+    }
+
+    public function hasObjectTasks(): bool
+    {
+        return !empty($this->getNumberObjectTasksOrderByStatus());
+    }
+
+    public function hasObjectTasksWithPendingStatus(): bool
+    {
+        return array_key_exists(ObjectTask::STATUS_PENDING, $this->getNumberObjectTasksOrderByStatus());
+    }
+
+    public function countObjectTaskWithPendingStatus(): int
+    {
+        return (int) ($this->getNumberObjectTasksOrderByStatus()[ObjectTask::STATUS_PENDING] ?? 0);
+    }
+
+    public function countObjectTask(): int
+    {
+        return array_sum(
+            $this->getNumberObjectTasksOrderByStatus()
+        );
     }
 }

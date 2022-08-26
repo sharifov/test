@@ -20,11 +20,6 @@ class MonitorCallIncomingAsset extends \yii\web\AssetBundle
 
     public function init()
     {
-        /** @fflag FFlag::FF_KEY_REFACTORING_INCOMING_CALL_ENABLE, Switch incoming monitor page to new version */
-        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_REFACTORING_INCOMING_CALL_ENABLE)) {
-            $this->js[] = 'js/monitor/call-incoming-vue.js';
-        } else {
-            $this->js[] = 'js/monitor/call-incoming.js';
-        }
+        $this->js[] = 'js/monitor/call-incoming-vue.js';
     }
 }

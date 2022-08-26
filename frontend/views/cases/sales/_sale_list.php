@@ -1,6 +1,7 @@
 <?php
 
 use frontend\helpers\JsonHelper;
+use modules\cases\src\abac\saleList\SaleListAbacObject;
 use src\auth\Auth;
 use common\models\CreditCard;
 use common\models\search\CreditCardSearch;
@@ -23,8 +24,9 @@ use yii\widgets\Pjax;
 $user = Yii::$app->user->identity;
 
 $userCanRefresh = Auth::can('/cases/ajax-refresh-sale-info');
-$userCanCheckFareRules = Auth::can('/cases/ajax-refresh-sale-info');
 $userCanDeleteSaleData = Auth::can('/sale/delete-ajax');
+/** @abac null, SaleListAbacObject::UI_BLOCK_SALE_LIST, SaleListAbacObject::ACTION_VIEW_FARE_RULES, View Fare Rules */
+$userCanCheckFareRules = Yii::$app->abac->can(null, SaleListAbacObject::UI_BLOCK_SALE_LIST, SaleListAbacObject::ACTION_VIEW_FARE_RULES);
 ?>
 
 <div class="x_panel">
@@ -125,7 +127,7 @@ $userCanDeleteSaleData = Auth::can('/sale/delete-ajax');
                     }
                     if ($userCanCheckFareRules) {
                         $label .= '<td>' . Html::button('<i class="fa fa-refresh"></i> Check Fare rules', [
-                                'class' => 'refresh-from-bo btn btn-info refresh-fr-1',
+                                'class' => 'check-fare-rules-bo btn btn-info',
                                 'data-case-id' => $item->css_cs_id,
                                 'data-case-sale-id' => $item->css_sale_id,
                                 'check-fare-rules' => 1,
@@ -259,6 +261,7 @@ $this->registerJs($jsCode, \yii\web\View::POS_READY);
 $urlRefresh = Url::to(['/cases/ajax-refresh-sale-info']);
 $urlSalePrepareResendTickets = Url::to(['/sale/prepare-resend-tickets']);
 $urlSalePrepareCancelSale = Url::to(['/sale/prepare-cancel-sale']);
+$urlViewFareRules = Url::to(['/sale/view-fare-rules']);
 
 $js = <<<JS
 
@@ -411,6 +414,28 @@ $(document).on('click', '.cancel-sale', function (e) {
     btn.addClass('disabled').find('i').attr('class', 'fas fa-spinner fa-spin');
     modal.find('.modal-body').html('');
     modal.find('.modal-title').html('Cancel Sale');
+    
+    modal.find('.modal-body').load(url, function( response, status, xhr ) {
+        modal.modal({
+          backdrop: 'static',
+          show: true
+        });
+        btn.removeClass('disabled').find('i').attr('class', btnClass);
+    });
+});
+
+$(document).on('click', '.check-fare-rules-bo', function(e){  
+    e.preventDefault();
+    
+    let btn = $(this);
+    let caseSaleId = btn.data('case-sale-id');
+    let url = "$urlViewFareRules?caseSaleId=" + caseSaleId;
+    let modal = $('#modal-md');
+    let btnClass = btn.find('i').attr('class');
+      
+    btn.addClass('disabled').find('i').attr('class', 'fas fa-spinner fa-spin');
+    modal.find('.modal-body').html('');
+    modal.find('.modal-title').html('Fare Rules');
     
     modal.find('.modal-body').load(url, function( response, status, xhr ) {
         modal.modal({

@@ -2,12 +2,16 @@
 
 use common\models\Employee;
 use common\models\UserParams;
+use modules\featureFlag\FFlag;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
 /* @var $model Employee */
+
+/* @fflag FFlag::FF_KEY_SWITCH_NEW_SHIFT_ENABLE, Switch new Shift Enable */
+$canNewShift = \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SWITCH_NEW_SHIFT_ENABLE);
 
 ?>
 
@@ -55,8 +59,8 @@ use yii\widgets\Pjax;
                     //        ],
                     'up_bonus_active:boolean',
                     'up_timezone',
-                    'up_work_start_tm',
-                    'up_work_minutes',
+                    ['attribute' => 'up_work_start_tm', 'visible' => !$canNewShift],
+                    ['attribute' => 'up_work_minutes', 'visible' => !$canNewShift],
                     //'up_inbox_show_limit_leads',
                     'up_default_take_limit_leads',
                     'up_min_percent_for_take_leads',

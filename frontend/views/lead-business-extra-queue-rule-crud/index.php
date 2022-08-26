@@ -28,7 +28,10 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-            'lbeqr_key',
+            [
+                'attribute' => 'lbeqr_key',
+                'contentOptions' => ['style' => 'width: 150px;'],
+            ],
             'lbeqr_name',
             'lbeqr_description:text',
             [
@@ -37,7 +40,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'relation' => 'lbeqrUpdatedUser',
                 'placeholder' => 'Updated User'
             ],
-            'lbeqr_duration',
+            [
+                'attribute' => 'lbeqr_duration',
+                'contentOptions' => ['style' => 'width: 85px;'],
+            ],
             'lbeqr_start_time',
             'lbeqr_end_time',
             [

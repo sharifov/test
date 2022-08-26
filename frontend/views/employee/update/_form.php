@@ -21,7 +21,8 @@ $this->title = 'Update user: ' . $form->targetUser->username . ' (ID:  ' . $form
 
 $this->params['breadcrumbs'][] = ['label' => 'User List', 'url' => ['list']];
 $this->params['breadcrumbs'][] = $this->title;
-
+/** @fflag FFlag::FF_KEY_SWITCH_NEW_SHIFT_ENABLE, Switch new Shift Enable */
+$canNewShift = \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SWITCH_NEW_SHIFT_ENABLE);
 ?>
 
 <div class="row">
@@ -254,7 +255,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
             <?php if ($form->fieldAccess->canShow('up_work_start_tm') || $form->fieldAccess->canShow('up_work_minutes') || $form->fieldAccess->canShow('up_timezone')) : ?>
                 <div class="row">
-                    <?php if ($form->fieldAccess->canShow('up_work_start_tm')) : ?>
+                    <?php if ($form->fieldAccess->canShow('up_work_start_tm') && !$canNewShift) : ?>
                         <div class="col-md-3">
                             <?= $activeForm->field(
                                 $form,
@@ -272,7 +273,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             ) ?>
                         </div>
                     <?php endif; ?>
-                    <?php if ($form->fieldAccess->canShow('up_work_minutes')) : ?>
+                    <?php if ($form->fieldAccess->canShow('up_work_minutes') && !$canNewShift) : ?>
                         <div class="col-md-3">
                             <?= $activeForm->field($form, 'up_work_minutes', [
                                 'options' => [

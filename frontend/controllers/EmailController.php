@@ -170,7 +170,7 @@ class EmailController extends FController
                         $flashMessage = 'Email was updated.<br/>';
                     }
 
-                    $this->emailService->sendMail($email);
+                    $this->emailService->sendMail($email, $email->emailData ?? []);
                     Yii::$app->session->setFlash('success', $flashMessage . '<strong>Email Message</strong> was successfully sent to <strong>' . $email->getEmailTo() . '</strong>');
 
                     return $this->redirect(['inbox', 'id' => $email->e_id]);
@@ -242,7 +242,7 @@ class EmailController extends FController
 
         $mailList = UserProjectParams::find()
             ->select(['el_email', 'upp_email_list_id'])
-            ->where(['upp_user_id' => Yii::$app->user->id])
+            ->where(['upp_user_id' => $user->id])
             ->joinWith('emailList', false, 'INNER JOIN')
             ->indexBy('el_email')
             ->column();
@@ -442,7 +442,7 @@ class EmailController extends FController
                         'createdUserId' => $form->user->id,
                     ]);
                     $mail = $this->emailService->createFromDTO($emailDTO, false);
-                    $this->emailService->sendMail($mail);
+                    $this->emailService->sendMail($mail, $mail->emailData ?? []);
                     $result['success'] = true;
                 } catch (CreateModelException $e) {
                     $result['errors'] = $e->getErrors();

@@ -5,6 +5,11 @@ namespace modules\objectTask\src\entities;
 use common\models\Lead;
 use common\models\Queue;
 use src\entities\EventTrait;
+use Yii;
+use yii\behaviors\BlameableBehavior;
+use yii\behaviors\TimestampBehavior;
+use yii\db\BaseActiveRecord;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "object_task".
@@ -50,6 +55,19 @@ class ObjectTask extends \yii\db\ActiveRecord
         return 'object_task';
     }
 
+    public function behaviors(): array
+    {
+        return [
+            'timestamp' => [
+                'class' => TimestampBehavior::class,
+                'attributes' => [
+                    BaseActiveRecord::EVENT_BEFORE_INSERT => ['ot_created_dt'],
+                ],
+                'value' => date('Y-m-d H:i:s'),
+            ],
+        ];
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -64,6 +82,24 @@ class ObjectTask extends \yii\db\ActiveRecord
             [['ot_q_id'], 'exist', 'skipOnError' => true, 'skipOnEmpty' => true, 'targetClass' => Queue::class, 'targetAttribute' => ['ot_q_id' => 'id']],
             [['ot_q_id'], 'exist', 'skipOnError' => false, 'targetClass' => ObjectTaskScenario::class, 'targetAttribute' => ['ot_ots_id' => 'ots_id']],
         ];
+    }
+
+    public function beforeSave($insert): bool
+    {
+        if ($insert === false) {
+            if (!empty($this->ot_q_id)) {
+                $oldStatus = $this->oldAttributes['ot_status'] ?? null;
+
+                if ($oldStatus !== $this->ot_status) {
+                    Yii::$app->queue_db->remove(
+                        $this->ot_q_id
+                    );
+                    $this->ot_q_id = null;
+                }
+            }
+        }
+
+        return parent::beforeSave($insert);
     }
 
     /**
@@ -164,5 +200,39 @@ class ObjectTask extends \yii\db\ActiveRecord
     public function setFailedStatus(): void
     {
         $this->ot_status = self::STATUS_FAILED;
+    }
+
+    public static function getStatusList(array $excludeStatusList = []): array
+    {
+        $statusList = self::STATUS_LIST;
+
+        foreach ($excludeStatusList as $excludeStatus) {
+            if (isset($statusList[$excludeStatus])) {
+                unset($statusList[$excludeStatus]);
+            }
+        }
+
+        return $statusList;
+    }
+
+    public static function countByStatus(string $object, int $objectID): array
+    {
+        $query = self::find()
+            ->where([
+                'ot_object' => $object,
+                'ot_object_id' => $objectID,
+            ])
+            ->select([
+                'ot_status',
+                'COUNT(ot_uuid) as amount',
+            ])
+            ->asArray()
+            ->groupBy([
+                'ot_status',
+            ]);
+
+        return ArrayHelper::map($query->all(), 'ot_status', static function ($data) {
+            return (int) $data['amount'];
+        });
     }
 }

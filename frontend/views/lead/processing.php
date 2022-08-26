@@ -421,10 +421,11 @@ $this->registerJs($js);
                     LeadUserRatingAbacObject::ACTION_EDIT
                 );
                 if ($canViewRating) {
-                    return LeadUserRatingFormatter::asStarRating($rating, $lead->id, $canUpdateRating);
+                    $rating = LeadUserRatingFormatter::asStarRating($rating, $lead->id, $canUpdateRating);
                 } else {
-                    return '-';
+                    $rating = '-';
                 }
+                return $rating . ' ' . \frontend\widgets\lead\notes\LeadNoteWidget::widget(['leadID' => $lead->id]);
             },
             'filter' => LeadUserRating::getRatingList(),
             'format' => 'raw',

@@ -1,6 +1,8 @@
 <?php
 
 use common\models\Employee;
+use modules\featureFlag\FFlag;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
 use src\formatters\client\ClientTimeFormatter;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -27,6 +29,8 @@ $this->registerJsFile('https://cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2
         \yii\web\JqueryAsset::class
     ]
 ]);
+/** @fflag FFlag::FF_KEY_SWITCH_NEW_SHIFT_ENABLE, Switch new Shift Enable */
+$canNewShift = \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SWITCH_NEW_SHIFT_ENABLE);
 
 
 ?>
@@ -153,8 +157,8 @@ $user = Yii::$app->user->identity;
                             ],*/
                             'up_bonus_active:boolean',
                             'up_timezone',
-                            'up_work_start_tm',
-                            'up_work_minutes',
+                            ['attribute' => 'up_work_start_tm', 'visible' => !$canNewShift],
+                            ['attribute' => 'up_work_minutes', 'visible' => !$canNewShift],
 
                             'up_inbox_show_limit_leads',
                             'up_default_take_limit_leads',
@@ -225,21 +229,60 @@ JS;
             <div id="myTimeline">
                 <ul class="timeline-events">
                     <?php
-                    $currentDateTS = strtotime(Yii::$app->formatter->asDate(time()));
-                    $startTime = date('Y-m-d ' . $modelUserParams->up_work_start_tm);
-                    echo $startTime;
-                    $endTime = date('Y-m-d H:i', strtotime($startTime) + ($modelUserParams->up_work_minutes * 60));
-                    ?>
-                    <li data-timeline-node="{ start:'<?=$startTime?>',end:'<?=$endTime?>',content:'1 shift',bgColor:'rgb(137, 201, 151)',color:'#fff',row:1,extend:{'post_id':1,'permalink':'https://google.com/'} }"><?=date('d-M [H:i]', strtotime($startTime))?> ........ <?=date('d-M [H:i]', strtotime($endTime))?> ..... (<?=round($modelUserParams->up_work_minutes / 60, 1)?> hours)</li>
+                    if ($canNewShift) :
+                        ?>
+                        <?php
+                        $firstUserShiftSchedule = UserShiftScheduleQuery::getQueryForNextShiftsByUserId(
+                            $user->id,
+                            (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))
+                        )
+                            ->select(['uss_start_utc_dt', 'uss_end_utc_dt', 'uss_duration'])
+                            ->limit(2)
+                            ->asArray()
+                            ->all();
+                        if (count($firstUserShiftSchedule) == 0) :?>
+                            <li data-timeline-node="{ start:'01.01.1970 00:00', end:'01.01.1970 00:00'}"></li>
 
-                    <?php
-                    $currentDateTS = strtotime(Yii::$app->formatter->asDate(strtotime("+1 day")));
-                    $startTime = date('Y-m-d ' . $modelUserParams->up_work_start_tm, $currentDateTS);
-                    echo $startTime;
-                    $endTime = date('Y-m-d H:i', strtotime($startTime) + ($modelUserParams->up_work_minutes * 60));
-                    ?>
-                    <li data-timeline-node="{ start:'<?=$startTime?>',end:'<?=$endTime?>',content:'2 shift',row:1 }"><?=date('d-M [H:i]', strtotime($startTime))?> ........ <?=date('d-M [H:i]', strtotime($endTime))?> ..... (<?=round($modelUserParams->up_work_minutes / 60, 1)?> hours)</li>
+                        <?php endif;
 
+                        foreach ($firstUserShiftSchedule as $key => $event) {
+                            $startTime = \Yii::$app->formatter->asDateTimeByUserTimezone(strtotime($event['uss_start_utc_dt']), ($modelUserParams->up_timezone ?: 'UTC'), 'php:Y-m-d H:i');
+                            echo $startTime;
+                            $endTime = \Yii::$app->formatter->asDateTimeByUserTimezone(strtotime($event['uss_end_utc_dt']), ($modelUserParams->up_timezone ?: 'UTC'), 'php:Y-m-d H:i');
+
+                            $params = "row:1";
+                            if ($key === 0) {
+                                $params = "bgColor:'rgb(137, 201, 151)',color:'#fff',row:1,extend:{'post_id':1,'permalink':'https://google.com/'}";
+                            } ?>
+                            <li data-timeline-node="{ start:'<?= $startTime ?>',end:'<?= $endTime ?>',content:'<?= $key + 1 ?> shift', <?= $params ?>}">
+                                <?= date('d-M [H:i]', strtotime($startTime)) ?>
+                                ........ <?= date('d-M [H:i]', strtotime($endTime)) ?> .....
+                                (<?= round($event['uss_duration'] / 60, 1) ?> hours)
+                            </li>
+                        <?php } ?>
+                    <?php else : ?>
+                        <?php
+                        $currentDateTS = strtotime(Yii::$app->formatter->asDate(time()));
+                        $startTime = date('Y-m-d ' . $modelUserParams->up_work_start_tm);
+                        echo $startTime;
+                        $endTime = date('Y-m-d H:i', strtotime($startTime) + ($modelUserParams->up_work_minutes * 60));
+                        ?>
+                        <li data-timeline-node="{ start:'<?= $startTime ?>',end:'<?= $endTime ?>',content:'1 shift',bgColor:'rgb(137, 201, 151)',color:'#fff',row:1,extend:{'post_id':1,'permalink':'https://google.com/'} }"><?= date('d-M [H:i]', strtotime($startTime)) ?>
+                            ........ <?= date('d-M [H:i]', strtotime($endTime)) ?> .....
+                            (<?= round($modelUserParams->up_work_minutes / 60, 1) ?> hours)
+                        </li>
+
+                        <?php
+                        $currentDateTS = strtotime(Yii::$app->formatter->asDate(strtotime("+1 day")));
+                        $startTime = date('Y-m-d ' . $modelUserParams->up_work_start_tm, $currentDateTS);
+                        echo $startTime;
+                        $endTime = date('Y-m-d H:i', strtotime($startTime) + ($modelUserParams->up_work_minutes * 60));
+                        ?>
+                        <li data-timeline-node="{ start:'<?= $startTime ?>',end:'<?= $endTime ?>',content:'2 shift',row:1 }"><?= date('d-M [H:i]', strtotime($startTime)) ?>
+                            ........ <?= date('d-M [H:i]', strtotime($endTime)) ?> .....
+                            (<?= round($modelUserParams->up_work_minutes / 60, 1) ?> hours)
+                        </li>
+                    <?php endif; ?>
                 </ul>
             </div>
             <!-- Timeline Event Detail View Area (optional) -->

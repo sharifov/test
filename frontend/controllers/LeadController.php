@@ -46,6 +46,8 @@ use modules\lead\src\abac\LeadAbacObject;
 use modules\lead\src\abac\LeadExpertCallObject;
 use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\lead\src\abac\services\AbacLeadExpertCallService;
+use modules\objectTask\src\entities\ObjectTaskSearch;
+use modules\objectTask\src\services\ObjectTaskService;
 use modules\offer\src\entities\offer\search\OfferSearch;
 use modules\offer\src\entities\offerSendLog\CreateDto;
 use modules\offer\src\entities\offerSendLog\OfferSendLogType;
@@ -123,6 +125,7 @@ use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\Cookie;
 use yii\web\ForbiddenHttpException;
+use yii\web\MethodNotAllowedHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
@@ -211,6 +214,7 @@ class LeadController extends FController
                     'closed',
                     'create',
                     'business-extra-queue',
+                    'get-object-task-list',
                 ],
             ],
         ];
@@ -2865,6 +2869,51 @@ class LeadController extends FController
             'dataProvider' => $dataProvider,
             'leadID' => $leadID,
         ]);
+    }
+
+    public function actionGetObjectTaskList(int $leadId)
+    {
+        $lead = $this->findLeadById($leadId);
+
+        /** @abac $abacDto, LeadAbacObject::OBJ_OBJECT_TASK, LeadAbacObject::ACTION_ACCESS, Show modal with Object Task list */
+        if (!Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_OBJECT_TASK, LeadAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access Denied.');
+        }
+
+        if (Yii::$app->request->isAjax) {
+            $searchModel = new ObjectTaskSearch();
+            $params = Yii::$app->request->queryParams;
+            $params['ObjectTaskSearch']['ot_object'] = ObjectTaskService::OBJECT_LEAD;
+            $params['ObjectTaskSearch']['ot_object_id'] = $leadId;
+            $dataProvider = $searchModel->search($params);
+
+            return $this->renderAjax('partial/_object_task_list', [
+                'dataProvider' => $dataProvider,
+                'searchModel' => $searchModel,
+            ]);
+        }
+    }
+
+    public function actionGetLeadNotes(int $leadId)
+    {
+        $lead = Lead::findOne($leadId);
+
+        if (!$lead) {
+            throw new NotFoundHttpException('Not found lead ID: ' . $leadId);
+        }
+
+        if (!Auth::can('lead-view/notes/view', ['lead' => $lead])) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
+        if (Yii::$app->request->isAjax) {
+            $notes = Note::find()->where(['lead_id' => $leadId])->orderBy(['id' => SORT_ASC])->all();
+
+            return $this->renderAjax('notes/notes_list', [
+                'notes' => $notes
+            ]);
+        }
+        throw new MethodNotAllowedHttpException('Method not allowed');
     }
 
     /**
