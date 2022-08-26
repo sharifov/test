@@ -22,6 +22,30 @@ use src\entities\email\form\EmailForm;
     <?= $form->field($emailForm->contacts['to'], '[to]email')->textInput() ?>
     <?= $form->field($emailForm->contacts['to'], '[to]name')->textInput() ?>
 
+    <?= $form->field($emailForm->contacts['cc'], '[cc]emails')
+         ->label('CC')
+         ->widget(\kartik\select2\Select2::class, [
+            'size' => \kartik\select2\Select2::SMALL,
+            'options' => ['multiple' => true],
+            'pluginOptions' => [
+                'allowClear' => true,
+                'tags' => true,
+                'tokenSeparators' => [',', ' '],
+            ],
+        ]);?>
+
+    <?= $form->field($emailForm->contacts['bcc'], '[bcc]emails')
+         ->label('BCC')
+         ->widget(\kartik\select2\Select2::class, [
+            'size' => \kartik\select2\Select2::SMALL,
+            'options' => ['multiple' => true],
+            'pluginOptions' => [
+                'allowClear' => true,
+                'tags' => true,
+                'tokenSeparators' => [',', ' '],
+            ],
+        ]);?>
+
     <?= $form->field($emailForm->body, 'subject')->textInput(['maxlength' => true]) ?>
 
     <?php if (isset($emailForm->body->data['files'])) : ?>
@@ -55,7 +79,7 @@ use src\entities\email\form\EmailForm;
     <?= $form->field($emailForm->params, 'templateType')->textInput() ?>
     <?= $form->field($emailForm->params, 'language')->dropDownList($emailForm->params->listLanguages()) ?>
 
-     <?= $form->field($emailForm->log, 'communicationId')->textInput() ?>
+    <?= $form->field($emailForm->log, 'communicationId')->textInput() ?>
     <?= $form->field($emailForm, 'isDeleted')->checkbox() ?>
 
     <?= $form->field($emailForm->log, 'isNew')->checkbox() ?>
