@@ -161,6 +161,11 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         return $this->pqc_status_id === ProductQuoteChangeStatus::NEW;
     }
 
+    public function isDeclined(): bool
+    {
+        return $this->pqc_status_id === ProductQuoteChangeStatus::DECLINED;
+    }
+
     public function statusToNew(): void
     {
         $this->pqc_status_id = ProductQuoteChangeStatus::NEW;

@@ -393,12 +393,11 @@ class CasesSaleService
      */
     public function prepareAdditionalData(CaseSale $caseSale, array $saleData): CaseSale
     {
+        $bookingId = $saleData['baseBookingId'] ?? $saleData['bookingId'] ?? $saleData['confirmationNumber'] ?? null;
+
         $caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
         $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
-        //$caseSale->css_sale_book_id = $saleData['confirmationNumber'] ?? null;
-        if (!empty($saleData['confirmationNumber'])) {
-            $caseSale->css_sale_book_id = $saleData['confirmationNumber'];
-        }
+        $caseSale->css_sale_book_id = $bookingId;
         $caseSale->css_sale_pax = $saleData['requestDetail']['passengersCnt'] ?? null;
         if (isset($saleData['price']['priceQuotes'])) {
             $amountCharged = 0;
@@ -632,8 +631,9 @@ class CasesSaleService
                     $caseSale = new CaseSale();
                     $caseSale->css_cs_id = $csId;
                     $caseSale->css_sale_id = $saleId;
-                    $caseSale->css_sale_book_id = $saleData['bookingId'] ?? $saleData['confirmationNumber'] ?? null;
-                    $case->cs_order_uid = $caseSale->css_sale_book_id;
+
+                    $bookingId = $saleData['baseBookingId'] ?? $saleData['bookingId'] ?? $saleData['confirmationNumber'] ?? null;
+                    $case->cs_order_uid = $bookingId;
                     $this->casesRepository->save($case);
 
                     $caseSale = $this->saveAdditionalData($caseSale, $case, $refreshSaleData);
@@ -706,13 +706,15 @@ class CasesSaleService
             throw new \RuntimeException('CaseSale already exist. Case(' . $caseId . ') Sale(' . $saleData['saleId'] . ')');
         }
 
+        $bookingId = $saleData['baseBookingId'] ?? $saleData['bookingId'] ?? $saleData['confirmationNumber'] ?? null;
+
         $cs = new CaseSale();
         $cs->css_cs_id = $caseId;
         $cs->css_sale_id = $saleData['saleId'];
         $cs->css_sale_data = $saleData;
         $cs->css_sale_pnr = $saleData['pnr'] ?? null;
         $cs->css_sale_created_dt = $saleData['created'] ?? null;
-        $cs->css_sale_book_id = $saleData['bookingId'] ?? null;
+        $cs->css_sale_book_id = $bookingId;
         $cs->css_sale_pax = isset($saleData['passengers']) && is_array($saleData['passengers']) ? count($saleData['passengers']) : null;
         $cs->css_sale_data_updated = $cs->css_sale_data;
 

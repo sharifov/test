@@ -8,6 +8,7 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\Quote;
 use common\models\QuoteCommunication;
+use common\models\UserProjectParams;
 use frontend\helpers\JsonHelper;
 use frontend\helpers\QuoteHelper;
 use modules\objectTask\src\entities\ObjectTask;
@@ -28,11 +29,28 @@ class SendEmailWithQuotes extends BaseCommand
 {
     public const COMMAND = 'sendEmailWithQuotes';
 
+    public const QUOTE_TYPE_BEST = 'best';
+    public const QUOTE_TYPE_FASTEST = 'fastest';
+    public const QUOTE_TYPE_CHEAPEST = 'cheapest';
+    public const QUOTE_TYPE_ANY_ASC = 'any_asc';
+    public const QUOTE_TYPE_ANY_DESC = 'any_desc';
+
+    public const QUOTES_TYPE_LIST = [
+        self::QUOTE_TYPE_BEST => 'Best',
+        self::QUOTE_TYPE_FASTEST => 'Fastest',
+        self::QUOTE_TYPE_CHEAPEST => 'Cheapest',
+        self::QUOTE_TYPE_ANY_ASC => 'Any (asc)',
+        self::QUOTE_TYPE_ANY_DESC => 'Any (desc)'
+    ];
+
     private AddQuoteService $addQuoteService;
     private QuoteRepository $quoteRepository;
     private EmailMainService $emailMainService;
     private ?Employee $agent = null;
     private ?Lead $lead = null;
+    private ?string $agentEmail = null;
+
+    private const COMMUNICATION_DATA_KEY = 'communicationData';
 
     public function __construct(
         ObjectTask $objectTask,
@@ -60,6 +78,16 @@ class SendEmailWithQuotes extends BaseCommand
             'uniqueQuotes' => false,
             'cid' => '',
             'templateKey' => 'templateKey',
+            'quoteTypes' => [
+                self::QUOTE_TYPE_BEST,
+                self::QUOTE_TYPE_FASTEST,
+                self::QUOTE_TYPE_CHEAPEST,
+                self::QUOTE_TYPE_ANY_ASC,
+                self::QUOTE_TYPE_ANY_DESC,
+            ],
+            self::COMMUNICATION_DATA_KEY => [
+                'day' => 1,
+            ]
         ];
     }
 
@@ -116,6 +144,22 @@ class SendEmailWithQuotes extends BaseCommand
                         if ($this->agent === null) {
                             throw new \Exception("Not found virtual agent for project {$projectKey}");
                         }
+
+                        $upp = UserProjectParams::find()
+                            ->where([
+                                'AND',
+                                ['upp_user_id' => $this->agent->id],
+                                ['upp_project_id' => $this->objectTask->lead->project_id],
+                                ['IS NOT', 'upp_email_list_id', null]
+                            ])
+                            ->limit(1)
+                            ->one();
+
+                        if ($upp === null || empty($upp->getEmail(true))) {
+                            throw new \Exception("Not found email for virtual agent, project {$projectKey}");
+                        }
+
+                        $this->agentEmail = $upp->getEmail(true);
                     }
                 }
             }
@@ -239,7 +283,7 @@ class SendEmailWithQuotes extends BaseCommand
             $projectContactInfo = Json::decode($project->contact_info);
         }
 
-        $clientEmail = ClientEmail::getGeneralEmail(
+        $clientEmail = ClientEmail::getFirstEmailByAllowedTypes(
             $lead->client_id
         );
 
@@ -253,11 +297,12 @@ class SendEmailWithQuotes extends BaseCommand
             $quoteArray['qc'] = $uid;
             return $quoteArray;
         }, $dataForPreview['quotes'] ?? []);
+        $dataForPreview[self::COMMUNICATION_DATA_KEY] = $this->getCommunicationData();
 
         $preview = Yii::$app->comms->mailPreview(
             $lead->project_id,
             $this->getTemplateKey(),
-            $agent->email,
+            $this->agentEmail,
             $clientEmail,
             $dataForPreview
         );
@@ -277,7 +322,13 @@ class SendEmailWithQuotes extends BaseCommand
             ]);
 
             $mail = $this->emailMainService->createFromDTO($mailDTO);
-            $this->emailMainService->sendMail($mail);
+
+            $this->emailMainService->sendMail(
+                $mail,
+                [
+                    self::COMMUNICATION_DATA_KEY => $this->getCommunicationData(),
+                ]
+            );
 
             foreach ($quotes as $quote) {
                 Repo::createForEmail($mail->e_id, $quote->id, $uid);
@@ -291,34 +342,68 @@ class SendEmailWithQuotes extends BaseCommand
         return true;
     }
 
+    protected function filterQuotesByType(array $quoteList, string $type): array
+    {
+        $quotes = [];
+
+        switch ($type) {
+            case self::QUOTE_TYPE_ANY_ASC:
+                $quotes = $quoteList;
+                break;
+            case self::QUOTE_TYPE_ANY_DESC:
+                $quotes = array_reverse($quoteList);
+                break;
+
+            default:
+                foreach ($quoteList as $quote) {
+                    if (isset($quote['meta'][$type]) && $quote['meta'][$type] === true) {
+                        $quotes[] = $quote;
+                    }
+                }
+
+                break;
+        }
+
+        return $quotes;
+    }
+
     protected function getUniqueQuotesForLeadFromApi(int $amount): array
     {
         $quotes = [];
+        $selectedQuoteKeys = [];
         $availableQuotes = $this->getQuotesFromApi();
 
         if (isset($availableQuotes['count'], $availableQuotes['results']) && $availableQuotes['count'] > 0) {
-            foreach ($availableQuotes['results'] as $quote) {
-                if ($quote['meta']['best'] === true) {
-                    if ($this->getNeedUniqueQuotes() === true) {
-                        $quoteExists = Quote::find()
-                            ->where([
-                                'AND',
-                                ['lead_id' => $this->objectTask->lead->id],
-                                ['<>', 'status', Quote::STATUS_DECLINED],
-                                ['LIKE', 'origin_search_data', $quote['key']]
-                            ])
-                            ->limit(1)
-                            ->exists();
+            $availableQuoteTypes = $this->getQuoteTypes();
 
-                        if ($quoteExists === false) {
+            foreach ($availableQuoteTypes as $availableQuoteType) {
+                $quoteList = $this->filterQuotesByType($availableQuotes['results'], $availableQuoteType);
+
+                foreach ($quoteList as $quote) {
+                    if (in_array($quote['key'], $selectedQuoteKeys) === false) {
+                        if ($this->getNeedUniqueQuotes() === true) {
+                            $quoteExists = Quote::find()
+                                ->where([
+                                    'AND',
+                                    ['lead_id' => $this->objectTask->lead->id],
+                                    ['<>', 'status', Quote::STATUS_DECLINED],
+                                    ['LIKE', 'origin_search_data', $quote['key']]
+                                ])
+                                ->limit(1)
+                                ->exists();
+
+                            if ($quoteExists === false) {
+                                $quotes[] = $quote;
+                                $selectedQuoteKeys[] = $quote['key'];
+                            }
+                        } else {
                             $quotes[] = $quote;
+                            $selectedQuoteKeys[] = $quote['key'];
                         }
-                    } else {
-                        $quotes[] = $quote;
                     }
 
                     if (count($quotes) >= $amount) {
-                        break;
+                        break(2);
                     }
                 }
             }
@@ -330,7 +415,7 @@ class SendEmailWithQuotes extends BaseCommand
     protected function getQuotesFromApi(): array
     {
         $lead = $this->getLead();
-        $keyCache = sprintf('commfgfand-quotes-search-%d-%s-%s-%s', $lead->id, '', $lead->generateLeadKey(), $this->getCid());
+        $keyCache = sprintf('command-quotes-search-%d-%s-%s-%s', $lead->id, '', $lead->generateLeadKey(), $this->getCid());
         $quotes = \Yii::$app->cacheFile->get($keyCache);
         $dto = new SearchServiceQuoteDTO($lead);
 
@@ -410,5 +495,21 @@ class SendEmailWithQuotes extends BaseCommand
     public function getCid(): ?string
     {
         return $this->config['cid'] ?? '';
+    }
+
+    public function getQuoteTypes(): array
+    {
+        $quoteTypes = (array) ($this->config['quoteTypes'] ?? []);
+
+        if (empty($quoteTypes)) {
+            $quoteTypes = [self::QUOTE_TYPE_BEST];
+        }
+
+        return $quoteTypes;
+    }
+
+    public function getCommunicationData(): array
+    {
+        return (array) ($this->config['communicationData'] ?? []);
     }
 }
