@@ -4,6 +4,7 @@ use common\models\Employee;
 use common\models\Quote;
 use kartik\select2\Select2;
 use modules\featureFlag\FFlag;
+use modules\lead\src\abac\LeadAbacObject;
 use src\access\ListsAccess;
 use src\model\flightQuoteLabelList\service\FlightQuoteLabelListService;
 use src\model\leadDataKey\entity\LeadDataKey;
@@ -37,9 +38,16 @@ use frontend\extensions\DatePicker;
                 <div class="col-sm-12">
                     <h4 class="brief"><i>Lead</i></h4>
                     <div class="row">
-                        <div class="col-md-1">
-                            <?= $form->field($model, 'id')->input('number', ['min' => 1]) ?>
-                        </div>
+                        <?php
+                        /** @abac LeadAbacObject::UI_DISPLAY_FORM_ID_INPUT, LeadAbacObject::ACTION_ACCESS, Access To ID Input In Search Form*/
+                        $canViewSearchFormIdInput = Yii::$app->abac->can(null, LeadAbacObject::UI_DISPLAY_FORM_ID_INPUT, LeadAbacObject::ACTION_ACCESS);
+                        //$canViewSearchFormIdInput = false;
+                        ?>
+                        <?php if ($canViewSearchFormIdInput) : ?>
+                            <div class="col-md-1">
+                                <?= $form->field($model, 'id')->input('number', ['min' => 1]) ?>
+                            </div>
+                        <?php endif;?>
                         <div class="col-md-1">
                             <?= $form->field($model, 'uid') ?>
                         </div>
