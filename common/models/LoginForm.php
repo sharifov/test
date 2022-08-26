@@ -38,7 +38,7 @@ class LoginForm extends Model
             ['rememberMe', 'boolean'],
             ['username', 'checkIsBlocked'],
             ['password', 'validatePassword'],
-            ['verifyCode', 'validateVerifyCode']
+            ['verifyCode', 'validateCaptchaCode']
         ];
     }
 
@@ -48,7 +48,7 @@ class LoginForm extends Model
      * @param $validator
      * @return bool
      */
-    public function validateVerifyCode($attribute, $params, $validator)
+    public function validateCaptchaCode($attribute, $params, $validator)
     {
         if ((new AntiBruteForceService())->checkCaptchaEnable()) {
             $validator = new CaptchaValidator();
@@ -241,7 +241,8 @@ class LoginForm extends Model
     /**
      * @return null|string
      */
-    public function getUserSecret() {
+    public function getUserSecret()
+    {
         $user = $this->getUser();
         return !is_null($user->userProfile) ? $user->userProfile->up_2fa_secret : null;
     }
