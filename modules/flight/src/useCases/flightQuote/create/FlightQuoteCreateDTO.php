@@ -83,7 +83,7 @@ class FlightQuoteCreateDTO
         $this->createdUserId = $userId;
         $this->createdExpertId = null;
         $this->createdExpertName = null;
-        $this->reservationDump = FlightQuoteHelper::getItineraryDump($quote) ?? '';
+        $this->reservationDump = $quote['reservationDump'] ?? null;
         $this->pricingInfo = !empty($quote['pricingInfo']) ? json_encode($quote['pricingInfo']) : null;
         $this->originSearchData = json_encode($quote);
         $this->lastTicketDate = $quote['prices']['lastTicketDate'] ?? null;

@@ -313,7 +313,8 @@ class VoluntaryQuoteManualCreateService
             'validatingCarrier' => $form->validatingCarrier,
             'fareType' => $form->fareType,
             'key' => md5(serialize($form->toArray())),
-            'trips' => FlightQuoteHelper::getTripsSegmentsData($form->reservationDump, $form->cabin, (int)$form->tripType),
+            'trips' => [],
+            'reservationDump' => $form->reservationDump
         ];
     }
 }
