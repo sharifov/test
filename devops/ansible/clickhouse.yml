@@ -1,7 +1,7 @@
 ---
-# This playbook provisions CRM shared server
+# This playbook provisions CRM ClickHouse server
 
-- name: Setup shared server
+- name: Setup ClickHouse server
   hosts: clickhouse
   remote_user: ubuntu
   gather_facts: false
