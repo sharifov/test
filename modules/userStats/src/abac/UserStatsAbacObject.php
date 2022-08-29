@@ -26,22 +26,8 @@ class UserStatsAbacObject extends AbacBaseModel implements AbacInterface
         self::OBJ_USER_STATS => [self::ACTION_ACCESS],
     ];
 
-    protected const ATTR_USER_STATS_USER_ID = [
-        'optgroup' => 'USER_STATS',
-        'id' => self::NS . 'userId',
-        'field' => 'userId',
-        'label' => 'User ID',
-        'type' => self::ATTR_TYPE_INTEGER,
-        'operators' =>  [self::OP_EQUAL2, self::OP_NOT_EQUAL2,
-            self::OP_IN, self::OP_NOT_IN, '<', '>', '<=', '>=']
-    ];
-
     /** --------------- ATTRIBUTE LIST ------------------------ */
-    public const OBJECT_ATTRIBUTE_LIST = [
-        self::OBJ_USER_STATS  =>  [
-            self::ATTR_USER_STATS_USER_ID
-        ]
-    ];
+    public const OBJECT_ATTRIBUTE_LIST = [];
 
     public static function getObjectList(): array
     {

@@ -59,8 +59,11 @@ echo GridView::widget([
             'visible' => $isConversionHidden,
             'value' => fn (array $model): string => Yii::$app->formatter->asNumCurrency($model['tips']),
         ],
+        'sales_conversion_call_priority',
+        'call_priority_current',
+        'gross_profit_call_priority',
         [
-            'attribute' => 'l_status_dt',
+            'attribute' => 'created',
             'label' => 'Date'
         ],
     ]

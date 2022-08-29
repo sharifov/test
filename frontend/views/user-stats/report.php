@@ -2,7 +2,6 @@
 
 use kartik\export\ExportMenu;
 use kartik\grid\GridView;
-use modules\userStats\src\abac\dto\UserStatsDto;
 use modules\userStats\src\abac\UserStatsAbacObject;
 use src\model\user\reports\stats\Metrics;
 use src\model\user\reports\stats\UserStatsReport;
@@ -61,12 +60,12 @@ if ($showReport) {
         $columns[] = [
             'attribute' => 'leads_created',
             'value' => static fn (array $model): string =>
-                /** @abac new $usAbacDto, ProductQuoteChangeAbacObject::OBJ_USER_STATS, ProductQuoteChangeAbacObject::UserStatsAbacObject, Act Flight Create Voluntary quote*/
-                !Yii::$app->abac->can(new UserStatsDto(Yii::$app->user->id), UserStatsAbacObject::OBJ_USER_STATS, UserStatsAbacObject::ACTION_ACCESS)
+                /** @abac null, ProductQuoteChangeAbacObject::OBJ_USER_STATS, ProductQuoteChangeAbacObject::UserStatsAbacObject, Act Flight Create Voluntary quote*/
+                !Yii::$app->abac->can(null, UserStatsAbacObject::OBJ_USER_STATS, UserStatsAbacObject::ACTION_ACCESS)
                     ? $model['leads_created']
                     : Html::a($model['leads_created'], 'javascript:void(0)', [
                         'class' => 'showModalButton',
-                        'title' =>  'Leads created',
+                        'title' =>  'Leads created by ' . $model['username'],
                         'data-modal_id' => 'show-user-created-leads',
                         'data-content-url' => Url::to([
                             'user-stats/ajax-show-user-leads',
@@ -87,12 +86,12 @@ if ($showReport) {
         $columns[] = [
             'attribute' => 'sold_leads',
             'value' => static fn (array $model): string =>
-                /** @abac new $usAbacDto, ProductQuoteChangeAbacObject::OBJ_USER_STATS, ProductQuoteChangeAbacObject::UserStatsAbacObject, Act Flight Create Voluntary quote*/
-                !Yii::$app->abac->can(new UserStatsDto(Yii::$app->user->id), UserStatsAbacObject::OBJ_USER_STATS, UserStatsAbacObject::ACTION_ACCESS)
+                /** @abac null, ProductQuoteChangeAbacObject::OBJ_USER_STATS, ProductQuoteChangeAbacObject::UserStatsAbacObject, Act Flight Create Voluntary quote*/
+                !Yii::$app->abac->can(null, UserStatsAbacObject::OBJ_USER_STATS, UserStatsAbacObject::ACTION_ACCESS)
                     ? $model['sold_leads']
                     : Html::a($model['sold_leads'], 'javascript:void(0)', [
                         'class' => 'showModalButton',
-                        'title' =>  'Sold Leads',
+                        'title' =>  'Sold Leads by ' . $model['username'],
                         'data-modal_id' => 'show-user-sold-leads',
                         'data-content-url' => Url::to([
                             'user-stats/ajax-show-user-leads',
@@ -139,12 +138,12 @@ if ($showReport) {
         $columns[] = [
             'attribute' => 'leads_processed',
             'value' => static fn (array $model): string =>
-                /** @abac new $usAbacDto, ProductQuoteChangeAbacObject::OBJ_USER_STATS, ProductQuoteChangeAbacObject::UserStatsAbacObject, Act Flight Create Voluntary quote*/
-                !Yii::$app->abac->can(new UserStatsDto(Yii::$app->user->id), UserStatsAbacObject::OBJ_USER_STATS, UserStatsAbacObject::ACTION_ACCESS)
+                /** @abac null, ProductQuoteChangeAbacObject::OBJ_USER_STATS, ProductQuoteChangeAbacObject::UserStatsAbacObject, Act Flight Create Voluntary quote*/
+                !Yii::$app->abac->can(null, UserStatsAbacObject::OBJ_USER_STATS, UserStatsAbacObject::ACTION_ACCESS)
                     ? $model['leads_processed']
                     : Html::a($model['leads_processed'], 'javascript:void(0)', [
                         'class' => 'showModalButton',
-                        'title' =>  'Leads Processed',
+                        'title' =>  'Leads Processed by ' . $model['username'],
                         'data-modal_id' => 'show-user-processed-leads',
                         'data-content-url' => Url::to([
                             'user-stats/ajax-show-user-leads',
@@ -159,12 +158,12 @@ if ($showReport) {
         $columns[] = [
             'attribute' => 'leads_trashed',
             'value' => static fn (array $model): string =>
-                /** @abac new $usAbacDto, ProductQuoteChangeAbacObject::OBJ_USER_STATS, ProductQuoteChangeAbacObject::UserStatsAbacObject, Act Flight Create Voluntary quote*/
-                !Yii::$app->abac->can(new UserStatsDto(Yii::$app->user->id), UserStatsAbacObject::OBJ_USER_STATS, UserStatsAbacObject::ACTION_ACCESS)
+                /** @abac null, ProductQuoteChangeAbacObject::OBJ_USER_STATS, ProductQuoteChangeAbacObject::UserStatsAbacObject, Act Flight Create Voluntary quote*/
+                !Yii::$app->abac->can(null, UserStatsAbacObject::OBJ_USER_STATS, UserStatsAbacObject::ACTION_ACCESS)
                     ? $model['leads_trashed']
                     : Html::a($model['leads_trashed'], 'javascript:void(0)', [
                         'class' => 'showModalButton',
-                        'title' =>  'Leads Trashed',
+                        'title' =>  'Leads Trashed by ' . $model['username'],
                         'data-modal_id' => 'show-user-trashed-leads',
                         'data-content-url' => Url::to([
                             'user-stats/ajax-show-user-leads',
@@ -179,12 +178,12 @@ if ($showReport) {
         $columns[] = [
             'attribute' => 'leads_follow_up',
             'value' => static fn (array $model): string =>
-                /** @abac new $usAbacDto, ProductQuoteChangeAbacObject::OBJ_USER_STATS, ProductQuoteChangeAbacObject::UserStatsAbacObject, Act Flight Create Voluntary quote*/
-                !Yii::$app->abac->can(new UserStatsDto(Yii::$app->user->id), UserStatsAbacObject::OBJ_USER_STATS, UserStatsAbacObject::ACTION_ACCESS)
+                /** @abac null, ProductQuoteChangeAbacObject::OBJ_USER_STATS, ProductQuoteChangeAbacObject::UserStatsAbacObject, Act Flight Create Voluntary quote*/
+                !Yii::$app->abac->can(null, UserStatsAbacObject::OBJ_USER_STATS, UserStatsAbacObject::ACTION_ACCESS)
                     ? $model['leads_follow_up']
                     : Html::a($model['leads_follow_up'], 'javascript:void(0)', [
                         'class' => 'showModalButton',
-                        'title' =>  'Leads Follow Up',
+                        'title' =>  'Leads Follow Up by ' . $model['username'],
                         'data-modal_id' => 'show-user-follow-up-leads',
                         'data-content-url' => Url::to([
                             'user-stats/ajax-show-user-leads',
@@ -199,12 +198,12 @@ if ($showReport) {
         $columns[] = [
             'attribute' => 'leads_cloned',
             'value' => static fn (array $model): string =>
-                /** @abac new $usAbacDto, ProductQuoteChangeAbacObject::OBJ_USER_STATS, ProductQuoteChangeAbacObject::UserStatsAbacObject, Act Flight Create Voluntary quote*/
-                !Yii::$app->abac->can(new UserStatsDto(Yii::$app->user->id), UserStatsAbacObject::OBJ_USER_STATS, UserStatsAbacObject::ACTION_ACCESS)
+                /** @abac null, ProductQuoteChangeAbacObject::OBJ_USER_STATS, ProductQuoteChangeAbacObject::UserStatsAbacObject, Act Flight Create Voluntary quote*/
+                !Yii::$app->abac->can(null, UserStatsAbacObject::OBJ_USER_STATS, UserStatsAbacObject::ACTION_ACCESS)
                     ? $model['leads_cloned']
                     : Html::a($model['leads_cloned'], 'javascript:void(0)', [
                         'class' => 'showModalButton',
-                        'title' =>  'Leads Cloned',
+                        'title' =>  'Leads Cloned by ' . $model['username'],
                         'data-modal_id' => 'show-user-cloned-leads',
                         'data-content-url' => Url::to([
                             'user-stats/ajax-show-user-leads',

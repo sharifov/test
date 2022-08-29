@@ -577,7 +577,7 @@ class UserStatsReport extends Model
         $query = (new Query())
             ->select([
                 'leads.id',
-                'leads.l_status_dt',
+                'leads.created'
             ])
             ->from('leads');
 
@@ -665,6 +665,21 @@ class UserStatsReport extends Model
                     ->andWhere(['BETWEEN', 'lf.created', $from, $to])
                     ->andWhere(['lf.employee_id' => $userId]);
                 break;
+        }
+
+        if (Metrics::isSalesConversionCallPriority($this->metrics)) {
+            $query->addSelect('ud1.ud_value AS sales_conversion_call_priority');
+            $query->leftJoin(['ud1' => UserData::tableName()], "leads.employee_id = ud1.ud_user_id AND ud1.ud_key = '" . UserDataKey::CONVERSION_PERCENT . "'");
+        }
+
+        if (Metrics::isCallPriorityCurrent($this->metrics)) {
+            $query->addSelect('ud2.up_call_user_level AS call_priority_current');
+            $query->leftJoin(['ud2' => UserParams::tableName()], 'leads.employee_id = ud2.up_user_id');
+        }
+
+        if (Metrics::isGrossProfitCallPriority($this->metrics)) {
+            $query->addSelect(['gross_profit_call_priority' => new Expression('CAST(ud3.ud_value AS DECIMAL(10,2))')]);
+            $query->leftJoin(['ud3' => UserData::tableName()], "leads.employee_id = ud3.ud_user_id AND ud3.ud_key = '" . UserDataKey::GROSS_PROFIT . "'");
         }
 
         return $dataProvider;

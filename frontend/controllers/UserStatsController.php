@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use modules\userStats\src\abac\UserStatsAbacObject;
 use src\auth\Auth;
 use src\model\user\entity\sales\SalesSearch;
 use src\model\user\entity\userStats\UserStatsSearch;
@@ -11,6 +12,7 @@ use src\model\user\reports\stats\UserStatsReport;
 use src\model\userModelSetting\service\UserModelSettingService;
 use Yii;
 use yii\helpers\ArrayHelper;
+use yii\web\ForbiddenHttpException;
 
 /**
  * Class UserStatsController
@@ -89,10 +91,17 @@ class UserStatsController extends FController
         ]);
     }
 
+    /**
+     * @throws ForbiddenHttpException
+     */
     public function actionAjaxShowUserLeads(): string
     {
         if (!Yii::$app->request->isAjax || !Yii::$app->request->isPost) {
             throw new \RuntimeException('Method is not allowed');
+        }
+        /** @abac null, ProductQuoteChangeAbacObject::OBJ_USER_STATS, ProductQuoteChangeAbacObject::UserStatsAbacObject, Act Flight Create Voluntary quote*/
+        if (!Yii::$app->abac->can(null, UserStatsAbacObject::OBJ_USER_STATS, UserStatsAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access Denied');
         }
 
         $user = Auth::user();
@@ -107,17 +116,16 @@ class UserStatsController extends FController
             (new Access($user))
         );
 
-        $request =& Yii::$app->request;
         $dataProvider = $searchModel->searchLeadsByUser(
             $savedFilters,
-            $request->get('user'),
-            $request->get('type')
+            Yii::$app->request->get('user'),
+            Yii::$app->request->get('type')
         );
 
         return $this->renderAjax('_user_leads_list_modal', [
             'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,
-            'type' => $request->get('type')
+            'type' => Yii::$app->request->get('type')
         ]);
     }
 }
