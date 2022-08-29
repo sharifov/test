@@ -10,6 +10,7 @@ use src\entities\cases\CaseEventLog;
 use src\entities\cases\Cases;
 use src\exception\BoResponseException;
 use src\exception\ValidationException;
+use src\helpers\app\AppHelper;
 use src\helpers\ErrorsToStringHelper;
 use src\services\cases\CasesSaleService;
 use Yii;
@@ -94,7 +95,7 @@ class BoRequestReProtectionService
     public function getSaleByBookingId(string $bookingId, string $baseBookingId, Cases $case): array
     {
         if (!Yii::$app->params['settings']['enable_request_to_bo_sale']) {
-            return [];
+            throw new \RuntimeException('Settings(enable_request_to_bo_sale) is disabled');
         }
         $case->addEventLog(
             CaseEventLog::RE_PROTECTION_CREATE,
@@ -145,7 +146,8 @@ class BoRequestReProtectionService
                 throw new \RuntimeException('BO request Error: ' . $responseStr, -1);
             }
         } catch (\Throwable $throwable) {
-            $message = VarDumper::dumpAsString([$throwable->getMessage(), $params], 20);
+            $message = AppHelper::throwableLog($throwable);
+            $message['params'] = $params;
             Yii::error($message, 'BoRequestReProtectionService:getSaleByBookingId');
         }
         return [];
