@@ -93,7 +93,6 @@ JS;
 $this->registerJs($js, \yii\web\View::POS_END);
 if ($rid) {
     $js = <<<JS
-function safeInitChatIfPossible() {
   var t = setInterval(function () {
     if (window.k && window.k.crmChat) {
       clearInterval(t);
@@ -106,10 +105,7 @@ function safeInitChatIfPossible() {
       });
     }
   }, 50);
-}
-
-window.addEventListener('load', safeInitChatIfPossible);
 JS;
 
-    $this->registerJs($js, \yii\web\View::POS_HEAD);
+    $this->registerJs($js, \yii\web\View::POS_LOAD);
 }
