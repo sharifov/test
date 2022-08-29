@@ -14,6 +14,7 @@ use yii\base\Model;
  * Class ReprotectionCreateForm
  *
  * @property $booking_id
+ * @property $base_booking_id
  * @property $is_automate
  * @property $flight_quote
  * @property $project_key
@@ -25,6 +26,7 @@ use yii\base\Model;
 class ReprotectionCreateForm extends Model
 {
     public $booking_id;
+    public $base_booking_id;
     public $is_automate;
     public $flight_quote;
     public $project_key;
@@ -38,6 +40,11 @@ class ReprotectionCreateForm extends Model
         return [
             [['booking_id'], 'required'],
             [['booking_id'], 'string', 'max' => 10],
+
+            [['base_booking_id'], 'string', 'max' => 10],
+            ['base_booking_id', 'filter', 'filter' => function ($value) {
+                return !empty($value) ? $value : $this->booking_id;
+            }],
 
             [['project_key'], 'required'],
             [['project_key'], 'string', 'max' => 50],

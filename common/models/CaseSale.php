@@ -110,6 +110,25 @@ class CaseSale extends \yii\db\ActiveRecord
         ]
     ];
 
+    public const STATUS_PENDING    = 1;
+    public const STATUS_PROCESSING = 2;
+    public const STATUS_VOID       = 3;
+    public const STATUS_CLOSE      = 4;
+    public const STATUS_REJECTED   = 5;
+
+    public const STATUS_LIST = [
+        self::STATUS_PENDING    => 'Pending',
+        self::STATUS_PROCESSING => 'Processing',
+        self::STATUS_VOID       => 'Void',
+        self::STATUS_CLOSE      => 'Close',
+        self::STATUS_REJECTED   => 'Rejected',
+    ];
+
+    public const ALLOW_REPROTECTION_STATUS_LIST = [
+        self::STATUS_PROCESSING => 'Processing',
+        self::STATUS_CLOSE      => 'Close',
+    ];
+
     public function beforeSave($insert)
     {
         $this->setDb();
