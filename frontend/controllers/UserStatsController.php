@@ -10,6 +10,7 @@ use src\model\user\reports\stats\SessionFilterStorage;
 use src\model\user\reports\stats\UserStatsReport;
 use src\model\userModelSetting\service\UserModelSettingService;
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class UserStatsController
@@ -20,6 +21,19 @@ class UserStatsController extends FController
     {
         parent::init();
         $this->layoutCrud();
+    }
+
+    public function behaviors(): array
+    {
+        $behaviors = [
+            'access' => [
+                'allowActions' => [
+                    'ajax-show-user-leads',
+                ],
+            ],
+        ];
+
+        return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
     public function actionIndex()
@@ -72,6 +86,38 @@ class UserStatsController extends FController
             'dataProvider' => $dataProvider,
             'showReport' => $searchModel->isValid && !$needResetFilters && Yii::$app->request->queryParams,
             'summaryStats' => $summaryStats
+        ]);
+    }
+
+    public function actionAjaxShowUserLeads(): string
+    {
+        if (!Yii::$app->request->isAjax || !Yii::$app->request->isPost) {
+            throw new \RuntimeException('Method is not allowed');
+        }
+
+        $user = Auth::user();
+        $timeZone = \Yii::$app->user->identity->timezone;
+
+        $filterStorage = new SessionFilterStorage();
+        $savedFilters = $filterStorage->find($user->id, UserStatsReport::class);
+
+        $searchModel = new UserStatsReport(
+            $timeZone,
+            date('Y-m') . '-01 00:00 - ' . date('Y-m-d') . ' 23:59',
+            (new Access($user))
+        );
+
+        $request =& Yii::$app->request;
+        $dataProvider = $searchModel->searchLeadsByUser(
+            $savedFilters,
+            $request->get('user'),
+            $request->get('type')
+        );
+
+        return $this->renderAjax('_user_leads_list_modal', [
+            'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
+            'type' => $request->get('type')
         ]);
     }
 }

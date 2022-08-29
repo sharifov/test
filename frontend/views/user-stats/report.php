@@ -2,10 +2,14 @@
 
 use kartik\export\ExportMenu;
 use kartik\grid\GridView;
+use modules\userStats\src\abac\dto\UserStatsDto;
+use modules\userStats\src\abac\UserStatsAbacObject;
 use src\model\user\reports\stats\Metrics;
 use src\model\user\reports\stats\UserStatsReport;
 use src\model\userModelSetting\service\UserModelSettingHelper;
 use yii\bootstrap4\Html;
+use yii\bootstrap4\Modal;
+use yii\helpers\Url;
 use yii\web\View;
 use yii\helpers\ArrayHelper;
 use yii\data\ArrayDataProvider;
@@ -56,6 +60,20 @@ if ($showReport) {
     if (Metrics::isLeadsCreated($searchModel->metrics)) {
         $columns[] = [
             'attribute' => 'leads_created',
+            'value' => static fn (array $model): string =>
+                /** @abac new $usAbacDto, ProductQuoteChangeAbacObject::OBJ_USER_STATS, ProductQuoteChangeAbacObject::UserStatsAbacObject, Act Flight Create Voluntary quote*/
+                !Yii::$app->abac->can(new UserStatsDto(Yii::$app->user->id), UserStatsAbacObject::OBJ_USER_STATS, UserStatsAbacObject::ACTION_ACCESS)
+                    ? $model['leads_created']
+                    : Html::a($model['leads_created'], 'javascript:void(0)', [
+                        'class' => 'showModalButton',
+                        'title' =>  'Leads created',
+                        'data-modal_id' => 'show-user-created-leads',
+                        'data-content-url' => Url::to([
+                            'user-stats/ajax-show-user-leads',
+                            'user' => $model['id'],
+                            'type' => 'created'
+                        ])
+                    ]),
             'format' => 'raw',
         ];
     }
@@ -68,6 +86,20 @@ if ($showReport) {
     if (Metrics::isSoldLeads($searchModel->metrics)) {
         $columns[] = [
             'attribute' => 'sold_leads',
+            'value' => static fn (array $model): string =>
+                /** @abac new $usAbacDto, ProductQuoteChangeAbacObject::OBJ_USER_STATS, ProductQuoteChangeAbacObject::UserStatsAbacObject, Act Flight Create Voluntary quote*/
+                !Yii::$app->abac->can(new UserStatsDto(Yii::$app->user->id), UserStatsAbacObject::OBJ_USER_STATS, UserStatsAbacObject::ACTION_ACCESS)
+                    ? $model['sold_leads']
+                    : Html::a($model['sold_leads'], 'javascript:void(0)', [
+                        'class' => 'showModalButton',
+                        'title' =>  'Sold Leads',
+                        'data-modal_id' => 'show-user-sold-leads',
+                        'data-content-url' => Url::to([
+                            'user-stats/ajax-show-user-leads',
+                            'user' => $model['id'],
+                            'type' => 'sold'
+                        ])
+                    ]),
             'format' => 'raw',
         ];
     }
@@ -106,24 +138,80 @@ if ($showReport) {
     if (Metrics::isLeadsProcessed($searchModel->metrics)) {
         $columns[] = [
             'attribute' => 'leads_processed',
+            'value' => static fn (array $model): string =>
+                /** @abac new $usAbacDto, ProductQuoteChangeAbacObject::OBJ_USER_STATS, ProductQuoteChangeAbacObject::UserStatsAbacObject, Act Flight Create Voluntary quote*/
+                !Yii::$app->abac->can(new UserStatsDto(Yii::$app->user->id), UserStatsAbacObject::OBJ_USER_STATS, UserStatsAbacObject::ACTION_ACCESS)
+                    ? $model['leads_processed']
+                    : Html::a($model['leads_processed'], 'javascript:void(0)', [
+                        'class' => 'showModalButton',
+                        'title' =>  'Leads Processed',
+                        'data-modal_id' => 'show-user-processed-leads',
+                        'data-content-url' => Url::to([
+                            'user-stats/ajax-show-user-leads',
+                            'user' => $model['id'],
+                            'type' => 'processed'
+                        ])
+                    ]),
             'format' => 'raw',
         ];
     }
     if (Metrics::isLeadsTrashed($searchModel->metrics)) {
         $columns[] = [
             'attribute' => 'leads_trashed',
+            'value' => static fn (array $model): string =>
+                /** @abac new $usAbacDto, ProductQuoteChangeAbacObject::OBJ_USER_STATS, ProductQuoteChangeAbacObject::UserStatsAbacObject, Act Flight Create Voluntary quote*/
+                !Yii::$app->abac->can(new UserStatsDto(Yii::$app->user->id), UserStatsAbacObject::OBJ_USER_STATS, UserStatsAbacObject::ACTION_ACCESS)
+                    ? $model['leads_trashed']
+                    : Html::a($model['leads_trashed'], 'javascript:void(0)', [
+                        'class' => 'showModalButton',
+                        'title' =>  'Leads Trashed',
+                        'data-modal_id' => 'show-user-trashed-leads',
+                        'data-content-url' => Url::to([
+                            'user-stats/ajax-show-user-leads',
+                            'user' => $model['id'],
+                            'type' => 'trashed'
+                        ])
+                    ]),
             'format' => 'raw',
         ];
     }
     if (Metrics::isLeadsToFollowUp($searchModel->metrics)) {
         $columns[] = [
             'attribute' => 'leads_follow_up',
+            'value' => static fn (array $model): string =>
+                /** @abac new $usAbacDto, ProductQuoteChangeAbacObject::OBJ_USER_STATS, ProductQuoteChangeAbacObject::UserStatsAbacObject, Act Flight Create Voluntary quote*/
+                !Yii::$app->abac->can(new UserStatsDto(Yii::$app->user->id), UserStatsAbacObject::OBJ_USER_STATS, UserStatsAbacObject::ACTION_ACCESS)
+                    ? $model['leads_follow_up']
+                    : Html::a($model['leads_follow_up'], 'javascript:void(0)', [
+                        'class' => 'showModalButton',
+                        'title' =>  'Leads Follow Up',
+                        'data-modal_id' => 'show-user-follow-up-leads',
+                        'data-content-url' => Url::to([
+                            'user-stats/ajax-show-user-leads',
+                            'user' => $model['id'],
+                            'type' => 'follow_up'
+                        ])
+                    ]),
             'format' => 'raw',
         ];
     }
     if (Metrics::isLeadsCloned($searchModel->metrics)) {
         $columns[] = [
             'attribute' => 'leads_cloned',
+            'value' => static fn (array $model): string =>
+                /** @abac new $usAbacDto, ProductQuoteChangeAbacObject::OBJ_USER_STATS, ProductQuoteChangeAbacObject::UserStatsAbacObject, Act Flight Create Voluntary quote*/
+                !Yii::$app->abac->can(new UserStatsDto(Yii::$app->user->id), UserStatsAbacObject::OBJ_USER_STATS, UserStatsAbacObject::ACTION_ACCESS)
+                    ? $model['leads_cloned']
+                    : Html::a($model['leads_cloned'], 'javascript:void(0)', [
+                        'class' => 'showModalButton',
+                        'title' =>  'Leads Cloned',
+                        'data-modal_id' => 'show-user-cloned-leads',
+                        'data-content-url' => Url::to([
+                            'user-stats/ajax-show-user-leads',
+                            'user' => $model['id'],
+                            'type' => 'cloned'
+                        ])
+                    ]),
             'format' => 'raw',
         ];
     }
@@ -310,8 +398,39 @@ if ($showReport) {
 
 </div>
 
+
+<?php
+    $modalIds = [
+        'modal-show-user-created-leads',
+        'modal-show-user-sold-leads',
+        'modal-show-user-processed-leads',
+        'modal-show-user-trashed-leads',
+        'modal-show-user-follow-up-leads',
+        'modal-show-user-cloned-leads',
+    ];
+    foreach ($modalIds as $modalId) : ?>
+        <?= Modal::widget([
+            'title' => '',
+            'id' => $modalId,
+            'size' => Modal::SIZE_LARGE,
+        ]) ?>
+    <?php endforeach; ?>
+
+
 <?php
 $js = <<<JS
+$(document).on('click', '.showModalButton', function(){
+    let id = $(this).data('modal_id');
+    let url = $(this).data('content-url');
+
+    $('#modal-' + id + '-label').html($(this).attr('title'));
+    $('#modal-' + id).modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
+
+    $.post(url, function(data) {
+        $('#modal-' + id).find('.modal-body').html(data);
+    });
+});
+
 $(document).on('beforeSubmit', '#UserStatsReportForm', function(event) {
     let btn = $(this).find('.js-user-stats-btn');
     btn.html('<span class="spinner-border spinner-border-sm"></span> Loading');        

@@ -572,6 +572,106 @@ class UserStatsReport extends Model
         return $dataProvider;
     }
 
+    public function searchLeadsByUser(array $params, int $userId, string $type): ActiveDataProvider
+    {
+        $query = (new Query())
+            ->select([
+                'leads.id',
+                'leads.l_status_dt',
+            ])
+            ->from('leads');
+
+        $dataProvider = new ActiveDataProvider(['query' => $query,]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            $this->isValid = false;
+            $query->where('0=1');
+
+            if (!\Yii::$app->request->isPost) {
+                $this->clearErrors();
+            }
+
+            return $dataProvider;
+        }
+
+        $from = QueryHelper::getDateFromUserTZToUtc($this->dateFrom, $this->timeZone)->format('Y-m-d H:i');
+        $to = QueryHelper::getDateFromUserTZToUtc($this->dateTo, $this->timeZone)->format('Y-m-d H:i');
+
+        switch ($type) {
+            case 'created':
+                $query->innerJoin(['lf' => LeadFlow::tableName()], 'leads.id = lf.lead_id AND leads.clone_id IS NULL')
+                    ->andWhere(['IS', 'lf.lf_from_status_id', null])
+                    ->andWhere(['lf.status' => Lead::STATUS_PROCESSING])
+                    ->andWhere(['BETWEEN', 'lf.created', $from, $to])
+                    ->andWhere(['lf.employee_id' => $userId]);
+                break;
+            case 'sold':
+                $conversionPercent = 'IF((SUM(ps.ps_percent) IS NULL OR SUM(ps.ps_percent) = 0 OR COUNT(luc.luc_lead_id) IS NULL OR COUNT(luc.luc_lead_id) = 0), 0,  ROUND(SUM(ps.ps_percent) / COUNT(luc.luc_lead_id), 2)) AS conversion_percent';
+                $splitShare = 'SUM(ROUND((ps.ps_percent / 100), 2)) AS split_share';
+                $qualifiedLeadsTaken = 'IF ((COUNT(luc.luc_lead_id) IS NULL OR COUNT(luc.luc_lead_id) = 0), 0, COUNT(luc.luc_lead_id)) AS qualified_leads_taken';
+
+                $grossProfitBase = 'SUM(ROUND((leads.final_profit - leads.agents_processing_fee) * ps.ps_percent/100, 2))';
+                $grossProfit = "IF (($grossProfitBase IS NULL OR $grossProfitBase = 0), 0, $grossProfitBase) AS gross_profit";
+
+                $tipsSplitBase = 'SUM(ROUND((leads.tips * ts.ts_percent/100), 2))';
+                $tipsSplit = "IF (($tipsSplitBase IS NULL OR $tipsSplitBase = 0), 0, $tipsSplitBase) AS tips";
+
+                $query->addSelect([
+                        $conversionPercent,
+                        $splitShare,
+                        $qualifiedLeadsTaken,
+                        $grossProfit,
+                        $tipsSplit,
+                    ])
+                    ->leftJoin(['ps' => ProfitSplit::tableName()], 'ps.ps_lead_id = leads.id')
+                    ->leftJoin(['ts' => TipsSplit::tableName()], 'ts_lead_id = leads.id')
+                    ->leftJoin(['luc' => LeadUserConversion::tableName()], 'luc.luc_lead_id = leads.id')
+                    ->andWhere(['status' => Lead::STATUS_SOLD])
+                    ->andWhere(['BETWEEN', 'leads.l_status_dt', $from, $to])
+                    ->andWhere(['ps.ps_user_id' => $userId])
+                    ->groupBy([
+                        'ps.ps_lead_id',
+                        'luc.luc_lead_id',
+                        'ts.ts_lead_id',
+                    ]);
+                break;
+            case 'processed':
+                $query->innerJoin(['lf' => LeadFlow::tableName()], 'leads.id = lf.lead_id')
+                    ->andWhere(['lf.status' => Lead::STATUS_PROCESSING])
+                    ->andWhere(['BETWEEN', 'lf.created', $from, $to])
+                    ->andWhere(['lf.lf_owner_id' => $userId])
+                    ->groupBy(['lf.lead_id']);
+                break;
+            case 'trashed':
+                $query->innerJoin(['lf' => LeadFlow::tableName()], 'leads.id = lf.lead_id')
+                    ->andWhere(['lf.status' => Lead::STATUS_TRASH])
+                    ->andWhere(['BETWEEN', 'lf.created', $from, $to])
+                    ->andWhere(['lf.employee_id' => $userId])
+                    ->groupBy(['lf.lead_id']);
+                break;
+            case 'follow_up':
+                $query->innerJoin(['lf' => LeadFlow::tableName()], 'leads.id = lf.lead_id')
+                    ->andWhere(['lf.status' => Lead::STATUS_FOLLOW_UP])
+                    ->andWhere(['BETWEEN', 'lf.created', $from, $to])
+                    ->andWhere(['lf.employee_id' => $userId])
+                    ->groupBy(['lf.lead_id']);
+                break;
+            case 'cloned':
+                $query->innerJoin(['lf' => LeadFlow::tableName()], 'leads.id = lf.lead_id AND leads.clone_id IS NOT NULL')
+                    ->andWhere(['IS', 'lf.lf_from_status_id', null])
+                    ->andWhere(['lf.status' => Lead::STATUS_PROCESSING])
+                    ->andWhere(['BETWEEN', 'lf.created', $from, $to])
+                    ->andWhere(['lf.employee_id' => $userId]);
+                break;
+        }
+
+        \Yii::error($query->createCommand()->rawSql);
+
+        return $dataProvider;
+    }
+
     public function calculateSummaryStats(Query $query): void
     {
         $data = [];
