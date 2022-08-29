@@ -51,4 +51,9 @@ class EmailContactType
     {
         return $type === self::BCC;
     }
+
+    public static function isRequired(int $type): bool
+    {
+        return in_array($type, [self::FROM, self::TO]);
+    }
 }

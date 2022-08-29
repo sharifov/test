@@ -13,7 +13,7 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 
 /**
- * @deprecated 
+ * @deprecated
  */
 class Menu extends \yii\widgets\Menu
 {
