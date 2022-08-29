@@ -15,9 +15,10 @@ module "mysql" {
   multi_az              = false
   port                  = "3306"
 
-  db_name  = var.MYSQL_RDS_DATABASE
-  username = var.MYSQL_RDS_USERNAME
-  password = var.MYSQL_RDS_PASSWORD
+  db_name                = var.MYSQL_RDS_DATABASE
+  username               = var.MYSQL_RDS_USERNAME
+  password               = var.MYSQL_RDS_PASSWORD
+  create_random_password = false
 
   subnet_ids                          = var.PRIVATE_SUBNETS
   vpc_security_group_ids              = [aws_security_group.mysql.id]
