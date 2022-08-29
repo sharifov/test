@@ -15,9 +15,10 @@ module "mysql" {
   multi_az              = false
   port                  = "3306"
 
-  db_name  = var.MYSQL_RDS_DATABASE
-  username = var.MYSQL_RDS_USERNAME
-  password = var.MYSQL_RDS_PASSWORD
+  db_name                = var.MYSQL_RDS_DATABASE
+  username               = var.MYSQL_RDS_USERNAME
+  password               = var.MYSQL_RDS_PASSWORD
+  create_random_password = false
 
   subnet_ids                          = var.PRIVATE_SUBNETS
   vpc_security_group_ids              = [aws_security_group.mysql.id]
@@ -85,7 +86,7 @@ module "mysql_replica" {
   engine_version        = "8.0.28"
   major_engine_version  = "8.0"
   family                = "mysql8.0"
-  instance_class        = "db.t4g.medium"
+  instance_class        = "db.t4g.small"
   allocated_storage     = var.MYSQL_RDS_VOLUME_SIZE
   max_allocated_storage = var.MYSQL_RDS_VOLUME_MAX
   storage_encrypted     = true
