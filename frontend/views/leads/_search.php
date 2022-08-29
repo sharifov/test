@@ -41,7 +41,6 @@ use frontend\extensions\DatePicker;
                         <?php
                         /** @abac LeadAbacObject::UI_DISPLAY_FORM_ID_INPUT, LeadAbacObject::ACTION_ACCESS, Access To ID Input In Search Form*/
                         $canViewSearchFormIdInput = Yii::$app->abac->can(null, LeadAbacObject::UI_DISPLAY_FORM_ID_INPUT, LeadAbacObject::ACTION_ACCESS);
-                        //$canViewSearchFormIdInput = false;
                         ?>
                         <?php if ($canViewSearchFormIdInput) : ?>
                             <div class="col-md-1">
