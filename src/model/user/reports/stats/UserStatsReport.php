@@ -667,8 +667,6 @@ class UserStatsReport extends Model
                 break;
         }
 
-        \Yii::error($query->createCommand()->rawSql);
-
         return $dataProvider;
     }
 
