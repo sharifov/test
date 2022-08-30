@@ -27,13 +27,21 @@ use yii\helpers\ArrayHelper;
  * @property FileClientRepository $fileClientRepository
  * @property FileLeadRepository $fileLeadRepository
  * @property FileCaseRepository $fileCaseRepository
+ * @property UrlGenerator $urlGenerator
+ *
+ * @property int|null $leadId
+ * @property int|null $caseId
+ * @property int|null $clientId
+ * @property array $attachments
+ * @property Email|EmailNorm $email
+ *
  */
 class AttachmentsService
 {
-    public $leadId;
-    public $caseId;
-    public $clientId;
-    public $attachments = [];
+    public ?int $leadId;
+    public ?int $caseId;
+    public ?int $clientId;
+    public array $attachments = [];
 
     private $email;
     private FileSystem $fileSystem;
