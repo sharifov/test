@@ -32,6 +32,7 @@ use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\leadUserData\entity\LeadUserData;
 use src\model\leadUserData\entity\LeadUserDataDictionary;
 use src\model\leadUserData\repository\LeadUserDataRepository;
+use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use modules\lead\src\services\LeadTaskListService;
 use common\components\jobs\UserTaskCompletionJob;
@@ -43,19 +44,20 @@ use src\repositories\email\EmailOldRepository;
 use src\services\cases\CasesCommunicationService;
 use src\model\emailReviewQueue\EmailReviewQueueManageService;
 use src\model\emailReviewQueue\entity\EmailReviewQueue;
+use yii\web\NotFoundHttpException;
 
 /**
  *
  * Class EmailMainService
  *
  * @property EmailService $oldService
- * @property EmailsNormalizeService $normalizedService
+ * @property EmailsNormalizeService|null $normalizedService
  * @property EmailServiceHelper $helper
  * @property EmailOldRepository $emailOldRepository
  * @property EmailRepository $emailRepository
  *
- * @property Email $emailObj
- * @property EmailNorm $emailNormObj
+ * @property Email|null $emailObj
+ * @property EmailNorm|null $emailNormObj
  *
  */
 class EmailMainService implements EmailServiceInterface
@@ -63,24 +65,19 @@ class EmailMainService implements EmailServiceInterface
     public const FROM_OLD = 1; //CALLED FROM OLD EMAIL MODEL
     public const FROM_NORM = 2; //CALLED FROM NORM EMAIL MODEL
 
-    private EmailServiceHelper $helper;
     private EmailService $oldService;
-    private $normalizedService;
+    private ?EmailsNormalizeService $normalizedService;
     private EmailRepository $emailRepository;
     private EmailOldRepository $emailOldRepository;
 
     private $emailObj;
     private $emailNormObj;
 
-    private $calledFrom;
-
     public function __construct(
-        EmailServiceHelper $helper,
         EmailRepository $emailRepository,
         EmailOldRepository $emailOldRepo,
         EmailService $emailService
     ) {
-        $this->helper = $helper;
         $this->emailRepository = $emailRepository;
         $this->emailOldRepository = $emailOldRepo;
         $this->oldService = $emailService;
@@ -92,12 +89,11 @@ class EmailMainService implements EmailServiceInterface
 
     public static function newInstance()
     {
-        $helper = Yii::createObject(EmailServiceHelper::class);
         $emailRepository = Yii::createObject(EmailRepository::class);
         $emailOldRepository = Yii::createObject(EmailOldRepository::class);
         $oldService = Yii::createObject(EmailService::class);
 
-        return new static($helper, $emailRepository, $emailOldRepository, $oldService);
+        return new static($emailRepository, $emailOldRepository, $oldService);
     }
 
     private function setEmailObjById(int $emailId)
@@ -112,7 +108,7 @@ class EmailMainService implements EmailServiceInterface
         return $this->emailObj;
     }
 
-    private function getEmailObj()
+    private function getEmailObj(): ?Email
     {
         return $this->emailObj;
     }
@@ -138,18 +134,9 @@ class EmailMainService implements EmailServiceInterface
         return $this->emailNormObj;
     }
 
-    private function setCalledFrom(int $calledFrom)
+    private function getCalledFrom(EmailInterface $email = null): ?int
     {
-        $this->calledFrom = $calledFrom;
-        return $this->calledFrom;
-    }
-
-    private function getCalledFrom(EmailInterface $email = null)
-    {
-        if ($this->calledFrom === null && $email !== null) {
-            $this->calledFrom = ($email instanceof Email) ? self::FROM_OLD : self::FROM_NORM;
-        }
-        return $this->calledFrom;
+        return ($email instanceof Email) ? self::FROM_OLD : self::FROM_NORM;
     }
 
     public function sendMail(EmailInterface $email, array $data = [])
@@ -235,7 +222,7 @@ class EmailMainService implements EmailServiceInterface
 
     private function leadProcessAfterEmailSending(int $emailId, ?string $tplType, ?Lead $lead)
     {
-        if ($emailId && $lead && LeadPoorProcessingService::checkEmailTemplate($tplType)) {
+        if ($emailId && $lead && $tplType && LeadPoorProcessingService::checkEmailTemplate($tplType)) {
             LeadPoorProcessingService::addLeadPoorProcessingRemoverJob(
                 $lead->id,
                 [
