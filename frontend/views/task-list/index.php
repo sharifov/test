@@ -121,8 +121,12 @@ $subtypeTotalData = [];
 
                             [
                                 'attribute' => 'ut_status_id',
+                                'contentOptions' => ['class' => 'status-column'],
                                 'value' => static function (UserTask $model) {
-                                    return UserTaskHelper::statusLabel($model->ut_status_id);
+                                    $result = UserTaskHelper::statusLabel($model->ut_status_id);
+                                    $result .= ($model->isDeadline()) ? '<p class="status-column__deadline-symb"><i class="fa fa-times-circle"></i></p>' : '';
+
+                                    return $result;
                                 },
                                 'format' => 'raw',
                                 'filter' => UserTask::STATUS_LIST,
@@ -290,6 +294,17 @@ $ajaxUrl = \yii\helpers\Url::to(['task-list/my-data-ajax']);
 $openModalEventUrl = \yii\helpers\Url::to(['shift-schedule/ajax-event-details']);
 $openModalUserTaskUrl = \yii\helpers\Url::to(['task-list/ajax-user-task-details']);
 // 'https://fullcalendar.io/api/demo-feeds/events.json?overload-day',
+
+$css = <<<CSS
+    .status-column__deadline-symb {
+        text-align: center;
+        margin-top: 5px;
+        font-size: 18px;
+        color: red;
+    }
+CSS;
+
+$this->registerCss($css);
 
 $js = <<<JS
     var shiftScheduleDataUrl = '$ajaxUrl';
