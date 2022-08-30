@@ -334,9 +334,16 @@ $leadAbacDto = new LeadAbacDto($leadModel, $userId);
         $leadAbacDto = new LeadAbacDto($leadModel, (int) Auth::id());
         /** @abac $leadAbacDto, LeadAbacObject::OBJ_EXTRA_QUEUE, LeadAbacObject::ACTION_ACCESS, show LeadPoorProcessingLogs in lead/view */
         $canLeadPoorProcessingLogs = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_EXTRA_QUEUE, LeadAbacObject::ACTION_ACCESS);
+        $canObjectTaskList = false;
+
+        /** @fflag FFlag::FF_KEY_NO_ANSWER_PROTOCOL_ENABLE, No Answer protocol enable */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_NO_ANSWER_PROTOCOL_ENABLE) === true) {
+            /** @abac $leadAbacDto, LeadAbacObject::OBJ_OBJECT_TASK, LeadAbacObject::ACTION_ACCESS, Show Object Task list in lead/view */
+            $canObjectTaskList = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::OBJ_OBJECT_TASK, LeadAbacObject::ACTION_ACCESS);
+        }
         ?>
 
-        <?php if ($canStatusLog || $canDataLogs || $canVisitorLogs || $canLeadPoorProcessingLogs) : ?>
+        <?php if ($canStatusLog || $canDataLogs || $canVisitorLogs || $canLeadPoorProcessingLogs || $canObjectTaskList) : ?>
             &nbsp; <div class="dropdown">
                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <i class="fa fa-bars"> </i> Logs
@@ -358,6 +365,16 @@ $leadAbacDto = new LeadAbacDto($leadModel, $userId);
                             'data-modal_id' => 'lg',
                             'title' => 'General Lead Log #' . $leadForm->lead->id,
                             'data-content-url' => Url::to(['global-log/ajax-view-general-lead-log', 'lid' => $leadForm->lead->id])
+                        ]) ?>
+                    <?php endif; ?>
+
+                    <?php if ($canObjectTaskList) : ?>
+                        <?= Html::a('<i class="fa fa-tasks"> </i> Object Task list', null, [
+                            'id' => 'btn-general-lead-object-task-list',
+                            'class' => 'dropdown-item showModalButton',
+                            'data-modal_id' => 'lg',
+                            'title' => 'Object Task list',
+                            'data-content-url' => Url::to(['get-object-task-list', 'leadId' => $leadForm->lead->id])
                         ]) ?>
                     <?php endif; ?>
 

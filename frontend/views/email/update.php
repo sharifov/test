@@ -4,7 +4,7 @@ use yii\helpers\Html;
 
 /* @var $this yii\web\View */
 /* @var $id int */
-/* @var $emailForm src\entities\email\form\EmailCreateForm */
+/* @var $emailForm src\entities\email\form\EmailForm */
 
 $this->title = 'Update Email: ' . $id;
 $this->params['breadcrumbs'][] = ['label' => 'Emails', 'url' => ['index']];

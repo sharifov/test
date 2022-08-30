@@ -19,6 +19,8 @@ use modules\lead\src\abac\LeadAbacObject;
 use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacDto;
 use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\objectSegment\src\contracts\ObjectSegmentListContract;
+use modules\objectTask\src\entities\ObjectTask;
+use modules\objectTask\src\services\ObjectTaskService;
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
 use modules\product\src\entities\product\Product;
@@ -452,6 +454,7 @@ class Lead extends ActiveRecord implements Objectable
     public $quoteType;
 
     private $oldAdditionalInformation;
+    private ?array $objectTaskOrderByStatus = null;
 
     /**
      * {@inheritdoc}
@@ -4085,18 +4088,22 @@ Reason: {reason}',
         return $result;
     }
 
+
     /**
      * @param array $quoteIds
      * @param $projectContactInfo
      * @param string|null $lang
+     * @param array $agent
+     * @param Employee|null $employee
      * @return array
      * @throws \Exception
      */
-    public function getEmailData2(array $quoteIds, $projectContactInfo, ?string $lang = null, array $agent = []): array
+    public function getEmailData2(array $quoteIds, $projectContactInfo, ?string $lang = null, array $agent = [], ?Employee $employee = null): array
     {
+        $employee = $employee ?? Yii::$app->user->identity;
         $project = $this->project;
 
-        $uppQuery = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->withPhoneList();
+        $uppQuery = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => $employee->id])->withEmailList()->withPhoneList();
         $upp = $this->project ? $uppQuery->one() : null;
 
         if ($quoteIds && is_array($quoteIds)) {
@@ -4148,9 +4155,9 @@ Reason: {reason}',
         ];
 
         $content_data['agent'] = [
-            'name'  => array_key_exists('full_name', $agent) ? $agent['full_name'] : Yii::$app->user->identity->full_name,
-            'username'  => array_key_exists('username', $agent) ? $agent['username'] : Yii::$app->user->identity->username,
-            'nickname' => array_key_exists('nickname', $agent) ? $agent['nickname'] : Yii::$app->user->identity->nickname,
+            'name'  => array_key_exists('full_name', $agent) ? $agent['full_name'] : $employee->full_name,
+            'username'  => array_key_exists('username', $agent) ? $agent['username'] : $employee->username,
+            'nickname' => array_key_exists('nickname', $agent) ? $agent['nickname'] : $employee->nickname,
             'phone' => $upp && $upp->getPhone() ? $upp->getPhone() : '',
             'email' => $upp && $upp->getEmail() ? $upp->getEmail() : '',
         ];
@@ -5387,5 +5394,39 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             ->where(['ld_field_key' => LeadDataKeyDictionary::KEY_LEAD_OBJECT_SEGMENT])
             ->andWhere(['ld_field_value' => ObjectSegmentListContract::OBJECT_SEGMENT_LIST_KEY_LEAD_TYPE_BUSINESS])
             ->count();
+    }
+
+    private function getNumberObjectTasksOrderByStatus(): array
+    {
+        if ($this->objectTaskOrderByStatus === null) {
+            $this->objectTaskOrderByStatus = ObjectTask::countByStatus(
+                ObjectTaskService::OBJECT_LEAD,
+                $this->id
+            );
+        }
+
+        return $this->objectTaskOrderByStatus;
+    }
+
+    public function hasObjectTasks(): bool
+    {
+        return !empty($this->getNumberObjectTasksOrderByStatus());
+    }
+
+    public function hasObjectTasksWithPendingStatus(): bool
+    {
+        return array_key_exists(ObjectTask::STATUS_PENDING, $this->getNumberObjectTasksOrderByStatus());
+    }
+
+    public function countObjectTaskWithPendingStatus(): int
+    {
+        return (int) ($this->getNumberObjectTasksOrderByStatus()[ObjectTask::STATUS_PENDING] ?? 0);
+    }
+
+    public function countObjectTask(): int
+    {
+        return array_sum(
+            $this->getNumberObjectTasksOrderByStatus()
+        );
     }
 }

@@ -4,6 +4,8 @@ namespace common\models;
 
 use common\components\CommunicationService;
 use common\models\query\EmailTemplateTypeQuery;
+use modules\email\src\abac\dto\EmailTemplateTypeAbacDto;
+use modules\email\src\abac\EmailAbacObject;
 use modules\featureFlag\FFlag;
 use src\services\abtesting\email\EmailTemplateOfferABTestingService;
 use Yii;
@@ -344,7 +346,20 @@ class EmailTemplateType extends \yii\db\ActiveRecord
             }
         }
 
-        return $query->asArray()->all();
+        $templates = $query->asArray()->indexBy('etp_key')->all();
+
+        /** @fflag FFlag::FF_KEY_RESTRICT_EMAIL_TEMPLATE, Restrict access to display Email Template */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_RESTRICT_EMAIL_TEMPLATE)) {
+            foreach ($templates as $template) {
+                $abacDto = new EmailTemplateTypeAbacDto($template['etp_key']);
+                /** @abac $abacDto, EmailAbacObject::OBJ_EMAIL_TEMPLATE_TYPE, EmailAbacObject::ACTION_ACCESS, Access to email template */
+                if (!Yii::$app->abac->can($abacDto, EmailAbacObject::OBJ_EMAIL_TEMPLATE_TYPE, EmailAbacObject::ACTION_ACCESS)) {
+                    unset($templates[$template['etp_key']]);
+                }
+            }
+        }
+
+        return $templates;
     }
 
     public static function isJson($content): bool

@@ -51,7 +51,7 @@ class UserTaskStatusLogSearch extends UserTaskStatusLog
 
         if ($this->utsl_created_dt) {
             $query->andFilterWhere(['>=', 'utsl_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->utsl_created_dt))])
-                ->andFilterWhere(['<=', 'utsl_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->utsl_created_dt))]);
+                ->andFilterWhere(['<=', 'utsl_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->utsl_created_dt) + 3600 * 24)]);
         }
 
         // grid filtering conditions

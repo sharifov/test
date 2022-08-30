@@ -74,7 +74,7 @@ class EmailQuery extends ActiveQuery
 
     /**
      *
-     * @param int|arrat $status
+     * @param int|array $status
      * @return EmailQuery
      */
     public function byStatus($status)
@@ -139,6 +139,11 @@ class EmailQuery extends ActiveQuery
         return $this->andWhere(['e_case_id' => $caseId]);
     }
 
+    public function client(int $clientId)
+    {
+        return $this->andWhere(['e_client_id' => $clientId]);
+    }
+
     public function orderByLastInbox()
     {
         return $this->andWhere(['>', 'e_inbox_email_id', 0])->orderBy(['e_inbox_email_id' => SORT_DESC]);
@@ -155,5 +160,13 @@ class EmailQuery extends ActiveQuery
             ['e_email_to' => $mailList],
             ['e_email_from' => $mailList],
         ]);
+    }
+
+    public function notNormalized()
+    {
+        return $this
+            ->leftJoin(\src\entities\email\Email::tableName() . ' AS en', 'en.e_id = email.e_id')
+            ->where('en.e_id IS NULL')
+            ->orderBy(['email.e_id' => SORT_DESC]);
     }
 }

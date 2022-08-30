@@ -94,6 +94,7 @@ class AttachmentsService
             'value' => $fileStorage->fs_path,
             'name' => $fileStorage->fs_name,
             'type_id' => $fileStorage->fs_private ? $this->urlGenerator::TYPE_PRIVATE : $this->urlGenerator::TYPE_PUBLIC,
+            'uid' => $fileStorage->fs_uid,
         ];
     }
 

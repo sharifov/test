@@ -73,7 +73,7 @@ $('#{$idForm}').on('beforeSubmit', function (e) {
     let yiiform = $(this);
     fileStorageUploadButtonDisable();
     cleanErrors();
-    
+
     $.ajax({
         url: yiiform.attr('action'),
         type: yiiform.attr('method'),
@@ -91,11 +91,17 @@ $('#{$idForm}').on('beforeSubmit', function (e) {
             } else {
                 yiiform.yiiActiveForm('updateAttribute', '{$fileId}', data.errors.files);
             }
-        } else {  
+        } else {
             $('#{$modalId}').modal('hide');
             createNotify('Upload file', 'Success', 'success');
             $('#{$fileId}').fileinput('clear');
             $('.file-caption').removeClass('is-valid').removeClass('is-invalid');
+            if ($('#pjax-file-list').length > 0) {
+                pjaxReload({container: '#pjax-file-list'});
+            }
+            if ($('#pjax-file-count').length > 0) {
+                pjaxReload({container: '#pjax-file-count'});
+            }
         }
         fileStorageUploadButtonEnable();
     })

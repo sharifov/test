@@ -50,14 +50,14 @@ class EmailBodyForm extends Model
         return $instance;
     }
 
-    public function getText(): string
+    public function getText(): ?string
     {
-        return ($this->text) ?? TextConvertingHelper::htmlToText($this->bodyHtml);
+        return ($this->text) ?? ($this->bodyHtml !== null ? TextConvertingHelper::htmlToText($this->bodyHtml) : null);
     }
 
-    public function getBodyHtml(): string
+    public function getBodyHtml(): ?string
     {
-        return TextConvertingHelper::compress($this->bodyHtml);
+        return ($this->bodyHtml !== null ? TextConvertingHelper::compress($this->bodyHtml) : null);
     }
 
     public function rules(): array

@@ -458,6 +458,10 @@ return [
             'class' => \modules\smartLeadDistribution\SmartLeadDistributionModule::class,
             'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
         ],
+        'object-task' => [
+            'class' => \modules\objectTask\ObjectTaskModule::class,
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/main_crud',
+        ],
     ],
     'as beforeRequest' => [
         'class' => \frontend\components\UserSiteActivityLog::class,

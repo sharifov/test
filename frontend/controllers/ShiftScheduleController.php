@@ -110,6 +110,16 @@ class ShiftScheduleController extends FController
                         ),
                         'roles' => ['@'],
                     ],
+                    /** @abac ShiftAbacObject::ACT_USER_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_REMOVE_FUTURE_USER_SCHEDULE, Access to remove-future-user-data shift-schedule */
+                    [
+                        'actions' => ['remove-future-user-data'],
+                        'allow' => \Yii::$app->abac->can(
+                            null,
+                            ShiftAbacObject::ACT_USER_SHIFT_SCHEDULE,
+                            ShiftAbacObject::ACTION_REMOVE_FUTURE_USER_SCHEDULE
+                        ),
+                        'roles' => ['@'],
+                    ],
                 ],
             ],
         ];
@@ -439,6 +449,25 @@ class ShiftScheduleController extends FController
 
         if (UserShiftScheduleQuery::removeDataByUser($userId)) {
             Yii::$app->session->addFlash('success', 'Successfully: Remove example data UserId (' . $userId . ')!');
+        }
+        return $this->redirect($route);
+    }
+
+    /**
+     * @param int|null $userId
+     * @return Response
+     */
+    public function actionRemoveFutureUserData(?int $userId = null): Response
+    {
+        if ($userId) {
+            $route = ['shift-schedule/user', 'id' => $userId];
+        } else {
+            $userId = Auth::id();
+            $route = ['shift-schedule/index'];
+        }
+
+        if (UserShiftScheduleQuery::removeFutureDataByUser($userId)) {
+            Yii::$app->session->addFlash('success', 'Successfully: Remove Future UserShift data UserId (' . $userId . ')!');
         }
         return $this->redirect($route);
     }

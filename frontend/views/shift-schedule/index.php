@@ -83,6 +83,18 @@ $subtypeTotalData = [];
             ],
         ]) ?>
         <?php endif; ?>
+        <?php
+        /** @abac ShiftAbacObject::ACT_USER_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_REMOVE_FUTURE_USER_SCHEDULE, Access to remove-future-user-data shift-schedule */
+        if (\Yii::$app->abac->can(null, ShiftAbacObject::ACT_USER_SHIFT_SCHEDULE, ShiftAbacObject::ACTION_REMOVE_FUTURE_USER_SCHEDULE)) :
+            ?>
+            <?= Html::a('<i class="fa fa-remove"></i> Remove Future User Schedule Data', ['remove-future-user-data'], [
+            'class' => 'btn btn-danger',
+            'data' => [
+                'confirm' => 'Are you sure you want to delete future User Timelines?',
+                'method' => 'post',
+            ],
+        ]) ?>
+        <?php endif; ?>
         <?= Html::a(
             '<i class="fa fa-plus-circle"></i> Schedule Request',
             ['schedule-request-ajax'],

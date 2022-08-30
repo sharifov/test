@@ -39,6 +39,16 @@ return [
                 ['dsn' => 'mysql:host=' . env('COMMON_CONFIG_MAIN_COMPONENTS_DBSLAVE_SLAVES_0_DSN_HOST') . ';port=3306;dbname=' . env('COMMON_CONFIG_MAIN_COMPONENTS_DBSLAVE_SLAVES_0_DSN_DBNAME'),]
             ]
         ],
+        'clickhouse' => [
+            'class' => \kak\clickhouse\Connection::class,
+            'dsn' => env('COMMON_CONFIG_MAIN_COMPONENTS_DBCLICKHOUSE_DSN_HOST'),
+            'port' => env('COMMON_CONFIG_MAIN_COMPONENTS_DBCLICKHOUSE_DSN_PORT'),
+            'database' => env('COMMON_CONFIG_MAIN_COMPONENTS_DBCLICKHOUSE_DSN_DBNAME'),
+            'username' => env('COMMON_CONFIG_MAIN_COMPONENTS_DBCLICKHOUSE_USERNAME'),
+            'password' => env('COMMON_CONFIG_MAIN_COMPONENTS_DBCLICKHOUSE_PASSWORD'),
+            'enableSchemaCache' => env('COMMON_CONFIG_MAIN_COMPONENTS_DBCLICKHOUSE_ENABLESCHEMACACHE', 'bool'),
+            'schemaCacheDuration' => env('COMMON_CONFIG_MAIN_COMPONENTS_DBCLICKHOUSE_SCHEMACACHEDURATION', 'int'),
+        ],
         'formatter' => [
             'class' => 'yii\i18n\Formatter',
             'timeZone' => 'Europe/Chisinau',

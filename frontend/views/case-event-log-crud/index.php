@@ -10,6 +10,7 @@ use yii\widgets\Pjax;
 use yii\bootstrap4\Modal;
 use common\components\grid\DateTimeColumn;
 use yii\grid\ActionColumn;
+use common\components\i18n\Formatter;
 
 /* @var $this yii\web\View */
 /* @var $searchModel src\entities\cases\CaseEventLogSearch */
@@ -34,7 +35,13 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             'cel_id',
-            'cel_case_id',
+            [
+                'attribute' => 'cel_case_id',
+                'value' => static function (CaseEventLog $model) {
+                    return (new Formatter())->asCase($model->celCase);
+                },
+                'format' => 'raw'
+            ],
             'cel_description',
             [
                 'attribute' => 'cel_type_id',

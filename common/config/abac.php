@@ -18,6 +18,7 @@ return [
         'email' => \modules\email\src\abac\EmailAbacObject::class,
         'qa-task' => \modules\qaTask\src\abac\QaTaskAbacObject::class,
         'client-chat' => \src\model\clientChat\entity\abac\ClientChatAbacObject::class,
+        'client-chat-form' => \src\model\clientChatForm\entity\abac\ClientChatFormAbacObject::class,
         'client' => \src\model\client\abac\ClientAbacObject::class,
         'product-quote' => \modules\product\src\abac\ProductQuoteAbacObject::class,
         'call' => \src\model\call\abac\CallAbacObject::class,
@@ -44,6 +45,7 @@ return [
         'two-factor' => \src\useCase\login\twoFactorAuth\abac\TwoFactorAuthAbacObject::class,
         'lead-sale' => modules\lead\src\abac\sale\LeadSaleAbacObject::class,
         'business-extra-queue' => \modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject::class,
+        'object-task' => \modules\objectTask\src\abac\ObjectTaskObject::class,
     ],
     'scanDirs' => [
         '/modules/',

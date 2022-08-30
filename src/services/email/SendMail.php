@@ -19,7 +19,7 @@ abstract class SendMail
 
         $data['project_id'] = $projectId;
 
-        $request = Yii::$app->comms->mailSend(
+        $response = Yii::$app->comms->mailSend(
             $projectId,
             $tplType,
             $email->getEmailFrom(false),
@@ -30,12 +30,12 @@ abstract class SendMail
             0
         );
 
-        if (isset($request['error']) && $request['error']) {
-            $errorData = @json_decode($request['error'], true);
-            $errorMessage = $errorData['message'] ?: $request['error'];
-            throw new EmailNotSentException($email->e_email_to, $errorMessage);
+        if (isset($response['error']) && $response['error']) {
+            $errorData = @json_decode($response['error'], true);
+            $errorMessage = $errorData['message'] ?: $response['error'];
+            throw new EmailNotSentException($email->getEmailTo(false), $errorMessage);
         }
 
-        return $request['data'] ?? null;
+        return $response['data'] ?? null;
     }
 }

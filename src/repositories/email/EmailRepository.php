@@ -43,16 +43,6 @@ class EmailRepository implements EmailRepositoryInterface
         return $email->e_id;
     }
 
-    public function read($email): void
-    {
-        if ($email->emailLog && $email->isNew()) {
-            $email->saveEmailLog([
-                'el_is_new' => false,
-                'el_read_dt' => date('Y-m-d H:i:s')
-            ]);
-        }
-    }
-
     public function delete($email): int
     {
         $id = $email->e_id;
@@ -70,92 +60,6 @@ class EmailRepository implements EmailRepositoryInterface
             $removedIds[] = $this->delete($model);
         }
         return $removedIds;
-    }
-
-    public function changeStatus($email, int $statusId): void
-    {
-        if (EmailStatus::isDone($statusId)) {
-            $email->saveEmailLog(['el_status_done_dt' => date('Y-m-d H:i:s')]);
-        }
-        $email->e_status_id = $statusId;
-        $this->save($email);
-    }
-
-    public function saveInboxId($email, int $inboxId): void
-    {
-        $email->saveEmailLog([
-            'el_inbox_email_id' => $inboxId
-        ]);
-    }
-
-    /**
-     *
-     * @param Email $email
-     * @param array $leadsIds
-     * @return array
-     */
-    public function linkLeads($email, array $leadsIds): array
-    {
-        $linked = [];
-        foreach ($leadsIds as $id) {
-            if ($lead = Lead::findOne($id)) {
-                $email->link('leads', $lead);
-                $linked[] = $id;
-            }
-        }
-        return $linked;
-    }
-
-    /**
-     *
-     * @param Email $email
-     * @param array $casesIds
-     * @return array
-     */
-    public function linkCases(Email $email, array $casesIds): array
-    {
-        $linked = [];
-        foreach ($casesIds as $id) {
-            if ($case = Cases::findOne($id)) {
-                $email->link('cases', $case);
-                $linked[] = $id;
-            }
-        }
-        return $linked;
-    }
-
-    /**
-     *
-     * @param Email $email
-     * @param array $clientsIds
-     * @return array
-     */
-    public function linkClients(Email $email, array $clientsIds): array
-    {
-        $linked = [];
-        foreach ($clientsIds as $id) {
-            if ($client = Client::findOne($id)) {
-                $email->link('clients', $client);
-                $linked[] = $id;
-            }
-        }
-        return $linked;
-    }
-
-    /**
-     *
-     * @param Email $email
-     * @param int $replyId
-     * @return bool
-     */
-    public function linkReply(Email $email, int $replyId): bool
-    {
-        $reply = Email::findOne($replyId);
-        if ($reply) {
-            $email->link('reply', $reply);
-            return true;
-        }
-        return false;
     }
 
     /**

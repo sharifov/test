@@ -9,6 +9,7 @@ use modules\lead\src\abac\LeadAbacObject;
 use modules\qaTask\src\entities\qaTaskRules\QaTaskRules;
 use modules\qaTask\src\useCases\qaTask\create\lead\closeCheck\QaTaskCreateLeadCloseCheckService;
 use modules\qaTask\src\useCases\qaTask\create\lead\closeCheck\Rule;
+use src\model\leadStatusReason\entity\LeadStatusReasonQuery;
 use src\model\leadUserConversion\abac\dto\LeadAbacUserConversionAbacDto;
 use src\model\leadUserConversion\abac\LeadUserConversionAbacObject;
 use src\model\leadUserConversion\entity\LeadUserConversion;
@@ -45,6 +46,12 @@ class LeadStatusReasonService
     public function handleReason(HandleReasonDto $dto): void
     {
         $method = $this->formatKeyToMethodName($dto->leadStatusReasonKey);
+
+        if (empty($dto->reason)) {
+            $leadStatusReason = LeadStatusReasonQuery::getLeadStatusReasonByKey($dto->leadStatusReasonKey);
+            $dto->reason = $leadStatusReason->lsr_name ?? '';
+        }
+
         if (method_exists($this, $method)) {
             $this->$method($dto);
         }

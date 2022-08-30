@@ -55,6 +55,9 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_CONVERSION_BY_TIMEZONE = 'conversionByTimezone';
     public const FF_KEY_RESTRICT_EMAIL_TEMPLATE = 'restrictEmailTemplate';
     public const FF_KEY_CHANGE_QUERY_GET_SEND_QUOTE = 'changeQueryGetSendQuote';
+    public const FF_KEY_REMOVE_LIMITATION_SUPERVISION_IN_LEAD_SEARCH = 'removeLimitationSupervisionInLeadSearch';
+    public const FF_KEY_NO_ANSWER_PROTOCOL_ENABLE = 'noAnswerProtocolEnable';
+    public const FF_KEY_USER_CONVERSION_EXCLUDE_ALTERNATIVE_LEAD_ENABLE = 'userConversionExcludeAlternativeLeadEnable';
 
     public const FF_KEY_LIST = [
         self::FF_KEY_LPP_ENABLE,
@@ -100,6 +103,9 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_CONVERSION_BY_TIMEZONE,
         self::FF_KEY_RESTRICT_EMAIL_TEMPLATE,
         self::FF_KEY_CHANGE_QUERY_GET_SEND_QUOTE,
+        self::FF_KEY_REMOVE_LIMITATION_SUPERVISION_IN_LEAD_SEARCH,
+        self::FF_KEY_NO_ANSWER_PROTOCOL_ENABLE,
+        self::FF_KEY_USER_CONVERSION_EXCLUDE_ALTERNATIVE_LEAD_ENABLE,
     ];
 
     public const FF_OBJECT_LIST = [

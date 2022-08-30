@@ -50,6 +50,15 @@ return [
             'enableSchemaCache' => true,
             'schemaCacheDuration' => 3600,
         ],
+        'clickhouse' => [
+            'class' => 'yii\db\Connection',
+            'dsn' => '',
+            'username' => '',
+            'password' => '',
+            'charset' => '',
+            'enableSchemaCache' => false,
+            'schemaCacheDuration' => 3600,
+        ],
         'formatter' => [
             'class' => 'yii\i18n\Formatter',
             'timeZone' => 'Europe/Chisinau',
@@ -237,6 +246,13 @@ return [
                 'retryDelay' => 500,
             ],
         ],
+        'queue_db' => [
+            'class' => \yii\queue\db\Queue::class,
+            'db' => 'db',
+            'tableName' => '{{%queue}}',
+            'channel' => 'default',
+            'mutex' => \yii\mutex\MysqlMutex::class,
+        ],
         'telegram' => [
             'class' => \aki\telegram\Telegram::class,
             'botUsername' => '',
@@ -293,6 +309,7 @@ return [
         'queue_system_services',
         'queue_virtual_cron',
         'queue_lead_redial',
+        'queue_db',
         \common\components\SettingsBootstrap::class,
         \common\bootstrap\SetUp::class,
         \common\bootstrap\SetUpListeners::class,
