@@ -9,6 +9,8 @@ use common\models\Language;
 
 class EmailParamsForm extends Model
 {
+    use FormAttributesTrait;
+
     public $id;
     public $templateType;
     public $language;
@@ -71,18 +73,6 @@ class EmailParamsForm extends Model
             'ep_template_type_id' => 'templateType',
             'ep_id' => 'id'
         ];
-    }
-
-    public function getAttributesForModel($skipEmpty = false): array
-    {
-        $result = [];
-        foreach ($this->fields() as $index => $name) {
-            $key = is_int($index) ? $name : $index;
-            if (!$skipEmpty || ($skipEmpty && !empty($this->$name))) {
-                $result[$key] = $this->$name;
-            }
-        }
-        return $result;
     }
 
     public function rules(): array

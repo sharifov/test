@@ -80,14 +80,4 @@ class EmailBodyForm extends Model
             'bodyHtml',
         ];
     }
-
-    public function getAttributesForModel(): array
-    {
-        $result = [];
-        foreach ($this->fields() as $index => $name) {
-            $key = is_int($index) ? $name : $index;
-            $result[$key] = $this->$name;
-        }
-        return $result;
-    }
 }
