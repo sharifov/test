@@ -18,7 +18,7 @@ class m220830_064904_add_abac_policy_for_user_stats extends Migration
      */
     public function safeUp()
     {
-        if (AbacPolicy::deleteAll(['ap_object' => 'user-stats/user-stats/obj/user-stats', 'ap_subject' => '("admin" in r.sub.env.user.roles)'])) {
+        if (AbacPolicy::deleteAll(['ap_object' => 'user-stats/user-stats/obj/user-stats', 'ap_subject' => '("admin" in env.user.roles)'])) {
             \Yii::$app->abac->invalidatePolicyCache();
         }
 
