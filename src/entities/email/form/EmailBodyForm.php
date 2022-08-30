@@ -19,14 +19,14 @@ class EmailBodyForm extends Model
         parent::__construct($config);
     }
 
-    public static function fromArray(array $data)
+    public static function fromArray(array $data): EmailBodyForm
     {
         $instance = new static();
         $instance->setAttributes($data);
         return $instance;
     }
 
-    public static function fromModel(EmailBody $body, $config = [])
+    public static function fromModel(EmailBody $body, $config = []): EmailBodyForm
     {
         $instance = new static($config);
         $instance->subject = $body->embd_email_subject;
@@ -38,7 +38,7 @@ class EmailBodyForm extends Model
         return $instance;
     }
 
-    public static function replyFromModel(EmailBody $body, $userName = '', $config = [])
+    public static function replyFromModel(EmailBody $body, $userName = '', $config = []): EmailBodyForm
     {
         $instance = new static($config);
         $instance->subject = EmailBody::getReSubject($body->embd_email_subject);
@@ -70,7 +70,7 @@ class EmailBodyForm extends Model
         ];
     }
 
-    public function fields()
+    public function fields(): array
     {
         return [
             'embd_email_subject' => 'subject',
@@ -81,7 +81,7 @@ class EmailBodyForm extends Model
         ];
     }
 
-    public function getAttributesForModel()
+    public function getAttributesForModel(): array
     {
         $result = [];
         foreach ($this->fields() as $index => $name) {

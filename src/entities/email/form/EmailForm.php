@@ -24,15 +24,15 @@ use common\models\Employee;
  * @property int $type
  * @property int $status
  * @property int $projectId
- * @property int $depId
+ * @property int|null $depId
  * @property int|null $emailId
- * @property array $cases
- * @property array $clients
- * @property array $leads
+ * @property array|null $cases
+ * @property array|null $clients
+ * @property array|null $leads
  * @property string|null $createdDt
- * @property string $updatedDt
+ * @property string|null $updatedDt
  * @property int|null $replyId
- * @property bool|null $isDeleted
+ * @property int|null $isDeleted
  * @property int|null $userId
  *
  */
@@ -51,7 +51,7 @@ class EmailForm extends CompositeForm
     public $isDeleted;
     public $replyId;
 
-    private $userId;
+    private ?int $userId;
 
     public function __construct(?int $userId = null, $config = [])
     {
@@ -73,7 +73,7 @@ class EmailForm extends CompositeForm
         parent::__construct($config);
     }
 
-    public static function fromArray(array $data)
+    public static function fromArray(array $data): EmailForm
     {
         $instance = new static();
         $instance->userId = $data['userId'] ?? null;
@@ -109,7 +109,7 @@ class EmailForm extends CompositeForm
         return $instance;
     }
 
-    public static function fromModel(Email $email, ?int $userId = null, $config = [])
+    public static function fromModel(Email $email, ?int $userId = null, $config = []): EmailForm
     {
         $instance = new static($userId, $config);
         $instance->status = $email->e_status_id;
@@ -143,7 +143,7 @@ class EmailForm extends CompositeForm
         return $instance;
     }
 
-    public static function replyFromModel(Email $email, Employee $user, $config = [])
+    public static function replyFromModel(Email $email, Employee $user, $config = []): EmailForm
     {
         $instance = new static($user->id, $config);
         $instance->projectId = $email->e_project_id;
@@ -214,7 +214,7 @@ class EmailForm extends CompositeForm
         return ['params', 'body', 'contacts', 'log'];
     }
 
-    public function fields()
+    public function fields(): array
     {
         return [
             'e_id' => 'emailId',
@@ -230,7 +230,7 @@ class EmailForm extends CompositeForm
         ];
     }
 
-    public function getAttributesForModel($skipEmpty = false)
+    public function getAttributesForModel($skipEmpty = false): array
     {
         $result = [];
         foreach ($this->fields() as $index => $name) {

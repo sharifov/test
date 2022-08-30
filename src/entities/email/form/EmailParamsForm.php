@@ -19,14 +19,14 @@ class EmailParamsForm extends Model
         parent::__construct($config);
     }
 
-    public static function fromArray(array $data)
+    public static function fromArray(array $data): EmailParamsForm
     {
         $instance = new static();
         $instance->setAttributes($data);
         return $instance;
     }
 
-    public static function fromModel(EmailParams $param, $config = [])
+    public static function fromModel(EmailParams $param, $config = []): EmailParamsForm
     {
         $instance = new static($config);
         $instance->templateType = $param->ep_template_type_id;
@@ -37,7 +37,7 @@ class EmailParamsForm extends Model
         return $instance;
     }
 
-    public static function replyFromModel(EmailParams $param, $config = [])
+    public static function replyFromModel(EmailParams $param, $config = []): EmailParamsForm
     {
         $instance = new static($config);
         $instance->templateType = $param->ep_template_type_id;
@@ -47,7 +47,7 @@ class EmailParamsForm extends Model
         return $instance;
     }
 
-    public function isEmpty()
+    public function isEmpty(): bool
     {
         foreach ($this->attributes() as $attribute) {
             if (!empty($this->$attribute)) {
@@ -57,13 +57,13 @@ class EmailParamsForm extends Model
         return true;
     }
 
-    public function attributes()
+    public function attributes(): array
     {
         return ['language', 'priority', 'templateType', 'id'];
     }
 
 
-    public function fields()
+    public function fields(): array
     {
         return [
             'ep_language_id' => 'language',
@@ -73,7 +73,7 @@ class EmailParamsForm extends Model
         ];
     }
 
-    public function getAttributesForModel($skipEmpty = false)
+    public function getAttributesForModel($skipEmpty = false): array
     {
         $result = [];
         foreach ($this->fields() as $index => $name) {

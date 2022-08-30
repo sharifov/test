@@ -61,7 +61,7 @@ class EmailBody extends BaseActiveRecord
         return $this->hasOne(Email::class, ['e_body_id' => 'embd_id']);
     }
 
-    public function getEmailData()
+    public function getEmailData(): ?string
     {
         return !empty($this->embd_email_data) ? $this->embd_email_data : null;
     }
@@ -80,7 +80,7 @@ class EmailBody extends BaseActiveRecord
      * @param string $str
      * @return string
      */
-    public static function getReSubject($str = ''): string
+    public static function getReSubject(string $str = ''): string
     {
         $str = trim($str);
         if (strpos($str, 'Re:', 0) === false && strpos($str, 'Re[', 0) === false) {
