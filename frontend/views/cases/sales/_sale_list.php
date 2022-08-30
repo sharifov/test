@@ -59,8 +59,9 @@ $userCanCheckFareRules = Yii::$app->abac->can(null, SaleListAbacObject::UI_BLOCK
 
             <table class="table table-bordered table-striped" style="padding: 10px; color: #0d3349;"><tr>
                     <td style="width: 11%">Sale ID</td>
-                    <td style="width: 15%">Book Id</td>
-                    <td style="width: 15%">PNR</td>
+                    <td style="width: 10%">Base Book Id</td>
+                    <td style="width: 10%">Book Id</td>
+                    <td style="width: 10%">PNR</td>
                     <td style="width: 10%">Pax</td>
                     <td>Sale Created Date</td>
                     <td>Added Date</td>
@@ -96,8 +97,9 @@ $userCanCheckFareRules = Yii::$app->abac->can(null, SaleListAbacObject::UI_BLOCK
 
                     $label = '<table class="table table-bordered table-striped" style="margin: 0; color: #0d3349; font-size: 14px"><tr>
                         <td style="width: 10%">Id: ' . Html::encode($item->css_sale_id) . '</td>
-                        <td style="width: 15%">' . Html::encode($item->css_sale_book_id) . '</td>
-                        <td style="width: 15%">' . Html::encode($item->css_sale_pnr) . '</td>
+                        <td style="width: 10%">' . Html::encode($item->css_sale_book_id) . '</td>
+                        <td style="width: 10%">' . Html::encode($dataSale['bookingId'] ?? null) . '</td>
+                        <td style="width: 10%">' . Html::encode($item->css_sale_pnr) . '</td>
                         <td style="width: 10%">' . Html::encode($item->css_sale_pax) . '</td>
                         <td>' . Yii::$app->formatter->asDatetime($item->css_sale_created_dt) . '</td>
                         <td>' . Yii::$app->formatter->asDatetime($item->css_created_dt) . '</td>';

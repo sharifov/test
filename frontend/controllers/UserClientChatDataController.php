@@ -158,6 +158,7 @@ class UserClientChatDataController extends FController
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
+        $password = $model->uccd_password;
 
         if ($model->load(Yii::$app->request->post()) && $model->validate()) {
             try {
@@ -174,6 +175,10 @@ class UserClientChatDataController extends FController
                     $updateFields['uccd_password'] = 'password';
                 }
 
+                if (empty($model->uccd_password)) {
+                    $model->uccd_password = $password;
+                }
+
                 foreach ($updateFields as $column => $rcField) {
                     if ($model->isAttributeChanged($column) && $model->validate([$column])) {
                         $updateRC[$rcField] = $model->{$column};
@@ -182,6 +187,7 @@ class UserClientChatDataController extends FController
 
                 if (!empty($updateRC)) {
                     $rocketChat = \Yii::$app->rchat;
+                    $rocketChat->updateSystemAuth(false);
                     $result = $rocketChat->updateUser($rcUserId, $updateRC);
 
                     if (isset($result['error']) && !$result['error']) {
