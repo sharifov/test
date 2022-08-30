@@ -165,6 +165,7 @@ $tsEndUtc = strtotime($event->uss_end_utc_dt);
 
                         [
                             'attribute' => 'ut_status_id',
+                            'contentOptions' => ['class' => 'status-column'],
                             'value' => static function (UserTask $model) {
                                 $result = UserTaskHelper::statusLabel($model->ut_status_id);
                                 $result .= ($model->isDeadline()) ? '<p class="status-column__deadline-symb"><i class="fa fa-times-circle"></i></p>' : '';
