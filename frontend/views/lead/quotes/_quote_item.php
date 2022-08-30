@@ -49,9 +49,13 @@ if ($model->isDeclined()) {
 } elseif ($model->isAlternative()) {
     $bgColor =  '#fdffe5';
 }
-
+$totalSelling = $priceData['total']['selling'] ?? 0;
 ?>
-<div class="quote quote--highlight" id="quote-<?=$model->uid?>">
+<div
+    class="quote quote--highlight"
+    id="quote-<?=$model->uid?>"
+    style="border-color: <?php echo QuoteHelper::getBorderColorByPrice($totalSelling) ?>;">
+
     <?php $tripsInfo = []?>
     <?php foreach ($model->quoteTrips as $trip) :?>
         <?php
@@ -71,7 +75,7 @@ if ($model->isDeclined()) {
             </span>
             <?php if ($model->isOriginal()) : ?>
                 <span class="label label-primary"><?= Quote::getTypeName($model->type_id) ?></span>
-            <?php elseif (($leadForm->mode !== $leadForm::VIEW_MODE || $isManager) && in_array($model->status, [Quote::STATUS_CREATED, Quote::STATUS_SENT, Quote::STATUS_OPENED])) : ?>
+            <?php elseif (QuoteHelper::isShowCheckbox($leadForm, $isManager, $model, $totalSelling)) : ?>
                 <div class="custom-checkbox">
                     <input class="quotes-uid" id="q<?= $model->uid ?>" value="<?= $model->uid ?>" data-id="<?=$model->id?>" type="checkbox" name="quote[<?= $model->uid ?>]">
                     <label for="q<?= $model->uid ?>"></label>
@@ -102,12 +106,12 @@ if ($model->isDeclined()) {
         <div class="quote__heading-right">
             <?php if ($model->isDeclined()) : ?>
                 <span>
-                    <?= number_format($priceData['total']['selling'], 2)?>
+                    <?= number_format($totalSelling, 2)?>
                     <?= Html::encode($currency)?>
                 </span>
             <?php else : ?>
-                <span class="label label-info" style="font-size: 15px">
-                    <b><?= number_format($priceData['total']['selling'], 2)?></b>
+                <span class="label <?php echo QuoteHelper::getClassLabelByPrice($totalSelling) ?>" style="font-size: 15px">
+                    <b><?= number_format($totalSelling, 2)?></b>
                     <?= Html::encode($currency)?>
                 </span>
             <?php endif; ?>
@@ -158,7 +162,7 @@ if ($model->isDeclined()) {
 
                         <?php endif; ?>
 
-                        <?php if (!$model->isDeclined() && !$model->isAlternative() && !$model->isOriginal()) :?>
+                        <?php if (QuoteHelper::isShowCheckout($model, $totalSelling)) :?>
                             <?php  echo Html::a('<i class="fa fa-eye"></i> Checkout Page', $model->getCheckoutUrlPage(), [
                                     'class' => 'dropdown-item',
                                 'target'    => '_blank',
