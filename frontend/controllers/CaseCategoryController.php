@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use src\forms\cases\CaseCategoryCreateForm;
 use Yii;
 use src\entities\cases\CaseCategory;
 use src\entities\cases\CaseCategorySearch;
@@ -44,14 +45,25 @@ class CaseCategoryController extends FController
      */
     public function actionCreate()
     {
-        $model = new CaseCategory();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->cc_id]);
+        $form = new CaseCategoryCreateForm();
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            $model = new CaseCategory();
+            $form->mapAttributes($model);
+            if (!is_numeric($form->parentCategoryId)) {
+                $model->makeRoot();
+            } else {
+                $parent = CaseCategory::findNestedSets()->andWhere(['cc_id' => $form->parentCategoryId])->one();
+                if ($parent) {
+                    $model->appendTo($parent);
+                }
+            }
+            if ($model->save()) {
+                return $this->redirect(['view', 'id' => $model->cc_id]);
+            }
         }
-
         return $this->render('create', [
-            'model' => $model,
+            'model' => $form,
         ]);
     }
 
