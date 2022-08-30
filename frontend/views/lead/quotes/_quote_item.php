@@ -16,6 +16,7 @@ use common\models\Airline;
 use common\components\SearchService;
 use frontend\helpers\QuoteHelper;
 use frontend\models\LeadForm;
+use modules\featureFlag\FFlag;
 use src\helpers\app\AppHelper;
 use src\helpers\quote\ImageHelper;
 use src\services\quote\quotePriceService\ClientQuotePriceService;
@@ -50,11 +51,13 @@ if ($model->isDeclined()) {
     $bgColor =  '#fdffe5';
 }
 $totalSelling = $priceData['total']['selling'] ?? 0;
+/** @fflag FFlag::FF_KEY_QUOTE_MIN_PRICE_ENABLE, Enable Quote Min Price restriction in lead/view */
+$canQuoteMinPrice = \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_QUOTE_MIN_PRICE_ENABLE);
 ?>
 <div
     class="quote quote--highlight"
     id="quote-<?=$model->uid?>"
-    style="border-color: <?php echo QuoteHelper::getBorderColorByPrice($totalSelling) ?>;">
+    style="border-color: <?php echo QuoteHelper::getBorderColorByPrice($totalSelling, $canQuoteMinPrice) ?>;">
 
     <?php $tripsInfo = []?>
     <?php foreach ($model->quoteTrips as $trip) :?>
@@ -75,7 +78,7 @@ $totalSelling = $priceData['total']['selling'] ?? 0;
             </span>
             <?php if ($model->isOriginal()) : ?>
                 <span class="label label-primary"><?= Quote::getTypeName($model->type_id) ?></span>
-            <?php elseif (QuoteHelper::isShowCheckbox($leadForm, $isManager, $model, $totalSelling)) : ?>
+            <?php elseif (QuoteHelper::isShowCheckbox($leadForm, $isManager, $model, $totalSelling, $canQuoteMinPrice)) : ?>
                 <div class="custom-checkbox">
                     <input class="quotes-uid" id="q<?= $model->uid ?>" value="<?= $model->uid ?>" data-id="<?=$model->id?>" type="checkbox" name="quote[<?= $model->uid ?>]">
                     <label for="q<?= $model->uid ?>"></label>
@@ -110,7 +113,7 @@ $totalSelling = $priceData['total']['selling'] ?? 0;
                     <?= Html::encode($currency)?>
                 </span>
             <?php else : ?>
-                <span class="label <?php echo QuoteHelper::getClassLabelByPrice($totalSelling) ?>" style="font-size: 15px">
+                <span class="label <?php echo QuoteHelper::getClassLabelByPrice($totalSelling, $canQuoteMinPrice) ?>" style="font-size: 15px">
                     <b><?= number_format($totalSelling, 2)?></b>
                     <?= Html::encode($currency)?>
                 </span>
@@ -162,7 +165,7 @@ $totalSelling = $priceData['total']['selling'] ?? 0;
 
                         <?php endif; ?>
 
-                        <?php if (QuoteHelper::isShowCheckout($model, $totalSelling)) :?>
+                        <?php if (QuoteHelper::isShowCheckout($model, $totalSelling, $canQuoteMinPrice)) :?>
                             <?php  echo Html::a('<i class="fa fa-eye"></i> Checkout Page', $model->getCheckoutUrlPage(), [
                                     'class' => 'dropdown-item',
                                 'target'    => '_blank',
