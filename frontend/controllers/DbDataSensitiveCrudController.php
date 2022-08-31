@@ -5,6 +5,7 @@ namespace frontend\controllers;
 use common\models\DbDataSensitive;
 use common\models\search\DbDataSensitiveSearch;
 use yii\filters\VerbFilter;
+use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 
 /**
@@ -89,6 +90,10 @@ class DbDataSensitiveCrudController extends FController
     {
         $model = $this->findModel($id);
 
+        if ($model->isSystem()) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
         if ($model->load($this->request->post()) && $model->save()) {
             return $this->redirect(['view', 'id' => $model->dda_id]);
         }
@@ -108,7 +113,12 @@ class DbDataSensitiveCrudController extends FController
      */
     public function actionDelete($id)
     {
-        $this->findModel($id)->delete();
+        $model = $this->findModel($id);
+        if ($model->isSystem()) {
+            throw new ForbiddenHttpException('Access denied');
+        }
+
+        $model->delete();
 
         return $this->redirect(['index']);
     }

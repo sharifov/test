@@ -64,6 +64,36 @@ $this->params['breadcrumbs'][] = $this->title;
                             'data-method' => 'post',
                             'data-confirm' => 'Are you sure you want to delete views?'
                         ]);
+                    },
+                    'update' => function ($url, DbDataSensitive $model, $key) {
+                        if (!$model->isSystem()) {
+                            return Html::a(
+                                '<i class="glyphicon glyphicon-pencil"></i>',
+                                $url,
+                                [
+                                    'title' => 'Update',
+                                    'aria-label' => 'Update',
+                                    'data-pjax' => 0,
+                                ]
+                            );
+                        }
+                    },
+                    'delete' => function ($url, DbDataSensitive $model, $key) {
+                        if (!$model->isSystem()) {
+                            return Html::a(
+                                '<i class="glyphicon glyphicon-trash"></i>',
+                                $url,
+                                [
+                                    'title' => 'Delete',
+                                    'aria-label' => 'Delete',
+                                    'data' => [
+                                        'pjax' => 0,
+                                        'confirm' => 'Are you sure you want to delete this item?',
+                                        'method' => 'post'
+                                    ]
+                                ]
+                            );
+                        }
                     }
                 ]
             ],
