@@ -72,4 +72,14 @@ class ClientEmailQuery extends ActiveQuery
     {
         return $this->andWhere(['email' => $email])->orderBy(['id' => SORT_DESC])->limit(1);
     }
+
+    public static function getEmailListByAllowedTypes(int $clientId, array $allowedTypes = []): self
+    {
+        return ClientEmail::find()
+            ->where([
+                'AND',
+                ['client_id' => $clientId],
+                ['IN', 'type', $allowedTypes]
+            ]);
+    }
 }
