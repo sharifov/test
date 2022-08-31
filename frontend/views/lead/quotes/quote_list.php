@@ -8,8 +8,10 @@
  * @var $is_manager boolean
  */
 
+use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
+use modules\quoteAward\src\dictionary\AwardProgramDictionary;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
@@ -30,7 +32,8 @@ $canAccessPriceResearchLinks = \Yii::$app->abac->can(
     LeadAbacObject::ACT_PRICE_LINK_RESEARCH,
     LeadAbacObject::ACTION_ACCESS
 );
-
+/** @fflag FFlag::FF_KEY_AWARD_ENABLE, Award Enable */
+$enableAward = Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_AWARD_ENABLE);
 if ($canAccessPriceResearchLinks) {
     try {
         $priceResearchLinks = SettingHelper::getPriceResearchLinksNamesArray($lead);
@@ -185,6 +188,12 @@ JS;
                     <?php endif; ?>
                     <?php if (!$lead->client->isExcluded()) : ?>
                         <?= Html::a('<i class="fa fa-plus-circle success"></i> Add Quote', null, ['class' => 'add-clone-alt-quote dropdown-item', 'data-uid' => 0, 'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0])])?>
+                    <?php endif; ?>
+                    <?php
+                    if ($enableAward) : ?>
+                        <?php if (!$lead->client->isExcluded()) : ?>
+                            <?= Html::a('<i class="fa fa-plus-circle success"></i> Add Award Quote', null, ['class' => 'add-clone-alt-quote dropdown-item', 'data-uid' => 0, 'data-url' => Url::to(['quote-award/create', 'leadId' => $leadForm->getLead()->id])]) ?>
+                        <?php endif; ?>
                     <?php endif; ?>
                     <?= Html::a('<i class="fa fa-clone success"></i> Clone Quote', null, [
                         'class' => 'clone-quote-by-uid dropdown-item',
@@ -443,3 +452,138 @@ $js = <<<JS
     $('.popover-class[data-toggle="popover"]').popover({sanitize: false, html: true});
 JS;
 $this->registerJs($js);
+
+if ($enableAward) {
+    $awardType = AwardProgramDictionary::AWARD_MILE;
+    $flightUrl = Url::to(['quote-award/flight', 'leadId' => $lead->id]);
+    $segmentUrl = Url::to(['quote-award/segment', 'leadId' => $lead->id]);
+    $updateUrl = Url::to(['quote-award/update', 'leadId' => $lead->id]);
+    $js = <<<JS
+
+    var leadId = '$lead->id';
+    var flightUrl = '{$flightUrl}';
+    var segmentUrl = '{$segmentUrl}';
+    var awardType = '{$awardType}';
+    var updateUrl = '{$updateUrl}';
+   
+   
+    $(document).on('click', '#js-add-flight-award', function(event){
+        var AwardForm = $('#alt-award-quote-info-form');
+         loadingBtn($(this), true);       
+        $.ajax({
+            url: flightUrl,
+            type: 'POST',
+            data: AwardForm.serialize(),
+             success: function (data) {
+                let modal = $('#modal-lg');
+                modal.find('.js-update-ajax').html(data);
+                loadingBtn($('#js-add-flight-award'), false);
+            }
+        }) .fail(function(error) {
+            loadingBtn($('#js-add-flight-award'), false);
+            console.log(error);
+        })
+    });
+    
+     $(document).on('click', '.js-remove-flight-award', function(event){
+        var AwardForm = $('#alt-award-quote-info-form');
+         loadingBtn($(this), true);       
+         let id = $(this).data('id')
+        $.ajax({
+            url: flightUrl,
+            type: 'POST',
+            data: AwardForm.serialize()+'&index='+id,
+             success: function (data) {
+                let modal = $('#modal-lg');
+                modal.find('.js-update-ajax').html(data);
+            }
+        }) .fail(function(error) {
+            console.log(error);
+        })
+    });
+     
+     $(document).on('click', '#js-add-segment-award', function(event){
+        var AwardForm = $('#alt-award-quote-info-form');
+         loadingBtn($(this), true);       
+        $.ajax({
+            url: segmentUrl,
+            type: 'POST',
+            data: AwardForm.serialize(),
+             success: function (data) {
+                let modal = $('#modal-lg');
+                modal.find('.js-update-ajax').html(data);
+                loadingBtn($('#js-add-segment-award'), false);
+            }
+        }) .fail(function(error) {
+            loadingBtn($('#js-add-segment-award'), false);
+            console.log(error);
+        })
+    });
+     
+    $(document).on('change', '.js-flight-quote-program', function(event){
+        let id = $(this).data('id');
+        if($(this).val() === awardType){
+            $('.js-display-quote-program[data-id="'+id+'"]').removeClass('d-none')
+        }else {
+            $('.js-display-quote-program[data-id="'+id+'"]').addClass('d-none')
+        }
+    });
+    
+     $(document).on('change', '.js-pax-award', function(event){
+       
+        var AwardForm = $('#alt-award-quote-info-form');
+        var formDataAward = AwardForm.serialize()
+          $(this).prop( "disabled", true);
+          $.ajax({
+            url: updateUrl,
+            type: 'POST',
+            data: formDataAward,
+             success: function (data) {
+                let modal = $('#modal-lg');
+                modal.find('.js-update-ajax').html(data);
+                $(this).prop( "disabled", false);
+            }
+        }) .fail(function(error) {
+            console.log(error);
+            $(this).prop( "disabled", false);
+        })
+    });
+     
+     
+    
+     $(document).on('click', '.js-remove-segment-award', function(event){
+        var AwardForm = $('#alt-award-quote-info-form');
+         loadingBtn($(this), true);       
+         let id = $(this).data('id')
+        $.ajax({
+            url: segmentUrl,
+            type: 'POST',
+            data: AwardForm.serialize()+'&index='+id,
+             success: function (data) {
+                let modal = $('#modal-lg');
+                modal.find('.js-update-ajax').html(data);
+            }
+        }) .fail(function(error) {
+            console.log(error);
+        })
+    });
+    
+     function loadingBtn(btnObj, loading)
+    {
+        if (loading === true) {
+            btnObj.removeClass()
+                .addClass('btn btn-default')
+                .html('<span class="spinner-border spinner-border-sm"></span> Loading')
+                .prop("disabled", true);
+        } else {
+            let origClass = btnObj.data('class');
+            let origInner = btnObj.data('inner');
+            btnObj.removeClass()
+                .addClass(origClass)
+                .html(origInner)
+                .prop("disabled", false);
+        }  
+    }
+JS;
+    $this->registerJs($js);
+}
