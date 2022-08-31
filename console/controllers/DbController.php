@@ -27,6 +27,7 @@ use src\helpers\email\TextConvertingHelper;
 use src\logger\db\GlobalLogInterface;
 use src\logger\db\LogDTO;
 use src\model\project\entity\projectLocale\ProjectLocale;
+use src\repositories\NotFoundException;
 use src\services\dbDataSensitive\DbDataSensitiveService;
 use src\services\lead\qcall\CalculateDateService;
 use src\services\log\GlobalEntityAttributeFormatServiceService;
@@ -44,6 +45,7 @@ use yii\helpers\Console;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use src\model\airline\service\AirlineService;
+use common\models\DbDataSensitiveDictionary;
 
 /**
  * Class DbController
@@ -1498,5 +1500,46 @@ ORDER BY lf.lead_id, id';
 
         $resultInfo = 'Execute Time: ' . number_format(round(microtime(true) - $timeStart, 2), 2);
         $this->printInfo($resultInfo, $this->action->id);
+    }
+
+    /**
+     * Regenerate views from db_data_sensitive (where dda_key = view)
+     */
+    public function actionRegenerateDefaultSensitiveViews()
+    {
+        try {
+            $this->printInfo('Start....', $this->action->id, Console::BG_GREEN);
+
+            $this->printInfo('1/4 Searching default db_data_sensetive', $this->action->id, Console::BG_GREEN);
+            /** @var DbDataSensitive $sensitiveEntity */
+            $sensitiveEntity = DbDataSensitive::find()
+                ->andWhere(['dda_key' => 'view'])
+                ->one();
+
+            if (empty($sensitiveEntity)) {
+                throw new NotFoundException('Default view not found');
+            }
+
+            $this->printInfo('2/4 Droping default views', $this->action->id, Console::BG_GREEN);
+            $this->dbDataSensitiveService->dropViews($sensitiveEntity);
+
+            $this->printInfo('3/4 Update source of default db_data_sensetive', $this->action->id, Console::BG_GREEN);
+            $sensitiveEntity->load([
+                'dda_source' => DbDataSensitiveDictionary::SOURCE
+            ]);
+            $isSuccessSaved = $sensitiveEntity->save();
+
+            if (!$isSuccessSaved) {
+                throw new \RuntimeException('Cant update source of default db_data_sensetive');
+            }
+
+            $this->printInfo('4/4 Regeneration default views', $this->action->id, Console::BG_GREEN);
+            $this->dbDataSensitiveService->createViews($sensitiveEntity);
+
+            $this->printInfo('Done!', $this->action->id, Console::BG_GREEN);
+        } catch (\Throwable $e) {
+            Yii::error($e, 'DbController:actionRegenerateDefaultViews:Throwable');
+            $this->printInfo($e->getMessage(), $this->action->id, Console::BG_RED);
+        }
     }
 }
