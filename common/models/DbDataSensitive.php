@@ -156,4 +156,12 @@ class DbDataSensitive extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Employee::className(), ['id' => 'dda_updated_user_id']);
     }
+
+    /**
+     * @return bool
+     */
+    public function isSystem(): bool
+    {
+        return (bool)$this->db_is_system;
+    }
 }
