@@ -122,7 +122,13 @@ $subtypeTotalData = [];
                             [
                                 'attribute' => 'ut_status_id',
                                 'value' => static function (UserTask $model) {
-                                    return UserTaskHelper::statusLabel($model->ut_status_id);
+                                    $result = UserTaskHelper::statusLabel($model->ut_status_id);
+
+                                    if ($model->isDeadline()) {
+                                        $result .= '<p class="text-center mt-2"><i class="fa fa-times-circle text-danger"></i></p>';
+                                    }
+
+                                    return $result;
                                 },
                                 'format' => 'raw',
                                 'filter' => UserTask::STATUS_LIST,
