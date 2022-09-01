@@ -45,7 +45,7 @@ use yii\helpers\Console;
 use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use src\model\airline\service\AirlineService;
-use common\models\DbDataSensitiveDictionary;
+use src\model\dbDataSensitive\dictionary\DbDataSensitiveDictionary;
 use src\model\dbDataSensitive\repository\DbDataSensitiveRepository;
 
 /**

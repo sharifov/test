@@ -2,7 +2,7 @@
 
 use frontend\helpers\JsonHelper;
 use yii\db\Migration;
-use common\models\DbDataSensitiveDictionary;
+use src\model\dbDataSensitive\dictionary\DbDataSensitiveDictionary;
 
 /**
  * Handles the creation of table `{{%data_sensitive}}`.

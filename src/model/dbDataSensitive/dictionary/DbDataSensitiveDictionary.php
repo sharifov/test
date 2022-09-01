@@ -1,6 +1,6 @@
 <?php
 
-namespace common\models;
+namespace src\model\dbDataSensitive\dictionary;
 
 class DbDataSensitiveDictionary
 {
