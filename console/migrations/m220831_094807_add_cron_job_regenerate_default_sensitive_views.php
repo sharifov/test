@@ -3,6 +3,7 @@
 use yii\db\Migration;
 use kivork\VirtualCron\Services\Hasher;
 use kivork\VirtualCron\Models\CronScheduler;
+use src\helpers\app\AppHelper;
 
 /**
  * Class m220831_094807_add_cron_job_regenerate_default_sensitive_views
@@ -33,7 +34,7 @@ class m220831_094807_add_cron_job_regenerate_default_sensitive_views extends Mig
             }
             echo ' - Hash: ' . $cronScheduler->cs_hash . PHP_EOL;
         } catch (Throwable $throwable) {
-            Yii::error($throwable, 'm220831_094807_add_cron_job_regenerate_default_sensitive_views:safeUp:Throwable');
+            Yii::error(AppHelper::throwableLog($throwable), 'm220831_094807_add_cron_job_regenerate_default_sensitive_views:safeUp:Throwable');
         }
     }
 
@@ -52,7 +53,7 @@ class m220831_094807_add_cron_job_regenerate_default_sensitive_views extends Mig
                 }
             }
         } catch (Throwable $throwable) {
-            Yii::error($throwable, 'm220831_094807_add_cron_job_regenerate_default_sensitive_views:safeDown:Throwable');
+            Yii::error(AppHelper::throwableLog($throwable), 'm220831_094807_add_cron_job_regenerate_default_sensitive_views:safeDown:Throwable');
         }
     }
 }

@@ -4,6 +4,7 @@ namespace src\model\dbDataSensitive\dictionary;
 
 class DbDataSensitiveDictionary
 {
+    public const KEY_VIEW = 'view';
     public const SOURCE = [
         'contact_phone_list' => ['cpl_phone_number'],
         'phone_blacklist' => ['pbl_phone'],

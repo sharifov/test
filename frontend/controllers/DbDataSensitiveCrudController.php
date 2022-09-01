@@ -91,7 +91,7 @@ class DbDataSensitiveCrudController extends FController
         $model = $this->findModel($id);
 
         if ($model->isSystem()) {
-            throw new ForbiddenHttpException('Access denied');
+            throw new ForbiddenHttpException('Access denied for updating system DB Data Sensitive');
         }
 
         if ($model->load($this->request->post()) && $model->save()) {
@@ -115,7 +115,7 @@ class DbDataSensitiveCrudController extends FController
     {
         $model = $this->findModel($id);
         if ($model->isSystem()) {
-            throw new ForbiddenHttpException('Access denied');
+            throw new ForbiddenHttpException('Access denied for deleting system DB Data Sensitive');
         }
 
         $model->delete();

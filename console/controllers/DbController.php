@@ -24,6 +24,7 @@ use modules\requestControl\models\UserSiteActivity;
 use src\entities\cases\Cases;
 use src\helpers\app\AppHelper;
 use src\helpers\email\TextConvertingHelper;
+use src\helpers\ErrorsToStringHelper;
 use src\logger\db\GlobalLogInterface;
 use src\logger\db\LogDTO;
 use src\model\project\entity\projectLocale\ProjectLocale;
@@ -67,9 +68,6 @@ class DbController extends Controller
     /** @var DbDataSensitiveService  */
     private DbDataSensitiveService $dbDataSensitiveService;
 
-    /** @var DbDataSensitiveRepository  */
-    private DbDataSensitiveRepository $dbDataSensitiveRepository;
-
     /**
      * DbController constructor.
      * @param $id
@@ -82,13 +80,11 @@ class DbController extends Controller
         $module,
         GlobalEntityAttributeFormatServiceService $globalLogFormatAttrService,
         DbDataSensitiveService $dbDataSensitiveService,
-        DbDataSensitiveRepository $dbDataSensitiveRepository,
         $config = []
     ) {
         parent::__construct($id, $module, $config);
         $this->globalLogFormatAttrService = $globalLogFormatAttrService;
         $this->dbDataSensitiveService = $dbDataSensitiveService;
-        $this->dbDataSensitiveRepository = $dbDataSensitiveRepository;
     }
 
     public function actionUpdateCaseLastAction()
@@ -1536,17 +1532,20 @@ ORDER BY lf.lead_id, id';
             $this->dbDataSensitiveService->dropViews($sensitiveEntity);
 
             $this->printInfo('3/4 Update source of default db_data_sensetive', $this->action->id, Console::BG_GREEN);
-            $sensitiveEntity->load([
-                'dda_source' => DbDataSensitiveDictionary::SOURCE
-            ]);
-            $this->dbDataSensitiveRepository->save($sensitiveEntity);
+            $sensitiveEntity->dda_source = JsonHelper::encode(DbDataSensitiveDictionary::SOURCE);
+
+            if (!$sensitiveEntity->validate()) {
+                throw new \yii\base\Exception(ErrorsToStringHelper::extractFromModel($sensitiveEntity));
+            }
+            $dbDataSensitiveRepository = new DbDataSensitiveRepository($sensitiveEntity);
+            $dbDataSensitiveRepository->save();
 
             $this->printInfo('4/4 Regeneration default views', $this->action->id, Console::BG_GREEN);
             $this->dbDataSensitiveService->createViews($sensitiveEntity);
 
             $this->printInfo('Done!', $this->action->id, Console::BG_GREEN);
         } catch (\Throwable $e) {
-            Yii::error($e, 'DbController:actionRegenerateDefaultViews:Throwable');
+            Yii::error(AppHelper::throwableLog($e), 'DbController:actionRegenerateDefaultViews:Throwable');
             $this->printInfo($e->getMessage(), $this->action->id, Console::BG_RED);
         }
     }

@@ -1,6 +1,8 @@
 <?php
 
 use yii\db\Migration;
+use src\model\dbDataSensitive\dictionary\DbDataSensitiveDictionary;
+use common\models\DbDataSensitive;
 
 /**
  * Handles adding columns to table `{{%db_data_sensitive}}`.
@@ -15,15 +17,15 @@ class m220831_070922_add_db_is_system_column_to_db_data_sensitive_table extends 
     public function safeUp()
     {
         $this->addColumn(
-            static::TABLE_NAME,
+            DbDataSensitive::tableName(),
             'db_is_system',
             $this->boolean()->defaultValue(false)->notNull()
         );
 
-        $this->update(static::TABLE_NAME, [
-            'db_is_system' => 1
+        $this->update(DbDataSensitive::tableName(), [
+            'db_is_system' => 1,
         ], [
-            'dda_key' => 'view'
+            'dda_key' => DbDataSensitiveDictionary::KEY_VIEW,
         ]);
     }
 
@@ -32,6 +34,6 @@ class m220831_070922_add_db_is_system_column_to_db_data_sensitive_table extends 
      */
     public function safeDown()
     {
-        $this->dropColumn(static::TABLE_NAME, 'db_is_system');
+        $this->dropColumn(DbDataSensitive::tableName(), 'db_is_system');
     }
 }

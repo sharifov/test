@@ -3,23 +3,21 @@
 namespace src\model\dbDataSensitive\repository;
 
 use common\models\DbDataSensitive;
-use src\helpers\ErrorsToStringHelper;
+use src\repositories\AbstractRepositoryWithEvent;
+use yii\db\ActiveRecordInterface;
 
 /**
  * Repository for `db_data_sensitive`
  */
-class DbDataSensitiveRepository
+class DbDataSensitiveRepository extends AbstractRepositoryWithEvent
 {
-    /**
-     * @param DbDataSensitive $model
-     * @return DbDataSensitive
-     */
-    public function save(DbDataSensitive $model): DbDataSensitive
+    public function __construct(DbDataSensitive $model)
     {
-        if (!$model->save()) {
-            throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($model));
-        }
+        parent::__construct($model);
+    }
 
-        return $model;
+    public function getModel(): ActiveRecordInterface
+    {
+        return $this->model;
     }
 }

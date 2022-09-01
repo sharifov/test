@@ -46,7 +46,6 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => BooleanColumn::class,
                 'attribute' => 'db_is_system',
-                'label' => 'Is System',
             ],
             [
                 'class' => ActionColumn::className(),
