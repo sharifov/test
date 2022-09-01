@@ -83,6 +83,7 @@ class ObjectTaskCrudController extends FController
         $multipleErrors = [];
         $searchModel = new ObjectTaskSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
+        $changedTasks = 0;
 
         if ($multipleUpdateForm->load(Yii::$app->request->post()) && $multipleUpdateForm->validate()) {
             foreach ($multipleUpdateForm->element_list as $uuid) {
@@ -102,6 +103,7 @@ class ObjectTaskCrudController extends FController
                 if ($needSaveObjectTask === true) {
                     try {
                         (new ObjectTaskRepository($objectTask))->save();
+                        $changedTasks++;
                     } catch (\Throwable $e) {
                         $multipleErrors[$uuid] = $objectTask->getErrors();
                     }
@@ -120,6 +122,7 @@ class ObjectTaskCrudController extends FController
             'dataProvider' => $dataProvider,
             'multipleUpdateForm' => $multipleUpdateForm,
             'multipleErrors' => $multipleErrors,
+            'changedTasks' => $changedTasks,
         ]);
     }
 
