@@ -64,10 +64,10 @@ class UserTaskQuery
      * @param int $userId
      * @param string $startDt
      * @param string $endDt
-     * @param bool $isOnlyProcessing
+     * @param array $statusList
      * @return UserTaskScopes
      */
-    private static function getQueryTaskListByUser(int $userId, string $startDt, string $endDt, bool $isOnlyProcessing = false): UserTaskScopes
+    private static function getQueryTaskListByUser(int $userId, string $startDt, string $endDt, array $statusList): UserTaskScopes
     {
         $startDateTime = date('Y-m-d H:i', strtotime($startDt));
         $endDateTime = date('Y-m-d H:i', strtotime($endDt));
@@ -90,8 +90,8 @@ class UserTaskQuery
             ])
             ->andWhere(['ut_user_id' => $userId]);
 
-        if ($isOnlyProcessing) {
-            return $userTasks->andWhere(['ut_status_id' => UserTask::STATUS_PROCESSING]);
+        if (!empty($statusList)) {
+            return $userTasks->andWhere(['IN', 'ut_status_id', $statusList]);
         }
 
         return $userTasks;
@@ -101,12 +101,12 @@ class UserTaskQuery
      * @param int $userId
      * @param string $startDt
      * @param string $endDt
-     * @param bool $isOnlyProcessing
+     * @param array $statusList
      * @return array
      */
-    public static function getTaskListByUser(int $userId, string $startDt, string $endDt, bool $isOnlyProcessing = false): array
+    public static function getTaskListByUser(int $userId, string $startDt, string $endDt, array $statusList = []): array
     {
-        return self::getQueryTaskListByUser($userId, $startDt, $endDt, $isOnlyProcessing)->all();
+        return self::getQueryTaskListByUser($userId, $startDt, $endDt, $statusList)->all();
     }
 
 

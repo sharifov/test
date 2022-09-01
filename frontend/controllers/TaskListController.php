@@ -147,7 +147,7 @@ class TaskListController extends FController
         $endDt = Yii::$app->request->get('end', date('Y-m-d'));
 
         $timelineList = UserShiftScheduleQuery::getTimelineListByUserExcludeDeletedEvents($userId, $startDt, $endDt);
-        $taskList = UserTaskQuery::getTaskListByUser($userId, $startDt, $endDt, true);
+        $taskList = UserTaskQuery::getTaskListByUser($userId, $startDt, $endDt, [UserTask::STATUS_PROCESSING]);
         $userTimeZone = Auth::user()->timezone ?: 'UTC';
 
         $timeLineData = UserShiftScheduleQuery::getCalendarTimelineJsonData($timelineList, $userTimeZone);
