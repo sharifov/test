@@ -2,7 +2,7 @@
 
 namespace src\model\dbDataSensitive\repository;
 
-use common\models\DbDataSensitive;
+use src\model\dbDataSensitive\entity\DbDataSensitive;
 use src\repositories\AbstractRepositoryWithEvent;
 
 /**
