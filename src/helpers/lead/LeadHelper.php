@@ -3,7 +3,10 @@
 namespace src\helpers\lead;
 
 use common\components\i18n\Formatter;
+use common\models\ClientEmail;
+use common\models\ClientEmailQuery;
 use common\models\Department;
+use common\models\EmailUnsubscribe;
 use common\models\Employee;
 use common\models\Lead;
 use DateTime;
@@ -237,5 +240,28 @@ class LeadHelper
         }
 
         return '';
+    }
+
+    public static function getFirstEmailNotInUnsubscribeList(Lead $lead, array $allowedEmailTypes = [ClientEmail::EMAIL_FAVORITE, ClientEmail::EMAIL_VALID, ClientEmail::EMAIL_NOT_SET, null]): ?string
+    {
+        $email = null;
+        $clientEmails = ClientEmailQuery::getEmailListByAllowedTypes($lead->client_id, $allowedEmailTypes)->all();
+
+        if ($clientEmails && $allowedEmailTypes) {
+            foreach ($allowedEmailTypes as $allowedType) {
+                foreach ($clientEmails as $clientEmail) {
+                    if ($clientEmail->type !== $allowedType) {
+                        continue;
+                    }
+
+                    if (EmailUnsubscribe::emailInList($clientEmail->email, $lead->project_id) === false) {
+                        $email = $clientEmail->email;
+                        break(2);
+                    }
+                }
+            }
+        }
+
+        return $email;
     }
 }

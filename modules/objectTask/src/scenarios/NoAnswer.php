@@ -13,10 +13,11 @@ use modules\objectTask\src\services\ObjectTaskService;
 use modules\objectTask\src\services\ObjectTaskStatusLogService;
 use src\helpers\app\AppHelper;
 use src\helpers\DateHelper;
+use src\helpers\lead\LeadHelper;
 use src\repositories\lead\LeadRepository;
 use thamtech\uuid\helpers\UuidHelper;
 use Yii;
-use yii\helpers\Json;
+use yii\helpers\VarDumper;
 
 class NoAnswer extends BaseScenario
 {
@@ -209,7 +210,23 @@ class NoAnswer extends BaseScenario
     public function canProcess(): bool
     {
         if (parent::canProcess() === true) {
-            return NoAnswer::leadIsAvailableForProcess($this->getObject());
+            $lead = $this->getObject();
+
+            /** @fflag FFlag::FF_KEY_NO_ANSWER_PROTOCOL_CHECK_EMAIL_IN_UNSUBSCRIBE_LIST, No Answer check email in unsubscribe list */
+            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_NO_ANSWER_PROTOCOL_CHECK_EMAIL_IN_UNSUBSCRIBE_LIST) === true) {
+                $clientEmail = LeadHelper::getFirstEmailNotInUnsubscribeList($lead);
+
+                if ($clientEmail === null) {
+                    Yii::warning(VarDumper::dumpAsString([
+                        'leadId' => $lead->id,
+                        'message' => "Lead email does not exist or is in the unsubscribed list",
+                    ]), 'NoAnswer:canProcess');
+
+                    return false;
+                }
+            }
+
+            return NoAnswer::leadIsAvailableForProcess($lead);
         }
 
         return false;

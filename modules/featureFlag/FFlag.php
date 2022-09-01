@@ -59,6 +59,7 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_NO_ANSWER_PROTOCOL_ENABLE = 'noAnswerProtocolEnable';
     public const FF_KEY_USER_CONVERSION_EXCLUDE_ALTERNATIVE_LEAD_ENABLE = 'userConversionExcludeAlternativeLeadEnable';
     public const FF_KEY_SWITCH_NEW_SHIFT_ENABLE = 'switchNewShiftEnable';
+    public const FF_KEY_NO_ANSWER_PROTOCOL_CHECK_EMAIL_IN_UNSUBSCRIBE_LIST = 'noAnswerProtocolCheckEmailInUnsubscribeList';
     public const FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE = 'objectTaskStatusLogEnable';
 
     public const FF_KEY_LIST = [
@@ -109,6 +110,7 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_NO_ANSWER_PROTOCOL_ENABLE,
         self::FF_KEY_USER_CONVERSION_EXCLUDE_ALTERNATIVE_LEAD_ENABLE,
         self::FF_KEY_SWITCH_NEW_SHIFT_ENABLE,
+        self::FF_KEY_NO_ANSWER_PROTOCOL_CHECK_EMAIL_IN_UNSUBSCRIBE_LIST,
         self::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE,
     ];
 

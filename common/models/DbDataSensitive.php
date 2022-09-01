@@ -21,6 +21,7 @@ use yii\helpers\Inflector;
  * @property string|null $dda_updated_dt
  * @property int|null $dda_created_user_id
  * @property int|null $dda_updated_user_id
+ * @property bool $db_is_system
  *
  * @property Employee $createdUser
  * @property Employee $updatedUser
@@ -53,6 +54,8 @@ class DbDataSensitive extends \yii\db\ActiveRecord
                 return Inflector::slug($value, '_');
             }],
             ['dda_source', 'validateSource'],
+            [['db_is_system'], 'boolean'],
+            [['db_is_system'], 'default', 'value' => false],
         ];
     }
 
@@ -123,6 +126,7 @@ class DbDataSensitive extends \yii\db\ActiveRecord
             'dda_updated_dt' => 'Updated Date',
             'dda_created_user_id' => 'Created User',
             'dda_updated_user_id' => 'Updated User',
+            'db_is_system' => 'Is System',
         ];
     }
 
@@ -155,5 +159,13 @@ class DbDataSensitive extends \yii\db\ActiveRecord
     public function getUpdatedUser()
     {
         return $this->hasOne(Employee::className(), ['id' => 'dda_updated_user_id']);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSystem(): bool
+    {
+        return (bool)$this->db_is_system;
     }
 }
