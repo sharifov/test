@@ -11,7 +11,7 @@ use yii\widgets\Pjax;
 /* @var $searchModel common\models\search\SaleSearch */
 /* @var $dataProvider yii\data\ArrayDataProvider */
 
-$differentProject = CasesController::DIFFERENT_PROJECT
+$differentProject = CasesController::DIFFERENT_PROJECT;
 ?>
 
 <div class="x_panel" id="search-sale-panel" style="display: none;">
@@ -170,7 +170,7 @@ $differentProject = CasesController::DIFFERENT_PROJECT
 
                     [
                         'class' => 'yii\grid\ActionColumn',
-                        'template' => '{view} {add}',
+                        'template' => '{view} {add} {create}',
                         'controller' => 'case',
                         'buttons' => [
                             'view' => function ($url, $model, $key) {
@@ -185,6 +185,13 @@ $differentProject = CasesController::DIFFERENT_PROJECT
                                     '<span class="fa fa-plus"></span> Add',
                                     ['cases/add-sale'],
                                     ['title' => 'View', 'class' => 'btn btn-xs btn-success addSale', 'data-pjax' => 0, 'data-gid' => $caseModel->cs_gid, 'data-h' => base64_encode($model['confirmationNumber'] . '|' . $model['saleId'])]
+                                );
+                            },
+                            'create' => function ($url, $model, $key) use ($caseModel) {
+                                return Html::a(
+                                    '<span class="fa fa-cube"></span> Create Case',
+                                    ['cases/create-case-by-sale'],
+                                    ['title' => 'Create Case', 'class' => 'btn btn-xs btn-success createCase', 'data-pjax' => 0, 'data-gid' => $caseModel->cs_gid, 'data-h' => base64_encode($model['confirmationNumber'] . '|' . $model['saleId'])]
                                 );
                             },
                         ]
@@ -329,6 +336,70 @@ $jsCode = <<<JS
         
        return false;
     });
+    
+     $(document).on('click', '.createCase', function() {
+        var btn = $(this);
+        var h = btn.data('h');
+        var gid = btn.data('gid');
+        
+        btn.addClass('disabled');
+        btn.find('span').removeClass('fa-cube').addClass('fa-spinner fa-spin');
+        
+        $.ajax({
+            url: btn.attr('href'),
+            type: 'post',
+            data: {gid: gid, h: h},
+            success: function (data) {
+                if (data.error !== '') {
+                    if(data.error_type && data.error_type === "$differentProject"){
+                        let modal = $('#modalCaseSm');
+                        modal.modal('show');
+                        modal.find('.modal-header').html('<h3 class="text-danger font-weight-bold">Wrong Project!!! <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button></h3>');
+                        modal.find('.modal-body').html('<h5>' + data.error + '</h5>');
+                    } else {
+                        createNotifyByObject({
+                            title: 'Error Create Case',
+                            type: 'error',
+                            text: data.error,
+                            hide: true
+                        });
+                    }
+                    btn.removeClass('disabled');
+                    btn.find('span').removeClass('fa-spinner fa-spin').addClass('fa-cube');
+                } else {
+                    btn.removeClass('disabled');
+                    btn.find('span').removeClass('fa-spinner fa-spin').addClass('fa-cube');
+                    
+                    createNotifyByObject({
+                        title: 'Case created successfully',
+                        type: 'success',
+                        text: 'Case with Id: ' + data.data.newCaseId +' created successfully.',
+                        hide: true
+                    });
+                    
+                    if (data.data.newCaseGid) {
+                        openInNewTab('/cases/view/' + data.data.newCaseGid);
+                    }
+                }
+            },
+            error: function (error) {
+                alert('Server Error');
+                console.error('Error: ' + error);
+                btn.removeClass('disabled');
+                btn.find('span').removeClass('fa-spinner fa-spin').addClass('fa-cube');                
+            }
+        });
+        
+       return false;
+    });
+    
+    function openInNewTab(href) {
+        Object.assign(document.createElement('a'), {
+            target: '_blank',
+            rel: 'noopener noreferrer',
+            href: href
+        }).click();
+    }
 
 JS;
 
