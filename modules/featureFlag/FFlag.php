@@ -59,6 +59,7 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_NO_ANSWER_PROTOCOL_ENABLE = 'noAnswerProtocolEnable';
     public const FF_KEY_USER_CONVERSION_EXCLUDE_ALTERNATIVE_LEAD_ENABLE = 'userConversionExcludeAlternativeLeadEnable';
     public const FF_KEY_SWITCH_NEW_SHIFT_ENABLE = 'switchNewShiftEnable';
+    public const FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE = 'objectTaskStatusLogEnable';
 
     public const FF_KEY_LIST = [
         self::FF_KEY_LPP_ENABLE,
@@ -108,6 +109,7 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_NO_ANSWER_PROTOCOL_ENABLE,
         self::FF_KEY_USER_CONVERSION_EXCLUDE_ALTERNATIVE_LEAD_ENABLE,
         self::FF_KEY_SWITCH_NEW_SHIFT_ENABLE,
+        self::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE,
     ];
 
     public const FF_OBJECT_LIST = [
