@@ -28,6 +28,10 @@ use yii\db\ActiveRecord;
  * @property Cases[] $cases
  * @property Department $dep
  * @property Employee $updatedUser
+ * @method NestedSetsBehavior makeRoot()
+ * @method NestedSetsBehavior parents($depth = null)
+ * @method NestedSetsBehavior appendTo($node, $runValidation = true, $attributes = null)
+ *
  */
 class CaseCategory extends ActiveRecord
 {
@@ -81,6 +85,10 @@ class CaseCategory extends ActiveRecord
             'cc_updated_user_id' => 'Updated User ID',
             'cc_enabled' => 'Enabled',
             'cc_allow_to_select' => 'Allow to select',
+            'cc_lft' => 'Left Key',
+            'cc_rgt' => 'Right Key',
+            'cc_depth' => 'Depth Level',
+            'cc_tree' => 'Tree ID',
         ];
     }
     /**

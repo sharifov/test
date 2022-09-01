@@ -1,5 +1,6 @@
 <?php
 
+use src\entities\cases\CaseCategory;
 use yii\db\Migration;
 
 /**
@@ -17,6 +18,8 @@ class m220830_090122_add_columns_for_nested_sets_in_tbl_case_category extends Mi
         $this->addColumn('{{%case_category}}', 'cc_depth', $this->integer()->notNull());
         $this->addColumn('{{%case_category}}', 'cc_tree', $this->integer()->notNull());
         $this->addColumn('{{%case_category}}', 'cc_allow_to_select', $this->tinyInteger(1));
+
+        $this->initExistingModels();
     }
 
     /**
@@ -29,5 +32,26 @@ class m220830_090122_add_columns_for_nested_sets_in_tbl_case_category extends Mi
         $this->dropColumn('{{%case_category}}', 'cc_depth');
         $this->dropColumn('{{%case_category}}', 'cc_tree');
         $this->dropColumn('{{%case_category}}', 'cc_allow_to_select');
+    }
+
+    /**
+     * Init logic for preparing existing case categories
+     * @return void
+     * @see \creocoder\nestedsets\NestedSetsBehavior::beforeInsertRootNode
+     */
+    private function initExistingModels(): void
+    {
+        $models = CaseCategory::find()->all();
+        foreach ($models as $model) {
+            try {
+                $model->setAttribute('cc_tree', $model->getPrimaryKey());
+                $model->setAttribute('cc_lft', 1);
+                $model->setAttribute('cc_rgt', 2);
+                $model->setAttribute('cc_depth', 0);
+                $model->update(false);
+            } catch (\Throwable $throwable) {
+                echo $throwable->getMessage();
+            }
+        }
     }
 }

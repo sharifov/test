@@ -7,8 +7,11 @@ use src\entities\cases\CaseCategory;
 use src\entities\cases\CasesCategoryQuery;
 use yii\base\Model;
 
-class CaseCategoryCreateForm extends Model
+class CaseCategoryManageForm extends Model
 {
+    public const SCENARIO_CREATE = 'create';
+    public const SCENARIO_UPDATE = 'update';
+
     public ?string $parentCategoryId = null;
     public ?int $cc_id = null;
     public ?string $cc_key = null;
@@ -27,7 +30,7 @@ class CaseCategoryCreateForm extends Model
         return \Yii::$app->get('db');
     }
 
-    public static function find()
+    public static function find(): CasesCategoryQuery
     {
         return new CasesCategoryQuery(static::class);
     }
@@ -41,18 +44,38 @@ class CaseCategoryCreateForm extends Model
     }
 
     /**
-     * Map attributes from Model to Active Record
+     * Map attributes from Form Model to Active Record
      * @param CaseCategory $case
      * @return void
      */
-    public function mapAttributes(CaseCategory $case): void
+    public function mapAttributesToModel(CaseCategory $case): void
     {
+
+        $case->cc_key = $this->cc_key;
         $case->cc_name = $this->cc_name;
         $case->cc_dep_id = $this->cc_dep_id;
         $case->cc_allow_to_select = $this->cc_allow_to_select;
+        $case->cc_system = $this->cc_system;
+        $case->cc_enabled = $this->cc_enabled;
         //todo something wrong here with setting default value to tree id before InsertAfter logic in
         //vendor/creocoder/yii2-nested-sets/src/NestedSetsBehavior.php
         $case->cc_tree = $this->cc_tree ?? 0;
+    }
+
+    /**
+     * Map attributes from Active Record to Form Model
+     * @param CaseCategory $case
+     * @return void
+     */
+    public function mapAttributesFromModel(CaseCategory $case): void
+    {
+        $this->cc_key = $case->cc_key;
+        $this->cc_id = $case->cc_id;
+        $this->cc_name = $case->cc_name;
+        $this->cc_dep_id = $case->cc_dep_id;
+        $this->cc_allow_to_select = $case->cc_allow_to_select;
+        $this->cc_system = $case->cc_system;
+        $this->cc_enabled = $case->cc_enabled;
     }
 
     /**
@@ -70,10 +93,10 @@ class CaseCategoryCreateForm extends Model
                 'pattern' => '/^[a-z0-9_]+$/',
                 'message' => 'Key can only contain alphanumeric characters, underscores.'
             ],
-            ['cc_key', 'unique'],
+            ['cc_key', 'unique', 'on' => self::SCENARIO_CREATE],
             ['cc_name', 'required'],
             ['cc_name', 'string', 'max' => 255],
-            ['cc_name', 'unique'],
+            ['cc_name', 'unique', 'on' => self::SCENARIO_CREATE],
 
             ['cc_dep_id', 'required'],
             ['cc_dep_id', 'integer'],
@@ -82,7 +105,8 @@ class CaseCategoryCreateForm extends Model
                 'exist',
                 'skipOnError' => true,
                 'targetClass' => Department::class,
-                'targetAttribute' => ['cc_dep_id' => 'dep_id']
+                'targetAttribute' => ['cc_dep_id' => 'dep_id'],
+                'on' => self::SCENARIO_CREATE
             ],
 
             [['cc_system', 'cc_enabled'], 'boolean'],
@@ -90,6 +114,14 @@ class CaseCategoryCreateForm extends Model
             [['cc_lft', 'cc_rgt', 'cc_depth', 'cc_tree'], 'integer'],
             [['cc_lft', 'cc_rgt', 'cc_depth', 'cc_tree', 'parentCategoryId'], 'safe'],
             ['cc_allow_to_select', 'boolean'],
+        ];
+    }
+
+    public function scenarios(): array
+    {
+        return [
+          self::SCENARIO_CREATE => ['cc_key', 'cc_name', 'cc_dep_id', 'cc_system', 'cc_enabled', 'cc_lft', 'cc_rgt', 'cc_depth', 'cc_tree', 'parentCategoryId', 'cc_allow_to_select'],
+          self::SCENARIO_UPDATE => ['cc_key','cc_name', 'cc_dep_id', 'cc_system', 'cc_enabled', 'cc_lft', 'cc_rgt', 'cc_depth', 'cc_tree', 'parentCategoryId', 'cc_allow_to_select'],
         ];
     }
 
