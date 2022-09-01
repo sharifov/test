@@ -5354,6 +5354,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             'chd' => $this->children,
             'inf' => $this->infants,
             'leadId' => $this->id,
+            'a' => $this->employee_id,
             //TODO: refactor, use singleton, get from container doesn't work
             //'redirectUrl' => urlencode(base64_encode($settings['redirectUrl']))
         ] + $flexParams;
