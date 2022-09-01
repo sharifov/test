@@ -165,10 +165,12 @@ $tsEndUtc = strtotime($event->uss_end_utc_dt);
 
                         [
                             'attribute' => 'ut_status_id',
-                            'contentOptions' => ['class' => 'status-column'],
                             'value' => static function (UserTask $model) {
                                 $result = UserTaskHelper::statusLabel($model->ut_status_id);
-                                $result .= ($model->isDeadline()) ? '<p class="status-column__deadline-symb"><i class="fa fa-times-circle"></i></p>' : '';
+
+                                if ($model->isDeadline()) {
+                                    $result .= '<p class="text-center mt-2 text-danger"><i class="fa fa-times-circle"></i></p>';
+                                }
 
                                 return $result;
                             },
@@ -275,17 +277,3 @@ $tsEndUtc = strtotime($event->uss_end_utc_dt);
     <?php endif; ?>
 
 </div>
-
-
-<?php
-
-$css = <<<CSS
-    .status-column__deadline-symb {
-        text-align: center;
-        margin-top: 5px;
-        font-size: 18px;
-        color: red;
-    }
-CSS;
-
-$this->registerCss($css);
