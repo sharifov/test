@@ -4,10 +4,11 @@ namespace src\model\dbDataSensitive\repository;
 
 use common\models\DbDataSensitive;
 use src\repositories\AbstractRepositoryWithEvent;
-use yii\db\ActiveRecordInterface;
 
 /**
  * Repository for `db_data_sensitive`
+ *
+ * @property DbDataSensitive $model
  */
 class DbDataSensitiveRepository extends AbstractRepositoryWithEvent
 {
@@ -16,7 +17,7 @@ class DbDataSensitiveRepository extends AbstractRepositoryWithEvent
         parent::__construct($model);
     }
 
-    public function getModel(): ActiveRecordInterface
+    public function getModel(): DbDataSensitive
     {
         return $this->model;
     }
