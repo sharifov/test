@@ -9,7 +9,7 @@ use yii\db\Migration;
 class m220607_053422_create_db_data_sensitive_table extends Migration
 {
     private const DEFAULT_KEY = 'view';
-    public const SOURCE = [
+    private const SOURCE = [
         'contact_phone_list' => ['cpl_phone_number'],
         'phone_blacklist' => ['pbl_phone'],
         'email_list' => ['el_email'],

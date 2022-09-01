@@ -9,8 +9,6 @@ use common\models\DbDataSensitive;
  */
 class m220831_070922_add_db_is_system_column_to_db_data_sensitive_table extends Migration
 {
-    const TABLE_NAME = '{{%db_data_sensitive}}';
-
     /**
      * {@inheritdoc}
      */
