@@ -85,12 +85,19 @@ class ObjectTaskService
                     }
                 }
 
-                $scenario->process();
+                try {
+                    $scenario->process();
+                } catch (\Throwable $exception) {
+                    Yii::error(
+                        AppHelper::throwableLog($exception),
+                        'ObjectTaskService:runScenario'
+                    );
+                }
             }
         }
     }
 
-    public static function cancelJobs(string $scenarioKey, string $object, int $objectId): void
+    public static function cancelJobs(string $scenarioKey, string $object, int $objectId, ?string $description = null): void
     {
         $objectTaskScenario = ObjectTaskScenario::find()
             ->where([
@@ -111,7 +118,9 @@ class ObjectTaskService
         if (!empty($pendingObjectTaskList)) {
             foreach ($pendingObjectTaskList as $objectTask) {
                 try {
-                    $objectTask->setCanceledStatus();
+                    $objectTask->setCanceledStatus(
+                        $description
+                    );
 
                     (new ObjectTaskRepository($objectTask))->save();
                 } catch (\Throwable $e) {

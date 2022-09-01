@@ -23,7 +23,8 @@ class NoAnswerProtocolCancelListener
                 ObjectTaskService::cancelJobs(
                     NoAnswer::KEY,
                     ObjectTaskService::OBJECT_LEAD,
-                    $lead->id
+                    $lead->id,
+                    'Canceled by lead status change'
                 );
             } catch (\Throwable $e) {
                 Yii::error(

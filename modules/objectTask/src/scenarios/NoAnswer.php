@@ -10,6 +10,7 @@ use modules\objectTask\src\jobs\CommandExecutorJob;
 use modules\objectTask\src\scenarios\statements\NoAnswerDto;
 use modules\objectTask\src\scenarios\statements\NoAnswerObject;
 use modules\objectTask\src\services\ObjectTaskService;
+use modules\objectTask\src\services\ObjectTaskStatusLogService;
 use src\helpers\app\AppHelper;
 use src\helpers\DateHelper;
 use src\repositories\lead\LeadRepository;
@@ -108,8 +109,25 @@ class NoAnswer extends BaseScenario
                                 $groupHash
                             );
 
+                            $objectTask->setPendingStatus();
+
                             (new ObjectTaskRepository($objectTask))->save();
+
+                            /** @fflag FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE, Object Task status log enable */
+                            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE) === true) {
+                                ObjectTaskStatusLogService::createLog(
+                                    $uuid,
+                                    ObjectTask::STATUS_PENDING,
+                                    null,
+                                    'Created by noAnswer protocol'
+                                );
+                            }
                         } catch (\Exception $exception) {
+                            Yii::error(
+                                AppHelper::throwableLog($exception),
+                                'NoAnswer:process'
+                            );
+
                             Yii::$app->queue_db->remove($queueID);
 
                             throw $exception;
@@ -207,7 +225,8 @@ class NoAnswer extends BaseScenario
             ObjectTaskService::cancelJobs(
                 self::KEY,
                 ObjectTaskService::OBJECT_LEAD,
-                $lead->id
+                $lead->id,
+                'Client has answered'
             );
 
             if ($lead->status !== Lead::CALL_STATUS_PROCESS) {

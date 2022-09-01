@@ -4,6 +4,7 @@ namespace modules\objectTask\src\entities;
 
 use common\models\Lead;
 use common\models\Queue;
+use modules\objectTask\src\events\ObjectTaskStatusChangeEvent;
 use src\entities\EventTrait;
 use Yii;
 use yii\behaviors\BlameableBehavior;
@@ -160,8 +161,7 @@ class ObjectTask extends \yii\db\ActiveRecord
         int $objectID,
         string $command,
         string $executionDt,
-        string $groupHash,
-        int $status = self::STATUS_PENDING
+        string $groupHash
     ): self {
         $model = new self();
         $model->ot_uuid = $uuid;
@@ -170,36 +170,52 @@ class ObjectTask extends \yii\db\ActiveRecord
         $model->ot_object = $object;
         $model->ot_object_id = $objectID;
         $model->ot_command = $command;
-        $model->ot_status = $status;
         $model->ot_group_hash = $groupHash;
         $model->ot_execution_dt = $executionDt;
+        $model->ot_status = self::STATUS_CANCELED;
+
 
         return $model;
     }
 
-    public function setPendingStatus(): void
+    public function setPendingStatus(?string $description = null): void
     {
         $this->ot_status = self::STATUS_PENDING;
+        $this->recordStatusChangeEvent($description);
     }
 
-    public function setInProgressStatus(): void
+    public function setInProgressStatus(?string $description = null): void
     {
         $this->ot_status = self::STATUS_IN_PROGRESS;
+        $this->recordStatusChangeEvent($description);
     }
 
-    public function setDoneStatus(): void
+    public function setDoneStatus(?string $description = null): void
     {
         $this->ot_status = self::STATUS_DONE;
+        $this->recordStatusChangeEvent($description);
     }
 
-    public function setCanceledStatus(): void
+    public function setCanceledStatus(?string $description = null): void
     {
         $this->ot_status = self::STATUS_CANCELED;
+        $this->recordStatusChangeEvent($description);
     }
 
-    public function setFailedStatus(): void
+    public function setFailedStatus(?string $description = null): void
     {
         $this->ot_status = self::STATUS_FAILED;
+        $this->recordStatusChangeEvent($description);
+    }
+
+    private function recordStatusChangeEvent(?string $description = null): void
+    {
+        /** @fflag FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE, Object Task status log enable */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE) === true) {
+            $this->recordEvent(
+                new ObjectTaskStatusChangeEvent($this->ot_uuid, $this->ot_status, $this->getOldAttribute('ot_status'), $description)
+            );
+        }
     }
 
     public static function getStatusList(array $excludeStatusList = []): array
