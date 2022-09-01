@@ -243,13 +243,14 @@ $tsEndUtc = strtotime($event->uss_end_utc_dt);
                             'label' => 'Deadline',
                             'value' => static function (UserTask $model) {
                                 if ($model->isProcessing()) {
-                                    return $model->isDeadline() ? Html::tag(
+                                    return UserTaskHelper::getDeadlineTimer($model->ut_start_dt, $model->ut_end_dt);
+                                } elseif ($model->isDeadline() || $model->isFailed()) {
+                                    return Html::tag(
                                         'span',
                                         'Deadline',
                                         ['title' => \Yii::$app->formatter->asRelativeTime(strtotime($model->ut_end_dt)),
                                             'class' => 'badge badge-danger']
-                                    ) :
-                                        UserTaskHelper::getDeadlineTimer($model->ut_start_dt, $model->ut_end_dt);
+                                    );
                                 }
 
                                 return '-';

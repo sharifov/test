@@ -43,11 +43,13 @@ class UserTask extends \yii\db\ActiveRecord
     public const STATUS_PROCESSING = 1;
     public const STATUS_COMPLETE = 2;
     public const STATUS_CANCEL = 3;
+    public const STATUS_FAILED = 4;
 
     public const STATUS_LIST = [
         self::STATUS_PROCESSING => 'Processing',
         self::STATUS_COMPLETE => 'Complete',
         self::STATUS_CANCEL => 'Cancel',
+        self::STATUS_FAILED => 'Failed',
     ];
 
     public const PRIORITY_LOW = 1;
@@ -229,6 +231,14 @@ class UserTask extends \yii\db\ActiveRecord
         return $this;
     }
 
+    public function setStatusFailed(): self
+    {
+        $this->ut_status_id = self::STATUS_FAILED;
+        $this->recordStatusChangeEvent();
+
+        return $this;
+    }
+
     /**
      * @return bool
      */
@@ -279,6 +289,11 @@ class UserTask extends \yii\db\ActiveRecord
     public function isCanceled(): bool
     {
         return $this->ut_status_id === self::STATUS_CANCEL;
+    }
+
+    public function isFailed(): bool
+    {
+        return $this->ut_status_id === self::STATUS_FAILED;
     }
 
     public function setOwner(int $newOwnerId): UserTask

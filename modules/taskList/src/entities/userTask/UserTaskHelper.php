@@ -13,6 +13,7 @@ class UserTaskHelper
         UserTask::STATUS_PROCESSING => 'info',
         UserTask::STATUS_COMPLETE => 'success',
         UserTask::STATUS_CANCEL => 'warning',
+        UserTask::STATUS_FAILED => 'danger',
     ];
 
     public const PRIORITY_LIST_LABEL_MAP = [
