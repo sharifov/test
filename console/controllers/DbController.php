@@ -46,6 +46,7 @@ use yii\helpers\Json;
 use yii\helpers\VarDumper;
 use src\model\airline\service\AirlineService;
 use common\models\DbDataSensitiveDictionary;
+use src\model\dbDataSensitive\repository\DbDataSensitiveRepository;
 
 /**
  * Class DbController
@@ -59,11 +60,15 @@ class DbController extends Controller
         '\\common\\models\\',
         '\\frontend\\models\\'
     ];
-    /**
-     * @var GlobalEntityAttributeFormatServiceService
-     */
+
+    /** @var GlobalEntityAttributeFormatServiceService  */
     private $globalLogFormatAttrService;
+
+    /** @var DbDataSensitiveService  */
     private DbDataSensitiveService $dbDataSensitiveService;
+
+    /** @var DbDataSensitiveRepository  */
+    private DbDataSensitiveRepository $dbDataSensitiveRepository;
 
     /**
      * DbController constructor.
@@ -72,11 +77,18 @@ class DbController extends Controller
      * @param GlobalEntityAttributeFormatServiceService $globalLogFormatAttrService
      * @param array $config
      */
-    public function __construct($id, $module, GlobalEntityAttributeFormatServiceService $globalLogFormatAttrService, DbDataSensitiveService $dbDataSensitiveService, $config = [])
-    {
+    public function __construct(
+        $id,
+        $module,
+        GlobalEntityAttributeFormatServiceService $globalLogFormatAttrService,
+        DbDataSensitiveService $dbDataSensitiveService,
+        DbDataSensitiveRepository $dbDataSensitiveRepository,
+        $config = []
+    ) {
         parent::__construct($id, $module, $config);
         $this->globalLogFormatAttrService = $globalLogFormatAttrService;
         $this->dbDataSensitiveService = $dbDataSensitiveService;
+        $this->dbDataSensitiveRepository = $dbDataSensitiveRepository;
     }
 
     public function actionUpdateCaseLastAction()
@@ -1524,14 +1536,8 @@ ORDER BY lf.lead_id, id';
             $this->dbDataSensitiveService->dropViews($sensitiveEntity);
 
             $this->printInfo('3/4 Update source of default db_data_sensetive', $this->action->id, Console::BG_GREEN);
-            $sensitiveEntity->load([
-                'dda_source' => DbDataSensitiveDictionary::SOURCE
-            ]);
-            $isSuccessSaved = $sensitiveEntity->save();
-
-            if (!$isSuccessSaved) {
-                throw new \RuntimeException('Cant update source of default db_data_sensetive');
-            }
+            $sensitiveEntity->dda_source = DbDataSensitiveDictionary::SOURCE;
+            $this->dbDataSensitiveRepository->save($sensitiveEntity);
 
             $this->printInfo('4/4 Regeneration default views', $this->action->id, Console::BG_GREEN);
             $this->dbDataSensitiveService->createViews($sensitiveEntity);
