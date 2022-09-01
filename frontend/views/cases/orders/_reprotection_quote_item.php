@@ -79,7 +79,7 @@ $productQuoteAbacDto->mapOrderAttributes($order);
 
     <!--                    <td>--><?php //=\yii\helpers\VarDumper::dumpAsString($quote->attributes, 10, true)?><!--</td>-->
 
-    <td><?=Html::encode($quote->getBookingId())?></td>
+    <td><?=Html::encode($quote->getChildOrBaseBookingId())?></td>
     <td><?= ProductQuoteStatus::asFormat($quote->pq_status_id)?></td>
     <td><?= ($quote->getProductQuoteOptionsCount() ?: '-') ?></td>
     <td><?=$quote->pq_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($quote->pq_created_dt)) : '-'?></td>

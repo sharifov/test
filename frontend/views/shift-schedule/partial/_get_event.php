@@ -166,7 +166,13 @@ $tsEndUtc = strtotime($event->uss_end_utc_dt);
                         [
                             'attribute' => 'ut_status_id',
                             'value' => static function (UserTask $model) {
-                                return UserTaskHelper::statusLabel($model->ut_status_id);
+                                $result = UserTaskHelper::statusLabel($model->ut_status_id);
+
+                                if ($model->isDeadline()) {
+                                    $result .= '<p class="text-center mt-2 text-danger"><i class="fa fa-times-circle"></i></p>';
+                                }
+
+                                return $result;
                             },
                             'format' => 'raw',
                             'filter' => UserTask::STATUS_LIST,
