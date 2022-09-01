@@ -20,7 +20,7 @@ interface EmailServiceInterface
 
     public function updateAfterReview(EmailReviewQueueForm $form, $email);
 
-    public function createFromDTO(EmailDTO $emailDTO, $autoDetectEmpty = true);
+    public function createFromDTO(EmailDTO $emailDTO, bool $autoDetectEmpty = true);
 
     public function create(EmailForm $form);
 
