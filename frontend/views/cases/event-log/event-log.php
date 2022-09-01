@@ -59,7 +59,8 @@ use modules\cases\src\abac\dto\CasesAbacDto;
 //                ],
                 [
                     'attribute' => 'cel_description',
-                    'enableSorting' => false
+                    'enableSorting' => false,
+                    'format' => 'raw',
                 ],
                 [
                     'attribute' => 'cel_created_dt',

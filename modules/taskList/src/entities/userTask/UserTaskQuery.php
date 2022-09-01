@@ -64,14 +64,15 @@ class UserTaskQuery
      * @param int $userId
      * @param string $startDt
      * @param string $endDt
+     * @param array $statusList
      * @return UserTaskScopes
      */
-    private static function getQueryTaskListByUser(int $userId, string $startDt, string $endDt): UserTaskScopes
+    private static function getQueryTaskListByUser(int $userId, string $startDt, string $endDt, array $statusList): UserTaskScopes
     {
         $startDateTime = date('Y-m-d H:i', strtotime($startDt));
         $endDateTime = date('Y-m-d H:i', strtotime($endDt));
 
-        return UserTask::find()
+        $userTasks = UserTask::find()
             ->andWhere([
                 'OR',
                 ['between', 'ut_start_dt', $startDateTime, $endDateTime],
@@ -88,17 +89,24 @@ class UserTaskQuery
                 ]
             ])
             ->andWhere(['ut_user_id' => $userId]);
+
+        if (!empty($statusList)) {
+            return $userTasks->andWhere(['IN', 'ut_status_id', $statusList]);
+        }
+
+        return $userTasks;
     }
 
     /**
      * @param int $userId
      * @param string $startDt
      * @param string $endDt
+     * @param array $statusList
      * @return array
      */
-    public static function getTaskListByUser(int $userId, string $startDt, string $endDt): array
+    public static function getTaskListByUser(int $userId, string $startDt, string $endDt, array $statusList = []): array
     {
-        return self::getQueryTaskListByUser($userId, $startDt, $endDt)->all();
+        return self::getQueryTaskListByUser($userId, $startDt, $endDt, $statusList)->all();
     }
 
 

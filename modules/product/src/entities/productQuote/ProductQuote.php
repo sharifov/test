@@ -1184,6 +1184,15 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $bookingId;
     }
 
+    public function getChildOrBaseBookingId(): string
+    {
+        $bookingId = '';
+        if ($this->isFlight()) {
+            $bookingId = $this->flightQuote->getChildOrBaseBookingId();
+        }
+        return $bookingId;
+    }
+
     public function getLastBookingId(): ?string
     {
         if ($this->isFlight()) {
