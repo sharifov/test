@@ -1133,6 +1133,18 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ],
                     ],
                     [
+                        'label' => 'Object Task Status Logs',
+                        'url' => ['/object-task/object-task-status-log/index'],
+                        /** @abac ObjectTaskObject::ACT_OBJECT_TASK_STATUS_LOG, ObjectTaskObject::ACTION_ACCESS, Access to page /object-task/object-task-status-log/index */
+                        'abac' => [
+                            'dto' => null,
+                            'object' => ObjectTaskObject::ACT_OBJECT_TASK_STATUS_LOG,
+                            'action' => LeadAbacObject::ACTION_ACCESS
+                        ],
+                        /** @fflag FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE, Object Task status log enable */
+                        'visible' => \Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE),
+                    ],
+                    [
                         'label' => 'Object Task Scenarios',
                         'url' => ['/object-task/object-task-scenario/index'],
                         /** @abac ObjectTaskObject::ACT_OBJECT_TASK_SCENARIO, ObjectTaskObject::ACTION_ACCESS, Access to page /object-task/object-task-scenario/index */
