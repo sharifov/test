@@ -598,7 +598,7 @@ class FlightQuoteRefundController extends ApiBaseController
         } catch (\RuntimeException | \DomainException $e) {
             $flightRequest->statusToError();
             $flightRequest->save();
-            \Yii::error([
+            \Yii::warning([
                 'message' => $e->getMessage(),
             ], 'FlightQuoteRefundController:actionCreate:RuntimeException|DomainException');
             return $this->endApiLog(new ErrorResponse(

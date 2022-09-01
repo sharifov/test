@@ -39,6 +39,8 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
     public const UI_DISPLAY_QUOTE_SEARCH_PARAMS = self::NS . 'ui/quote/search/params';
     public const UI_DISPLAY_MARKETING_SOURCE = self::NS . 'ui/block/marketing_source';
     public const CHANGE_SPLIT_TIPS  = self::NS . 'change_split_tips';
+    public const UI_DISPLAY_FORM_ID_INPUT  = self::NS . 'search_form/id_input';
+
 
     /** LOGIC PERMISSION */
     public const LOGIC_CLIENT_DATA   = self::NS . 'logic/client_data';
@@ -100,6 +102,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_CHANGE_OWNER => self::ACT_CHANGE_OWNER,
         self::ACT_TAKE_LEAD_FROM_CHAT => self::ACT_TAKE_LEAD_FROM_CHAT,
         self::OBJ_OBJECT_TASK => self::OBJ_OBJECT_TASK,
+        self::UI_DISPLAY_FORM_ID_INPUT => self::UI_DISPLAY_FORM_ID_INPUT,
     ];
 
     /** --------------- ACTIONS --------------------------- */
@@ -201,6 +204,7 @@ class LeadAbacObject extends AbacBaseModel implements AbacInterface
         self::ACT_CHANGE_OWNER => [self::ACTION_UPDATE],
         self::ACT_TAKE_LEAD_FROM_CHAT => [self::ACTION_ACCESS],
         self::OBJ_OBJECT_TASK => [self::ACTION_ACCESS],
+        self::UI_DISPLAY_FORM_ID_INPUT => [self::ACTION_ACCESS],
     ];
 
     public const ATTR_LEAD_IS_OWNER = [

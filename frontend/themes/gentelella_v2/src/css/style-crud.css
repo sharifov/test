@@ -5508,6 +5508,8 @@ input[disabled] + .radio-tab__text {
 
 .select2-container--krajee .select2-selection--single {
   height: 30px !important;
+  padding-right: 36px;
+  padding-left: 9px;
 }
 
 .select2-container--krajee .select2-selection--single .select2-selection__rendered,
@@ -5516,10 +5518,10 @@ input[disabled] + .radio-tab__text {
   font-size: 13px !important;
 }
 
-.select2-container--krajee .select2-selection__clear {
+/*.select2-container--krajee .select2-selection__clear {
   top: 7px !important;
 }
-
+*/
 .select2-container--krajee .select2-selection--single .select2-selection__arrow {
   border-left-color: #e4e9ee !important;
 }
@@ -5699,7 +5701,9 @@ input[disabled] + .radio-tab__text {
 
 /****** SELECT KRAJEE PLUGIN ******/
 .select2-container--krajee .select2-selection--single .select2-selection__clear {
-    right: 2rem;
+    right: 1.5rem;
+    line-height: 16px;
+    top: 4px;
 }
 /****** END SELECT KRAJEE PLUGIN ******/
 

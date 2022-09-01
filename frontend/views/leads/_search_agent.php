@@ -2,6 +2,7 @@
 
 use common\models\Quote;
 use kartik\select2\Select2;
+use modules\lead\src\abac\LeadAbacObject;
 use src\model\leadDataKey\entity\LeadDataKey;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -26,11 +27,16 @@ use yii\widgets\ActiveForm;
 
     <div class="row">
         <div class="col-md-3">
-
+            <?php
+            /** @abac LeadAbacObject::UI_DISPLAY_FORM_ID_INPUT, LeadAbacObject::ACTION_ACCESS, Access To ID Input In Search Form*/
+            $canViewSearchFormIdInput = Yii::$app->abac->can(null, LeadAbacObject::UI_DISPLAY_FORM_ID_INPUT, LeadAbacObject::ACTION_ACCESS);
+            ?>
             <div class="row">
-                <div class="col-md-3">
-                    <?= $form->field($model, 'id')->input('number', ['min' => 1]) ?>
-                </div>
+                <?php if ($canViewSearchFormIdInput) : ?>
+                    <div class="col-md-3">
+                        <?= $form->field($model, 'id')->input('number', ['min' => 1]) ?>
+                    </div>
+                <?php endif;?>
                 <div class="col-md-3">
                     <?= $form->field($model, 'uid')->textInput(['maxlength' => true]) ?>
                 </div>

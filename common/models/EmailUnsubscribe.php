@@ -82,4 +82,21 @@ class EmailUnsubscribe extends \yii\db\ActiveRecord
         $model->eu_project_id = $projectId;
         return $model;
     }
+
+    public static function emailInList(string $email, ?int $projectId = null): bool
+    {
+        $query = self::find()
+            ->where([
+                'eu_email' => $email,
+            ])
+            ->limit(1);
+
+        if ($projectId !== null) {
+            $query->andWhere([
+                'eu_project_id' => $projectId,
+            ]);
+        }
+
+        return $query->exists();
+    }
 }

@@ -810,6 +810,29 @@ class FlightQuote extends ActiveRecord implements Quotable, ProductDataInterface
         return implode(', ', $bookingData);
     }
 
+    /**
+     * @return string
+     */
+    public function getChildOrBaseBookingId(): string
+    {
+        $bookingData = [];
+
+        if ($this->flightQuoteFlights) {
+            foreach ($this->flightQuoteFlights as $fqFlight) {
+                if ($fqFlight) {
+                    if (!empty($fqFlight->fqf_child_booking_id)) {
+                        $bookingData[] = $fqFlight->fqf_child_booking_id;
+                    } else {
+                        if (!empty($fqFlight->fqf_booking_id)) {
+                            $bookingData[] = $fqFlight->fqf_booking_id;
+                        }
+                    }
+                }
+            }
+        }
+        return implode(', ', $bookingData);
+    }
+
     public function getLastBookingId(): ?string
     {
         $bookingId = FlightQuoteFlight::find()->select(['fqf_booking_id'])->andWhere(['fqf_fq_id' => $this->fq_id])->orderBy(['fqf_id' => SORT_DESC])->scalar();
