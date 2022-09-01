@@ -172,8 +172,6 @@ class ObjectTask extends \yii\db\ActiveRecord
         $model->ot_command = $command;
         $model->ot_group_hash = $groupHash;
         $model->ot_execution_dt = $executionDt;
-        $model->ot_status = self::STATUS_CANCELED;
-
 
         return $model;
     }
