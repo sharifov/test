@@ -792,7 +792,7 @@ class LeadViewController extends FController
             }
             if (Yii::$app->getSession()->hasFlash('warning')) {
                 $message = [];
-                foreach (Yii::$app->getSession()->getFlash('warning') as $flash) {
+                foreach ((array)Yii::$app->getSession()->getFlash('warning') as $flash) {
                     $message[] = $flash;
                 }
                 return ['success' => true, 'message' => implode(PHP_EOL, $message)];

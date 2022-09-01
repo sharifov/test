@@ -166,7 +166,13 @@ $tsEndUtc = strtotime($event->uss_end_utc_dt);
                         [
                             'attribute' => 'ut_status_id',
                             'value' => static function (UserTask $model) {
-                                return UserTaskHelper::statusLabel($model->ut_status_id);
+                                $result = UserTaskHelper::statusLabel($model->ut_status_id);
+
+                                if ($model->isDeadline()) {
+                                    $result .= '<p class="text-center mt-2 text-danger"><i class="fa fa-times-circle"></i></p>';
+                                }
+
+                                return $result;
                             },
                             'format' => 'raw',
                             'filter' => UserTask::STATUS_LIST,
@@ -241,13 +247,17 @@ $tsEndUtc = strtotime($event->uss_end_utc_dt);
                         [
                             'label' => 'Deadline',
                             'value' => static function (UserTask $model) {
-                                return $model->isDeadline() ? Html::tag(
-                                    'span',
-                                    'Deadline',
-                                    ['title' => \Yii::$app->formatter->asRelativeTime(strtotime($model->ut_end_dt)),
-                                        'class' => 'badge badge-danger']
-                                ) :
-                                    UserTaskHelper::getDeadlineTimer($model->ut_start_dt, $model->ut_end_dt);
+                                if ($model->isProcessing()) {
+                                    return $model->isDeadline() ? Html::tag(
+                                        'span',
+                                        'Deadline',
+                                        ['title' => \Yii::$app->formatter->asRelativeTime(strtotime($model->ut_end_dt)),
+                                            'class' => 'badge badge-danger']
+                                    ) :
+                                        UserTaskHelper::getDeadlineTimer($model->ut_start_dt, $model->ut_end_dt);
+                                }
+
+                                return '-';
                             },
                             'format' => 'raw',
                         ],

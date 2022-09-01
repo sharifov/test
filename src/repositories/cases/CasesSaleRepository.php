@@ -69,7 +69,7 @@ class CasesSaleRepository
         $caseSale->css_sale_data = $saleData;
         $caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
         $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
-        $caseSale->css_sale_book_id = $saleData['bookingId'] ?? null;
+        $caseSale->css_sale_book_id = $saleData['baseBookingId'] ?? $saleData['bookingId'] ?? null;
         $caseSale->css_sale_pax = isset($saleData['passengers']) && is_array($saleData['passengers']) ? count($saleData['passengers']) : null;
         $caseSale->css_sale_data_updated = $saleData;
         $caseSale->css_need_sync_bo = 0;

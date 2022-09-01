@@ -19,6 +19,16 @@ ansible-playbook shared.yml \
     --private-key $HOME/.ssh/aws-dev-ssh.pem
 ```
 
+# Provision ClickHouse server (10 minutes)
+
+```
+ansible-playbook clickhouse.yml \
+    -i inventories/dev/aws_ec2.yml \
+    --vault-password-file=$HOME/.ansible/vaultfile-dev \
+    --private-key $HOME/.ssh/aws-dev-ssh.pem
+    --tags clickhouse
+```
+
 # Deploy a test release (2 minutes)
 
 ```

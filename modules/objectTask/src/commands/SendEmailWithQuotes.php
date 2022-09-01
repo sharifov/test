@@ -15,6 +15,7 @@ use modules\objectTask\src\entities\ObjectTask;
 use src\dto\email\EmailDTO;
 use src\dto\searchService\SearchServiceQuoteDTO;
 use src\helpers\app\AppHelper;
+use src\helpers\lead\LeadHelper;
 use src\quoteCommunication\Repo;
 use src\repositories\quote\QuoteRepository;
 use src\services\email\EmailMainService;
@@ -24,6 +25,7 @@ use src\services\quote\quotePriceService\ClientQuotePriceService;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
+use yii\helpers\VarDumper;
 
 class SendEmailWithQuotes extends BaseCommand
 {
@@ -99,6 +101,20 @@ class SendEmailWithQuotes extends BaseCommand
 
         if ($quoteAmount <= 0) {
             throw new \Exception("The number of quotas is less than or equal to zero");
+        }
+
+        /** @fflag FFlag::FF_KEY_NO_ANSWER_PROTOCOL_CHECK_EMAIL_IN_UNSUBSCRIBE_LIST, No Answer check email in unsubscribe list */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_NO_ANSWER_PROTOCOL_CHECK_EMAIL_IN_UNSUBSCRIBE_LIST) === true) {
+            $clientEmail = LeadHelper::getFirstEmailNotInUnsubscribeList($lead);
+
+            if ($clientEmail === null) {
+                Yii::warning(VarDumper::dumpAsString([
+                    'leadId' => $lead->id,
+                    'message' => "Lead email does not exist or is in the unsubscribed list",
+                ]), 'SendEmailWithQuotes:canProcess');
+
+                return false;
+            }
         }
 
         $newQuotes = $this->getUniqueQuotesForLeadFromApi($quoteAmount);
@@ -283,12 +299,18 @@ class SendEmailWithQuotes extends BaseCommand
             $projectContactInfo = Json::decode($project->contact_info);
         }
 
-        $clientEmail = ClientEmail::getFirstEmailByAllowedTypes(
-            $lead->client_id
-        );
+
+        /** @fflag FFlag::FF_KEY_NO_ANSWER_PROTOCOL_CHECK_EMAIL_IN_UNSUBSCRIBE_LIST, No Answer check email in unsubscribe list */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_NO_ANSWER_PROTOCOL_CHECK_EMAIL_IN_UNSUBSCRIBE_LIST) === true) {
+            $clientEmail = LeadHelper::getFirstEmailNotInUnsubscribeList($lead);
+        } else {
+            $clientEmail = ClientEmail::getFirstEmailByAllowedTypes(
+                $lead->client_id
+            );
+        }
 
         if ($clientEmail === null) {
-            throw new \Exception("Not found email for lead {$lead->id}");
+            throw new \Exception("Lead ({$lead->id}) email does not exist or is in the unsubscribed list");
         }
 
         $quoteIdList = ArrayHelper::getColumn($quotes, 'id');
