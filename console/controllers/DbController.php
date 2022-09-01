@@ -1536,7 +1536,9 @@ ORDER BY lf.lead_id, id';
             $this->dbDataSensitiveService->dropViews($sensitiveEntity);
 
             $this->printInfo('3/4 Update source of default db_data_sensetive', $this->action->id, Console::BG_GREEN);
-            $sensitiveEntity->dda_source = DbDataSensitiveDictionary::SOURCE;
+            $sensitiveEntity->load([
+                'dda_source' => DbDataSensitiveDictionary::SOURCE
+            ]);
             $this->dbDataSensitiveRepository->save($sensitiveEntity);
 
             $this->printInfo('4/4 Regeneration default views', $this->action->id, Console::BG_GREEN);

@@ -8,6 +8,7 @@ use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\BooleanColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\DbDataSensitiveSearch */
@@ -41,6 +42,11 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'class' => DateTimeColumn::class,
                 'attribute' => 'dda_updated_dt'
+            ],
+            [
+                'class' => BooleanColumn::class,
+                'attribute' => 'db_is_system',
+                'label' => 'Is System',
             ],
             [
                 'class' => ActionColumn::className(),

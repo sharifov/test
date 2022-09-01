@@ -19,6 +19,12 @@ class m220831_070922_add_db_is_system_column_to_db_data_sensitive_table extends 
             'db_is_system',
             $this->boolean()->defaultValue(false)->notNull()
         );
+
+        $this->update(static::TABLE_NAME, [
+            'db_is_system' => 1
+        ], [
+            'dda_key' => 'view'
+        ]);
     }
 
     /**
