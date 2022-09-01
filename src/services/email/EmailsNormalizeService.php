@@ -14,7 +14,6 @@ use src\entities\email\EmailBlob;
 use src\entities\email\EmailBody;
 use src\entities\email\EmailContact;
 use src\entities\email\EmailInterface;
-use src\entities\email\EmailLog;
 use src\entities\email\form\EmailForm;
 use src\entities\email\helpers\EmailContactType;
 use src\entities\email\helpers\EmailStatus;
@@ -22,22 +21,19 @@ use src\entities\email\helpers\EmailType;
 use src\forms\emailReviewQueue\EmailReviewQueueForm;
 use src\helpers\email\TextConvertingHelper;
 use Yii;
-use yii\helpers\ArrayHelper;
 
 /**
  *
  * Class EmailsNormalizeService
  *
  * @property EmailServiceHelper $helper
+ * @property int|null $userId
  *
  */
 class EmailsNormalizeService extends SendMail implements EmailServiceInterface
 {
-    protected $userId;
-    /**
-     * @var EmailServiceHelper
-     */
-    private $helper;
+    protected ?int $userId;
+    private EmailServiceHelper $helper;
 
     public function __construct(EmailServiceHelper $helper)
     {
@@ -45,12 +41,20 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
         $this->helper = $helper;
     }
 
-    public static function newInstance()
+    /**
+     * @return EmailsNormalizeService
+     * @throws \yii\base\InvalidConfigException
+     */
+    public static function newInstance(): EmailsNormalizeService
     {
         return new static(Yii::createObject(EmailServiceHelper::class));
     }
 
-    public static function getDataArrayFromOld(EmailOld $emailOld)
+    /**
+     * @param EmailOld $emailOld
+     * @return array
+     */
+    public static function getDataArrayFromOld(EmailOld $emailOld): array
     {
         $data = [
             'userId'        =>  $emailOld->e_created_user_id,
@@ -117,36 +121,35 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
         return $data;
     }
 
-    public function createEmailFromOld(EmailOld $emailOld)
+    /**
+     * @param EmailOld $emailOld
+     * @return Email
+     * @throws yii\db\Exception
+     * @throws yii\db\StaleObjectException
+     * @throws \Throwable
+     */
+    public function createEmailFromOld(EmailOld $emailOld): Email
     {
         $form = EmailForm::fromArray(self::getDataArrayFromOld($emailOld));
 
         return $this->create($form);
     }
 
-    public function getAddress(string $email, ?string $name = null, $update = false): EmailAddress
-    {
-        $attributes = [
-            'ea_email' => $email,
-            'ea_name' => preg_replace('~\"(.*)\"~iU', "$1", $name),
-        ];
-        $address = EmailAddress::findOneOrNew(['ea_email' => $email]);
-        if ($address->isNewRecord || $update) {
-            $address->attributes = $attributes;
-            $address->save();
-        }
-
-        return $address;
-    }
-
+    /**
+     * @return bool|int|string|null
+     */
     public static function getOldTotal()
     {
         return EmailOld::find()->count();
     }
 
-    public static function getTotalConnectedWithOld()
+    /**
+     * @return int|null
+     * @throws yii\db\Exception
+     */
+    public static function getTotalConnectedWithOld(): ?int
     {
-        $connection = \Yii::$app->getDb();
+        $connection = Yii::$app->getDb();
         $command = $connection->createCommand(
             "SELECT COUNT(emo.e_id)
              FROM `" . Email::tableName() . "` emn
@@ -155,9 +158,16 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
         return $command->queryScalar();
     }
 
-    public function create(EmailForm $form)
+    /**
+     * @param EmailForm $form
+     * @return Email
+     * @throws yii\db\Exception
+     * @throws \Throwable
+     * @throws yii\db\StaleObjectException
+     */
+    public function create(EmailForm $form): Email
     {
-        $transaction = \Yii::$app->db->beginTransaction();
+        $transaction = Yii::$app->db->beginTransaction();
 
         try {
             //=Email
@@ -172,6 +182,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
                 'e_updated_dt' => $form->updatedDt ?? date('Y-m-d H:i:s'),
                 'e_is_deleted' => $form->isDeleted ?? 0,
             ];
+            /** @var Email $email */
             $email = Email::create($emailData);
             //=!Email
 
@@ -245,7 +256,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
             }
             //=!link Reply
 
-            if ($email->getMessageId() === null) {
+            if (null === $email->getMessageId()) {
                 $email->setMessageId();
             }
 
@@ -258,9 +269,16 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
         return $email;
     }
 
-    public function update($email, EmailForm $form)
+    /**
+     * @param $email
+     * @param EmailForm $form
+     * @return Email
+     * @throws yii\db\Exception
+     * @throws \Throwable
+     */
+    public function update($email, EmailForm $form): Email
     {
-        $transaction = \Yii::$app->db->beginTransaction();
+        $transaction = Yii::$app->db->beginTransaction();
 
         try {
             //=update Email
@@ -307,7 +325,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
                 if (EmailContactType::isRequired($contactForm->type)) { // TO OR FROM
                     if (isset($contactForm->id) && !empty($contactForm->id)) {
                         $contact = EmailContact::findOne($contactForm->id);
-                    } else{
+                    } else {
                         $contact = EmailContact::findOne([
                             'ec_email_id' => $email->e_id,
                             'ec_type_id' => $contactForm->type
@@ -374,7 +392,7 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
      * @param Email $email
      * @return array
      */
-    protected function generateContentData(EmailInterface $email)
+    protected function generateContentData(EmailInterface $email): array
     {
         $content_data['email_body_html'] = $email->emailBody->getBodyHtml();
         $content_data['email_body_text'] = $email->emailBody->embd_email_body_text;
@@ -401,7 +419,12 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
         return $this->sendToCommunication($email, $contentData, $data);
     }
 
-    public function updataAfterSendMail(Email $email, $requestData)
+    /**
+     * @param Email $email
+     * @param $requestData
+     * @return void
+     */
+    public function updateAfterSendMail(Email $email, $requestData)
     {
         if ($requestData && isset($requestData['eq_status_id'])) {
             $email->updateAttributes([
@@ -412,9 +435,14 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
         }
     }
 
-    public function getDataArrayFromPreviewForm(EmailPreviewFromInterface $previewEmailForm, array $attachments = [])
+    /**
+     * @param EmailPreviewFromInterface $previewEmailForm
+     * @param array $attachments
+     * @return array
+     */
+    public function getDataArrayFromPreviewForm(EmailPreviewFromInterface $previewEmailForm, array $attachments = []): array
     {
-        $data = [
+        return [
             'userId'        =>  $this->userId,
             'type'          =>  EmailType::OUTBOX,
             'status'        =>  EmailStatus::PENDING,
@@ -441,11 +469,18 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
                 ],
             ]
         ];
-
-        return $data;
     }
 
-    public function createFromLead(EmailPreviewFromInterface $previewEmailForm, Lead $lead, array $attachments = [], $emailId = null): Email
+    /**
+     * @param EmailPreviewFromInterface $previewEmailForm
+     * @param Lead $lead
+     * @param array $attachments
+     * @param int|null $emailId
+     * @return Email
+     * @throws \Throwable
+     * @throws yii\db\Exception
+     */
+    public function createFromLead(EmailPreviewFromInterface $previewEmailForm, Lead $lead, array $attachments = [], ?int $emailId = null): Email
     {
         $data = $this->getDataArrayFromPreviewForm($previewEmailForm, $attachments);
         $data['projectId'] = $lead->project_id;
@@ -456,7 +491,16 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
         return $this->create(EmailForm::fromArray($data));
     }
 
-    public function createFromCase(EmailPreviewFromInterface $previewEmailForm, Cases $case, array $attachments = [], $emailId = null): Email
+    /**
+     * @param EmailPreviewFromInterface $previewEmailForm
+     * @param Cases $case
+     * @param array $attachments
+     * @param int|null $emailId
+     * @return Email
+     * @throws \Throwable
+     * @throws yii\db\Exception
+     */
+    public function createFromCase(EmailPreviewFromInterface $previewEmailForm, Cases $case, array $attachments = [], ?int $emailId = null): Email
     {
         $data = $this->getDataArrayFromPreviewForm($previewEmailForm, $attachments);
         $data['projectId'] = $case->cs_project_id;
@@ -467,38 +511,48 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
         return $this->create(EmailForm::fromArray($data));
     }
 
-    public function updateAfterReview(EmailReviewQueueForm $form, $email)
-    {
-        try {
-            $data = [
-                'userId'        =>  $this->userId,
-                'status'        =>  EmailStatus::PENDING,
-                'body'  =>  [
-                    'subject'   =>  $form->emailSubject,
-                    'bodyHtml'  =>  $form->emailMessage,
-                ],
-                'contacts' => [
-                    'from' => [
-                        'email' => $form->emailFrom,
-                        'name'  =>  $form->emailFromName,
-                        'type' => EmailContactType::FROM,
-                    ],
-                    'to' => [
-                        'email' => $form->emailTo,
-                        'name'  =>  $form->emailToName,
-                        'type' => EmailContactType::TO,
-                    ],
-                ]
-            ];
-            $email = $this->update($email, EmailForm::fromArray($data));
-        } catch (\Throwable $e) {
-            throw $e;
-        }
 
-        return $email;
+    /**
+     * @param EmailReviewQueueForm $form
+     * @param Email $email
+     * @return Email
+     * @throws yii\db\Exception
+     * @throws \Throwable
+     */
+    public function updateAfterReview(EmailReviewQueueForm $form, $email): Email
+    {
+        $data = [
+            'userId'        =>  $this->userId,
+            'status'        =>  EmailStatus::PENDING,
+            'body'  =>  [
+                'subject'   =>  $form->emailSubject,
+                'bodyHtml'  =>  $form->emailMessage,
+            ],
+            'contacts' => [
+                'from' => [
+                    'email' => $form->emailFrom,
+                    'name'  =>  $form->emailFromName,
+                    'type' => EmailContactType::FROM,
+                ],
+                'to' => [
+                    'email' => $form->emailTo,
+                    'name'  =>  $form->emailToName,
+                    'type' => EmailContactType::TO,
+                ],
+            ]
+        ];
+        return $this->update($email, EmailForm::fromArray($data));
     }
 
-    public function createFromDTO(EmailDTO $emailDTO, $autoDetectEmpty = true): Email
+    /**
+     * @param EmailDTO $emailDTO
+     * @param bool $autoDetectEmpty
+     * @return Email
+     * @throws yii\db\Exception
+     * @throws \Throwable
+     * @throws yii\db\StaleObjectException
+     */
+    public function createFromDTO(EmailDTO $emailDTO, bool $autoDetectEmpty = true): Email
     {
         $clientId = $emailDTO->clientId ?? null;
         $leadId = $emailDTO->leadId ?? null;
@@ -559,6 +613,11 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
         return $this->create(EmailForm::fromArray($data));
     }
 
+    /**
+     * @param Email $email
+     * @param int $statusId
+     * @return void
+     */
     public function changeStatus(Email $email, int $statusId): void
     {
         if (EmailStatus::isDone($statusId)) {
