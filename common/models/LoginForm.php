@@ -8,6 +8,7 @@ use src\services\authentication\AntiBruteForceService;
 use Yii;
 use yii\base\Model;
 use yii\captcha\CaptchaValidator;
+use yii\db\Query;
 use yii\helpers\Url;
 use yii\helpers\VarDumper;
 use yii\web\IdentityInterface;
@@ -243,8 +244,14 @@ class LoginForm extends Model
      */
     public function getUserSecret()
     {
-        $user = $this->getUser();
-        return !is_null($user->userProfile) ? $user->userProfile->up_2fa_secret : null;
+        $result = (new Query())
+            ->select('t.up_2fa_secret')
+            ->from(['t' => UserProfile::tableName()])
+            ->leftJoin(['u' => Employee::tableName()], 'u.id=t.up_user_id')
+            ->where(['u.username' => $this->username])
+            ->one();
+
+        return isset($result['up_2fa_secret']) ? $result['up_2fa_secret'] : null;
     }
 
     /**
