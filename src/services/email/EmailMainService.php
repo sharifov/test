@@ -756,4 +756,28 @@ class EmailMainService implements EmailServiceInterface
 
         return ($calledFrom == self::FROM_OLD) ? $emailOld : $emailNorm ?? $email;
     }
+
+    /**
+     * @param Email|EmailNorm $email
+     * @return void
+     */
+    public function softDelete($email)
+    {
+        $isDeleted = $email->isDeleted();
+
+        $calledFrom = $this->getCalledFrom($email);
+        $emailOld = ($calledFrom == self::FROM_NORM) ? $this->setEmailObjById($email->e_id) : $email;
+        $emailOld->updateAttributes([
+            'e_is_deleted' => !$isDeleted
+        ]);
+
+        if ($this->normalizedService !== null) {
+            $emailNorm = ($calledFrom == self::FROM_OLD) ? $this->setEmailNormObjById($email->e_id) : $email;
+            if (isset($emailNorm)) {
+                $emailNorm->updateAttributes([
+                    'e_is_deleted' => !$isDeleted
+                ]);
+            }
+        }
+    }
 }
