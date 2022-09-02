@@ -59,8 +59,12 @@ class EmailService extends SendMail implements EmailServiceInterface
         return $content_data;
     }
 
-
-    public function sendMail(EmailInterface $email, array $data = [])
+    /**
+     * @param Email $email
+     * @param array $data
+     * @return mixed|null
+     */
+    public function sendMail($email, array $data = [])
     {
         $contentData = $this->generateContentData($email);
         return $this->sendToCommunication($email, $contentData, $data);
@@ -84,7 +88,8 @@ class EmailService extends SendMail implements EmailServiceInterface
     /**
      * @param EmailForm $form
      * @return Email
-     * @throws StaleObjectException|CreateModelException
+     * @throws StaleObjectException
+     * @throws CreateModelException
      */
     public function create(EmailForm $form): Email
     {
@@ -247,7 +252,8 @@ class EmailService extends SendMail implements EmailServiceInterface
      * @param Lead $lead
      * @param array $attachments
      * @return Email
-     * @throws StaleObjectException|CreateModelException
+     * @throws StaleObjectException
+     * @throws CreateModelException
      */
     public function createFromLead(EmailPreviewFromInterface $previewEmailForm, Lead $lead, array $attachments = []): Email
     {
@@ -269,7 +275,8 @@ class EmailService extends SendMail implements EmailServiceInterface
      * @param Cases $case
      * @param array $attachments
      * @return Email
-     * @throws StaleObjectException|CreateModelException
+     * @throws StaleObjectException
+     * @throws CreateModelException
      */
     public function createFromCase(EmailPreviewFromInterface $previewEmailForm, Cases $case, array $attachments = []): Email
     {
@@ -314,7 +321,8 @@ class EmailService extends SendMail implements EmailServiceInterface
      * @param EmailDTO $emailDTO
      * @param bool $autoDetectEmpty
      * @return Email
-     * @throws StaleObjectException|CreateModelException
+     * @throws StaleObjectException
+     * @throws CreateModelException
      */
     public function createFromDTO(EmailDTO $emailDTO, bool $autoDetectEmpty = true): Email
     {
