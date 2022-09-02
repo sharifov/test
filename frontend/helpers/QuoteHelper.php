@@ -5,6 +5,7 @@ namespace frontend\helpers;
 use common\models\Quote;
 use common\models\Airports;
 use common\models\Lead;
+use frontend\models\LeadForm;
 use Yii;
 use yii\helpers\VarDumper;
 
@@ -589,5 +590,54 @@ class QuoteHelper
         }
 
         return $isChanged;
+    }
+
+    public static function getClassLabelByPrice(float $price, bool $canQuoteMinPrice, int $minPrice = 0): string
+    {
+        if ($canQuoteMinPrice && ($price <= $minPrice)) {
+            return 'label-danger';
+        }
+        return 'label-info';
+    }
+
+    public static function getBorderColorByPrice(float $price, bool $canQuoteMinPrice, int $minPrice = 0): string
+    {
+        if ($canQuoteMinPrice && ($price <= $minPrice)) {
+            return '#e15554';
+        }
+        return '#82b9e2';
+    }
+
+    public static function isShowCheckbox(
+        LeadForm $leadForm,
+        bool $isManager,
+        Quote $model,
+        float $totalSelling,
+        bool $canQuoteMinPrice,
+        int $minPrice = 0
+    ): bool {
+        $check = (
+            $leadForm->mode !== $leadForm::VIEW_MODE || $isManager)
+            &&
+            in_array($model->status, [Quote::STATUS_CREATED, Quote::STATUS_SENT, Quote::STATUS_OPENED], true);
+
+        if ($canQuoteMinPrice) {
+            return $check && ($totalSelling > $minPrice);
+        }
+        return $check;
+    }
+
+    public static function isShowCheckout(
+        Quote $model,
+        float $totalSelling,
+        bool $canQuoteMinPrice,
+        int $minPrice = 0
+    ): bool {
+        $check = (!$model->isDeclined() && !$model->isAlternative() && !$model->isOriginal());
+
+        if ($canQuoteMinPrice) {
+            return $check && ($totalSelling > $minPrice);
+        }
+        return $check;
     }
 }

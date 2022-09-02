@@ -451,7 +451,7 @@ class ProductQuoteChange extends \yii\db\ActiveRecord
         return (int) $this->pqc_type_id === self::TYPE_RE_PROTECTION;
     }
 
-    public function isTypeVoluntary(): string
+    public function isTypeVoluntary(): bool
     {
         return (int) $this->pqc_type_id === self::TYPE_VOLUNTARY_EXCHANGE;
     }
