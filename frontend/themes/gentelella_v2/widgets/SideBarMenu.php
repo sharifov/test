@@ -12,6 +12,7 @@ use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\objectTask\src\abac\ObjectTaskObject;
+use modules\objectTask\src\services\ObjectTaskStatusLogService;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\services\UserShiftScheduleService;
@@ -1135,14 +1136,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                     [
                         'label' => 'Object Task Status Logs',
                         'url' => ['/object-task/object-task-status-log/index'],
-                        /** @abac ObjectTaskObject::ACT_OBJECT_TASK_STATUS_LOG, ObjectTaskObject::ACTION_ACCESS, Access to page /object-task/object-task-status-log/index */
-                        'abac' => [
-                            'dto' => null,
-                            'object' => ObjectTaskObject::ACT_OBJECT_TASK_STATUS_LOG,
-                            'action' => LeadAbacObject::ACTION_ACCESS
-                        ],
-                        /** @fflag FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE, Object Task status log enable */
-                        'visible' => \Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE),
+                        'visible' => ObjectTaskStatusLogService::linkIsVisibleInSidebar(),
                     ],
                     [
                         'label' => 'Object Task Scenarios',
