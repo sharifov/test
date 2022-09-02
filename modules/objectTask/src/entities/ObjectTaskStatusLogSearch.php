@@ -17,7 +17,8 @@ class ObjectTaskStatusLogSearch extends ObjectTaskStatusLog
     {
         return [
             [['otsl_id', 'otsl_old_status', 'otsl_new_status', 'otsl_created_user_id'], 'integer'],
-            [['otsl_ot_uuid', 'otsl_description', 'otsl_created_dt'], 'safe'],
+            [['otsl_ot_uuid', 'otsl_description'], 'safe'],
+            [['otsl_created_dt'], 'date', 'format' => 'php:Y-m-d'],
         ];
     }
 

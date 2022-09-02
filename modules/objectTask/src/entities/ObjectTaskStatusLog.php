@@ -42,7 +42,7 @@ class ObjectTaskStatusLog extends \yii\db\ActiveRecord
     {
         return [
             [['otsl_old_status', 'otsl_new_status', 'otsl_created_user_id'], 'integer'],
-            [['otsl_created_dt'], 'safe'],
+            [['otsl_created_dt'], 'date', 'format' => 'php:Y-m-d'],
             [['otsl_ot_uuid', 'otsl_description'], 'string', 'max' => 255],
             [['otsl_created_user_id'], 'exist', 'skipOnError' => true, 'skipOnEmpty' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['otsl_created_user_id' => 'id']],
             [['otsl_ot_uuid'], 'exist', 'skipOnError' => true, 'targetClass' => ObjectTask::class, 'targetAttribute' => ['otsl_ot_uuid' => 'ot_uuid']],
