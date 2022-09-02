@@ -459,6 +459,7 @@ class SendEmailWithQuotes extends BaseCommand
 
                 foreach ($quoteList as $quote) {
                     if (in_array($quote['key'], $selectedQuoteKeys) === false) {
+                        $quote['createTypeId'] = Quote::CREATE_TYPE_SMART_SEARCH;
                         if ($this->getNeedUniqueQuotes() === true) {
                             $quoteExists = Quote::find()
                                 ->where([
