@@ -14,6 +14,9 @@ use frontend\models\Log;
 class LogSearch extends Log
 {
     public $days;
+
+    public $excludedCategories;
+
     /**
      * @inheritdoc
      */
@@ -21,8 +24,9 @@ class LogSearch extends Log
     {
         return [
             [['id', 'level'], 'integer'],
-            [['category', 'prefix', 'message', 'log_time'], 'safe'],
-            [['days'], 'integer', 'min' => 0, 'max' => 365]
+            [['category', 'prefix', 'message', 'log_time', 'excludedCategories'], 'safe'],
+            [['days'], 'integer', 'min' => 0, 'max' => 365],
+            ['excludedCategories', 'each', 'rule' => ['string']]
         ];
     }
 
@@ -63,7 +67,9 @@ class LogSearch extends Log
         }
         $query->andFilterWhere(['like', 'category', $this->category])
             ->andFilterWhere(['like', 'prefix', $this->prefix])
-            ->andFilterWhere(['like', 'message', $this->message]);
+            ->andFilterWhere(['like', 'message', $this->message])
+            ->andFilterWhere(['NOT IN', 'category', $this->excludedCategories]);
+
         $query->orderBy(['id' => SORT_DESC]);
         return $dataProvider;
     }
