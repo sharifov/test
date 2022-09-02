@@ -1,5 +1,6 @@
 <?php
 
+use kartik\tree\TreeViewInput;
 use src\entities\cases\CaseCategory;
 use src\forms\cases\CaseCategoryManageForm;
 use yii\helpers\ArrayHelper;
@@ -28,16 +29,31 @@ use common\models\Department;
                   'prompt' => 'Select department',
                 ]) ?>
 
-                <?php
-                $caseCategoriesList = ArrayHelper::map(CaseCategory::findNestedSets()->all(), 'cc_id', 'cc_name');
+                <div class="form-group">
+                    <?php
+                    echo Html::label('Parent Category');
+                    $condition = [];
+                    if ($model->scenario === CaseCategoryManageForm::SCENARIO_UPDATE) {
+                        $currentModelId = $model->cc_id;
+                        $condition = ['<>', 'cc_id', $currentModelId];
+                    }
+                    echo TreeViewInput::widget([
+                      'name' => 'kvTreeInput',
+                      'query' => CaseCategory::findNestedSets()->addOrderBy('cc_tree, cc_lft')->andWhere($condition),
+                      'headingOptions' => ['label' => 'Case Categories'],
+                      'rootOptions' => ['label' => '<i class="fas fa-tree text-success"></i>'],
+                      'fontAwesome' => true,
+                      'model' => $model,
+                      'attribute' => 'parentCategoryId',
+                      'autoCloseOnSelect' => true,
+                      'asDropdown' => true,
+                      'multiple' => false,
+                      'options' => ['disabled' => false]
+                    ]);
 
-                //delete from list current id to prevent setting model as self parent
-                if ($model->scenario === CaseCategoryManageForm::SCENARIO_UPDATE) {
-                    $currentModelId = $model->cc_id;
-                    unset($caseCategoriesList[$currentModelId]);
-                }
-                echo $form->field($model, 'parentCategoryId')->dropDownList($caseCategoriesList, ['prompt' => 'Choose a parent category']);
-                ?>
+                    ?>
+                </div>
+
 
                 <?= $form->field($model, 'cc_allow_to_select')->checkbox() ?>
                 <?= $form->field($model, 'cc_system')->checkbox() ?>

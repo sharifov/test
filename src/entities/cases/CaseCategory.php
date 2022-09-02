@@ -5,6 +5,7 @@ namespace src\entities\cases;
 use common\models\Department;
 use common\models\Employee;
 use creocoder\nestedsets\NestedSetsBehavior;
+use kartik\tree\models\TreeTrait;
 use src\behaviors\SlugBehavior;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -38,6 +39,14 @@ class CaseCategory extends ActiveRecord
     /**
      * @return array
      */
+    use TreeTrait;
+
+    public $encodeNodeNames = false;
+    public $purifyNodeIcons = false;
+    public function isDisabled()
+    {
+        return false;
+    }
     public function behaviors(): array
     {
         return [
