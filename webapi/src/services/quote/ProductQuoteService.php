@@ -3,10 +3,7 @@
 namespace webapi\src\services\quote;
 
 use modules\featureFlag\FFlag;
-use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCreateService;
 use modules\product\src\entities\productQuote\ProductQuote;
-use modules\product\src\entities\productQuote\ProductQuoteStatus;
-use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use webapi\src\request\RequestBoInterface;
 use Yii;
 use yii\base\Model;
@@ -38,21 +35,6 @@ class ProductQuoteService implements RequestBoInterface
 
         if (!$model instanceof ProductQuote) {
             return $additionalInfo;
-        }
-
-        $productQuoteChange = VoluntaryExchangeCreateService::getLastProductQuoteChangeByPqId(
-            $model->pq_id,
-            [ProductQuoteChangeStatus::IN_PROGRESS]
-        );
-
-        if ($productQuoteChange) {
-            $voluntaryQuote = VoluntaryExchangeCreateService::getProductQuoteByProductQuoteChange(
-                $productQuoteChange->pqc_id,
-                [ProductQuoteStatus::IN_PROGRESS]
-            );
-            if ($voluntaryQuote) {
-                $model = $voluntaryQuote;
-            }
         }
 
         $createdBy = $model->getPqCreatedUser()->limit(1)->one();
