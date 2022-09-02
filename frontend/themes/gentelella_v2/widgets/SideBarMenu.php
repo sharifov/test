@@ -12,6 +12,7 @@ use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\objectTask\src\abac\ObjectTaskObject;
+use modules\objectTask\src\services\ObjectTaskStatusLogService;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\services\UserShiftScheduleService;
@@ -1131,6 +1132,11 @@ class SideBarMenu extends \yii\bootstrap\Widget
                             'object' => ObjectTaskObject::ACT_OBJECT_TASK_LIST,
                             'action' => LeadAbacObject::ACTION_ACCESS
                         ],
+                    ],
+                    [
+                        'label' => 'Object Task Status Logs',
+                        'url' => ['/object-task/object-task-status-log/index'],
+                        'visible' => ObjectTaskStatusLogService::linkIsVisibleInSidebar(),
                     ],
                     [
                         'label' => 'Object Task Scenarios',

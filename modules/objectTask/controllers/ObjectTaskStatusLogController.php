@@ -4,17 +4,17 @@ namespace modules\objectTask\controllers;
 
 use frontend\controllers\FController;
 use modules\objectTask\src\abac\ObjectTaskObject;
-use modules\objectTask\src\entities\ObjectTaskScenario;
-use modules\objectTask\src\entities\ObjectTaskScenarioSearch;
+use modules\objectTask\src\entities\ObjectTaskStatusLog;
+use modules\objectTask\src\entities\ObjectTaskStatusLogSearch;
 use yii\filters\AccessControl;
-use yii\helpers\Json;
+use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 
 /**
- * ObjectTaskScenarioController implements the CRUD actions for ObjectTaskScenario model.
+ * ObjectTaskStatusLogController implements the CRUD actions for ObjectTaskStatusLog model.
  */
-class ObjectTaskScenarioController extends FController
+class ObjectTaskStatusLogController extends FController
 {
     public function init(): void
     {
@@ -39,43 +39,33 @@ class ObjectTaskScenarioController extends FController
                 'access' => [
                     'class' => AccessControl::class,
                     'rules' => [
-                        /** @abac ObjectTaskObject::ACT_OBJECT_TASK_SCENARIO, ObjectTaskObject::ACTION_ACCESS, Access to page /object-task/object-task-scenario/(index|view) */
+                        /** @abac ObjectTaskObject::ACT_OBJECT_TASK_STATUS_LOG, ObjectTaskObject::ACTION_ACCESS, Access to page object-task/object-task-status-log/(index|view) */
                         [
                             'actions' => ['index', 'view'],
                             'allow' => \Yii::$app->abac->can(
                                 null,
-                                ObjectTaskObject::ACT_OBJECT_TASK_SCENARIO,
+                                ObjectTaskObject::ACT_OBJECT_TASK_STATUS_LOG,
                                 ObjectTaskObject::ACTION_ACCESS
                             ),
                             'roles' => ['@'],
                         ],
-                        /** @abac ObjectTaskObject::ACT_OBJECT_TASK_SCENARIO, ObjectTaskObject::ACTION_UPDATE, Access to page /object-task/object-task-scenario/update */
+                        /** @abac ObjectTaskObject::ACT_OBJECT_TASK_STATUS_LOG, ObjectTaskObject::ACTION_UPDATE, Access to page object-task/object-task-status-log/update */
                         [
                             'actions' => ['update'],
                             'allow' => \Yii::$app->abac->can(
                                 null,
-                                ObjectTaskObject::ACT_OBJECT_TASK_SCENARIO,
+                                ObjectTaskObject::ACT_OBJECT_TASK_STATUS_LOG,
                                 ObjectTaskObject::ACTION_UPDATE
                             ),
                             'roles' => ['@'],
                         ],
-                        /** @abac ObjectTaskObject::ACT_OBJECT_TASK_SCENARIO, ObjectTaskObject::ACTION_UPDATE, Access to page /object-task/object-task-scenario/delete */
+                        /** @abac ObjectTaskObject::ACT_OBJECT_TASK_STATUS_LOG, ObjectTaskObject::ACTION_UPDATE, Access to page object-task/object-task-status-log/delete */
                         [
                             'actions' => ['delete'],
                             'allow' => \Yii::$app->abac->can(
                                 null,
-                                ObjectTaskObject::ACT_OBJECT_TASK_SCENARIO,
+                                ObjectTaskObject::ACT_OBJECT_TASK_STATUS_LOG,
                                 ObjectTaskObject::ACTION_DELETE
-                            ),
-                            'roles' => ['@'],
-                        ],
-                        /** @abac ObjectTaskObject::ACT_OBJECT_TASK_SCENARIO, ObjectTaskObject::ACTION_CREATE, Access to page /object-task/object-task-scenario/create */
-                        [
-                            'actions' => ['create'],
-                            'allow' => \Yii::$app->abac->can(
-                                null,
-                                ObjectTaskObject::ACT_OBJECT_TASK_SCENARIO,
-                                ObjectTaskObject::ACTION_CREATE
                             ),
                             'roles' => ['@'],
                         ],
@@ -86,13 +76,13 @@ class ObjectTaskScenarioController extends FController
     }
 
     /**
-     * Lists all ObjectTaskScenario models.
+     * Lists all ObjectTaskStatusLog models.
      *
      * @return string
      */
     public function actionIndex()
     {
-        $searchModel = new ObjectTaskScenarioSearch();
+        $searchModel = new ObjectTaskStatusLogSearch();
         $dataProvider = $searchModel->search($this->request->queryParams);
 
         return $this->render('index', [
@@ -102,35 +92,30 @@ class ObjectTaskScenarioController extends FController
     }
 
     /**
-     * Displays a single ObjectTaskScenario model.
-     * @param int $ots_id Ots ID
+     * Displays a single ObjectTaskStatusLog model.
+     * @param int $otsl_id ID
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionView($ots_id)
+    public function actionView($otsl_id)
     {
         return $this->render('view', [
-            'model' => $this->findModel($ots_id),
+            'model' => $this->findModel($otsl_id),
         ]);
     }
 
     /**
-     * Creates a new ObjectTaskScenario model.
+     * Creates a new ObjectTaskStatusLog model.
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
      */
-    public function actionCreate(?string $key = null)
+    public function actionCreate()
     {
-        $model = new ObjectTaskScenario();
-
-        if ($key !== null) {
-            $model->ots_key = $key;
-            $model->ots_data_json = $model->getScenarioTemplate();
-        }
+        $model = new ObjectTaskStatusLog();
 
         if ($this->request->isPost) {
             if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'ots_id' => $model->ots_id]);
+                return $this->redirect(['view', 'otsl_id' => $model->otsl_id]);
             }
         } else {
             $model->loadDefaultValues();
@@ -142,23 +127,18 @@ class ObjectTaskScenarioController extends FController
     }
 
     /**
-     * Updates an existing ObjectTaskScenario model.
+     * Updates an existing ObjectTaskStatusLog model.
      * If update is successful, the browser will be redirected to the 'view' page.
-     * @param int $ots_id Ots ID
+     * @param int $otsl_id ID
      * @return string|\yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionUpdate($ots_id, ?string $key = null)
+    public function actionUpdate($otsl_id)
     {
-        $model = $this->findModel($ots_id);
-
-        if ($key !== null) {
-            $model->ots_key = $key;
-            $model->ots_data_json = $model->getScenarioTemplate();
-        }
+        $model = $this->findModel($otsl_id);
 
         if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'ots_id' => $model->ots_id]);
+            return $this->redirect(['view', 'otsl_id' => $model->otsl_id]);
         }
 
         return $this->render('update', [
@@ -167,29 +147,29 @@ class ObjectTaskScenarioController extends FController
     }
 
     /**
-     * Deletes an existing ObjectTaskScenario model.
+     * Deletes an existing ObjectTaskStatusLog model.
      * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param int $ots_id Ots ID
+     * @param int $otsl_id ID
      * @return \yii\web\Response
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($ots_id)
+    public function actionDelete($otsl_id)
     {
-        $this->findModel($ots_id)->delete();
+        $this->findModel($otsl_id)->delete();
 
         return $this->redirect(['index']);
     }
 
     /**
-     * Finds the ObjectTaskScenario model based on its primary key value.
+     * Finds the ObjectTaskStatusLog model based on its primary key value.
      * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param int $ots_id Ots ID
-     * @return ObjectTaskScenario the loaded model
+     * @param int $otsl_id ID
+     * @return ObjectTaskStatusLog the loaded model
      * @throws NotFoundHttpException if the model cannot be found
      */
-    protected function findModel($ots_id)
+    protected function findModel($otsl_id)
     {
-        if (($model = ObjectTaskScenario::findOne(['ots_id' => $ots_id])) !== null) {
+        if (($model = ObjectTaskStatusLog::findOne(['otsl_id' => $otsl_id])) !== null) {
             return $model;
         }
 
