@@ -31,22 +31,18 @@ use yii\widgets\ActiveForm;
             ]); ?>
 
             <div class="row">
-                <div class="col-sm-12">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <?php try {
-                                echo $form->field($searchModel, 'excludedCategories')
-                                    ->widget(Select2::class, [
-                                        'data' => Log::getCategoryFilter(),
-                                        'size' => Select2::SMALL,
-                                        'options' => ['placeholder' => '-'],
-                                        'pluginOptions' => ['allowClear' => true, 'multiple' => true],
-                                    ])->label('Excluded fields');
-                            } catch (Exception $e) {
-                                echo 'Widget cannot be displayed: ' . $e->getMessage();
-                            } ?>
-                        </div>
-                    </div>
+                <div class="col-md-3">
+                    <?php try {
+                        echo $form->field($searchModel, 'excludedCategories')
+                            ->widget(Select2::class, [
+                                'data' => Log::getCategoryFilter(),
+                                'size' => Select2::SMALL,
+                                'options' => ['placeholder' => '-'],
+                                'pluginOptions' => ['allowClear' => true, 'multiple' => true],
+                            ])->label('Excluded fields');
+                    } catch (Exception $e) {
+                        echo 'Widget cannot be displayed: ' . $e->getMessage();
+                    } ?>
                 </div>
             </div>
 
