@@ -413,7 +413,12 @@ class EmailsNormalizeService extends SendMail implements EmailServiceInterface
         return $content_data;
     }
 
-    public function sendMail(EmailInterface $email, array $data = [])
+    /**
+     * @param Email $email
+     * @param array $data
+     * @return mixed|null
+     */
+    public function sendMail($email, array $data = [])
     {
         $contentData = $this->generateContentData($email);
         return $this->sendToCommunication($email, $contentData, $data);
