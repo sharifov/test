@@ -12,13 +12,11 @@
 
 use common\models\Currency;
 use common\models\Quote;
-use common\models\Airline;
 use common\components\SearchService;
 use frontend\helpers\QuoteHelper;
 use frontend\models\LeadForm;
 use modules\featureFlag\FFlag;
 use src\helpers\app\AppHelper;
-use src\helpers\quote\ImageHelper;
 use src\services\quote\quotePriceService\ClientQuotePriceService;
 use yii\bootstrap\Html;
 use yii\helpers\ArrayHelper;
@@ -29,7 +27,6 @@ $user = Yii::$app->user->identity;
 $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 $airlineName = $model->mainAirline ? $model->mainAirline->name : '';
 $currency = empty($model->q_client_currency) ? Currency::getDefaultCurrencyCode() : $model->q_client_currency;
-
 
 if ($model->isClientCurrencyDefault()) {
     $priceData = $model->getPricesData();
@@ -54,6 +51,13 @@ $totalSelling = $priceData['total']['selling'] ?? 0;
 /** @fflag FFlag::FF_KEY_QUOTE_MIN_PRICE_ENABLE, Enable Quote Min Price restriction in lead/view */
 $canQuoteMinPrice = \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_QUOTE_MIN_PRICE_ENABLE);
 ?>
+
+<?php Pjax::begin([
+    'id' => 'pjax-quote_box-' . $model->id,
+    'enablePushState' => false,
+    'enableReplaceState' => false,
+]) ?>
+
 <div
     class="quote quote--highlight"
     id="quote-<?=$model->uid?>"
@@ -104,8 +108,8 @@ $canQuoteMinPrice = \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_QUOTE_MIN_PR
                     </small>
                 <?php endif; ?>
             </span>
-
         </div>
+
         <div class="quote__heading-right">
             <?php if ($model->isDeclined()) : ?>
                 <span>
@@ -468,6 +472,8 @@ $canQuoteMinPrice = \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_QUOTE_MIN_PR
 
     </div>
 </div>
+<br />
+<?php Pjax::end(); ?>
 
 <?php
 $css = <<<CSS

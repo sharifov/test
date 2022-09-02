@@ -21,11 +21,12 @@ $defaultCurrencyCode = Currency::getDefaultCurrencyCode();
 $inverseCurrencyRate = 1 / $quote->q_client_currency_rate;
 $qp_client_extra_mark_up = (float)$leadQuoteExtraMarkUpForm->qp_client_extra_mark_up;
 $extra_mark_up = (float)$leadQuoteExtraMarkUpForm->extra_mark_up;
-
+$quoteExtraMarkUpForm = 'lead-quote-extra-mark-up-edit-form_' . $quote->id;
 ?>
+
     <div class="edit-name-modal-content-ghj">
         <?php $form = ActiveForm::begin([
-            'id' => 'lead-quote-extra-mark-up-edit-form',
+            'id' => $quoteExtraMarkUpForm,
             'action' => Url::to(['lead-view/ajax-edit-lead-quote-extra-mark-up', 'quoteId' => $quote->id, 'paxCode' => $paxCode]),
             'enableClientValidation' => true,
             'enableAjaxValidation' => false,
@@ -78,7 +79,6 @@ $extra_mark_up = (float)$leadQuoteExtraMarkUpForm->extra_mark_up;
                         d-none
             <?php endif; ?>">
 
-
                 <?= $form->field(
                     $leadQuoteExtraMarkUpForm,
                     'extra_mark_up',
@@ -105,7 +105,6 @@ $extra_mark_up = (float)$leadQuoteExtraMarkUpForm->extra_mark_up;
             </div>
         </div>
 
-
         <div style="margin-top: 20px;" class="text-center">
             <?= Html::submitButton('<i class="fa fa-save"></i> Save Extra MarkUp', [
                 'class' => 'btn btn-primary save_extra_mark_up_btn'
@@ -117,48 +116,52 @@ $extra_mark_up = (float)$leadQuoteExtraMarkUpForm->extra_mark_up;
 <?php
 $js = <<<JS
 
+var formId = '$quoteExtraMarkUpForm';
+
 $('#qp_client_extra_mark_up_modal_field').on('change keyup input',function(){
     let currencyRate = '$inverseCurrencyRate';
-    $('#extra_mark_up_modal_field').val(($(this).val() * currencyRate).toFixed(2) );
+    $('#extra_mark_up_modal_field').val(($(this).val() * currencyRate).toFixed(2));
 });
 $('#extra_mark_up_modal_field').on('change keyup input',function(){
        let currencyRate = '$quote->q_client_currency_rate';
        $('#qp_client_extra_mark_up_modal_field').val(($(this).val() * currencyRate).toFixed(2));
 });
 
-$('#lead-quote-extra-mark-up-edit-form').on('beforeSubmit', function (e) {
+$('#' + formId).on('beforeSubmit', function (e) {
     e.preventDefault();
-    let btn = $(this).find('.save_extra_mark_up_btn');
+
+    let form = $('#' + formId);
+    let btn = form.find('.save_extra_mark_up_btn');
     let btnTextDefalut = btn.html();
     let btnTextLoading = '<span class="spinner-border spinner-border-sm"></span> Loading';    
-    btn.html(btnTextLoading);        
+    btn.html(btnTextLoading);
     btn.prop("disabled", true);
+
     $.ajax({
-       type: $(this).attr('method'),
-       url: $(this).attr('action'),
-       data: $(this).serializeArray(),
+       type: form.attr('method'),
+       url: form.attr('action'),
+       data: form.serializeArray(),
        dataType: 'json',
        success: function(data) {
             var type = 'error',
                 text = data.message,
                 title = 'Lead extra markup savin error error';
-                
+
             if (data.error) {
                 btn.html(btnTextDefalut);
                 btn.prop("disabled", false); 
                 title = data.error;
             }
-            
+
             if (!data.error) {
                 $('#modal-client-manage-info').modal('hide');
-                
+
                 type = 'success';
                 title = 'Quote Extra-mark successfully updated';
-                
-                $.pjax.reload({container: '#pjax-quote_prices-{$quote->id}', async: false});
-                $.pjax.reload({container: '#pjax-quote_estimation_profit-{$quote->id}', async: false});
+
+                $.pjax.reload({container: '#pjax-quote_box-{$quote->id}', async: false});
             }
-            
+
             createNotifyByObject({
                 title: title,
                 text: data.message,
@@ -167,16 +170,16 @@ $('#lead-quote-extra-mark-up-edit-form').on('beforeSubmit', function (e) {
        },
        error: function (error) {
            btn.html(btnTextDefalut);
-           btn.prop("disabled", false);           
+           btn.prop("disabled", false);
             createNotifyByObject({
                 title: 'Error',
                 text: 'Internal Server Error. Try again letter.',
-                type: 'error'                
+                type: 'error'
             });
        }
-    })
+    });
+
     return false;
 }); 
 JS;
 $this->registerJs($js);
-?>
