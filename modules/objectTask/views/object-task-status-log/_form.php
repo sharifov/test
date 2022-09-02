@@ -20,10 +20,6 @@ use yii\widgets\ActiveForm;
 
     <?= $form->field($model, 'otsl_description')->textInput(['maxlength' => true]) ?>
 
-    <?= $form->field($model, 'otsl_created_user_id')->textInput() ?>
-
-    <?= $form->field($model, 'otsl_created_dt')->textInput() ?>
-
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
     </div>
