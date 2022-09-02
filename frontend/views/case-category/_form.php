@@ -34,9 +34,7 @@ use common\models\Department;
                 //delete from list current id to prevent setting model as self parent
                 if ($model->scenario === CaseCategoryManageForm::SCENARIO_UPDATE) {
                     $currentModelId = $model->cc_id;
-                    if (!$model->parentCategoryId) {
-                        unset($caseCategoriesList[$currentModelId]);
-                    }
+                    unset($caseCategoriesList[$currentModelId]);
                 }
                 echo $form->field($model, 'parentCategoryId')->dropDownList($caseCategoriesList, ['prompt' => 'Choose a parent category']);
                 ?>
