@@ -3,7 +3,10 @@
     "list": [
       {
         "builtIn": 1,
-        "datasource": "-- Grafana --",
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
+        },
         "enable": true,
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
@@ -23,8 +26,8 @@
   "fiscalYearStartMonth": 0,
   "gnetId": 707,
   "graphTooltip": 0,
-  "id": 5,
-  "iteration": 1651679829714,
+  "id": 99,
+  "iteration": 1662361074846,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -33,7 +36,9 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "$datasource",
+      "datasource": {
+        "uid": "$datasource"
+      },
       "editable": true,
       "error": false,
       "fieldConfig": {
@@ -74,7 +79,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.2.3",
+      "pluginVersion": "8.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -113,7 +118,9 @@
             "filter": ""
           },
           "matchExact": true,
+          "metricEditorMode": 0,
           "metricName": "CPUUtilization",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -145,7 +152,9 @@
             "filter": ""
           },
           "matchExact": true,
+          "metricEditorMode": 0,
           "metricName": "FailedSQLServerAgentJobsCount",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -158,9 +167,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "CPUUtilization/FailedSQLServerAgentJobsCount",
       "tooltip": {
         "msResolution": false,
@@ -170,33 +177,26 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "percent",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": 0,
           "show": true
         },
         {
           "format": "cpm",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": "0",
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -204,7 +204,9 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "$datasource",
+      "datasource": {
+        "uid": "$datasource"
+      },
       "editable": true,
       "error": false,
       "fieldConfig": {
@@ -245,7 +247,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.2.3",
+      "pluginVersion": "8.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -280,7 +282,9 @@
             "filter": ""
           },
           "matchExact": true,
+          "metricEditorMode": 0,
           "metricName": "DatabaseConnections",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -312,7 +316,9 @@
             "filter": ""
           },
           "matchExact": true,
+          "metricEditorMode": 0,
           "metricName": "DiskQueueDepth",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -325,9 +331,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "DatabaseConnections/DiskQueueDepth",
       "tooltip": {
         "msResolution": false,
@@ -337,33 +341,25 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "none",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": 0,
           "show": true
         },
         {
           "format": "none",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -371,7 +367,9 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "$datasource",
+      "datasource": {
+        "uid": "$datasource"
+      },
       "editable": true,
       "error": false,
       "fieldConfig": {
@@ -412,7 +410,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.2.3",
+      "pluginVersion": "8.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -444,7 +442,9 @@
           "item": {
             "filter": ""
           },
+          "metricEditorMode": 0,
           "metricName": "FreeableMemory",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -473,7 +473,9 @@
           "item": {
             "filter": ""
           },
+          "metricEditorMode": 0,
           "metricName": "FreeStorageSpace",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -486,9 +488,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "FreeableMemory/FreeStorageSpace",
       "tooltip": {
         "msResolution": false,
@@ -498,33 +498,25 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "bytes",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": 0,
           "show": true
         },
         {
           "format": "bytes",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -532,7 +524,9 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "$datasource",
+      "datasource": {
+        "uid": "$datasource"
+      },
       "editable": true,
       "error": false,
       "fieldConfig": {
@@ -573,7 +567,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.2.3",
+      "pluginVersion": "8.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -612,7 +606,9 @@
             "filter": ""
           },
           "matchExact": true,
+          "metricEditorMode": 0,
           "metricName": "ReadIOPS",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -644,7 +640,9 @@
             "filter": ""
           },
           "matchExact": true,
+          "metricEditorMode": 0,
           "metricName": "WriteIOPS",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -676,7 +674,9 @@
             "filter": ""
           },
           "matchExact": true,
+          "metricEditorMode": 0,
           "metricName": "BurstBalance",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -689,9 +689,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "ReadIOPS/WriteIOPS/BurstBalance",
       "tooltip": {
         "msResolution": false,
@@ -701,33 +699,26 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "iops",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": 0,
           "show": true
         },
         {
           "format": "percent",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": "0",
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -735,7 +726,9 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "$datasource",
+      "datasource": {
+        "uid": "$datasource"
+      },
       "editable": true,
       "error": false,
       "fieldConfig": {
@@ -776,7 +769,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.2.3",
+      "pluginVersion": "8.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -808,7 +801,9 @@
           "item": {
             "filter": ""
           },
+          "metricEditorMode": 0,
           "metricName": "ReadLatency",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -837,7 +832,9 @@
           "item": {
             "filter": ""
           },
+          "metricEditorMode": 0,
           "metricName": "WriteLatency",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -850,9 +847,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "ReadLatency/WriteLatency",
       "tooltip": {
         "msResolution": false,
@@ -862,33 +857,25 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "s",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": 0,
           "show": true
         },
         {
           "format": "none",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": false
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -896,15 +883,11 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "$datasource",
+      "datasource": {
+        "uid": "$datasource"
+      },
       "editable": true,
       "error": false,
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
       "fill": 1,
       "fillGradient": 0,
       "grid": {},
@@ -934,10 +917,9 @@
       "links": [],
       "nullPointMode": "connected",
       "options": {
-        "alertThreshold": true
+        "dataLinks": []
       },
       "percentage": false,
-      "pluginVersion": "8.2.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -969,7 +951,9 @@
           "item": {
             "filter": ""
           },
+          "metricEditorMode": 0,
           "metricName": "ReadThroughput",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -998,7 +982,9 @@
           "item": {
             "filter": ""
           },
+          "metricEditorMode": 0,
           "metricName": "WriteThroughput",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -1011,9 +997,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "ReadThroughput/WriteThroughput",
       "tooltip": {
         "msResolution": false,
@@ -1023,33 +1007,25 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "Bps",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": 0,
           "show": true
         },
         {
           "format": "none",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": false
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -1057,15 +1033,11 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "$datasource",
+      "datasource": {
+        "uid": "$datasource"
+      },
       "editable": true,
       "error": false,
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
       "fill": 1,
       "fillGradient": 0,
       "grid": {},
@@ -1095,10 +1067,9 @@
       "links": [],
       "nullPointMode": "connected",
       "options": {
-        "alertThreshold": true
+        "dataLinks": []
       },
       "percentage": false,
-      "pluginVersion": "8.2.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1130,7 +1101,9 @@
           "item": {
             "filter": ""
           },
+          "metricEditorMode": 0,
           "metricName": "NetworkReceiveThroughput",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -1159,7 +1132,9 @@
           "item": {
             "filter": ""
           },
+          "metricEditorMode": 0,
           "metricName": "NetworkTransmitThroughput",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -1172,9 +1147,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "NetworkReceiveThroughput/NetworkTransmitThroughput",
       "tooltip": {
         "msResolution": false,
@@ -1184,33 +1157,25 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "Bps",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": 0,
           "show": true
         },
         {
           "format": "none",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": false
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -1218,15 +1183,11 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "$datasource",
+      "datasource": {
+        "uid": "$datasource"
+      },
       "editable": true,
       "error": false,
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
       "fill": 1,
       "fillGradient": 0,
       "grid": {},
@@ -1256,10 +1217,9 @@
       "links": [],
       "nullPointMode": "connected",
       "options": {
-        "alertThreshold": true
+        "dataLinks": []
       },
       "percentage": false,
-      "pluginVersion": "8.2.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1291,7 +1251,9 @@
           "item": {
             "filter": ""
           },
+          "metricEditorMode": 0,
           "metricName": "SwapUsage",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -1320,7 +1282,9 @@
           "item": {
             "filter": ""
           },
+          "metricEditorMode": 0,
           "metricName": "BinLogDiskUsage",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -1333,9 +1297,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "SwapUsage/BinLogDiskUsage",
       "tooltip": {
         "msResolution": false,
@@ -1345,33 +1307,25 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "bytes",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": 0,
           "show": true
         },
         {
           "format": "bytes",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -1379,15 +1333,11 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "$datasource",
+      "datasource": {
+        "uid": "$datasource"
+      },
       "editable": true,
       "error": false,
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
       "fill": 1,
       "fillGradient": 0,
       "grid": {},
@@ -1417,10 +1367,9 @@
       "links": [],
       "nullPointMode": "connected",
       "options": {
-        "alertThreshold": true
+        "dataLinks": []
       },
       "percentage": false,
-      "pluginVersion": "8.2.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1452,7 +1401,9 @@
           "item": {
             "filter": ""
           },
+          "metricEditorMode": 0,
           "metricName": "CPUCreditUsage",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -1481,7 +1432,9 @@
           "item": {
             "filter": ""
           },
+          "metricEditorMode": 0,
           "metricName": "CPUCreditBalance",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -1494,9 +1447,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "CPUCreditUsage/CPUCreditBalance",
       "tooltip": {
         "msResolution": false,
@@ -1506,33 +1457,25 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "none",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": 0,
           "show": true
         },
         {
           "format": "none",
-          "label": null,
           "logBase": 1,
-          "max": null,
-          "min": null,
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -1540,15 +1483,11 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "$datasource",
+      "datasource": {
+        "uid": "$datasource"
+      },
       "editable": true,
       "error": false,
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
       "fill": 1,
       "fillGradient": 0,
       "grid": {},
@@ -1578,10 +1517,9 @@
       "links": [],
       "nullPointMode": "connected",
       "options": {
-        "alertThreshold": true
+        "dataLinks": []
       },
       "percentage": false,
-      "pluginVersion": "8.2.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1616,7 +1554,9 @@
             "filter": ""
           },
           "matchExact": true,
+          "metricEditorMode": 0,
           "metricName": "OldestReplicationSlotLag",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -1648,7 +1588,9 @@
             "filter": ""
           },
           "matchExact": true,
+          "metricEditorMode": 0,
           "metricName": "ReplicaLag",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -1661,9 +1603,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "OldestReplicationSlotLag/ReplicaLag",
       "tooltip": {
         "msResolution": false,
@@ -1673,33 +1613,26 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "decmbytes",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": 0,
           "show": true
         },
         {
           "format": "s",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": "0",
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -1707,15 +1640,11 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "$datasource",
+      "datasource": {
+        "uid": "$datasource"
+      },
       "editable": true,
       "error": false,
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
       "fill": 1,
       "fillGradient": 0,
       "grid": {},
@@ -1745,10 +1674,9 @@
       "links": [],
       "nullPointMode": "connected",
       "options": {
-        "alertThreshold": true
+        "dataLinks": []
       },
       "percentage": false,
-      "pluginVersion": "8.2.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1783,7 +1711,9 @@
             "filter": ""
           },
           "matchExact": true,
+          "metricEditorMode": 0,
           "metricName": "OldestReplicationSlotLag",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -1815,7 +1745,9 @@
             "filter": ""
           },
           "matchExact": true,
+          "metricEditorMode": 0,
           "metricName": "ReplicaLag",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -1828,9 +1760,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "ReplicationSlotDiskUsage/TransactionLogsDiskUsage",
       "tooltip": {
         "msResolution": false,
@@ -1840,33 +1770,26 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "decmbytes",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": 0,
           "show": true
         },
         {
           "format": "s",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": "0",
           "show": false
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
@@ -1874,15 +1797,11 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "$datasource",
+      "datasource": {
+        "uid": "$datasource"
+      },
       "editable": true,
       "error": false,
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
       "fill": 1,
       "fillGradient": 0,
       "grid": {},
@@ -1912,10 +1831,9 @@
       "links": [],
       "nullPointMode": "connected",
       "options": {
-        "alertThreshold": true
+        "dataLinks": []
       },
       "percentage": false,
-      "pluginVersion": "8.2.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1945,7 +1863,9 @@
             "filter": ""
           },
           "matchExact": true,
+          "metricEditorMode": 0,
           "metricName": "MaximumUsedTransactionIDs",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -1977,7 +1897,9 @@
             "filter": ""
           },
           "matchExact": true,
+          "metricEditorMode": 0,
           "metricName": "TransactionLogsGeneration",
+          "metricQueryType": 0,
           "mode": 0,
           "namespace": "AWS/RDS",
           "options": {
@@ -1990,9 +1912,7 @@
         }
       ],
       "thresholds": [],
-      "timeFrom": null,
       "timeRegions": [],
-      "timeShift": null,
       "title": "MaximumUsedTransactionIDs/TransactionLogsGeneration",
       "tooltip": {
         "msResolution": false,
@@ -2002,37 +1922,33 @@
       },
       "type": "graph",
       "xaxis": {
-        "buckets": null,
         "mode": "time",
-        "name": null,
         "show": true,
         "values": []
       },
       "yaxes": [
         {
           "format": "none",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": 0,
           "show": true
         },
         {
           "format": "Bps",
-          "label": null,
           "logBase": 1,
-          "max": null,
           "min": "0",
           "show": true
         }
       ],
       "yaxis": {
-        "align": false,
-        "alignLevel": null
+        "align": false
       }
     },
     {
-      "datasource": "$datasource",
+      "content": "<a style=\"xfloat: right\" href=\"http://www.monitoringartist.com\" target=\"_blank\" title=\"Dashboard maintained by Monitoring Artist - DevOps / Docker / Kubernetes / AWS ECS / Google GCP / Zabbix / Zenoss / Terraform / Monitoring\"><img src=\"https://monitoringartist.github.io/monitoring-artist-logo-grafana.png\" height=\"30px\" /></a> | \n<a style=\"xfloat: left\"  target=\"_blank\" href=\"https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/MonitoringOverview.html#monitoring-cloudwatch\">AWS CloudWatch RDS documentation</a> | \n<a style=\"xfloat: left\"  target=\"_blank\" href=\"https://grafana.com/dashboards/707\">Installed from Grafana.com dashboards</a>",
+      "datasource": {
+        "uid": "$datasource"
+      },
       "editable": true,
       "error": false,
       "gridPos": {
@@ -2044,17 +1960,13 @@
       "id": 2,
       "isNew": true,
       "links": [],
-      "options": {
-        "content": "<a style=\"xfloat: right\" href=\"http://www.monitoringartist.com\" target=\"_blank\" title=\"Dashboard maintained by Monitoring Artist - DevOps / Docker / Kubernetes / AWS ECS / Google GCP / Zabbix / Zenoss / Terraform / Monitoring\"><img src=\"https://monitoringartist.github.io/monitoring-artist-logo-grafana.png\" height=\"30px\" /></a> | \n<a style=\"xfloat: left\"  target=\"_blank\" href=\"https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/MonitoringOverview.html#monitoring-cloudwatch\">AWS CloudWatch RDS documentation</a> | \n<a style=\"xfloat: left\"  target=\"_blank\" href=\"https://grafana.com/dashboards/707\">Installed from Grafana.com dashboards</a>",
-        "mode": "html"
-      },
-      "pluginVersion": "8.2.3",
+      "mode": "html",
       "title": "Documentation",
       "type": "text"
     }
   ],
-  "refresh": "30s",
-  "schemaVersion": 31,
+  "refresh": false,
+  "schemaVersion": 36,
   "style": "dark",
   "tags": [
     "monitoringartist",
@@ -2065,11 +1977,9 @@
       {
         "current": {
           "selected": false,
-          "text": "CloudWatch",
-          "value": "CloudWatch"
+          "text": "cloudwatch-dev-stage",
+          "value": "cloudwatch-dev-stage"
         },
-        "description": null,
-        "error": null,
         "hide": 0,
         "includeAll": false,
         "label": "Datasource",
@@ -2077,22 +1987,22 @@
         "name": "datasource",
         "options": [],
         "query": "cloudwatch",
+        "queryValue": "",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
         "type": "datasource"
       },
       {
-        "allValue": null,
         "current": {
           "selected": false,
           "text": "default",
           "value": "default"
         },
-        "datasource": "$datasource",
+        "datasource": {
+          "uid": "$datasource"
+        },
         "definition": "",
-        "description": null,
-        "error": null,
         "hide": 0,
         "includeAll": false,
         "label": "Region",
@@ -2110,16 +2020,15 @@
         "useTags": false
       },
       {
-        "allValue": null,
         "current": {
           "selected": false,
-          "text": "pgsql-dev-crm",
-          "value": "pgsql-dev-crm"
+          "text": "mysql-crm-dev",
+          "value": "mysql-crm-dev"
         },
-        "datasource": "$datasource",
+        "datasource": {
+          "uid": "$datasource"
+        },
         "definition": "",
-        "description": null,
-        "error": null,
         "hide": 0,
         "includeAll": false,
         "label": "DBInstanceIdentifier",
@@ -2128,7 +2037,7 @@
         "options": [],
         "query": "dimension_values($region, AWS/RDS, CPUUtilization, DBInstanceIdentifier)",
         "refresh": 1,
-        "regex": "/pgsql-.*/",
+        "regex": ".*crm.*|.*crm-gtt",
         "skipUrlSync": false,
         "sort": 0,
         "tagValuesQuery": "",
@@ -2168,7 +2077,8 @@
     ]
   },
   "timezone": "browser",
-  "title": "PostgreSQL  RDS",
-  "uid": "AWSRDSPostgdbi",
-  "version": 1
+  "title": "AWS RDS",
+  "uid": "AWSRDScrm",
+  "version": 4,
+  "weekStart": ""
 }

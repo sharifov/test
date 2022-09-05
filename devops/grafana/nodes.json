@@ -21,95 +21,230 @@
       }
     ]
   },
-  "description": "PHP-FPM monitoring dashboard",
   "editable": true,
   "fiscalYearStartMonth": 0,
-  "gnetId": 3901,
-  "graphTooltip": 0,
-  "id": 57,
-  "iteration": 1662361129456,
+  "graphTooltip": 1,
+  "id": 73,
+  "iteration": 1662361118704,
   "links": [],
   "liveNow": false,
   "panels": [
     {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
       },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [
-            {
-              "options": {
-                "0": {
-                  "index": 1,
-                  "text": "DOWN"
-                },
-                "1": {
-                  "index": 0,
-                  "text": "UP"
-                }
-              },
-              "type": "value"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              },
-              {
-                "color": "green",
-                "value": 1
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
+      "fill": 1,
+      "fillGradient": 0,
       "gridPos": {
         "h": 7,
-        "w": 12,
+        "w": 9,
         "x": 0,
         "y": 0
       },
-      "id": 10,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "text": {},
-        "textMode": "value"
+      "hiddenSeries": false,
+      "id": 2,
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": true,
+        "total": false,
+        "values": false
       },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
       "pluginVersion": "8.5.3",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": true,
+      "steppedLine": false,
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "exemplar": true,
-          "expr": "phpfpm_up{project=\"crm\", env=\"$env\", instance=\"$instance\"}",
-          "interval": "",
-          "legendFormat": "",
+          "expr": "(\n  (1 - rate(node_cpu_seconds_total{job=~\"crm_node.*\", mode=\"idle\", instance=\"$instance\", env=\"$env\"}[$__rate_interval]))\n/ ignoring(cpu) group_left\n  count without (cpu)( node_cpu_seconds_total{job=~\"crm_node.*\", mode=\"idle\", instance=\"$instance\", env=\"$env\"})\n)\n",
+          "format": "time_series",
+          "intervalFactor": 5,
+          "legendFormat": "{{cpu}}",
           "refId": "A"
         }
       ],
-      "title": "Panel Title",
-      "type": "stat"
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "CPU Usage",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "percentunit",
+          "logBase": 1,
+          "max": 1,
+          "min": 0,
+          "show": true
+        },
+        {
+          "format": "percentunit",
+          "logBase": 1,
+          "max": 1,
+          "min": 0,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "fill": 0,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 7,
+        "w": 11,
+        "x": 9,
+        "y": 0
+      },
+      "hiddenSeries": false,
+      "id": 3,
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "8.5.3",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "node_load1{job=~\"crm_node.*\", instance=\"$instance\", env=\"$env\"}",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "1m load average",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "node_load5{job=~\"crm_node.*\", instance=\"$instance\", env=\"$env\"}",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "5m load average",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "node_load15{job=\"node-exporter\", instance=\"$instance\"}",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "15m load average",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "count(node_cpu_seconds_total{job=\"node-exporter\", instance=\"$instance\", mode=\"idle\"})",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "logical cores",
+          "refId": "D"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "Load Average",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "logBase": 1,
+          "min": 0,
+          "show": true
+        },
+        {
+          "format": "short",
+          "logBase": 1,
+          "min": 0,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
     },
     {
       "datasource": {
@@ -126,12 +261,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
-                "value": null
-              },
-              {
                 "color": "green",
-                "value": 1
+                "value": null
               }
             ]
           }
@@ -140,14 +271,14 @@
       },
       "gridPos": {
         "h": 7,
-        "w": 12,
-        "x": 12,
+        "w": 4,
+        "x": 20,
         "y": 0
       },
-      "id": 12,
+      "id": 11,
       "options": {
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
@@ -157,7 +288,6 @@
           "fields": "",
           "values": false
         },
-        "text": {},
         "textMode": "name"
       },
       "pluginVersion": "8.5.3",
@@ -167,14 +297,13 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "exemplar": true,
-          "expr": "phpfpm_up{project=\"crm\", env=~\"$env\", instance=\"$instance\"} ",
-          "interval": "",
+          "editorMode": "code",
+          "expr": "node_memory_MemTotal_bytes{job=~\"crm_node.*\",instance=\"$instance\",env=\"$env\"}",
           "legendFormat": "{{name}}",
+          "range": true,
           "refId": "A"
         }
       ],
-      "title": "Host name",
       "type": "stat"
     },
     {
@@ -184,316 +313,25 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Total number of accepted connections",
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
+        "uid": "$datasource"
       },
       "fill": 1,
       "fillGradient": 0,
       "gridPos": {
         "h": 7,
-        "w": 12,
+        "w": 20,
         "x": 0,
         "y": 7
-      },
-      "hiddenSeries": false,
-      "id": 1,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "8.5.3",
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "exemplar": true,
-          "expr": "sum(phpfpm_accepted_connections_total{project=\"crm\", env=\"$env\", instance=\"$instance\"}) by (name)",
-          "format": "time_series",
-          "interval": "",
-          "intervalFactor": 2,
-          "legendFormat": "{{name}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "Accepted Connections",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "format": "short",
-          "logBase": 1,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 7
-      },
-      "hiddenSeries": false,
-      "id": 2,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "8.5.3",
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "exemplar": true,
-          "expr": "sum(phpfpm_active_max_processes{project=\"crm\", env=\"$env\", instance=\"$instance\"}) by (name)",
-          "format": "time_series",
-          "interval": "",
-          "intervalFactor": 2,
-          "legendFormat": "{{name}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "Active Max Processes",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "format": "short",
-          "logBase": 1,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 0,
-        "y": 14
-      },
-      "hiddenSeries": false,
-      "id": 3,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "8.5.3",
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "exemplar": true,
-          "expr": "sum(phpfpm_listen_queue_connections{env=\"$env\", project=\"crm\", instance=\"$instance\"})by(name)",
-          "format": "time_series",
-          "interval": "",
-          "intervalFactor": 2,
-          "legendFormat": "{{name}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "Listen Queue Connections",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "format": "short",
-          "logBase": 1,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "The length of the socket queue, dictating maximum number of pending connections",
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 14
       },
       "hiddenSeries": false,
       "id": 4,
       "legend": {
+        "alignAsTable": false,
         "avg": false,
         "current": false,
         "max": false,
         "min": false,
+        "rightSide": false,
         "show": true,
         "total": false,
         "values": false
@@ -512,7 +350,7 @@
       "renderer": "flot",
       "seriesOverrides": [],
       "spaceLength": 10,
-      "stack": false,
+      "stack": true,
       "steppedLine": false,
       "targets": [
         {
@@ -520,18 +358,49 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "exemplar": true,
-          "expr": "SUM(phpfpm_listen_queue_length_connections{env=\"$env\", project=\"crm\", instance=\"$instance\"}) by (name)",
+          "expr": "(\n  node_memory_MemTotal_bytes{job=~\"crm_node.*\", instance=\"$instance\", env=\"$env\"}\n-\n  node_memory_MemFree_bytes{job=~\"crm_node.*\", instance=\"$instance\", env=\"$env\"}\n-\n  node_memory_Buffers_bytes{job=~\"crm_node.*\", instance=\"$instance\", env=\"$env\"}\n-\n  node_memory_Cached_bytes{job=~\"crm_node.*\", instance=\"$instance\", env=\"$env\"}\n)\n",
           "format": "time_series",
-          "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "{{name}}",
+          "legendFormat": "memory used",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "node_memory_Buffers_bytes{job=\"node_crm\", instance=\"$instance\", env=\"$env\"}",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "memory buffers",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "node_memory_Cached_bytes{job=\"node_crm\", instance=\"$instance\", env=\"$env\"}",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "memory cached",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "node_memory_MemFree_bytes{job=\"node_crm\", instance=\"$instance\", env=\"$env\"}",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "memory free",
+          "refId": "D"
         }
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "Listen Queue Length Connections",
+      "title": "Memory Usage",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -545,13 +414,15 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "bytes",
           "logBase": 1,
+          "min": 0,
           "show": true
         },
         {
-          "format": "short",
+          "format": "bytes",
           "logBase": 1,
+          "min": 0,
           "show": true
         }
       ],
@@ -560,132 +431,114 @@
       }
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "N/A"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "rgba(50, 172, 45, 0.97)",
+                "value": null
+              },
+              {
+                "color": "rgba(237, 129, 40, 0.89)",
+                "value": 80
+              },
+              {
+                "color": "rgba(245, 54, 54, 0.9)",
+                "value": 90
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 4,
+        "x": 20,
+        "y": 7
+      },
+      "id": 5,
+      "links": [],
+      "maxDataPoints": 100,
+      "options": {
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
+      },
+      "pluginVersion": "8.5.3",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "100 -\n(\n  avg(node_memory_MemAvailable_bytes{job=~\"crm_node.*\", instance=\"$instance\", env=\"$env\"})\n/\n  avg(node_memory_MemTotal_bytes{job=~\"crm_node.*\", instance=\"$instance\", env=\"$env\"})\n* 100\n)\n",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Memory Usage",
+      "type": "gauge"
+    },
+    {
       "aliasColors": {},
       "bars": false,
       "dashLength": 10,
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "$datasource"
       },
-      "description": "Max number of connections the listen queue has reached since FPM start",
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
+      "fill": 0,
       "fillGradient": 0,
       "gridPos": {
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 21
-      },
-      "hiddenSeries": false,
-      "id": 5,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "8.5.3",
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "exemplar": true,
-          "expr": "sum(phpfpm_listen_queue_max_connections{env=\"$env\", project=\"crm\", instance=\"$instance\"}) by (name)",
-          "format": "time_series",
-          "interval": "",
-          "intervalFactor": 2,
-          "legendFormat": "{{name}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "Listen Queue Max Connections",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "format": "short",
-          "logBase": 1,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Number of times the process limit has been reached",
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 21
+        "y": 14
       },
       "hiddenSeries": false,
       "id": 6,
       "legend": {
+        "alignAsTable": false,
         "avg": false,
         "current": false,
         "max": false,
         "min": false,
+        "rightSide": false,
         "show": true,
         "total": false,
         "values": false
@@ -702,7 +555,16 @@
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
-      "seriesOverrides": [],
+      "seriesOverrides": [
+        {
+          "alias": "/ read| written/",
+          "yaxis": 1
+        },
+        {
+          "alias": "/ io time/",
+          "yaxis": 2
+        }
+      ],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
@@ -712,18 +574,38 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "exemplar": true,
-          "expr": "sum(phpfpm_max_children_reached_total{env=\"$env\", project=\"crm\", instance=\"$instance\"}) by (name)",
+          "expr": "rate(node_disk_read_bytes_total{job=~\"crm_node.*\", instance=\"$instance\", device=~\"mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|dasd.+\", env=\"$env\"}[$__rate_interval])",
           "format": "time_series",
-          "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "{{name}}",
+          "legendFormat": "{{device}} read",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "rate(node_disk_written_bytes_total{job=~\"crm_node.*\", instance=\"$instance\", device=~\"mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|dasd.+\", env=\"$env\"}[$__rate_interval])",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "{{device}} written",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "rate(node_disk_io_time_seconds_total{job=~\"crm_node.*\", instance=\"$instance\", device=~\"mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|dasd.+\", env=\"$env\"}[$__rate_interval])",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "{{device}} io time",
+          "refId": "C"
         }
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "Max Children Reached",
+      "title": "Disk I/O",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -737,12 +619,12 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "bytes",
           "logBase": 1,
           "show": true
         },
         {
-          "format": "short",
+          "format": "s",
           "logBase": 1,
           "show": true
         }
@@ -758,109 +640,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 0,
-        "y": 28
-      },
-      "hiddenSeries": false,
-      "id": 7,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "8.5.3",
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "exemplar": true,
-          "expr": "sum(phpfpm_processes_total{env=\"$env\", project=\"crm\", instance=\"$instance\"}) by (name, state)",
-          "format": "time_series",
-          "interval": "",
-          "intervalFactor": 2,
-          "legendFormat": "{{name}} - {{state}}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "Process Count",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "logBase": 1,
-          "show": true
-        },
-        {
-          "format": "short",
-          "logBase": 1,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "description": "Number of requests that exceed request_slowlog_timeout",
-      "fieldConfig": {
-        "defaults": {
-          "links": []
-        },
-        "overrides": []
+        "uid": "$datasource"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -868,15 +648,128 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 28
+        "y": 14
       },
       "hiddenSeries": false,
-      "id": 8,
+      "id": 7,
       "legend": {
+        "alignAsTable": false,
         "avg": false,
         "current": false,
         "max": false,
         "min": false,
+        "rightSide": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "8.5.3",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "alias": "used",
+          "color": "#E0B400"
+        },
+        {
+          "alias": "available",
+          "color": "#73BF69"
+        }
+      ],
+      "spaceLength": 10,
+      "stack": true,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(\n  max by (device) (\n    node_filesystem_size_bytes{job=~\"crm_node.*\", instance=\"$instance\", fstype!=\"\", env=\"$env\"}\n  -\n    node_filesystem_avail_bytes{job=~\"crm_node.*\", instance=\"$instance\", fstype!=\"\", env=\"$env\"}\n  )\n)\n",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "used",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(\n  max by (device) (\n    node_filesystem_avail_bytes{job=\"node_crm\", instance=\"$instance\", fstype!=\"\", env=\"$env\"}\n  )\n)\n",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "available",
+          "refId": "B"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "Disk Space Usage",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "bytes",
+          "logBase": 1,
+          "min": 0,
+          "show": true
+        },
+        {
+          "format": "bytes",
+          "logBase": 1,
+          "min": 0,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "fill": 0,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 21
+      },
+      "hiddenSeries": false,
+      "id": 8,
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
         "show": true,
         "total": false,
         "values": false
@@ -903,19 +796,16 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "exemplar": true,
-          "expr": "sum(phpfpm_slow_requests_total{env=\"$env\", project=\"crm\", instance=\"$instance\"}) by (name)",
+          "expr": "rate(node_network_receive_bytes_total{job=~\"crm_node.*\", instance=\"$instance\", device!=\"lo\", env=\"$env\"}[$__rate_interval])",
           "format": "time_series",
-          "hide": false,
-          "interval": "",
           "intervalFactor": 2,
-          "legendFormat": "{{name}} - {{state}}",
+          "legendFormat": "{{device}}",
           "refId": "A"
         }
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "Slow Requests",
+      "title": "Network Received",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -929,13 +819,106 @@
       },
       "yaxes": [
         {
-          "format": "short",
+          "format": "bytes",
           "logBase": 1,
+          "min": 0,
           "show": true
         },
         {
-          "format": "short",
+          "format": "bytes",
           "logBase": 1,
+          "min": 0,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "fill": 0,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 21
+      },
+      "hiddenSeries": false,
+      "id": 9,
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "8.5.3",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "rate(node_network_transmit_bytes_total{job=~\"crm_node.*\", instance=\"$instance\", device!=\"lo\", env=\"$env\"}[$__rate_interval])",
+          "format": "time_series",
+          "intervalFactor": 2,
+          "legendFormat": "{{device}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "Network Transmitted",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "bytes",
+          "logBase": 1,
+          "min": 0,
+          "show": true
+        },
+        {
+          "format": "bytes",
+          "logBase": 1,
+          "min": 0,
           "show": true
         }
       ],
@@ -944,7 +927,7 @@
       }
     }
   ],
-  "refresh": "30s",
+  "refresh": "",
   "schemaVersion": 36,
   "style": "dark",
   "tags": [],
@@ -953,8 +936,8 @@
       {
         "current": {
           "selected": false,
-          "text": "gtt",
-          "value": "gtt"
+          "text": "kiv",
+          "value": "kiv"
         },
         "datasource": {
           "type": "prometheus",
@@ -980,21 +963,21 @@
       {
         "current": {
           "selected": false,
-          "text": "prod",
-          "value": "prod"
+          "text": "dev2",
+          "value": "dev2"
         },
         "datasource": {
           "type": "prometheus",
           "uid": "prometheus"
         },
-        "definition": "label_values(node_exporter_build_info{ns=~\"$namespace\"},env)",
+        "definition": "label_values(node_exporter_build_info{job=~\"crm_node.*\",ns=~\"$namespace\"}, env)",
         "hide": 0,
         "includeAll": false,
         "multi": false,
         "name": "env",
         "options": [],
         "query": {
-          "query": "label_values(node_exporter_build_info{ns=~\"$namespace\"},env)",
+          "query": "label_values(node_exporter_build_info{job=~\"crm_node.*\",ns=~\"$namespace\"}, env)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -1006,38 +989,59 @@
       {
         "current": {
           "selected": false,
-          "text": "i-00db42923249588a6",
-          "value": "i-00db42923249588a6"
+          "text": "i-0cd726e62176cba89",
+          "value": "i-0cd726e62176cba89"
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "prometheus"
+          "uid": "$datasource"
         },
-        "definition": "label_values(phpfpm_up{project=\"crm\", env=\"$env\",ns=~\"$namespace\"},instance)",
+        "definition": "label_values(node_exporter_build_info{job=~\"crm_node.*\", env=\"$env\",ns=~\"$namespace\"}, instance)",
         "hide": 0,
         "includeAll": false,
-        "label": "instance",
         "multi": false,
         "name": "instance",
         "options": [],
         "query": {
-          "query": "label_values(phpfpm_up{project=\"crm\", env=\"$env\",ns=~\"$namespace\"},instance)",
+          "query": "label_values(node_exporter_build_info{job=~\"crm_node.*\", env=\"$env\",ns=~\"$namespace\"}, instance)",
           "refId": "StandardVariableQuery"
         },
-        "refresh": 1,
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
-        "type": "query"
+        "tagValuesQuery": "",
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "Prometheus",
+          "value": "Prometheus"
+        },
+        "hide": 2,
+        "includeAll": false,
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "query": "prometheus",
+        "queryValue": "",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
       }
     ]
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {
     "refresh_intervals": [
+      "5s",
       "10s",
       "30s",
       "1m",
@@ -1060,9 +1064,9 @@
       "30d"
     ]
   },
-  "timezone": "",
-  "title": "PHP",
-  "uid": "ZGUv9Tm7z",
-  "version": 12,
+  "timezone": "utc",
+  "title": "Nodes",
+  "uid": "q806Pik4z",
+  "version": 6,
   "weekStart": ""
 }

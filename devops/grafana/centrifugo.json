@@ -26,15 +26,15 @@
   "fiscalYearStartMonth": 0,
   "gnetId": 13039,
   "graphTooltip": 0,
-  "id": 5,
-  "iteration": 1655374402643,
+  "id": 54,
+  "iteration": 1662361105246,
   "links": [],
   "liveNow": false,
   "panels": [
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "gridPos": {
         "h": 5,
@@ -47,14 +47,14 @@
         "content": "<p style=\"text-align:center;\">\n<img src=\"https://centrifugal.github.io/centrifugo/images/favicon.png\" width=\"100\">\n</p>",
         "mode": "html"
       },
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "title": "Centrifugo $version",
       "type": "text"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -121,17 +121,17 @@
           "values": false
         },
         "text": {},
-        "textMode": "auto"
+        "textMode": "value"
       },
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "process_start_time_seconds{env=~\"$env\",job=\"$job\"}",
+          "expr": "process_start_time_seconds{env=~\"$env\", instance=\"$instance\", job=~\"crm_centrifugo.*\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -143,7 +143,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -187,15 +187,15 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "max(time() - process_start_time_seconds{env=~\"$env\", job=\"$job\"})",
+          "expr": "max(time() - process_start_time_seconds{env=~\"$env\", instance=\"$instance\", job=~\"crm_centrifugo.*\"})",
           "instant": true,
           "interval": "",
           "legendFormat": "",
@@ -208,7 +208,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -255,15 +255,15 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": " sum(centrifugo_node_num_clients{env=~\"$env\", job=\"$job\"})",
+          "expr": " sum(centrifugo_node_num_clients{env=~\"$env\", instance=\"$instance\"})",
           "instant": true,
           "interval": "",
           "legendFormat": "-",
@@ -276,7 +276,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -319,15 +319,15 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "min(centrifugo_node_num_nodes{env=~\"$env\", job=\"$job\"})",
+          "expr": "min(centrifugo_node_num_nodes{env=~\"$env\", instance=\"$instance\"})",
           "instant": true,
           "interval": "",
           "legendFormat": "-",
@@ -340,7 +340,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -386,15 +386,15 @@
         "text": {},
         "textMode": "name"
       },
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "process_start_time_seconds{env=~\"$env\", job=\"$job\"}",
+          "expr": "process_start_time_seconds{env=~\"$env\", instance=\"$instance\", job=~\"crm_centrifugo.*\"}",
           "interval": "",
           "legendFormat": "{{name}}",
           "refId": "A"
@@ -410,7 +410,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -442,7 +442,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -454,10 +454,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum(round(rate(centrifugo_client_command_duration_seconds_count{env=~\"$env\", job=\"$job\"}[2m])*60)) by (method)",
+          "expr": "sum(round(rate(centrifugo_client_command_duration_seconds_count{env=~\"$env\", instance=\"$instance\"}[2m])*60)) by (method)",
           "interval": "",
           "legendFormat": "{{method}}",
           "refId": "A"
@@ -500,7 +500,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -528,7 +528,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -540,10 +540,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "avg(centrifugo_client_command_duration_seconds{quantile=\"$quantile\", job=~\"$job\",env=~\"$env\"}) by (method)",
+          "expr": "avg(centrifugo_client_command_duration_seconds{quantile=\"$quantile\",env=~\"$env\", instance=\"$instance\"}) by (method)",
           "interval": "",
           "legendFormat": "{{method}}",
           "refId": "A"
@@ -586,7 +586,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -618,7 +618,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -628,8 +628,12 @@
       "steppedLine": false,
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "exemplar": true,
-          "expr": "sum(round(rate(centrifugo_api_command_duration_seconds_count{env=~\"$env\"}[2m])*60)) by (protocol, method)",
+          "expr": "sum(round(rate(centrifugo_api_command_duration_seconds_count{env=~\"$env\", instance=\"$instance\"}[2m])*60)) by (protocol, method)",
           "interval": "",
           "legendFormat": "{{protocol}}://{{method}}",
           "refId": "A"
@@ -672,7 +676,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -700,7 +704,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -712,10 +716,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "avg(centrifugo_api_command_duration_seconds{quantile=\"$quantile\", env=~\"$env\",job=\"$job\"}) by (protocol, method)",
+          "expr": "avg(centrifugo_api_command_duration_seconds{quantile=\"$quantile\", env=~\"$env\", instance=\"$instance\"}) by (protocol, method)",
           "interval": "",
           "legendFormat": "{{protocol}}://{{method}}",
           "refId": "A"
@@ -758,7 +762,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "description": "",
       "fill": 1,
@@ -787,7 +791,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -799,10 +803,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "centrifugo_node_num_clients{env=~\"$env\",job=\"$job\"}",
+          "expr": "centrifugo_node_num_clients{env=~\"$env\"}",
           "hide": false,
           "interval": "",
           "legendFormat": "{{name}}",
@@ -847,7 +851,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -875,7 +879,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -887,10 +891,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "centrifugo_node_num_users{env=~\"$env\",job=\"$job\"}",
+          "expr": "centrifugo_node_num_users{env=~\"$env\"}",
           "interval": "",
           "legendFormat": "{{name}}",
           "refId": "A"
@@ -934,7 +938,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -962,7 +966,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -974,10 +978,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "centrifugo_node_num_channels{env=~\"$env\", job=\"$job\"}",
+          "expr": "centrifugo_node_num_channels{env=~\"$env\"}",
           "interval": "",
           "legendFormat": "{{name}}",
           "refId": "A"
@@ -1021,7 +1025,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -1049,7 +1053,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1061,10 +1065,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum(round(rate(centrifugo_node_messages_sent_count{env=~\"$env\",job=\"$job\"}[2m])*60)) by (type)",
+          "expr": "sum(round(rate(centrifugo_node_messages_sent_count{env=~\"$env\", instance=\"$instance\"}[2m])*60)) by (type)",
           "interval": "",
           "legendFormat": "{{type}}",
           "refId": "A"
@@ -1107,7 +1111,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -1135,7 +1139,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1147,10 +1151,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum(rate(centrifugo_node_messages_received_count{env=~\"$env\",job=\"$job\"}[2m])*60) by (type)",
+          "expr": "sum(rate(centrifugo_node_messages_received_count{env=~\"$env\", instance=\"$instance\"}[2m])*60) by (type)",
           "interval": "",
           "legendFormat": "{{type}}",
           "refId": "A"
@@ -1193,7 +1197,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -1221,7 +1225,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1233,10 +1237,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum(rate(centrifugo_transport_messages_sent{env=~\"$env\",job=\"$job\"}[2m])*60) by (transport)",
+          "expr": "sum(rate(centrifugo_transport_messages_sent{env=~\"$env\", instance=\"$instance\"}[2m])*60) by (transport)",
           "interval": "",
           "legendFormat": "{{transport}}",
           "refId": "A"
@@ -1279,7 +1283,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -1307,7 +1311,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1319,10 +1323,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum(round(rate(centrifugo_transport_connect_count{env=~\"$env\",job=\"$job\"}[2m])*60)) by (transport)",
+          "expr": "sum(round(rate(centrifugo_transport_connect_count{env=~\"$env\", instance=\"$instance\"}[2m])*60)) by (transport)",
           "interval": "",
           "legendFormat": "{{transport}}",
           "refId": "A"
@@ -1365,7 +1369,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -1397,7 +1401,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1409,10 +1413,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum(round(rate(centrifugo_client_num_server_disconnects{env=~\"$env\",job=\"$job\"}[2m])*60)) by (code)",
+          "expr": "sum(round(rate(centrifugo_client_num_server_disconnects{env=~\"$env\", instance=\"$instance\"}[2m])*60)) by (code)",
           "interval": "",
           "legendFormat": "{{code}}",
           "refId": "A"
@@ -1455,7 +1459,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -1487,7 +1491,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1499,10 +1503,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum(round(rate(centrifugo_node_action_count{env=~\"$env\", job=\"$job\"}[2m])*60)) by (action)",
+          "expr": "sum(round(rate(centrifugo_node_action_count{env=~\"$env\", instance=\"$instance\"}[2m])*60)) by (action)",
           "interval": "",
           "legendFormat": "{{action}}",
           "refId": "A"
@@ -1545,7 +1549,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -1577,7 +1581,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1589,10 +1593,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum(round(rate(centrifugo_proxy_duration_seconds_count{env=~\"$env\"}[2m])*60)) by (protocol, type)",
+          "expr": "sum(round(rate(centrifugo_proxy_duration_seconds_count{env=~\"$env\", instance=\"$instance\"}[2m])*60)) by (protocol, type)",
           "interval": "",
           "legendFormat": "{{protocol}}://{{type}}",
           "refId": "A"
@@ -1636,7 +1640,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -1668,7 +1672,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1678,8 +1682,12 @@
       "steppedLine": false,
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "exemplar": true,
-          "expr": "sum(round(rate(centrifugo_proxy_errors{env=~\"$env\"}[2m])*60)) by (protocol, type)",
+          "expr": "sum(round(rate(centrifugo_proxy_errors{env=~\"$env\", instance=\"$instance\"}[2m])*60)) by (protocol, type)",
           "interval": "",
           "legendFormat": "{{protocol}}://{{type}}",
           "refId": "A"
@@ -1723,7 +1731,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -1751,7 +1759,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1761,8 +1769,12 @@
       "steppedLine": false,
       "targets": [
         {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "exemplar": true,
-          "expr": "avg(centrifugo_proxy_duration_seconds{quantile=\"$quantile\", env=~\"$env\"}) by (protocol, type)",
+          "expr": "avg(centrifugo_proxy_duration_seconds{quantile=\"$quantile\", env=~\"$env\", instance=\"$instance\"}) by (protocol, type)",
           "interval": "",
           "legendFormat": "{{protocol}}://{{type}}",
           "refId": "A"
@@ -1806,7 +1818,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -1834,7 +1846,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1846,10 +1858,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "go_goroutines{env=~\"$env\", job=\"$job\"}",
+          "expr": "go_goroutines{env=~\"$env\", instance=\"$instance\"}",
           "interval": "",
           "legendFormat": "{{name}}",
           "refId": "A"
@@ -1892,7 +1904,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -1928,7 +1940,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1940,10 +1952,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "go_gc_duration_seconds{quantile=\"0.75\", env=~\"$env\", job=\"$job\"}",
+          "expr": "go_gc_duration_seconds{quantile=\"0.75\", env=~\"$env\", instance=\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1988,7 +2000,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -2016,7 +2028,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -2028,10 +2040,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "process_open_fds{env=~\"$env\", job=\"$job\"}",
+          "expr": "process_open_fds{env=~\"$env\", instance=\"$instance\"}",
           "interval": "",
           "legendFormat": "{{name}}",
           "refId": "A"
@@ -2039,10 +2051,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "process_max_fds{env=~\"$env\", job=\"$job\"}",
+          "expr": "process_max_fds{env=~\"$env\", instance=\"$instance\"}",
           "hide": false,
           "interval": "",
           "legendFormat": "max:{{name}}",
@@ -2086,7 +2098,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -2114,7 +2126,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -2126,10 +2138,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "go_threads{env=~\"$env\", job=\"$job\"}",
+          "expr": "go_threads{env=~\"$env\", instance=\"$instance\"}",
           "interval": "",
           "legendFormat": "{{name}}",
           "refId": "A"
@@ -2172,7 +2184,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -2200,7 +2212,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -2212,10 +2224,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "process_resident_memory_bytes{env=~\"$env\",job=\"$job\"}",
+          "expr": "process_resident_memory_bytes{env=~\"$env\", instance=\"$instance\"}",
           "interval": "",
           "legendFormat": "{{name}}",
           "refId": "A"
@@ -2258,7 +2270,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fill": 1,
       "fillGradient": 0,
@@ -2286,7 +2298,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -2298,10 +2310,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "rate(process_cpu_seconds_total{env=~\"$env\", job=\"$job\"}[5m])*100",
+          "expr": "rate(process_cpu_seconds_total{env=~\"$env\", instance=\"$instance\"}[5m])*100",
           "interval": "",
           "legendFormat": "{{name}}",
           "refId": "A"
@@ -2338,12 +2350,93 @@
       }
     }
   ],
-  "refresh": "30s",
+  "refresh": "10s",
   "schemaVersion": 36,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "gtt",
+          "value": "gtt"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(node_exporter_build_info, ns)",
+        "hide": 0,
+        "includeAll": false,
+        "label": "namespace",
+        "multi": false,
+        "name": "namespace",
+        "options": [],
+        "query": {
+          "query": "label_values(node_exporter_build_info, ns)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "prod",
+          "value": "prod"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(node_exporter_build_info{ns=~\"$namespace\"},env)",
+        "hide": 0,
+        "includeAll": false,
+        "label": "env",
+        "multi": false,
+        "name": "env",
+        "options": [],
+        "query": {
+          "query": "label_values(node_exporter_build_info{ns=~\"$namespace\"},env)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "i-01c9ebba97eed773e",
+          "value": "i-01c9ebba97eed773e"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(process_start_time_seconds{env=~\"$env\",project=\"crm\",job=~\".*centrifugo_.*\",ns=~\"$namespace\"}, instance)",
+        "hide": 0,
+        "includeAll": false,
+        "label": "instance",
+        "multi": false,
+        "name": "instance",
+        "options": [],
+        "query": {
+          "query": "label_values(process_start_time_seconds{env=~\"$env\",project=\"crm\",job=~\".*centrifugo_.*\",ns=~\"$namespace\"}, instance)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
       {
         "current": {
           "selected": true,
@@ -2378,37 +2471,6 @@
         "type": "custom"
       },
       {
-        "allValue": "",
-        "current": {
-          "selected": false,
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
-        },
-        "definition": "label_values({__name__=~\"centrifugo_.*\"}, name)",
-        "hide": 2,
-        "includeAll": true,
-        "label": "host",
-        "multi": false,
-        "name": "host",
-        "options": [],
-        "query": {
-          "query": "label_values({__name__=~\"centrifugo_.*\"}, name)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 1,
-        "tagValuesQuery": "",
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
         "current": {
           "selected": false,
           "text": "3.1.1",
@@ -2416,7 +2478,7 @@
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
+          "uid": "prometheus"
         },
         "definition": "label_values(centrifugo_node_build,  version)",
         "hide": 2,
@@ -2436,87 +2498,6 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
-      },
-      {
-        "current": {
-          "selected": true,
-          "text": "prod",
-          "value": "prod"
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
-        },
-        "definition": "label_values(node_exporter_build_info,env)",
-        "hide": 0,
-        "includeAll": false,
-        "label": "env",
-        "multi": false,
-        "name": "env",
-        "options": [],
-        "query": {
-          "query": "label_values(node_exporter_build_info,env)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "type": "query"
-      },
-      {
-        "current": {
-          "selected": false,
-          "text": "i-074f036ce85a34bc6",
-          "value": "i-074f036ce85a34bc6"
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
-        },
-        "definition": "label_values(process_start_time_seconds{env=~\"$env\",project=\"crm\",job=~\"centrifugo_.*\"}, instance)",
-        "hide": 0,
-        "includeAll": false,
-        "label": "instance",
-        "multi": false,
-        "name": "insrance",
-        "options": [],
-        "query": {
-          "query": "label_values(process_start_time_seconds{env=~\"$env\",project=\"crm\",job=~\"centrifugo_.*\"}, instance)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "type": "query"
-      },
-      {
-        "current": {
-          "selected": false,
-          "text": "centrifugo_crm_prod",
-          "value": "centrifugo_crm_prod"
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
-        },
-        "definition": "label_values(process_start_time_seconds{env=\"$env\",project=\"crm\"}, job)",
-        "hide": 2,
-        "includeAll": false,
-        "label": "job",
-        "multi": false,
-        "name": "job",
-        "options": [],
-        "query": {
-          "query": "label_values(process_start_time_seconds{env=\"$env\",project=\"crm\"}, job)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 1,
-        "regex": "/centrifugo_.*/",
-        "skipUrlSync": false,
-        "sort": 0,
-        "type": "query"
       }
     ]
   },
@@ -2540,6 +2521,6 @@
   "timezone": "",
   "title": "Centrifugo",
   "uid": "JQwvpZOMz",
-  "version": 5,
+  "version": 14,
   "weekStart": ""
 }

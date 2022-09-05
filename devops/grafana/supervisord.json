@@ -24,15 +24,15 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 13,
-  "iteration": 1655374569215,
+  "id": 59,
+  "iteration": 1662361188078,
   "links": [],
   "liveNow": false,
   "panels": [
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -100,12 +100,12 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
           "expr": "sum(node_supervisord_up{env=~\"$env\", instance=~\"$instance\", name=~\".*crm.*\"}) by (name, instance)",
@@ -120,7 +120,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -168,12 +168,12 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
           "expr": "sum(node_supervisord_up{env=~\"$env\", instance=~\"$instance\", name=~\".*crm.*\"}) by (name, instance)",
@@ -188,7 +188,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -234,12 +234,12 @@
         "text": {},
         "textMode": "name"
       },
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
           "expr": "sum(node_supervisord_up{env=~\"$env\", instance=~\"$instance\", name=~\".*crm.*\"}) by (name, instance)",
@@ -258,7 +258,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -296,7 +296,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -308,10 +308,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "changes(node_supervisord_start_time_seconds{env=\"$env\",instance=\"$instance\", project=\"crm\", job=\"$job\"}[5m])",
+          "expr": "changes(node_supervisord_start_time_seconds{env=\"$env\",instance=\"$instance\", project=\"crm\"}[5m])",
           "interval": "",
           "legendFormat": "{{name}} - {{exported_name}}",
           "refId": "B"
@@ -354,7 +354,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "description": "Process States\n--------------\n0=STOPPED, 10=STARTING,\n20=RUNNING, 30=BACKOFF,\n40=STOPPING, 100=EXITED,\n200=FATAL, 1000=UNKNOWN",
       "fieldConfig": {
@@ -391,7 +391,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -403,10 +403,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "node_supervisord_state{env=~\"$env\", job=\"$job\",instance=\"$instance\", name=~\".*crm.*\"}",
+          "expr": "node_supervisord_state{env=~\"$env\",instance=\"$instance\", name=~\".*crm.*\"}",
           "interval": "",
           "legendFormat": "{{name}} - {{exported_name}}",
           "refId": "B"
@@ -444,24 +444,51 @@
       }
     }
   ],
-  "refresh": "",
+  "refresh": "30s",
   "schemaVersion": 36,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": [
       {
-        "allValue": ".*",
         "current": {
-          "selected": true,
-          "text": "prod",
-          "value": "prod"
+          "selected": false,
+          "text": "kiv",
+          "value": "kiv"
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
+          "uid": "prometheus"
         },
-        "definition": "label_values(node_exporter_build_info,env)",
+        "definition": "label_values(node_exporter_build_info, ns)",
+        "hide": 0,
+        "includeAll": false,
+        "label": "namespace",
+        "multi": false,
+        "name": "namespace",
+        "options": [],
+        "query": {
+          "query": "label_values(node_exporter_build_info, ns)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allValue": ".*",
+        "current": {
+          "selected": false,
+          "text": "dev",
+          "value": "dev"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(node_exporter_build_info{ns=~\"$namespace\"},env)",
         "hide": 0,
         "includeAll": false,
         "label": "env",
@@ -469,8 +496,8 @@
         "name": "env",
         "options": [],
         "query": {
-          "query": "label_values(node_exporter_build_info,env)",
-          "refId": "Prometheus-env-Variable-Query"
+          "query": "label_values(node_exporter_build_info{ns=~\"$namespace\"},env)",
+          "refId": "StandardVariableQuery"
         },
         "refresh": 1,
         "regex": "",
@@ -484,14 +511,14 @@
       {
         "current": {
           "selected": false,
-          "text": "i-02cdf27613caba89c",
-          "value": "i-02cdf27613caba89c"
+          "text": "i-0f02315fd72def37a",
+          "value": "i-0f02315fd72def37a"
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
+          "uid": "prometheus"
         },
-        "definition": "label_values(node_supervisord_up{env=~\"$env\",  name=~\".*crm.*\"},instance) ",
+        "definition": "label_values(node_supervisord_up{env=~\"$env\",  name=~\".*crm.*\",ns=~\"$namespace\"},instance) ",
         "hide": 0,
         "includeAll": false,
         "label": "instance",
@@ -499,34 +526,7 @@
         "name": "instance",
         "options": [],
         "query": {
-          "query": "label_values(node_supervisord_up{env=~\"$env\",  name=~\".*crm.*\"},instance) ",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "type": "query"
-      },
-      {
-        "current": {
-          "selected": false,
-          "text": "node_crm_prod",
-          "value": "node_crm_prod"
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
-        },
-        "definition": "label_values(node_supervisord_up{env=\"$env\",project=\"crm\"}, job)",
-        "hide": 2,
-        "includeAll": false,
-        "label": "job",
-        "multi": false,
-        "name": "job",
-        "options": [],
-        "query": {
-          "query": "label_values(node_supervisord_up{env=\"$env\",project=\"crm\"}, job)",
+          "query": "label_values(node_supervisord_up{env=~\"$env\",  name=~\".*crm.*\",ns=~\"$namespace\"},instance) ",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -538,7 +538,7 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {
@@ -557,6 +557,6 @@
   "timezone": "",
   "title": "Supervisord",
   "uid": "SYE-uTinz",
-  "version": 2,
+  "version": 8,
   "weekStart": ""
 }
