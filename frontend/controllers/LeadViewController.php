@@ -965,16 +965,18 @@ class LeadViewController extends FController
                 'leadQuoteExtraMarkUpForm' => $form,
             ]);
         } catch (\RuntimeException | \DomainException $e) {
-            Yii::warning(
-                AppHelper::throwableLog($e),
-                'LeadViewController::actionAjaxEditQuoteExtraMarkUpModalContent:exception'
-            );
+            $message = AppHelper::throwableLog($e);
+            $message['quoteId'] = $quoteId ?? null;
+            $message['paxCode'] = $paxCode ?? null;
+            Yii::warning($message, 'LeadViewController::actionAjaxEditQuoteExtraMarkUpModalContent:exception');
+
             return $this->renderAjax('_error', ['error' => $e->getMessage()]);
         } catch (\Throwable $e) {
-            Yii::error(
-                AppHelper::throwableLog($e),
-                'LeadViewController:actionAjaxEditQuoteExtraMarkUpModalContent:Throwable'
-            );
+            $message = AppHelper::throwableLog($e);
+            $message['quoteId'] = $quoteId ?? null;
+            $message['paxCode'] = $paxCode ?? null;
+            Yii::error($message, 'LeadViewController:actionAjaxEditQuoteExtraMarkUpModalContent:Throwable');
+
             return $this->renderAjax('_error', ['error' => $e->getMessage()]);
         }
     }
@@ -1032,7 +1034,8 @@ class LeadViewController extends FController
 
             $clientQuotePriceService = new ClientQuotePriceService($quote);
             $priceData = $clientQuotePriceService->getClientPricesData();
-            $sellingOld = $priceData['total']['selling'];
+            $sellingOld = $priceData['total']['selling'] ?? 0;
+
             $transaction->begin();
             foreach ($quotePrices as $quotePrice) {
                 $quotePrice->extra_mark_up = $form->extra_mark_up;
@@ -1042,31 +1045,26 @@ class LeadViewController extends FController
             $quote->changeExtraMarkUp($currentUserId, $sellingOld);
             $this->quoteRepository->save($quote);
             $transaction->commit();
-            return [
-                'message' => 'Quote Extra mark-up Updated Successfully'
-            ];
+
+            return ['message' => 'Quote Extra mark-up Updated Successfully'];
         } catch (\RuntimeException | \DomainException $e) {
             $transaction->rollBack();
-            Yii::warning(
-                AppHelper::throwableFormatter($e),
-                'LeadViewController::actionAjaxEditQuoteExtraMarkUp:exception'
-            );
-            return [
-                'error' => $e->getMessage()
-            ];
+            $message = AppHelper::throwableLog($e);
+            $message['quoteId'] = $quoteId ?? null;
+            $message['paxCode'] = $paxCode ?? null;
+            \Yii::warning($message, 'LeadViewController::actionAjaxEditQuoteExtraMarkUp:exception');
+
+            return ['error' => $e->getMessage()];
         } catch (\Throwable $e) {
             $transaction->rollBack();
-            Yii::error(
-                AppHelper::throwableLog($e),
-                'LeadViewController:actionAjaxEditQuoteExtraMarkUp:Throwable'
-            );
-            return [
-                'error' => 'Server Error'
-            ];
+            $message = AppHelper::throwableLog($e);
+            $message['quoteId'] = $quoteId ?? null;
+            $message['paxCode'] = $paxCode ?? null;
+            \Yii::error($message, 'LeadViewController:actionAjaxEditQuoteExtraMarkUp:Throwable');
+
+            return ['error' => 'Server Error'];
         }
     }
-
-
 
     /**
      * @return string
