@@ -39,7 +39,7 @@ class ProductQuoteService implements RequestBoInterface
 
         $createdBy = $model->getPqCreatedUser()->limit(1)->one();
         if ($createdBy) {
-            $additionalInfo['user']['name'] = $createdBy->full_name ?? null;
+            $additionalInfo['user']['name'] = $createdBy->username ?? null;
             $additionalInfo['user']['email'] = $createdBy->email ?? null;
         }
         $additionalInfo['quote']['created'] = $model->pq_created_dt ?? null;

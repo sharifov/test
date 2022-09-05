@@ -18,6 +18,7 @@ use yii\widgets\Pjax;
 /* @var $dataProvider yii\data\ActiveDataProvider */
 /** @var \modules\objectTask\src\forms\ObjectTaskMultipleUpdateForm $multipleUpdateForm */
 /** @var array $multipleErrors */
+/** @var int $changedTasks */
 
 $this->title = 'Object Tasks';
 $this->params['breadcrumbs'][] = $this->title;
@@ -199,6 +200,13 @@ $this->params['breadcrumbs'][] = $this->title;
         var selectAllUrl = '<?= $selectAllUrl ?>';
     </script>
 
+    <?php
+    if ($changedTasks > 0) {
+        $this->registerJs(
+            "createNotifyByObject({title: 'Success', type: 'success', text: 'Tasks successfully edited: {$changedTasks}', hide: true});"
+        );
+    }
+    ?>
     <?php Pjax::end(); ?>
 
 </div>

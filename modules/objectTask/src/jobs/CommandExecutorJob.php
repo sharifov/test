@@ -5,6 +5,8 @@ namespace modules\objectTask\src\jobs;
 use modules\objectTask\src\commands\BaseCommand;
 use modules\objectTask\src\entities\ObjectTask;
 use modules\objectTask\src\entities\repositories\ObjectTaskRepository;
+use modules\objectTask\src\exceptions\CommandCanceledException;
+use modules\objectTask\src\exceptions\CommandFailedException;
 use modules\objectTask\src\services\ObjectTaskService;
 use Yii;
 use yii\helpers\VarDumper;
@@ -40,10 +42,18 @@ class CommandExecutorJob extends BaseObjectTaskJob implements \yii\queue\JobInte
             if ($process === true) {
                 $objectTask->setDoneStatus();
             } else {
-                $objectTask->setCanceledStatus();
+                $objectTask->setCanceledStatus(
+                    'Command process returned false'
+                );
             }
-
-            (new ObjectTaskRepository($objectTask))->save();
+        } catch (CommandCanceledException $exception) {
+            $objectTask->setCanceledStatus(
+                $exception->getMessage()
+            );
+        } catch (CommandFailedException $exception) {
+            $objectTask->setFailedStatus(
+                $exception->getMessage()
+            );
         } catch (\Exception | \Throwable $exception) {
             Yii::error(VarDumper::dumpAsString([
                 'objectTaskUuid' => $objectTask->ot_uuid,
@@ -51,6 +61,7 @@ class CommandExecutorJob extends BaseObjectTaskJob implements \yii\queue\JobInte
             ]), 'CommandExecutorJob:process');
 
             $objectTask->setFailedStatus();
+        } finally {
             (new ObjectTaskRepository($objectTask))->save();
         }
 
