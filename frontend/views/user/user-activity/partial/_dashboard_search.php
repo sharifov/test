@@ -22,7 +22,7 @@ use kartik\form\ActiveForm;
         </div>
         <div class="x_content">
             <?php $form = ActiveForm::begin([
-                'action' => ['dashboard'],
+                //'action' => ['dashboard'],
                 'method' => 'get',
                 'options' => [
                     'data-pjax' => 1
