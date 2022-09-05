@@ -150,10 +150,10 @@ class AddQuoteService
         });
     }
 
-    public function createByData(array $data, Lead $lead, ?int $providerProjectId): string
+    public function createByData(array $data, Lead $lead, ?int $providerProjectId, ?Employee $employee = null): string
     {
-        return $this->transactionManager->wrap(function () use ($data, $lead, $providerProjectId) {
-            $quote = Quote::createQuoteFromSearch($data, $lead, $lead->employee, null);
+        return $this->transactionManager->wrap(function () use ($data, $lead, $providerProjectId, $employee) {
+            $quote = Quote::createQuoteFromSearch($data, $lead, ($employee ?? $lead->employee), null);
             $quote->provider_project_id = $providerProjectId;
             $this->quoteRepository->save($quote);
 
