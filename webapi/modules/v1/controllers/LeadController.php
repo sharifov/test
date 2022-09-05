@@ -21,6 +21,7 @@ use modules\featureFlag\FFlag;
 use modules\flight\models\FlightQuoteSegment;
 use modules\flight\models\FlightSegment;
 use modules\objectTask\src\scenarios\NoAnswer;
+use modules\objectTask\src\services\NoAnswerProtocolService;
 use modules\product\src\useCases\product\api\create\flight\Handler;
 use modules\webEngage\settings\WebEngageDictionary;
 use modules\webEngage\src\service\webEngageEventData\lead\eventData\LeadCreatedEventData;
@@ -1902,7 +1903,7 @@ class LeadController extends ApiBaseController
 
                         /** @fflag FFlag::FF_KEY_NO_ANSWER_PROTOCOL_SOLD_AUTO_REPLACE_AFK_EMPLOYEE_ENABLE, Auto replace employee when lead was sold without agent */
                         if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_NO_ANSWER_PROTOCOL_SOLD_AUTO_REPLACE_AFK_EMPLOYEE_ENABLE)) {
-                            if ($lead->isFromNoAnswerProtocol() === true && empty($lead->employee_id)) {
+                            if (NoAnswerProtocolService::leadWasInNoAnswer($lead) === true && empty($lead->employee_id)) {
                                 $employee = NoAnswer::getVirtualAgentByProjectKey(
                                     $lead->project->project_key
                                 );
