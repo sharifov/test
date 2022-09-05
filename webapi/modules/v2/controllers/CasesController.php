@@ -11,7 +11,9 @@ use src\entities\cases\Cases;
 use src\helpers\app\AppHelper;
 use src\model\cases\CaseCodeException;
 use src\model\cases\useCases\cases\api\create\CreateForm;
+use src\model\cases\useCases\cases\api\create\CreateMinifyForm;
 use src\model\cases\useCases\cases\api\create\Handler;
+use src\model\cases\useCases\cases\api\create\MinifyHandler;
 use src\repositories\NotFoundException;
 use src\services\cases\CasesSaleService;
 use webapi\src\ApiCodeException;
@@ -33,23 +35,27 @@ use yii\helpers\VarDumper;
  * Class CasesController
  *
  * @property Handler $createHandler
+ * @property MinifyHandler $createMinifyHandler
  * @property CasesSaleService $casesSaleService
  */
 class CasesController extends BaseController
 {
-    private $createHandler;
-    private $casesSaleService;
+    private Handler $createHandler;
+    private MinifyHandler $createMinifyHandler;
+    private CasesSaleService $casesSaleService;
 
     public function __construct(
         $id,
         $module,
         ApiLogger $logger,
         Handler $createHandler,
+        MinifyHandler $createMinifyHandler,
         CasesSaleService $casesSaleService,
         $config = []
     ) {
         parent::__construct($id, $module, $logger, $config);
         $this->createHandler = $createHandler;
+        $this->createMinifyHandler = $createMinifyHandler;
         $this->casesSaleService = $casesSaleService;
     }
 
@@ -297,6 +303,168 @@ class CasesController extends BaseController
                 new Message('case_id', $result->csId),
                 new Message('case_gid', $result->caseGid),
                 new Message('client_uuid', $result->clientUuid),
+            )
+        );
+    }
+
+    /**
+     * @api {post} /v2/cases/create-minify Create Case Minify
+     * @apiVersion 0.2.0
+     * @apiName CreateCaseMinify
+     * @apiGroup Cases
+     * @apiPermission Authorized User
+     *
+     * @apiHeader {string} Authorization Credentials <code>base64_encode(Username:Password)</code>
+     * @apiHeaderExample {json} Header-Example:
+     *  {
+     *      "Authorization": "Basic YXBpdXNlcjpiYjQ2NWFjZTZhZTY0OWQxZjg1NzA5MTFiOGU5YjViNB==",
+     *      "Accept-Encoding": "Accept-Encoding: gzip, deflate"
+     *  }
+     *
+     * @apiParam {int}                  [category_id]                    Case category id Required
+     * @apiParam {string{100}}          [project_key]                    Project Key Required
+     * @apiParam {string{255}}          [subject]                        Subject
+     * @apiParam {string{65000}}        [description]                    Description
+     *
+     * @apiParamExample {json} Request-Example:
+     * {
+     *       "category_id": 1,
+     *       "project_key": "project_key",
+     *       "subject": "Subject text",
+     *       "description": "Description text"
+     *   }
+     *
+     * @apiSuccessExample {json} Success-Response:
+     *
+     * HTTP/1.1 200 OK
+     *   {
+     *       "status": 200,
+     *       "message": "OK",
+     *       "data": {
+     *           "case_id": 2354356,
+     *           "case_gid": "708ddf3e44ec477f8807d8b5f748bb6c"
+     *       },
+     *       "technical": {
+     *           "action": "v2/cases/create-minify",
+     *           "response_id": 11934216,
+     *           "request_dt": "2020-03-17 08:31:30",
+     *           "response_dt": "2020-03-17 08:31:30",
+     *           "execution_time": 0.156,
+     *           "memory_usage": 979248
+     *       },
+     *       "request": {
+     *           "category_id": 1,
+     *           "project_key": "project_key",
+     *           "subject": "Subject text",
+     *           "description": "Description text"
+     *       }
+     *   }
+     *
+     * @apiErrorExample {json} Error-Response(Validation error) (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     *   {
+     *       "status": 422,
+     *       "message": "Validation error",
+     *       "errors": {
+     *           "category_id": [
+     *               "Category ID cannot be blank."
+     *           ],
+     *           "project_key": [
+     *               "Project Key cannot be blank."
+     *           ]
+     *       },
+     *       "code": "21301",
+     *       "technical": {
+     *          ...
+     *       },
+     *       "request": {
+     *          ...
+     *       }
+     *   }
+     *
+     * @apiErrorExample {json} Error-Response (422):
+     *
+     * HTTP/1.1 422 Unprocessable entity
+     * {
+     *       "status": 422,
+     *       "message": "Saving error",
+     *       "errors": [
+     *           "Saving error"
+     *       ],
+     *       "code": 21101,
+     *       "technical": {
+     *           ...
+     *       },
+     *       "request": {
+     *           ...
+     *       }
+     * }
+     *
+     * @apiErrorExample {json} Error-Response(Load data error) (400):
+     *
+     * HTTP/1.1 400 Bad Request
+     * {
+     *       "status": 400,
+     *       "message": "Load data error",
+     *       "errors": [
+     *           "Not found Case data on POST request"
+     *       ],
+     *       "code": 21300,
+     *       "technical": {
+     *           ...
+     *       },
+     *       "request": {
+     *           ...
+     *       }
+     * }
+     */
+    public function actionCreateMinify(): Response
+    {
+        $minifyForm = new CreateMinifyForm($this->auth->au_project_id);
+
+        if (!$minifyForm->load(Yii::$app->request->post())) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage(Messages::LOAD_DATA_ERROR),
+                new ErrorsMessage('Not found Case data on POST request'),
+                new CodeMessage(CaseCodeException::API_CASE_CREATE_NOT_FOUND_DATA_ON_REQUEST)
+            );
+        }
+
+        if (!$minifyForm->validate()) {
+            return new ErrorResponse(
+                new MessageMessage(Messages::VALIDATION_ERROR),
+                new ErrorsMessage($minifyForm->getErrors()),
+                new CodeMessage(CaseCodeException::API_CASE_CREATE_VALIDATE)
+            );
+        }
+
+        if (!$this->auth->au_project_id && !$minifyForm->project_key) {
+            return new ErrorResponse(
+                new StatusCodeMessage(400),
+                new MessageMessage('Not found project Key or Project for API user ' . $this->auth->au_api_username),
+                new ErrorsMessage('Not found project Key or Project for API user ' . $this->auth->au_api_username),
+                new CodeMessage(ApiCodeException::NOT_FOUND_PROJECT_CURRENT_USER)
+            );
+        }
+
+        $caseCategory = $minifyForm->getCaseCategory();
+
+        try {
+            $result = $this->createMinifyHandler->handle($minifyForm->getDto(), $caseCategory);
+        } catch (\Throwable $e) {
+            return new ErrorResponse(
+                new MessageMessage($e->getMessage()),
+                new ErrorsMessage($e->getMessage()),
+                new CodeMessage($e->getCode())
+            );
+        }
+
+        return new SuccessResponse(
+            new DataMessage(
+                new Message('case_id', $result->csId),
+                new Message('case_gid', $result->caseGid),
             )
         );
     }
