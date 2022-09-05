@@ -20,6 +20,7 @@ use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacDto;
 use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\objectSegment\src\contracts\ObjectSegmentListContract;
 use modules\objectTask\src\entities\ObjectTask;
+use modules\objectTask\src\scenarios\NoAnswer;
 use modules\objectTask\src\services\ObjectTaskService;
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
@@ -5429,5 +5430,16 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return array_sum(
             $this->getNumberObjectTasksOrderByStatus()
         );
+    }
+
+    public function isFromNoAnswerProtocol(): bool
+    {
+        return $this
+            ->getLeadData()
+            ->where([
+                'ld_field_key' => LeadDataKeyDictionary::KEY_AUTO_FOLLOW_UP,
+                'ld_field_value' => NoAnswer::KEY,
+            ])
+            ->exists();
     }
 }
