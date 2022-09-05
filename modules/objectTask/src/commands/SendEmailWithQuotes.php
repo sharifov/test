@@ -263,7 +263,7 @@ class SendEmailWithQuotes extends BaseCommand
         $lead = $this->getLead();
 
         foreach ($quotes as $newQuote) {
-            $uid = $this->addQuoteService->createByData($newQuote, $lead, null);
+            $uid = $this->addQuoteService->createByData($newQuote, $lead, null, $agent);
             $quote = Quote::find()
                 ->where([
                     'uid' => $uid
