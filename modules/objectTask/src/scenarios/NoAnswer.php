@@ -2,6 +2,7 @@
 
 namespace modules\objectTask\src\scenarios;
 
+use common\models\Employee;
 use common\models\Lead;
 use common\models\query\LeadFlowQuery;
 use modules\objectTask\src\entities\ObjectTask;
@@ -248,6 +249,22 @@ class NoAnswer extends BaseScenario
         $project = $lead->project;
 
         return ($project !== null && isset($virtualAgentList[$project->project_key]) && !empty($virtualAgentList[$project->project_key]));
+    }
+
+    public static function getVirtualAgentByProjectKey(string $key): ?Employee
+    {
+        $virtualAgentList = \Yii::$app->params['settings']['virtual_agent_list'] ?? [];
+
+        if (isset($virtualAgentList[$key]) && !empty($virtualAgentList[$key])) {
+            return Employee::find()
+                ->where([
+                    'username' => $virtualAgentList[$key],
+                ])
+                ->limit(1)
+                ->one();
+        }
+
+        return null;
     }
 
     public function canProcess(): bool

@@ -63,6 +63,7 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_NO_ANSWER_PROTOCOL_CHECK_EMAIL_IN_UNSUBSCRIBE_LIST = 'noAnswerProtocolCheckEmailInUnsubscribeList';
     public const FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE = 'objectTaskStatusLogEnable';
     public const FF_KEY_QUOTE_MIN_PRICE_ENABLE = 'quoteMinPriceEnable';
+    public const FF_KEY_NO_ANSWER_PROTOCOL_SOLD_AUTO_REPLACE_AFK_EMPLOYEE_ENABLE = 'noAnswerProtocolSoldAutoReplaceAfkEmployee';
 
     public const FF_KEY_LIST = [
         self::FF_KEY_LPP_ENABLE,
@@ -115,6 +116,7 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_NO_ANSWER_PROTOCOL_CHECK_EMAIL_IN_UNSUBSCRIBE_LIST,
         self::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE,
         self::FF_KEY_QUOTE_MIN_PRICE_ENABLE,
+        self::FF_KEY_NO_ANSWER_PROTOCOL_SOLD_AUTO_REPLACE_AFK_EMPLOYEE_ENABLE,
     ];
 
     public const FF_OBJECT_LIST = [
