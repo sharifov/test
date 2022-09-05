@@ -5431,15 +5431,4 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             $this->getNumberObjectTasksOrderByStatus()
         );
     }
-
-    public function isFromNoAnswerProtocol(): bool
-    {
-        return $this
-            ->getLeadData()
-            ->where([
-                'ld_field_key' => LeadDataKeyDictionary::KEY_AUTO_FOLLOW_UP,
-                'ld_field_value' => NoAnswer::KEY,
-            ])
-            ->exists();
-    }
 }
