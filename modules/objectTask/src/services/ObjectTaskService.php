@@ -171,4 +171,24 @@ class ObjectTaskService
 
         return $data;
     }
+
+    public static function getParametersDescriptionForScenario(string $key): array
+    {
+        $data = [];
+        /** @var BaseScenario $class */
+        $class = self::SCENARIO_CLASS_LIST[$key] ?? null;
+
+        if ($class !== null) {
+            try {
+                $data = $class::getParametersDescription();
+            } catch (\Throwable $e) {
+                Yii::error(
+                    AppHelper::throwableLog($e),
+                    'ObjectTaskService:getParametersDescriptionForScenario'
+                );
+            }
+        }
+
+        return $data;
+    }
 }
