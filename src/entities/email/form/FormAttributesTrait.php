@@ -31,7 +31,7 @@ trait FormAttributesTrait
     public function isEmpty(): bool
     {
         foreach ($this->attributes() as $attribute) {
-            if (!empty($this->$attribute)) {
+            if (!$this->isEmptyVal($this->$attribute)) {
                 return false;
             }
         }
