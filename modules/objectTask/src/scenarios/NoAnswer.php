@@ -151,6 +151,49 @@ class NoAnswer extends BaseScenario
         return new NoAnswerObject();
     }
 
+    public static function getParametersDescription(): array
+    {
+        $data = [];
+
+        $data['allowedTime'] = [
+            'description' => 'Time to send an email to the lead, applies only to the Days interval.',
+            'type' => ['object'],
+            'data' => [
+                'hour' => [
+                    'description' => 'Hours, from 0 to 23',
+                    'type' => ['integer']
+                ],
+                'minute' => [
+                    'description' => 'Minutes from 0 to 59',
+                    'type' => ['integer']
+                ],
+            ],
+        ];
+
+        foreach (self::INTERVAL_TYPE_LIST as $interval) {
+            $data[$interval] = [
+                'description' => "Object containing the {$interval} on which the email should be sent. The object key is the ordinal number of the day.",
+                'type' => ['object'],
+                'data' => [
+                    3 => [
+                        'description' => 'Index number',
+                        'type' => ['array'],
+                        'data' => [
+                            [
+                                'command' => 'name',
+                                'config' => [
+                                    'parameter' => 'value'
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+        }
+
+        return $data;
+    }
+
     public static function getTemplate(): array
     {
         $template = [
