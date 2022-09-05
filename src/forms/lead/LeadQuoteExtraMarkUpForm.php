@@ -26,9 +26,12 @@ class LeadQuoteExtraMarkUpForm extends Model
     {
         return [
             [['extra_mark_up'], 'number', 'min' => 0],
-            [['qp_client_extra_mark_up'], 'number', 'min' => 0],
-            [['qp_client_extra_mark_up'], 'validateCurrencyRate', 'message' => 'Incorrect client/default mark-up relation'],
+            [['extra_mark_up'], 'default', 'value' => 0.00],
             [['extra_mark_up'], 'validateExtraMarkUp'],
+
+            [['qp_client_extra_mark_up'], 'number', 'min' => 0],
+            [['qp_client_extra_mark_up'], 'default', 'value' => 0.00],
+            [['qp_client_extra_mark_up'], 'validateCurrencyRate', 'message' => 'Incorrect client/default mark-up relation'],
         ];
     }
 
