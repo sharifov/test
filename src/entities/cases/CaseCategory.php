@@ -39,14 +39,6 @@ class CaseCategory extends ActiveRecord
     /**
      * @return array
      */
-    use TreeTrait;
-
-    public $encodeNodeNames = false;
-    public $purifyNodeIcons = false;
-    public function isDisabled()
-    {
-        return false;
-    }
     public function behaviors(): array
     {
         return [

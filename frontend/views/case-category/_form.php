@@ -1,9 +1,8 @@
 <?php
 
-use kartik\tree\TreeViewInput;
+use frontend\widgets\nestedSets\NestedSetsWidget;
 use src\entities\cases\CaseCategory;
 use src\forms\cases\CaseCategoryManageForm;
-use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 use common\models\Department;
@@ -29,31 +28,21 @@ use common\models\Department;
                   'prompt' => 'Select department',
                 ]) ?>
 
-                <div class="form-group">
-                    <?php
-                    echo Html::label('Parent Category');
-                    $condition = [];
-                    if ($model->scenario === CaseCategoryManageForm::SCENARIO_UPDATE) {
-                        $currentModelId = $model->cc_id;
-                        $condition = ['<>', 'cc_id', $currentModelId];
+                <?php
+                $params = [
+                    'query' => CaseCategory::findNestedSets(),
+                    'attribute' => 'parentCategoryId',
+                    'model' => $model
+                ];
+                if ($model->scenario === CaseCategoryManageForm::SCENARIO_UPDATE) {
+                    $currentModelId = $model->cc_id;
+                    $params['currentModelId'] = $currentModelId;
+                    if (isset($model->parentCategoryId)) {
+                        $params['parentCategoryId'] = $model->parentCategoryId;
                     }
-                    echo TreeViewInput::widget([
-                      'name' => 'kvTreeInput',
-                      'query' => CaseCategory::findNestedSets()->addOrderBy('cc_tree, cc_lft')->andWhere($condition),
-                      'headingOptions' => ['label' => 'Case Categories'],
-                      'rootOptions' => ['label' => '<i class="fas fa-tree text-success"></i>'],
-                      'fontAwesome' => true,
-                      'model' => $model,
-                      'attribute' => 'parentCategoryId',
-                      'autoCloseOnSelect' => true,
-                      'asDropdown' => true,
-                      'multiple' => false,
-                      'options' => ['disabled' => false]
-                    ]);
-
-                    ?>
-                </div>
-
+                }
+                echo NestedSetsWidget::widget($params);
+                ?>
 
                 <?= $form->field($model, 'cc_allow_to_select')->checkbox() ?>
                 <?= $form->field($model, 'cc_system')->checkbox() ?>
