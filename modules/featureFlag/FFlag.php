@@ -50,6 +50,7 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_SEGMENT_SIMPLE_LEAD_ENABLE = 'segmentSimpleLead';
     public const FF_KEY_LEAD_TASK_LIST_HISTORY_MODAL_ENABLE = 'leadTaskListHistoryModalEnable';
     public const FF_KEY_DEBUG_ASSIGN_USER_TASK = 'debugAssignUserTaskEnable';
+    public const FF_KEY_TWO_FACTOR_AUTH_MODULE = 'twoFactorAuthModule';
 
     public const FF_KEY_USER_TASK_COMPLETION_DEBUG = 'userTaskCompletionDebug';
     public const FF_KEY_CONVERSION_BY_TIMEZONE = 'conversionByTimezone';
