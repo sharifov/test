@@ -72,6 +72,11 @@ window.initChatDialog = function (params) {
       window.refreshRcAgentToken();
   };
   
+  params.onConnect = function(rid) {
+    $('._cc-list-item').removeClass('_cc_active');
+    $('._cc-list-item[data-rid="' + rid  + '"]').addClass('_cc_active');
+  }
+  
   if (typeof window.chatDialog === 'function') {
     window.chatDialog(params);
   } else {
