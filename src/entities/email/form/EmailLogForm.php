@@ -54,16 +54,6 @@ class EmailLogForm extends Model
         return new static($config);
     }
 
-    public function isEmpty(): bool
-    {
-        foreach ($this->attributes() as $attribute) {
-            if (!empty($this->$attribute)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     public function attributes(): array
     {
         return [
