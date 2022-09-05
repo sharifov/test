@@ -35,6 +35,10 @@ $pjaxListId = 'pjax-log';
                     ]
                 ) ?>
             </div>
+
+            <div class="col-md-12" >
+                <?= $this->render('_search', compact('searchModel')); ?>
+            </div>
         </div>
     <?php endif ?>
 

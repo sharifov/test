@@ -263,7 +263,7 @@ class SendEmailWithQuotes extends BaseCommand
         $lead = $this->getLead();
 
         foreach ($quotes as $newQuote) {
-            $uid = $this->addQuoteService->createByData($newQuote, $lead, null);
+            $uid = $this->addQuoteService->createByData($newQuote, $lead, null, $agent);
             $quote = Quote::find()
                 ->where([
                     'uid' => $uid
@@ -459,6 +459,7 @@ class SendEmailWithQuotes extends BaseCommand
 
                 foreach ($quoteList as $quote) {
                     if (in_array($quote['key'], $selectedQuoteKeys) === false) {
+                        $quote['createTypeId'] = Quote::CREATE_TYPE_SMART_SEARCH;
                         if ($this->getNeedUniqueQuotes() === true) {
                             $quoteExists = Quote::find()
                                 ->where([

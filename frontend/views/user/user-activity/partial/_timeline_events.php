@@ -19,12 +19,28 @@ use yii\helpers\Html;
 /* @var $userOnlineData array */
 
 \frontend\assets\Timeline2Asset::register($this);
+
+
+if ($user->getTimezone()) {
+    $timeZone2 = $user->getTimezone();
+} else {
+    $timeZone2 = 'UTC';
+}
+$timeZone = 'UTC';
+
+$userTime = \Yii::$app->formatter->asDateTimeByUserTimezone(time(), $timeZone2, 'php:d-M [H:i]');
+
 ?>
 
-
+    <p><i class="fa fa-clock-o"></i> Current User Local Time with TimeZone (<b><?= Html::encode($timeZone2) ?></b>): <b>
+            <span class="text-info">
 <?php
    // \yii\helpers\VarDumper::dump($userOnlineData, 10, true);
+echo $userTime;
 ?>
+            </span>
+        </b>
+    </p>
 <div id="myTimeline">
     <ul class="timeline-events">
         <?php if (!empty($scheduleEventList)) : ?>
@@ -340,11 +356,7 @@ use yii\helpers\Html;
 //$userListStr = implode(', ', $userList);
 
 
-if ($user->getTimezone()) {
-    $timeZone = $user->getTimezone();
-} else {
-    $timeZone = 'UTC';
-}
+
  //'UTC';
 //echo $timeZone;
 //$timeZone = 'Europe/Chisinau';
@@ -369,6 +381,7 @@ function renderUserTimeline(){
     let startDateTime = '$startDateTimeCalendar';
     let endDatetime = '$endDateTimeCalendar';
     let timeZone = '$timeZone';
+    let timeZone2 = '$timeZone2';
     const labelListStr = [$labelListStr];
     
     
@@ -396,7 +409,7 @@ function renderUserTimeline(){
                 //background: "transparent",
                 locale:     "en-US",
                 format:     {
-                    timeZone: timeZone, weekday: "short", year: "numeric", month: "long", hour: "2-digit", minute: "2-digit"
+                    timeZone: timeZone, weekday: "short", year: "numeric", month: "long", hour: "2-digit", minute: "2-digit" //, timeZoneName: "short"
                 }
             },
             bottom: {
@@ -413,11 +426,11 @@ function renderUserTimeline(){
        },    
        headline: {
             display: true,
-            title:   "My Shift Schedule Timeline and Activity",
+            title:   "Shift Schedule Timeline and Activity", //  (TimeZone: " + timeZone2 + ")
             range:   true,
             locale:  "en-US",
             format:  {
-                timeZone: timeZone,
+                timeZone: timeZone2,
                 custom: "%d-%b [%H:00]"
             }
        },

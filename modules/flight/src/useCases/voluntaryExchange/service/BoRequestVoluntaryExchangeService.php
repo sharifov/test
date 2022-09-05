@@ -5,8 +5,11 @@ namespace modules\flight\src\useCases\voluntaryExchange\service;
 use common\components\BackOffice;
 use modules\flight\src\useCases\sale\form\OrderContactForm;
 use modules\flight\src\useCases\voluntaryExchangeCreate\form\VoluntaryExchangeCreateForm;
+use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCreateService;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use src\entities\cases\Cases;
 use src\exception\BoResponseException;
 use src\exception\ValidationException;
@@ -111,6 +114,20 @@ class BoRequestVoluntaryExchangeService
                 $service = RequestBoAdditionalSources::getServiceByType(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE);
                 if (!$service) {
                     throw new \RuntimeException('Service not found by type: ' . RequestBoAdditionalSources::getTypeNameById(RequestBoAdditionalSources::TYPE_PRODUCT_QUOTE));
+                }
+                $productQuoteChange = VoluntaryExchangeCreateService::getLastProductQuoteChangeByPqId(
+                    $productQuote->pq_id,
+                    [ProductQuoteChangeStatus::IN_PROGRESS]
+                );
+
+                if ($productQuoteChange) {
+                    $voluntaryQuote = VoluntaryExchangeCreateService::getProductQuoteByProductQuoteChange(
+                        $productQuoteChange->pqc_id,
+                        [ProductQuoteStatus::IN_PROGRESS]
+                    );
+                    if ($voluntaryQuote) {
+                        $productQuote = $voluntaryQuote;
+                    }
                 }
                 $data['additionalInfo'] = $service->prepareAdditionalInfo($productQuote);
             } catch (\Throwable $e) {
