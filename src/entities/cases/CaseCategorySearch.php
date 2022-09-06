@@ -27,6 +27,7 @@ class CaseCategorySearch extends CaseCategory
             [['cc_id', 'cc_key', 'cc_name'], 'string'],
             [['cc_dep_id', 'cc_system'], 'integer'],
             ['cc_enabled', 'boolean'],
+            ['cc_allow_to_select', 'boolean'],
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['createTimeStart', 'createTimeEnd', 'depID'], 'safe'],
         ];
@@ -78,6 +79,7 @@ class CaseCategorySearch extends CaseCategory
             'cc_dep_id' => $this->cc_dep_id,
             'cc_system' => $this->cc_system,
             'cc_enabled' => $this->cc_enabled,
+            'cc_allow_to_select' => $this->cc_allow_to_select,
         ]);
 
         $query

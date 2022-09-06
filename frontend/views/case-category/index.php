@@ -48,6 +48,7 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             ['class' => BooleanColumn::class, 'attribute' => 'cc_system'],
             ['class' => BooleanColumn::class, 'attribute' => 'cc_enabled'],
+            ['class' => BooleanColumn::class, 'attribute' => 'cc_allow_to_select'],
             ['class' => yii\grid\ActionColumn::class],
         ],
     ]); ?>
