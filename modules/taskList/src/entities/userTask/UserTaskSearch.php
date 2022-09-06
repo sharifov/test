@@ -6,9 +6,11 @@ use common\models\Employee;
 use kartik\daterange\DateRangeBehavior;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTask;
+use modules\taskList\src\entities\taskList\TaskList;
 use src\helpers\app\AppHelper;
 use src\helpers\app\DBHelper;
 use yii\data\ActiveDataProvider;
+use yii\db\Expression;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -16,6 +18,8 @@ use yii\helpers\ArrayHelper;
  */
 class UserTaskSearch extends UserTask
 {
+    public const SEPARATOR_DATE_RANGE = ' - ';
+
     public string $createTimeRange = '';
     public string $createTimeStart = '';
     public string $createTimeEnd = '';
@@ -29,12 +33,14 @@ class UserTaskSearch extends UserTask
 
     private string $defaultDTStart;
     private string $defaultDTEnd;
+    private string $formatDt = 'Y-m-d';
 
     public function __construct(int $defaultMonth = 1, string $formatDt = 'Y-m-d', array $config = [])
     {
-        $this->defaultDTEnd = (new \DateTime())->format($formatDt);
+        $this->formatDt = $formatDt;
+        $this->defaultDTEnd = (new \DateTime())->format($this->formatDt);
         $this->defaultDTStart = (new \DateTimeImmutable())
-            ->modify('-' . abs($defaultMonth) . ' months')->format($formatDt);
+            ->modify('-' . abs($defaultMonth) . ' months')->format($this->formatDt);
 
         parent::__construct($config);
     }
@@ -69,7 +75,7 @@ class UserTaskSearch extends UserTask
             ['ut_year', 'integer'],
             ['ut_month', 'integer'],
 
-            [['createTimeRange'], 'default', 'value' => $this->defaultDTStart . ' - ' . $this->defaultDTEnd],
+            [['createTimeRange'], 'default', 'value' => $this->defaultDTStart . self::SEPARATOR_DATE_RANGE . $this->defaultDTEnd],
 
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['createTimeStart', 'createTimeEnd'], 'safe'],
@@ -400,5 +406,75 @@ class UserTaskSearch extends UserTask
         }
 
         $query->andFilterWhere(['like', 'ut_target_object', $this->ut_target_object]);
+    }
+
+    public function queryReportSummary(array $queryParams): UserTaskScopes
+    {
+        $query = UserTask::find();
+        $query->addSelect([
+            'processingCnt' =>
+                new Expression('SUM(CASE WHEN ut_status_id = ' . UserTask::STATUS_PROCESSING . ' THEN 1 ELSE 0 END)'),
+            'completeCnt' =>
+                new Expression('SUM(CASE WHEN ut_status_id = ' . UserTask::STATUS_COMPLETE . ' THEN 1 ELSE 0 END)'),
+            'cancelCnt' =>
+                new Expression('SUM(CASE WHEN ut_status_id = ' . UserTask::STATUS_CANCEL . ' THEN 1 ELSE 0 END)'),
+            'leadCnt' =>
+                new Expression('COUNT(DISTINCT(ut_target_object_id))'),
+            'allUserTaskCnt' =>
+                new Expression('COUNT(*)'),
+        ]);
+
+        $this->load($queryParams);
+        if (!$this->validate()) {
+            $query->where('0=1');
+            return $query;
+        }
+
+        if ($this->createTimeRange) {
+            $dTStart = new \DateTimeImmutable(date('Y-m-d 00:00:00', $this->createTimeStart));
+            $dTEnd = new \DateTime(date('Y-m-d 23:59:59', $this->createTimeEnd));
+        } else {
+            $dTStart = new \DateTimeImmutable(date('Y-m-d 00:00:00', strtotime($this->defaultDTStart)));
+            $dTEnd = new \DateTime(date('Y-m-d 23:59:59', strtotime($this->defaultDTEnd)));
+        }
+
+        $query = $this->createTimeRangeRestriction($query, $dTStart, $dTEnd);
+
+        /* TODO::  */
+
+
+
+        return $query;
+    }
+
+    private function createTimeRangeRestriction(
+        UserTaskScopes $query,
+        \DateTimeImmutable $dTStart,
+        \DateTime $dTEnd
+    ): UserTaskScopes {
+        try {
+            $query->andWhere(DBHelper::yearMonthRestrictionQuery(
+                $dTStart,
+                $dTEnd,
+                'ut_year',
+                'ut_month'
+            ));
+            $query->andWhere([
+                'BETWEEN',
+                'ut_start_dt',
+                $dTStart->format($this->formatDt),
+                $dTEnd->format($this->formatDt)
+            ]);
+        } catch (\RuntimeException | \DomainException $throwable) {
+            $message = AppHelper::throwableLog($throwable);
+            $message['model'] = ArrayHelper::toArray($this);
+            \Yii::warning($message, 'UserTaskSearch:createTimeRangeRestriction:Exception');
+        } catch (\Throwable $throwable) {
+            $message = AppHelper::throwableLog($throwable);
+            $message['model'] = ArrayHelper::toArray($this);
+            \Yii::error($message, 'UserTaskSearch:createTimeRangeRestriction:Throwable');
+        }
+
+        return $query;
     }
 }
