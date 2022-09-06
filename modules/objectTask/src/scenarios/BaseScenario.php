@@ -27,6 +27,8 @@ abstract class BaseScenario
 
     abstract public static function getTemplate(): array;
 
+    abstract public static function getParametersDescription(): array;
+
     public function canProcess(): bool
     {
         return ConditionExpressionService::isValidCondition(

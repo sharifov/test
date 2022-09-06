@@ -24,8 +24,8 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 7,
-  "iteration": 1655374145991,
+  "id": 52,
+  "iteration": 1662361032360,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -33,7 +33,7 @@
       "collapsed": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "gridPos": {
         "h": 1,
@@ -49,7 +49,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -57,6 +57,13 @@
           "color": {
             "mode": "thresholds"
           },
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "crm",
+              "url": "https://grafana.infra.travel-dev.com/d/SYE-uTinz1/supervisord?orgId=1&refresh=30s&var-env=dev&var-instance=i-02e3c9ef2d7a9c0ae&from=now-15m&to=now"
+            }
+          ],
           "mappings": [
             {
               "options": {
@@ -115,15 +122,15 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "probe_success{instance=\"$target\", job=\"$job\"}   ",
+          "expr": "probe_success{instance=\"$target\"}   ",
           "interval": "",
           "legendFormat": "{{name}}",
           "refId": "A"
@@ -135,7 +142,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -202,15 +209,15 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "probe_http_status_code{instance=\"$target\", job=\"$job\"}   ",
+          "expr": "probe_http_status_code{instance=\"$target\"}   ",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -222,7 +229,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -272,15 +279,15 @@
         },
         "textMode": "value"
       },
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "probe_duration_seconds{instance=~\"$target\",job=\"$job\"}",
+          "expr": "probe_duration_seconds{instance=~\"$target\"}",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -292,7 +299,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -341,15 +348,15 @@
         },
         "textMode": "value"
       },
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "avg(probe_dns_lookup_time_seconds{instance=~\"$target\",job=\"$job\"})",
+          "expr": "avg(probe_dns_lookup_time_seconds{instance=~\"$target\"})",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -365,7 +372,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "description": "",
       "fill": 1,
@@ -394,7 +401,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -406,10 +413,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "probe_success{instance=\"$target\", job=\"$job\"}   ",
+          "expr": "probe_success{instance=\"$target\"}   ",
           "interval": "",
           "legendFormat": "{{instance}}",
           "refId": "A"
@@ -452,7 +459,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -486,7 +493,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -498,10 +505,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "probe_http_duration_seconds{instance=\"$target\", job=\"$job\",phase=\"connect\"}",
+          "expr": "probe_http_duration_seconds{instance=\"$target\",phase=\"connect\"}",
           "interval": "",
           "legendFormat": "{{phase}}",
           "refId": "A"
@@ -509,10 +516,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "probe_http_duration_seconds{instance=\"$target\", job=\"$job\",phase=\"processing\"}",
+          "expr": "probe_http_duration_seconds{instance=\"$target\",phase=\"processing\"}",
           "hide": false,
           "interval": "",
           "legendFormat": "{{phase}}",
@@ -556,7 +563,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -590,7 +597,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -602,10 +609,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "probe_duration_seconds{instance=\"$target\", job=\"$job\"}",
+          "expr": "probe_duration_seconds{instance=\"$target\"}",
           "interval": "",
           "legendFormat": "{{instance}}",
           "refId": "A"
@@ -642,7 +649,7 @@
       }
     }
   ],
-  "refresh": "",
+  "refresh": "5s",
   "schemaVersion": 36,
   "style": "dark",
   "tags": [],
@@ -650,45 +657,42 @@
     "list": [
       {
         "current": {
-          "selected": true,
-          "text": "api.crm.travel-insides.com/application-status/health",
-          "value": "api.crm.travel-insides.com/application-status/health"
+          "selected": false,
+          "text": "kiv",
+          "value": "kiv"
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
+          "uid": "prometheus"
         },
-        "definition": "label_values(probe_success{env=\"$env\"}, instance)",
+        "definition": "label_values(node_exporter_build_info, ns)",
         "hide": 0,
         "includeAll": false,
-        "label": "target",
+        "label": "namespace",
         "multi": false,
-        "name": "target",
+        "name": "namespace",
         "options": [],
         "query": {
-          "query": "label_values(probe_success{env=\"$env\"}, instance)",
+          "query": "label_values(node_exporter_build_info, ns)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
-        "regex": "/.*crm.*/",
+        "regex": "",
         "skipUrlSync": false,
         "sort": 0,
-        "tagValuesQuery": "",
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
+        "type": "query"
       },
       {
         "current": {
           "selected": true,
-          "text": "prod",
-          "value": "prod"
+          "text": "dev",
+          "value": "dev"
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
+          "uid": "prometheus"
         },
-        "definition": "label_values(node_exporter_build_info, env)",
+        "definition": "label_values(node_exporter_build_info{ns=~\"$namespace\"}, env)",
         "hide": 0,
         "includeAll": false,
         "label": "env",
@@ -696,7 +700,7 @@
         "name": "env",
         "options": [],
         "query": {
-          "query": "label_values(node_exporter_build_info, env)",
+          "query": "label_values(node_exporter_build_info{ns=~\"$namespace\"}, env)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -708,40 +712,43 @@
       {
         "current": {
           "selected": false,
-          "text": "api_availability_prod",
-          "value": "api_availability_prod"
+          "text": "https://api.crm.dev.travel-dev.com/application-status/health",
+          "value": "https://api.crm.dev.travel-dev.com/application-status/health"
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
+          "uid": "prometheus"
         },
-        "definition": "label_values(probe_success{instance=\"$target\",env=\"$env\"}, job)",
-        "hide": 2,
+        "definition": "label_values(probe_success{env=\"$env\",project=\"crm\", ns=~\"$namespace\"}, instance)",
+        "hide": 0,
         "includeAll": false,
-        "label": "job",
+        "label": "target",
         "multi": false,
-        "name": "job",
+        "name": "target",
         "options": [],
         "query": {
-          "query": "label_values(probe_success{instance=\"$target\",env=\"$env\"}, job)",
+          "query": "label_values(probe_success{env=\"$env\",project=\"crm\", ns=~\"$namespace\"}, instance)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
-        "regex": "",
+        "regex": ".*crm.*",
         "skipUrlSync": false,
         "sort": 0,
-        "type": "query"
+        "tagValuesQuery": "",
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
       }
     ]
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Availability",
   "uid": "PEW9_fy7k",
-  "version": 21,
+  "version": 12,
   "weekStart": ""
 }

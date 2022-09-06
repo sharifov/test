@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bc3327815f35a94c1462e1c1d36433b0",
+    "content-hash": "2c8b26331e81dfbbe8cd785c26ea8927",
     "packages": [
         {
             "name": "2amigos/yii2-arrayquery-component",
@@ -4370,6 +4370,49 @@
                 "source": "https://bitbucket.org/techork/yii2-search-module"
             },
             "time": "2022-02-15T00:00:00+00:00"
+        },
+        {
+            "name": "kivork/yii2-two-factor-auth",
+            "version": "1.2.1-stable",
+            "source": {
+                "type": "git",
+                "url": "git@bitbucket.org:techork/yii2-two-factor-auth.git",
+                "reference": "2e663e82a52d546ae8a128a8a48e0e5536030ebe"
+            },
+            "require": {
+                "endroid/qr-code": "4.4.9",
+                "ext-json": "*",
+                "jp3cki/totp": "2.0.0",
+                "php": ">=7.4",
+                "yiisoft/yii2": "~2.0.10",
+                "yiisoft/yii2-bootstrap": "^2.0.10"
+            },
+            "type": "yii2-extension",
+            "autoload": {
+                "psr-4": {
+                    "kivork\\TwoFactorAuth\\": "src\\"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Safi Shain",
+                    "email": "safi.shain@kiv.dev"
+                }
+            ],
+            "description": "Yii2 two factor auth",
+            "keywords": [
+                "2fa",
+                "extension",
+                "two-factor",
+                "yii2"
+            ],
+            "support": {
+                "source": "https://bitbucket.org/techork/yii2-two-factor-auth.git"
+            },
+            "time": "2022-06-14T00:00:00+00:00"
         },
         {
             "name": "kivork/yii2-virtual-cron",
@@ -15818,5 +15861,5 @@
         "ext-pgsql": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.3.0"
 }
