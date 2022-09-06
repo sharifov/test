@@ -54,16 +54,22 @@ class NestedSetsWidget extends Widget
         return Json::encode($nestedSetData);
     }
 
+    /**
+     * Generate data structure for js extension. To make option disabled put empty string to id(value)
+     * @param $node
+     * @return array
+     */
     private function findChildren($node): array
     {
         $nodeData = [
           'id'   => $node->cc_id,
           'text' => $node->cc_name,
+
         ];
         $children = $node->children(1)->all();
         if ($children) {
             foreach ($children as $child) {
-                $nodeData['inc'][] = $this->findChildren($child);
+                $nodeData['inc'][]    = $this->findChildren($child);
             }
         }
 
