@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2c8b26331e81dfbbe8cd785c26ea8927",
+    "content-hash": "43efc0ba283c52fbc562ff37d09b592b",
     "packages": [
         {
             "name": "2amigos/yii2-arrayquery-component",
@@ -4321,11 +4321,11 @@
         },
         {
             "name": "kivork/yii2-search-module",
-            "version": "v1.13.0",
+            "version": "v1.14.0",
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:techork/yii2-search-module.git",
-                "reference": "1d21d22f0fdee3cb21adbe177c65a89291420f62"
+                "reference": "b7ece36b53b27111cc341b09044c5ba2c32df400"
             },
             "require": {
                 "kovalenkojuls/yii2-widget-combodate": "*",
