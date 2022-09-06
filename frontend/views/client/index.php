@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Client;
+use src\helpers\text\MaskStringHelper;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -37,6 +38,13 @@ $this->params['breadcrumbs'][] = $this->title;
             'id',
             'uuid',
             'parent_id',
+            [
+                'attribute' => 'first_name',
+                'value' => static function (Client $model) {
+                    return MaskStringHelper::masking($model->first_name);
+                },
+                'format' => 'raw'
+            ],
             'first_name',
             'middle_name',
             'last_name',
@@ -63,7 +71,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'client_phone',
                 'value' => function (Client $model) {
                     return \frontend\widgets\SliceAndShowMoreWidget::widget([
-                        'data' => $model->getOnlyPhones(),
+                        'data' => $model->getOnlyPhonesMask($model->getOnlyPhones()),
                         'separator' => ' <i class="fa fa-phone"><code></code></i>'
                     ]);
                 },
@@ -76,7 +84,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'client_email',
                 'value' => function (Client $model) {
                     return \frontend\widgets\SliceAndShowMoreWidget::widget([
-                        'data' => $model->getOnlyEmails(),
+                        'data' => $model->getOnlyEmailsMask($model->getOnlyEmails()),
                         'separator' => ' <i class="fa fa-phone"><code></code></i>'
                     ]);
                 },

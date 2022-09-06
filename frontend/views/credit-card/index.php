@@ -1,5 +1,7 @@
 <?php
 
+use common\models\CreditCard;
+use src\helpers\text\MaskStringHelper;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -47,7 +49,12 @@ $this->params['breadcrumbs'][] = $this->title;
 //                },
 //                'filter' => false
 //            ],
-            'cc_holder_name',
+            [
+                'attribute' => 'cc_holder_name',
+                'value' => static function (CreditCard $model) {
+                    return MaskStringHelper::masking($model->cc_holder_name);
+                }
+            ],
             'cc_expiration_month',
             'cc_expiration_year',
             'cc_security_hash',
@@ -58,7 +65,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function (\common\models\CreditCard $model) {
                     return $model->typeName;
                 },
-                'filter' => \common\models\CreditCard::getTypeList()
+                'filter' => CreditCard::getTypeList()
             ],
             [
                 'attribute' => 'cc_status_id',

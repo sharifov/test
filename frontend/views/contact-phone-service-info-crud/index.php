@@ -2,6 +2,7 @@
 
 use common\components\grid\DateTimeColumn;
 use frontend\helpers\JsonHelper;
+use src\helpers\phone\MaskPhoneHelper;
 use src\model\contactPhoneData\entity\ContactPhoneData;
 use src\model\contactPhoneServiceInfo\entity\ContactPhoneServiceInfo;
 use yii\grid\ActionColumn;
@@ -49,6 +50,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function (ContactPhoneServiceInfo $model) {
                     $resultStr = '-';
                     if ($decodedData = JsonHelper::decode($model->cpsi_data_json)) {
+                        $decodedData = \src\helpers\text\MaskStringHelper::maskArray($decodedData);
                         $truncatedStr = StringHelper::truncate(
                             Html::encode(VarDumper::dumpAsString($decodedData)),
                             300,
@@ -73,7 +75,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     if (!$model->cpsiCpl) {
                         return Yii::$app->formatter->nullDisplay;
                     }
-                    return $model->cpsiCpl->cpl_phone_number;
+                    return MaskPhoneHelper::masking($model->cpsiCpl->cpl_phone_number);
                 }
             ],
             [

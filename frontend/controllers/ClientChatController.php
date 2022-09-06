@@ -1826,13 +1826,15 @@ class ClientChatController extends FController
 
     public function actionRealTime()
     {
-        $host = AppParamsHelper::liveChatRealTimeVisitorsUrl();
+        throw new NotFoundHttpException();
+
+        /*$host = AppParamsHelper::liveChatRealTimeVisitorsUrl();
         $projectsWithKeys = Project::getListByUserWithProjectKeys(Auth::id());
 
         return $this->render(
             'real-time',
             ['host' => $host, 'projectsWithKeys' => json_encode($projectsWithKeys, true)]
-        );
+        );*/
     }
 
     /**

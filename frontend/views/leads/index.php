@@ -364,7 +364,7 @@ $this->registerJs($js);
             'visible' => $searchModel->show_fields && in_array('communication', $searchModel->show_fields, true),
         ],
 
-        [
+        /*[
             'label' => 'PNR',
             'value' => static function (Lead $model) {
                 $allPnr = $model->getAdditionalInformationMultiplePnr();
@@ -378,7 +378,7 @@ $this->registerJs($js);
                 'class' => 'text-center'
             ],
             'visible' => $searchModel->show_fields && in_array('pnr', $searchModel->show_fields, true),
-        ],
+        ],*/
         [
             'attribute' => 'hybrid_uid',
             'label' => '<span title="Hybrid UID">Booking ID</span>',

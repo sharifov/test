@@ -179,12 +179,14 @@ class LeadsController extends FController
      */
     public function actionExport()
     {
-        $searchModel = new LeadSearch();
+        throw new NotFoundHttpException();
 
-        $params = Yii::$app->request->queryParams;
+        //$searchModel = new LeadSearch();
+
+        //$params = Yii::$app->request->queryParams;
 
         /** @fflag FFlag::FF_KEY_REMOVE_LIMITATION_SUPERVISION_IN_LEAD_SEARCH, Remove User Group limitation for Search Leads for Sale Supervisor role */
-        if (!\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_REMOVE_LIMITATION_SUPERVISION_IN_LEAD_SEARCH)) {
+        /*if (!\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_REMOVE_LIMITATION_SUPERVISION_IN_LEAD_SEARCH)) {
             if (Yii::$app->user->identity->canRole('supervision')) {
                 $params['LeadSearch']['supervision_id'] = Yii::$app->user->id;
             }
@@ -195,7 +197,7 @@ class LeadsController extends FController
         return $this->render('export', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
-        ]);
+        ]);*/
     }
 
     public function actionExportCsv()

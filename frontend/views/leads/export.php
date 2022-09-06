@@ -87,16 +87,6 @@ $lists =  new ListsAccess(Yii::$app->user->id);
             },
         ],
         [
-            'header' => 'Customer email',
-            'value' => function (\common\models\Lead $model) {
-                $emails = [];
-                if ($model->client && $emailList = $model->client->clientEmails) {
-                    $emails = \yii\helpers\ArrayHelper::map($emailList, 'email', 'email');
-                }
-                return implode(', ', $emails);
-            },
-        ],
-        [
             'attribute' => 'called_expert',
         ],
         [

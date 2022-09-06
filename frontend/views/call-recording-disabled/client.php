@@ -20,6 +20,12 @@ echo GridView::widget([
     'dataProvider' => $clientDataProvider,
     'filterModel' => $clientSearchModel,
     'columns' => [
+        [
+            'attribute' => 'first_name',
+            'value' => static function (Client $model) {
+                return \src\helpers\text\MaskStringHelper::masking($model->first_name);
+            }
+        ],
         'first_name',
         'middle_name',
         'last_name',
