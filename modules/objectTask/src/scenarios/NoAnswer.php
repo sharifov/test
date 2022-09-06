@@ -6,10 +6,12 @@ use common\models\Employee;
 use common\models\Lead;
 use common\models\query\LeadFlowQuery;
 use modules\objectTask\src\entities\ObjectTask;
+use modules\objectTask\src\entities\ObjectTaskScenario;
 use modules\objectTask\src\entities\repositories\ObjectTaskRepository;
 use modules\objectTask\src\jobs\CommandExecutorJob;
 use modules\objectTask\src\scenarios\statements\NoAnswerDto;
 use modules\objectTask\src\scenarios\statements\NoAnswerObject;
+use modules\objectTask\src\services\NoAnswerProtocolService;
 use modules\objectTask\src\services\ObjectTaskService;
 use modules\objectTask\src\services\ObjectTaskStatusLogService;
 use src\helpers\app\AppHelper;
@@ -36,6 +38,11 @@ class NoAnswer extends BaseScenario
         self::INTERVAL_TYPE_MINUTES,
         self::INTERVAL_TYPE_SECONDS,
     ];
+
+    public const PARAMETER_ANSWER_NOTIFICATION = 'answerNotification';
+    public const PARAMETER_ANSWER_NOTIFICATION_ROLES = 'roles';
+    public const PARAMETER_ANSWER_NOTIFICATION_TITLE = 'title';
+    public const PARAMETER_ANSWER_NOTIFICATION_DESCRIPTION = 'description';
 
     public function process(): void
     {
@@ -156,8 +163,28 @@ class NoAnswer extends BaseScenario
     {
         $data = [];
 
+        $data[self::PARAMETER_ANSWER_NOTIFICATION] = [
+            'description' => 'Client response notification (<span class="text-danger">applies only to the roles included in the lead project</span>)',
+            'type' => ['object'],
+            'data' => [
+                'title' => [
+                    'description' => 'Notification title. Can use templates of type {{id}} from the Lead object',
+                    'type' => ['text'],
+                ],
+                'description' => [
+                    'description' => 'Notification text. Can use templates of type {{id}} from the Lead object',
+                    'type' => ['text'],
+                ],
+                'roles' => [
+                    'description' => 'Roles that should receive notifications',
+                    'type' => ['array'],
+                    'data' => ['supervision', 'sale_manager'],
+                ],
+            ],
+        ];
+
         $data['allowedTime'] = [
-            'description' => 'Time to send an email to the lead, applies only to the Days interval.',
+            'description' => 'Time to send an email to the lead (<span class="text-danger">applies only to the Days interval</span>).',
             'type' => ['object'],
             'data' => [
                 'hour' => [
@@ -294,17 +321,33 @@ class NoAnswer extends BaseScenario
 
     public static function clientResponseLogicInit(Lead $lead): void
     {
-        if ($lead->status !== Lead::STATUS_FOLLOW_UP) {
+        if ($lead->status !== Lead::STATUS_FOLLOW_UP || NoAnswerProtocolService::leadWasInNoAnswer($lead) === false) {
             return;
         }
 
         try {
-            ObjectTaskService::cancelJobs(
+            $scenarioIds = ObjectTaskService::cancelJobs(
                 self::KEY,
                 ObjectTaskService::OBJECT_LEAD,
                 $lead->id,
                 'Client has answered'
             );
+
+            if ($scenarioIds) {
+                foreach ($scenarioIds as $scenarioId) {
+                    $objectTaskScenario = ObjectTaskScenario::find()
+                        ->where([
+                            'ots_id' => $scenarioId,
+                        ])
+                        ->limit(1)
+                        ->one();
+
+                    NoAnswerProtocolService::notifyAboutClientAnswer(
+                        $objectTaskScenario,
+                        $lead
+                    );
+                }
+            }
 
             if ($lead->status !== Lead::CALL_STATUS_PROCESS) {
                 $leadFlow = LeadFlowQuery::getLastOwnerOfLead($lead->id);
