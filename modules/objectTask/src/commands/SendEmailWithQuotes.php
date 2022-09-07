@@ -524,7 +524,7 @@ class SendEmailWithQuotes extends BaseCommand
         return $quotes;
     }
 
-    protected function findLastQuote(array $allowedStatusList = [Quote::STATUS_SENT, Quote::STATUS_OPENED, Quote::STATUS_APPLIED]): ?Quote
+    protected function findLastQuote(array $allowedStatusList = [Quote::STATUS_SENT, Quote::STATUS_OPENED, Quote::STATUS_APPLIED, Quote::STATUS_DECLINED]): ?Quote
     {
         $lead = $this->getLead();
 
