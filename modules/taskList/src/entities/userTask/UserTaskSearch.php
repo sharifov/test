@@ -378,26 +378,14 @@ class UserTaskSearch extends UserTask
     private function filterSearchQuery(UserTaskScopes $query)
     {
         if ($this->createTimeRange) {
-            try {
-                $dTStart = new \DateTimeImmutable(date('Y-m-d 00:00:00', $this->createTimeStart));
-                $dTEnd = new \DateTime(date('Y-m-d 23:59:59', $this->createTimeEnd));
-                $sqlDTRestriction = DBHelper::yearMonthRestrictionQuery(
-                    $dTStart,
-                    $dTEnd,
-                    'ut_year',
-                    'ut_month'
-                );
-                $query->where($sqlDTRestriction);
-            } catch (\RuntimeException | \DomainException $throwable) {
-                $message = AppHelper::throwableLog($throwable);
-                $message['model'] = ArrayHelper::toArray($this);
-                \Yii::warning($message, 'UserTaskSearch:search:Exception');
-            } catch (\Throwable $throwable) {
-                $message = AppHelper::throwableLog($throwable);
-                $message['model'] = ArrayHelper::toArray($this);
-                \Yii::error($message, 'UserTaskSearch:search:Throwable');
-            }
+            $dTStart = new \DateTimeImmutable(date('Y-m-d 00:00:00', $this->createTimeStart));
+            $dTEnd = new \DateTime(date('Y-m-d 23:59:59', $this->createTimeEnd));
+        } else {
+            $dTStart = new \DateTimeImmutable(date('Y-m-d 00:00:00', strtotime($this->defaultDTStart)));
+            $dTEnd = new \DateTime(date('Y-m-d 23:59:59', strtotime($this->defaultDTEnd)));
         }
+
+        $query = $this->createTimeRangeRestriction($query, $dTStart, $dTEnd);
 
         // grid filtering conditions
         $query->andFilterWhere([
