@@ -8,13 +8,10 @@ use common\models\Lead;
 use common\models\UserGroup;
 use common\models\UserGroupAssign;
 use kartik\daterange\DateRangeBehavior;
-use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
-use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTask;
 use modules\taskList\src\entities\TargetObject;
 use modules\taskList\src\entities\taskList\TaskList;
 use src\helpers\app\AppHelper;
 use src\helpers\app\DBHelper;
-use src\validators\DateTimeRangeValidator;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
@@ -66,12 +63,6 @@ class UserTaskSearch extends UserTask
                 'dateStartAttribute' => 'createTimeStart',
                 'dateEndAttribute' => 'createTimeEnd',
             ],
-            [
-                'class' => DateRangeBehavior::class,
-                'attribute' => 'leadCreateDTRange',
-                'dateStartAttribute' => 'leadCreateTimeStart',
-                'dateEndAttribute' => 'leadCreateTimeEnd',
-            ],
         ];
     }
 
@@ -114,8 +105,7 @@ class UserTaskSearch extends UserTask
             [['leadStatus'], IsArrayValidator::class],
             [['leadStatus'], 'each', 'rule' => ['in', 'range' => array_keys(Lead::STATUS_LIST)], 'skipOnError' => true, 'skipOnEmpty' => true],
 
-            [['leadCreateDTRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['leadCreateDTRange'], DateTimeRangeValidator::class, 'separator' => self::SEPARATOR_DATE_RANGE],
+            [['leadCreateDTRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/', 'skipOnEmpty' => true],
             [['leadCreateTimeStart', 'leadCreateTimeEnd'], 'safe'],
         ];
     }
@@ -148,7 +138,6 @@ class UserTaskSearch extends UserTask
 
         return $dataProvider;
     }
-
 
     /**
      * Creates data provider instance with search query applied
@@ -478,9 +467,7 @@ class UserTaskSearch extends UserTask
 
         $query = $this->createTimeRangeRestriction($query, $dTStart, $dTEnd);
         $query = $this->userTaskRestriction($query);
-        $query = $this->leadRestriction($query);
-
-        return $query;
+        return $this->leadRestriction($query);
     }
 
     private function userTaskRestriction(UserTaskScopes $query): UserTaskScopes
@@ -510,22 +497,27 @@ class UserTaskSearch extends UserTask
     {
         if ($this->leadStatus) {
             $query->innerJoin([
-                'leadSubQuery' => Lead::find()
+                'leadStatusQuery' => Lead::find()
                     ->select(['id', 'status'])
                     ->andWhere(['IN', 'status', $this->leadStatus])
                     ->groupBy(['id', 'status'])
-            ], 'leadSubQuery.id = ut_target_object_id AND ut_target_object = :leadObj', [':leadObj' => TargetObject::TARGET_OBJ_LEAD]);
+            ], 'leadStatusQuery.id = ut_target_object_id AND ut_target_object = :leadObj', [':leadObj' => TargetObject::TARGET_OBJ_LEAD]);
         }
         if ($this->leadCreateDTRange) {
             try {
-                $dTStart = new \DateTimeImmutable(date('Y-m-d 00:00:00', $this->createTimeStart));
-                $dTEnd = new \DateTimeImmutable(date('Y-m-d 23:59:59', $this->createTimeEnd));
-
-                $query->andWhere($sqlDTRestriction);
-            } catch (\RuntimeException | \DomainException $throwable) {
-                $message = AppHelper::throwableLog($throwable);
-                $message['model'] = ArrayHelper::toArray($this);
-                \Yii::warning($message, 'UserTaskSearch:leadRestriction:Exception');
+                $dTStart = new \DateTimeImmutable(date('Y-m-d 00:00:00', strtotime($this->leadCreateTimeStart)));
+                $dTEnd = new \DateTimeImmutable(date('Y-m-d 23:59:59', strtotime($this->leadCreateTimeEnd)));
+                $query->innerJoin([
+                    'leadCreateQuery' => Lead::find()
+                        ->select(['id'])
+                        ->andWhere([
+                            'BETWEEN',
+                            'created',
+                            $dTStart->format('Y-m-d H:i:s'),
+                            $dTEnd->format('Y-m-d H:i:s')
+                        ])
+                        ->groupBy(['id'])
+                ], 'leadCreateQuery.id = ut_target_object_id AND ut_target_object = :leadObj', [':leadObj' => TargetObject::TARGET_OBJ_LEAD]);
             } catch (\Throwable $throwable) {
                 $message = AppHelper::throwableLog($throwable);
                 $message['model'] = ArrayHelper::toArray($this);
@@ -545,8 +537,8 @@ class UserTaskSearch extends UserTask
             $query->andWhere([
                 'BETWEEN',
                 'ut_start_dt',
-                $dTStart->format($this->formatDt),
-                $dTEnd->format($this->formatDt)
+                $dTStart->format('Y-m-d H:i:s'),
+                $dTEnd->format('Y-m-d H:i:s')
             ]);
             $query->andWhere(DBHelper::yearMonthRestrictionQuery(
                 $dTStart,
@@ -554,10 +546,6 @@ class UserTaskSearch extends UserTask
                 'ut_year',
                 'ut_month'
             ));
-        } catch (\RuntimeException | \DomainException $throwable) {
-            $message = AppHelper::throwableLog($throwable);
-            $message['model'] = ArrayHelper::toArray($this);
-            \Yii::warning($message, 'UserTaskSearch:createTimeRangeRestriction:Exception');
         } catch (\Throwable $throwable) {
             $message = AppHelper::throwableLog($throwable);
             $message['model'] = ArrayHelper::toArray($this);

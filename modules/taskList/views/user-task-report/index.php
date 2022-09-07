@@ -1,15 +1,7 @@
 <?php
 
-use common\components\grid\DateTimeColumn;
-use common\components\grid\UserSelect2Column;
-use modules\taskList\src\entities\TargetObject;
-use modules\taskList\src\entities\userTask\UserTask;
-use modules\taskList\src\entities\userTask\UserTaskHelper;
 use src\helpers\NumberHelper;
 use yii\helpers\Html;
-use yii\helpers\Url;
-use yii\grid\ActionColumn;
-use yii\grid\GridView;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
@@ -29,6 +21,7 @@ $this->params['breadcrumbs'][] = $this->title;
     $processingCnt = $result['processingCnt'] ?? 0;
     $completeCnt = $result['completeCnt'] ?? 0;
     $cancelCnt = $result['cancelCnt'] ?? 0;
+    $leadCnt = $result['leadCnt'] ?? 0;
 
     $processingPercent = NumberHelper::getPercent($processingCnt, $allUserTaskCnt);
     $completePercent = NumberHelper::getPercent($completeCnt, $allUserTaskCnt);
@@ -126,10 +119,36 @@ $this->params['breadcrumbs'][] = $this->title;
                     </div>
                 </div>
             </div>
+        </div>
+        <div class="col-md-4 col-sm-4 ">
+            <div class="x_panel tile" >
+                <div class="x_title">
+                    <h2>Lead</h2>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <h4></h4>
+                    <div class="widget_summary">
+                        <div class="w_left w_25">
+                            <span>All Leads</span>
+                        </div>
+                        <div class="w_center w_55">
+                            <div class="progress">
+                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="100"
+                                     aria-valuemin="0" aria-valuemax="100" style="width: 100%;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w_right w_20">
+                            <span><?php echo $leadCnt ?></span>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </div>
 
         </div>
     </div>
 
     <?php Pjax::end(); ?>
-
 </div>

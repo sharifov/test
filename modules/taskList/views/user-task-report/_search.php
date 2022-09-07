@@ -23,6 +23,15 @@ use kartik\select2\Select2;
         ],
     ]); ?>
 
+    <?php if ($model->hasErrors()) : ?>
+        <div class="js_error_box alert alert-warning alert-dismissible fade show" role="alert">
+            <?php echo \src\helpers\ErrorsToStringHelper::extractFromModel($model) ?>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    <?php endif ?>
+
     <div class="row">
         <div class="col-md-2">
             <?php echo $form->field($model, 'createTimeRange', [
@@ -37,11 +46,11 @@ use kartik\select2\Select2;
                     'pluginOptions' => [
                         'locale' => [
                             'format' => 'Y-m-d',
-                            'separator' => ' - '
+                            'separator' => ' - ',
                         ],
-                        'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default']
+                        'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default'],
                     ],
-                ])->label('UserTask StartDT Range');
+                ])->label('UserTask StartDT Range(UTC)');
             ?>
         </div>
         <div class="col-md-2">
@@ -86,6 +95,26 @@ use kartik\select2\Select2;
 
     <div class="row">
         <div class="col-md-2">
+            <?php echo $form->field($model, 'leadCreateDTRange', [
+                    'options' => ['class' => 'form-group']
+                ])->widget(\kartik\daterange\DateRangePicker::class, [
+                    'useWithAddon' => true,
+                    'presetDropdown' => true,
+                    'hideInput' => true,
+                    'convertFormat' => true,
+                    'startAttribute' => 'leadCreateTimeStart',
+                    'endAttribute' => 'leadCreateTimeEnd',
+                    'pluginOptions' => [
+                        'locale' => [
+                            'format' => 'Y-m-d',
+                            'separator' => ' - ',
+                        ],
+                        'ranges' => \Yii::$app->params['dateRangePicker']['configs']['default'],
+                    ],
+                ])->label('Lead CreateDT Range(UTC)');
+            ?>
+        </div>
+        <div class="col-md-2">
             <?= $form->field($model, 'leadStatus', [
                 'options' => ['class' => 'form-group']
             ])->widget(Select2::class, [
@@ -102,5 +131,4 @@ use kartik\select2\Select2;
     </div>
 
     <?php ActiveForm::end(); ?>
-
 </div>

@@ -17,12 +17,10 @@ class UserTaskReportController extends FController
         $this->layoutCrud();
     }
 
-    public function actionIndex()
+    public function actionIndex(): string
     {
         $searchModel = new UserTaskSearch();
         $query = $searchModel->queryReportSummary($this->request->queryParams);
-
-        //$x = $query->asArray()->one(); /* TODO:: FOR DEBUG:: must by remove  */
 
         return $this->render('index', [
             'searchModel' => $searchModel,
