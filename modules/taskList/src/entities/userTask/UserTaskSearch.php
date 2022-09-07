@@ -2,13 +2,19 @@
 
 namespace modules\taskList\src\entities\userTask;
 
+use common\components\validators\IsArrayValidator;
 use common\models\Employee;
+use common\models\Lead;
+use common\models\UserGroup;
+use common\models\UserGroupAssign;
 use kartik\daterange\DateRangeBehavior;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTask;
+use modules\taskList\src\entities\TargetObject;
 use modules\taskList\src\entities\taskList\TaskList;
 use src\helpers\app\AppHelper;
 use src\helpers\app\DBHelper;
+use src\validators\DateTimeRangeValidator;
 use yii\data\ActiveDataProvider;
 use yii\db\Expression;
 use yii\helpers\ArrayHelper;
@@ -20,20 +26,26 @@ class UserTaskSearch extends UserTask
 {
     public const SEPARATOR_DATE_RANGE = ' - ';
 
+    public $taskListIds;
+    public $userTaskStatus;
+    public $userTaskEmployee;
+    public $userTaskUserGroup;
+    public $leadStatus;
+
     public string $createTimeRange = '';
     public string $createTimeStart = '';
     public string $createTimeEnd = '';
+    public string $leadCreateDTRange = '';
+    public string $leadCreateTimeStart = '';
+    public string $leadCreateTimeEnd = '';
 
     public string $taskName = '';
-
     public string $clientStartDate = '';
     public string $clientEndDate = '';
-//    public string $startedDateRange = '';
-//    public string $endedDateRange = '';
 
     private string $defaultDTStart;
     private string $defaultDTEnd;
-    private string $formatDt = 'Y-m-d';
+    private string $formatDt;
 
     public function __construct(int $defaultMonth = 1, string $formatDt = 'Y-m-d', array $config = [])
     {
@@ -53,6 +65,12 @@ class UserTaskSearch extends UserTask
                 'attribute' => 'createTimeRange',
                 'dateStartAttribute' => 'createTimeStart',
                 'dateEndAttribute' => 'createTimeEnd',
+            ],
+            [
+                'class' => DateRangeBehavior::class,
+                'attribute' => 'leadCreateDTRange',
+                'dateStartAttribute' => 'leadCreateTimeStart',
+                'dateEndAttribute' => 'leadCreateTimeEnd',
             ],
         ];
     }
@@ -76,11 +94,29 @@ class UserTaskSearch extends UserTask
             ['ut_month', 'integer'],
 
             [['createTimeRange'], 'default', 'value' => $this->defaultDTStart . self::SEPARATOR_DATE_RANGE . $this->defaultDTEnd],
-
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
             [['createTimeStart', 'createTimeEnd'], 'safe'],
 
             ['taskName', 'string'],
+
+            [['taskListIds'], IsArrayValidator::class],
+            [['taskListIds'], 'each', 'rule' => ['in', 'range' => array_keys(TaskList::getListCache())], 'skipOnError' => true, 'skipOnEmpty' => true],
+
+            [['userTaskStatus'], IsArrayValidator::class],
+            [['userTaskStatus'], 'each', 'rule' => ['in', 'range' => array_keys(self::STATUS_LIST)], 'skipOnError' => true, 'skipOnEmpty' => true],
+
+            [['userTaskEmployee'], IsArrayValidator::class],
+            [['userTaskEmployee'], 'each', 'rule' => ['in', 'range' => array_keys(Employee::getActiveUsersList())], 'skipOnError' => true, 'skipOnEmpty' => true],
+
+            [['userTaskUserGroup'], IsArrayValidator::class],
+            [['userTaskUserGroup'], 'each', 'rule' => ['in', 'range' => array_keys(UserGroup::getList())], 'skipOnError' => true, 'skipOnEmpty' => true],
+
+            [['leadStatus'], IsArrayValidator::class],
+            [['leadStatus'], 'each', 'rule' => ['in', 'range' => array_keys(Lead::STATUS_LIST)], 'skipOnError' => true, 'skipOnEmpty' => true],
+
+            [['leadCreateDTRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            [['leadCreateDTRange'], DateTimeRangeValidator::class, 'separator' => self::SEPARATOR_DATE_RANGE],
+            [['leadCreateTimeStart', 'leadCreateTimeEnd'], 'safe'],
         ];
     }
 
@@ -406,6 +442,8 @@ class UserTaskSearch extends UserTask
         }
 
         $query->andFilterWhere(['like', 'ut_target_object', $this->ut_target_object]);
+
+        $this->userTaskRestriction($query);
     }
 
     public function queryReportSummary(array $queryParams): UserTaskScopes
@@ -439,10 +477,61 @@ class UserTaskSearch extends UserTask
         }
 
         $query = $this->createTimeRangeRestriction($query, $dTStart, $dTEnd);
+        $query = $this->userTaskRestriction($query);
+        $query = $this->leadRestriction($query);
 
-        /* TODO::  */
+        return $query;
+    }
 
+    private function userTaskRestriction(UserTaskScopes $query): UserTaskScopes
+    {
+        if ($this->taskListIds) {
+            $query->andWhere(['IN', 'ut_task_list_id', $this->taskListIds]);
+        }
+        if ($this->userTaskStatus) {
+            $query->andWhere(['IN', 'ut_status_id', $this->userTaskStatus]);
+        }
+        if ($this->userTaskEmployee) {
+            $query->andWhere(['IN', 'ut_user_id', $this->userTaskEmployee]);
+        }
+        if ($this->userTaskUserGroup) {
+            $query->innerJoin([
+                'userGroupAssign' => UserGroupAssign::find()
+                    ->select(['ugs_user_id'])
+                    ->andWhere(['IN', 'ugs_group_id', $this->userTaskUserGroup])
+                    ->groupBy(['ugs_user_id'])
+            ], 'userGroupAssign.ugs_user_id = ut_user_id');
+        }
 
+        return $query;
+    }
+
+    private function leadRestriction(UserTaskScopes $query): UserTaskScopes
+    {
+        if ($this->leadStatus) {
+            $query->innerJoin([
+                'leadSubQuery' => Lead::find()
+                    ->select(['id', 'status'])
+                    ->andWhere(['IN', 'status', $this->leadStatus])
+                    ->groupBy(['id', 'status'])
+            ], 'leadSubQuery.id = ut_target_object_id AND ut_target_object = :leadObj', [':leadObj' => TargetObject::TARGET_OBJ_LEAD]);
+        }
+        if ($this->leadCreateDTRange) {
+            try {
+                $dTStart = new \DateTimeImmutable(date('Y-m-d 00:00:00', $this->createTimeStart));
+                $dTEnd = new \DateTimeImmutable(date('Y-m-d 23:59:59', $this->createTimeEnd));
+
+                $query->andWhere($sqlDTRestriction);
+            } catch (\RuntimeException | \DomainException $throwable) {
+                $message = AppHelper::throwableLog($throwable);
+                $message['model'] = ArrayHelper::toArray($this);
+                \Yii::warning($message, 'UserTaskSearch:leadRestriction:Exception');
+            } catch (\Throwable $throwable) {
+                $message = AppHelper::throwableLog($throwable);
+                $message['model'] = ArrayHelper::toArray($this);
+                \Yii::error($message, 'UserTaskSearch:leadRestriction:Throwable');
+            }
+        }
 
         return $query;
     }
@@ -453,18 +542,18 @@ class UserTaskSearch extends UserTask
         \DateTime $dTEnd
     ): UserTaskScopes {
         try {
-            $query->andWhere(DBHelper::yearMonthRestrictionQuery(
-                $dTStart,
-                $dTEnd,
-                'ut_year',
-                'ut_month'
-            ));
             $query->andWhere([
                 'BETWEEN',
                 'ut_start_dt',
                 $dTStart->format($this->formatDt),
                 $dTEnd->format($this->formatDt)
             ]);
+            $query->andWhere(DBHelper::yearMonthRestrictionQuery(
+                $dTStart,
+                $dTEnd,
+                'ut_year',
+                'ut_month'
+            ));
         } catch (\RuntimeException | \DomainException $throwable) {
             $message = AppHelper::throwableLog($throwable);
             $message['model'] = ArrayHelper::toArray($this);
