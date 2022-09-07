@@ -514,7 +514,7 @@ class UserTaskSearch extends UserTask
                             'BETWEEN',
                             'created',
                             $dTStart->format('Y-m-d H:i:s'),
-                            $dTEnd->format('Y-m-d H:i:s')
+                            $dTEnd->format('Y-m-d H:i:s'),
                         ])
                         ->groupBy(['id'])
                 ], 'leadCreateQuery.id = ut_target_object_id AND ut_target_object = :leadObj', [':leadObj' => TargetObject::TARGET_OBJ_LEAD]);
@@ -538,7 +538,7 @@ class UserTaskSearch extends UserTask
                 'BETWEEN',
                 'ut_start_dt',
                 $dTStart->format('Y-m-d H:i:s'),
-                $dTEnd->format('Y-m-d H:i:s')
+                $dTEnd->format('Y-m-d H:i:s'),
             ]);
             $query->andWhere(DBHelper::yearMonthRestrictionQuery(
                 $dTStart,
