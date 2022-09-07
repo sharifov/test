@@ -4,8 +4,10 @@ namespace common\components\jobs;
 
 use DateTime;
 use modules\product\src\entities\productQuote\ProductQuote;
+use modules\product\src\entities\productQuote\ProductQuoteStatus;
 use modules\product\src\entities\productQuoteChange\events\ProductQuoteChangeClientRemainderNotificationEvent;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteChange\ProductQuoteChangeStatus;
 use src\dispatchers\EventDispatcher;
 use src\dto\flightQuote\UnUsedSegmentDTO;
 use src\entities\cases\Cases;
@@ -73,7 +75,25 @@ class SendNotificationToClientJob extends BaseJob implements JobInterface
                     $delayJob = $nextDateOfNotification->getTimestamp() - $now->getTimestamp();
 
                     $this->repeatJob($this->unUsedSegment, $delayJob);
+                } else {
+                    Yii::info([
+                        'message' => 'Empty "nextDateOfNotification", job will not repeat.',
+                        'caseId' => $case->cs_id,
+                        'ProductQuoteChangeId' => $productQuoteChange->pqc_id,
+                        'ProductQuoteId' => $productQuote->pq_id,
+                        'ProductQuoteChangeStatus' =>  ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id),
+                        'ProductQuoteStatus' =>  ProductQuoteStatus::getName($productQuote->pq_id),
+                    ], 'SendNotificationToClientJob:execute:Info');
                 }
+            } else {
+                Yii::info([
+                    'message' => 'Product Quote Change status is not in "pending" and product quote is not "new".',
+                    'caseId' => $case->cs_id,
+                    'ProductQuoteChangeId' => $productQuoteChange->pqc_id,
+                    'ProductQuoteId' => $productQuote->pq_id,
+                    'ProductQuoteChangeStatus' =>  ProductQuoteChangeStatus::getName($productQuoteChange->pqc_status_id),
+                    'ProductQuoteStatus' =>  ProductQuoteStatus::getName($productQuote->pq_id),
+                ], 'SendNotificationToClientJob:execute:Info');
             }
         } catch (\RuntimeException | \DomainException | NotFoundException $throwable) {
             $message = AppHelper::throwableLog($throwable);
