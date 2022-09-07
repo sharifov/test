@@ -17,6 +17,7 @@ use yii\base\Exception;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\httpclient\CurlTransport;
+use yii\web\BadRequestHttpException;
 
 class BackOffice
 {
@@ -39,10 +40,12 @@ class BackOffice
         }
         curl_setopt($ch, CURLOPT_VERBOSE, true);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        $userId = Yii::$app->params['backOffice']['userid'];
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
-            'version: ' . Yii::$app->params['backOffice']['ver'],
-            'signature: ' . self::getSignatureBO(Yii::$app->params['backOffice']['apiKey'], Yii::$app->params['backOffice']['ver'])
+            'userid: ' . $userId,
+            'signature: ' . self::getSignatureBO($userId, Yii::$app->params['backOffice']['apiKey'], $fields)
         ]);
         $result = curl_exec($ch);
         try {
@@ -75,7 +78,6 @@ class BackOffice
         $host = $host ?: Yii::$app->params['backOffice']['url'];
 
         $uri = $host . '/' . $endpoint;
-        $signature = self::getSignatureBO(Yii::$app->params['backOffice']['apiKey'], Yii::$app->params['backOffice']['ver']);
 
         $client = new \yii\httpclient\Client([
             'transport' => CurlTransport::class,
@@ -93,8 +95,11 @@ class BackOffice
             //"Content-length"    => mb_strlen($xmlRequest),
         ];*/
 
+        $userId = Yii::$app->params['backOffice']['userid'];
+        $signature = self::getSignatureBO($userId, Yii::$app->params['backOffice']['apiKey'], $fields);
+
         $headers = [
-            'version'   => Yii::$app->params['backOffice']['ver'],
+            'userid'   => $userId,
             'signature' => $signature
         ];
 
@@ -135,15 +140,20 @@ class BackOffice
 
 
     /**
+     * @param int $userId
      * @param string $apiKey
-     * @param string $version
+     * @param array|null $requestBodyParams
      * @return string
      */
-    private static function getSignatureBO(string $apiKey = '', string $version = ''): string
+    private static function getSignatureBO(int $userId, string $apiKey, array $requestBodyParams = []): string
     {
-        $expired = time() + 3600;
-        $md5 = md5(sprintf('%s:%s:%s', $apiKey, $version, $expired));
-        return implode('.', [md5($md5), $expired, $md5]);
+        $requestBodyParams += ['userid' => $userId];
+        asort($requestBodyParams);
+        $requestBodyParamsJson = json_encode($requestBodyParams);
+        if (!empty($apiKey) && !empty($userId)) {
+            return hash_hmac('sha256', $requestBodyParamsJson, $apiKey);
+        }
+        throw new BadRequestHttpException('Your .env BO settings has invalid apiKey or userid.');
     }
 
     public static function wh(string $type, array $data): array

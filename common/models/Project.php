@@ -24,6 +24,7 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\httpclient\CurlTransport;
 use common\components\validators\IsArrayValidator;
+use yii\web\BadRequestHttpException;
 
 /**
  * Class Project
@@ -412,10 +413,6 @@ class Project extends \yii\db\ActiveRecord
         $out['error'] = false;
 
         $uri = Yii::$app->params['backOffice']['url'] . '/default/projects';
-        $signature = self::getSignatureBO(
-            Yii::$app->params['backOffice']['apiKey'],
-            Yii::$app->params['backOffice']['ver']
-        );
 
         $client = new \yii\httpclient\Client([
             'transport' => CurlTransport::class,
@@ -433,10 +430,11 @@ class Project extends \yii\db\ActiveRecord
             //"Content-length"    => mb_strlen($xmlRequest),
         ];*/
 
+        $userId = Yii::$app->params['backOffice']['userid'];
 
         $headers = [
-            'version' => Yii::$app->params['backOffice']['ver'],
-            'signature' => $signature
+            'userid' => $userId,
+            'signature' =>  self::getSignatureBO($userId, Yii::$app->params['backOffice']['apiKey'])
         ];
 
         //$requestData['cid'] = $this->api_cid;
@@ -467,15 +465,20 @@ class Project extends \yii\db\ActiveRecord
     }
 
     /**
+     * @param int $userId
      * @param string $apiKey
-     * @param string $version
+     * @param array|null $requestBodyParams
      * @return string
      */
-    private static function getSignatureBO(string $apiKey = '', string $version = ''): string
+    private static function getSignatureBO(int $userId, string $apiKey, array $requestBodyParams = []): string
     {
-        $expired = time() + 3600;
-        $md5 = md5(sprintf('%s:%s:%s', $apiKey, $version, $expired));
-        return implode('.', [md5($md5), $expired, $md5]);
+        $requestBodyParams += ['userid' => $userId];
+        asort($requestBodyParams);
+        $requestBodyParamsJson = json_encode($requestBodyParams);
+        if (!empty($apiKey) && !empty($userId)) {
+            return hash_hmac('sha256', $requestBodyParamsJson, $apiKey);
+        }
+        throw new BadRequestHttpException('Your .env BO settings has invalid apiKey or userid.');
     }
 
     /**
