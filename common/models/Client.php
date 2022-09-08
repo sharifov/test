@@ -264,39 +264,9 @@ class Client extends ActiveRecord
         return $this->hasMany(ClientEmail::class, ['client_id' => 'id'])->select('email')->asArray()->column();
     }
 
-    /**
-     * @param array $emails
-     * @return array
-     */
-    public function getOnlyEmailsMask(array $emails): array
-    {
-        $result = [];
-        if ($emails) {
-            foreach ($emails as $email) {
-                $result[] = MaskEmailHelper::masking($email);
-            }
-        }
-        return $result;
-    }
-
     public function getOnlyPhones(): array
     {
         return $this->hasMany(ClientPhone::class, ['client_id' => 'id'])->select('phone')->asArray()->column();
-    }
-
-    /**
-     * @param $phones
-     * @return array
-     */
-    public function getOnlyPhonesMask($phones): array
-    {
-        $result = [];
-        if ($phones) {
-            foreach ($phones as $phone) {
-                $result[] = MaskPhoneHelper::masking($phone);
-            }
-        }
-        return $result;
     }
 
     public function getLeadIdsAndRequestIp(int $limit = 5): array

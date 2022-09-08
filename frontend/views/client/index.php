@@ -69,8 +69,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'header' => 'Phones',
                 'attribute' => 'client_phone',
                 'value' => function (Client $model) {
+                    $data = $model->getOnlyPhones();
                     return \frontend\widgets\SliceAndShowMoreWidget::widget([
-                        'data' => $model->getOnlyPhonesMask($model->getOnlyPhones()),
+                        'data' => \common\helpers\LogHelper::hidePersonalData($data, array_keys($data)),
                         'separator' => ' <i class="fa fa-phone"><code></code></i>'
                     ]);
                 },
@@ -82,8 +83,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'header' => 'Emails',
                 'attribute' => 'client_email',
                 'value' => function (Client $model) {
+                    $data = $model->getOnlyEmails();
                     return \frontend\widgets\SliceAndShowMoreWidget::widget([
-                        'data' => $model->getOnlyEmailsMask($model->getOnlyEmails()),
+                        'data' => \common\helpers\LogHelper::hidePersonalData($data, array_keys($data)),
                         'separator' => ' <i class="fa fa-phone"><code></code></i>'
                     ]);
                 },
