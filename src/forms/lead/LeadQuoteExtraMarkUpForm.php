@@ -37,9 +37,8 @@ class LeadQuoteExtraMarkUpForm extends Model
 
     public function validateCurrencyRate($attribute, $value): void
     {
-        if (round($this->extra_mark_up, 2) !== round($this->qp_client_extra_mark_up * $this->clientCurrencyRate, 2)) {
-            //$this->addError($attribute, 'Extra Mark Up not equal Client Extra Mark-Up');
-            /* TODO:: P2BPT-1651 */
+        if (round($this->extra_mark_up, 2) !== round($this->qp_client_extra_mark_up / $this->clientCurrencyRate, 2)) {
+            $this->addError($attribute, 'Extra Mark Up not equal Client Extra Mark-Up');
         }
     }
 
