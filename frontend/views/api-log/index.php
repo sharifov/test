@@ -22,16 +22,7 @@ $pjaxListId = 'pjax-api-log';
 <div class="api-log-index">
 
     <h1><i class="fa fa-list"></i> <?= Html::encode($this->title) ?></h1>
-<?php
-$json = '{"sms": ["s_phone_from", "s_phone_to", "s_sms_text", "s_sms_data"], "call": ["c_from", "c_to", "c_forwarded_from", "c_caller_name", "c_recording_url"], "email": ["e_email_from", {"mask": "regexp", "column": "e_email_from", "pattern": "(?<!^).(?=[^@]+@)", "replace": " "}, {"mask": "mail", "column": "e_email_to"}, "e_email_to", "e_email_cc", "e_email_bc", "e_email_body_text", "e_attach", "e_email_from_name", "e_email_to_name", "e_message_id", "e_ref_message_id"], "leads": ["l_client_first_name", "l_client_last_name", "l_client_phone", "l_client_email", "additional_information"], "coupon": ["c_code"], "clients": ["first_name", "middle_name", "last_name"], "invoice": ["inv_description"], "api_user": ["au_api_username", "au_api_password", "au_email"], "call_log": ["cl_phone_from", "cl_phone_to"], "projects": ["api_key"], "case_sale": ["css_sale_data", "css_sale_data_updated"], "conference": ["cf_recording_url", "cf_recording_sid"], "email_list": ["el_email"], "lead_qcall": ["lqc_call_from"], "phone_list": ["pl_phone_number", {"mask": "phone", "start": 2, "column": "pl_phone_number", "length": 3}, {"mask": "year", "column": "pl_created_dt"}], "credit_card": ["cc_number", "cc_display_number", "cc_holder_name", "cc_expiration_month", "cc_expiration_year", "cc_cvv", "cc_security_hash"], "hotel_quote": ["hq_json_booking"], "sale_ticket": ["st_client_name"], "billing_info": ["bi_first_name", "bi_last_name", "bi_middle_name", "bi_address_line1", "bi_address_line2", "bi_contact_phone", "bi_contact_email", "bi_contact_name"], "client_email": ["email"], "client_phone": ["phone"], "cruise_quote": ["crq_data_json"], "flight_quote": [{"path": ["$.title", "$.id", "$.type"], "column": "fq_json_booking"}, "fq_ticket_json"], "order_contact": ["oc_first_name", "oc_last_name", "oc_middle_name", "oc_email", "oc_phone_number"], "attraction_pax": ["atnp_first_name", "atnp_last_name"], "client_account": ["ca_username", "ca_first_name", "ca_middle_name", "ca_last_name", "ca_phone", "ca_email"], "hotel_room_pax": ["hrp_first_name", "hrp_last_name"], "product_holder": ["ph_first_name", "ph_last_name", "ph_middle_name", "ph_email", "ph_phone_number"], "call_log_record": ["clr_record_sid"], "phone_blacklist": ["pbl_phone"], "email_unsubscribe": ["eu_email"], "contact_phone_list": ["cpl_phone_number"], "phone_blacklist_log": ["pbll_phone"], "hotel_quote_room_pax": ["hqrp_first_name", "hqrp_last_name"], "employee_contact_info": ["email_pass"], "sms_distribution_list": ["sdl_phone_from", "sdl_phone_to"]}';
-$json = \yii\helpers\Json::decode($json);
 
-$t = \src\helpers\text\MaskStringHelper::maskArray($json);
-echo "<pre>";
-//print_r($json);
-print_r($t);
-echo "</pre>";
-?>
     <p>
         <?= Html::a('<i class="fa fa-remove"></i> Truncate ApiLog table', ['delete-all'], [
             'class' => 'btn btn-danger',
