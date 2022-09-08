@@ -757,8 +757,12 @@ class SideBarMenu extends \yii\bootstrap\Widget
                             'title' => 'Task List'
                         ],
                         [
-                            'label' => 'User Task',
+                            'label' => 'User Task CRUD',
                             'url' => ['/task/user-task-crud/index'],
+                        ],
+                        [
+                            'label' => 'User Task Report',
+                            'url' => ['/task/user-task-report/index'],
                         ],
                         [
                             'label' => 'User Task Status Logs',
