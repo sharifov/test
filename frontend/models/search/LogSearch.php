@@ -18,6 +18,10 @@ class LogSearch extends Log
     public $days;
     public $excludedCategories;
     public $createdDateTimeRange;
+    public $createdDateTimeStart;
+    public $createdDateTimeStartTs;
+    public $createdDateTimeEnd;
+    public $createdDateTimeEndTs;
 
     /**
      * @inheritdoc
@@ -30,6 +34,8 @@ class LogSearch extends Log
             [['days'], 'integer', 'min' => 0, 'max' => 365],
             ['excludedCategories', 'each', 'rule' => ['string']],
             [['createdDateTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
+            ['createdDateTimeStart', 'datetime', 'format' => 'yyyy-MM-dd HH:mm', 'timestampAttribute' => 'createdDateTimeStartTs', 'defaultTimeZone' => Yii::$app->user->identity->timezone],
+            ['createdDateTimeEnd', 'datetime', 'format' => 'yyyy-MM-dd HH:mm', 'timestampAttribute' => 'createdDateTimeEndTs', 'defaultTimeZone' => Yii::$app->user->identity->timezone],
         ];
     }
 
@@ -67,12 +73,11 @@ class LogSearch extends Log
         ]);
 
         if ($this->createdDateTimeRange) {
-            $dates = DateHelper::getDatesFromDateRangeString($this->createdDateTimeRange);
             $query->andFilterWhere([
                 'BETWEEN',
                 'log_time',
-                strtotime(Employee::convertTimeFromUserDtToUTC(strtotime($dates['start']))),
-                strtotime(Employee::convertTimeFromUserDtToUTC(strtotime($dates['end']))),
+                $this->createdDateTimeStartTs,
+                $this->createdDateTimeEndTs
             ]);
         }
 

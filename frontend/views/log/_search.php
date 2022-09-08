@@ -58,6 +58,8 @@ use yii\widgets\ActiveForm;
                             'presetDropdown' => true,
                             'hideInput' => true,
                             'convertFormat' => true,
+                            'startAttribute' => 'createdDateTimeStart',
+                            'endAttribute' => 'createdDateTimeEnd',
                             'pluginOptions' => [
                                 'timePicker' => true,
                                 'timePickerIncrement' => 1,
