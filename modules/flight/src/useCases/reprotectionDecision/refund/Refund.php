@@ -107,7 +107,7 @@ class Refund
             throw $e;
         }
 
-        $this->createBoRequestJob($bookingId, $orderRefundId, $productQuoteRefundId, $userId, $case);
+        $this->createBoRequestJob($bookingId, $orderRefundId, $productQuoteRefundId, $userId, $case->cs_id);
     }
 
     private function createRefunds(ProductQuote $productQuote, Cases $case): array
@@ -179,14 +179,14 @@ class Refund
         ], CaseEventLog::CATEGORY_DEBUG);
     }
 
-    private function createBoRequestJob(string $bookingId, int $orderRefundId, int $productQuoteRefundId, ?int $userId, Cases $case): void
+    private function createBoRequestJob(string $bookingId, int $orderRefundId, int $productQuoteRefundId, ?int $userId, int $caseId): void
     {
         $boJob = new BoRequestJob();
         $boJob->bookingId = $bookingId;
         $boJob->orderRefundId = $orderRefundId;
         $boJob->productQuoteRefundId = $productQuoteRefundId;
         $boJob->userId = $userId;
-        $boJob->caseId = $case->cs_id;
+        $boJob->caseId = $caseId;
         $jobId = \Yii::$app->queue_job->push($boJob);
         if (!$jobId) {
             \Yii::error([

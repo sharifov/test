@@ -91,7 +91,7 @@ class Confirm
             $this->processingProductQuoteChange($productQuoteChange, $userId, $reprotectionQuote, $case);
         });
 
-        $this->createBoRequestJob($reprotectionQuote, $userId, $case);
+        $this->createBoRequestJob($reprotectionQuote, $userId, $case->cs_id);
 
         if (!empty($reprotectionQuote->pq_id)) {
             $productQuoteData = ProductQuoteData::createConfirmed($reprotectionQuote->pq_id);
@@ -136,12 +136,12 @@ class Confirm
         ], CaseEventLog::CATEGORY_DEBUG);
     }
 
-    private function createBoRequestJob(ProductQuote $quote, ?int $userId, Cases $case): void
+    private function createBoRequestJob(ProductQuote $quote, ?int $userId, int $caseId): void
     {
         $boJob = new BoRequestJob();
         $boJob->quoteGid = $quote->pq_gid;
         $boJob->userId = $userId;
-        $boJob->caseId = $case->cs_id;
+        $boJob->caseId = $caseId;
         $jobId = \Yii::$app->queue_job->push($boJob);
         if (!$jobId) {
             \Yii::error([

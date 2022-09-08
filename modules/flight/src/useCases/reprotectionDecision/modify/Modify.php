@@ -107,7 +107,7 @@ class Modify
 
         $this->productQuoteDataManageService->updateRecommendedChangeQuote($originalProductQuote->pq_id, $quote->pq_id);
 
-        $this->createBoRequestJob($quote, $userId, $case);
+        $this->createBoRequestJob($quote, $userId, $case->cs_id);
     }
 
     private function modifyProductQuoteChange(ProductQuoteChange $change, ?int $userId, Cases $case): void
@@ -143,12 +143,12 @@ class Modify
         ], CaseEventLog::CATEGORY_DEBUG);
     }
 
-    private function createBoRequestJob(ProductQuote $quote, ?int $userId, Cases $case): void
+    private function createBoRequestJob(ProductQuote $quote, ?int $userId, int $caseId): void
     {
         $boJob = new BoRequestJob();
         $boJob->quoteGid = $quote->pq_gid;
         $boJob->userId = $userId;
-        $boJob->caseId = $case->cs_id;
+        $boJob->caseId = $caseId;
         $jobId = \Yii::$app->queue_job->push($boJob);
         if (!$jobId) {
             \Yii::error([
