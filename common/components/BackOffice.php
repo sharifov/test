@@ -4,6 +4,7 @@ namespace common\components;
 
 use common\models\Project;
 use frontend\helpers\JsonHelper;
+use modules\featureFlag\FFlag;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
 use src\entities\cases\CaseEventLog;
@@ -41,12 +42,21 @@ class BackOffice
         curl_setopt($ch, CURLOPT_VERBOSE, true);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-        $sigUsername = Yii::$app->params['backOffice']['username'];
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'sig-username: ' . $sigUsername,
-            'signature: ' . self::getSignatureBO($sigUsername, $endpoint, $fields)
-        ]);
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_BO_API_RBAC_AUTH)) {
+            $sigUsername = Yii::$app->params['backOffice']['username'];
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'sig-username: ' . $sigUsername,
+                'signature: ' . self::getSignatureForBO($sigUsername, $endpoint, $fields)
+            ]);
+        } else {
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'version: ' . Yii::$app->params['backOffice']['ver'],
+                'signature: ' . self::getSignatureBO(Yii::$app->params['backOffice']['apiKey'], Yii::$app->params['backOffice']['ver'])
+            ]);
+        }
+
         $result = curl_exec($ch);
         try {
             return json_decode($result, true, 512, JSON_THROW_ON_ERROR);
@@ -94,15 +104,20 @@ class BackOffice
             //"Authorization"     => "Basic ".$this->api_key,
             //"Content-length"    => mb_strlen($xmlRequest),
         ];*/
-
-        $sigUsername = Yii::$app->params['backOffice']['username'];
-
-        $signature = self::getSignatureBO($sigUsername, $endpoint, $fields);
-
-        $headers = [
-            'sig-username'   => $sigUsername,
-            'signature' => $signature
-        ];
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_BO_API_RBAC_AUTH)) {
+            $sigUsername = Yii::$app->params['backOffice']['username'];
+            $signature   = self::getSignatureFromBO($sigUsername, $endpoint, $fields);
+            $headers = [
+                'sig-username' => $sigUsername,
+                'signature'    => $signature
+            ];
+        } else {
+            $signature = self::getSignatureBO(Yii::$app->params['backOffice']['apiKey'], Yii::$app->params['backOffice']['ver']);
+            $headers = [
+                'version'   => Yii::$app->params['backOffice']['ver'],
+                'signature' => $signature
+            ];
+        }
 
         if ($addBasicAuth) {
             $username = Yii::$app->params['backOffice']['username'] ?? '';
@@ -146,7 +161,7 @@ class BackOffice
      * @return string
      * @throws BadRequestHttpException
      */
-    private static function getSignatureBO(string $sigUsername, string $endpointUrl = '', array $requestBodyFields = []): string
+    private static function getSignatureFromBO(string $sigUsername, string $endpointUrl = '', array $requestBodyFields = []): string
     {
         $apiKey = Yii::$app->params['backOffice']['apiKey'];
         $requestBodyString = $requestQueryString = '';
@@ -162,6 +177,18 @@ class BackOffice
         }
 
         throw new BadRequestHttpException('Your .env BO settings has invalid apiKey or username.');
+    }
+
+    /**
+     * @param string $apiKey
+     * @param string $version
+     * @return string
+     */
+    private static function getSignatureBO(string $apiKey = '', string $version = ''): string
+    {
+        $expired = time() + 3600;
+        $md5 = md5(sprintf('%s:%s:%s', $apiKey, $version, $expired));
+        return implode('.', [md5($md5), $expired, $md5]);
     }
 
     public static function wh(string $type, array $data): array

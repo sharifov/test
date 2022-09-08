@@ -6,6 +6,7 @@ use common\models\local\ContactInfo;
 use common\models\query\ProjectQuery;
 use frontend\helpers\JsonHelper;
 use common\components\BackOffice;
+use modules\featureFlag\FFlag;
 use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeService;
 use modules\qaTask\src\entities\qaTask\QaTask;
 use src\model\clientChat\entity\ClientChat;
@@ -430,12 +431,22 @@ class Project extends \yii\db\ActiveRecord
             //"Content-length"    => mb_strlen($xmlRequest),
         ];*/
 
-        $sigUsername = Yii::$app->params['backOffice']['username'];
-
-        $headers = [
-            'sig-username' => $sigUsername,
-            'signature' =>  BackOffice::getSignatureBO($sigUsername)
-        ];
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_BO_API_RBAC_AUTH)) {
+            $sigUsername = Yii::$app->params['backOffice']['username'];
+            $headers = [
+                'sig-username' => $sigUsername,
+                'signature'    => BackOffice::getSignatureFromBO($sigUsername)
+            ];
+        } else {
+            $signature = self::getSignatureBO(
+                Yii::$app->params['backOffice']['apiKey'],
+                Yii::$app->params['backOffice']['ver']
+            );
+            $headers = [
+                'version' => Yii::$app->params['backOffice']['ver'],
+                'signature' => $signature
+            ];
+        }
 
         //$requestData['cid'] = $this->api_cid;
 
@@ -459,6 +470,18 @@ class Project extends \yii\db\ActiveRecord
         }
 
         return $out;
+    }
+
+    /**
+     * @param string $apiKey
+     * @param string $version
+     * @return string
+     */
+    private static function getSignatureBO(string $apiKey = '', string $version = ''): string
+    {
+        $expired = time() + 3600;
+        $md5 = md5(sprintf('%s:%s:%s', $apiKey, $version, $expired));
+        return implode('.', [md5($md5), $expired, $md5]);
     }
 
     /**

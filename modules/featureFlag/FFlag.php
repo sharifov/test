@@ -58,6 +58,7 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_REMOVE_LIMITATION_SUPERVISION_IN_LEAD_SEARCH = 'removeLimitationSupervisionInLeadSearch';
     public const FF_KEY_NO_ANSWER_PROTOCOL_ENABLE = 'noAnswerProtocolEnable';
     public const FF_KEY_USER_CONVERSION_EXCLUDE_ALTERNATIVE_LEAD_ENABLE = 'userConversionExcludeAlternativeLeadEnable';
+    public const FF_BO_API_RBAC_AUTH = 'boApiRbacAuth';
 
     public const FF_KEY_LIST = [
         self::FF_KEY_LPP_ENABLE,
@@ -106,6 +107,7 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_REMOVE_LIMITATION_SUPERVISION_IN_LEAD_SEARCH,
         self::FF_KEY_NO_ANSWER_PROTOCOL_ENABLE,
         self::FF_KEY_USER_CONVERSION_EXCLUDE_ALTERNATIVE_LEAD_ENABLE,
+        self::FF_BO_API_RBAC_AUTH,
     ];
 
     public const FF_OBJECT_LIST = [
