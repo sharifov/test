@@ -19,12 +19,16 @@ class CaseCategoryController extends FController
      */
     public function actionIndex(): string
     {
+        $params       = Yii::$app->request->queryParams;
         $searchModel  = new CaseCategorySearch();
-        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider = $searchModel->search($params);
+
+        $parentCategoryId = $params['CaseCategoryManageForm']['parentCategoryId'] ?? 0;
 
         return $this->render('index', [
-          'searchModel'  => $searchModel,
-          'dataProvider' => $dataProvider,
+          'searchModel'      => $searchModel,
+          'dataProvider'     => $dataProvider,
+          'parentCategoryId' => $parentCategoryId,
         ]);
     }
 
@@ -35,8 +39,8 @@ class CaseCategoryController extends FController
      */
     public function actionView($id): string
     {
-        $model  = $this->findModel($id);
-        $parent = $model->parents(1)->one();
+        $model                                  = $this->findModel($id);
+        $parent                                 = $model->parents(1)->one();
         $this->view->params['parentCategoryId'] = null;
         if ($parent) {
             $this->view->params['parentCategoryId'] = $parent->cc_id;
@@ -145,12 +149,27 @@ class CaseCategoryController extends FController
      */
     private function moveNestedSetModel(CaseCategory $model, CaseCategoryManageForm $form): void
     {
+        /*check if model is not a root already(the root has left attribute equal 1) and parent category id is selected*/
         if (!is_numeric($form->parentCategoryId)) {
-            $model->makeRoot();
+            if ($model->cc_lft !== 1) {
+                $model->makeRoot();
+            }
         } else {
             $parent = CaseCategory::findNestedSets()->andWhere(['cc_id' => $form->parentCategoryId])->one();
             if ($parent) {
-                $model->appendTo($parent);
+                $nestedModel = CaseCategory::findNestedSets()->andWhere(['cc_id' => $model->cc_id])->one();
+                $this->appendChildren($nestedModel, $parent);
+            }
+        }
+    }
+
+    private function appendChildren($model, $parent): void
+    {
+        $children = $model->children(1)->all();
+        $model->appendTo($parent);
+        if ($children) {
+            foreach ($children as $child) {
+                $this->appendChildren($child, $model);
             }
         }
     }

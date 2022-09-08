@@ -57,9 +57,6 @@ class CaseCategoryManageForm extends Model
         $case->cc_allow_to_select = $this->cc_allow_to_select;
         $case->cc_system = $this->cc_system;
         $case->cc_enabled = $this->cc_enabled;
-        //todo something wrong here with setting default value to tree id before InsertAfter logic in
-        //vendor/creocoder/yii2-nested-sets/src/NestedSetsBehavior.php
-        $case->cc_tree = $this->cc_tree ?? 0;
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace frontend\widgets\nestedSets;
 
+use frontend\assets\JqueryAsset;
 use frontend\assets\Select2Asset;
 use yii\web\AssetBundle;
 
@@ -18,6 +19,9 @@ class NestedSetsAsset extends AssetBundle
     ];
 
     public $depends = [
+      JqueryAsset::class,
       Select2Asset::class,
     ];
+
+    public $jsOptions = ['position' => \yii\web\View::POS_END];
 }

@@ -32,7 +32,8 @@ use common\models\Department;
                 $params = [
                     'query' => CaseCategory::findNestedSets(),
                     'attribute' => 'parentCategoryId',
-                    'model' => $model
+                    'model' => $model,
+                    'allowToSelectEnabled' => true
                 ];
                 if ($model->scenario === CaseCategoryManageForm::SCENARIO_UPDATE) {
                     $currentModelId = $model->cc_id;

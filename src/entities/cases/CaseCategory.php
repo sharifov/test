@@ -26,6 +26,8 @@ use yii\db\ActiveRecord;
  * @property bool $cc_enabled
  * @property bool $cc_allow_to_select;
  * @property int $cc_tree;
+ * @property int $cc_lft;
+ * @property int $cc_rgt;
  * @property Cases[] $cases
  * @property Department $dep
  * @property Employee $updatedUser

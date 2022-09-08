@@ -1,5 +1,6 @@
 <?php
 
+use src\helpers\nestedSets\NestedSetsHelper;
 use yii\helpers\Html;
 use yii\widgets\DetailView;
 use src\entities\cases\CaseCategory;
@@ -29,13 +30,19 @@ $this->params['breadcrumbs'][] = $this->title;
         </p>
 
         <?php
-        $parentCategory = CaseCategory::findNestedSets()->andWhere(['cc_id' => $this->params['parentCategoryId']])
-                                      ->one();
+        $parentCategory     = CaseCategory::findNestedSets()->andWhere(['cc_id' => $this->params['parentCategoryId']])
+                                          ->one();
         $parentCategoryName = 'Not set';
-        $parentCategoryId = 'Not set';
+        $parentCategoryId   = 'Not set';
         if ($parentCategory) {
             $parentCategoryName = $parentCategory->getAttribute('cc_name');
-            $parentCategoryId  = $parentCategory->getAttribute('cc_id');
+            $parentCategoryId   = $parentCategory->getAttribute('cc_id');
+        }
+        $allParents                 = $model->parents()->asArray()->all();
+        $parentsCategoriesHierarchy = 'Not set';
+        if ($allParents) {
+            $parentsNames               = array_column($allParents, 'cc_name');
+            $parentsCategoriesHierarchy = NestedSetsHelper::formatHierarchyString($parentsNames);
         }
         ?>
         <?= DetailView::widget([
@@ -65,6 +72,10 @@ $this->params['breadcrumbs'][] = $this->title;
             [
               'attribute' => 'parentCategoryId',
               'value'     => $parentCategoryId,
+            ],
+            [
+              'attribute' => 'parentsCategoriesHierarchy',
+              'value'     => $parentsCategoriesHierarchy,
             ],
             'cc_created_dt',
             'cc_updated_dt',
