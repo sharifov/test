@@ -24,7 +24,8 @@ echo GridView::widget([
         [
             'attribute' => 'first_name',
             'value' => static function (Client $model) {
-                return $model->first_name;
+                $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['first_name']);
+                return $data['first_name'];
             }
         ],
         'first_name',
