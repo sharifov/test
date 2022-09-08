@@ -41,11 +41,11 @@ class BackOffice
         curl_setopt($ch, CURLOPT_VERBOSE, true);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-        $userId = Yii::$app->params['backOffice']['userid'];
+        $sigUsername = Yii::$app->params['backOffice']['username'];
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
-            'userid: ' . $userId,
-            'signature: ' . self::getSignatureBO($userId, Yii::$app->params['backOffice']['apiKey'], $fields)
+            'sig-username: ' . $sigUsername,
+            'signature: ' . self::getSignatureBO($sigUsername, $endpoint, $fields)
         ]);
         $result = curl_exec($ch);
         try {
@@ -95,11 +95,12 @@ class BackOffice
             //"Content-length"    => mb_strlen($xmlRequest),
         ];*/
 
-        $userId = Yii::$app->params['backOffice']['userid'];
-        $signature = self::getSignatureBO($userId, Yii::$app->params['backOffice']['apiKey'], $fields);
+        $sigUsername = Yii::$app->params['backOffice']['username'];
+
+        $signature = self::getSignatureBO($sigUsername, $endpoint, $fields);
 
         $headers = [
-            'userid'   => $userId,
+            'sig-username'   => $sigUsername,
             'signature' => $signature
         ];
 
@@ -134,26 +135,33 @@ class BackOffice
         $metrics->histogramMetric('back_office', $seconds, ['action' => $action]);
         unset($metrics);
 
-        //VarDumper::dump($response->content, 10, true); exit;
         return $response;
     }
 
 
     /**
-     * @param int $userId
-     * @param string $apiKey
-     * @param array|null $requestBodyParams
+     * @param string $sigUsername
+     * @param string $endpointUrl
+     * @param array|null $requestBodyFields
      * @return string
+     * @throws BadRequestHttpException
      */
-    private static function getSignatureBO(int $userId, string $apiKey, array $requestBodyParams = []): string
+    private static function getSignatureBO(string $sigUsername, string $endpointUrl = '', array $requestBodyFields = []): string
     {
-        $requestBodyParams += ['userid' => $userId];
-        asort($requestBodyParams);
-        $requestBodyParamsJson = json_encode($requestBodyParams);
-        if (!empty($apiKey) && !empty($userId)) {
-            return hash_hmac('sha256', $requestBodyParamsJson, $apiKey);
+        $apiKey = Yii::$app->params['backOffice']['apiKey'];
+        $requestBodyString = $requestQueryString = '';
+        if (count($requestBodyFields)) {
+            $requestBodyString = json_encode($requestBodyFields);
         }
-        throw new BadRequestHttpException('Your .env BO settings has invalid apiKey or userid.');
+        if ($endpointUrl != '') {
+            $requestQueryString = parse_url($endpointUrl, PHP_URL_QUERY) ;
+        }
+        if (!empty($apiKey) && !empty($sigUsername)) {
+            $requestDataString = $requestQueryString . $sigUsername . $requestBodyString;
+            return hash_hmac('sha256', $requestDataString, $apiKey);
+        }
+
+        throw new BadRequestHttpException('Your .env BO settings has invalid apiKey or username.');
     }
 
     public static function wh(string $type, array $data): array

@@ -2,6 +2,7 @@
 
 namespace webapi\src\request;
 
+use common\components\BackOffice;
 use Yii;
 use yii\helpers\VarDumper;
 use yii\httpclient\Request;
@@ -40,8 +41,15 @@ class RequestBo
         if ($data !== null) {
             $this->addData($data);
         }
+        $sigUsername = Yii::$app->params['backOffice']['username'];
+        $signature = BackOffice::getSignatureBO($sigUsername, '', $data);
 
-        $response = $this->next->setUrl($this->createUrl($action))->send();
+        $headers = [
+            'sig-username'   => $sigUsername,
+            'signature' => $signature
+        ];
+
+        $response = $this->next->setUrl($this->createUrl($action))->addHeaders($headers)->send();
 
         $response = $this->checkRedirect($response);
 
