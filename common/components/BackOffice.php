@@ -42,7 +42,7 @@ class BackOffice
         curl_setopt($ch, CURLOPT_VERBOSE, true);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-        if (Yii::$app->featureFlag->isEnable(FFlag::FF_BO_API_RBAC_AUTH)) {
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BO_API_RBAC_AUTH)) {
             $sigUsername = Yii::$app->params['backOffice']['username'];
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 'Content-Type: application/json',
@@ -104,7 +104,7 @@ class BackOffice
             //"Authorization"     => "Basic ".$this->api_key,
             //"Content-length"    => mb_strlen($xmlRequest),
         ];*/
-        if (Yii::$app->featureFlag->isEnable(FFlag::FF_BO_API_RBAC_AUTH)) {
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BO_API_RBAC_AUTH)) {
             $sigUsername = Yii::$app->params['backOffice']['username'];
             $signature   = self::getSignatureFromBO($sigUsername, $endpoint, $fields);
             $headers = [

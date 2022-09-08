@@ -431,7 +431,7 @@ class Project extends \yii\db\ActiveRecord
             //"Content-length"    => mb_strlen($xmlRequest),
         ];*/
 
-        if (Yii::$app->featureFlag->isEnable(FFlag::FF_BO_API_RBAC_AUTH)) {
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BO_API_RBAC_AUTH)) {
             $sigUsername = Yii::$app->params['backOffice']['username'];
             $headers = [
                 'sig-username' => $sigUsername,
