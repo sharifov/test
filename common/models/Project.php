@@ -5,6 +5,7 @@ namespace common\models;
 use common\models\local\ContactInfo;
 use common\models\query\ProjectQuery;
 use frontend\helpers\JsonHelper;
+use common\components\BackOffice;
 use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeService;
 use modules\qaTask\src\entities\qaTask\QaTask;
 use src\model\clientChat\entity\ClientChat;
@@ -24,7 +25,6 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use yii\httpclient\CurlTransport;
 use common\components\validators\IsArrayValidator;
-use yii\web\BadRequestHttpException;
 
 /**
  * Class Project
@@ -430,11 +430,11 @@ class Project extends \yii\db\ActiveRecord
             //"Content-length"    => mb_strlen($xmlRequest),
         ];*/
 
-        $userId = Yii::$app->params['backOffice']['userid'];
+        $sigUsername = Yii::$app->params['backOffice']['username'];
 
         $headers = [
-            'userid' => $userId,
-            'signature' =>  self::getSignatureBO($userId, Yii::$app->params['backOffice']['apiKey'])
+            'sig-username' => $sigUsername,
+            'signature' =>  BackOffice::getSignatureBO($sigUsername)
         ];
 
         //$requestData['cid'] = $this->api_cid;
@@ -452,9 +452,6 @@ class Project extends \yii\db\ActiveRecord
             ])
             ->send();
 
-
-        //VarDumper::dump($response->content, 10, true); exit;
-
         if ($response->isOk) {
             $out['data'] = $response->data;
         } else {
@@ -462,23 +459,6 @@ class Project extends \yii\db\ActiveRecord
         }
 
         return $out;
-    }
-
-    /**
-     * @param int $userId
-     * @param string $apiKey
-     * @param array|null $requestBodyParams
-     * @return string
-     */
-    private static function getSignatureBO(int $userId, string $apiKey, array $requestBodyParams = []): string
-    {
-        $requestBodyParams += ['userid' => $userId];
-        asort($requestBodyParams);
-        $requestBodyParamsJson = json_encode($requestBodyParams);
-        if (!empty($apiKey) && !empty($userId)) {
-            return hash_hmac('sha256', $requestBodyParamsJson, $apiKey);
-        }
-        throw new BadRequestHttpException('Your .env BO settings has invalid apiKey or userid.');
     }
 
     /**
