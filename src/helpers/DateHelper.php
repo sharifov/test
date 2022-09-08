@@ -102,19 +102,4 @@ class DateHelper
 
         return $dateTime->modify("+{$minutes} minutes")->format($format);
     }
-
-    /**
-     * @param string $dateRange
-     * @param string $delimiter
-     * @return array{start: string, end: string}
-     */
-    public static function getDatesFromDateRangeString(string $dateRange, string $delimiter = ' - '): array
-    {
-        $dates = explode($delimiter, $dateRange);
-
-        return [
-            'start' => $dates[0] ?? '',
-            'end' => $dates[1] ?? '',
-        ];
-    }
 }
