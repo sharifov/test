@@ -256,21 +256,6 @@ return [
         'gridview' => [
             'class' => '\kartik\grid\Module'
         ],
-        'treemanager' =>  [
-          'class' => '\kartik\tree\Module',
-          'treeStructure' => [
-            'treeAttribute' => 'cc_tree',
-            'leftAttribute' => 'cc_lft',
-            'rightAttribute' => 'cc_rgt',
-            'depthAttribute' => 'cc_depth',
-          ],
-          'dataStructure' => [
-            'keyAttribute' => 'cc_id',
-            'nameAttribute' => 'cc_name',
-            'iconTypeAttribute' => 'cc_name',
-            'iconAttribute' => 'cc_id',
-          ],
-        ],
 
         /*'supervisor' => [
             'class'    => 'supervisormanager\Module',
