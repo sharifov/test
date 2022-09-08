@@ -1,4 +1,5 @@
 <?php
+
 use kivork\FeatureFlag\Services\FeatureFlagService;
 use yii\db\Migration;
 
