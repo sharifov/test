@@ -66,7 +66,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function (\common\models\CreditCard $model) {
                     return $model->typeName;
                 },
-                'filter' => CreditCard::getTypeList()
+                'filter' => \common\models\CreditCard::getTypeList()
             ],
             [
                 'attribute' => 'cc_status_id',

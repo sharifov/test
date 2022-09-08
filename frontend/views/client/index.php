@@ -45,7 +45,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $data ['first_name'];
                 },
             ],
-            //'first_name',
             'middle_name',
             'last_name',
             'company_name',

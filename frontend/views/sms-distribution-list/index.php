@@ -104,7 +104,6 @@ $gridId = 'sms-grid-id';
                 'filter' => SmsDistributionList::getStatusList()
             ],
             'sdl_phone_from',
-            //'sdl_phone_to',
             [
                 'attribute' => 'sdl_phone_to',
                 'value' => static function (SmsDistributionList $model) {
