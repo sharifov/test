@@ -1,7 +1,6 @@
 <?php
 
 use common\models\Client;
-use src\helpers\text\MaskStringHelper;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
