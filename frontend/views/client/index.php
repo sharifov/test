@@ -28,6 +28,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php
     $filterProjects = \common\models\Project::getList();
     $filterProjects['-1'] = 'Without project';
+
     ?>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -40,12 +41,12 @@ $this->params['breadcrumbs'][] = $this->title;
             'parent_id',
             [
                 'attribute' => 'first_name',
-                'value' => static function (Client $model) {
-                    return MaskStringHelper::masking($model->first_name);
+                'value' => static function ($model) {
+                    $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['first_name']);
+                    return $data ['first_name'];
                 },
-                'format' => 'raw'
             ],
-            'first_name',
+            //'first_name',
             'middle_name',
             'last_name',
             'company_name',

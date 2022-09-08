@@ -52,7 +52,8 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'cc_holder_name',
                 'value' => static function (CreditCard $model) {
-                    return MaskStringHelper::masking($model->cc_holder_name);
+                    $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['cc_holder_name']);
+                    return $data['cc_holder_name'];
                 }
             ],
             'cc_expiration_month',

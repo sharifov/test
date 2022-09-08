@@ -34,7 +34,8 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'bi_first_name',
                 'value' => static function (BillingInfo $model) {
-                    return \src\helpers\text\MaskStringHelper::masking($model->bi_first_name);
+                    $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['bi_first_name']);
+                    return $data['bi_first_name'];
                 },
                 'format' => 'raw'
             ],

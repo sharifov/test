@@ -44,13 +44,15 @@ $pjaxListId = 'pjax-client-account';
             [
                 'attribute' => 'ca_username',
                 'value' => static function ($model) {
-                    return MaskStringHelper::masking($model->ca_username);
+                    $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['ca_username']);
+                    return $data['ca_username'];
                 }
             ],
             [
                 'attribute' => 'ca_first_name',
                 'value' => static function ($model) {
-                    return MaskStringHelper::masking($model->ca_first_name);
+                    $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['ca_first_name']);
+                    return $data['ca_first_name'];
                 }
             ],
             'ca_middle_name',

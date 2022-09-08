@@ -3,7 +3,6 @@
 use modules\product\src\entities\productHolder\ProductHolder;
 use src\helpers\email\MaskEmailHelper;
 use src\helpers\phone\MaskPhoneHelper;
-use src\helpers\text\MaskStringHelper;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -35,7 +34,8 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'ph_first_name',
                 'value' => static function (ProductHolder $model) {
-                    return MaskStringHelper::masking($model->ph_first_name);
+                    $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['ph_first_name']);
+                    return $data['ph_first_name'];
                 }
             ],
             'ph_last_name',

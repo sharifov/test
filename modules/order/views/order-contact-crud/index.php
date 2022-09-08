@@ -5,7 +5,6 @@ use common\components\i18n\Formatter;
 use modules\order\src\entities\orderContact\OrderContact;
 use src\helpers\email\MaskEmailHelper;
 use src\helpers\phone\MaskPhoneHelper;
-use src\helpers\text\MaskStringHelper;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -43,7 +42,8 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'oc_first_name',
                 'value' => static function (OrderContact $model) {
-                    return MaskStringHelper::masking($model->oc_first_name);
+                    $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['oc_first_name']);
+                    return $data['oc_first_name'];
                 },
                 'format' => 'raw'
             ],

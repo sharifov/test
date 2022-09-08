@@ -53,7 +53,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function (LeadRequest $model) {
                     $resultStr = '-';
                     if ($decodedData = \frontend\helpers\JsonHelper::decode($model->lr_json_data)) {
-                        $decodedData = \src\helpers\text\MaskStringHelper::maskArray($decodedData);
+                        $decodedData = \common\helpers\LogHelper::replaceSource($decodedData);
                         $truncatedStr = StringHelper::truncate(
                             Html::encode(VarDumper::dumpAsString($decodedData)),
                             1200,
