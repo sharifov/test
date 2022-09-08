@@ -10,6 +10,7 @@ class EmailContactForm extends Model
 {
     public $id;
     public $email;
+    public $emails;
     public $name;
     public $type;
 
@@ -39,10 +40,37 @@ class EmailContactForm extends Model
     public function rules(): array
     {
         return [
-            [['email', 'type'], 'required'],
+            [['type'], 'required'],
             [['email', 'name'], 'string'],
+            [['emails'], 'default'],
+            ['emails', 'safe'],
+            ['email',
+                'required',
+                'isEmpty' => function ($value) {
+                    return empty($value);
+                },
+                'when' => function ($model) {
+                    return (empty($model->emails)) && EmailContactType::isRequired($model->type);
+                },
+            ],
+            ['emails',
+                'validateEmails',
+                'isEmpty' => function ($value) {
+                    return empty($value);
+                },
+                'when' => function ($model) {
+                    return EmailContactType::isRequired($model->type);
+                },
+             ],
             [['type', 'id'], 'integer'],
         ];
+    }
+
+    public function validateEmails($attribute, $params)
+    {
+        if (empty($this->email)) {
+            $this->addError($attribute, 'Emails cannot be blank.');
+        }
     }
 
     public function fields()

@@ -1097,6 +1097,11 @@ class FlightQuoteController extends FController
                         );
                     });
 
+                if ($productQuoteChange->isDeclined()) {
+                    $productQuoteChange->statusToNew();
+                    $this->productQuoteChangeRepository->save($productQuoteChange);
+                }
+
                 $response['message'] = 'Success. FlightQuote ID(' . $flightQuote->getId() . ') created';
                 $response['status'] = 1;
             } catch (\RuntimeException | \DomainException $exception) {

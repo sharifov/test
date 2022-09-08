@@ -27,15 +27,15 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 4,
-  "iteration": 1655374306892,
+  "id": 53,
+  "iteration": 1662361085714,
   "links": [],
   "liveNow": false,
   "panels": [
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -90,16 +90,16 @@
         "text": {},
         "textMode": "value"
       },
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "repeatDirection": "h",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "uptime{env=~\"$env\",job=~\"$job\"}",
+          "expr": "uptime{env=~\"$env\", instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -113,7 +113,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -181,15 +181,15 @@
         },
         "textMode": "value"
       },
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "current_tubes{env=~\"$env\",job=~\"$job\"}",
+          "expr": "current_tubes{env=~\"$env\", instance=~\"$instance\"}",
           "instant": false,
           "interval": "",
           "legendFormat": "",
@@ -202,7 +202,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -248,15 +248,15 @@
         "text": {},
         "textMode": "name"
       },
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "current_tubes{env=~\"$env\",job=~\"$job\"}",
+          "expr": "current_tubes{env=~\"$env\", instance=~\"$instance\"}",
           "interval": "",
           "legendFormat": "{{name}}",
           "refId": "A"
@@ -269,7 +269,7 @@
       "collapsed": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "gridPos": {
         "h": 1,
@@ -289,7 +289,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "decimals": 0,
       "description": "tubes -  the number of currently-existing tubes\n\nproducers - the number of open connections that have each issued at least one put command\n\nworkers - the number of open connections that have each issued at least one reserve command\n\nwaiting - the number of open connections that have issued a reserve command but not yet received a response\n\n",
@@ -328,7 +328,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -340,10 +340,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "current_tubes{env=~\"$env\",job=~\"$job\"}",
+          "expr": "current_tubes{env=~\"$env\", instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -353,10 +353,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "current_workers{env=~\"$env\",job=~\"$job\"}",
+          "expr": "current_workers{env=~\"$env\", instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -366,10 +366,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "current_producers{env=~\"$env\",job=~\"$job\"}",
+          "expr": "current_producers{env=~\"$env\", instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -379,10 +379,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "current_waiting{env=~\"$env\",job=~\"$job\"}",
+          "expr": "current_waiting{env=~\"$env\", instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -425,7 +425,7 @@
       "collapsed": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "gridPos": {
         "h": 1,
@@ -445,7 +445,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "description": "Cumulative count of jobs created in all tubes after restart beanstalkd process  in rate of range 1 minutes",
       "fieldConfig": {
@@ -483,7 +483,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -500,10 +500,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "irate(total_jobs{env=~\"$env\",job=~\"$job\"}[1m])",
+          "expr": "irate(total_jobs{env=~\"$env\", instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -550,7 +550,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "decimals": 2,
       "description": "Current number jobs in different state",
@@ -589,7 +589,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -601,10 +601,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "current_jobs_ready{env=~\"$env\",job=~\"$job\"}",
+          "expr": "current_jobs_ready{env=~\"$env\", instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -614,10 +614,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "current_jobs_buried{env=~\"$env\",job=~\"$job\"}",
+          "expr": "current_jobs_buried{env=~\"$env\", instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -627,10 +627,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "current_jobs_delayed{env=~\"$env\",job=~\"$job\"}",
+          "expr": "current_jobs_delayed{env=~\"$env\", instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -640,10 +640,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "current_jobs_reserved{env=~\"$env\",job=~\"$job\"}",
+          "expr": "current_jobs_reserved{env=~\"$env\", instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -653,10 +653,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "current_jobs_urgent{env=~\"$env\",job=~\"beanstalk_crm\"}",
+          "expr": "current_jobs_urgent{env=~\"$env\", instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -702,7 +702,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "decimals": 2,
       "description": "",
@@ -741,7 +741,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -753,10 +753,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum by (instance,tube) (tube_total_jobs{env=~\"$env\",job=~\"$job\"})",
+          "expr": "sum by (instance,tube) (tube_total_jobs{env=~\"$env\", instance=~\"$instance\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -799,7 +799,7 @@
       "collapsed": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "gridPos": {
         "h": 1,
@@ -819,7 +819,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "decimals": 2,
       "description": "Tube total jobs in rate of range 1 minutes",
@@ -858,7 +858,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -870,10 +870,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum by (instance,tube) (irate(tube_total_jobs{env=~\"$env\",job=~\"$job\"}[1m]))",
+          "expr": "sum by (instance,tube) (irate(tube_total_jobs{env=~\"$env\", instance=~\"$instance\"}[1m]))",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -919,7 +919,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "decimals": 2,
       "description": "",
@@ -958,7 +958,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -970,10 +970,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum by (instance,tube) (tube_current_jobs_ready{env=~\"$env\",job=~\"$job\"})",
+          "expr": "sum by (instance,tube) (tube_current_jobs_ready{env=~\"$env\", instance=~\"$instance\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1019,7 +1019,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -1057,7 +1057,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1069,10 +1069,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum by (instance,tube) (tube_current_jobs_reserved{env=~\"$env\",job=~\"$job\"})",
+          "expr": "sum by (instance,tube) (tube_current_jobs_reserved{env=~\"$env\", instance=~\"$instance\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1118,7 +1118,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -1156,7 +1156,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1168,10 +1168,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum by (instance,tube) (tube_current_jobs_delayed{env=~\"$env\",job=~\"$job\"})",
+          "expr": "sum by (instance,tube) (tube_current_jobs_delayed{env=~\"$env\", instance=~\"$instance\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1217,7 +1217,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -1255,7 +1255,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1267,10 +1267,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum by (instance,tube) (tube_current_jobs_buried{env=~\"$env\",job=~\"$job\"})",
+          "expr": "sum by (instance,tube) (tube_current_jobs_buried{env=~\"$env\", instance=~\"$instance\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1316,7 +1316,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -1354,7 +1354,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1366,10 +1366,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum by (instance,tube) (tube_current_jobs_urgent{env=~\"$env\",job=~\"$job\"})",
+          "expr": "sum by (instance,tube) (tube_current_jobs_urgent{env=~\"$env\", instance=~\"$instance\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1412,7 +1412,7 @@
       "collapsed": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "gridPos": {
         "h": 1,
@@ -1432,7 +1432,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "description": "",
       "fieldConfig": {
@@ -1471,7 +1471,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1482,7 +1482,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "irate(cmd_delete{env=~\"$env\",job=~\"beanstalk_crm\"}[5m])",
+          "expr": "irate(cmd_delete{env=~\"$env\", instance=~\"$instance\"}[5m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1491,7 +1491,7 @@
         },
         {
           "exemplar": true,
-          "expr": "irate(cmd_ignore{env=~\"$env\",job=~\"beanstalk_crm\"}[5m])",
+          "expr": "irate(cmd_ignore{env=~\"$env\", instance=~\"$instance\"}[5m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1500,7 +1500,7 @@
         },
         {
           "exemplar": true,
-          "expr": "irate(cmd_put{env=~\"$env\",job=~\"beanstalk_crm\"}[5m])",
+          "expr": "irate(cmd_put{env=~\"$env\", instance=~\"$instance\"}[5m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1509,7 +1509,7 @@
         },
         {
           "exemplar": true,
-          "expr": "irate(cmd_reserve_with_timeout{env=~\"$env\",job=~\"beanstalk_crm\"}[5m])",
+          "expr": "irate(cmd_reserve_with_timeout{env=~\"$env\", instance=~\"$instance\"}[5m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1518,7 +1518,7 @@
         },
         {
           "exemplar": true,
-          "expr": "irate(cmd_stats{env=~\"$env\",job=~\"beanstalk_crm\"}[5m])",
+          "expr": "irate(cmd_stats{env=~\"$env\", instance=~\"$instance\"}[5m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1527,7 +1527,7 @@
         },
         {
           "exemplar": true,
-          "expr": "irate(cmd_stats_job{env=~\"$env\",job=~\"beanstalk_crm\"}[5m])",
+          "expr": "irate(cmd_stats_job{env=~\"$env\", instance=~\"$instance\"}[5m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1536,7 +1536,7 @@
         },
         {
           "exemplar": true,
-          "expr": "irate(cmd_stats_tube{env=~\"$env\",job=~\"beanstalk_crm\"}[5m])",
+          "expr": "irate(cmd_stats_tube{env=~\"$env\", instance=~\"$instance\"}[5m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1545,7 +1545,7 @@
         },
         {
           "exemplar": true,
-          "expr": "irate(cmd_use{env=~\"$env\",job=~\"beanstalk_crm\"}[5m])",
+          "expr": "irate(cmd_use{env=~\"$env\", instance=~\"$instance\"}[5m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1554,7 +1554,7 @@
         },
         {
           "exemplar": true,
-          "expr": "irate(cmd_watch{env=~\"$env\",job=~\"beanstalk_crm\"}[5m])",
+          "expr": "irate(cmd_watch{env=~\"$env\", instance=~\"$instance\"}[5m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1563,7 +1563,7 @@
         },
         {
           "exemplar": true,
-          "expr": "irate(cmd_reserve{env=~\"$env\",job=~\"beanstalk_crm\"}[5m])",
+          "expr": "irate(cmd_reserve{env=~\"$env\", instance=~\"$instance\"}[5m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1572,7 +1572,7 @@
         },
         {
           "exemplar": true,
-          "expr": "irate(cmd_bury{env=~\"$env\",job=~\"beanstalk_crm\"}[5m])",
+          "expr": "irate(cmd_bury{env=~\"$env\", instance=~\"$instance\"}[5m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1581,7 +1581,7 @@
         },
         {
           "exemplar": true,
-          "expr": "irate(cmd_kick{env=~\"$env\",job=~\"beanstalk_crm\"}[5m])",
+          "expr": "irate(cmd_kick{env=~\"$env\", instance=~\"$instance\"}[5m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1590,7 +1590,7 @@
         },
         {
           "exemplar": true,
-          "expr": "irate(cmd_pause_tube{env=~\"$env\",job=~\"beanstalk_crm\"}[5m])",
+          "expr": "irate(cmd_pause_tube{env=~\"$env\", instance=~\"$instance\"}[5m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1599,7 +1599,7 @@
         },
         {
           "exemplar": true,
-          "expr": "irate(cmd_release{name=~\"$node\",job=~\"beanstalk_crm\"}[5m])",
+          "expr": "irate(cmd_release{instance=~\"$instance\"}[5m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1608,7 +1608,7 @@
         },
         {
           "exemplar": true,
-          "expr": "irate(cmd_list_tubes{name=~\"$node\",job=~\"beanstalk_crm\"}[5m])",
+          "expr": "irate(cmd_list_tubes{instance=~\"$instance\"}[5m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1653,7 +1653,7 @@
       "collapsed": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "gridPos": {
         "h": 1,
@@ -1673,7 +1673,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "decimals": 0,
       "description": "Total  count of connections in rate of range 1 minutes",
@@ -1712,7 +1712,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1724,10 +1724,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "irate(total_connections{env=~\"$env\",job=~\"$job\"}[1m])",
+          "expr": "irate(total_connections{env=~\"$env\", instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1770,7 +1770,7 @@
       "collapsed": true,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "gridPos": {
         "h": 1,
@@ -1790,7 +1790,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "decimals": 0,
       "description": "Index of the current binlog file ",
@@ -1829,7 +1829,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1841,10 +1841,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "binlog_current_index{env=~\"$env\",job=~\"$job\"}",
+          "expr": "binlog_current_index{env=~\"$env\", instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1890,7 +1890,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "decimals": 0,
       "description": "The index of the oldest binlog file needed to store the current jobs",
@@ -1929,7 +1929,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -1941,10 +1941,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "binlog_oldest_index{env=~\"$env\",job=~\"$job\"}",
+          "expr": "binlog_oldest_index{env=~\"$env\", instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1990,7 +1990,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "decimals": 0,
       "description": "The maximum size in bytes a binlog file is allowed to get before a new binlog file is opened",
@@ -2029,7 +2029,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -2041,10 +2041,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "binlog_max_size{env=~\"$env\",job=~\"$job\"}",
+          "expr": "binlog_max_size{env=~\"$env\", instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -2090,7 +2090,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "decimals": 0,
       "description": "the cumulative number of records written to the binlog ",
@@ -2129,7 +2129,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -2141,10 +2141,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "binlog_records_written{env=~\"$env\",job=~\"$job\"}",
+          "expr": "binlog_records_written{env=~\"$env\", instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -2190,7 +2190,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "decimals": 0,
       "description": "the  number of records written to the binlog in rate of  range 1 minutes",
@@ -2229,7 +2229,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -2241,10 +2241,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "irate(binlog_records_written{env=~\"$env\",job=~\"$job\"}[1m])",
+          "expr": "irate(binlog_records_written{env=~\"$env\", instance=~\"$instance\"}[1m])",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -2290,7 +2290,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "decimals": 0,
       "description": "The cumulative number of records written as part of compaction",
@@ -2329,7 +2329,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
@@ -2341,10 +2341,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "binlog_records_migrated{env=~\"$env\",job=~\"$job\"}",
+          "expr": "binlog_records_migrated{env=~\"$env\", instance=~\"$instance\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -2384,7 +2384,7 @@
       }
     }
   ],
-  "refresh": "",
+  "refresh": "10s",
   "schemaVersion": 36,
   "style": "dark",
   "tags": [],
@@ -2393,44 +2393,41 @@
       {
         "current": {
           "selected": false,
-          "text": "shared-crm-dev",
-          "value": "shared-crm-dev"
+          "text": "gtt",
+          "value": "gtt"
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
+          "uid": "prometheus"
         },
-        "definition": "label_values(beanstalkd_exporter_requests_total{job=\"beanstalk_crm\"}, name)",
-        "hide": 2,
+        "definition": "label_values(node_exporter_build_info, ns)",
+        "hide": 0,
         "includeAll": false,
-        "label": "Host",
+        "label": "namespace",
         "multi": false,
-        "name": "node",
+        "name": "namespace",
         "options": [],
         "query": {
-          "query": "label_values(beanstalkd_exporter_requests_total{job=\"beanstalk_crm\"}, name)",
+          "query": "label_values(node_exporter_build_info, ns)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
-        "regex": "/.*crm.*/",
+        "regex": "",
         "skipUrlSync": false,
-        "sort": 1,
-        "tagValuesQuery": "",
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
+        "sort": 0,
+        "type": "query"
       },
       {
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "prod",
           "value": "prod"
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
+          "uid": "prometheus"
         },
-        "definition": "label_values(node_exporter_build_info,env)",
+        "definition": "label_values(node_exporter_build_info{ns=\"$namespace\"}, env)",
         "hide": 0,
         "includeAll": false,
         "label": "env",
@@ -2438,7 +2435,7 @@
         "name": "env",
         "options": [],
         "query": {
-          "query": "label_values(node_exporter_build_info,env)",
+          "query": "label_values(node_exporter_build_info{ns=\"$namespace\"}, env)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -2450,14 +2447,14 @@
       {
         "current": {
           "selected": false,
-          "text": "i-074f036ce85a34bc6",
-          "value": "i-074f036ce85a34bc6"
+          "text": "i-01c9ebba97eed773e",
+          "value": "i-01c9ebba97eed773e"
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
+          "uid": "prometheus"
         },
-        "definition": "label_values(current_tubes{env=~\"$env\",job=~\"$job\"}, instance)",
+        "definition": "label_values(current_tubes{env=~\"$env\", job=~\"crm_beanstalk.*\", ns=~\"$namespace\"}, instance)",
         "hide": 0,
         "includeAll": false,
         "label": "instance",
@@ -2465,34 +2462,7 @@
         "name": "instance",
         "options": [],
         "query": {
-          "query": "label_values(current_tubes{env=~\"$env\",job=~\"$job\"}, instance)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "type": "query"
-      },
-      {
-        "current": {
-          "selected": false,
-          "text": "beanstalk_crm_prod",
-          "value": "beanstalk_crm_prod"
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
-        },
-        "definition": "label_values(current_tubes{env=\"$env\",project=\"crm\"}, job)",
-        "hide": 2,
-        "includeAll": false,
-        "label": "job",
-        "multi": false,
-        "name": "job",
-        "options": [],
-        "query": {
-          "query": "label_values(current_tubes{env=\"$env\",project=\"crm\"}, job)",
+          "query": "label_values(current_tubes{env=~\"$env\", job=~\"crm_beanstalk.*\", ns=~\"$namespace\"}, instance)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -2534,6 +2504,6 @@
   "timezone": "",
   "title": "Beanstalkd",
   "uid": "Dvwr4Amnk",
-  "version": 5,
+  "version": 17,
   "weekStart": ""
 }

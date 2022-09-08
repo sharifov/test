@@ -18,8 +18,8 @@ resource "aws_instance" "shared" {
     Project     = var.PROJECT
     Ns          = var.NAMESPACE
     Domain      = var.DOMAIN
-    App         = "redis, beanstalkd, centrifugo"
-    Kind        = "shared"
+    App         = "redis,beanstalkd,centrifugo"
+    Kind        = "shared,clickhouse"
     Monitoring  = "prometheus"
     Terraform   = "true"
   }
@@ -48,7 +48,7 @@ resource "aws_security_group" "shared" {
   }
 
   ingress {
-    description = "Clickhouse http"
+    description = "ClickHouse http"
     from_port   = 8123
     to_port     = 8123
     protocol    = "tcp"
@@ -56,7 +56,7 @@ resource "aws_security_group" "shared" {
   }
 
   ingress {
-    description = "Clickhouse binary"
+    description = "ClickHouse binary"
     from_port   = 9000
     to_port     = 9009
     protocol    = "tcp"

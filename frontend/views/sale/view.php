@@ -33,7 +33,8 @@ if (Yii::$app->request->isPjax) {
     $this->params['breadcrumbs'][] = $this->title;
 }
 
-$title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'];
+$isSeparate = isset($data['isSeparate']) ? $data['isSeparate'] ? 'Yes' : 'No' : 'Refresh data from B/O to check it';
+$title = 'Sale ID: ' . $data['saleId'] . ', BookId: ' . $data['bookingId'] . ', Separate: ' . $isSeparate;
 
 $caseGuard = Yii::createObject(CaseManageSaleInfoGuard::class);
 if (!empty($caseSaleModel)) {

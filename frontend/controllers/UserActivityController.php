@@ -2,6 +2,8 @@
 
 namespace frontend\controllers;
 
+use common\models\Employee;
+use common\models\User;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
 use modules\taskList\src\entities\userTask\UserTaskSearch;
@@ -79,6 +81,44 @@ class UserActivityController extends FController
 
         $data['user'] = $user;
         $data['searchModel'] = $searchModel;
+
+        $this->view->title = 'My Activity' . ' (' . $user->username . ')';
+
+        return $this->render(
+            '/user/user-activity/dashboard',
+            $data
+        );
+    }
+
+    /**
+     * Lists all UserActivity models.
+     *
+     * @param int $id
+     * @return string
+     * @throws NotFoundHttpException
+     */
+    public function actionUserInfo(int $id): string
+    {
+        $user = Employee::findOne($id);
+        if (!$user) {
+            throw new NotFoundHttpException('The requested user does not exist.');
+        }
+
+        $searchModel = new UserActivitySearch();
+        $defaultStartTime = strtotime('-24 hours');
+        $defaultEndTime = strtotime('+8 hours');
+
+        $data = $searchModel->searchUserActivity(
+            Yii::$app->request->queryParams,
+            $user,
+            $defaultStartTime,
+            $defaultEndTime
+        );
+
+        $data['user'] = $user;
+        $data['searchModel'] = $searchModel;
+
+        $this->view->title = 'User Activity' . ' (' . $user->username . ')';
 
         return $this->render(
             '/user/user-activity/dashboard',

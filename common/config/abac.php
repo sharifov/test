@@ -27,6 +27,7 @@ return [
         'product-quote-refund' => \modules\product\src\abac\ProductQuoteRefundAbacObject::class,
         'related-product-quote' => \modules\product\src\abac\RelatedProductQuoteAbacObject::class,
         'notification' => \modules\notification\src\abac\NotificationAbacObject::class,
+        'user-stats' => \modules\userStats\src\abac\UserStatsAbacObject::class,
         'leadData' => \src\model\leadData\abac\LeadDataAbacObject::class,
         'leadTaskList' => \modules\lead\src\abac\taskLIst\LeadTaskListAbacObject::class,
         'user' => \modules\user\src\abac\UserAbacObject::class,

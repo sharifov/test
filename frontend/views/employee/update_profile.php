@@ -2,6 +2,7 @@
 
 use frontend\helpers\PasswordHelper;
 use kartik\password\PasswordInput;
+use modules\featureFlag\FFlag;
 use src\helpers\setting\SettingHelper;
 use yii\grid\ActionColumn;
 /**
@@ -30,6 +31,8 @@ $this->title = 'My profile - ' . $model->username;
 
 $this->params['breadcrumbs'][] = ['label' => 'Dashboard', 'url' => ['/']];
 $this->params['breadcrumbs'][] = $this->title;
+/** @fflag FFlag::FF_KEY_SWITCH_NEW_SHIFT_ENABLE, Switch new Shift Enable */
+$canNewShift = \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SWITCH_NEW_SHIFT_ENABLE);
 ?>
 <h1><?=Html::encode($this->title)?></h1>
 <div class="col-sm-6">
@@ -298,8 +301,8 @@ JS;
             ],
             'up_bonus_active:boolean',
             'up_timezone',
-            'up_work_start_tm',
-            'up_work_minutes',
+            ['attribute' => 'up_work_start_tm', 'visible' => !$canNewShift],
+            ['attribute' => 'up_work_minutes', 'visible' => !$canNewShift],
             //'up_inbox_show_limit_leads',
             'up_default_take_limit_leads',
             'up_min_percent_for_take_leads'

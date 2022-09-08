@@ -61,6 +61,36 @@ use common\components\widgets\BaseForm;
         </div>
         <div class="row">
             <div class="col-md-8">
+                <?= $form->field($emailForm->contacts['cc'], '[cc]emails')
+                     ->label('CC')
+                     ->widget(\kartik\select2\Select2::class, [
+                        'size' => \kartik\select2\Select2::SMALL,
+                        'options' => ['multiple' => true],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                            'tags' => true,
+                            'tokenSeparators' => [',', ' '],
+                        ],
+                    ]);?>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8">
+                <?= $form->field($emailForm->contacts['bcc'], '[bcc]emails')
+                     ->label('BCC')
+                     ->widget(\kartik\select2\Select2::class, [
+                        'size' => \kartik\select2\Select2::SMALL,
+                        'options' => ['multiple' => true],
+                        'pluginOptions' => [
+                            'allowClear' => true,
+                            'tags' => true,
+                            'tokenSeparators' => [',', ' '],
+                        ],
+                    ]);?>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8">
                 <?= $form->field($emailForm->body, 'subject')->textInput(['maxlength' => true]) ?>
             </div>
             <?php if (isset($emailForm->body->data['files'])) : ?>

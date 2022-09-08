@@ -16,6 +16,7 @@ use yii\base\Model;
  * @property string $ce_title
  * @property int $client_id
  * @property $type
+ * @property string|null $comments
  */
 class EmailCreateForm extends Model
 {
@@ -44,6 +45,7 @@ class EmailCreateForm extends Model
     public $required = false;
     public $message = 'Email cannot be blank.';
     public $ce_title;
+    public $comments;
 
     /**
      * @return array
@@ -64,6 +66,7 @@ class EmailCreateForm extends Model
             ['email', 'checkUniqueClientEmail', 'on' => 'update'],
             ['type', 'checkTypeForExistence'],
             ['email', InternalEmailValidator::class, 'allowInternalEmail' => \Yii::$app->params['settings']['allow_contact_internal_email']],
+            ['comments', 'string'],
         ];
     }
 

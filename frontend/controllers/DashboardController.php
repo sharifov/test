@@ -310,26 +310,6 @@ class DashboardController extends FController
             }
         }
 
-        @exec('ps aux | grep -E "(queue|WorkerMan)" | grep -v grep', $out);
-
-        if (isset($out) && count($out)) {
-            foreach ($out as $line) {
-                //if(!preg_match("/(grep|workqueue)/", $line)) {
-                $tpmArr =  preg_split("#\s+#", $line);
-                $com = '';
-                for ($i = 10; $i < count($tpmArr); $i++) {
-                    $com .= $tpmArr[$i] . ' ';
-                }
-                $processList[] = [
-                        'pid' => $tpmArr[1],
-                        'stime' => $tpmArr[8],
-                        'time' => $tpmArr[9],
-                        'command' => $com,
-                    ];
-                //}
-            }
-        }
-
         return $this->render('index_admin', [
             /*'dataProvider' => $dataProvider,
             'searchModel' => $searchModel,*/

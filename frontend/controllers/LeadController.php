@@ -125,6 +125,7 @@ use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\Cookie;
 use yii\web\ForbiddenHttpException;
+use yii\web\MethodNotAllowedHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
@@ -2891,6 +2892,28 @@ class LeadController extends FController
                 'searchModel' => $searchModel,
             ]);
         }
+    }
+
+    public function actionGetLeadNotes(int $leadId)
+    {
+        $lead = Lead::findOne($leadId);
+
+        if (!$lead) {
+            throw new NotFoundHttpException('Not found lead ID: ' . $leadId);
+        }
+
+        if (!Auth::can('lead-view/notes/view', ['lead' => $lead])) {
+            throw new ForbiddenHttpException('Access denied.');
+        }
+
+        if (Yii::$app->request->isAjax) {
+            $notes = Note::find()->where(['lead_id' => $leadId])->orderBy(['id' => SORT_ASC])->all();
+
+            return $this->renderAjax('notes/notes_list', [
+                'notes' => $notes
+            ]);
+        }
+        throw new MethodNotAllowedHttpException('Method not allowed');
     }
 
     /**

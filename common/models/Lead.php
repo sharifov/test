@@ -20,6 +20,7 @@ use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacDto;
 use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\objectSegment\src\contracts\ObjectSegmentListContract;
 use modules\objectTask\src\entities\ObjectTask;
+use modules\objectTask\src\scenarios\NoAnswer;
 use modules\objectTask\src\services\ObjectTaskService;
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
@@ -5354,6 +5355,7 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
             'chd' => $this->children,
             'inf' => $this->infants,
             'leadId' => $this->id,
+            'a' => $this->employee_id,
             //TODO: refactor, use singleton, get from container doesn't work
             //'redirectUrl' => urlencode(base64_encode($settings['redirectUrl']))
         ] + $flexParams;

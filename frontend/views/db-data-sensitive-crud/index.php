@@ -8,6 +8,7 @@ use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
+use common\components\grid\BooleanColumn;
 
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\DbDataSensitiveSearch */
@@ -43,6 +44,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'dda_updated_dt'
             ],
             [
+                'class' => BooleanColumn::class,
+                'attribute' => 'db_is_system',
+            ],
+            [
                 'class' => ActionColumn::className(),
                 'urlCreator' => function ($action, DbDataSensitive $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'id' => $model->dda_id]);
@@ -64,6 +69,36 @@ $this->params['breadcrumbs'][] = $this->title;
                             'data-method' => 'post',
                             'data-confirm' => 'Are you sure you want to delete views?'
                         ]);
+                    },
+                    'update' => function ($url, DbDataSensitive $model, $key) {
+                        if (!$model->isSystem()) {
+                            return Html::a(
+                                '<i class="glyphicon glyphicon-pencil"></i>',
+                                $url,
+                                [
+                                    'title' => 'Update',
+                                    'aria-label' => 'Update',
+                                    'data-pjax' => 0,
+                                ]
+                            );
+                        }
+                    },
+                    'delete' => function ($url, DbDataSensitive $model, $key) {
+                        if (!$model->isSystem()) {
+                            return Html::a(
+                                '<i class="glyphicon glyphicon-trash"></i>',
+                                $url,
+                                [
+                                    'title' => 'Delete',
+                                    'aria-label' => 'Delete',
+                                    'data' => [
+                                        'pjax' => 0,
+                                        'confirm' => 'Are you sure you want to delete this item?',
+                                        'method' => 'post'
+                                    ]
+                                ]
+                            );
+                        }
                     }
                 ]
             ],

@@ -144,6 +144,7 @@ class FlightController extends BaseController
      *  }
      *
      * @apiParam {string{10}}           booking_id                              Booking Id
+     * @apiParam {string{10}}           base_booking_id                         Base Booking Id
      * @apiParam {string{50}}           project_key                             Project key
      * @apiParam {bool}                 [is_automate]                           Is automate (default false)
      * @apiParam {bool}                 [refundAllowed]                         Refund Allowed (default true)
@@ -523,6 +524,7 @@ class FlightController extends BaseController
                 $job = new ReprotectionCreateJob();
                 $job->flight_request_id = $flightRequest->fr_id;
                 $job->flight_request_is_automate = $reprotectionCreateForm->is_automate;
+                $job->base_booking_id = $reprotectionCreateForm->base_booking_id;
                 $jobId = Yii::$app->queue_job->priority(100)->push($job);
 
                 $flightRequest->fr_job_id = $jobId;

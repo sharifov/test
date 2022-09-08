@@ -96,6 +96,7 @@ use src\entities\email\helpers\EmailStatus;
  *
  * @property array $usersIdByEmail
  * @property string|mixed $priorityName
+ * @property int $id
  * @property int|null $leadId
  * @property int|null $caseId
  * @property int|null $clientId
@@ -117,8 +118,6 @@ use src\entities\email\helpers\EmailStatus;
  * @property string|null $statusDoneDt
  * @property string $statusName
  * @property string $typeName
- * @property bool $isNew
- * @property bool $isDeleted
  *
  */
 class Email extends \yii\db\ActiveRecord implements EmailInterface
@@ -1122,5 +1121,10 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
         $this->updateAttributes([
             'e_inbox_email_id' => $inboxId
         ]);
+    }
+
+    public function getId()
+    {
+        return $this->e_id;
     }
 }

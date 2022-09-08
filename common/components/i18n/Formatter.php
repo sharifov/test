@@ -1012,6 +1012,14 @@ class Formatter extends \yii\i18n\Formatter
         return $this->nullDisplay;
     }
 
+    public function asList(?array $data): string
+    {
+        if ($data) {
+            return join(', ', $data);
+        }
+        return $this->nullDisplay;
+    }
+
     public function asFileLogType($value): string
     {
         if ($value === null) {

@@ -23,6 +23,7 @@ use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\ArrayHelper;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
+use src\entities\email\helpers\EmailPriority;
 
 /**
  * This is the model class for table "email_norm".
@@ -55,12 +56,16 @@ use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
  * @property EmailAddress[] $contacts
  * @property EmailAddress $contactFrom
  * @property EmailAddress $contactTo
+ * @property EmailAddress[] $contactsTo
+ * @property EmailAddress[] $contactsCc
+ * @property EmailAddress[] $contactsBcc
  * @property EmailContact $emailContactFrom
  * @property EmailContact $emailContactTo
  * @property EmailContact[] $emailContacts
  * @property Email $reply
  * @property EmailTemplateType $templateType
  *
+ * @property int $id
  * @property array $leadsIds
  * @property array $casesIds
  * @property array $clientsIds
@@ -69,11 +74,15 @@ use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
  * @property int|null $clientId
  * @property int|null $projectId
  * @property int|null $templateTypeId
+ * @property int|null $priority
  * @property string|null $templateTypeName
  * @property string|null $emailFrom
  * @property string|null $emailFromName
  * @property string|null $emailTo
  * @property string|null $emailToName
+ * @property array $emailsTo
+ * @property array $emailsCc
+ * @property array $emailsBcc
  * @property string|null $emailSubject
  * @property int|null $communicationId
  * @property string|null $languageId
@@ -86,8 +95,6 @@ use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
  * @property string|null $statusDoneDt
  * @property string $statusName
  * @property string $typeName
- * @property bool $isNew
- * @property bool $isDeleted
  *
  */
 class Email extends BaseActiveRecord implements EmailInterface
@@ -101,8 +108,8 @@ class Email extends BaseActiveRecord implements EmailInterface
             ['e_created_dt', 'required'],
             [['e_body_id', 'e_project_id', 'e_status_id', 'e_type_id', 'e_is_deleted', 'e_created_user_id', 'e_updated_user_id', 'e_departament_id'], 'integer'],
             ['e_is_deleted', 'boolean'],
-           // ['e_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_created_user_id' => 'id']],
-          //  ['e_updated_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_updated_user_id' => 'id']],
+            ['e_created_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_created_user_id' => 'id']],
+            ['e_updated_user_id', 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['e_updated_user_id' => 'id']],
             ['e_departament_id', 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['e_departament_id' => 'dep_id']],
             ['e_project_id', 'exist', 'skipOnError' => true, 'targetClass' => Project::class, 'targetAttribute' => ['e_project_id' => 'id']],
             ['e_updated_dt', 'safe'],
@@ -222,12 +229,12 @@ class Email extends BaseActiveRecord implements EmailInterface
         return $this->hasMany(EmailContact::class, ['ec_email_id' => 'e_id']);
     }
 
-    public function getEmailContactFrom()
+    public function getEmailContactFrom(): \yii\db\ActiveQuery
     {
         return $this->hasOne(EmailContact::class, ['ec_email_id' => 'e_id'])->onCondition(['ec_type_id' => EmailContactType::FROM]);
     }
 
-    public function getEmailContactTo()
+    public function getEmailContactTo(): \yii\db\ActiveQuery
     {
         return $this->hasOne(EmailContact::class, ['ec_email_id' => 'e_id'])->onCondition(['ec_type_id' => EmailContactType::TO]);
     }
@@ -247,18 +254,57 @@ class Email extends BaseActiveRecord implements EmailInterface
     public function getContactTo(): \yii\db\ActiveQuery
     {
         return $this->hasOne(EmailAddress::class, ['ea_id' => 'ec_address_id'])
-        ->viaTable(
-            'email_contact',
-            ['ec_email_id' => 'e_id'],
-            function ($query) {
-                $query->onCondition(['ec_type_id' => EmailContactType::TO]);
-            }
-        );
+            ->viaTable(
+                'email_contact',
+                ['ec_email_id' => 'e_id'],
+                function ($query) {
+                    $query->onCondition(['ec_type_id' => EmailContactType::TO]);
+                }
+            );
     }
 
-    public function getEmailFrom($masking = true): string
+    public function getContactsTo(): \yii\db\ActiveQuery
     {
-        return $this->contactFrom->getEmail(EmailType::isInbox($this->e_type_id) && $masking);
+        return $this->hasMany(EmailAddress::class, ['ea_id' => 'ec_address_id'])
+            ->viaTable(
+                'email_contact',
+                ['ec_email_id' => 'e_id'],
+                function ($query) {
+                    $query->onCondition(['ec_type_id' => EmailContactType::TO]);
+                }
+            );
+    }
+
+    public function getContactsCc(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(EmailAddress::class, ['ea_id' => 'ec_address_id'])
+            ->viaTable(
+                'email_contact',
+                ['ec_email_id' => 'e_id'],
+                function ($query) {
+                    $query->onCondition(['ec_type_id' => EmailContactType::CC]);
+                }
+            );
+    }
+
+    public function getContactsBcc(): \yii\db\ActiveQuery
+    {
+        return $this->hasMany(EmailAddress::class, ['ea_id' => 'ec_address_id'])
+            ->viaTable(
+                'email_contact',
+                ['ec_email_id' => 'e_id'],
+                function ($query) {
+                    $query->onCondition(['ec_type_id' => EmailContactType::BCC]);
+                }
+            );
+    }
+
+    public function getEmailFrom($masking = true): ?string
+    {
+        if ($this->contactFrom) {
+            return $this->contactFrom->getEmail(EmailType::isInbox($this->e_type_id) && $masking) ?? null;
+        }
+        return null;
     }
 
     public function getEmailTo($masking = true): ?string
@@ -266,8 +312,59 @@ class Email extends BaseActiveRecord implements EmailInterface
         if ($this->contactTo) {
             return $this->contactTo->getEmail(EmailType::isOutbox($this->e_type_id) && $masking) ?? null;
         }
-
         return null;
+    }
+
+    public function getEmailsByType(int $type): array
+    {
+       switch ($type) {
+            case EmailContactType::CC:
+                return $this->emailsCc;
+            case EmailContactType::BCC:
+                return $this->emailsBcc;
+            case EmailContactType::TO:
+                return $this->emailsTo;
+            case EmailContactType::FROM:
+                $emailFrom = $this->getEmailFrom(false);
+                return ($emailFrom !== null) ? [$emailFrom] : [];
+        }
+        return [];
+    }
+
+    public function getEmailsTo(): array
+    {
+        $emails = [];
+        if ($this->contactsTo) {
+            foreach ($this->contactsTo as $contact) {
+                $emails[] = $contact->getEmail(false);
+            }
+        }
+
+        return $emails;
+    }
+
+    public function getEmailsCc(): array
+    {
+        $emails = [];
+        if ($this->contactsCc) {
+            foreach ($this->contactsCc as $contact) {
+                $emails[] = $contact->getEmail(false);
+            }
+        }
+
+        return $emails;
+    }
+
+    public function getEmailsBcc(): array
+    {
+        $emails = [];
+        if ($this->contactsBcc) {
+            foreach ($this->contactsBcc as $contact) {
+                $emails[] = $contact->getEmail(false);
+            }
+        }
+
+        return $emails;
     }
 
     public function getEmailFromName(): ?string
@@ -571,6 +668,11 @@ class Email extends BaseActiveRecord implements EmailInterface
         return $this->params->ep_language_id ?? null;
     }
 
+    public function getPriority(): ?int
+    {
+        return $this->params->ep_priority ?? EmailPriority::NORMAL;
+    }
+
     public function getStatusDoneDt(): ?string
     {
         return $this->emailLog->el_status_done_dt ?? null;
@@ -725,6 +827,38 @@ class Email extends BaseActiveRecord implements EmailInterface
         }
         if ($replyId == null || ($linkedToReply != null && !$linkedToReply->equals($reply))) {
             $this->unlink('reply', $linkedToReply, true);
+        }
+    }
+
+    public function getEmailsContactsIndexedByEmail(int $type): array
+    {
+        $emailContacts = EmailContact::find()
+            ->joinWith('address')
+            ->byType($type)
+            ->byEmail($this->e_id)
+            ->all();
+
+        return ArrayHelper::index($emailContacts, 'address.ea_email');
+    }
+
+    public function addContact(int $type, string $email, ?string $name = null): void
+    {
+        $emails = $this->getEmailsByType($type);
+        if (empty($emails) || !in_array($email, $emails)) {
+            $address = EmailAddress::findOrNew($email, $name, !empty($name));
+            EmailContact::create([
+                'ec_address_id' => $address->ea_id,
+                'ec_email_id' => $this->e_id,
+                'ec_type_id' => $type
+            ]);
+        }
+    }
+
+    public function removeContact(int $type, string $email): void
+    {
+        $emailContacts = $this->getEmailsContactsIndexedByEmail($type);
+        if ($contact = $emailContacts[$email]) {
+            $contact->delete();
         }
     }
 }

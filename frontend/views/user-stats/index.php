@@ -1,6 +1,8 @@
 <?php
 
 use common\models\Employee;
+use modules\featureFlag\FFlag;
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
 use src\helpers\user\GravatarHelper;
 use src\model\user\entity\userStats\UserStatsSearch;
 use src\model\userModelSetting\service\UserModelSettingDictionary;
@@ -16,6 +18,8 @@ use yii\web\View;
 
 $this->title = 'User Statistic';
 $this->params['breadcrumbs'][] = $this->title;
+/** @fflag FFlag::FF_KEY_SWITCH_NEW_SHIFT_ENABLE, Switch new Shift Enable */
+$canNewShift = \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_SWITCH_NEW_SHIFT_ENABLE);
 ?>
 <div class="user-stats-index">
 
@@ -91,19 +95,37 @@ $this->params['breadcrumbs'][] = $this->title;
         $rowField = UserModelSettingHelper::getGridDefaultColumn(UserModelSettingDictionary::FIELD_SHIFT_HOURS);
         $rowField['filter'] = false;
         $rowField['enableSorting'] = false;
-        $rowField['value'] = static function ($model) {
-            if (empty($model['up_work_start_tm'])) {
-                return 'Work start: ' . Yii::$app->formatter->nullDisplay;
-            }
-            if (empty($model['up_work_minutes'])) {
-                return 'Work minutes: ' . Yii::$app->formatter->nullDisplay;
-            }
+        $rowField['value'] = static function ($model) use ($canNewShift) {
+            if ($canNewShift) {
+                $firstUserShiftSchedule = UserShiftScheduleQuery::getQueryForNextShiftsByUserId(
+                    $model['id'],
+                    (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))
+                )
+                    ->select(['uss_start_utc_dt', 'uss_end_utc_dt'])
+                    ->limit(1)
+                    ->asArray()
+                    ->one();
 
-            $startDateTime = new DateTime($model['up_work_start_tm']);
-            $startTime = $startDateTime->format('H:i');
-            $endDateTime = $startDateTime->modify('+' . $model['up_work_minutes'] . ' minutes');
-            $endTime = $endDateTime->format('H:i');
-            return $startTime . ' - ' . $endTime;
+                if (!$firstUserShiftSchedule) {
+                    return 'Work start: ' . Yii::$app->formatter->nullDisplay;
+                }
+                return \Yii::$app->formatter->asDateTimeByUserTimezone(strtotime($firstUserShiftSchedule['uss_start_utc_dt']), ($model['up_timezone'] ?: 'UTC'), 'php:H:i')
+                    . ' - ' .
+                    \Yii::$app->formatter->asDateTimeByUserTimezone(strtotime($firstUserShiftSchedule['uss_end_utc_dt']), ($model['up_timezone'] ?: 'UTC'), 'php:H:i');
+            } else {
+                if (empty($model['up_work_start_tm'])) {
+                    return 'Work start: ' . Yii::$app->formatter->nullDisplay;
+                }
+                if (empty($model['up_work_minutes'])) {
+                    return 'Work minutes: ' . Yii::$app->formatter->nullDisplay;
+                }
+
+                $startDateTime = new DateTime($model['up_work_start_tm']);
+                $startTime = $startDateTime->format('H:i');
+                $endDateTime = $startDateTime->modify('+' . $model['up_work_minutes'] . ' minutes');
+                $endTime = $endDateTime->format('H:i');
+                return $startTime . ' - ' . $endTime;
+            }
         };
         $columns[] = $rowField;
     }

@@ -12,9 +12,12 @@ use common\models\UserProjectParams;
 use frontend\helpers\JsonHelper;
 use frontend\helpers\QuoteHelper;
 use modules\objectTask\src\entities\ObjectTask;
+use modules\objectTask\src\exceptions\CommandCanceledException;
+use modules\objectTask\src\exceptions\CommandFailedException;
 use src\dto\email\EmailDTO;
 use src\dto\searchService\SearchServiceQuoteDTO;
 use src\helpers\app\AppHelper;
+use src\helpers\lead\LeadHelper;
 use src\quoteCommunication\Repo;
 use src\repositories\quote\QuoteRepository;
 use src\services\email\EmailMainService;
@@ -24,6 +27,7 @@ use src\services\quote\quotePriceService\ClientQuotePriceService;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Json;
+use yii\helpers\VarDumper;
 
 class SendEmailWithQuotes extends BaseCommand
 {
@@ -98,13 +102,45 @@ class SendEmailWithQuotes extends BaseCommand
         $quoteAmount = $this->getAmountQuotesForSend();
 
         if ($quoteAmount <= 0) {
-            throw new \Exception("The number of quotas is less than or equal to zero");
+            $errorMessage = 'The number of quotas is less than or equal to zero';
+            /** @fflag FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE, Object Task status log enable */
+            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE) === true) {
+                throw new CommandCanceledException($errorMessage);
+            } else {
+                throw new \Exception($errorMessage);
+            }
+        }
+
+        /** @fflag FFlag::FF_KEY_NO_ANSWER_PROTOCOL_CHECK_EMAIL_IN_UNSUBSCRIBE_LIST, No Answer check email in unsubscribe list */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_NO_ANSWER_PROTOCOL_CHECK_EMAIL_IN_UNSUBSCRIBE_LIST) === true) {
+            $clientEmail = LeadHelper::getFirstEmailNotInUnsubscribeList($lead);
+
+            if ($clientEmail === null) {
+                $errorMessage = 'Lead email does not exist or is in the unsubscribed list';
+                /** @fflag FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE, Object Task status log enable */
+                if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE) === true) {
+                    throw new CommandCanceledException($errorMessage);
+                } else {
+                    Yii::warning(VarDumper::dumpAsString([
+                        'leadId' => $lead->id,
+                        'message' => "Lead email does not exist or is in the unsubscribed list",
+                    ]), 'SendEmailWithQuotes:canProcess');
+
+                    return false;
+                }
+            }
         }
 
         $newQuotes = $this->getUniqueQuotesForLeadFromApi($quoteAmount);
 
         if (empty($newQuotes)) {
-            throw new \Exception("Not found quotes for lead {$lead->id}");
+            $errorMessage = "Not found quotes for lead {$lead->id}";
+            /** @fflag FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE, Object Task status log enable */
+            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE) === true) {
+                throw new CommandCanceledException($errorMessage);
+            } else {
+                throw new \Exception($errorMessage);
+            }
         }
 
         $savedQuotes = $this->saveQuotesToLeadWithNewExtraMarkup(
@@ -114,7 +150,13 @@ class SendEmailWithQuotes extends BaseCommand
         );
 
         if (empty($savedQuotes)) {
-            throw new \Exception("Failed save quotes with updated extra markup");
+            $errorMessage = 'Failed save quotes with updated extra markup';
+            /** @fflag FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE, Object Task status log enable */
+            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE) === true) {
+                throw new CommandFailedException($errorMessage);
+            } else {
+                throw new \Exception($errorMessage);
+            }
         }
 
         $this->sendToEmail($savedQuotes);
@@ -142,7 +184,13 @@ class SendEmailWithQuotes extends BaseCommand
                             ->one();
 
                         if ($this->agent === null) {
-                            throw new \Exception("Not found virtual agent for project {$projectKey}");
+                            $errorMessage = "Not found virtual agent for project {$projectKey}";
+                            /** @fflag FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE, Object Task status log enable */
+                            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE) === true) {
+                                throw new CommandCanceledException($errorMessage);
+                            } else {
+                                throw new \Exception($errorMessage);
+                            }
                         }
 
                         $upp = UserProjectParams::find()
@@ -156,7 +204,13 @@ class SendEmailWithQuotes extends BaseCommand
                             ->one();
 
                         if ($upp === null || empty($upp->getEmail(true))) {
-                            throw new \Exception("Not found email for virtual agent, project {$projectKey}");
+                            $errorMessage = "Not found email for virtual agent, project {$projectKey}";
+                            /** @fflag FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE, Object Task status log enable */
+                            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE) === true) {
+                                throw new CommandCanceledException($errorMessage);
+                            } else {
+                                throw new \Exception($errorMessage);
+                            }
                         }
 
                         $this->agentEmail = $upp->getEmail(true);
@@ -174,7 +228,13 @@ class SendEmailWithQuotes extends BaseCommand
             $this->lead = $this->objectTask->lead;
 
             if ($this->lead === null) {
-                throw new \Exception("Not found lead. Object task id {$this->objectTask->ot_object_id}");
+                $errorMessage = "Not found lead. Object task id {$this->objectTask->ot_object_id}";
+                /** @fflag FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE, Object Task status log enable */
+                if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE) === true) {
+                    throw new CommandFailedException($errorMessage);
+                } else {
+                    throw new \Exception($errorMessage);
+                }
             }
         }
 
@@ -203,7 +263,7 @@ class SendEmailWithQuotes extends BaseCommand
         $lead = $this->getLead();
 
         foreach ($quotes as $newQuote) {
-            $uid = $this->addQuoteService->createByData($newQuote, $lead, null);
+            $uid = $this->addQuoteService->createByData($newQuote, $lead, null, $agent);
             $quote = Quote::find()
                 ->where([
                     'uid' => $uid
@@ -214,7 +274,13 @@ class SendEmailWithQuotes extends BaseCommand
             $prices = $quote->quotePrices;
 
             if (empty($prices)) {
-                throw new \Exception("Not found prices for quote {$quote->id}");
+                $errorMessage = "Not found prices for quote {$quote->id}";
+                /** @fflag FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE, Object Task status log enable */
+                if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE) === true) {
+                    throw new CommandFailedException($errorMessage);
+                } else {
+                    throw new \Exception($errorMessage);
+                }
             }
 
             $clientQuotePriceService = new ClientQuotePriceService($quote);
@@ -283,12 +349,24 @@ class SendEmailWithQuotes extends BaseCommand
             $projectContactInfo = Json::decode($project->contact_info);
         }
 
-        $clientEmail = ClientEmail::getFirstEmailByAllowedTypes(
-            $lead->client_id
-        );
+
+        /** @fflag FFlag::FF_KEY_NO_ANSWER_PROTOCOL_CHECK_EMAIL_IN_UNSUBSCRIBE_LIST, No Answer check email in unsubscribe list */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_NO_ANSWER_PROTOCOL_CHECK_EMAIL_IN_UNSUBSCRIBE_LIST) === true) {
+            $clientEmail = LeadHelper::getFirstEmailNotInUnsubscribeList($lead);
+        } else {
+            $clientEmail = ClientEmail::getFirstEmailByAllowedTypes(
+                $lead->client_id
+            );
+        }
 
         if ($clientEmail === null) {
-            throw new \Exception("Not found email for lead {$lead->id}");
+            $errorMessage = "Lead ({$lead->id}) email does not exist or is in the unsubscribed list";
+            /** @fflag FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE, Object Task status log enable */
+            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE) === true) {
+                throw new CommandCanceledException($errorMessage);
+            } else {
+                throw new \Exception($errorMessage);
+            }
         }
 
         $quoteIdList = ArrayHelper::getColumn($quotes, 'id');
@@ -381,6 +459,7 @@ class SendEmailWithQuotes extends BaseCommand
 
                 foreach ($quoteList as $quote) {
                     if (in_array($quote['key'], $selectedQuoteKeys) === false) {
+                        $quote['createTypeId'] = Quote::CREATE_TYPE_SMART_SEARCH;
                         if ($this->getNeedUniqueQuotes() === true) {
                             $quoteExists = Quote::find()
                                 ->where([
@@ -445,7 +524,7 @@ class SendEmailWithQuotes extends BaseCommand
         return $quotes;
     }
 
-    protected function findLastQuote(array $allowedStatusList = [Quote::STATUS_SENT, Quote::STATUS_OPENED, Quote::STATUS_APPLIED]): ?Quote
+    protected function findLastQuote(array $allowedStatusList = [Quote::STATUS_SENT, Quote::STATUS_OPENED, Quote::STATUS_APPLIED, Quote::STATUS_DECLINED]): ?Quote
     {
         $lead = $this->getLead();
 
