@@ -2,7 +2,6 @@
 
 namespace modules\flight\src\useCases\reprotectionDecision\confirm;
 
-use common\components\BackOffice;
 use modules\flight\models\FlightQuoteFlight;
 use modules\flight\src\useCases\reprotectionDecision\CustomerDecisionService;
 use modules\product\src\entities\productQuote\ProductQuote;
@@ -44,7 +43,7 @@ class BoRequest
         $this->customerDecisionService = $customerDecisionService;
     }
 
-    public function appliedQuote(string $quoteGid, ?int $userId): void
+    public function appliedQuote(string $quoteGid, ?int $userId, int $caseId): void
     {
         $quote = $this->productQuoteRepository->findByGidFlightProductQuote($quoteGid);
         if (!$quote->flightQuote->isTypeReProtection()) {
@@ -67,35 +66,31 @@ class BoRequest
         );
 
         if ($responseBO) {
-            $this->transactionManager->wrap(function () use ($quote, $productQuoteChange, $userId) {
-                $this->successProcessing($quote, $productQuoteChange, $userId);
+            $this->transactionManager->wrap(function () use ($quote, $productQuoteChange, $userId, $caseId) {
+                $this->successProcessing($quote, $productQuoteChange, $userId, $caseId);
             });
             return;
         }
 
-        $this->transactionManager->wrap(function () use ($quote, $productQuoteChange, $userId) {
-            $this->errorProcessing($quote, $productQuoteChange, $userId);
+        $this->transactionManager->wrap(function () use ($quote, $productQuoteChange, $userId, $caseId) {
+            $this->errorProcessing($quote, $productQuoteChange, $userId, $caseId);
         });
     }
 
-    private function successProcessing(ProductQuote $quote, ProductQuoteChange $productQuoteChange, ?int $userId): void
+    private function successProcessing(ProductQuote $quote, ProductQuoteChange $productQuoteChange, ?int $userId, int $caseId): void
     {
         $this->markQuoteToInProgress($quote, $userId);
         $this->markQuoteChangeToInProgress($productQuoteChange);
-        $case = $this->getCase($productQuoteChange);
-        if ($case) {
-            $this->processingCaseBySuccessResult($case, $userId);
-        }
+        $case = $this->getCase($caseId);
+        $this->processingCaseBySuccessResult($case, $userId);
     }
 
-    private function errorProcessing(ProductQuote $quote, ProductQuoteChange $productQuoteChange, ?int $userId): void
+    private function errorProcessing(ProductQuote $quote, ProductQuoteChange $productQuoteChange, ?int $userId, int $caseId): void
     {
         $this->markQuoteToError($quote, $userId);
         $this->markQuoteChangeToError($productQuoteChange);
-        $case = $this->getCase($productQuoteChange);
-        if ($case) {
-            $this->processingCaseByErrorResult($case, $userId);
-        }
+        $case = $this->getCase($caseId);
+        $this->processingCaseByErrorResult($case, $userId);
     }
 
     private function markQuoteChangeToInProgress(ProductQuoteChange $productQuoteChange): void
@@ -123,12 +118,9 @@ class BoRequest
         $this->casesRepository->save($case);
     }
 
-    private function getCase(ProductQuoteChange $productQuoteChange): ?Cases
+    private function getCase(int $caseId): Cases
     {
-        if ($productQuoteChange->pqc_case_id) {
-            return $productQuoteChange->pqcCase;
-        }
-        return null;
+        return $this->casesRepository->find($caseId);
     }
 
     private function markQuoteToError(ProductQuote $quote, ?int $userId): void

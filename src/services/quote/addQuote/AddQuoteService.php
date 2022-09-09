@@ -35,6 +35,7 @@ use src\repositories\quote\QuoteSegmentStopRepository;
 use src\repositories\quote\QuoteTripRepository;
 use src\services\quote\addQuote\price\QuotePriceCreateService;
 use src\services\quote\addQuote\price\QuotePriceSearchForm;
+use src\services\quote\QuoteSearchCidService;
 use src\services\TransactionManager;
 use Yii;
 use yii\data\ArrayDataProvider;
@@ -129,6 +130,7 @@ class AddQuoteService
             }
 
             $quote = Quote::createQuoteFromSearch($quoteData, $lead, $employee, $currency);
+            $this->saveCid($quote, $quoteData);
             $this->quoteRepository->save($quote);
 
             $this->createQuoteTripsFromSearch($quoteData['trips'] ?? [], $quote);
@@ -150,11 +152,12 @@ class AddQuoteService
         });
     }
 
-    public function createByData(array $data, Lead $lead, ?int $providerProjectId): string
+    public function createByData(array $data, Lead $lead, ?int $providerProjectId, ?Employee $employee = null): string
     {
-        return $this->transactionManager->wrap(function () use ($data, $lead, $providerProjectId) {
-            $quote = Quote::createQuoteFromSearch($data, $lead, $lead->employee, null);
+        return $this->transactionManager->wrap(function () use ($data, $lead, $providerProjectId, $employee) {
+            $quote = Quote::createQuoteFromSearch($data, $lead, ($employee ?? $lead->employee), null);
             $quote->provider_project_id = $providerProjectId;
+            $this->saveCid($quote, $data);
             $this->quoteRepository->save($quote);
 
             $this->createQuoteTripsFromSearch($data['trips'] ?? [], $quote);
@@ -189,7 +192,7 @@ class AddQuoteService
             $quotes = SearchService::getOnlineQuotes($dto);
 
             if ($quotes && !empty($quotes['data']['results']) && empty($quotes['error'])) {
-                \Yii::$app->cacheFile->set($keyCache, $quotes = QuoteHelper::formatQuoteData($quotes['data']), 600);
+                \Yii::$app->cacheFile->set($keyCache, $quotes = QuoteHelper::formatQuoteData($quotes['data'], $dto->cid), 600);
             } else {
                 throw new \RuntimeException(!empty($quotes['error']) ? JsonHelper::decode($quotes['error'])['Message'] : 'Search result is empty!');
             }
@@ -323,6 +326,13 @@ class AddQuoteService
                     throw $throwable;
                 }
             }
+        }
+    }
+
+    private function saveCid(Quote $quote, array $quoteData): void
+    {
+        if (QuoteSearchCidService::ffIsEnable() === true && isset($quoteData['cid'])) {
+            $quote->recordSaveEvent($quoteData['cid']);
         }
     }
 }

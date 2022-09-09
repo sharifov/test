@@ -2,6 +2,8 @@
 
 namespace src\helpers\text;
 
+use yii\helpers\ArrayHelper;
+
 class StringHelper extends \yii\helpers\StringHelper
 {
     /**
@@ -43,5 +45,31 @@ class StringHelper extends \yii\helpers\StringHelper
         $text = preg_replace('!\s+!', ' ', $text);
 
         return $text;
+    }
+
+    /**
+     * @param string $text Use {{data}} for access to object properties
+     * @param $object
+     * @return string
+     * @throws \Exception
+     */
+    public static function parseStringWithObjectTemplate(string $text, $object): string
+    {
+        preg_match_all('/{{(.*?)}}/m', $text, $keys);
+
+        if (!isset($keys[1])) {
+            return $text;
+        }
+
+        $placeholders = [];
+        foreach ($keys[1] as $index => $key) {
+            if (empty($key)) {
+                continue;
+            }
+
+            $placeholders[$keys[0][$index]] = ArrayHelper::getValue($object, $key, '');
+        }
+
+        return strtr($text, $placeholders);
     }
 }

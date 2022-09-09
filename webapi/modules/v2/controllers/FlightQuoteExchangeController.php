@@ -606,6 +606,14 @@ class FlightQuoteExchangeController extends BaseController
             }
 
             try {
+                $voluntaryExchangeCreateHandler->additionalProcessing();
+                $voluntaryExchangeCreateHandler->doneProcess();
+            } catch (\Throwable $throwable) {
+                $voluntaryExchangeCreateHandler->failProcess($throwable->getMessage());
+                Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteExchangeController:AdditionalProcessing');
+            }
+
+            try {
                 if (!$responseBo = $this->boRequestVoluntaryExchangeService->sendVoluntaryExchange($post, $voluntaryExchangeCreateForm)) {
                     $case->addEventLog(
                         CaseEventLog::VOLUNTARY_EXCHANGE_CREATE,
@@ -629,14 +637,6 @@ class FlightQuoteExchangeController extends BaseController
                 $description = 'Response from Back Office is failed, status(' . $responseBo['status'] . ') ' . $message;
                 $voluntaryExchangeCreateHandler->failProcess($description);
                 throw new \RuntimeException($description, ApiCodeException::REQUEST_TO_BACK_OFFICE_ERROR);
-            }
-
-            try {
-                $voluntaryExchangeCreateHandler->additionalProcessing();
-                $voluntaryExchangeCreateHandler->doneProcess();
-            } catch (\Throwable $throwable) {
-                $voluntaryExchangeCreateHandler->failProcess($throwable->getMessage());
-                Yii::error(AppHelper::throwableLog($throwable), 'FlightQuoteExchangeController:AdditionalProcessing');
             }
 
             $changeQuote = $voluntaryExchangeCreateHandler->getVoluntaryExchangeQuote();

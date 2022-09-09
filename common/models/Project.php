@@ -5,6 +5,8 @@ namespace common\models;
 use common\models\local\ContactInfo;
 use common\models\query\ProjectQuery;
 use frontend\helpers\JsonHelper;
+use common\components\BackOffice;
+use modules\featureFlag\FFlag;
 use modules\flight\src\useCases\voluntaryExchange\service\CaseVoluntaryExchangeService;
 use modules\qaTask\src\entities\qaTask\QaTask;
 use src\model\clientChat\entity\ClientChat;
@@ -412,10 +414,6 @@ class Project extends \yii\db\ActiveRecord
         $out['error'] = false;
 
         $uri = Yii::$app->params['backOffice']['url'] . '/default/projects';
-        $signature = self::getSignatureBO(
-            Yii::$app->params['backOffice']['apiKey'],
-            Yii::$app->params['backOffice']['ver']
-        );
 
         $client = new \yii\httpclient\Client([
             'transport' => CurlTransport::class,
@@ -433,11 +431,22 @@ class Project extends \yii\db\ActiveRecord
             //"Content-length"    => mb_strlen($xmlRequest),
         ];*/
 
-
-        $headers = [
-            'version' => Yii::$app->params['backOffice']['ver'],
-            'signature' => $signature
-        ];
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BO_API_RBAC_AUTH)) {
+            $sigUsername = Yii::$app->params['backOffice']['username'];
+            $headers = [
+                'sig-username' => $sigUsername,
+                'signature'    => BackOffice::getSignatureBOForRbac($sigUsername)
+            ];
+        } else {
+            $signature = self::getSignatureBO(
+                Yii::$app->params['backOffice']['apiKey'],
+                Yii::$app->params['backOffice']['ver']
+            );
+            $headers = [
+                'version' => Yii::$app->params['backOffice']['ver'],
+                'signature' => $signature
+            ];
+        }
 
         //$requestData['cid'] = $this->api_cid;
 
@@ -453,9 +462,6 @@ class Project extends \yii\db\ActiveRecord
                 CURLOPT_TIMEOUT => 30,
             ])
             ->send();
-
-
-        //VarDumper::dump($response->content, 10, true); exit;
 
         if ($response->isOk) {
             $out['data'] = $response->data;
