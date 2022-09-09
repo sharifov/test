@@ -69,6 +69,7 @@ use src\forms\lead\ItineraryEditForm;
 use src\forms\lead\LeadCreateForm;
 use src\forms\leadflow\TakeOverReasonForm;
 use src\helpers\app\AppHelper;
+use src\helpers\ErrorsToStringHelper;
 use src\helpers\setting\SettingHelper;
 use src\logger\db\GlobalLogInterface;
 use src\logger\db\LogDTO;
@@ -1045,7 +1046,7 @@ class LeadController extends FController
 
         if (!$userTasksListForm->validate()) {
             $msg = [
-                'message' => VarDumper::dumpAsString($userTasksListForm->getErrors()),
+                'message' => ErrorsToStringHelper::extractFromModel($userTasksListForm),
                 'gid' => $userTasksListForm->gid,
                 'page' => $userTasksListForm->page,
                 'userShiftScheduleId' => $userTasksListForm->userShiftScheduleId,

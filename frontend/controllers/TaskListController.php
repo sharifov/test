@@ -193,7 +193,12 @@ class TaskListController extends FController
     {
         $abacDto = new TaskListAbacDto();
         $userTask = UserTask::findOne($userTaskId);
-        $abacDto->setIsUserTaskOwner(!empty($userTask) && $userTask->isOwner(Auth::id()));
+
+        if (empty($userTask)) {
+            throw new NotFoundHttpException('User task with id - ' . $userTaskId . ' not found.');
+        }
+
+        $abacDto->setIsUserTaskOwner($userTask->isOwner(Auth::id()));
         $result = [
             'isSuccess' => false,
             'userTaskId' => $userTaskId,
