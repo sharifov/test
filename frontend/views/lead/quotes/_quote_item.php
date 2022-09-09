@@ -16,6 +16,7 @@ use common\components\SearchService;
 use frontend\helpers\QuoteHelper;
 use frontend\models\LeadForm;
 use modules\featureFlag\FFlag;
+use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use src\services\quote\quotePriceService\ClientQuotePriceService;
 use yii\bootstrap\Html;
@@ -226,6 +227,14 @@ $canQuoteMinPrice = \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_QUOTE_MIN_PR
                         &nbsp; | &nbsp;
                         <span title="Separate Ticket">
                             <i class="fa fa-ticket warning"></i> Separate Ticket (<?=count($ticketSegments)?>)
+                        </span>
+                    <?php endif; ?>
+
+                    <?php if (\src\services\quote\QuoteSearchCidService::userIsCanSeeCid($model)) : ?>
+                        &nbsp; | &nbsp;
+                        <i class="fa fa-search"></i>
+                        <span data-toggle="tooltip" title="Search cid: <?= Html::encode($model->quoteSearchCid->qsc_cid)?>">
+                             <?= $model->quoteSearchCid->qsc_cid ?>
                         </span>
                     <?php endif; ?>
 

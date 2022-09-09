@@ -435,7 +435,7 @@ class Project extends \yii\db\ActiveRecord
             $sigUsername = Yii::$app->params['backOffice']['username'];
             $headers = [
                 'sig-username' => $sigUsername,
-                'signature'    => BackOffice::getSignatureFromBO($sigUsername)
+                'signature'    => BackOffice::getSignatureBOForRbac($sigUsername)
             ];
         } else {
             $signature = self::getSignatureBO(
