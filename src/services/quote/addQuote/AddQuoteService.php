@@ -332,7 +332,7 @@ class AddQuoteService
     private function saveCid(Quote $quote, array $quoteData): void
     {
         if (QuoteSearchCidService::ffIsEnable() === true && isset($quoteData['cid'])) {
-            $quote->recordSaveCidEvent($quoteData['cid']);
+            $quote->recordSaveEvent($quoteData['cid']);
         }
     }
 }

@@ -3103,7 +3103,7 @@ class Quote extends \yii\db\ActiveRecord
             ->all();
     }
 
-    public function recordSaveCidEvent(?string $cid = null)
+    public function recordSaveEvent(?string $cid = null)
     {
         $this->recordEvent(new QuoteSaveEvent($this, $cid));
     }
