@@ -36,7 +36,7 @@ use dosamigos\datepicker\DatePicker;
     <?php $currency = (CurrencyQuery::getCurrencySymbolByCode($refundForm->getRefundForm()->currency) ?: $refundForm->getRefundForm()->currency); ?>
     <?php
       $infoText = 'Refundable amount: ';
-      $infoText .= $refundForm->originData['allow'] ?
+      $infoText .= !empty($refundForm->originData['allow']) ?
         '<span style="color: green">Successfully identified</span>' :
         '<span style="color:blue;">Check manually</span>';
     ?>

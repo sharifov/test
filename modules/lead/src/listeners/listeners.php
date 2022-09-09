@@ -152,6 +152,7 @@ return [
     LeadProcessingEvent::class => [
         LeadProcessingEventLogListener::class,
         LeadInfoReloadListener::class,
+        NoAnswerProtocolCancelListener::class,
     ],
     LeadRejectEvent::class => [
         LeadRejectEventLogListener::class,

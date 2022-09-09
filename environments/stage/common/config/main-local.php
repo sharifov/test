@@ -76,6 +76,14 @@ return [
             'password' => env('COMMON_CONFIG_MAIN_COMPONENTS_REDIS_PASSWORD'),
             'unixSocket' => null,
         ],
+        'redis_2fa' => [
+            'class' => \yii\redis\Connection::class,
+            'hostname' => env('COMMON_CONFIG_MAIN_COMPONENTS_REDIS_HOSTNAME'),
+            'port' => env('COMMON_CONFIG_MAIN_COMPONENTS_REDIS_PORT'),
+            'database' => 1,
+            'password' => env('COMMON_CONFIG_MAIN_COMPONENTS_REDIS_PASSWORD'),
+            'unixSocket' => null,
+        ],
         'session' => [
             'class' => \yii\redis\Session::class,
         ],

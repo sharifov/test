@@ -12,12 +12,12 @@
 
 use common\models\Currency;
 use common\models\Quote;
-use common\models\Airline;
 use common\components\SearchService;
 use frontend\helpers\QuoteHelper;
 use frontend\models\LeadForm;
+use modules\featureFlag\FFlag;
+use src\auth\Auth;
 use src\helpers\app\AppHelper;
-use src\helpers\quote\ImageHelper;
 use src\services\quote\quotePriceService\ClientQuotePriceService;
 use yii\bootstrap\Html;
 use yii\helpers\ArrayHelper;
@@ -28,7 +28,6 @@ $user = Yii::$app->user->identity;
 $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
 $airlineName = $model->mainAirline ? $model->mainAirline->name : '';
 $currency = empty($model->q_client_currency) ? Currency::getDefaultCurrencyCode() : $model->q_client_currency;
-
 
 if ($model->isClientCurrencyDefault()) {
     $priceData = $model->getPricesData();
@@ -49,9 +48,22 @@ if ($model->isDeclined()) {
 } elseif ($model->isAlternative()) {
     $bgColor =  '#fdffe5';
 }
-
+$totalSelling = $priceData['total']['selling'] ?? 0;
+/** @fflag FFlag::FF_KEY_QUOTE_MIN_PRICE_ENABLE, Enable Quote Min Price restriction in lead/view */
+$canQuoteMinPrice = \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_QUOTE_MIN_PRICE_ENABLE);
 ?>
-<div class="quote quote--highlight" id="quote-<?=$model->uid?>">
+
+<?php Pjax::begin([
+    'id' => 'pjax-quote_box-' . $model->id,
+    'enablePushState' => false,
+    'enableReplaceState' => false,
+]) ?>
+
+<div
+    class="quote quote--highlight"
+    id="quote-<?=$model->uid?>"
+    style="border-color: <?php echo QuoteHelper::getBorderColorByPrice($totalSelling, $canQuoteMinPrice) ?>;">
+
     <?php $tripsInfo = []?>
     <?php foreach ($model->quoteTrips as $trip) :?>
         <?php
@@ -71,7 +83,7 @@ if ($model->isDeclined()) {
             </span>
             <?php if ($model->isOriginal()) : ?>
                 <span class="label label-primary"><?= Quote::getTypeName($model->type_id) ?></span>
-            <?php elseif (($leadForm->mode !== $leadForm::VIEW_MODE || $isManager) && in_array($model->status, [Quote::STATUS_CREATED, Quote::STATUS_SENT, Quote::STATUS_OPENED])) : ?>
+            <?php elseif (QuoteHelper::isShowCheckbox($leadForm, $isManager, $model, $totalSelling, $canQuoteMinPrice)) : ?>
                 <div class="custom-checkbox">
                     <input class="quotes-uid" id="q<?= $model->uid ?>" value="<?= $model->uid ?>" data-id="<?=$model->id?>" type="checkbox" name="quote[<?= $model->uid ?>]">
                     <label for="q<?= $model->uid ?>"></label>
@@ -97,17 +109,17 @@ if ($model->isDeclined()) {
                     </small>
                 <?php endif; ?>
             </span>
-
         </div>
+
         <div class="quote__heading-right">
             <?php if ($model->isDeclined()) : ?>
                 <span>
-                    <?= number_format($priceData['total']['selling'], 2)?>
+                    <?= number_format($totalSelling, 2)?>
                     <?= Html::encode($currency)?>
                 </span>
             <?php else : ?>
-                <span class="label label-info" style="font-size: 15px">
-                    <b><?= number_format($priceData['total']['selling'], 2)?></b>
+                <span class="label <?php echo QuoteHelper::getClassLabelByPrice($totalSelling, $canQuoteMinPrice) ?>" style="font-size: 15px">
+                    <b><?= number_format($totalSelling, 2)?></b>
                     <?= Html::encode($currency)?>
                 </span>
             <?php endif; ?>
@@ -158,7 +170,7 @@ if ($model->isDeclined()) {
 
                         <?php endif; ?>
 
-                        <?php if (!$model->isDeclined() && !$model->isAlternative() && !$model->isOriginal()) :?>
+                        <?php if (QuoteHelper::isShowCheckout($model, $totalSelling, $canQuoteMinPrice)) :?>
                             <?php  echo Html::a('<i class="fa fa-eye"></i> Checkout Page', $model->getCheckoutUrlPage(), [
                                     'class' => 'dropdown-item',
                                 'target'    => '_blank',
@@ -215,6 +227,14 @@ if ($model->isDeclined()) {
                         &nbsp; | &nbsp;
                         <span title="Separate Ticket">
                             <i class="fa fa-ticket warning"></i> Separate Ticket (<?=count($ticketSegments)?>)
+                        </span>
+                    <?php endif; ?>
+
+                    <?php if (\src\services\quote\QuoteSearchCidService::userIsCanSeeCid($model)) : ?>
+                        &nbsp; | &nbsp;
+                        <i class="fa fa-search"></i>
+                        <span data-toggle="tooltip" title="Search cid: <?= Html::encode($model->quoteSearchCid->qsc_cid)?>">
+                             <?= $model->quoteSearchCid->qsc_cid ?>
                         </span>
                     <?php endif; ?>
 
@@ -461,6 +481,8 @@ if ($model->isDeclined()) {
 
     </div>
 </div>
+<br />
+<?php Pjax::end(); ?>
 
 <?php
 $css = <<<CSS

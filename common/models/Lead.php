@@ -20,6 +20,7 @@ use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacDto;
 use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\objectSegment\src\contracts\ObjectSegmentListContract;
 use modules\objectTask\src\entities\ObjectTask;
+use modules\objectTask\src\scenarios\NoAnswer;
 use modules\objectTask\src\services\ObjectTaskService;
 use modules\offer\src\entities\offer\Offer;
 use modules\order\src\entities\order\Order;
@@ -1209,6 +1210,11 @@ class Lead extends ActiveRecord implements Objectable
     public function setTripType(string $type = null): void
     {
         if ($type) {
+            /** @fflag FFlag::FF_KEY_UPPERCASE_CONVERT_IN_SET_TRIP_TYPE_METHOD_ENABLE, Enable converting trip_type key in setTripType method */
+            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_UPPERCASE_CONVERT_IN_SET_TRIP_TYPE_METHOD_ENABLE) === true) {
+                $type = mb_strtoupper($type);
+            }
+
             $list = LeadHelper::tripTypeList();
             if (isset($list[$type])) {
                 $this->trip_type = $type;
@@ -4115,7 +4121,8 @@ Reason: {reason}',
                         'uid' => $quoteModel->uid,
                         'cabinClass' => $quoteModel->cabin,
                         'tripType' => $quoteModel->trip_type,
-                        'hasSeparates' =>  $quoteModel->getTicketSegments() ? true : false
+                        'hasSeparates' =>  $quoteModel->getTicketSegments() ? true : false,
+                        'currencyRate' => $quoteModel->q_client_currency_rate
                     ];
 
                     $quoteItem = array_merge($quoteItem, $quoteModel->getInfoForEmail2($lang));
@@ -4136,7 +4143,7 @@ Reason: {reason}',
             }
             // sorting quotes by pricePerPax asc
             if (isset($content_data['quotes']) && is_array($content_data['quotes'])) {
-                usort($content_data['quotes'], fn($a, $b) => (($a['pricePerPax'] ?? 0) - ($b['pricePerPax'] ?? 0)));
+                usort($content_data['quotes'], fn($a, $b) => (($a['pricePerPax'] ?? 0) / ($a['currencyRate'] ?? 1) - ($b['pricePerPax'] ?? 0) / ($b['currencyRate'] ?? 1)));
             }
         }
 

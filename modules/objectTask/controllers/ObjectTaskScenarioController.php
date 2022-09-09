@@ -69,6 +69,16 @@ class ObjectTaskScenarioController extends FController
                             ),
                             'roles' => ['@'],
                         ],
+                        /** @abac ObjectTaskObject::ACT_OBJECT_TASK_SCENARIO, ObjectTaskObject::ACTION_CREATE, Access to page /object-task/object-task-scenario/create */
+                        [
+                            'actions' => ['create'],
+                            'allow' => \Yii::$app->abac->can(
+                                null,
+                                ObjectTaskObject::ACT_OBJECT_TASK_SCENARIO,
+                                ObjectTaskObject::ACTION_CREATE
+                            ),
+                            'roles' => ['@'],
+                        ],
                     ],
                 ],
             ]

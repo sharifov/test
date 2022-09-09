@@ -49,6 +49,7 @@ abstract class BaseApplication extends yii\base\Application
  * @property \yii\caching\Cache $webApiCache FileCache.
  * @property \yii\caching\Cache $consoleCache FileCache.
  * @property \yii\redis\Connection $redis Redis Connection.
+ * @property \yii\redis\Connection $redis_2fa Redis Connection.
  * @property \common\components\RocketChat $rchat Rocket Chat component
  * @property \common\components\ChatBot $chatBot ChatBot component
  * @property \common\components\TravelServices $travelServices TravelServices component

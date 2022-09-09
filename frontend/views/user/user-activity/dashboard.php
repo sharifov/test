@@ -23,7 +23,7 @@ use yii\widgets\Pjax;
 /* @var $searchModel UserActivitySearch */
 
 
-$this->title = 'My Activity' . ' (' . $user->username . ')';
+//$this->title = 'User Activity' . ' (' . $user->username . ')';
 $this->params['breadcrumbs'][] = $this->title;
 
 \frontend\assets\FullCalendarAsset::register($this);

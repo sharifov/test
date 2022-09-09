@@ -1,6 +1,7 @@
 <?php
 
 use common\models\Employee;
+use src\auth\Auth;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 
@@ -88,6 +89,15 @@ $this->params['breadcrumbs'][] = $this->title;
                             <i class="fa fa-user user-profile-icon"></i> Full
                             Name: <?= Html::encode($model->full_name) ?>
                         </li>
+                        <?php if (Auth::can('/user-activity/user-info')) : ?>
+                        <li>
+                            <?php echo Html::a(
+                                '<span class="fa fa-clock-o"></span> User Activity Info',
+                                ['user-activity/user-info', 'id' => $model->id],
+                                ['title' => 'User Activity Info', 'target' => '_blank', 'data-pjax' => 0]
+                            ); ?>
+                        </li>
+                        <?php endif; ?>
 
                         <!--                        <li class="m-top-xs">-->
                         <!--                            <i class="fa fa-external-link user-profile-icon"></i>-->

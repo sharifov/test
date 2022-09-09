@@ -2,14 +2,18 @@
 
 namespace modules\objectTask\src\scenarios;
 
+use common\models\Employee;
 use common\models\Lead;
 use common\models\query\LeadFlowQuery;
 use modules\objectTask\src\entities\ObjectTask;
+use modules\objectTask\src\entities\ObjectTaskScenario;
 use modules\objectTask\src\entities\repositories\ObjectTaskRepository;
 use modules\objectTask\src\jobs\CommandExecutorJob;
 use modules\objectTask\src\scenarios\statements\NoAnswerDto;
 use modules\objectTask\src\scenarios\statements\NoAnswerObject;
+use modules\objectTask\src\services\NoAnswerProtocolService;
 use modules\objectTask\src\services\ObjectTaskService;
+use modules\objectTask\src\services\ObjectTaskStatusLogService;
 use src\helpers\app\AppHelper;
 use src\helpers\DateHelper;
 use src\helpers\lead\LeadHelper;
@@ -34,6 +38,11 @@ class NoAnswer extends BaseScenario
         self::INTERVAL_TYPE_MINUTES,
         self::INTERVAL_TYPE_SECONDS,
     ];
+
+    public const PARAMETER_ANSWER_NOTIFICATION = 'answerNotification';
+    public const PARAMETER_ANSWER_NOTIFICATION_ROLES = 'roles';
+    public const PARAMETER_ANSWER_NOTIFICATION_TITLE = 'title';
+    public const PARAMETER_ANSWER_NOTIFICATION_DESCRIPTION = 'description';
 
     public function process(): void
     {
@@ -109,8 +118,25 @@ class NoAnswer extends BaseScenario
                                 $groupHash
                             );
 
+                            $objectTask->setPendingStatus();
+
                             (new ObjectTaskRepository($objectTask))->save();
+
+                            /** @fflag FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE, Object Task status log enable */
+                            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE) === true) {
+                                ObjectTaskStatusLogService::createLog(
+                                    $uuid,
+                                    ObjectTask::STATUS_PENDING,
+                                    null,
+                                    'Created by noAnswer protocol'
+                                );
+                            }
                         } catch (\Exception $exception) {
+                            Yii::error(
+                                AppHelper::throwableLog($exception),
+                                'NoAnswer:process'
+                            );
+
                             Yii::$app->queue_db->remove($queueID);
 
                             throw $exception;
@@ -131,6 +157,69 @@ class NoAnswer extends BaseScenario
     public static function getStatementObject(): NoAnswerObject
     {
         return new NoAnswerObject();
+    }
+
+    public static function getParametersDescription(): array
+    {
+        $data = [];
+
+        $data[self::PARAMETER_ANSWER_NOTIFICATION] = [
+            'description' => 'Client response notification (<span class="text-danger">applies only to the roles included in the lead project</span>)',
+            'type' => ['object'],
+            'data' => [
+                'title' => [
+                    'description' => 'Notification title. Can use templates of type {{id}} from the Lead object',
+                    'type' => ['text'],
+                ],
+                'description' => [
+                    'description' => 'Notification text. Can use templates of type {{id}} from the Lead object',
+                    'type' => ['text'],
+                ],
+                'roles' => [
+                    'description' => 'Roles that should receive notifications',
+                    'type' => ['array'],
+                    'data' => ['supervision', 'sale_manager'],
+                ],
+            ],
+        ];
+
+        $data['allowedTime'] = [
+            'description' => 'Time to send an email to the lead (<span class="text-danger">applies only to the Days interval</span>).',
+            'type' => ['object'],
+            'data' => [
+                'hour' => [
+                    'description' => 'Hours, from 0 to 23',
+                    'type' => ['integer']
+                ],
+                'minute' => [
+                    'description' => 'Minutes from 0 to 59',
+                    'type' => ['integer']
+                ],
+            ],
+        ];
+
+        foreach (self::INTERVAL_TYPE_LIST as $interval) {
+            $data[$interval] = [
+                'description' => "Object containing the {$interval} on which the email should be sent. The object key is the ordinal number of the day.",
+                'type' => ['object'],
+                'data' => [
+                    3 => [
+                        'description' => 'Index number',
+                        'type' => ['array'],
+                        'data' => [
+                            [
+                                'command' => 'name',
+                                'config' => [
+                                    'parameter' => 'value'
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+        }
+
+        return $data;
     }
 
     public static function getTemplate(): array
@@ -189,6 +278,22 @@ class NoAnswer extends BaseScenario
         return ($project !== null && isset($virtualAgentList[$project->project_key]) && !empty($virtualAgentList[$project->project_key]));
     }
 
+    public static function getVirtualAgentByProjectKey(string $key): ?Employee
+    {
+        $virtualAgentList = \Yii::$app->params['settings']['virtual_agent_list'] ?? [];
+
+        if (isset($virtualAgentList[$key]) && !empty($virtualAgentList[$key])) {
+            return Employee::find()
+                ->where([
+                    'username' => $virtualAgentList[$key],
+                ])
+                ->limit(1)
+                ->one();
+        }
+
+        return null;
+    }
+
     public function canProcess(): bool
     {
         if (parent::canProcess() === true) {
@@ -216,16 +321,33 @@ class NoAnswer extends BaseScenario
 
     public static function clientResponseLogicInit(Lead $lead): void
     {
-        if ($lead->status !== Lead::STATUS_FOLLOW_UP) {
+        if ($lead->status !== Lead::STATUS_FOLLOW_UP || NoAnswerProtocolService::leadWasInNoAnswer($lead) === false) {
             return;
         }
 
         try {
-            ObjectTaskService::cancelJobs(
+            $scenarioIds = ObjectTaskService::cancelJobs(
                 self::KEY,
                 ObjectTaskService::OBJECT_LEAD,
-                $lead->id
+                $lead->id,
+                'Client has answered'
             );
+
+            if ($scenarioIds) {
+                foreach ($scenarioIds as $scenarioId) {
+                    $objectTaskScenario = ObjectTaskScenario::find()
+                        ->where([
+                            'ots_id' => $scenarioId,
+                        ])
+                        ->limit(1)
+                        ->one();
+
+                    NoAnswerProtocolService::notifyAboutClientAnswer(
+                        $objectTaskScenario,
+                        $lead
+                    );
+                }
+            }
 
             if ($lead->status !== Lead::CALL_STATUS_PROCESS) {
                 $leadFlow = LeadFlowQuery::getLastOwnerOfLead($lead->id);
