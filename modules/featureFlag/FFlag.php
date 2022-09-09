@@ -66,6 +66,7 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_NO_ANSWER_PROTOCOL_SOLD_AUTO_REPLACE_AFK_EMPLOYEE_ENABLE = 'noAnswerProtocolSoldAutoReplaceAfkEmployee';
     public const FF_KEY_SYSTEM_LOG_SEARCH_BLOCK_IMPROVEMENTS_ENABLE = 'systemLogSearchBlockImprovementsEnable';
     public const FF_KEY_BO_API_RBAC_AUTH = 'boApiRbacAuth';
+    public const FF_KEY_VALIDATE_CHANGE_EXTRA_MARK_UP = 'validateChangeExtraMarkUp';
 
     public const FF_KEY_LIST = [
         self::FF_KEY_LPP_ENABLE,
