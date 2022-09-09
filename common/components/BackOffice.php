@@ -161,7 +161,7 @@ class BackOffice
      * @return string
      * @throws BadRequestHttpException
      */
-    public static function getSignatureBOForRbac(string $sigUsername, ?string $endpointUrl = '', ?array $requestBodyArray = [], ?string $requestBodyJson = ''): string
+    public static function getSignatureBOForRbac(string $sigUsername, ?string $endpointUrl = '', ?array $requestBodyArray = [], ?string $requestBodyFieldsJson = ''): string
     {
         $apiKey = Yii::$app->params['backOffice']['apiKey'];
         $requestBodyString = $requestQueryString = '';
