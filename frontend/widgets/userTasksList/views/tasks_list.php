@@ -63,7 +63,7 @@ $calcPagination = UserTasksListHelper::calcPagination($shiftScheduleTasksPaginat
                             <ul class="nav lead-user-tasks-timeline__schedule">
                                 <?php foreach ($userShiftSchedulesList as $key => $userShiftSchedule) : ?>
                                     <li class="lead-user-tasks-timeline__nav-item nav-item">
-                                        <a href="<?= $pjaxUrl . '&user-shift-schedule-id=' . $key; ?>" class="lead-user-tasks-timeline__nav-link rounded-top text-center <?= ($activeShiftScheduleId == $key ? 'active' : ''); ?> <?= ($userShiftSchedule['isDayToday'] ? 'day-today' : ''); ?>">
+                                        <a href="<?= $pjaxUrl . '&userShiftScheduleId=' . $key; ?>" class="lead-user-tasks-timeline__nav-link rounded-top text-center <?= ($activeShiftScheduleId == $key ? 'active' : ''); ?> <?= ($userShiftSchedule['isDayToday'] ? 'day-today' : ''); ?>">
                                             <p class="lead-user-tasks-timeline__title"> <?= $userShiftSchedule['mainTabTitle']; ?></p>
                                             <p class="lead-user-tasks-timeline__subtitle"><?= $userShiftSchedule['subTabTitle']; ?></p>
                                         </a>

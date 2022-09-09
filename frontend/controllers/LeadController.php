@@ -1041,15 +1041,16 @@ class LeadController extends FController
         $result = '';
         $request = \Yii::$app->request;
         $userTasksListForm = new UserTasksListForm();
-        $userTasksListForm->load([
-            'gid' => $gid,
-            'page' => $request->get('page', 1),
-            'userShiftScheduleId' => $request->get('user-shift-schedule-id'),
-        ], '');
+        $userTasksListForm->load($request->get(), '');
 
         if (!$userTasksListForm->validate()) {
-            Yii::error(VarDumper::dumpAsString($userTasksListForm->getErrors()), 'LeadController:actionPjaxUserTasksList');
-            return $result;
+            $msg = [
+                'message' => VarDumper::dumpAsString($userTasksListForm->getErrors()),
+                'gid' => $userTasksListForm->gid,
+                'page' => $userTasksListForm->page,
+                'userShiftScheduleId' => $userTasksListForm->userShiftScheduleId,
+            ];
+            throw new \HttpInvalidParamException(VarDumper::dumpAsString($msg), 'LeadController:actionPjaxUserTasksList');
         }
 
         $lead = Lead::find()->where([

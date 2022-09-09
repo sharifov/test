@@ -23,6 +23,7 @@ class UserTasksListForm extends Model
         return [
             ['gid', 'string', 'max' => 32],
             ['page', 'integer'],
+            ['page', 'default', 'value' => 1],
             ['userShiftScheduleId', 'integer'],
         ];
     }
