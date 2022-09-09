@@ -74,9 +74,27 @@ class ClientNotificationListener
 
             $notificationSettings = $this->projectSettings->getNotificationSettings($project->id, $notificationType->getType());
             if (!$notificationSettings) {
+                \Yii::warning([
+                    'message' => 'Not found notification settings',
+                    'event' => [
+                        'name' => $event->getClass(),
+                        'productQuoteChangeId' => $event->getProductQuoteChangeId(),
+                        'projectId' => !empty($project) ? $project->id : null,
+                        'notificationType' => $notificationType->getType() ?? null,
+                    ],
+                ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:NotFound');
                 return;
             }
             if (!$notificationSettings->isAnyEnabled()) {
+                \Yii::warning([
+                    'message' => 'Not enabled any notification type (phone, sms, email)',
+                    'event' => [
+                        'name' => $event->getClass(),
+                        'productQuoteChangeId' => $event->getProductQuoteChangeId(),
+                        'projectId' => !empty($project) ? $project->id : null,
+                        'notificationType' => $notificationType->getType() ?? null,
+                    ],
+                ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:NotEnabled');
                 return;
             }
 
@@ -84,14 +102,47 @@ class ClientNotificationListener
 
             if ($client->phoneId && $notificationSettings->sendPhoneNotification->enabled) {
                 $this->phoneNotificationProcessing($project, $notificationType, $client, $notificationSettings->sendPhoneNotification, $productQuoteChange);
+            } else {
+                \Yii::warning([
+                    'message' => 'Client not have phone or "sendPhoneNotification" is disabled',
+                    'event' => [
+                        'name' => $event->getClass(),
+                        'productQuoteChangeId' => $event->getProductQuoteChangeId(),
+                        'projectId' => !empty($project) ? $project->id : null,
+                        'notificationType' => $notificationType->getType() ?? null,
+                        'clientId' => !empty($client->id) ? $client->id : null,
+                    ],
+                ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:NotEnabled');
             }
 
             if ($client->phoneId && $notificationSettings->sendSmsNotification->enabled) {
                 $this->smsNotificationProcessing($project, $notificationType, $client, $notificationSettings->sendSmsNotification, $productQuoteChange);
+            } else {
+                \Yii::warning([
+                    'message' => 'Client not have phone or "sendSmsNotification" is disabled',
+                    'event' => [
+                        'name' => $event->getClass(),
+                        'productQuoteChangeId' => $event->getProductQuoteChangeId(),
+                        'projectId' => !empty($project) ? $project->id : null,
+                        'notificationType' => $notificationType->getType() ?? null,
+                        'clientId' => !empty($client->id) ? $client->id : null,
+                    ],
+                ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:NotEnabled');
             }
 
             if ($client->emailId && $notificationSettings->sendEmailNotification->enabled) {
                 $this->emailNotificationProcessing($project, $notificationType, $client, $notificationSettings->sendEmailNotification, $productQuoteChange);
+            } else {
+                \Yii::warning([
+                    'message' => 'Client not have phone or "sendEmailNotification" is disabled',
+                    'event' => [
+                        'name' => $event->getClass(),
+                        'productQuoteChangeId' => $event->getProductQuoteChangeId(),
+                        'projectId' => $project->id,
+                        'notificationType' => $notificationType->getType() ?? null,
+                        'clientId' => !empty($client->id) ? $client->id : null,
+                    ],
+                ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:NotEnabled');
             }
         } catch (OverdueException $e) {
             \Yii::warning([
@@ -99,6 +150,7 @@ class ClientNotificationListener
                 'event' => [
                     'name' => $event->getClass(),
                     'productQuoteChangeId' => $event->getProductQuoteChangeId(),
+                    'projectId' => !empty($project) ? $project->id : null,
                 ],
                 'exception' => AppHelper::throwableLog($e, true),
             ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:OverdueException');
@@ -108,6 +160,7 @@ class ClientNotificationListener
                 'event' => [
                     'name' => $event->getClass(),
                     'productQuoteChangeId' => $event->getProductQuoteChangeId(),
+                    'projectId' => !empty($project) ? $project->id : null,
                 ],
                 'exception' => AppHelper::throwableLog($e, true),
             ], 'ProductQuoteChangeAutoDecisionPendingClientNotificationListener:handle');
@@ -337,7 +390,7 @@ class ClientNotificationListener
     private function addClientPhone(int $clientId, string $phone): ?int
     {
         try {
-            $client = \common\models\Client::find()->byId($clientId)->one();
+            $client = \common\models\Client::findOne($clientId);
             $clientPhone = $this->clientManageService->addPhone($client, new PhoneCreateForm([
                 'client_id' => $clientId,
                 'phone' => $phone,
@@ -364,7 +417,7 @@ class ClientNotificationListener
     private function addClientEmail(int $clientId, string $email): ?int
     {
         try {
-            $client = \common\models\Client::find()->byId($clientId)->limit(1)->one();
+            $client = \common\models\Client::findOne($clientId);
             $clientEmail = $this->clientManageService->addEmail($client, new EmailCreateForm([
                 'client_id' => $clientId,
                 'email' => $email,

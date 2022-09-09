@@ -23,6 +23,7 @@ use frontend\helpers\QuoteHelper;
 use frontend\widgets\notification\NotificationMessage;
 use modules\invoice\src\exceptions\InvoiceCodeException;
 use modules\lead\src\entities\lead\LeadQuery;
+use modules\objectTask\src\services\NoAnswerProtocolService;
 use src\auth\Auth;
 use src\exception\AdditionalDataException;
 use src\forms\quote\QuoteCreateDataForm;
@@ -1370,7 +1371,13 @@ class QuoteController extends ApiBaseController
                                 $repo = Yii::createObject(LeadRepository::class);
                                 $newOwner = $model->lead->employee_id;
                                 if (!$newOwner) {
-                                    $newOwner = LeadQuery::getLastActiveUserId($model->lead->id);
+                                    /** @fflag FFlag::FF_KEY_NO_ANSWER_PROTOCOL_SOLD_AUTO_REPLACE_AFK_EMPLOYEE_ENABLE, Auto replace employee when lead was sold without agent */
+                                    if (
+                                        \Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_NO_ANSWER_PROTOCOL_SOLD_AUTO_REPLACE_AFK_EMPLOYEE_ENABLE) === false ||
+                                        NoAnswerProtocolService::leadWasInNoAnswer($lead) === false
+                                    ) {
+                                        $newOwner = LeadQuery::getLastActiveUserId($model->lead->id);
+                                    }
                                 }
                                 $model->lead->booked($newOwner, null);
                                 $repo->save($model->lead);
