@@ -67,6 +67,7 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_SYSTEM_LOG_SEARCH_BLOCK_IMPROVEMENTS_ENABLE = 'systemLogSearchBlockImprovementsEnable';
     public const FF_KEY_BO_API_RBAC_AUTH = 'boApiRbacAuth';
     public const FF_KEY_SAVE_CID_FOR_QUOTES_FROM_SEARCH_ENABLE = 'saveCidForQuotesFromSearchEnable';
+    public const FF_KEY_VALIDATE_CHANGE_EXTRA_MARK_UP = 'validateChangeExtraMarkUp';
 
     public const FF_KEY_LIST = [
         self::FF_KEY_LPP_ENABLE,
@@ -123,6 +124,7 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_SYSTEM_LOG_SEARCH_BLOCK_IMPROVEMENTS_ENABLE,
         self::FF_KEY_BO_API_RBAC_AUTH,
         self::FF_KEY_SAVE_CID_FOR_QUOTES_FROM_SEARCH_ENABLE,
+        self::FF_KEY_VALIDATE_CHANGE_EXTRA_MARK_UP,
     ];
 
     public const FF_OBJECT_LIST = [
