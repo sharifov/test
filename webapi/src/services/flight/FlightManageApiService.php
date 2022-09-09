@@ -30,6 +30,7 @@ use modules\flight\src\repositories\flightQuoteSegment\FlightQuoteSegmentReposit
 use modules\flight\src\repositories\flightQuoteSegmentPaxBaggageRepository\FlightQuoteSegmentPaxBaggageRepository;
 use modules\flight\src\repositories\flightQuoteTicket\FlightQuoteTicketRepository;
 use modules\flight\src\repositories\flightQuoteTripRepository\FlightQuoteTripRepository;
+use modules\flight\src\useCases\services\cases\CaseService;
 use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\entities\orderRefund\OrderRefund;
 use modules\order\src\entities\orderRefund\OrderRefundRepository;
@@ -101,6 +102,7 @@ use yii\helpers\ArrayHelper;
  * @property FlightRefundUpdateForm $form
  * @property Cases $case
  * @property ProductQuoteRefund $productQuoteRefund
+ * @property CaseService $caseService
  */
 class FlightManageApiService implements BoWebhookService
 {
@@ -144,6 +146,7 @@ class FlightManageApiService implements BoWebhookService
      * @var ProductQuoteRefund|null
      */
     private ?ProductQuoteRefund $productQuoteRefund = null;
+    private CaseService $caseService;
 
     /**
      * @param FlightQuoteFlightRepository $flightQuoteFlightRepository
@@ -169,6 +172,7 @@ class FlightManageApiService implements BoWebhookService
      * @param CasesRepository $casesRepository
      * @param ProductQuoteChangeRepository $productQuoteChangeRepository
      * @param CasesCommunicationService $casesCommunicationService
+     * @param CaseService $caseService
      */
     public function __construct(
         FlightQuoteFlightRepository $flightQuoteFlightRepository,
@@ -193,7 +197,8 @@ class FlightManageApiService implements BoWebhookService
         ProductQuoteRefundRepository $productQuoteRefundRepository,
         CasesRepository $casesRepository,
         ProductQuoteChangeRepository $productQuoteChangeRepository,
-        CasesCommunicationService $casesCommunicationService
+        CasesCommunicationService $casesCommunicationService,
+        CaseService $caseService
     ) {
         $this->flightQuoteFlightRepository = $flightQuoteFlightRepository;
         $this->flightQuoteBookingRepository = $flightQuoteBookingRepository;
@@ -218,6 +223,7 @@ class FlightManageApiService implements BoWebhookService
         $this->casesRepository = $casesRepository;
         $this->productQuoteChangeRepository = $productQuoteChangeRepository;
         $this->casesCommunicationService = $casesCommunicationService;
+        $this->caseService = $caseService;
     }
 
     public function ticketIssue(FlightRequestApiForm $flightRequestApiForm): void
@@ -543,7 +549,18 @@ class FlightManageApiService implements BoWebhookService
                 throw new NotFoundException('Product Quote Refund found by bookingId: ' . $form->booking_id);
             }
             if ($this->productQuoteRefund->isInProcessing()) {
-                $this->case = $this->productQuoteRefund->case;
+                $this->case = $this->caseService->getCaseByProductQuoteRefund($this->productQuoteRefund, $this->productQuote);
+                if (!$this->case) {
+                    \Yii::warning([
+                        'message' => 'Case not found by Product Quote Refund (' . $this->productQuoteRefund->pqr_id . ') or by Product Quote (' . $this->productQuote->pq_id . ')',
+                        'productQuoteId' => $this->productQuote->pq_id,
+                        'productQuoteGid' => $this->productQuote->pq_gid,
+                        'productQuoteRefundId' => $this->productQuoteRefund->pqr_id,
+                        'productQuoteRefundGid' => $this->productQuoteRefund->pqr_gid,
+                    ], 'FlightManageApiService:processRequest:NotFoundException');
+                    throw new NotFoundException('Case not found by Product Quote Refund (' . $this->productQuoteRefund->pqr_id . ') or by Product Quote (' . $this->productQuote->pq_id . ')');
+                }
+
                 if ($form->isProcessing()) {
                     if (!$this->productQuoteRefund->isCompleted()) {
                         $this->productQuoteRefund->processing();

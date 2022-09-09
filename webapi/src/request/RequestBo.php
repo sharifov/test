@@ -2,6 +2,8 @@
 
 namespace webapi\src\request;
 
+use common\components\BackOffice;
+use modules\featureFlag\FFlag;
 use Yii;
 use yii\helpers\VarDumper;
 use yii\httpclient\Request;
@@ -41,7 +43,17 @@ class RequestBo
             $this->addData($data);
         }
 
-        $response = $this->next->setUrl($this->createUrl($action))->send();
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BO_API_RBAC_AUTH)) {
+            $sigUsername = Yii::$app->params['backOffice']['username'];
+            $signature   = BackOffice::getSignatureFromBO($sigUsername, '', $data);
+            $headers = [
+                'sig-username' => $sigUsername,
+                'signature'    => $signature
+            ];
+            $response = $this->next->setUrl($this->createUrl($action))->addHeaders($headers)->send();
+        } else {
+            $response = $this->next->setUrl($this->createUrl($action))->send();
+        }
 
         $response = $this->checkRedirect($response);
 

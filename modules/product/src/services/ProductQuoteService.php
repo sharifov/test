@@ -6,6 +6,7 @@ use common\components\hybrid\HybridWhData;
 use common\components\HybridService;
 use common\models\Currency;
 use modules\flight\models\FlightQuoteFlight;
+use modules\flight\src\useCases\services\cases\CaseService;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
@@ -42,6 +43,8 @@ use yii\db\Transaction;
  * @property ProductQuoteChange $productQuoteChange
  * @property ProductQuote $productQuote
  * @property ReprotectionUpdateForm $form
+ *
+ * @property CaseService $caseService
  */
 class ProductQuoteService implements BoWebhookService
 {
@@ -87,6 +90,11 @@ class ProductQuoteService implements BoWebhookService
     private ?ReprotectionUpdateForm $form = null;
 
     /**
+     * @var CaseService
+     */
+    private CaseService $caseService;
+
+    /**
      * ProductQuoteService constructor.
      * @param ProductQuoteRepository $productQuoteRepository
      * @param CasesManageService $casesManageService
@@ -94,6 +102,7 @@ class ProductQuoteService implements BoWebhookService
      * @param FlightQuoteFlightRepository $flightQuoteFlightRepository
      * @param ProductQuoteChangeRepository $productQuoteChangeRepository
      * @param CasesCommunicationService $casesCommunicationService
+     * @param CaseService $caseService
      */
     public function __construct(
         ProductQuoteRepository $productQuoteRepository,
@@ -101,7 +110,8 @@ class ProductQuoteService implements BoWebhookService
         CasesRepository $casesRepository,
         FlightQuoteFlightRepository $flightQuoteFlightRepository,
         ProductQuoteChangeRepository $productQuoteChangeRepository,
-        CasesCommunicationService $casesCommunicationService
+        CasesCommunicationService $casesCommunicationService,
+        CaseService $caseService
     ) {
         $this->productQuoteRepository = $productQuoteRepository;
         $this->casesManageService = $casesManageService;
@@ -109,6 +119,7 @@ class ProductQuoteService implements BoWebhookService
         $this->flightQuoteFlightRepository = $flightQuoteFlightRepository;
         $this->productQuoteChangeRepository = $productQuoteChangeRepository;
         $this->casesCommunicationService = $casesCommunicationService;
+        $this->caseService = $caseService;
     }
 
     /**
@@ -144,7 +155,19 @@ class ProductQuoteService implements BoWebhookService
                 if (!$this->productQuoteChange = $this->productQuote->productQuoteChangeLastRelation->pqcrPqc ?? null) {
                     throw new \RuntimeException('productQuoteChange not found');
                 }
-                $this->case = $this->productQuoteChange->pqcCase;
+
+                $this->case = $this->caseService->getCase($this->productQuoteChange, $this->productQuote);
+                if (!$this->case) {
+                    \Yii::warning([
+                        'message' => 'Case not found by Product Quote Change (' . $this->productQuoteChange->pqc_id . ') or by Product Quote (' . $this->productQuote->pq_id . ')',
+                        'productQuoteId' => $this->productQuote->pq_id,
+                        'productQuoteGid' => $this->productQuote->pq_gid,
+                        'productQuoteChangeId' => $this->productQuoteChange->pqc_id,
+                        'productQuoteChangeGid' => $this->productQuoteChange->pqc_gid,
+                    ], 'ProductQuoteService:processRequest:RuntimeException');
+                    throw new \RuntimeException('Case not found by Product Quote Change (' . $this->productQuoteChange->pqc_id . ') or by Product Quote (' . $this->productQuote->pq_id . ')');
+                }
+
                 if ($form->isCanceled()) {
                     $this->handleCanceled();
                 } elseif ($form->isExchanged()) {
