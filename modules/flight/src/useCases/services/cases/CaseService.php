@@ -4,6 +4,7 @@ namespace modules\flight\src\useCases\services\cases;
 
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuoteChange\ProductQuoteChange;
+use modules\product\src\entities\productQuoteRefund\ProductQuoteRefund;
 use src\entities\cases\Cases;
 use src\model\caseOrder\entity\CaseOrder;
 
@@ -13,8 +14,8 @@ use src\model\caseOrder\entity\CaseOrder;
 class CaseService
 {
     /**
-     * @param ProductQuote $productQuote
      * @param ProductQuoteChange $productQuoteChange
+     * @param ProductQuote $productQuote
      * @return Cases|null
      */
     public function getCase(ProductQuoteChange $productQuoteChange, ProductQuote $productQuote): ?Cases
@@ -24,6 +25,20 @@ class CaseService
             return $case;
         }
         return $productQuoteChange->pqcCase ?? null;
+    }
+
+    /**
+     * @param ProductQuoteRefund $productQuoteRefund
+     * @param ProductQuote $productQuote
+     * @return Cases|null
+     */
+    public function getCaseByProductQuoteRefund(ProductQuoteRefund $productQuoteRefund, ProductQuote $productQuote): ?Cases
+    {
+        $case = $this->getCaseByStatusAndProductQuote($productQuote);
+        if (!empty($case)) {
+            return $case;
+        }
+        return $productQuoteRefund->case ?? null;
     }
 
     /**
