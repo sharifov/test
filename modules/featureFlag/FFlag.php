@@ -126,6 +126,7 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_BO_API_RBAC_AUTH,
         self::FF_KEY_SAVE_CID_FOR_QUOTES_FROM_SEARCH_ENABLE,
         self::FF_KEY_VALIDATE_CHANGE_EXTRA_MARK_UP,
+        self::FF_KEY_UPPERCASE_CONVERT_IN_SET_TRIP_TYPE_METHOD_ENABLE,
     ];
 
     public const FF_OBJECT_LIST = [
