@@ -456,15 +456,15 @@ return [
                 return 12000;
             },
             'authenticators' => [
+                'google-auth' => [
+                    'class' => common\implementations\twoFactorAuth\OneTimeCodeAuth::class
+                ],
                 'email-auth' => [
                     'class' => common\implementations\twoFactorAuth\EmailAuth::class,
                     'codeDuration' => 700,
                     'options' => [
                         'from' => env('COMMON_CONFIG_MAIN_COMPONENTS_EMAIL_DEFAULTFROMEMAIL')
                     ]
-                ],
-                'google-auth' => [
-                    'class' => common\implementations\twoFactorAuth\OneTimeCodeAuth::class
                 ]
             ],
             'storage' => [
