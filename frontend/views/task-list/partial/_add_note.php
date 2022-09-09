@@ -28,14 +28,18 @@ $form = ActiveForm::begin([
 ]); ?>
 
 <div class="form-group lead-user-tasks-note__btns">
-    <?php if (!empty($addNoteForm->note)) {
-        echo Html::a('<i class="fa fa-trash" aria-hidden="true"></i> Delete', $urlToDeleteNote, [
-            'class' => 'btn btn-danger lead-user-tasks-note__delete',
-        ]);
+    <?php
+    /** @abac TaskListAbacObject::OBJ_USER_TASK, TaskListAbacObject::ACTION_REMOVE_NOTE, Access to delete UserTask Note */
+    if (Yii::$app->abac->can($abacDto, TaskListAbacObject::OBJ_USER_TASK, TaskListAbacObject::ACTION_REMOVE_NOTE)) {
+        if (!empty($addNoteForm->note)) {
+            echo Html::a('<i class="fa fa-trash" aria-hidden="true"></i> Delete', $urlToDeleteNote, [
+                'class' => 'btn btn-danger lead-user-tasks-note__delete',
+            ]);
+        }
     }
 
-    /** @abac TaskListAbacObject::OBJ_USER_TASK, TaskListAbacObject::ACTION_ADD_NOTE, Access to delete UserTask Note */
-    if (Yii::$app->abac->can($abacDto, TaskListAbacObject::OBJ_USER_TASK, TaskListAbacObject::ACTION_REMOVE_NOTE)) {
+    /** @abac TaskListAbacObject::OBJ_USER_TASK, TaskListAbacObject::ACTION_ADD_NOTE, Access to add UserTask Note */
+    if (Yii::$app->abac->can($abacDto, TaskListAbacObject::OBJ_USER_TASK, TaskListAbacObject::ACTION_ADD_NOTE)) {
         echo Html::submitButton('Save', [
             'class' => 'btn btn-success lead-user-tasks-note__submit',
             'data' => [
