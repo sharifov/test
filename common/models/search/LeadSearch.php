@@ -455,7 +455,7 @@ class LeadSearch extends Lead
         $this->load($params);
 
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query);
         }
 
@@ -1040,7 +1040,7 @@ class LeadSearch extends Lead
 
         $this->load($params);
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query);
         }
 
@@ -1379,7 +1379,7 @@ class LeadSearch extends Lead
 
         $this->load($params);
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query);
         }
 
@@ -1813,7 +1813,7 @@ class LeadSearch extends Lead
 
         $this->load($params);
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query);
         }
 
@@ -1983,7 +1983,7 @@ class LeadSearch extends Lead
 
         $this->load($params);
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query);
         }
 
@@ -2120,7 +2120,7 @@ class LeadSearch extends Lead
         $this->load($params);
         $leadTable = Lead::tableName();
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query, $leadTable);
         }
 
@@ -2237,7 +2237,7 @@ class LeadSearch extends Lead
 
         $this->load($params);
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query, $leadTable);
         }
 
@@ -2320,7 +2320,7 @@ class LeadSearch extends Lead
 
         $leadTable = Lead::tableName();
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query, $leadTable);
         }
 
@@ -2375,7 +2375,7 @@ class LeadSearch extends Lead
 
         $this->load($params);
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query, $leadTable);
         }
 
@@ -2465,7 +2465,7 @@ class LeadSearch extends Lead
 
         $this->load($params);
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query, $leadTable);
         }
 
@@ -2561,7 +2561,7 @@ class LeadSearch extends Lead
 
         $this->load($params);
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query, $leadTable);
         }
 
@@ -2679,7 +2679,7 @@ class LeadSearch extends Lead
 
         $this->load($params);
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query, $leadTable);
         }
 
@@ -2824,7 +2824,7 @@ class LeadSearch extends Lead
 
         $this->load($params);
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query, $leadTable);
         }
 
@@ -3051,7 +3051,7 @@ class LeadSearch extends Lead
 
         $this->load($params);
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query, $leadTable);
         }
 
@@ -3133,7 +3133,7 @@ class LeadSearch extends Lead
 
         $this->load($params);
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query, $leadTable);
         }
 
@@ -3204,7 +3204,7 @@ class LeadSearch extends Lead
 
         $this->load($params);
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query, $leadTable);
         }
 
@@ -3252,7 +3252,7 @@ class LeadSearch extends Lead
 
         $this->load($params);
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query, $leadTable);
         }
 
@@ -3312,7 +3312,7 @@ class LeadSearch extends Lead
 
         $this->load($params);
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query, $leadTable);
         }
 
@@ -3471,7 +3471,7 @@ class LeadSearch extends Lead
 
         $this->load($params);
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query, $leadTable);
         }
 
@@ -3545,7 +3545,7 @@ class LeadSearch extends Lead
 
         $this->load($params);
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query, $leadTable);
         }
 
@@ -3594,7 +3594,7 @@ class LeadSearch extends Lead
         $query->andFilterWhere(['l.status' => [Lead::STATUS_PROCESSING, Lead::STATUS_PENDING, Lead::STATUS_FOLLOW_UP, Lead::STATUS_ON_HOLD]]);
 
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query, 'l');
         }
 
@@ -3650,7 +3650,7 @@ class LeadSearch extends Lead
         $query->andFilterWhere(['l.status' => [Lead::STATUS_PROCESSING, Lead::STATUS_PENDING, Lead::STATUS_FOLLOW_UP, Lead::STATUS_ON_HOLD]]);
 
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query, 'l');
         }
 
@@ -3711,7 +3711,7 @@ class LeadSearch extends Lead
         $query->andFilterWhere(['l.status' => [Lead::STATUS_PROCESSING, Lead::STATUS_PENDING, Lead::STATUS_FOLLOW_UP, Lead::STATUS_ON_HOLD]]);
 
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query, 'l');
         }
 
@@ -4735,7 +4735,7 @@ class LeadSearch extends Lead
         $this->load($params);
 
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query, $leadTable);
         }
 
@@ -4852,7 +4852,7 @@ class LeadSearch extends Lead
         $this->load($params);
 
         /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES) === true) {
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
             $this->excludeIsTest($query, $leadTable);
         }
 
