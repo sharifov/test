@@ -47,7 +47,7 @@ class BackOffice
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 'Content-Type: application/json',
                 'sig-username: ' . $sigUsername,
-                'signature: ' . self::getSignatureBOForRbac($sigUsername, $endpoint, null, $fields)
+                'signature: ' . self::getSignatureBOForRbac($sigUsername, $endpoint, [], $fields)
             ]);
         } else {
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
