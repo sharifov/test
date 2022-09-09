@@ -55,6 +55,7 @@ use modules\offer\src\services\OfferSendLogService;
 use modules\order\src\entities\order\search\OrderSearch;
 use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTaskQuery;
 use modules\taskList\src\entities\TargetObject;
+use modules\taskList\src\entities\userTask\UserTaskQuery;
 use modules\taskList\src\entities\userTask\UserTaskSearch;
 use PHPUnit\Framework\Warning;
 use src\auth\Auth;
@@ -115,6 +116,7 @@ use src\services\TransactionManager;
 use Yii;
 use yii\caching\DbDependency;
 use yii\data\ActiveDataProvider;
+use yii\data\Pagination;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
@@ -131,6 +133,7 @@ use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
 use yii\web\UploadedFile;
 use yii\widgets\ActiveForm;
+use frontend\widgets\userTasksList\UserTasksListWidget;
 
 /**
  * Class LeadController
@@ -1006,14 +1009,6 @@ class LeadController extends FController
 //        $tmpl = $isQA ? 'view_qa' : 'view';
         $tmpl = 'view';
 
-        $shiftScheduleEventTasks = [];
-        /** @fflag FFlag::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE, New User Task List in Lead view Enable */
-        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE)) {
-            $shiftScheduleEventTasks = ShiftScheduleEventTaskQuery::getAllByLeadId($lead->id, Auth::id())
-                ->asArray()
-                ->all();
-        }
-
         return $this->render($tmpl, [
             'leadForm' => $leadForm,
             'previewEmailForm' => $previewEmailForm,
@@ -1028,7 +1023,6 @@ class LeadController extends FController
             'itineraryForm' => $itineraryForm,
             'dataProviderNotes' => $dataProviderNotes,
             'modelNote' => $modelNote,
-            'shiftScheduleEventTasks' => $shiftScheduleEventTasks,
 
             'dataProviderOffers' => $dataProviderOffers,
             'dataProviderOrders' => $dataProviderOrders,
@@ -1039,6 +1033,39 @@ class LeadController extends FController
 
             'isCreatedFlightRequest' => $isCreatedFlightRequest,
         ]);
+    }
+
+    public function actionPjaxUserTasksList(string $gid)
+    {
+        $result = '';
+        $request = \Yii::$app->request;
+        $gid = mb_substr($gid, 0, 32);
+        $lead = Lead::find()->where([
+            'gid' => $gid,
+        ])->limit(1)->one();
+
+        if (empty($lead)) {
+            throw new NotFoundHttpException('Not found lead ID: ' . $gid . ' for getting pjax task list');
+        }
+
+        /** @abac $abacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS, Access to view lead  */
+        if (!Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access Denied for getting pjax task list.');
+        }
+
+        /** @fflag FFlag::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE, New User Task List in Lead view Enable */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE)) {
+            $pageNumber = $request->get('page', 1);
+            $activeShiftScheduleId = $request->get('user-shift-schedule-id');
+
+            $result = UserTasksListWidget::widget([
+                'lead' => $lead,
+                'pageNumber' => $pageNumber,
+                'activeShiftScheduleId' => $activeShiftScheduleId,
+            ]);
+        }
+
+        return $result;
     }
 
     public function actionGetAirport($term)
@@ -2863,10 +2890,24 @@ class LeadController extends FController
             $this->request->queryParams
         );
 
+        $query = $dataProvider->query->addSelect(['user_task.*', 'task_list.tl_title', 'complete_time' => (UserTaskQuery::getQueryCompleteTime())])
+            ->innerJoin('task_list', 'user_task.ut_task_list_id = task_list.tl_id');
+
+        $pagination = new Pagination([
+            'pageSize' => $dataProvider->getPagination()->getPageSize(),
+            'totalCount' => (clone $query)->count(),
+        ]);
+
+        $historyTasks = $query->offset($pagination->getOffset())
+            ->limit($pagination->getLimit())
+            ->orderBy($dataProvider->getSort()->orders)
+            ->asArray()
+            ->all();
 
         return $this->renderAjax('user-task/user-task-list', [
+            'pagination' => $pagination,
             'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
+            'historyTasks' => $historyTasks,
             'leadID' => $leadID,
         ]);
     }

@@ -57,11 +57,11 @@ class UserTaskHelper
     {
         switch ($status) {
             case UserTask::STATUS_COMPLETE:
-                return '<i class="fa fa-check-square-o" aria-hidden="true"></i>';
+                return '<i class="fa fa-check-square fa-status-complete" aria-hidden="true"></i>';
             case UserTask::STATUS_CANCEL:
-                return '<i class="fa fa-times" aria-hidden="true"></i>';
+                return '<i class="fa fa-exclamation-circle fa-status-cancel" aria-hidden="true"></i>';
             default:
-                return '<i class="fa fa-square-o" aria-hidden="true"></i>';
+                return '<i class="fa fa-square-o fa-status" aria-hidden="true"></i>';
         }
     }
 

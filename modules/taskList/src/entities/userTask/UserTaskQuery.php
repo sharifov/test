@@ -6,6 +6,7 @@ use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTask;
 use modules\taskList\src\entities\TargetObject;
+use src\helpers\app\AppHelper;
 use Yii;
 
 class UserTaskQuery
@@ -190,5 +191,49 @@ class UserTaskQuery
             ->andWhere(['ut_target_object' => $targetObject])
             ->andWhere(['ut_target_object_id' => $targetObjectId])
             ->andWhere(['ut_task_list_id' => $taskListId]);
+    }
+
+    public static function getQueryCompleteTime(): UserTaskStatusLogScopes
+    {
+        return UserTaskStatusLog::find()
+            ->select(['utsl_created_dt'])
+            ->where([
+                'utsl_new_status' => UserTask::STATUS_COMPLETE,
+            ])
+            ->andWhere('user_task_status_log.utsl_ut_id = user_task.ut_id')
+            ->orderBy('utsl_created_dt DESC')
+            ->limit(1);
+    }
+
+    /**
+     * @param int $userId
+     * @param int $targetObjectId
+     * @param string $startDate
+     * @param string $endDate
+     * @param string $targetObject
+     * @return UserTaskScopes
+     */
+    public static function getQueryUserIdAndTargetIdAndDateAndTargetObject(
+        int $userId,
+        int $targetObjectId,
+        string $startDate,
+        string $endDate,
+        string $targetObject = TargetObject::TARGET_OBJ_LEAD
+    ): UserTaskScopes {
+        $query = static::getQueryTaskListByUser($userId, $startDate, $endDate, []);
+        $query->select([
+            'user_task.*',
+            'task_list.tl_title',
+            'complete_time' => static::getQueryCompleteTime(),
+        ]);
+
+        $query->andWhere([
+            'ut_target_object' => $targetObject,
+            'ut_target_object_id' => $targetObjectId,
+        ]);
+
+        $query->innerJoin('task_list', 'user_task.ut_task_list_id = task_list.tl_id');
+
+        return $query;
     }
 }

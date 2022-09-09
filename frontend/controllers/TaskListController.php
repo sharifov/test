@@ -2,6 +2,7 @@
 
 namespace frontend\controllers;
 
+use frontend\widgets\userTasksList\helpers\UserTasksListHelper;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
@@ -16,7 +17,9 @@ use modules\user\src\events\UserEvents;
 use modules\user\userActivity\service\UserActivityService;
 use modules\taskList\src\forms\UserTaskNoteForm;
 use src\auth\Auth;
+use src\helpers\app\AppHelper;
 use Yii;
+use yii\caching\TagDependency;
 use yii\filters\AccessControl;
 use yii\helpers\ArrayHelper;
 use yii\helpers\StringHelper;
@@ -59,7 +62,7 @@ class TaskListController extends FController
                     ],
 
                     [
-                        'actions' => ['ajax-add-note', 'ajax-user-task-details'],
+                        'actions' => ['ajax-add-note', 'ajax-user-task-details', 'ajax-delete-note'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -176,12 +179,44 @@ class TaskListController extends FController
             $userTask->ut_description = $form->note;
             (new UserTaskRepository($userTask))->save(true);
             \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+            TagDependency::invalidate(\Yii::$app->cache, UserTasksListHelper::getUserTasksListCacheTag((int)$userTask->ut_target_object_id, Auth::id()));
             return ['note' => $form->note, 'truncateNote' => StringHelper::truncate($form->note, 15), 'userTaskId' => $form->userTaskId];
         }
 
         return $this->renderAjax('partial/_add_note', [
-            'addNoteForm' => $form
+            'addNoteForm' => $form,
+            'abacDto' => $dto
         ]);
+    }
+
+    public function actionAjaxDeleteNote(int $userTaskId)
+    {
+        $abacDto = new TaskListAbacDto();
+        $userTask = UserTask::findOne($userTaskId);
+        $abacDto->setIsUserTaskOwner(!empty($userTask) && $userTask->isOwner(Auth::id()));
+        $result = [
+            'isSuccess' => false,
+            'userTaskId' => $userTaskId,
+        ];
+
+        /** @abac TaskListAbacObject::OBJ_USER_TASK, TaskListAbacObject::ACTION_ADD_NOTE, Access to delete UserTask Note */
+        if (!Yii::$app->abac->can($abacDto, TaskListAbacObject::OBJ_USER_TASK, TaskListAbacObject::ACTION_REMOVE_NOTE)) {
+            throw new ForbiddenHttpException('Permission denied to delete UserTask note (' . $userTaskId . ')');
+        }
+
+        try {
+            $userTask->ut_description = '';
+            (new UserTaskRepository($userTask))->save();
+            $result['isSuccess'] = true;
+
+            TagDependency::invalidate(\Yii::$app->cache, UserTasksListHelper::getUserTasksListCacheTag($userTask->ut_target_object_id, Auth::id()));
+        } catch (\Throwable $e) {
+            Yii::error(AppHelper::throwableLog($e), 'TaskListController:actionAjaxDeleteNote:Throwable');
+            $result['message'] = 'Something went wrong';
+        }
+
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        return $result;
     }
 
     /**
