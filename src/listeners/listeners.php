@@ -4,9 +4,11 @@ use src\events\client\ClientEmailChangedEvent;
 use src\events\client\ClientEmailCreatedEvent;
 use src\events\client\ClientPhoneChangedEvent;
 use src\events\client\ClientPhoneCreatedEvent;
+use src\events\quote\QuoteSaveEvent;
 use src\events\quote\QuoteSendEvent;
 use src\listeners\client\ClientEmailAssignTaskListListener;
 use src\listeners\client\ClientPhoneAssignTaskListListener;
+use src\listeners\quote\QuoteSaveCidListener;
 use src\listeners\quote\QuoteSendEventListener;
 use src\model\client\entity\events\ClientChangeIpEvent;
 use src\model\client\entity\events\ClientCreatedEvent;
@@ -60,6 +62,9 @@ return [
     QuoteSendEvent::class => [QuoteSendEventListener::class],
     QuoteExtraMarkUpChangeEvent::class => [
         QuoteExtraMarkUpChangeEventListener::class,
+    ],
+    QuoteSaveEvent::class => [
+        QuoteSaveCidListener::class,
     ],
     UpdateChatUserAccessWidgetEvent::class => [UpdateChatUserAccessWidgetListener::class],
     ResetChatUserAccessWidgetEvent::class => [ResetChatUserAccessWidgetListener::class],
