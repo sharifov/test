@@ -45,7 +45,7 @@ class RequestBo
 
         if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BO_API_RBAC_AUTH)) {
             $sigUsername = Yii::$app->params['backOffice']['username'];
-            $signature   = BackOffice::getSignatureBO($sigUsername, '', $data);
+            $signature   = BackOffice::getSignatureFromBO($sigUsername, '', $data);
             $headers = [
                 'sig-username' => $sigUsername,
                 'signature'    => $signature

@@ -1,6 +1,8 @@
 <?php
 
 use kivork\FeatureFlag\Services\FeatureFlagService;
+use kivork\FeatureFlag\Models\FeatureFlag;
+use modules\featureFlag\FFlag;
 use yii\db\Migration;
 
 /**
@@ -8,23 +10,38 @@ use yii\db\Migration;
  */
 class m220908_142347_add_rbac_feature_flag extends Migration
 {
-    private const API_RBAC = 'boApiRbacAuth';
-
     /**
      * {@inheritdoc}
      */
     public function safeUp()
     {
-        $ff = new FeatureFlagService();
-        $ff->addSimpleFlag(
-            self::API_RBAC,
-            false,
-            'API RBAC authorization',
-            'rbac',
-            'Require API User authorization',
-        );
+        try {
+            if (!class_exists(FeatureFlag::class)) {
+                throw new \RuntimeException('Class (FeatureFlag) not found');
+            }
+            if (FeatureFlag::find()->where(['ff_key' => FFlag::FF_KEY_BO_API_RBAC_AUTH])->exists()) {
+                throw new \RuntimeException('FeatureFlag (' . FFlag::FF_KEY_BO_API_RBAC_AUTH . ') already exit');
+            }
 
-        return true;
+            $ff = new FeatureFlagService();
+            $ff->add(
+                FFlag::FF_KEY_BO_API_RBAC_AUTH,
+                'Backoffice API RBAC authorization',
+                FeatureFlag::TYPE_BOOL,
+                false,
+                FeatureFlag::ET_DISABLED,
+                [
+                    'ff_category' => FFlag::FF_CATEGORY_SYSTEM,
+                    'ff_description' => 'Require API User authorization'
+                ]
+            );
+            \Yii::$app->featureFlag->invalidateCache();
+        } catch (\Throwable $throwable) {
+            \Yii::error(
+                AppHelper::throwableLog($throwable),
+                'm220908_142347_add_rbac_feature_flag:safeUp:Throwable'
+            );
+        }
     }
 
     /**
@@ -32,9 +49,20 @@ class m220908_142347_add_rbac_feature_flag extends Migration
      */
     public function safeDown()
     {
-        $ff = new FeatureFlagService();
-        $ff->delete(self::API_RBAC);
+        try {
+            if (!class_exists(FeatureFlag::class)) {
+                throw new \RuntimeException('Class (FeatureFlag) not found');
+            }
 
-        return true;
+            $featureFlagService = new FeatureFlagService();
+            $featureFlagService::delete(FFlag::FF_KEY_BO_API_RBAC_AUTH);
+
+            \Yii::$app->featureFlag->invalidateCache();
+        } catch (\Throwable $throwable) {
+            \Yii::error(
+                AppHelper::throwableLog($throwable),
+                'm220908_142347_add_rbac_feature_flag:safeDown:Throwable'
+            );
+        }
     }
 }
