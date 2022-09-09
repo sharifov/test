@@ -42,6 +42,15 @@ class LeadQuoteExtraMarkUpForm extends Model
         if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_VALIDATE_CHANGE_EXTRA_MARK_UP)) {
             if (round($this->extra_mark_up, 2) !== round($this->qp_client_extra_mark_up / $this->clientCurrencyRate, 2)) {
                 $this->addError($attribute, 'Extra Mark Up not equal Client Extra Mark-Up');
+                $message = [
+                    'message' => 'Extra Mark Up not equal Client Extra Mark-Up',
+                    'extraMarkUp' => $this->extra_mark_up,
+                    'roundExtraMarkUp' => round($this->extra_mark_up, 2),
+                    'clientExtraMarkUp' => $this->qp_client_extra_mark_up,
+                    'clientCurrencyRate' => $this->clientCurrencyRate,
+                    'roundClientExtraMarkUpByRate' => round($this->qp_client_extra_mark_up / $this->clientCurrencyRate, 2),
+                ];
+                \Yii::warning($message, 'LeadQuoteExtraMarkUpForm:validateCurrencyRate');
             }
         }
     }
