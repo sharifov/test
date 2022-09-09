@@ -36,6 +36,7 @@ use frontend\models\LeadPreviewSmsForm;
 use frontend\models\LeadUserRatingForm;
 use frontend\models\ProfitSplitForm;
 use frontend\models\TipsSplitForm;
+use frontend\widgets\userTasksList\forms\UserTasksListForm;
 use modules\email\src\abac\dto\EmailPreviewDto;
 use modules\email\src\abac\EmailAbacObject;
 use modules\featureFlag\FFlag;
@@ -1039,13 +1040,24 @@ class LeadController extends FController
     {
         $result = '';
         $request = \Yii::$app->request;
-        $gid = mb_substr($gid, 0, 32);
-        $lead = Lead::find()->where([
+        $userTasksListForm = new UserTasksListForm();
+        $userTasksListForm->load([
             'gid' => $gid,
+            'page' => $request->get('page', 1),
+            'userShiftScheduleId' => $request->get('user-shift-schedule-id'),
+        ], '');
+
+        if (!$userTasksListForm->validate()) {
+            Yii::error(VarDumper::dumpAsString($userTasksListForm->getErrors()), 'LeadController:actionPjaxUserTasksList');
+            return $result;
+        }
+
+        $lead = Lead::find()->where([
+            'gid' => $userTasksListForm->gid,
         ])->limit(1)->one();
 
         if (empty($lead)) {
-            throw new NotFoundHttpException('Not found lead ID: ' . $gid . ' for getting pjax task list');
+            throw new NotFoundHttpException('Not found lead ID: ' . $userTasksListForm->gid . ' for getting pjax task list');
         }
 
         /** @abac $abacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS, Access to view lead  */
@@ -1055,13 +1067,10 @@ class LeadController extends FController
 
         /** @fflag FFlag::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE, New User Task List in Lead view Enable */
         if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE)) {
-            $pageNumber = $request->get('page', 1);
-            $activeShiftScheduleId = $request->get('user-shift-schedule-id');
-
             $result = UserTasksListWidget::widget([
                 'lead' => $lead,
-                'pageNumber' => $pageNumber,
-                'activeShiftScheduleId' => $activeShiftScheduleId,
+                'pageNumber' => $userTasksListForm->page,
+                'activeShiftScheduleId' => $userTasksListForm->userShiftScheduleId,
             ]);
         }
 
