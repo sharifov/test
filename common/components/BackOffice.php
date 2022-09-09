@@ -106,7 +106,7 @@ class BackOffice
         ];*/
         if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_BO_API_RBAC_AUTH)) {
             $sigUsername = Yii::$app->params['backOffice']['username'];
-            $signature   = self::getSignatureFromBO($sigUsername, $endpoint, $fields);
+            $signature   = self::getSignatureForBO($sigUsername, $endpoint, $fields);
             $headers = [
                 'sig-username' => $sigUsername,
                 'signature'    => $signature
@@ -161,7 +161,7 @@ class BackOffice
      * @return string
      * @throws BadRequestHttpException
      */
-    public static function getSignatureFromBO(string $sigUsername, string $endpointUrl = '', array $requestBodyFields = []): string
+    public static function getSignatureForBO(string $sigUsername, string $endpointUrl = '', array $requestBodyFields = []): string
     {
         $apiKey = Yii::$app->params['backOffice']['apiKey'];
         $requestBodyString = $requestQueryString = '';
