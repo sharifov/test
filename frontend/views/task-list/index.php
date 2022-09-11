@@ -95,7 +95,7 @@ $subtypeTotalData = [];
                                     'class' => 'bg-info'
                                 ];
                             }
-                            if ($model->isDeadline()) {
+                            if ($model->isFailed()) {
                                 return [
                                     'class' => 'danger'
                                 ];
@@ -123,6 +123,11 @@ $subtypeTotalData = [];
                                 'attribute' => 'ut_status_id',
                                 'value' => static function (UserTask $model) {
                                     $result = UserTaskHelper::statusLabel($model->ut_status_id);
+
+                                    if ($model->isFailed()) {
+                                        $result .= '<span class="task-list__status-ico">' . UserTaskHelper::renderStatus($model->ut_status_id) . '</span>';
+                                    }
+
                                     return $result;
                                 },
                                 'format' => 'raw',
@@ -219,16 +224,21 @@ $subtypeTotalData = [];
                             [
                                 'label' => 'Deadline',
                                 'value' => static function (UserTask $model) {
-                                    if ($model->isProcessing()) {
-                                        return UserTaskHelper::getDeadlineTimer($model->ut_start_dt, $model->ut_end_dt);
-                                    } elseif ($model->isDeadline() || $model->isFailed()) {
-                                        return Html::tag(
-                                            'span',
-                                            'Deadline',
-                                            ['title' => \Yii::$app->formatter->asRelativeTime(strtotime($model->ut_end_dt)),
-                                                'class' => 'badge badge-danger']
-                                        );
+                                    if ($model->isFailed()) {
+                                        if ($model->isDeadline()) {
+                                            return Html::tag(
+                                                'span',
+                                                'Deadline',
+                                                ['title' => \Yii::$app->formatter->asRelativeTime(strtotime($model->ut_end_dt)),
+                                                    'class' => 'badge badge-danger']
+                                            );
+                                        }
+                                    } elseif ($model->isProcessing()) {
+                                        if (!$model->isDeadline()) {
+                                            return UserTaskHelper::getDeadlineTimer($model->ut_start_dt, $model->ut_end_dt);
+                                        }
                                     }
+
                                     return '-';
                                 },
                                 'format' => 'raw',

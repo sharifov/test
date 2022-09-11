@@ -20,7 +20,7 @@ class m220901_151955_add_cron_job_failed_status_for_deadline_user_tasks extends 
     {
         try {
             $cronScheduler = new CronScheduler();
-            $cronScheduler->cs_cron_expression = '* * * * *';
+            $cronScheduler->cs_cron_expression = '5 * * * *';
             $cronScheduler->cs_cron_command = self::COMMAND;
             $cronScheduler->cs_description = 'Set "Failed" status for deadline user tasks';
             $cronScheduler->cs_enabled = true;

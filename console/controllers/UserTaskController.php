@@ -19,17 +19,21 @@ class UserTaskController extends Controller
         $this->printInfo('Start....', $this->action->id, Console::BG_GREEN);
 
         try {
-            $db = \Yii::$app->db;
-            $condition = 'ut_status_id != ' . UserTask::STATUS_FAILED . ' AND ut_end_dt <= ' . $db->quoteValue(date('Y-m-d H:i'));
+            $userTasks = UserTask::find()
+                ->andWhere(['ut_status_id' => UserTask::STATUS_PROCESSING])
+                ->andWhere(['<=', 'ut_end_dt', date('Y-m-d H:i')])
+                ->all();
 
-            $isSuccess = (bool)$db->createCommand()->update(UserTask::tableName(), [
-                'ut_status_id' => UserTask::STATUS_FAILED,
-            ], $condition)->execute();
-
-            if (!$isSuccess) {
-                throw new \Exception('Failed to change status to `' . UserTask::STATUS_LIST[UserTask::STATUS_FAILED] . '` for deadline user tasks');
-            }
+            $transaction = \Yii::$app->db->beginTransaction();
+            array_reduce($userTasks, function ($carry, $userTask) {
+                /** @var UserTask $userTask */
+                $userTask->setStatusFailed()
+                    ->update();
+            });
+            $transaction->commit();
         } catch (\Throwable $e) {
+            $transaction->rollBack();
+
             $this->printInfo($e->getMessage(), $this->action->id, Console::BG_RED);
             \Yii::error(AppHelper::throwableLog($e), 'UserTaskController:actionSetFailedStatusesForDeadlines:Throwable');
         }
