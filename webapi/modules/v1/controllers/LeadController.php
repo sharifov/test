@@ -5,6 +5,7 @@ namespace webapi\modules\v1\controllers;
 use common\components\jobs\AutoAddQuoteJob;
 use common\components\jobs\WebEngageLeadRequestJob;
 use common\components\purifier\Purifier;
+use common\helpers\LogHelper;
 use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
@@ -501,6 +502,7 @@ class LeadController extends ApiBaseController
 
             if (!$modelLead->validate()) {
                 if ($errors = $modelLead->getErrors()) {
+                    \Yii::warning(LogHelper::prepareErrorDataForLogFromModel($modelLead), 'v1::LeadController::create::validate');
                     throw new UnprocessableEntityHttpException($this->errorToString($errors), 5);
                 } else {
                     throw new UnprocessableEntityHttpException('Not validate Api Lead data', 5);
