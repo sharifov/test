@@ -3,10 +3,7 @@
 namespace frontend\widgets\userTasksList\services;
 
 use frontend\widgets\userTasksList\helpers\UserTasksListHelper;
-use modules\shiftSchedule\src\entities\userShiftSchedule\{
-    UserShiftSchedule,
-    UserShiftScheduleRepository
-};
+use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
 use modules\taskList\src\entities\userTask\UserTaskQuery;
 use src\auth\Auth;
 use yii\caching\TagDependency;
@@ -26,13 +23,20 @@ class UserTaskLeadService
         $cacheKeyOfSchedules = UserTasksListHelper::generateUserSchedulesListCacheKey($leadId, Auth::id());
 
         $userShiftSchedules = $cache->getOrSet($cacheKeyOfSchedules, static function () use ($leadId) {
-            $userShiftScheduleRepository = new UserShiftScheduleRepository(new UserShiftSchedule());
-            return $userShiftScheduleRepository->getAllThatHaveTasksByLeadIdAndUserIdAndType($leadId, Auth::id());
+            return UserShiftScheduleQuery::getAllThatHaveTasksByLeadIdAndUserIdAndType($leadId, Auth::id())
+                ->with('shiftScheduleEventTask')
+                ->all();
         });
 
         if (!empty($userShiftSchedules)) {
-            $activeUserShiftScheduleId = $activeUserShiftScheduleId ?: reset($userShiftSchedules)['uss_id'];
-            $activeScheduleData = $activeUserShiftScheduleId ? $userShiftSchedules[$activeUserShiftScheduleId] : reset($userShiftSchedules);
+            $userShiftSchedulesNew = [];
+            foreach ($userShiftSchedules as $shiftSchedules) {
+                $eventId = $shiftSchedules->shiftScheduleEventTask['0']->sset_event_id;
+                $userShiftSchedulesNew[$eventId] = $shiftSchedules;
+            }
+
+            $activeUserShiftScheduleId = $activeUserShiftScheduleId ?: reset($userShiftSchedulesNew)['uss_id'];
+            $activeScheduleData = $activeUserShiftScheduleId ? $userShiftSchedulesNew[$activeUserShiftScheduleId] : reset($userShiftSchedulesNew);
 
             $cacheKey = UserTasksListHelper::generateUserTasksListCacheKey(
                 $leadId,
@@ -62,7 +66,7 @@ class UserTaskLeadService
                     ->all();
 
                 $cache->set($cacheKey, [
-                    'userShiftSchedules' => $userShiftSchedules,
+                    'userShiftSchedules' => $userShiftSchedulesNew,
                     'shiftScheduleTasks' => $shiftScheduleTasks,
                     'activeShiftScheduleId' => $activeUserShiftScheduleId,
                     'shiftScheduleTasksPagination' => $shiftScheduleTasksPagination,
