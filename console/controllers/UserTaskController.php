@@ -2,6 +2,7 @@
 
 namespace console\controllers;
 
+use modules\taskList\src\entities\userTask\repository\UserTaskRepository;
 use src\helpers\app\AppHelper;
 use yii\console\Controller;
 use modules\taskList\src\entities\userTask\UserTask;
@@ -27,8 +28,10 @@ class UserTaskController extends Controller
             $transaction = \Yii::$app->db->beginTransaction();
             array_reduce($userTasks, function ($carry, $userTask) {
                 /** @var UserTask $userTask */
-                $userTask->setStatusFailed()
-                    ->update();
+                $userTask->setStatusFailed();
+
+                $userTaskRepository = new UserTaskRepository($userTask);
+                $userTaskRepository->save();
             });
             $transaction->commit();
         } catch (\Throwable $e) {
