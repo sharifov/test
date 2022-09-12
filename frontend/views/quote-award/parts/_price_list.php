@@ -24,7 +24,13 @@ use modules\quoteAward\src\entities\QuoteFlightProgram;
                     <thead>
                     <tr>
                         <th>Pax</th>
-                        <th></th>
+                        <th>
+                            <div class="js-display-quote-program d-none"
+                                 data-id="<?= $flight->id ?>">
+                            Flight Program
+                            </div>
+
+                        </th>
                         <th>Selling Price</th>
                         <th>Net Price</th>
                         <th>Fare</th>
@@ -41,7 +47,7 @@ use modules\quoteAward\src\entities\QuoteFlightProgram;
                             <td>
                                 <div class="js-display-quote-program <?= $price->is_required_award_program ? '' : 'd-none' ?>"
                                      data-id="<?= $flight->id ?>">
-                                    <?= $form->field($price, '[' . $flight->id . '-' . $type . ']award_program')->dropDownList(QuoteFlightProgram::getList(), ['required' => 'required'])->label(false) ?>
+                                    <?= $form->field($price, '[' . $flight->id . '-' . $type . ']award_program')->dropDownList(QuoteFlightProgram::getList(), ['prompt' => '---', 'required' => 'required'])->label(false) ?>
                                 </div>
                             </td>
                             <td><?= $form->field($price, '[' . $flight->id . '-' . $type . ']selling', [
@@ -50,7 +56,7 @@ use modules\quoteAward\src\entities\QuoteFlightProgram;
                                     ],
                                     'template' => '<div class="input-group"><span class="input-group-addon">$</span>{input}</div>{error}'
                                 ])->textInput([
-                                    'class' => 'form-control alt-quote-price',
+                                    'class' => 'form-control',
                                     'maxlength' => 10,
                                 ]) ?>
                             </td>
@@ -74,10 +80,14 @@ use modules\quoteAward\src\entities\QuoteFlightProgram;
                                     ],
                                     'template' => '<div class="input-group"><span class="input-group-addon">$</span>{input}</div>{error}'
                                 ])->textInput([
-                                    'class' => 'form-control alt-quote-price',
-                                    'readonly' => true,
+                                    'class' => 'form-control',
                                     'maxlength' => 10,
                                 ]) ?>
+                                <div class="js-display-quote-program <?= $price->is_required_award_program ? '' : 'd-none' ?>"
+                                     data-id="<?= $flight->id ?>">
+                                    <?= $form->field($price, '[' . $index . ']miles')->textInput(['type' => 'number', 'class' => 'form-control']) ?>
+                                    <?= $form->field($price, '[' . $index . ']ppm')->textInput(['type' => 'number', 'class' => 'form-control']) ?>
+                                </div>
                             </td>
                             <td>
                                 <?= $form->field($price, '[' . $flight->id . '-' . $type . ']taxes', [
@@ -86,8 +96,7 @@ use modules\quoteAward\src\entities\QuoteFlightProgram;
                                     ],
                                     'template' => '<div class="input-group"><span class="input-group-addon">$</span>{input}</div>{error}'
                                 ])->textInput([
-                                    'class' => 'form-control alt-quote-price',
-                                    'readonly' => true,
+                                    'class' => 'form-control',
                                     'maxlength' => 10,
                                 ]) ?>
                             </td>
@@ -98,8 +107,7 @@ use modules\quoteAward\src\entities\QuoteFlightProgram;
                                     ],
                                     'template' => '<div class="input-group"><span class="input-group-addon">$</span>{input}</div>{error}'
                                 ])->textInput([
-                                    'class' => 'form-control alt-quote-price mark-up',
-                                    'readonly' => true,
+                                    'class' => 'form-control mark-up',
                                     'maxlength' => 10,
                                 ]) ?>
                             </td>

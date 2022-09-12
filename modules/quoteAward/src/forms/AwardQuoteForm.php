@@ -14,6 +14,9 @@ use yii\helpers\ArrayHelper;
  */
 class AwardQuoteForm extends CompositeForm
 {
+    public const REQUEST_FLIGHT = 'flight';
+    public const REQUEST_SEGMENT = 'segment';
+
     private Lead $lead;
 
     /**

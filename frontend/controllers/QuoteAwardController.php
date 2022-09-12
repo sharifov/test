@@ -23,10 +23,9 @@ class QuoteAwardController extends FController
         return null;
     }
 
-    public function actionFlight($leadId): ?string
+    public function actionUpdate($leadId, $type = null): ?string
     {
         $lead = Lead::findOne(['id' => $leadId]);
-
         $form = new AwardQuoteForm(
             $lead,
             \Yii::$app->request->post('FlightAwardQuoteForm', []),
@@ -35,58 +34,24 @@ class QuoteAwardController extends FController
         );
 
         if ($lead !== null) {
-            $removeIndex = (int)\Yii::$app->request->post('index', 0);
-            if ($removeIndex) {
-                $form->removeFlight($removeIndex);
-            } else {
-                $form->addFlight();
+            if (!empty($type)) {
+                $removeIndex = (int)\Yii::$app->request->post('index', 0);
+                if ($type === AwardQuoteForm::REQUEST_FLIGHT) {
+                    if ($removeIndex) {
+                        $form->removeFlight($removeIndex);
+                    } else {
+                        $form->addFlight();
+                    }
+                }
+
+                if ($type === AwardQuoteForm::REQUEST_SEGMENT) {
+                    if ($removeIndex) {
+                        $form->removeSegment($removeIndex);
+                    } else {
+                        $form->addSegment();
+                    }
+                }
             }
-
-            return $this->renderAjax('parts/_flights', [
-                'model' => $form,
-                'lead' => $lead
-            ]);
-        }
-        return null;
-    }
-
-    public function actionSegment($leadId): ?string
-    {
-        $lead = Lead::findOne(['id' => $leadId]);
-        $form = new AwardQuoteForm(
-            $lead,
-            \Yii::$app->request->post('FlightAwardQuoteForm', []),
-            \Yii::$app->request->post('SegmentAwardQuoteForm', []),
-            \Yii::$app->request->post('PriceListAwardQuoteForm', [])
-        );
-
-        if ($lead !== null) {
-            $removeIndex = (int)\Yii::$app->request->post('index', 0);
-            if ($removeIndex) {
-                $form->removeSegment($removeIndex);
-            } else {
-                $form->addSegment();
-            }
-
-            return $this->renderAjax('parts/_flights', [
-                'model' => $form,
-                'lead' => $lead
-            ]);
-        }
-        return null;
-    }
-
-    public function actionUpdate($leadId): ?string
-    {
-        $lead = Lead::findOne(['id' => $leadId]);
-        $form = new AwardQuoteForm(
-            $lead,
-            \Yii::$app->request->post('FlightAwardQuoteForm', []),
-            \Yii::$app->request->post('SegmentAwardQuoteForm', []),
-            \Yii::$app->request->post('PriceListAwardQuoteForm', [])
-        );
-
-        if ($lead !== null) {
             return $this->renderAjax('parts/_flights', [
                 'model' => $form,
                 'lead' => $lead

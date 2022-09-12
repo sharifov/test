@@ -12,6 +12,7 @@ use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\quoteAward\src\dictionary\AwardProgramDictionary;
+use modules\quoteAward\src\forms\AwardQuoteForm;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
@@ -455,8 +456,8 @@ $this->registerJs($js);
 
 if ($enableAward) {
     $awardType = AwardProgramDictionary::AWARD_MILE;
-    $flightUrl = Url::to(['quote-award/flight', 'leadId' => $lead->id]);
-    $segmentUrl = Url::to(['quote-award/segment', 'leadId' => $lead->id]);
+    $flightUrl = Url::to(['quote-award/update', 'leadId' => $lead->id, 'type' => AwardQuoteForm::REQUEST_FLIGHT]);
+    $segmentUrl = Url::to(['quote-award/update', 'leadId' => $lead->id, 'type' => AwardQuoteForm::REQUEST_SEGMENT]);
     $updateUrl = Url::to(['quote-award/update', 'leadId' => $lead->id]);
     $js = <<<JS
 
