@@ -3,13 +3,11 @@
 namespace console\controllers;
 
 use modules\taskList\src\entities\userTask\repository\UserTaskRepository;
-use src\helpers\app\{
-    AppHelper,
-    DBHelper
-};
+use src\helpers\app\DBHelper;
 use yii\console\Controller;
 use modules\taskList\src\entities\userTask\UserTask;
 use yii\helpers\Console;
+use yii\helpers\VarDumper;
 
 class UserTaskController extends Controller
 {
@@ -22,29 +20,22 @@ class UserTaskController extends Controller
     {
         $this->printInfo('Start....', $this->action->id, Console::BG_GREEN);
 
-        try {
-            $userTasks = UserTask::find()
-                ->andWhere(['ut_status_id' => UserTask::STATUS_PROCESSING])
-                ->andWhere(['=', 'ut_year', date('Y')])
-                ->andWhere(['in', 'ut_month', [
-                    date('n'),
-                    date('n', strtotime(date('Y-n') . ' -1 month')),
-                ]])
-                ->andWhere(['<=', 'ut_end_dt', date('Y-m-d H:i')])
-                ->all();
+        $startDateTime = date('Y-m-d H:i:s', strtotime(date('Y-m-d H:i') . ' -1 month'));
+        $dTStart = (new \DateTimeImmutable($startDateTime))->setTime(0, 0);
+        $dTEnd = (new \DateTime(date('Y-m-d H:i')));
 
-            array_reduce($userTasks, function ($carry, $userTask) {
-                /** @var UserTask $userTask */
-                $userTask->setStatusFailed();
+        $userTasks = UserTask::find()
+            ->andWhere(['ut_status_id' => UserTask::STATUS_PROCESSING])
+            ->andWhere(DBHelper::yearMonthRestrictionQuery(
+                $dTStart,
+                $dTEnd,
+                'ut_year',
+                'ut_month'
+            ))
+            ->andWhere(['<=', 'ut_end_dt', date('Y-m-d H:i')])
+            ->all();
 
-                $userTaskRepository = new UserTaskRepository($userTask);
-                $userTaskRepository->save();
-            });
-        } catch (\Throwable $e) {
-            $this->printInfo($e->getMessage(), $this->action->id, Console::BG_RED);
-            \Yii::error(AppHelper::throwableLog($e), 'UserTaskController:actionSetFailedStatusesForDeadlines:Throwable');
-        }
-
+        $this->saveTasks($userTasks, 'actionSetFailedStatusesForDeadlines');
         $this->printInfo('Statuses of deadlines tasks changed to "Failed"', $this->action->id, Console::BG_GREEN);
     }
 
@@ -57,34 +48,37 @@ class UserTaskController extends Controller
     {
         $this->printInfo('Start....', $this->action->id, Console::BG_GREEN);
 
-        try {
-            $dTStart = (new \DateTimeImmutable('2000-01-01 00:00:00'));
-            $dTEnd = new \DateTime(date('Y-m-d H:i'));
+        $userTasks = UserTask::find()
+            ->andWhere(['ut_status_id' => UserTask::STATUS_PROCESSING])
+            ->andWhere(['<=', 'ut_end_dt', date('Y-m-d H:i')])
+            ->all();
 
-            $userTasks = UserTask::find()
-                ->andWhere(['ut_status_id' => UserTask::STATUS_PROCESSING])
-                ->andWhere(DBHelper::yearMonthRestrictionQuery(
-                    $dTStart,
-                    $dTEnd,
-                    'ut_year',
-                    'ut_month'
-                ))
-                ->andWhere(['<=', 'ut_end_dt', date('Y-m-d H:i')])
-                ->all();
-
-            array_reduce($userTasks, function ($carry, $userTask) {
-                /** @var UserTask $userTask */
-                $userTask->setStatusFailed();
-
-                $userTaskRepository = new UserTaskRepository($userTask);
-                $userTaskRepository->save();
-            });
-        } catch (\Throwable $e) {
-            $this->printInfo($e->getMessage(), $this->action->id, Console::BG_RED);
-            \Yii::error(AppHelper::throwableLog($e), 'UserTaskController:actionSetFailedStatusForAbsoluteAllDeadlines:Throwable');
-        }
-
+        $this->saveTasks($userTasks, 'actionSetFailedStatusForAbsoluteAllDeadlines');
         $this->printInfo('Statuses of deadlines tasks changed to "Failed"', $this->action->id, Console::BG_GREEN);
+    }
+
+    private function saveTasks($userTasks, string $methodName)
+    {
+        if (!empty($userTasks)) {
+            foreach ($userTasks as $userTask) {
+                try {
+                    /** @var UserTask $userTask */
+                    $userTask->setStatusFailed();
+
+                    $userTaskRepository = new UserTaskRepository($userTask);
+                    $userTaskRepository->save();
+                } catch (\Throwable $e) {
+                    $message = [
+                        'message' => $e->getMessage(),
+                        'throwable' => $e,
+                        'entity' => $userTask,
+                    ];
+
+                    $this->printInfo($e->getMessage(), $this->action->id, Console::BG_RED);
+                    \Yii::error(VarDumper::dumpAsString($message), 'UserTaskController:' . $methodName . ':Throwable');
+                }
+            }
+        }
     }
 
     /**
