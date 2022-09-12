@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "77b1df899ead2827b4b5f1cf8757e545",
+    "content-hash": "43efc0ba283c52fbc562ff37d09b592b",
     "packages": [
         {
             "name": "2amigos/yii2-arrayquery-component",
@@ -2519,58 +2519,6 @@
             "time": "2022-06-20T21:43:11+00:00"
         },
         {
-            "name": "ikimea/browser",
-            "version": "1.12.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Ikimea/Browser.git",
-                "reference": "3fb8a2498ed36d49832d95f1da0c4cc055a64728"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Ikimea/Browser/zipball/3fb8a2498ed36d49832d95f1da0c4cc055a64728",
-                "reference": "3fb8a2498ed36d49832d95f1da0c4cc055a64728",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "Ikimea\\Browser\\": "lib/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Ikimea",
-                    "homepage": "http://www.ikimea.com"
-                },
-                {
-                    "name": "Gary White",
-                    "homepage": "http://www.apptools.com/phptools/browser/"
-                },
-                {
-                    "name": "Chris Schuld",
-                    "homepage": "http://chrisschuld.com"
-                }
-            ],
-            "description": "Detecting the user’s browser",
-            "homepage": "http://www.ikimea.com",
-            "keywords": [
-                "browser"
-            ],
-            "support": {
-                "issues": "https://github.com/Ikimea/Browser/issues",
-                "source": "https://github.com/Ikimea/Browser/tree/1.12.0"
-            },
-            "time": "2015-08-26T20:05:14+00:00"
-        },
-        {
             "name": "index0h/yii2-log",
             "version": "0.0.3",
             "source": {
@@ -4373,11 +4321,11 @@
         },
         {
             "name": "kivork/yii2-search-module",
-            "version": "v1.13.0",
+            "version": "v1.14.0",
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:techork/yii2-search-module.git",
-                "reference": "1d21d22f0fdee3cb21adbe177c65a89291420f62"
+                "reference": "b7ece36b53b27111cc341b09044c5ba2c32df400"
             },
             "require": {
                 "kovalenkojuls/yii2-widget-combodate": "*",
@@ -4422,6 +4370,49 @@
                 "source": "https://bitbucket.org/techork/yii2-search-module"
             },
             "time": "2022-02-15T00:00:00+00:00"
+        },
+        {
+            "name": "kivork/yii2-two-factor-auth",
+            "version": "1.2.1-stable",
+            "source": {
+                "type": "git",
+                "url": "git@bitbucket.org:techork/yii2-two-factor-auth.git",
+                "reference": "2e663e82a52d546ae8a128a8a48e0e5536030ebe"
+            },
+            "require": {
+                "endroid/qr-code": "4.4.9",
+                "ext-json": "*",
+                "jp3cki/totp": "2.0.0",
+                "php": ">=7.4",
+                "yiisoft/yii2": "~2.0.10",
+                "yiisoft/yii2-bootstrap": "^2.0.10"
+            },
+            "type": "yii2-extension",
+            "autoload": {
+                "psr-4": {
+                    "kivork\\TwoFactorAuth\\": "src\\"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Safi Shain",
+                    "email": "safi.shain@kiv.dev"
+                }
+            ],
+            "description": "Yii2 two factor auth",
+            "keywords": [
+                "2fa",
+                "extension",
+                "two-factor",
+                "yii2"
+            ],
+            "support": {
+                "source": "https://bitbucket.org/techork/yii2-two-factor-auth.git"
+            },
+            "time": "2022-06-14T00:00:00+00:00"
         },
         {
             "name": "kivork/yii2-virtual-cron",
@@ -8914,296 +8905,6 @@
                 }
             ],
             "time": "2022-04-13T16:25:32+00:00"
-        },
-        {
-            "name": "webvimark/bootstrap-switch",
-            "version": "1.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/webvimark/bootstrap-switch.git",
-                "reference": "c7493ba37747a83951cd95acf876668cbc0aba7f"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/webvimark/bootstrap-switch/zipball/c7493ba37747a83951cd95acf876668cbc0aba7f",
-                "reference": "c7493ba37747a83951cd95acf876668cbc0aba7f",
-                "shasum": ""
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "webvimark\\extensions\\BootstrapSwitch\\": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "description": "BootstrapSwitch extension for yii 2",
-            "support": {
-                "issues": "https://github.com/webvimark/bootstrap-switch/issues",
-                "source": "https://github.com/webvimark/bootstrap-switch/tree/master"
-            },
-            "time": "2014-06-23T10:35:32+00:00"
-        },
-        {
-            "name": "webvimark/components",
-            "version": "1.0.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/webvimark/components.git",
-                "reference": "805b7ecfaea1654a8c0f47bc007497c97bdc9613"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/webvimark/components/zipball/805b7ecfaea1654a8c0f47bc007497c97bdc9613",
-                "reference": "805b7ecfaea1654a8c0f47bc007497c97bdc9613",
-                "shasum": ""
-            },
-            "require": {
-                "webvimark/helpers": "^1.0.0",
-                "webvimark/image": "^1.0.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "webvimark\\components\\": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "description": "Components for yii 2",
-            "support": {
-                "issues": "https://github.com/webvimark/components/issues",
-                "source": "https://github.com/webvimark/components/tree/master"
-            },
-            "time": "2016-06-28T09:29:18+00:00"
-        },
-        {
-            "name": "webvimark/date-range-picker",
-            "version": "1.0.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/webvimark/date-range-picker.git",
-                "reference": "195826787e1e516cb101a5a5720ffa42f3255210"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/webvimark/date-range-picker/zipball/195826787e1e516cb101a5a5720ffa42f3255210",
-                "reference": "195826787e1e516cb101a5a5720ffa42f3255210",
-                "shasum": ""
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "webvimark\\extensions\\DateRangePicker\\": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "description": "dangrossman daterangepicker yii 2 gridview",
-            "support": {
-                "issues": "https://github.com/webvimark/date-range-picker/issues",
-                "source": "https://github.com/webvimark/date-range-picker/tree/master"
-            },
-            "time": "2017-02-27T19:12:56+00:00"
-        },
-        {
-            "name": "webvimark/grid-bulk-actions",
-            "version": "1.0.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/webvimark/grid-bulk-actions.git",
-                "reference": "c15cc98cc926a4ec0537a08d12ed25208c024440"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/webvimark/grid-bulk-actions/zipball/c15cc98cc926a4ec0537a08d12ed25208c024440",
-                "reference": "c15cc98cc926a4ec0537a08d12ed25208c024440",
-                "shasum": ""
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "webvimark\\extensions\\GridBulkActions\\": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "description": "Bulk actions extension for yii 2 gridview",
-            "support": {
-                "issues": "https://github.com/webvimark/grid-bulk-actions/issues",
-                "source": "https://github.com/webvimark/grid-bulk-actions/tree/1.0.2"
-            },
-            "time": "2016-10-25T06:25:33+00:00"
-        },
-        {
-            "name": "webvimark/grid-page-size",
-            "version": "1.0.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/webvimark/grid-page-size.git",
-                "reference": "cb0163614e34ebb0319ef436da6db755f30546d2"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/webvimark/grid-page-size/zipball/cb0163614e34ebb0319ef436da6db755f30546d2",
-                "reference": "cb0163614e34ebb0319ef436da6db755f30546d2",
-                "shasum": ""
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "webvimark\\extensions\\GridPageSize\\": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "description": "Grid page size extension for yii 2 gridview",
-            "support": {
-                "issues": "https://github.com/webvimark/grid-page-size/issues",
-                "source": "https://github.com/webvimark/grid-page-size/tree/1.0.2"
-            },
-            "time": "2016-10-25T06:28:39+00:00"
-        },
-        {
-            "name": "webvimark/helpers",
-            "version": "1.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/webvimark/helpers.git",
-                "reference": "7bb59438d50149cec8233f3b509dd686200ea567"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/webvimark/helpers/zipball/7bb59438d50149cec8233f3b509dd686200ea567",
-                "reference": "7bb59438d50149cec8233f3b509dd686200ea567",
-                "shasum": ""
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "webvimark\\helpers\\": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "description": "Helpers for yii 2",
-            "support": {
-                "issues": "https://github.com/webvimark/helpers/issues",
-                "source": "https://github.com/webvimark/helpers/tree/master"
-            },
-            "time": "2016-10-03T08:50:29+00:00"
-        },
-        {
-            "name": "webvimark/image",
-            "version": "1.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/webvimark/image.git",
-                "reference": "18a3f257b55d0670086b4ccdac005fe376ad7c21"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/webvimark/image/zipball/18a3f257b55d0670086b4ccdac005fe376ad7c21",
-                "reference": "18a3f257b55d0670086b4ccdac005fe376ad7c21",
-                "shasum": ""
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "webvimark\\image\\": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "description": "Kohana image lib wrapper for yii 2",
-            "support": {
-                "issues": "https://github.com/webvimark/image/issues",
-                "source": "https://github.com/webvimark/image/tree/master"
-            },
-            "time": "2014-07-02T07:33:43+00:00"
-        },
-        {
-            "name": "webvimark/module-user-management",
-            "version": "1.0.13",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/webvimark/user-management.git",
-                "reference": "48adb6cc53fc0a7da34dbf31bba47a0ef8d35cd8"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/webvimark/user-management/zipball/48adb6cc53fc0a7da34dbf31bba47a0ef8d35cd8",
-                "reference": "48adb6cc53fc0a7da34dbf31bba47a0ef8d35cd8",
-                "shasum": ""
-            },
-            "require": {
-                "ikimea/browser": "1.12.0",
-                "webvimark/bootstrap-switch": "^1.0.0",
-                "webvimark/components": "^1.0.0",
-                "webvimark/date-range-picker": "^1.0.0",
-                "webvimark/grid-bulk-actions": "^1.0.0",
-                "webvimark/grid-page-size": "^1.0.0",
-                "webvimark/helpers": "^1.0.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "webvimark\\modules\\UserManagement\\": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "description": "User with improved RBAC",
-            "support": {
-                "issues": "https://github.com/webvimark/user-management/issues",
-                "source": "https://github.com/webvimark/user-management/tree/master"
-            },
-            "time": "2016-10-14T10:53:00+00:00"
-        },
-        {
-            "name": "workerman/workerman",
-            "version": "v3.5.31",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/walkor/Workerman.git",
-                "reference": "b73ddc45b3c7299f330923a2bde23ca6e974fd96"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/walkor/Workerman/zipball/b73ddc45b3c7299f330923a2bde23ca6e974fd96",
-                "reference": "b73ddc45b3c7299f330923a2bde23ca6e974fd96",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3"
-            },
-            "suggest": {
-                "ext-event": "For better performance. "
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Workerman\\": "./"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "walkor",
-                    "email": "walkor@workerman.net",
-                    "homepage": "http://www.workerman.net",
-                    "role": "Developer"
-                }
-            ],
-            "description": "An asynchronous event driven PHP framework for easily building fast, scalable network applications.",
-            "homepage": "http://www.workerman.net",
-            "keywords": [
-                "asynchronous",
-                "event-loop"
-            ],
-            "support": {
-                "email": "walkor@workerman.net",
-                "forum": "http://wenda.workerman.net/",
-                "issues": "https://github.com/walkor/workerman/issues",
-                "source": "https://github.com/walkor/workerman",
-                "wiki": "http://doc.workerman.net/"
-            },
-            "time": "2020-08-24T03:49:23+00:00"
         },
         {
             "name": "yii2mod/yii2-rbac",
@@ -16160,5 +15861,5 @@
         "ext-pgsql": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.3.0"
 }

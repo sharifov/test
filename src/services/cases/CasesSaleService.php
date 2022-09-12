@@ -395,10 +395,7 @@ class CasesSaleService
     {
         $caseSale->css_sale_pnr = $saleData['pnr'] ?? null;
         $caseSale->css_sale_created_dt = $saleData['created'] ?? null;
-        //$caseSale->css_sale_book_id = $saleData['confirmationNumber'] ?? null;
-        if (!empty($saleData['confirmationNumber'])) {
-            $caseSale->css_sale_book_id = $saleData['confirmationNumber'];
-        }
+        $caseSale->css_sale_book_id = $saleData['baseBookingId'] ?? $saleData['bookingId'] ?? null;
         $caseSale->css_sale_pax = $saleData['requestDetail']['passengersCnt'] ?? null;
         if (isset($saleData['price']['priceQuotes'])) {
             $amountCharged = 0;
@@ -632,8 +629,8 @@ class CasesSaleService
                     $caseSale = new CaseSale();
                     $caseSale->css_cs_id = $csId;
                     $caseSale->css_sale_id = $saleId;
-                    $caseSale->css_sale_book_id = $saleData['bookingId'] ?? $saleData['confirmationNumber'] ?? null;
-                    $case->cs_order_uid = $caseSale->css_sale_book_id;
+
+                    $case->cs_order_uid = $refreshSaleData['bookingId'] ?? null;
                     $this->casesRepository->save($case);
 
                     $caseSale = $this->saveAdditionalData($caseSale, $case, $refreshSaleData);
@@ -648,10 +645,10 @@ class CasesSaleService
 
 //                    $this->updateCaseProjectBySale($case, $refreshSaleData);
 
-                    if ($caseSale->css_cs_id && SettingHelper::isEnableOrderFromSale()) {
+                    if ($caseSale->css_cs_id && SettingHelper::isEnableOrderFromSale() && !empty($refreshSaleData['bookingId'])) {
                         $transaction = new Transaction(['db' => Yii::$app->db]);
                         try {
-                            $bookingId = $refreshSaleData['baseBookingId'] ? $refreshSaleData['baseBookingId'] : $refreshSaleData['bookingId'];
+                            $bookingId = $refreshSaleData['bookingId'];
                             if (!$order = OrderManageService::getBySaleIdOrBookingId($saleId, (string) $bookingId)) {
                                 $orderCreateFromSaleForm = new OrderCreateFromSaleForm();
                                 if (!$orderCreateFromSaleForm->load($refreshSaleData)) {
@@ -712,7 +709,7 @@ class CasesSaleService
         $cs->css_sale_data = $saleData;
         $cs->css_sale_pnr = $saleData['pnr'] ?? null;
         $cs->css_sale_created_dt = $saleData['created'] ?? null;
-        $cs->css_sale_book_id = $saleData['bookingId'] ?? null;
+        $cs->css_sale_book_id = $saleData['baseBookingId'] ?? $saleData['bookingId'] ?? null;
         $cs->css_sale_pax = isset($saleData['passengers']) && is_array($saleData['passengers']) ? count($saleData['passengers']) : null;
         $cs->css_sale_data_updated = $cs->css_sale_data;
 
@@ -816,5 +813,108 @@ class CasesSaleService
         } catch (\Throwable $throwable) {
             AppHelper::throwableLogger($throwable, 'CasesSaleService:updateCaseProject:Throwable');
         }
+    }
+
+    /**
+     * @param array $params
+     * @return array
+     */
+    public function getAllSalesByBookingId(array $params): array
+    {
+        if (!Yii::$app->params['settings']['enable_request_to_bo_sale']) {
+            return [];
+        }
+        try {
+            $response = BackOffice::sendRequest2('cs/search', $params, 'POST', 120);
+
+            if ($response->isOk) {
+                $result = $response->data;
+                if (isset($result['items']) && is_array($result['items']) && count($result['items'])) {
+                    return $result['items'];
+                }
+            } else {
+                $responseStr = VarDumper::dumpAsString($response->content);
+                throw new \RuntimeException('BO request Error: ' . $responseStr, -1);
+            }
+        } catch (\Throwable $throwable) {
+            $message = VarDumper::dumpAsString([$throwable->getMessage(), $params], 20);
+            if ($throwable->getCode() > 0) {
+                Yii::error($message, 'CasesSaleService:getAllSalesByBookingId:Fail');
+            } else {
+                Yii::info($message, 'info\CasesSaleService:getAllSalesByBookingId:Fail');
+            }
+        }
+        return [];
+    }
+
+    /**
+     * @param Project $project
+     * @param array $saleData
+     * @return bool
+     */
+    public function sameProject(Project $project, array $saleData): bool
+    {
+        $caseProjectApiKey = $project->api_key;
+        $saleProjectApiKey = $saleData['projectApiKey'] ?? null;
+
+        if (trim($caseProjectApiKey) !== trim($saleProjectApiKey)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param int $saleId
+     * @param int $departmentId
+     * @return bool
+     */
+    public function checkExistCaseBySaleAndDepartment(int $saleId, int $departmentId): bool
+    {
+        $caseSales = CaseSale::find()->select(['css_cs_id'])->where(['css_sale_id' => $saleId])->all();
+        if (count($caseSales)) {
+            foreach ($caseSales as $caseSale) {
+                $case = Cases::find()->where(['cs_id' => $caseSale->css_cs_id])->limit(1)->one();
+                if ($case) {
+                    if (!$case->isTrash() && !$case->isSolved() && ($case->cs_dep_id == $departmentId)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param string $originalBookingId
+     * @param string $projectApiKey
+     * @param string $searchBookingId
+     * @return bool
+     */
+    public function allowToCreateCaseWithBookingId(string $originalBookingId, string $projectApiKey, string $searchBookingId): bool
+    {
+        $allowedBookingIds = [];
+        try {
+            $params = ['confirmation_number' => $originalBookingId, 'project_key' => $projectApiKey];
+            $allBoSales = $this->getAllSalesByBookingId($params);
+
+            if (count($allBoSales)) {
+                foreach ($allBoSales as $allBoSale) {
+                    if (isset($allBoSale['confirmationNumber'])) {
+                        $allowedBookingIds[] = $allBoSale['confirmationNumber'];
+                    }
+                }
+            }
+        } catch (\Throwable $throwable) {
+            $message = VarDumper::dumpAsString([$throwable->getMessage(), $params], 20);
+            Yii::error($message, 'CasesSaleService:getAllSalesByBookingId:Fail');
+            return false;
+        }
+
+        if (!in_array($searchBookingId, $allowedBookingIds)) {
+            return false;
+        }
+
+        return true;
     }
 }

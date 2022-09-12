@@ -60,11 +60,13 @@ use src\repositories\product\ProductQuoteRepository;
 /**
  * @property int $flight_request_id
  * @property bool $flight_request_is_automate
+ * @property string $base_booking_id
  */
 class ReprotectionCreateJob extends BaseJob implements JobInterface
 {
     public $flight_request_id;
     public $flight_request_is_automate;
+    public string $base_booking_id;
 
     /**
      * @param Queue $queue
@@ -147,18 +149,27 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
 
             if (!$originProductQuote || !$reProtectionCreateService::isScheduleChangeUpdatableExist($originProductQuote)) {
                 try {
-                    $saleData = $boRequestReProtectionService->getSaleData($flightRequest->fr_booking_id, $case);
+                    $saleData = $boRequestReProtectionService->getSaleByBookingId($flightRequest->fr_booking_id, $this->base_booking_id, $case);
 
-                    $client = $reProtectionCreateService->getOrCreateClient(
-                        $flightRequest->fr_project_id,
-                        $boRequestReProtectionService->getOrderContactForm()
-                    );
+                    if (count($saleData) && isset($saleData['saleId'])) {
+                        $client = $reProtectionCreateService->getOrCreateClient(
+                            $flightRequest->fr_project_id,
+                            $boRequestReProtectionService->getOrderContactForm()
+                        );
 
-                    $caseReProtectionService->additionalFillingCase($client->id, $flightRequest->fr_project_id);
-                    if ($caseSale = CaseSale::findOne(['css_cs_id' => $case->cs_id, 'css_sale_id' => $saleData['saleId']])) {
-                        $caseSale->delete();
+                        $caseReProtectionService->additionalFillingCase($client->id, $flightRequest->fr_project_id);
+                        if ($caseSale = CaseSale::findOne(['css_cs_id' => $case->cs_id, 'css_sale_id' => $saleData['saleId']])) {
+                            $caseSale->delete();
+                        }
+                        $reProtectionCreateService->createCaseSale($saleData, $case);
+                    } else {
+                        Yii::warning([
+                            'message' => 'Unable to get sale from BO',
+                            'bookingId' => $flightRequest->fr_booking_id,
+                            'baseBookingId' => $this->base_booking_id,
+                            'caseId' => $case->cs_id,
+                        ], 'ReprotectionCreateJob:getSaleByBookingId');
                     }
-                    $reProtectionCreateService->createCaseSale($saleData, $case);
                 } catch (Throwable $throwable) {
                     $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Case sale not created');
                     $caseReProtectionService->caseToManual('Case sale not created');

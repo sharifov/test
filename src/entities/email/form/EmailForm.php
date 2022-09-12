@@ -24,20 +24,22 @@ use common\models\Employee;
  * @property int $type
  * @property int $status
  * @property int $projectId
- * @property int $depId
+ * @property int|null $depId
  * @property int|null $emailId
- * @property array $cases
- * @property array $clients
- * @property array $leads
+ * @property array|null $cases
+ * @property array|null $clients
+ * @property array|null $leads
  * @property string|null $createdDt
- * @property string $updatedDt
+ * @property string|null $updatedDt
  * @property int|null $replyId
- * @property bool|null $isDeleted
+ * @property int|null $isDeleted
  * @property int|null $userId
  *
  */
 class EmailForm extends CompositeForm
 {
+    use FormAttributesTrait;
+
     public $type;
     public $status;
     public $projectId;
@@ -51,7 +53,7 @@ class EmailForm extends CompositeForm
     public $isDeleted;
     public $replyId;
 
-    private $userId;
+    private ?int $userId;
 
     public function __construct(?int $userId = null, $config = [])
     {
@@ -66,12 +68,14 @@ class EmailForm extends CompositeForm
         $this->contacts = [
             'from' => new EmailContactForm(EmailContactType::FROM),
             'to' => new EmailContactForm(EmailContactType::TO),
+            'cc' => new EmailContactForm(EmailContactType::CC),
+            'bcc' => new EmailContactForm(EmailContactType::BCC),
         ];
 
         parent::__construct($config);
     }
 
-    public static function fromArray(array $data)
+    public static function fromArray(array $data): EmailForm
     {
         $instance = new static();
         $instance->userId = $data['userId'] ?? null;
@@ -94,21 +98,20 @@ class EmailForm extends CompositeForm
 
         $from = (isset($data['contacts']['from'])) ? EmailContactForm::fromArray($data['contacts']['from']) : new EmailContactForm(EmailContactType::FROM);
         $to = (isset($data['contacts']['to'])) ? EmailContactForm::fromArray($data['contacts']['to']) : new EmailContactForm(EmailContactType::TO);
+        $cc = (isset($data['contacts']['cc'])) ? EmailContactForm::fromArray($data['contacts']['cc']) : new EmailContactForm(EmailContactType::CC);
+        $bcc = (isset($data['contacts']['bcc'])) ? EmailContactForm::fromArray($data['contacts']['bcc']) : new EmailContactForm(EmailContactType::BCC);
         $contactsForm = [
             'from' => $from,
             'to' => $to,
+            'cc' => $cc,
+            'bcc' => $bcc,
         ];
-       /*  if (isset($data['contacts']['cc'])) {
-            foreach ($data['contacts']['cc'] as $key => $ccData) {
-                $contactsForm['cc' . ($key+1) ] = EmailContactForm::fromArray($ccData);
-            }
-        } */
         $instance->contacts = $contactsForm;
 
         return $instance;
     }
 
-    public static function fromModel(Email $email, ?int $userId = null, $config = [])
+    public static function fromModel(Email $email, ?int $userId = null, $config = []): EmailForm
     {
         $instance = new static($userId, $config);
         $instance->status = $email->e_status_id;
@@ -129,16 +132,20 @@ class EmailForm extends CompositeForm
 
         $from = EmailContactForm::fromModel($email->emailContactFrom);
         $to = EmailContactForm::fromModel($email->emailContactTo);
+        $cc = EmailContactForm::fromArray(['type' => EmailContactType::CC, 'emails' => $email->emailsCc]);
+        $bcc = EmailContactForm::fromArray(['type' => EmailContactType::BCC, 'emails' => $email->emailsBcc]);
         $contactsForm = [
             'from' => $from,
             'to' => $to,
+            'cc' => $cc,
+            'bcc' => $bcc,
         ];
         $instance->contacts = $contactsForm;
 
         return $instance;
     }
 
-    public static function replyFromModel(Email $email, Employee $user, $config = [])
+    public static function replyFromModel(Email $email, Employee $user, $config = []): EmailForm
     {
         $instance = new static($user->id, $config);
         $instance->projectId = $email->e_project_id;
@@ -162,6 +169,8 @@ class EmailForm extends CompositeForm
         $contactsForm = [
             'from' => $from,
             'to' => $to,
+            'cc' => new EmailContactForm(EmailContactType::CC),
+            'bcc' => new EmailContactForm(EmailContactType::BCC),
         ];
         $instance->contacts = $contactsForm;
 
@@ -207,7 +216,7 @@ class EmailForm extends CompositeForm
         return ['params', 'body', 'contacts', 'log'];
     }
 
-    public function fields()
+    public function fields(): array
     {
         return [
             'e_id' => 'emailId',
@@ -221,17 +230,5 @@ class EmailForm extends CompositeForm
             'e_created_dt' => 'createdDt',
             'e_updated_dt' => 'updatedDt',
         ];
-    }
-
-    public function getAttributesForModel($skipEmpty = false)
-    {
-        $result = [];
-        foreach ($this->fields() as $index => $name) {
-            $key = is_int($index) ? $name : $index;
-            if (!$skipEmpty || ($skipEmpty && !empty($this->$name))) {
-                $result[$key] = $this->$name;
-            }
-        }
-        return $result;
     }
 }

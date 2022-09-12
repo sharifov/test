@@ -24,6 +24,7 @@ use src\forms\lead\LeadPreferencesForm;
 use src\forms\lead\LeadQuoteExtraMarkUpForm;
 use src\forms\lead\PhoneCreateForm;
 use src\helpers\app\AppHelper;
+use src\helpers\ErrorsToStringHelper;
 use src\model\clientChat\socket\ClientChatSocketCommands;
 use src\model\clientChatLead\entity\ClientChatLead;
 use src\model\quote\abac\dto\QuoteFlightExtraMarkupAbacDto;
@@ -792,7 +793,7 @@ class LeadViewController extends FController
             }
             if (Yii::$app->getSession()->hasFlash('warning')) {
                 $message = [];
-                foreach (Yii::$app->getSession()->getFlash('warning') as $flash) {
+                foreach ((array)Yii::$app->getSession()->getFlash('warning') as $flash) {
                     $message[] = $flash;
                 }
                 return ['success' => true, 'message' => implode(PHP_EOL, $message)];
@@ -921,10 +922,11 @@ class LeadViewController extends FController
             }
             $quoteId = (int)Yii::$app->request->get('quoteId');
             $paxCode = (string)Yii::$app->request->get('paxCode');
-            $quote   = Quote::findOne($quoteId);
-            if (empty($quote)) {
+
+            if (!$quote   = Quote::findOne($quoteId)) {
                 throw new \RuntimeException('Quote not Founded');
             }
+
             $lead = $quote->lead;
             $isOwner = $lead->employee_id = Auth::id();
             $quoteFlightExtraMarkUpAbacDto = new QuoteFlightExtraMarkupAbacDto($lead, $quote, $isOwner);
@@ -935,44 +937,51 @@ class LeadViewController extends FController
                 QuoteFlightAbacObject::ACTION_UPDATE
             );
             if (!$canUpdateExtraMarkUp) {
-                throw new \RuntimeException('Access Denied');
+                throw new \RuntimeException('Access Denied. ABAC(' .
+                    QuoteFlightAbacObject::OBJ_EXTRA_MARKUP . ':' . QuoteFlightAbacObject::ACTION_UPDATE . ')');
             }
-            $quotePrices = QuotePriceRepository::getAllByQuoteIdAndPaxCode($quoteId, $paxCode);
-            if (empty($quotePrices)) {
+            if (!QuotePriceRepository::getAllByQuoteIdAndPaxCode($quoteId, $paxCode)) {
                 throw new \RuntimeException('Quote Price not founded');
             }
-            $clientCurrency = $quote->clientCurrency;
-            if (empty($clientCurrency)) {
-                throw new \RuntimeException('Currency not Founded');
+            if (!$quote->clientCurrency) {
+                throw new \RuntimeException('ClientCurrency not Founded');
             }
-            $quotePrice = QuotePriceRepository::findByQuoteIdAndPaxCode($quoteId, $paxCode);
+            if (!$quotePrice = QuotePriceRepository::findByQuoteIdAndPaxCode($quoteId, $paxCode)) {
+                throw new \RuntimeException('QuotePrice not Founded');
+            }
+
+            $tickets = (isset($quote->getPricesData()['prices'][mb_strtoupper($paxCode)]) ?
+                $quote->getPricesData()['prices'][mb_strtoupper($paxCode)]['tickets'] : 1);
+            $maxValueExtraMarkUp = abs($quotePrice->net) * $tickets;
+
             $form = new LeadQuoteExtraMarkUpForm(
                 $quote->q_client_currency_rate,
-                $quotePrice->net *
-                (isset($quote->getPricesData()['prices'][mb_strtoupper($paxCode)]) ? $quote->getPricesData()['prices'][mb_strtoupper($paxCode)]['tickets'] : 1)
+                $maxValueExtraMarkUp
             );
             $form->load($quotePrice->toArray());
+
             return $this->renderAjax('partial/_quote_edit_extra_mark_up_content', [
                 'quote'                    => $quote,
                 'paxCode'                  => $paxCode,
                 'leadQuoteExtraMarkUpForm' => $form,
             ]);
         } catch (\RuntimeException | \DomainException $e) {
-            Yii::warning(
-                AppHelper::throwableFormatter($e),
-                'LeadViewController::actionAjaxEditQuoteExtraMarkUpModalContent:exception'
-            );
-            return $this->renderAjax('_error', [
-                'error' => $e->getMessage()
-            ]);
+            $message = AppHelper::throwableLog($e);
+            $message['quoteId'] = $quoteId ?? null;
+            $message['paxCode'] = $paxCode ?? null;
+            if (isset($form)) {
+                $message['form'] = ArrayHelper::toArray($form);
+            }
+            Yii::warning($message, 'LeadViewController::actionAjaxEditQuoteExtraMarkUpModalContent:exception');
+
+            return $this->renderAjax('_error', ['error' => $e->getMessage()]);
         } catch (\Throwable $e) {
-            Yii::error(
-                AppHelper::throwableLog($e),
-                'LeadViewController:actionAjaxEditQuoteExtraMarkUpModalContent:Throwable'
-            );
-            return $this->renderAjax('_error', [
-                'error' => 'ServerError'
-            ]);
+            $message = AppHelper::throwableLog($e);
+            $message['quoteId'] = $quoteId ?? null;
+            $message['paxCode'] = $paxCode ?? null;
+            Yii::error($message, 'LeadViewController:actionAjaxEditQuoteExtraMarkUpModalContent:Throwable');
+
+            return $this->renderAjax('_error', ['error' => $e->getMessage()]);
         }
     }
 
@@ -986,8 +995,8 @@ class LeadViewController extends FController
             }
             $quoteId = (int)Yii::$app->request->get('quoteId');
             $paxCode = (string)Yii::$app->request->get('paxCode');
-            $quote = Quote::findOne($quoteId);
-            if (empty($quote)) {
+
+            if (!$quote = Quote::findOne($quoteId)) {
                 throw new \RuntimeException('Quote not founded');
             }
             $lead = $quote->lead;
@@ -1001,29 +1010,36 @@ class LeadViewController extends FController
                 QuoteFlightAbacObject::ACTION_UPDATE
             );
             if (!$canUpdateExtraMarkUp) {
-                throw new \RuntimeException('Access Denied');
+                throw new \RuntimeException('Access Denied. ABAC(' .
+                    QuoteFlightAbacObject::OBJ_EXTRA_MARKUP . ':' . QuoteFlightAbacObject::ACTION_UPDATE . ')');
             }
-            $quotePrices = QuotePriceRepository::getAllByQuoteIdAndPaxCode($quoteId, $paxCode);
-            if (empty($quotePrices)) {
+            if (!$quotePrices = QuotePriceRepository::getAllByQuoteIdAndPaxCode($quoteId, $paxCode)) {
                 throw new \RuntimeException('Quote Prices not founded');
             }
-            $clientCurrency = $quote->clientCurrency;
-            if (empty($clientCurrency)) {
+            if (!$quote->clientCurrency) {
                 throw new \RuntimeException('Currency not Founded');
             }
-            $quotePriceModel = QuotePriceRepository::findByQuoteIdAndPaxCode($quoteId, $paxCode);
+            if (!$quotePriceModel = QuotePriceRepository::findByQuoteIdAndPaxCode($quoteId, $paxCode)) {
+                throw new \RuntimeException('QuotePriceModel not Founded');
+            }
+
+            $tickets = (isset($quote->getPricesData()['prices'][mb_strtoupper($paxCode)]) ?
+                $quote->getPricesData()['prices'][mb_strtoupper($paxCode)]['tickets'] : 1);
+            $maxValueExtraMarkUp = abs($quotePriceModel->net) * $tickets;
+
             $form = new LeadQuoteExtraMarkUpForm(
                 $quote->q_client_currency_rate,
-                $quotePriceModel->net *
-                (isset($quote->getPricesData()['prices'][mb_strtoupper($paxCode)]) ? $quote->getPricesData()['prices'][mb_strtoupper($paxCode)]['tickets'] : 1)
+                $maxValueExtraMarkUp
             );
             $form->load(Yii::$app->request->post());
             if (!$form->validate()) {
-                throw new \RuntimeException(implode(', ', $form->getErrorSummary(true)));
+                throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($form));
             }
+
             $clientQuotePriceService = new ClientQuotePriceService($quote);
             $priceData = $clientQuotePriceService->getClientPricesData();
-            $sellingOld = $priceData['total']['selling'];
+            $sellingOld = $priceData['total']['selling'] ?? 0;
+
             $transaction->begin();
             foreach ($quotePrices as $quotePrice) {
                 $quotePrice->extra_mark_up = $form->extra_mark_up;
@@ -1033,31 +1049,30 @@ class LeadViewController extends FController
             $quote->changeExtraMarkUp($currentUserId, $sellingOld);
             $this->quoteRepository->save($quote);
             $transaction->commit();
-            return [
-                'message' => 'Quote Extra mark-up Updated Successfully'
-            ];
+
+            return ['message' => 'Quote Extra mark-up Updated Successfully'];
         } catch (\RuntimeException | \DomainException $e) {
             $transaction->rollBack();
-            Yii::warning(
-                AppHelper::throwableFormatter($e),
-                'LeadViewController::actionAjaxEditQuoteExtraMarkUp:exception'
-            );
-            return [
-                'error' => $e->getMessage()
-            ];
+            $message = AppHelper::throwableLog($e);
+            $message['quoteId'] = $quoteId ?? null;
+            $message['paxCode'] = $paxCode ?? null;
+            if (isset($form)) {
+                $message['form'] = ArrayHelper::toArray($form);
+            }
+
+            \Yii::warning($message, 'LeadViewController::actionAjaxEditQuoteExtraMarkUp:exception');
+
+            return ['error' => $e->getMessage()];
         } catch (\Throwable $e) {
             $transaction->rollBack();
-            Yii::error(
-                AppHelper::throwableLog($e),
-                'LeadViewController:actionAjaxEditQuoteExtraMarkUp:Throwable'
-            );
-            return [
-                'error' => 'Server Error'
-            ];
+            $message = AppHelper::throwableLog($e);
+            $message['quoteId'] = $quoteId ?? null;
+            $message['paxCode'] = $paxCode ?? null;
+            \Yii::error($message, 'LeadViewController:actionAjaxEditQuoteExtraMarkUp:Throwable');
+
+            return ['error' => 'Server Error'];
         }
     }
-
-
 
     /**
      * @return string

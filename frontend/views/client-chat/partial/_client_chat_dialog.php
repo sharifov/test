@@ -72,6 +72,11 @@ window.initChatDialog = function (params) {
       window.refreshRcAgentToken();
   };
   
+  params.onConnect = function(rid) {
+    $('._cc-list-item').removeClass('_cc_active');
+    $('._cc-list-item[data-rid="' + rid  + '"]').addClass('_cc_active');
+  }
+  
   if (typeof window.chatDialog === 'function') {
     window.chatDialog(params);
   } else {
@@ -93,8 +98,8 @@ JS;
 $this->registerJs($js, \yii\web\View::POS_END);
 if ($rid) {
     $js = <<<JS
-var t = setInterval(function() {
-   if (window.k && window.k.crmChat) {
+  var t = setInterval(function () {
+    if (window.k && window.k.crmChat) {
       clearInterval(t);
       initChatDialog({
         token: window.chatAgentToken,
@@ -107,5 +112,5 @@ var t = setInterval(function() {
   }, 50);
 JS;
 
-    $this->registerJs($js, \yii\web\View::POS_HEAD);
+    $this->registerJs($js, \yii\web\View::POS_LOAD);
 }

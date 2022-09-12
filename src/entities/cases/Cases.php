@@ -294,6 +294,29 @@ class Cases extends ActiveRecord implements Objectable
     }
 
     /**
+     * @param Cases $case
+     * @param Employee $user
+     * @param string $bookingId
+     * @return Cases
+     */
+    public function createClone(Cases $case, Employee $user, string $bookingId): self
+    {
+        $clone                     = self::create();
+        $clone->cs_subject         = $case->cs_subject;
+        $clone->cs_description     = $case->cs_description;
+        $clone->cs_category_id     = $case->cs_category_id;
+        $clone->cs_status          = $case->cs_status;
+        $clone->cs_user_id         = $user->id;
+        $clone->cs_dep_id          = $case->cs_dep_id;
+        $clone->cs_project_id      = $case->cs_project_id;
+        $clone->cs_client_id       = $case->cs_client_id;
+        $clone->cs_source_type_id  = CasesSourceType::CRM;
+        $clone->cs_order_uid       = $bookingId;
+
+        return $clone;
+    }
+
+    /**
      * @return string
      */
     private static function generateGid(): string

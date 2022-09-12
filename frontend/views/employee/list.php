@@ -106,7 +106,6 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
         <div class="btn-group">
             <?php echo Html::button('<span class="fa fa-square-o"></span> Check All', ['class' => 'btn btn-default', 'id' => 'btn-check-all']); ?>
 
-            <?php // if (\webvimark\modules\UserManagement\models\User::canRoute('/email-layout/delete-selected')): ?>
             <button type="button" class="btn btn-default dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"
                     aria-haspopup="true" aria-expanded="false">
                 <span class="sr-only">Toggle Dropdown</span>
@@ -155,7 +154,7 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
                 ],
                 [
                     'class' => ActionColumn::class,
-                    'template' => '{info} {update} {projects} {groups} {switch} {shiftCalendar}',
+                    'template' => '{info} {update} {projects} {groups} {switch} {shiftCalendar} {activity}',
                     'visibleButtons' => [
                         /*'view' => function ($model, $key, $index) {
                             return User::hasPermission('viewOrder');
@@ -194,6 +193,9 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
                                 ShiftAbacObject::ACT_USER_SHIFT_SCHEDULE,
                                 ShiftAbacObject::ACTION_ACCESS
                             );
+                        },
+                        'activity' => static function (Employee $model, $key, $index) {
+                            return Auth::can('/user-activity/user-info');
                         },
                     ],
                     'buttons' => [
@@ -236,6 +238,13 @@ $isAdmin = $user->isAdmin() || $user->isSuperAdmin();
                                 ['title' => 'User Shift Calendar', 'target' => '_blank', 'data-pjax' => 0]
                             );
                         },
+                        'activity' => static function ($url, Employee $model, $key) {
+                            return Html::a(
+                                '<span class="fa fa-clock-o"></span>',
+                                ['user-activity/user-info', 'id' => $model->id],
+                                ['title' => 'User Activity Info', 'target' => '_blank', 'data-pjax' => 0]
+                            );
+                        }
                     ]
                 ],
 

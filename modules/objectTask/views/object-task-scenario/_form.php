@@ -92,6 +92,20 @@ $operators = json_encode(\modules\objectTask\src\scenarios\statements\BaseObject
                 $this->registerJs($jsCode, \yii\web\View::POS_READY);
             }
             ?>
+
+            <?php if (array_key_exists($model->ots_key, ObjectTaskService::SCENARIO_CLASS_LIST)) : ?>
+                <h3>Parameters description</h3>
+                <div>
+                    <ul>
+                    <?php foreach (ObjectTaskService::getParametersDescriptionForScenario($model->ots_key) as $key => $desc) : ?>
+                        <li><?= $this->render('components/_scenario-description', [
+                            'key' => $key,
+                            'object' => $desc,
+                        ]) ?></li>
+                    <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
             <h3>Allowed commands</h3>
             <?php /** @var \modules\objectTask\src\commands\BaseCommand $classname */ ?>
             <?php foreach (ObjectTaskService::COMMAND_CLASS_LIST as $command => $classname) : ?>

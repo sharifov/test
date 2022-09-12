@@ -9,7 +9,6 @@ use common\models\Project;
 use common\models\search\EmailSearch;
 use common\models\UserProjectParams;
 use frontend\widgets\newWebPhone\email\form\EmailSendForm;
-use http\Url;
 use modules\email\src\abac\dto\EmailAbacDto;
 use modules\email\src\abac\EmailAbacObject;
 use src\auth\Auth;
@@ -20,7 +19,6 @@ use src\entities\email\helpers\EmailContactType;
 use src\entities\email\helpers\EmailType;
 use src\exception\CreateModelException;
 use src\exception\EmailNotSentException;
-use src\model\emailList\entity\EmailList;
 use src\repositories\email\EmailOldRepository;
 use src\services\email\EmailMainService;
 use src\services\email\EmailsNormalizeService;
@@ -36,12 +34,12 @@ use yii\web\Response;
  * EmailController implements the CRUD actions for Email model.
  *
  * @property EmailMainService $emailService
- * @property EmailRepositoryInterface $emailRepository
+ * @property EmailOldRepository $emailRepository
  */
 class EmailController extends FController
 {
-    private $emailService;
-    private $emailRepository;
+    private EmailMainService $emailService;
+    private EmailOldRepository $emailRepository;
 
     public function __construct($id, $module, EmailMainService $emailService, EmailOldRepository $emailRepository, $config = [])
     {
@@ -412,8 +410,7 @@ class EmailController extends FController
     public function actionSoftDelete($id): \yii\web\Response
     {
         $model = $this->findModel($id);
-        $model->e_is_deleted = (int) ! $model->e_is_deleted;
-        $model->save();
+        $this->emailService->softDelete($model);
         return $this->redirect(Yii::$app->request->referrer);
     }
 

@@ -16,16 +16,18 @@ use src\entities\email\EmailSearch;
 use src\entities\email\form\EmailForm;
 use src\entities\email\helpers\EmailContactType;
 use src\entities\email\helpers\EmailFilterType;
+use src\exception\CreateModelException;
 use src\repositories\email\EmailRepository;
+use src\services\email\EmailMainService;
 use src\services\email\EmailsNormalizeService;
 use Yii;
 use yii\bootstrap\Html;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\ForbiddenHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
-use src\services\email\EmailMainService;
 
 /**
  * EmailNormalizedController implements the CRUD actions for Email model.
@@ -300,10 +302,10 @@ class EmailNormalizedController extends FController
         $model = $this->findModel($id);
         /** @abac new EmailAbacDto($model), EmailAbacObject::ACT_VIEW, EmailAbacObject::ACTION_ACCESS, Restrict access to view emails on case or lead*/
 
-/*         if (!Yii::$app->abac->can(new EmailAbacDto($model), EmailAbacObject::ACT_VIEW, EmailAbacObject::ACTION_ACCESS)) {
+        if (!Yii::$app->abac->can(new EmailAbacDto($model), EmailAbacObject::ACT_VIEW, EmailAbacObject::ACTION_ACCESS)) {
             throw new ForbiddenHttpException('Access denied.');
         }
- */
+
         if (Yii::$app->request->get('preview')) {
             return $model->emailBody->getBodyHtml() ?: '';
         }
@@ -351,8 +353,7 @@ class EmailNormalizedController extends FController
     public function actionSoftDelete($id): \yii\web\Response
     {
         $model = $this->findModel($id);
-        $model->e_is_deleted = (int) ! $model->e_is_deleted;
-        $model->save();
+        $this->emailService->softDelete($model);
         return $this->redirect(Yii::$app->request->referrer);
     }
 

@@ -16,7 +16,7 @@ filters:
 keyed_groups:
   - prefix: ''
     separator: ''
-    key: tags['Kind']
+    key: tags['Kind'].split(',')
 
 compose:
   ansible_host: private_ip_address

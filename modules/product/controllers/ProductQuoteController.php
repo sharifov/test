@@ -667,7 +667,21 @@ class ProductQuoteController extends FController
                                             $errorData['case_id'] = $case->cs_id;
                                             Yii::warning($errorData, 'ProductQuoteController:actionReprotectionQuoteSendEmail:Throwable');
                                         }
+                                    } else {
+                                        Yii::info([
+                                            'message' => 'Segment already used',
+                                            'caseId' => $case->cs_id,
+                                            'ProductQuoteChangeId' => $productQuoteChange->pqc_id,
+                                            'ProductQuoteId' => $reprotectionQuote->pq_id,
+                                        ], 'ProductQuoteController:actionReprotectionQuoteSendEmail:Info');
                                     }
+                                } else {
+                                    Yii::info([
+                                        'message' => 'ProductQuoteChange already added to queue',
+                                        'caseId' => $case->cs_id,
+                                        'ProductQuoteChangeId' => $productQuoteChange->pqc_id,
+                                        'ProductQuoteId' => $reprotectionQuote->pq_id,
+                                    ], 'ProductQuoteController:actionReprotectionQuoteSendEmail:Info');
                                 }
                             }
                         } catch (\Throwable $throwable) {

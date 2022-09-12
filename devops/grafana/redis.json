@@ -26,15 +26,15 @@
   "fiscalYearStartMonth": 0,
   "gnetId": 763,
   "graphTooltip": 0,
-  "id": 12,
-  "iteration": 1655374508843,
+  "id": 58,
+  "iteration": 1662361139934,
   "links": [],
   "liveNow": false,
   "panels": [
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -94,15 +94,15 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "redis_up{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"} ",
+          "expr": "redis_up{instance=~\".*\", project=\"crm\", env=~\"$env\", instance=\"$instance\"} ",
           "interval": "",
           "legendFormat": "",
           "refId": "A"
@@ -114,7 +114,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -175,15 +175,15 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "max(max_over_time(redis_uptime_in_seconds{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}[$__interval]))",
+          "expr": "max(max_over_time(redis_uptime_in_seconds{project=\"crm\", env=~\"$env\", instance=\"$instance\", job=~\"crm_redis.*\"}[$__interval]))",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -198,7 +198,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -260,15 +260,15 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "redis_connected_clients{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}",
+          "expr": "redis_connected_clients{instance=~\".*\", project=\"crm\", env=~\"$env\", instance=\"$instance\"}",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -284,7 +284,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -346,15 +346,15 @@
         "text": {},
         "textMode": "auto"
       },
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "redis_memory_used_bytes{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}",
+          "expr": "redis_memory_used_bytes{instance=~\".*\", project=\"crm\", env=~\"$env\", instance=\"$instance\"}",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -370,7 +370,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "fieldConfig": {
         "defaults": {
@@ -416,15 +416,15 @@
         "text": {},
         "textMode": "name"
       },
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "redis_up{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"} ",
+          "expr": "redis_up{project=\"crm\", env=~\"$env\", instance=\"$instance\"} ",
           "interval": "",
           "legendFormat": "{{name}}",
           "refId": "A"
@@ -440,7 +440,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "editable": true,
       "error": false,
@@ -478,7 +478,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -490,10 +490,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "rate(redis_commands_processed_total{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}[5m])",
+          "expr": "rate(redis_commands_processed_total{instance=~\".*\", project=\"crm\", env=~\"$env\", instance=\"$instance\"}[5m])",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "",
@@ -541,7 +541,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "decimals": 2,
       "editable": true,
@@ -580,7 +580,7 @@
         "alertThreshold": true
       },
       "percentage": true,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -592,10 +592,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "irate(redis_keyspace_hits_total{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}[5m])",
+          "expr": "irate(redis_keyspace_hits_total{instance=~\".*\", project=\"crm\", env=~\"$env\", instance=\"$instance\"}[5m])",
           "hide": false,
           "interval": "",
           "intervalFactor": 2,
@@ -608,10 +608,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "irate(redis_keyspace_misses_total{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}[5m])",
+          "expr": "irate(redis_keyspace_misses_total{instance=~\".*\", project=\"crm\", env=~\"$env\", instance=\"$instance\"}[5m])",
           "hide": false,
           "interval": "",
           "intervalFactor": 2,
@@ -664,7 +664,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "editable": true,
       "error": false,
@@ -704,7 +704,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -716,10 +716,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "redis_memory_used_bytes{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"} ",
+          "expr": "redis_memory_used_bytes{instance=~\".*\", project=\"crm\", env=~\"$env\", instance=\"$instance\"} ",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "used",
@@ -731,10 +731,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "redis_memory_max_bytes{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"} ",
+          "expr": "redis_memory_max_bytes{instance=~\".*\", project=\"crm\", env=~\"$env\", instance=\"$instance\"} ",
           "hide": false,
           "interval": "",
           "intervalFactor": 2,
@@ -782,7 +782,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "editable": true,
       "error": false,
@@ -820,7 +820,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -832,10 +832,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "rate(redis_net_input_bytes_total{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}[5m])",
+          "expr": "rate(redis_net_input_bytes_total{instance=~\".*\", project=\"crm\", env=~\"$env\"}[5m])",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "input ",
@@ -845,10 +845,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "rate(redis_net_output_bytes_total{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}[5m])",
+          "expr": "rate(redis_net_output_bytes_total{instance=~\".*\", project=\"crm\", env=~\"$env\"}[5m])",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "output",
@@ -894,7 +894,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "editable": true,
       "error": false,
@@ -936,7 +936,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -948,10 +948,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum (redis_db_keys{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}) by (db)",
+          "expr": "sum (redis_db_keys{instance=~\".*\", project=\"crm\", env=~\"$env\", instance=\"$instance\"}) by (db)",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "{{ db }} ",
@@ -998,7 +998,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "editable": true,
       "error": false,
@@ -1036,7 +1036,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1048,10 +1048,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum (redis_db_keys{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"redis_crm\"}) - sum (redis_db_keys_expiring{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}) ",
+          "expr": "sum (redis_db_keys{instance=\"$instance\", project=\"crm\", env=~\"$env\"}) - sum (redis_db_keys_expiring{instance=\"$instance\", project=\"crm\", env=~\"$env\"}) ",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "not expiring",
@@ -1062,10 +1062,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum (redis_db_keys_expiring{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}) ",
+          "expr": "sum (redis_db_keys_expiring{instance=\"$instance\", project=\"crm\", env=~\"$env\"}) ",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "expiring",
@@ -1114,7 +1114,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "editable": true,
       "error": false,
@@ -1152,7 +1152,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1169,10 +1169,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum(rate(redis_expired_keys_total{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}[5m])) by (addr)",
+          "expr": "sum(rate(redis_expired_keys_total{instance=\"$instance\", project=\"crm\", env=~\"$env\"}[5m])) by (addr)",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "expired",
@@ -1184,10 +1184,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "sum(rate(redis_evicted_keys_total{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"}[5m])) by (addr)",
+          "expr": "sum(rate(redis_evicted_keys_total{instance=\"$instance\", project=\"crm\", env=~\"$env\"}[5m])) by (addr)",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "evicted",
@@ -1233,7 +1233,7 @@
       "dashes": false,
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "prometheus"
       },
       "editable": true,
       "error": false,
@@ -1271,7 +1271,7 @@
         "alertThreshold": true
       },
       "percentage": false,
-      "pluginVersion": "8.5.0",
+      "pluginVersion": "8.5.3",
       "pointradius": 5,
       "points": false,
       "renderer": "flot",
@@ -1283,10 +1283,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "prometheus"
           },
           "exemplar": true,
-          "expr": "topk(5, irate(redis_commands_total{instance=~\".*\", project=\"crm\", env=~\"$env\", job=\"$job\"} [1m]))",
+          "expr": "topk(5, irate(redis_commands_total{instance=\"$instance\", project=\"crm\", env=~\"$env\"} [1m]))",
           "interval": "",
           "intervalFactor": 2,
           "legendFormat": "{{ cmd }}",
@@ -1327,7 +1327,7 @@
       }
     }
   ],
-  "refresh": "",
+  "refresh": "10s",
   "schemaVersion": 36,
   "style": "dark",
   "tags": [],
@@ -1336,81 +1336,22 @@
       {
         "current": {
           "selected": false,
-          "text": "shared-crm-dev",
-          "value": "shared-crm-dev"
+          "text": "kiv",
+          "value": "kiv"
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
+          "uid": "prometheus"
         },
-        "definition": "label_values(redis_connected_clients, name)",
-        "hide": 2,
-        "includeAll": false,
-        "multi": false,
-        "name": "host",
-        "options": [],
-        "query": {
-          "query": "label_values(redis_connected_clients, name)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 1,
-        "regex": "/.*crm.*/",
-        "skipUrlSync": false,
-        "sort": 1,
-        "tagValuesQuery": "",
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "current": {
-          "selected": true,
-          "text": "prod",
-          "value": "prod"
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
-        },
-        "definition": "label_values(node_exporter_build_info,env)",
+        "definition": "label_values(node_exporter_build_info, ns)",
         "hide": 0,
         "includeAll": false,
-        "label": "env",
+        "label": "namespace",
         "multi": false,
-        "name": "env",
+        "name": "namespace",
         "options": [],
         "query": {
-          "query": "label_values(node_exporter_build_info,env)",
-          "refId": "Prometheus-env-Variable-Query"
-        },
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 0,
-        "tagValuesQuery": "",
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
-        "current": {
-          "selected": false,
-          "text": "i-074f036ce85a34bc6",
-          "value": "i-074f036ce85a34bc6"
-        },
-        "datasource": {
-          "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
-        },
-        "definition": "label_values(redis_up{ project=\"crm\", env=~\"$env\", job=\"$job\"} ,instance)",
-        "hide": 0,
-        "includeAll": false,
-        "label": "instance",
-        "multi": false,
-        "name": "instance",
-        "options": [],
-        "query": {
-          "query": "label_values(redis_up{ project=\"crm\", env=~\"$env\", job=\"$job\"} ,instance)",
+          "query": "label_values(node_exporter_build_info, ns)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -1422,22 +1363,52 @@
       {
         "current": {
           "selected": false,
-          "text": "redis_crm_prod",
-          "value": "redis_crm_prod"
+          "text": "dev",
+          "value": "dev"
         },
         "datasource": {
           "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
+          "uid": "prometheus"
         },
-        "definition": "label_values(redis_up{env=\"$env\",project=\"crm\"}, job)",
-        "hide": 2,
+        "definition": "label_values(node_exporter_build_info{ns=~\"$namespace\"},env)",
+        "hide": 0,
         "includeAll": false,
-        "label": "job",
+        "label": "env",
         "multi": false,
-        "name": "job",
+        "name": "env",
         "options": [],
         "query": {
-          "query": "label_values(redis_up{env=\"$env\",project=\"crm\"}, job)",
+          "query": "label_values(node_exporter_build_info{ns=~\"$namespace\"},env)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "i-09ee387c650467d50",
+          "value": "i-09ee387c650467d50"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "definition": "label_values(redis_up{ project=\"crm\", env=~\"$env\",ns=~\"$namespace\"} ,instance)",
+        "hide": 0,
+        "includeAll": false,
+        "label": "instance",
+        "multi": false,
+        "name": "instance",
+        "options": [],
+        "query": {
+          "query": "label_values(redis_up{ project=\"crm\", env=~\"$env\",ns=~\"$namespace\"} ,instance)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -1479,6 +1450,6 @@
   "timezone": "browser",
   "title": "Redis",
   "uid": "v9flQoink",
-  "version": 3,
+  "version": 10,
   "weekStart": ""
 }

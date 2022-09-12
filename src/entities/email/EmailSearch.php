@@ -85,7 +85,7 @@ class EmailSearch extends Email
 
     public function search($params)
     {
-        $query = self::find()->joinWith(['contactFrom', 'contactTo', 'params']);
+        $query = self::find();
 
         $query->addSelect([
             'e_id',
@@ -119,8 +119,7 @@ class EmailSearch extends Email
         }
 
         if ($this->datetime_start && $this->datetime_end) {
-            $query->andFilterWhere(['>=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))])
-            ->andFilterWhere(['<=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
+            $query->createdBetween(Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start)), Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end)));
         }
 
         if (!empty($this->e_created_dt)) {
@@ -198,19 +197,21 @@ class EmailSearch extends Email
             ],
         ]);
 
+        $this->load($params);
+
         if (isset($params['email_type_id']) && $params['email_type_id'] > 0) {
             $this->email_type_id = (int) $params['email_type_id'];
 
             if (EmailFilterType::isAll($this->email_type_id)) {
-                $query->where(['e_is_deleted' => false]);
+                $query->notDeleted();
             } elseif (EmailFilterType::isInbox($this->email_type_id)) {
-                $query->where(['e_type_id' => EmailType::INBOX, 'e_is_deleted' => false]);
+                $query->notDeleted()->inbox();
             } elseif (EmailFilterType::isOutbox($this->email_type_id)) {
-                $query->where(['e_type_id' => EmailType::OUTBOX, 'e_is_deleted' => false]);
+                $query->notDeleted()->outbox();
             } elseif (EmailFilterType::isDraft($this->email_type_id)) {
-                $query->where(['e_type_id' => EmailType::DRAFT, 'e_is_deleted' => false]);
+                $query->notDeleted()->draft();
             } elseif (EmailFilterType::isTrash($this->email_type_id)) {
-                $query->where(['e_is_deleted' => true]);
+                $query->deleted();
             }
         }
 
@@ -223,13 +224,16 @@ class EmailSearch extends Email
 
         if (isset($params['EmailSearch']['email']) && !empty($params['EmailSearch']['email'])) {
             $params['EmailSearch']['email'] = strtolower(trim($params['EmailSearch']['email']));
-            $query->joinWith(['contacts' => function ($q) use ($params) {
-                $q->andFilterWhere(['like', 'ea_email', $params['EmailSearch']['email']]);
-            }]);
+            $query->withContact([$params['EmailSearch']['email']]);
         }
 
-        if (!($this->load($params) && $this->validate())) {
-            $dataProvider->setTotalCount(QueryHelper::getQueryCountInvalidModel($this, static::class . 'searchEmails' . $params['EmailSearch']['user_id'], $query, 60));
+        $prefix = 'searchEmails_u_' . $params['EmailSearch']['user_id'] .
+            '_t_' . $params['email_type_id'] .
+            '_p_' . $params['EmailSearch']['e_project_id'] .
+            '_e_' . $params['EmailSearch']['email'];
+
+        if (!$this->validate()) {
+            $dataProvider->setTotalCount(QueryHelper::getQueryCountInvalidModel($this, static::class . $prefix, $query, 60));
             return $dataProvider;
         }
 
@@ -243,27 +247,24 @@ class EmailSearch extends Email
             'e_created_user_id' => $this->e_created_user_id,
         ]);
 
-        $dataProvider->setTotalCount(QueryHelper::getQueryCountValidModel($this, static::class . 'searchEmails' . $params['EmailSearch']['user_id'], $query, 60));
+        $dataProvider->setTotalCount(QueryHelper::getQueryCountValidModel($this, static::class . $prefix, $query, 60));
 
         return $dataProvider;
     }
 
     public function searchEmailGraph($params, $user_id): array
     {
-        $query = new Query();
+        $query = self::find();
         $query->addSelect(['DATE(e_created_dt) as createdDate,
                SUM(IF(e_status_id= ' . EmailStatus::DONE . ', 1, 0)) AS emailsDone,
                SUM(IF(e_status_id= ' . EmailStatus::ERROR . ', 1, 0)) AS emailsError
         ']);
 
-        $query->from(static::tableName());
         $query->where('e_status_id IS NOT NULL');
-        $query->andWhere(['e_created_user_id' => $user_id]);
+        $query->createdBy($user_id);
         if ($this->datetime_start && $this->datetime_end) {
-            $query->andWhere(['>=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start))]);
-            $query->andWhere(['<=', 'e_created_dt', Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end))]);
+            $query->createdBetween(Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_start)), Employee::convertTimeFromUserDtToUTC(strtotime($this->datetime_end)));
         }
-
         $query->groupBy('createdDate');
 
         return $query->createCommand()->queryAll();

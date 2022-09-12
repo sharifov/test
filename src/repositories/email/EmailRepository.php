@@ -2,20 +2,18 @@
 
 namespace src\repositories\email;
 
-use common\models\Client;
 use common\models\DepartmentEmailProject;
+use common\models\EmailTemplateType;
 use common\models\Lead;
 use common\models\UserProjectParams;
 use src\dispatchers\EventDispatcher;
-use src\entities\cases\Cases;
-use src\repositories\NotFoundException;
 use src\entities\email\Email;
-use yii\db\Expression;
-use common\models\EmailTemplateType;
-use src\entities\email\helpers\EmailType;
 use src\entities\email\EmailParams;
-use yii\db\ActiveQuery;
 use src\entities\email\helpers\EmailStatus;
+use src\entities\email\helpers\EmailType;
+use src\repositories\NotFoundException;
+use yii\db\ActiveQuery;
+use yii\db\Expression;
 
 class EmailRepository implements EmailRepositoryInterface
 {

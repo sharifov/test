@@ -12,6 +12,7 @@ class CasesSourceType
     public const MAIL = 4;
     public const REVIEW = 5;
     public const API = 6;
+    public const CRM = 7;
     public const OTHER = 9;
 
     private const LIST = [
@@ -21,6 +22,7 @@ class CasesSourceType
         self::MAIL => 'Mail',
         self::REVIEW => 'Review',
         self::API => 'Api',
+        self::CRM => 'CRM',
         self::OTHER => 'Other',
     ];
 
@@ -31,6 +33,7 @@ class CasesSourceType
         self::MAIL => 'danger',
         self::REVIEW => 'warning',
         self::API => 'info',
+        self::CRM => 'info',
         self::OTHER => 'info',
     ];
 

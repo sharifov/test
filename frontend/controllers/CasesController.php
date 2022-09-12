@@ -1941,4 +1941,100 @@ class CasesController extends FController
         }
         return $params;
     }
+
+    /**
+     * @return array
+     */
+    public function actionCreateCaseBySale(): array
+    {
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $out = [
+            'error' => '',
+            'data' => [],
+        ];
+
+        $gid = Yii::$app->request->post('gid');
+        $hash = Yii::$app->request->post('h');
+
+        try {
+            $arr = explode('|', base64_decode($hash));
+            $bookingId = $arr[0] ?? null;
+            $saleId = (int)($arr[1] ?? 0);
+
+            $originalCase = $this->findModelByGid($gid);
+            if (!Auth::can('cases/update', ['case' => $originalCase])) {
+                throw new ForbiddenHttpException('Access denied.');
+            }
+        } catch (\Throwable $throwable) {
+            Yii::warning(AppHelper::throwableLog($throwable), 'CasesController::actionCreateCaseBySale:Throwable');
+            $out['error'] = $throwable->getMessage();
+            return $out;
+        }
+
+        try {
+            $project = $originalCase->project;
+            if (!$project) {
+                throw new \DomainException('Not found Project. Id ' . $originalCase->cs_project_id);
+            }
+            if (!$project->api_key) {
+                throw new \DomainException('Not found API KEY. Project. Id ' . $originalCase->cs_project_id);
+            }
+        } catch (\Throwable $throwable) {
+            $out['error'] = $throwable->getMessage();
+            Yii::warning(AppHelper::throwableLog($throwable), 'CasesController::actionCreateCaseBySale:Throwable');
+            return $out;
+        }
+
+        if (!$this->casesSaleService->allowToCreateCaseWithBookingId($originalCase->cs_order_uid, $project->api_key, $bookingId)) {
+            $errorMessage = 'Restriction: you can create new case only for separate bookings';
+            $out['error'] = $errorMessage;
+            Yii::info($errorMessage, 'CasesController::actionCreateCaseBySale:allowToCreateCaseWithBookingId');
+            return $out;
+        }
+
+        if ($this->casesSaleService->checkExistCaseBySaleAndDepartment($saleId, $originalCase->cs_dep_id)) {
+            $errorMessage = 'Already exist case with this sale (' . $saleId . ')';
+            $out['error'] = $errorMessage;
+            Yii::info($errorMessage, 'CasesController::actionCreateCaseBySale:checkExistCaseBySaleAndDepartment');
+            return $out;
+        }
+
+        try {
+            $saleData = $this->casesSaleService->detailRequestToBackOffice($saleId, 0, 120, 1);
+        } catch (\Throwable $throwable) {
+            Yii::info(AppHelper::throwableLog($throwable), 'CasesController::actionCreateCaseBySale:detailRequestToBackOffice');
+            $out['error'] = $throwable->getMessage();
+            return $out;
+        }
+
+        if (!$this->casesSaleService->sameProject($project, $saleData)) {
+            $errorMessage = '[Different Project] Case Id (' . $originalCase->cs_id . ') Case project (' . $project->name . ') Sale project (' . $saleData['project'] . ')';
+            $out['error'] = $errorMessage;
+            $out['error_type'] = self::DIFFERENT_PROJECT;
+            Yii::info($errorMessage, 'CasesController::actionCreateCaseBySale:sameProject');
+            return $out;
+        }
+
+        try {
+            /** @var Employee $user */
+            $user = Yii::$app->user->identity;
+            $clone = $originalCase->createClone($originalCase, $user, $bookingId);
+            $this->casesRepository->save($clone);
+
+            $sourceCaseLink = '<a href="/cases/view/' . $originalCase->cs_gid . '" target="_blank" data-pjax="0">' . $originalCase->cs_id . '</a>';
+            $newCaseLink = '<a href="/cases/view/' . $clone->cs_gid . '" target="_blank" data-pjax="0">' . $clone->cs_id . '</a>';
+
+            $clone->addEventLog(null, 'Source Case ' . $sourceCaseLink . ', BookingID: ' . $bookingId . ', Crated by: ' . $user->username);
+            $originalCase->addEventLog(null, 'New case created for BookingID ' . $bookingId . ', New Case: ' . $newCaseLink . ', Crated by: ' . $user->username);
+
+            $this->casesSaleService->createSale($clone->cs_id, $saleData);
+
+            $out['data'] = ['newCaseId' => $clone->cs_id, 'newCaseGid' => $clone->cs_gid];
+        } catch (\Throwable $e) {
+            Yii::$app->session->setFlash('error', $e->getMessage());
+            Yii::error($e, 'error\CasesController::actionCreateCaseBySale');
+        }
+
+        return $out;
+    }
 }
