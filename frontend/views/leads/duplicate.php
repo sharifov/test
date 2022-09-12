@@ -1,5 +1,7 @@
 <?php
 
+use src\helpers\email\MaskEmailHelper;
+use src\helpers\phone\MaskPhoneHelper;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use kartik\grid\GridView;
@@ -38,11 +40,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         'attribute' => 'cnt',
                         'filter' => false,
                     ],
-
                     [
                         'attribute' => 'client_phone',
                         'value' => function ($model) {
-                            return Html::a($model['client_phone'], ['leads/index', 'LeadSearch[client_phone]' => $model['client_phone']], ['data-pjax' => 0, 'target' => '_blank']);
+                            return Html::a(MaskPhoneHelper::masking($model['client_phone']), ['leads/index', 'LeadSearch[client_phone]' => MaskPhoneHelper::masking($model['client_phone'])], ['data-pjax' => 0, 'target' => '_blank']);
                         },
                         'format' => 'raw',
                     ],
@@ -101,7 +102,7 @@ $this->params['breadcrumbs'][] = $this->title;
                             //'header' => 'Email',
                             'attribute' => 'client_email',
                             'value' => function ($model) {
-                                return Html::a($model['client_email'], ['leads/index', 'LeadSearch[client_email]' => $model['client_email']], ['data-pjax' => 0, 'target' => '_blank']);
+                                return Html::a(MaskEmailHelper::masking($model['client_email']), ['leads/index', 'LeadSearch[client_email]' => MaskEmailHelper::masking($model['client_email'])], ['data-pjax' => 0, 'target' => '_blank']);
                             },
                             'format' => 'raw',
 
