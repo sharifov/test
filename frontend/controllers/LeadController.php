@@ -1040,35 +1040,30 @@ class LeadController extends FController
     public function actionPjaxUserTasksList(string $gid)
     {
         $result = '';
-        $request = \Yii::$app->request;
-        $userTasksListForm = new UserTasksListForm();
-        $userTasksListForm->load($request->get(), '');
-
-        if (!$userTasksListForm->validate()) {
-            $msg = [
-                'message' => ErrorsToStringHelper::extractFromModel($userTasksListForm),
-                'gid' => $userTasksListForm->gid,
-                'page' => $userTasksListForm->page,
-                'userShiftScheduleId' => $userTasksListForm->userShiftScheduleId,
-            ];
-            throw new \HttpInvalidParamException(VarDumper::dumpAsString($msg), 'LeadController:actionPjaxUserTasksList');
-        }
-
-        $lead = Lead::find()->where([
-            'gid' => $userTasksListForm->gid,
-        ])->limit(1)->one();
-
-        if (empty($lead)) {
-            throw new NotFoundHttpException('Not found lead ID: ' . $userTasksListForm->gid . ' for getting pjax task list');
-        }
-
-        /** @abac $abacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS, Access to view lead  */
-        if (!Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS)) {
-            throw new ForbiddenHttpException('Access Denied for getting pjax task list.');
-        }
 
         /** @fflag FFlag::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE, New User Task List in Lead view Enable */
         if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE)) {
+            $request = \Yii::$app->request;
+            $userTasksListForm = new UserTasksListForm();
+            $userTasksListForm->load($request->get(), '');
+
+            if (!$userTasksListForm->validate()) {
+                $msg = [
+                    'message' => ErrorsToStringHelper::extractFromModel($userTasksListForm),
+                    'gid' => $userTasksListForm->gid,
+                    'page' => $userTasksListForm->page,
+                    'userShiftScheduleId' => $userTasksListForm->userShiftScheduleId,
+                ];
+                throw new \HttpInvalidParamException(VarDumper::dumpAsString($msg), 'LeadController:actionPjaxUserTasksList');
+            }
+
+            $lead = $this->findLeadByGid($userTasksListForm->gid);
+
+            /** @abac $abacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS, Access to view lead  */
+            if (!Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS)) {
+                throw new ForbiddenHttpException('Access Denied for getting pjax task list.');
+            }
+
             $result = UserTasksListWidget::widget([
                 'lead' => $lead,
                 'pageNumber' => $userTasksListForm->page,
