@@ -2,7 +2,6 @@
 
 namespace src\entities\email;
 
-use Yii;
 use src\model\BaseActiveRecord;
 
 /**

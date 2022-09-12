@@ -7,6 +7,7 @@ use common\models\query\ClientQuery;
 use src\behaviors\metric\MetricClientCounterBehavior;
 use src\entities\cases\Cases;
 use src\entities\EventTrait;
+use src\helpers\email\MaskEmailHelper;
 use src\helpers\phone\MaskPhoneHelper;
 use src\model\client\entity\events\ClientChangeIpEvent;
 use src\model\client\entity\events\ClientCreatedEvent;

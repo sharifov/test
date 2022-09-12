@@ -33,7 +33,6 @@ $this->params['breadcrumbs'][] = $this->title;
             //['class' => 'yii\grid\SerialColumn'],
 
             'cp_id',
-            'cp_identity',
             ['class' => ConferenceParticipantTypeColumn::class],
             ['class' => UserSelect2Column::class, 'attribute' => 'cp_user_id', 'relation' => 'user'],
             //'cp_cf_id',

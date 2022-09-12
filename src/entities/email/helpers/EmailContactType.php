@@ -2,8 +2,6 @@
 
 namespace src\entities\email\helpers;
 
-use src\entities\email\Email;
-
 /**
  * Class EmailContactType
  *
