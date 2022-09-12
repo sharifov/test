@@ -58,7 +58,7 @@ class UserProjectParamsSearch extends UserProjectParams
      */
     public function search($params)
     {
-        $query = UserProjectParams::find()->with('uppUpdatedUser', 'uppUser', 'uppProject', 'emailList', 'phoneList', 'uppDep')->joinWith(['voiceMail']);
+        $query = UserProjectParams::find()->with('uppUpdatedUser', 'uppUser', 'uppProject', 'emailList', 'phoneList', 'uppDep')->joinWith(['voiceMail', 'uppUser']);
 
         // add conditions that should always apply here
 
