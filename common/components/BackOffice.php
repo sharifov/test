@@ -47,7 +47,7 @@ class BackOffice
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 'Content-Type: application/json',
                 'sig-username: ' . $sigUsername,
-                'signature: ' . self::getSignatureBOForRbac($sigUsername, $endpoint, $fields)
+                'signature: ' . self::getSignatureBOForRbac($sigUsername, $endpoint, [], $fields)
             ]);
         } else {
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -157,22 +157,22 @@ class BackOffice
     /**
      * @param string $sigUsername
      * @param string $endpointUrl
-     * @param array|null $requestBodyFields
+     * @param array|null $requestBodyArray
      * @return string
      * @throws BadRequestHttpException
      */
-    public static function getSignatureBOForRbac(string $sigUsername, string $endpointUrl = '', array $requestBodyFields = []): string
+    public static function getSignatureBOForRbac(string $sigUsername, string $endpointUrl = '', array $requestBodyArray = [], ?string $requestBodyJson = ''): string
     {
         $apiKey = Yii::$app->params['backOffice']['apiKey'];
-        $requestBodyString = $requestQueryString = '';
-        if (count($requestBodyFields)) {
-            $requestBodyString = json_encode($requestBodyFields);
+        $requestBodyString = $requestQueryString = $requestBodyJson = '';
+        if (count($requestBodyArray)) {
+            $requestBodyString = json_encode($requestBodyArray);
         }
         if ($endpointUrl != '') {
             $requestQueryString = parse_url($endpointUrl, PHP_URL_QUERY) ;
         }
         if (!empty($apiKey) && !empty($sigUsername)) {
-            $requestDataString = $requestQueryString . $sigUsername . $requestBodyString;
+            $requestDataString = $requestQueryString . $sigUsername . $requestBodyString . $requestBodyJson;
             return hash_hmac('sha256', $requestDataString, $apiKey);
         }
 

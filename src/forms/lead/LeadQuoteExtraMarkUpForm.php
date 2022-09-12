@@ -8,6 +8,7 @@ use yii\base\Model;
 class LeadQuoteExtraMarkUpForm extends Model
 {
     private const MAX_EXTRA_MARK_UP_FACTOR = 10;
+    private const ALLOWABLE_RATE = 0.05;
 
     public $extra_mark_up;
     public $qp_client_extra_mark_up;
@@ -40,8 +41,19 @@ class LeadQuoteExtraMarkUpForm extends Model
     {
         /** @fflag FFlag::FF_KEY_VALIDATE_CHANGE_EXTRA_MARK_UP, Enable validate change Extra Mark Up in lead/view page */
         if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_VALIDATE_CHANGE_EXTRA_MARK_UP)) {
-            if (round($this->extra_mark_up, 2) !== round($this->qp_client_extra_mark_up / $this->clientCurrencyRate, 2)) {
+            $diffAbs = abs($this->extra_mark_up - ($this->qp_client_extra_mark_up / $this->clientCurrencyRate));
+
+            if ($diffAbs > self::ALLOWABLE_RATE) {
                 $this->addError($attribute, 'Extra Mark Up not equal Client Extra Mark-Up');
+                $message = [
+                    'message' => 'Extra Mark Up not equal Client Extra Mark-Up',
+                    'extraMarkUp' => $this->extra_mark_up,
+                    'clientExtraMarkUp' => $this->qp_client_extra_mark_up,
+                    'clientCurrencyRate' => $this->clientCurrencyRate,
+                    'diffAbs' => $diffAbs,
+                    'allowableRate' => self::ALLOWABLE_RATE,
+                ];
+                \Yii::warning($message, 'LeadQuoteExtraMarkUpForm:validateCurrencyRate');
             }
         }
     }

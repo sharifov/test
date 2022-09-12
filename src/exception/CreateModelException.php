@@ -2,7 +2,9 @@
 
 namespace src\exception;
 
-class CreateModelException extends \RuntimeException
+use RuntimeException;
+
+class CreateModelException extends RuntimeException
 {
     protected $errors = [];
 
@@ -18,7 +20,7 @@ class CreateModelException extends \RuntimeException
         return $this->errors;
     }
 
-    public function getFirstErrors()
+    public function getFirstErrors(): array
     {
         if (empty($this->errors)) {
             return [];
@@ -34,7 +36,7 @@ class CreateModelException extends \RuntimeException
         return $errors;
     }
 
-    public function getErrorSummary($showAllErrors)
+    public function getErrorSummary($showAllErrors): array
     {
         $lines = [];
         $errors = $showAllErrors ? $this->getErrors() : $this->getFirstErrors();

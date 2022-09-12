@@ -6,8 +6,6 @@ use common\components\ChartTools;
 use common\components\CommunicationService;
 use common\components\jobs\UserTaskCompletionJob;
 use common\models\query\EmailQuery;
-use common\models\DepartmentEmailProject;
-use common\models\UserProjectParams;
 use DateTime;
 use modules\featureFlag\FFlag;
 use modules\lead\src\services\LeadTaskListService;
@@ -107,7 +105,6 @@ use src\entities\email\helpers\EmailStatus;
  * @property string|null $emailFromName
  * @property string|null $emailTo
  * @property string|null $emailToName
- * @property string|null $templateTypeName
  * @property string|null $emailSubject
  * @property int|null $communicationId
  * @property string|null $languageId
@@ -564,76 +561,6 @@ class Email extends \yii\db\ActiveRecord implements EmailInterface
         $message = '<' . implode('.', $arr) . '>';
         return $message;
     }
-
-    /**
-     * @deprecated
-     * @return int|mixed
-     */
-    public function detectLeadId()
-    {
-
-        // $subject = 'RE Hello [lid:78456123]';
-        // $subject = 'RE Hello [uid:lkasdjlkjkl234]';
-        // $ref_message_id = '<kiv.1.6.345.alex.connor@gmail.com> <qwewqeqweqwe.qweqwe@mail.com> <aasdfkjal.sfasldfkl@gmail.com>';
-
-//        $subject = $this->e_email_subject;
-//
-//        $matches = [];
-//        $lead = null;
-//
-//        preg_match('~\[lid:(\d+)\]~si', $subject, $matches);
-//
-//        if(isset($matches[1]) && $matches[1]) {
-//            $lead_id = (int) $matches[1];
-//            $lead = Lead::find()->where(['id' => $lead_id])->one();
-//        }
-//
-//        if(!$lead) {
-//            $matches = [];
-//            preg_match('~\[uid:(\w+)\]~si', $subject, $matches);
-//            if(isset($matches[1]) && $matches[1]) {
-//                $lead = Lead::find()->where(['uid' => $matches[1]])->one();
-//            }
-//        }
-//
-//        //preg_match('~\[uid:(\w+)\]~si', $subject, $matches);
-//
-//        if(!$lead) {
-//            $matches = [];
-//            preg_match_all('~<kiv\.(.+)>~iU', $this->e_ref_message_id, $matches);
-//            if (isset($matches[1]) && $matches[1]) {
-//                foreach ($matches[1] as $messageId) {
-//                    $messageArr = explode('.', $messageId);
-//                    if (isset($messageArr[2]) && $messageArr[2]) {
-//                        $lead_id = (int) $messageArr[2];
-//
-//                        $lead = Lead::find()->where(['id' => $lead_id])->one();
-//                        if($lead) {
-//                            break;
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//
-//        if($lead) {
-//            $this->e_lead_id = $lead->id;
-//        } else {
-//            $clientEmail = ClientEmail::find()->where(['email' => $this->e_email_from])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-//            if($clientEmail && $clientEmail->client_id) {
-//                $lead = Lead::find()->where(['client_id' => $clientEmail->client_id, 'status' => [Lead::STATUS_PROCESSING, Lead::STATUS_SNOOZE, Lead::STATUS_ON_HOLD, Lead::STATUS_FOLLOW_UP]])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-//                if(!$lead) {
-//                    $lead = Lead::find()->where(['client_id' => $clientEmail->client_id])->orderBy(['id' => SORT_DESC])->limit(1)->one();
-//                }
-//                if($lead) {
-//                    $this->e_lead_id = $lead->id;
-//                }
-//            }
-//        }
-//
-//        return $this->e_lead_id;
-    }
-
 
     /**
      * @deprecated
