@@ -35,6 +35,7 @@ use yii\helpers\ArrayHelper;
  * @property UserShiftSchedule[] $userShiftEvents
  * @property Employee $user
  * @property TaskList $taskList
+ * @property UserTaskStatusLog $completeTime
  */
 class UserTask extends \yii\db\ActiveRecord
 {
@@ -313,5 +314,19 @@ class UserTask extends \yii\db\ActiveRecord
     public function isOwner(?int $userId): bool
     {
         return $this->ut_user_id === $userId;
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getCompleteTime(): ActiveQuery
+    {
+        return $this->hasOne(UserTaskStatusLog::class, ['utsl_ut_id' => 'ut_id'])
+            ->where([
+                'utsl_new_status' => UserTask::STATUS_COMPLETE,
+            ])
+            ->orderBy([
+                'utsl_created_dt' => SORT_DESC,
+            ]);
     }
 }

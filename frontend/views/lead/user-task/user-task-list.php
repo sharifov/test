@@ -73,7 +73,6 @@ $calcPagination = UserTasksListHelper::calcPagination($pagination);
             <tbody class="user-task-history-table__tbody">
                 <?php $iterationNumb = $calcPagination['from']; ?>
                 <?php foreach ($historyTasks as $task) :
-                    $task = (object)$task;
                     $isDeadline = UserTasksListHelper::isDeadline($task->ut_end_dt, $task->ut_status_id, $userTimezone);
                     $statusName = $isDeadline ? 'failed' : UserTask::STATUS_LIST[(int)$task->ut_status_id];
                     ?>
@@ -85,7 +84,7 @@ $calcPagination = UserTasksListHelper::calcPagination($pagination);
                             <?= $iterationNumb++; ?>
                         </td>
                         <td class="user-task-history-table__task">
-                            <?= $task->tl_title ?: ''; ?>
+                            <?= $task->taskList->tl_title ?: ''; ?>
                         </td>
                         <td class="user-task-history-table__start">
                             <?= UserTasksListHelper::renderStartDate($task->ut_status_id, $task->ut_start_dt, $isDeadline, $userTimezone); ?>
@@ -94,7 +93,9 @@ $calcPagination = UserTasksListHelper::calcPagination($pagination);
                             <?= UserTasksListHelper::renderDeadlineStatus($task->ut_status_id, $task->ut_start_dt, $task->ut_end_dt, $userTimezone); ?>
                         </td>
                         <td class="user-task-history-table__completed">
-                            <?= UserTasksListHelper::renderCompletedStatus($task->ut_status_id, $task->complete_time, $userTimezone); ?>
+                            <?php if (!empty($task->completeTime)) {
+                                echo UserTasksListHelper::renderCompletedStatus($task->ut_status_id, $task->completeTime->utsl_created_dt, $userTimezone);
+                            } ?>
                         </td>
                         <th class="user-task-history-table__note">
                             <?php if (!empty($task->ut_description)) {

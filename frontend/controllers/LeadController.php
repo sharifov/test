@@ -2900,25 +2900,12 @@ class LeadController extends FController
             $leadID,
             $this->request->queryParams
         );
-
-        $query = $dataProvider->query->addSelect(['user_task.*', 'task_list.tl_title', 'complete_time' => (UserTaskQuery::getQueryCompleteTime())])
-            ->innerJoin('task_list', 'user_task.ut_task_list_id = task_list.tl_id');
-
-        $pagination = new Pagination([
-            'pageSize' => $dataProvider->getPagination()->getPageSize(),
-            'totalCount' => (clone $query)->count(),
-        ]);
-
-        $historyTasks = $query->offset($pagination->getOffset())
-            ->limit($pagination->getLimit())
-            ->orderBy($dataProvider->getSort()->orders)
-            ->asArray()
-            ->all();
+        $dataProvider->query->with(['completeTime', 'taskList']);
 
         return $this->renderAjax('user-task/user-task-list', [
-            'pagination' => $pagination,
+            'pagination' => $dataProvider->getPagination(),
             'searchModel' => $searchModel,
-            'historyTasks' => $historyTasks,
+            'historyTasks' => $dataProvider->getModels(),
             'leadID' => $leadID,
         ]);
     }
