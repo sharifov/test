@@ -267,7 +267,7 @@ class SaleController extends FController
             ];
             $host = Yii::$app->params['backOffice']['urlV3'];
             $responseBO = BackOffice::sendRequest2('flight-request/resend-tickets', $data, 'POST', 120, $host);
-            $data['emails'] = LogHelper::hidePersonalData($data['emails'], range(0, count($emails) - 1));
+            $data['emails'] = LogHelper::hidePersonalData($data['emails'], array_keys($emails));
 
             if (!$responseBO->isOk) {
                 Yii::error([
