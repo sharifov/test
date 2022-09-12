@@ -13,6 +13,7 @@ use Yii;
 use yii\helpers\ArrayHelper;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
+use src\exception\BoResponseException;
 
 class LeadSaleController extends FController
 {
@@ -65,6 +66,10 @@ class LeadSaleController extends FController
             }
 
             $viewData['sale'] = $this->leadSaleService->getSaleByBoFlightId($lead->bo_flight_id);
+        } catch (BoResponseException $e) {
+            $viewData['errorMessage'] = "BO response is empty or Broken Data";
+            $message = ArrayHelper::merge(AppHelper::throwableLog($e), ['lead_id' => $leadId]);
+            Yii::warning($message, 'LeadSaleController::actionAjaxView::Exception');
         } catch (\DomainException | \RuntimeException $e) {
             $viewData['errorMessage'] = $e->getMessage();
             $message = ArrayHelper::merge(AppHelper::throwableLog($e), ['lead_id' => $leadId]);

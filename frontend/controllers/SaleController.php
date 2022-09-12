@@ -267,7 +267,7 @@ class SaleController extends FController
             ];
             $host = Yii::$app->params['backOffice']['urlV3'];
             $responseBO = BackOffice::sendRequest2('flight-request/resend-tickets', $data, 'POST', 120, $host);
-            $data['emails'] = LogHelper::hidePersonalData($emails, ['emails']);
+            $data['emails'] = LogHelper::hidePersonalData($data['emails'], array_keys($emails));
 
             if (!$responseBO->isOk) {
                 Yii::error([
@@ -323,6 +323,9 @@ class SaleController extends FController
                 ], 'SaleController:resendTickets');
                 throw new \RuntimeException('Resend tickets BO errors. Undefined error.');
             }
+
+            $username = Auth::user()->username ?? null;
+            $case->addEventLog(null, 'Sent Ticket Receipts To: (' . implode(', ', $data['emails']) . '), By username: ' . $username);
 
             $result['error'] = false;
             $result['message'] = 'Tickets resend successfully';

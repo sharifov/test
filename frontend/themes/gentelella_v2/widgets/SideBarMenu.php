@@ -23,6 +23,7 @@ use modules\user\userFeedback\abac\dto\UserFeedbackAbacDto;
 use modules\user\userFeedback\abac\UserFeedbackAbacObject;
 use src\helpers\app\AppHelper;
 use src\services\lead\LeadBusinessExtraQueueService;
+use src\services\quote\QuoteSearchCidService;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -541,6 +542,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Quote Segment Baggages', 'url' => ['/quote-segment-baggage-crud/index'], 'icon' => 'list'],
                         ['label' => 'Quote Segment Baggage Charges', 'url' => ['/quote-segment-baggage-charge-crud/index'], 'icon' => 'list'],
                         ['label' => 'Quote Segment Stop CRUD', 'url' => ['/quote-segment-stop-crud/index'], 'icon' => 'list'],
+                        (QuoteSearchCidService::ffIsEnable()) ? ['label' => 'Quote Search Cid List', 'url' => ['/quote-search-cid/index'], 'icon' => 'list'] : null,
                     ],
                 ],
                 ['label' => 'Call User Access', 'url' => ['/call-user-access/index'], 'icon' => 'list'],
@@ -757,8 +759,12 @@ class SideBarMenu extends \yii\bootstrap\Widget
                             'title' => 'Task List'
                         ],
                         [
-                            'label' => 'User Task',
+                            'label' => 'User Task CRUD',
                             'url' => ['/task/user-task-crud/index'],
+                        ],
+                        [
+                            'label' => 'User Task Report',
+                            'url' => ['/task/user-task-report/index'],
                         ],
                         [
                             'label' => 'User Task Status Logs',
