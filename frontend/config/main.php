@@ -470,7 +470,8 @@ return [
             'storage' => [
                 'class' => common\implementations\twoFactorAuth\AuthStorage::class
             ],
-            'layout' => '@frontend/themes/gentelella_v2/views/layouts/login_2fa.php'
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/login_2fa.php',
+            'viewFooter' => '@frontend/themes/gentelella_v2/views/layouts/login_2fa_footer.php'
         ],
         'object-task' => [
             'class' => \modules\objectTask\ObjectTaskModule::class,
