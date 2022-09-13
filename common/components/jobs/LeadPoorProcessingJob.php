@@ -80,13 +80,15 @@ class LeadPoorProcessingJob extends BaseJob implements JobInterface
                 }
                 $leadPoorProcessingService->handle();
                 $transaction->commit();
-            } catch (\RuntimeException | \DomainException $throwable) {
+            } catch (\DomainException $throwable) {
                 $transaction->rollBack();
                 /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
                 if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG)) {
                     $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
                     \Yii::warning($message, 'LeadPoorProcessingJob:execute:Exception');
                 }
+            } catch (\RuntimeException $throwable) {
+                $transaction->rollBack();
             } catch (\Throwable $throwable) {
                 $transaction->rollBack();
                 $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
