@@ -47,8 +47,22 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw'
             ],
-            'oc_last_name',
-            'oc_middle_name',
+            [
+                'attribute' => 'oc_last_name',
+                'value' => static function (OrderContact $model) {
+                    $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['oc_last_name']);
+                    return $data['oc_last_name'];
+                },
+                'format' => 'raw'
+            ],
+            [
+                'attribute' => 'oc_middle_name',
+                'value' => static function (OrderContact $model) {
+                    $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['oc_middle_name']);
+                    return $data['oc_middle_name'];
+                },
+                'format' => 'raw'
+            ],
             [
                 'attribute' => 'oc_email',
                 'value' => static function (OrderContact $model) {

@@ -38,8 +38,20 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $data['ph_first_name'];
                 }
             ],
-            'ph_last_name',
-            'ph_middle_name',
+            [
+                'attribute' => 'ph_last_name',
+                'value' => static function (ProductHolder $model) {
+                    $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['ph_last_name']);
+                    return $data['ph_last_name'];
+                }
+            ],
+            [
+                'attribute' => 'ph_middle_name',
+                'value' => static function (ProductHolder $model) {
+                    $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['ph_middle_name']);
+                    return $data['ph_middle_name'];
+                }
+            ],
             [
                 'attribute' => 'ph_email',
                 'value' => static function (ProductHolder $model) {

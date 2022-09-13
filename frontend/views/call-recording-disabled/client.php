@@ -28,8 +28,20 @@ echo GridView::widget([
                 return $data['first_name'];
             }
         ],
-        'middle_name',
-        'last_name',
+        [
+            'attribute' => 'middle_name',
+            'value' => static function (Client $model) {
+                $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['middle_name']);
+                return $data['middle_name'];
+            }
+        ],
+        [
+            'attribute' => 'last_name',
+            'value' => static function (Client $model) {
+                $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['last_name']);
+                return $data['last_name'];
+            }
+        ],
         'company_name',
         [
             'attribute' => 'cl_type_id',

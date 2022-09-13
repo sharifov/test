@@ -45,8 +45,20 @@ $this->params['breadcrumbs'][] = $this->title;
                     return $data ['first_name'];
                 },
             ],
-            'middle_name',
-            'last_name',
+            [
+                'attribute' => 'middle_name',
+                'value' => static function ($model) {
+                    $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['middle_name']);
+                    return $data ['middle_name'];
+                },
+            ],
+            [
+                'attribute' => 'last_name',
+                'value' => static function ($model) {
+                    $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['last_name']);
+                    return $data ['last_name'];
+                },
+            ],
             'company_name',
             'is_company:boolean',
             'is_public:boolean',
