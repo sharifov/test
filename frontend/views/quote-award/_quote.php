@@ -53,13 +53,8 @@ function formatRepo( repo ) {
         if (repo.loading) return repo.text;
 
         var markup = "<div class='select2-result-repository clearfix'>" +
-            //"<div class='select2-result-repository__avatar'><i class=\"fa fa-plane\"></div>" +
             "<div class='select2-result-repository__meta'>" +
                 "<div class='select2-result-repository__title'>" + repo.text + "</div>";
-        
-        /*markup += "<div class='select2-result-repository__statistics'>" +
-                    "<div class='select2-result-repository__forks'>" + repo.id + "</div>" +
-                "</div>" +*/
         markup +=	"</div></div>";
 
         return markup;

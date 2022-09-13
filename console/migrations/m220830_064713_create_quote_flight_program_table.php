@@ -27,8 +27,8 @@ class m220830_064713_create_quote_flight_program_table extends Migration
 
         $this->createTable('{{%quote_flight_program}}', [
             'gfp_id' => $this->primaryKey(),
-            'gfp_name' => $this->string()->notNull(),
-            'gfp_airline_iata' => $this->string()->notNull(),
+            'gfp_name' => $this->string(50)->notNull(),
+            'gfp_airline_iata' => $this->string(3)->notNull(),
             'gfp_ppm' => $this->decimal(10, 4),
             'gfp_created_dt' => $this->dateTime(),
             'gfp_updated_dt' => $this->dateTime(),
