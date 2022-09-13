@@ -14,6 +14,7 @@ use src\behaviors\metric\MetricQuoteCounterBehavior;
 use src\behaviors\quote\ClientCurrencyBehavior;
 use src\entities\EventTrait;
 use src\events\quote\QuoteExtraMarkUpChangeEvent;
+use src\events\quote\QuoteSaveEvent;
 use src\events\quote\QuoteSendEvent;
 use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
@@ -77,6 +78,7 @@ use yii\helpers\VarDumper;
  * @property QuoteLabel[] $quoteLabel
  * @property Currency|null $clientCurrency
  * @property int|null $q_create_type_id
+ * @property QuoteSearchCid $quoteSearchCid
  */
 class Quote extends \yii\db\ActiveRecord
 {
@@ -1717,6 +1719,11 @@ class Quote extends \yii\db\ActiveRecord
         return $this->hasMany(QuoteLabel::class, ['ql_quote_id' => 'id']);
     }
 
+    public function getQuoteSearchCid(): ActiveQuery
+    {
+        return $this->hasOne(QuoteSearchCid::class, ['qsc_q_id' => 'id']);
+    }
+
     public function getQuoteTripsData()
     {
         $trips = [];
@@ -3094,5 +3101,10 @@ class Quote extends \yii\db\ActiveRecord
             ->orderBy(['id' => SORT_DESC])
             ->limit($limit + 1)
             ->all();
+    }
+
+    public function recordSaveEvent(?string $cid = null)
+    {
+        $this->recordEvent(new QuoteSaveEvent($this, $cid));
     }
 }

@@ -12,6 +12,7 @@ use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
 use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\objectTask\src\abac\ObjectTaskObject;
+use modules\objectTask\src\services\ObjectTaskStatusLogService;
 use modules\qaTask\src\entities\qaTaskStatus\QaTaskStatus;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\services\UserShiftScheduleService;
@@ -22,6 +23,7 @@ use modules\user\userFeedback\abac\dto\UserFeedbackAbacDto;
 use modules\user\userFeedback\abac\UserFeedbackAbacObject;
 use src\helpers\app\AppHelper;
 use src\services\lead\LeadBusinessExtraQueueService;
+use src\services\quote\QuoteSearchCidService;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
@@ -540,6 +542,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Quote Segment Baggages', 'url' => ['/quote-segment-baggage-crud/index'], 'icon' => 'list'],
                         ['label' => 'Quote Segment Baggage Charges', 'url' => ['/quote-segment-baggage-charge-crud/index'], 'icon' => 'list'],
                         ['label' => 'Quote Segment Stop CRUD', 'url' => ['/quote-segment-stop-crud/index'], 'icon' => 'list'],
+                        (QuoteSearchCidService::ffIsEnable()) ? ['label' => 'Quote Search Cid List', 'url' => ['/quote-search-cid/index'], 'icon' => 'list'] : null,
                     ],
                 ],
                 ['label' => 'Call User Access', 'url' => ['/call-user-access/index'], 'icon' => 'list'],
@@ -756,8 +759,12 @@ class SideBarMenu extends \yii\bootstrap\Widget
                             'title' => 'Task List'
                         ],
                         [
-                            'label' => 'User Task',
+                            'label' => 'User Task CRUD',
                             'url' => ['/task/user-task-crud/index'],
+                        ],
+                        [
+                            'label' => 'User Task Report',
+                            'url' => ['/task/user-task-report/index'],
                         ],
                         [
                             'label' => 'User Task Status Logs',
@@ -1131,6 +1138,11 @@ class SideBarMenu extends \yii\bootstrap\Widget
                             'object' => ObjectTaskObject::ACT_OBJECT_TASK_LIST,
                             'action' => LeadAbacObject::ACTION_ACCESS
                         ],
+                    ],
+                    [
+                        'label' => 'Object Task Status Logs',
+                        'url' => ['/object-task/object-task-status-log/index'],
+                        'visible' => ObjectTaskStatusLogService::linkIsVisibleInSidebar(),
                     ],
                     [
                         'label' => 'Object Task Scenarios',

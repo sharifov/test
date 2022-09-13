@@ -5,6 +5,7 @@ namespace webapi\modules\v1\controllers;
 use common\components\jobs\AutoAddQuoteJob;
 use common\components\jobs\WebEngageLeadRequestJob;
 use common\components\purifier\Purifier;
+use common\helpers\LogHelper;
 use common\models\Client;
 use common\models\ClientEmail;
 use common\models\ClientPhone;
@@ -20,6 +21,8 @@ use modules\experiment\models\ExperimentTarget;
 use modules\featureFlag\FFlag;
 use modules\flight\models\FlightQuoteSegment;
 use modules\flight\models\FlightSegment;
+use modules\objectTask\src\scenarios\NoAnswer;
+use modules\objectTask\src\services\NoAnswerProtocolService;
 use modules\product\src\useCases\product\api\create\flight\Handler;
 use modules\webEngage\settings\WebEngageDictionary;
 use modules\webEngage\src\service\webEngageEventData\lead\eventData\LeadCreatedEventData;
@@ -499,6 +502,7 @@ class LeadController extends ApiBaseController
 
             if (!$modelLead->validate()) {
                 if ($errors = $modelLead->getErrors()) {
+                    \Yii::warning(LogHelper::prepareErrorDataForLogFromModel($modelLead), 'v1::LeadController::create::validate');
                     throw new UnprocessableEntityHttpException($this->errorToString($errors), 5);
                 } else {
                     throw new UnprocessableEntityHttpException('Not validate Api Lead data', 5);
@@ -1897,8 +1901,20 @@ class LeadController extends ApiBaseController
                     $response = [];
 
                     if (!$isSold && $lead->isSold()) {
+                        $employeeId = $lead->employee_id;
+
+                        /** @fflag FFlag::FF_KEY_NO_ANSWER_PROTOCOL_SOLD_AUTO_REPLACE_AFK_EMPLOYEE_ENABLE, Auto replace employee when lead was sold without agent */
+                        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_NO_ANSWER_PROTOCOL_SOLD_AUTO_REPLACE_AFK_EMPLOYEE_ENABLE)) {
+                            if (NoAnswerProtocolService::leadWasInNoAnswer($lead) === true && empty($lead->employee_id)) {
+                                $employee = NoAnswer::getVirtualAgentByProjectKey(
+                                    $lead->project->project_key
+                                );
+                                $employeeId = $employee->id ?? null;
+                            }
+                        }
+
                         $lead->status = $lastStatus;
-                        $lead->sold($lead->employee_id, null);
+                        $lead->sold($employeeId, null);
                     } elseif (!$isReject && $lead->isReject()) {
                         $lead->status = $lastStatus;
                         $lead->reject($lead->employee_id, null, 'BO rejected');

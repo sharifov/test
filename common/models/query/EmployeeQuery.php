@@ -227,4 +227,28 @@ class EmployeeQuery extends \yii\db\ActiveQuery
     {
         return Employee::findOne(['email' => $email]);
     }
+
+    public static function selectByRolesAndProjectId(array $roles, int $projectId): self
+    {
+        $query = Employee::find()
+            ->where([
+                'status' => Employee::STATUS_ACTIVE,
+            ]);
+
+        $query->leftJoin(
+            'auth_assignment',
+            'auth_assignment.user_id = id'
+        )->andWhere([
+            'IN', 'auth_assignment.item_name', $roles
+        ]);
+
+        $query->leftJoin(
+            'project_employee_access',
+            'project_employee_access.employee_id = id'
+        )->andOnCondition([
+            'project_employee_access.project_id' => $projectId,
+        ]);
+
+        return $query;
+    }
 }

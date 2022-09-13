@@ -104,7 +104,6 @@ $gridId = 'sms-grid-id';
                 'filter' => SmsDistributionList::getStatusList()
             ],
             'sdl_phone_from',
-            //'sdl_phone_to',
             [
                 'attribute' => 'sdl_phone_to',
                 'value' => static function (SmsDistributionList $model) {
@@ -113,12 +112,6 @@ $gridId = 'sms-grid-id';
                 }
             ],
             'sdl_client_id:client',
-            [
-                'label' => 'Client Name',
-                'value' => static function (SmsDistributionList $model) {
-                    return $model->sdl_client_id && $model->sdlClient ? $model->sdlClient->full_name : '-';
-                },
-            ],
             [
                 'attribute' => 'sdl_text',
                 'value' => static function (SmsDistributionList $model) {

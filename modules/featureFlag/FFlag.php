@@ -50,6 +50,7 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_SEGMENT_SIMPLE_LEAD_ENABLE = 'segmentSimpleLead';
     public const FF_KEY_LEAD_TASK_LIST_HISTORY_MODAL_ENABLE = 'leadTaskListHistoryModalEnable';
     public const FF_KEY_DEBUG_ASSIGN_USER_TASK = 'debugAssignUserTaskEnable';
+    public const FF_KEY_TWO_FACTOR_AUTH_MODULE = 'twoFactorAuthModule';
 
     public const FF_KEY_USER_TASK_COMPLETION_DEBUG = 'userTaskCompletionDebug';
     public const FF_KEY_CONVERSION_BY_TIMEZONE = 'conversionByTimezone';
@@ -60,6 +61,15 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_USER_CONVERSION_EXCLUDE_ALTERNATIVE_LEAD_ENABLE = 'userConversionExcludeAlternativeLeadEnable';
     public const FF_KEY_SWITCH_NEW_SHIFT_ENABLE = 'switchNewShiftEnable';
     public const FF_KEY_NO_ANSWER_PROTOCOL_CHECK_EMAIL_IN_UNSUBSCRIBE_LIST = 'noAnswerProtocolCheckEmailInUnsubscribeList';
+    public const FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE = 'objectTaskStatusLogEnable';
+    public const FF_KEY_QUOTE_MIN_PRICE_ENABLE = 'quoteMinPriceEnable';
+    public const FF_KEY_NO_ANSWER_PROTOCOL_SOLD_AUTO_REPLACE_AFK_EMPLOYEE_ENABLE = 'noAnswerProtocolSoldAutoReplaceAfkEmployee';
+    public const FF_KEY_SYSTEM_LOG_SEARCH_BLOCK_IMPROVEMENTS_ENABLE = 'systemLogSearchBlockImprovementsEnable';
+    public const FF_KEY_BO_API_RBAC_AUTH = 'boApiRbacAuth';
+    public const FF_KEY_SAVE_CID_FOR_QUOTES_FROM_SEARCH_ENABLE = 'saveCidForQuotesFromSearchEnable';
+    public const FF_KEY_VALIDATE_CHANGE_EXTRA_MARK_UP = 'validateChangeExtraMarkUp';
+    public const FF_KEY_UPPERCASE_CONVERT_IN_SET_TRIP_TYPE_METHOD_ENABLE = 'uppercaseConvertInSetTripTypeMethodEnable';
+    public const FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES = 'excludeTestLeadFromQueues';
 
     public const FF_KEY_LIST = [
         self::FF_KEY_LPP_ENABLE,
@@ -110,6 +120,15 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_USER_CONVERSION_EXCLUDE_ALTERNATIVE_LEAD_ENABLE,
         self::FF_KEY_SWITCH_NEW_SHIFT_ENABLE,
         self::FF_KEY_NO_ANSWER_PROTOCOL_CHECK_EMAIL_IN_UNSUBSCRIBE_LIST,
+        self::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE,
+        self::FF_KEY_QUOTE_MIN_PRICE_ENABLE,
+        self::FF_KEY_NO_ANSWER_PROTOCOL_SOLD_AUTO_REPLACE_AFK_EMPLOYEE_ENABLE,
+        self::FF_KEY_SYSTEM_LOG_SEARCH_BLOCK_IMPROVEMENTS_ENABLE,
+        self::FF_KEY_BO_API_RBAC_AUTH,
+        self::FF_KEY_SAVE_CID_FOR_QUOTES_FROM_SEARCH_ENABLE,
+        self::FF_KEY_VALIDATE_CHANGE_EXTRA_MARK_UP,
+        self::FF_KEY_UPPERCASE_CONVERT_IN_SET_TRIP_TYPE_METHOD_ENABLE,
+        self::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES,
     ];
 
     public const FF_OBJECT_LIST = [

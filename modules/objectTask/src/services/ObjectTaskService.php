@@ -85,35 +85,52 @@ class ObjectTaskService
                     }
                 }
 
-                $scenario->process();
+                try {
+                    $scenario->process();
+                } catch (\Throwable $exception) {
+                    Yii::error(
+                        AppHelper::throwableLog($exception),
+                        'ObjectTaskService:runScenario'
+                    );
+                }
             }
         }
     }
 
-    public static function cancelJobs(string $scenarioKey, string $object, int $objectId): void
+    /**
+     * @param string $scenarioKey
+     * @param string $object
+     * @param int $objectId
+     * @param string|null $description
+     * @return array Id list of scenarios IDs whose jobs were canceled
+     */
+    public static function cancelJobs(string $scenarioKey, string $object, int $objectId, ?string $description = null): array
     {
-        $objectTaskScenario = ObjectTaskScenario::find()
-            ->where([
-                'ots_key' => $scenarioKey,
-            ])
-            ->limit(1)
-            ->one();
-
+        $scenarioIdList = [];
         $pendingObjectTaskList = ObjectTask::find()
             ->where([
-                'ot_ots_id' => $objectTaskScenario->ots_id,
                 'ot_object' => $object,
                 'ot_object_id' => $objectId,
                 'ot_status' => ObjectTask::STATUS_PENDING
+            ])
+            ->leftJoin('object_task_scenario', 'object_task_scenario.ots_id = ot_ots_id')
+            ->onCondition([
+                'object_task_scenario.ots_key' => $scenarioKey,
             ])
             ->all();
 
         if (!empty($pendingObjectTaskList)) {
             foreach ($pendingObjectTaskList as $objectTask) {
                 try {
-                    $objectTask->setCanceledStatus();
+                    $objectTask->setCanceledStatus(
+                        $description
+                    );
 
                     (new ObjectTaskRepository($objectTask))->save();
+
+                    if (in_array($objectTask->ot_ots_id, $scenarioIdList) === false) {
+                        $scenarioIdList[] = $objectTask->ot_ots_id;
+                    }
                 } catch (\Throwable $e) {
                     \Yii::error(
                         AppHelper::throwableLog($e),
@@ -122,6 +139,8 @@ class ObjectTaskService
                 }
             }
         }
+
+        return $scenarioIdList;
     }
 
     public static function getStatementObjectForScenario(string $key): ?BaseObject
@@ -156,6 +175,26 @@ class ObjectTaskService
                 Yii::error(
                     AppHelper::throwableLog($e),
                     'ObjectTaskService:getTemplateForScenario'
+                );
+            }
+        }
+
+        return $data;
+    }
+
+    public static function getParametersDescriptionForScenario(string $key): array
+    {
+        $data = [];
+        /** @var BaseScenario $class */
+        $class = self::SCENARIO_CLASS_LIST[$key] ?? null;
+
+        if ($class !== null) {
+            try {
+                $data = $class::getParametersDescription();
+            } catch (\Throwable $e) {
+                Yii::error(
+                    AppHelper::throwableLog($e),
+                    'ObjectTaskService:getParametersDescriptionForScenario'
                 );
             }
         }

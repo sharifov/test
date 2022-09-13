@@ -17,6 +17,7 @@ use common\models\UserParams;
 use Endroid\QrCode\Builder\Builder;
 use frontend\models\form\UserProfileForm;
 use frontend\themes\gentelella_v2\widgets\SideBarMenu;
+use modules\featureFlag\FFlag;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
@@ -144,8 +145,8 @@ class SiteController extends FController
     /**
      * Login action.
      *
-     * @return string
-     * @throws \Da\TwoFA\Exception\InvalidSecretKeyException
+     * @return string|Response
+     * @throws \yii\base\InvalidConfigException
      */
     public function actionLogin()
     {
@@ -157,17 +158,27 @@ class SiteController extends FController
 
         $model = new LoginForm();
 
-        if ($model->load(Yii::$app->request->post()) && $user = $model->checkedUser()) {
-            if (SettingHelper::isTwoFactorAuthEnabled() && $this->get2FAAbacAccess($user) && $user->userProfile /*&& $user->userProfile->is2faEnable()*/) {
-                return $this->redirectToTwoFactorAuth($user, $model);
-            }
+        if ($model->load(Yii::$app->request->post()) && $model->checkedUser() && $model->login()) {
+            /** @var Employee $user */
+            $user = \Yii::$app->user->identity;
 
-            if ($model->login()) {
-                if (UserConnection::isIdleMonitorEnabled()) {
-                    UserMonitor::addEvent(Yii::$app->user->id, UserMonitor::TYPE_LOGIN);
+            if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_TWO_FACTOR_AUTH_MODULE)) {
+                if (SettingHelper::isTwoFactorAuthEnabled() && $this->get2FAAbacAccess($user) && $user->userProfile) {
+                    $module = \Yii::$app->getModule('two-factor-auth');
+                    $module->startAuthProcess($model);
+                }
+            } else {
+                if (SettingHelper::isTwoFactorAuthEnabled() && $this->get2FAAbacAccess($user) && $user->userProfile /*&& $user->userProfile->is2faEnable()*/) {
+                    return $this->redirectToTwoFactorAuth($user, $model);
                 }
 
-                return $this->goBack();
+                if ($model->login()) {
+                    if (UserConnection::isIdleMonitorEnabled()) {
+                        UserMonitor::addEvent(Yii::$app->user->id, UserMonitor::TYPE_LOGIN);
+                    }
+
+                    return $this->goBack();
+                }
             }
         }
 

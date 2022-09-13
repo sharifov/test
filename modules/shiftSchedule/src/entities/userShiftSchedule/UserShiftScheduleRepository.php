@@ -2,6 +2,8 @@
 
 namespace modules\shiftSchedule\src\entities\userShiftSchedule;
 
+use modules\taskList\src\entities\TargetObject;
+use src\helpers\app\AppHelper;
 use src\repositories\AbstractRepositoryWithEvent;
 
 class UserShiftScheduleRepository extends AbstractRepositoryWithEvent

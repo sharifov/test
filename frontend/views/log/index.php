@@ -35,10 +35,28 @@ $pjaxListId = 'pjax-log';
                     ]
                 ) ?>
             </div>
+
+            <?php /** @fflag FFlag::FF_KEY_SYSTEM_LOG_SEARCH_BLOCK_IMPROVEMENTS_ENABLE, Enable improvements in system log search block */ ?>
+            <?php if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_SYSTEM_LOG_SEARCH_BLOCK_IMPROVEMENTS_ENABLE) === false) : ?>
+                <div class="col-md-12" >
+                    <?= $this->render('_search', compact('searchModel')); ?>
+                </div>
+            <?php endif; ?>
         </div>
     <?php endif ?>
 
     <?php \yii\widgets\Pjax::begin(['id' => $pjaxListId, 'scrollTo' => 0]); ?>
+
+    <?php /** @fflag FFlag::FF_KEY_SYSTEM_LOG_SEARCH_BLOCK_IMPROVEMENTS_ENABLE, Enable improvements in system log search block */ ?>
+    <?php if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_SYSTEM_LOG_SEARCH_BLOCK_IMPROVEMENTS_ENABLE) === true) : ?>
+        <div class="row">
+            <div class="col-md-12" >
+                <?= $this->render('_search', [
+                    'searchModel' => $searchModel,
+                ]); ?>
+            </div>
+        </div>
+    <?php endif; ?>
 
     <div class="row">
         <div class="col-md-12">
@@ -76,8 +94,10 @@ $pjaxListId = 'pjax-log';
                         'attribute' => 'category',
                         'filter' =>  Select2::widget([
                             'model' => $searchModel,
+                            'pjaxContainerId' => $pjaxListId,
                             'attribute' => 'category',
-                            'data' => \frontend\models\Log::getCategoryFilter(is_numeric($searchModel->level) ? $searchModel->level : null, Yii::$app->request->isPjax),
+                            'data' => $searchModel->getCategoriesFilter(Yii::$app->request->isPjax),
+                            'value' => $searchModel->category,
                             //'value' => 'category',
 
                             //'name' => Html::getInputName($filter, 'channelId'),

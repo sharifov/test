@@ -37,6 +37,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function (OrderRequest $model, $key, $index) {
                     $resultStr = '-';
                     if ($decodedData = @json_decode($model->orr_request_data_json, true, 512, JSON_THROW_ON_ERROR)) {
+                        $decodedData = \common\helpers\LogHelper::replaceSource($decodedData);
                         $truncatedStr = StringHelper::truncate(
                             Html::encode(VarDumper::dumpAsString($decodedData)),
                             500,
@@ -60,6 +61,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'value' => static function (OrderRequest $model) {
                     $resultStr = '-';
                     if ($decodedData = @json_decode($model->orr_response_data_json, true, 512, JSON_THROW_ON_ERROR)) {
+                        $decodedData = \common\helpers\LogHelper::replaceSource($decodedData);
                         $truncatedStr = StringHelper::truncate(
                             Html::encode(VarDumper::dumpAsString($decodedData)),
                             500,
