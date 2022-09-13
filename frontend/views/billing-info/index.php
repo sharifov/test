@@ -39,7 +39,6 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw'
             ],
-            'bi_first_name',
             'bi_last_name',
             'bi_middle_name',
             'bi_company_name',
