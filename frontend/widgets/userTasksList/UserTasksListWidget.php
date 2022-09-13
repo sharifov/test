@@ -27,7 +27,6 @@ class UserTasksListWidget extends Widget
     public function run(): string
     {
         $userTaskLeadService = new UserTaskLeadService();
-        $this->lead->employee_id = null;
         $userSchedulesWithTasks = $userTaskLeadService->getSchedulesWithTasksPagination($this->lead, $this->pageNumber, $this->activeShiftScheduleId);
 
         /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
