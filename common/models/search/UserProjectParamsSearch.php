@@ -58,7 +58,7 @@ class UserProjectParamsSearch extends UserProjectParams
      */
     public function search($params)
     {
-        $query = UserProjectParams::find()->with('uppUpdatedUser', 'uppUser', 'uppProject', 'emailList', 'phoneList', 'uppDep')->joinWith(['voiceMail', 'uppUser']);
+        $query = UserProjectParams::find()->with('uppUpdatedUser', 'uppUser', 'uppProject', 'emailList', 'phoneList', 'uppDep')->joinWith(['voiceMail']);
 
         // add conditions that should always apply here
 
@@ -123,7 +123,7 @@ class UserProjectParamsSearch extends UserProjectParams
         if ($this->supervision_id > 0) {
             $subQuery1 = UserGroupAssign::find()->select(['ugs_group_id'])->where(['ugs_user_id' => $this->supervision_id]);
             $subQuery = UserGroupAssign::find()->select(['DISTINCT(ugs_user_id)'])->where(['IN', 'ugs_group_id', $subQuery1]);
-            $query->andWhere(['IN', 'employees.id', $subQuery]);
+            $query->andWhere(['IN', 'upp_user_id', $subQuery]);
         }
 
 //        $query
