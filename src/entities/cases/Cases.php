@@ -294,35 +294,6 @@ class Cases extends ActiveRecord implements Objectable
     }
 
     /**
-     * @param int $projectId
-     * @param int $departmentId
-     * @param string|null $subject
-     * @param string|null $description
-     * @param int $categoryId
-     * @param bool $isAutomate
-     * @return Cases
-     */
-    public static function createByApiMinify(
-        int $projectId,
-        int $departmentId,
-        ?string $subject,
-        ?string $description,
-        int $categoryId,
-        bool $isAutomate
-    ): self {
-        $case = self::create();
-        $case->cs_project_id = $projectId;
-        $case->cs_dep_id = $departmentId;
-        $case->cs_subject = $subject;
-        $case->cs_description = $description;
-        $case->cs_category_id = $categoryId;
-        $case->cs_source_type_id = CasesSourceType::API;
-        $case->cs_is_automate = $isAutomate;
-        $case->pending(null, 'Created by api minify');
-        return $case;
-    }
-
-    /**
      * @param Cases $case
      * @param Employee $user
      * @param string $bookingId
