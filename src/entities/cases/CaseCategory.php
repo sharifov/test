@@ -5,7 +5,6 @@ namespace src\entities\cases;
 use common\models\Department;
 use common\models\Employee;
 use creocoder\nestedsets\NestedSetsBehavior;
-use kartik\tree\models\TreeTrait;
 use src\behaviors\SlugBehavior;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
@@ -71,6 +70,7 @@ class CaseCategory extends ActiveRecord
             ],
         ];
     }
+
     /**
      * @return array
      */
@@ -94,6 +94,7 @@ class CaseCategory extends ActiveRecord
             'cc_tree' => 'Tree ID',
         ];
     }
+
     /**
      * @return ActiveQuery
      */

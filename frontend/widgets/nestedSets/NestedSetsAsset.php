@@ -11,16 +11,16 @@ class NestedSetsAsset extends AssetBundle
     public $sourcePath = '@frontend/widgets/nestedSets/assets';
 
     public $js = [
-      'js/select2totree.js',
+        'js/select2totree.js',
     ];
 
     public $css = [
-      'css/select2totree.css',
+        'css/select2totree.css',
     ];
 
     public $depends = [
-      JqueryAsset::class,
-      Select2Asset::class,
+        JqueryAsset::class,
+        Select2Asset::class,
     ];
 
     public $jsOptions = ['position' => \yii\web\View::POS_END];

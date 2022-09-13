@@ -3,6 +3,7 @@
 namespace frontend\controllers;
 
 use src\forms\cases\CaseCategoryManageForm;
+use src\helpers\nestedSets\NestedSetsHelper;
 use Yii;
 use src\entities\cases\CaseCategory;
 use src\entities\cases\CaseCategorySearch;
@@ -14,21 +15,14 @@ use yii\web\Response;
  */
 class CaseCategoryController extends FController
 {
-    /**
-     * @return string
-     */
     public function actionIndex(): string
     {
-        $params       = Yii::$app->request->queryParams;
-        $searchModel  = new CaseCategorySearch();
-        $dataProvider = $searchModel->search($params);
-
-        $parentCategoryId = $params['CaseCategoryManageForm']['parentCategoryId'] ?? 0;
+        $searchModel = new CaseCategorySearch();
+        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
-          'searchModel'      => $searchModel,
-          'dataProvider'     => $dataProvider,
-          'parentCategoryId' => $parentCategoryId,
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 
@@ -39,15 +33,30 @@ class CaseCategoryController extends FController
      */
     public function actionView($id): string
     {
-        $model                                  = $this->findModel($id);
-        $parent                                 = $model->parents(1)->one();
-        $this->view->params['parentCategoryId'] = null;
+        $model = $this->findModel($id);
+        $parent = $model->parents(1)->one();
+        $parentCategoryName = null;
+        $parentCategoryId = null;
+        $parentsCategoriesHierarchy = null;
         if ($parent) {
-            $this->view->params['parentCategoryId'] = $parent->cc_id;
+            $parentCategoryId = $parent->cc_id;
+            $parentCategory = CaseCategory::findNestedSets()->andWhere(['cc_id' => $parent->cc_id])
+                ->one();
+            if ($parentCategory) {
+                $parentCategoryName = $parentCategory->getAttribute('cc_name');
+                $parentCategoryId = $parentCategory->getAttribute('cc_id');
+            }
+            $allParents = $model->parents()->asArray()->all();
+            if ($allParents) {
+                $parentsNames = array_column($allParents, 'cc_name');
+                $parentsCategoriesHierarchy = NestedSetsHelper::formatHierarchyString($parentsNames);
+            }
         }
-
         return $this->render('view', [
-          'model' => $model,
+            'model' => $model,
+            'parentCategoryId' => $parentCategoryId,
+            'parentCategoryName' => $parentCategoryName,
+            'parentsCategoriesHierarchy' => $parentsCategoriesHierarchy,
         ]);
     }
 
@@ -56,7 +65,7 @@ class CaseCategoryController extends FController
      */
     public function actionCreate()
     {
-        $form           = new CaseCategoryManageForm();
+        $form = new CaseCategoryManageForm();
         $form->scenario = CaseCategoryManageForm::SCENARIO_CREATE;
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
             $model = new CaseCategory();
@@ -68,7 +77,7 @@ class CaseCategoryController extends FController
         }
 
         return $this->render('create', [
-          'model' => $form,
+            'model' => $form,
         ]);
     }
 
@@ -81,7 +90,7 @@ class CaseCategoryController extends FController
     {
         $model = $this->findModel($id);
 
-        $form           = new CaseCategoryManageForm();
+        $form = new CaseCategoryManageForm();
         $form->scenario = CaseCategoryManageForm::SCENARIO_UPDATE;
 
         if ($form->load(Yii::$app->request->post()) && $form->validate()) {
@@ -98,7 +107,7 @@ class CaseCategoryController extends FController
         }
 
         return $this->render('update', [
-          'model' => $form,
+            'model' => $form,
         ]);
     }
 
@@ -118,12 +127,12 @@ class CaseCategoryController extends FController
 
     public function actionReport()
     {
-        $searchModel  = new CaseCategorySearch();
+        $searchModel = new CaseCategorySearch();
         $dataProvider = $searchModel->prepareReportData(Yii::$app->request->queryParams);
 
         return $this->render('report', [
-          'searchModel'  => $searchModel,
-          'dataProvider' => $dataProvider,
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
         ]);
     }
 
@@ -143,8 +152,8 @@ class CaseCategoryController extends FController
 
     /**
      * Move the Model to the root of the new tree or attach to the parent
-     * @param  \src\entities\cases\CaseCategory  $model
-     * @param  \src\forms\cases\CaseCategoryManageForm  $form
+     * @param \src\entities\cases\CaseCategory $model
+     * @param \src\forms\cases\CaseCategoryManageForm $form
      * @return void
      */
     private function moveNestedSetModel(CaseCategory $model, CaseCategoryManageForm $form): void
@@ -157,8 +166,7 @@ class CaseCategoryController extends FController
         } else {
             $parent = CaseCategory::findNestedSets()->andWhere(['cc_id' => $form->parentCategoryId])->one();
             if ($parent) {
-                $nestedModel = CaseCategory::findNestedSets()->andWhere(['cc_id' => $model->cc_id])->one();
-                $this->appendChildren($nestedModel, $parent);
+                $this->appendChildren($model, $parent);
             }
         }
     }

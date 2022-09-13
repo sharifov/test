@@ -4,15 +4,15 @@ namespace src\forms\cases;
 
 use common\models\Department;
 use src\entities\cases\CaseCategory;
-use src\entities\cases\CasesCategoryQuery;
 use yii\base\Model;
 
 class CaseCategoryManageForm extends Model
 {
     public const SCENARIO_CREATE = 'create';
     public const SCENARIO_UPDATE = 'update';
+    public const SCENARIO_INDEX = 'index';
 
-    public ?string $parentCategoryId = null;
+    public ?string $parentCategoryId = '';
     public ?int $cc_id = null;
     public ?string $cc_key = null;
     public ?string $cc_name = null;
@@ -25,24 +25,6 @@ class CaseCategoryManageForm extends Model
     public ?int $cc_depth = null;
     public ?int $cc_tree = null;
 
-    public static function getDb()
-    {
-        return \Yii::$app->get('db');
-    }
-
-    public static function find(): CasesCategoryQuery
-    {
-        return new CasesCategoryQuery(static::class);
-    }
-
-    /**
-     * @return string
-     */
-    public static function tableName(): string
-    {
-        return '{{%case_category}}';
-    }
-
     /**
      * Map attributes from Form Model to Active Record
      * @param CaseCategory $case
@@ -50,13 +32,15 @@ class CaseCategoryManageForm extends Model
      */
     public function mapAttributesToModel(CaseCategory $case): void
     {
-
         $case->cc_key = $this->cc_key;
         $case->cc_name = $this->cc_name;
         $case->cc_dep_id = $this->cc_dep_id;
         $case->cc_allow_to_select = $this->cc_allow_to_select;
         $case->cc_system = $this->cc_system;
         $case->cc_enabled = $this->cc_enabled;
+        if (!$case->cc_tree) {
+            $case->cc_tree = $this->cc_tree ?? 0;
+        }
     }
 
     /**
@@ -90,13 +74,30 @@ class CaseCategoryManageForm extends Model
                 'pattern' => '/^[a-z0-9_]+$/',
                 'message' => 'Key can only contain alphanumeric characters, underscores.'
             ],
-            ['cc_key', 'unique', 'on' => self::SCENARIO_CREATE],
-            ['cc_name', 'required'],
+            [
+                'cc_key',
+                'unique',
+                'targetClass' => CaseCategory::class,
+                'targetAttribute' => ['cc_key' => 'cc_key'],
+                'on' => self::SCENARIO_CREATE
+            ],
+            [
+                'cc_name',
+                'required',
+                'on' => [self::SCENARIO_CREATE, self::SCENARIO_UPDATE]
+            ],
             ['cc_name', 'string', 'max' => 255],
-            ['cc_name', 'unique', 'on' => self::SCENARIO_CREATE],
+            [
+                'cc_name',
+                'unique',
+                'targetClass' => CaseCategory::class,
+                'targetAttribute' => ['cc_name' => 'cc_name'],
+                'on' => self::SCENARIO_CREATE
+            ],
 
-            ['cc_dep_id', 'required'],
+            ['cc_dep_id', 'required', 'on' => [self::SCENARIO_CREATE, self::SCENARIO_UPDATE]],
             ['cc_dep_id', 'integer'],
+            [['parentCategoryId'], 'string'],
             [
                 'cc_dep_id',
                 'exist',
@@ -116,10 +117,11 @@ class CaseCategoryManageForm extends Model
 
     public function scenarios(): array
     {
-        return [
-          self::SCENARIO_CREATE => ['cc_key', 'cc_name', 'cc_dep_id', 'cc_system', 'cc_enabled', 'cc_lft', 'cc_rgt', 'cc_depth', 'cc_tree', 'parentCategoryId', 'cc_allow_to_select'],
-          self::SCENARIO_UPDATE => ['cc_key','cc_name', 'cc_dep_id', 'cc_system', 'cc_enabled', 'cc_lft', 'cc_rgt', 'cc_depth', 'cc_tree', 'parentCategoryId', 'cc_allow_to_select'],
-        ];
+        $scenarios = parent::scenarios();
+        $scenarios[self::SCENARIO_CREATE] = ['cc_key', 'cc_name', 'cc_dep_id', 'cc_system', 'cc_enabled', 'cc_lft', 'cc_rgt', 'cc_depth', 'cc_tree', 'parentCategoryId', 'cc_allow_to_select'];
+        $scenarios[self::SCENARIO_UPDATE] = ['cc_key', 'cc_name', 'cc_dep_id', 'cc_system', 'cc_enabled', 'cc_lft', 'cc_rgt', 'cc_depth', 'cc_tree', 'parentCategoryId', 'cc_allow_to_select'];
+        $scenarios[self::SCENARIO_INDEX] = ['cc_key', 'cc_name', 'cc_dep_id', 'cc_system', 'cc_enabled', 'cc_lft', 'cc_rgt', 'cc_depth', 'cc_tree', 'parentCategoryId', 'cc_allow_to_select'];
+        return $scenarios;
     }
 
     /**

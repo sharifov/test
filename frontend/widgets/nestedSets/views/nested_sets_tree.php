@@ -3,7 +3,7 @@
 
 /** @var  $placeholder string */
 /** @var  $currentModelId string */
-/** @var  $parentCategoryId int */
+/** @var  $parentCategoryId string */
 /** @var  $attribute string */
 /** @var  $name string */
 /** @var  $label string */
@@ -36,7 +36,7 @@ $(document).ready(function(){
 		}
    
     /* set the option "selected" if parent  category ID exists for a model */
-    const parentCategoryId = {$parentCategoryId};
+    const parentCategoryId = "$parentCategoryId";
     if (parentCategoryId){
       nestedSetsSelect.val(parentCategoryId).trigger('change.select2');
     }   
