@@ -131,6 +131,14 @@ class UserTasksListHelper
                     'custom-class' => 'lead-user-tasks-table__note-tooltip',
                 ],
             ]);
+        } elseif (!empty($description)) {
+            $result = Html::tag('span', StringHelper::truncate($description, 10), [
+                'class' => 'js-tooltip',
+                'data' => [
+                    'custom-class' => 'lead-user-tasks-table__note-tooltip',
+                    'original-title' => $description,
+                ]
+            ]);
         }
 
         return $result;

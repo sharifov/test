@@ -29,6 +29,15 @@ class UserTasksListWidget extends Widget
         $userTaskLeadService = new UserTaskLeadService();
         $userSchedulesWithTasks = $userTaskLeadService->getSchedulesWithTasksPagination($this->lead, $this->pageNumber, $this->activeShiftScheduleId);
 
+        $userTimezone = 'UTC';
+        $userSchedulesWithTasks = $this->prepareDataForView($userSchedulesWithTasks, $userTimezone);
+
+        $result = $this->render('tasks_list', $userSchedulesWithTasks);
+        return $result;
+    }
+
+    protected function prepareDataForView($userSchedulesWithTasks, string $userTimeZone)
+    {
         /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
         if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE)) {
             $message = [
@@ -40,27 +49,6 @@ class UserTasksListWidget extends Widget
             \Yii::info($message, 'info\UserTasksListWidget:run:first');
         }
 
-        $userTimezone = 'UTC';
-        $userSchedulesWithTasks = $this->prepareDataForView($userSchedulesWithTasks, $userTimezone);
-
-        /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE)) {
-            $message = [
-                'leadId' => $this->lead->id,
-                'employee_id' => $this->lead->employee_id,
-                'userTimezone' => $userTimezone,
-                'userSchedulesWithTasks' => $userSchedulesWithTasks,
-            ];
-
-            \Yii::info($message, 'info\UserTasksListWidget:run:second');
-        }
-
-        $result = $this->render('tasks_list', $userSchedulesWithTasks);
-        return $result;
-    }
-
-    protected function prepareDataForView($userSchedulesWithTasks, string $userTimeZone)
-    {
         $userSchedulesWithTasks['lead'] = $this->lead;
         $userSchedulesWithTasks['userTimeZone'] = $userTimeZone;
         $userSchedulesWithTasks['pjaxUrl'] = Url::to(['lead/pjax-user-tasks-list', 'gid' => $this->lead->gid]);
@@ -84,6 +72,18 @@ class UserTasksListWidget extends Widget
                 $carry[$newItem['sset_event_id']] = $result;
                 return $carry;
             }) ?: [];
+        }
+
+        /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE)) {
+            $message = [
+                'leadId' => $this->lead->id,
+                'employee_id' => $this->lead->employee_id,
+                'userTimezone' => $userTimeZone,
+                'userSchedulesWithTasks' => $userSchedulesWithTasks,
+            ];
+
+            \Yii::info($message, 'info\UserTasksListWidget:run:second');
         }
 
         return $userSchedulesWithTasks;
