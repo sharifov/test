@@ -3,6 +3,7 @@
 namespace common\models;
 
 use frontend\models\UserFailedLogin;
+use src\helpers\app\AppHelper;
 use src\services\authentication\AntiBruteForceHelper;
 use src\services\authentication\AntiBruteForceService;
 use Yii;
@@ -149,7 +150,7 @@ class LoginForm extends Model
     {
         if ($user->acl_rules_activated) {
             $clientIP = AntiBruteForceHelper::getClientIPAddress();
-            if ($clientIP === 'UNKNOWN' ||  (!GlobalAcl::isActiveIPRule($clientIP) && !EmployeeAcl::isActiveIPRule($clientIP, $user->id))) {
+            if ($clientIP === 'UNKNOWN' || (!GlobalAcl::isActiveIPRule($clientIP) && !EmployeeAcl::isActiveIPRule($clientIP, $user->id))) {
                 $this->addError('username', sprintf('Remote Address %s Denied! Please, contact your Supervision or Administrator.', $clientIP));
                 return false;
             }
@@ -205,27 +206,31 @@ class LoginForm extends Model
 
     public function afterValidate(): void
     {
-        if ($this->hasErrors() && (isset($this->_user) && !$this->_user->isBlocked() || !isset($this->_user))) {
-            $user = $this->_user ?? Employee::findOne(['username' => $this->username]);
-            $userFailedLogin = UserFailedLogin::create(
-                $this->username,
-                $user ? $user->id : null,
-                AntiBruteForceHelper::getBrowserName() . ' UserAgent:' . Yii::$app->request->getUserAgent(),
-                AntiBruteForceHelper::getClientIPAddress(),
-                Yii::$app->session->id
-            );
-            if (!$userFailedLogin->save()) {
-                \Yii::error(
-                    VarDumper::dumpAsString($userFailedLogin->getErrors(), 10),
-                    'LoginForm:afterValidate:saveFailed'
-                );
-            }
-        }
         if ($this->hasErrors()) {
-            if ($this->_user) {
-                (new AntiBruteForceService())->checkAttempts($this->_user);
+            $user = $this->_user ?? Employee::findOne(['username' => $this->username]);
+
+            if (!$user || !$user->isBlocked()) {
+                $userFailedLogin = UserFailedLogin::create(
+                    $this->username,
+                    $user ? $user->id : null,
+                    AntiBruteForceHelper::getBrowserName() . ' UserAgent:' . Yii::$app->request->getUserAgent(),
+                    AntiBruteForceHelper::getClientIPAddress(),
+                    Yii::$app->session->id
+                );
+
+                if (!$userFailedLogin->save()) {
+                    \Yii::error(
+                        AppHelper::validationLog($userFailedLogin),
+                        'LoginForm:afterValidate:saveFailed'
+                    );
+                }
+            }
+
+            if ($user) {
+                (new AntiBruteForceService())->checkAttempts($user);
             }
         }
+
         parent::afterValidate();
     }
 

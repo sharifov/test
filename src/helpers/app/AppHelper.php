@@ -11,10 +11,27 @@ namespace src\helpers\app;
 
 use Throwable;
 use Yii;
-use yii\helpers\VarDumper;
+use yii\base\Model;
 
 class AppHelper
 {
+    public static function validationLog(Model $model, string $message = ''): array
+    {
+        if (!$model->hasErrors()) {
+            throw new \InvalidArgumentException('The $model must be validated and contain errors.');
+        }
+
+        if (!$message) {
+            $message = (new \ReflectionClass($model))->getShortName() . ' validation failed.';
+        }
+
+        return [
+            'message' => $message,
+            'errors' => $model->errors,
+            'data' => $model->toArray()
+        ];
+    }
+
     /**
      * @param \Throwable $throwable
      * @return string
@@ -151,7 +168,7 @@ class AppHelper
      * @param string $index (array key)
      * @param array $arrayVal (array of filter values)
      * @return array
-    */
+     */
     public static function filterByArrayContainValues(array $array, string $index, array $arrayVal = []): array
     {
         $newArray = [];
