@@ -16,7 +16,7 @@ class m220912_143840_add_abac_policy_access_user_schedule extends AbacMigration
     private const AP_OBJECT = 'shift/shift/act/user_shift_schedule';
     private const AP_ACTION = '(access)';
     private const AP_EFFECT = 1;
-    private const AP_SUBJECT_JSON = '{"condition":"OR","rules":[{"id":"env_user_roles","field":"env.user.roles","type":"string","input":"select","operator":"in_array","value":"admin"},{"id":"env_user_roles","field":"env.user.roles","type":"string","input":"select","operator":"in_array","value":"shift_manager"},{"id":"env_user_roles","field":"env.user.roles","type":"string","input":"select","operator":"in_array","value":"shift_supervisor"}],"not":false,"valid":true}';
+    private const AP_SUBJECT_JSON = '{"condition":"OR","rules":[{"id":"env_user_roles","field":"env.user.roles","type":"string","input":"select","operator":"in_array","value":"admin"}],"not":false,"valid":true}';
 
     private const GENERATE_HASH_DATA = [
         self::AP_OBJECT,
