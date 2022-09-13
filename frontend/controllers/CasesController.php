@@ -1988,28 +1988,47 @@ class CasesController extends FController
         if (empty($originalCase->cs_order_uid)) {
             $errorMessage = 'Please add Booking ID to case';
             $out['error'] = $errorMessage;
-            Yii::info($errorMessage, 'CasesController::actionCreateCaseBySale:MissingCaseBookingId');
+            Yii::info([
+                'message' => 'Missing case booking Id.',
+                'caseId' => $originalCase->cs_id,
+                'projectId' => $project->id,
+                'caseBookingId' => $originalCase->cs_order_uid,
+            ], 'info\CasesController::actionCreateCaseBySale:MissingCaseBookingId');
             return $out;
         }
 
         if (!$this->casesSaleService->allowToCreateCaseWithBookingId($originalCase->cs_order_uid, $project->api_key, $bookingId)) {
             $errorMessage = 'Restriction: you can create new case only for separate bookings';
             $out['error'] = $errorMessage;
-            Yii::info($errorMessage, 'CasesController::actionCreateCaseBySale:allowToCreateCaseWithBookingId');
+            Yii::info([
+                'message' => 'Booking Ids is no separate',
+                'caseId' => $originalCase->cs_id,
+                'caseBookingId' => $originalCase->cs_order_uid,
+                'bookingId' => $bookingId,
+                'projectId' => $project->id,
+            ], 'info\CasesController::actionCreateCaseBySale:allowToCreateCaseWithBookingId');
             return $out;
         }
 
         if ($this->casesSaleService->checkExistCaseBySaleAndDepartment($saleId, $originalCase->cs_dep_id)) {
             $errorMessage = 'Already exist case with this sale (' . $saleId . ')';
             $out['error'] = $errorMessage;
-            Yii::info($errorMessage, 'CasesController::actionCreateCaseBySale:checkExistCaseBySaleAndDepartment');
+            Yii::info([
+                'message' => 'Already exist case with this sale (' . $saleId . ') at department (' . $originalCase->cs_dep_id . ')',
+                'caseId' => $originalCase->cs_id,
+                'caseBookingId' => $originalCase->cs_order_uid,
+                'bookingId' => $bookingId,
+                'projectId' => $project->id,
+                'saleId' => $saleId,
+                'departmentId' => $originalCase->cs_dep_id,
+            ], 'info\CasesController::actionCreateCaseBySale:checkExistCaseBySaleAndDepartment');
             return $out;
         }
 
         try {
             $saleData = $this->casesSaleService->detailRequestToBackOffice($saleId, 0, 120, 1);
         } catch (\Throwable $throwable) {
-            Yii::info(AppHelper::throwableLog($throwable), 'CasesController::actionCreateCaseBySale:detailRequestToBackOffice');
+            Yii::warning(AppHelper::throwableLog($throwable), 'CasesController::actionCreateCaseBySale:detailRequestToBackOffice');
             $out['error'] = $throwable->getMessage();
             return $out;
         }
@@ -2018,7 +2037,12 @@ class CasesController extends FController
             $errorMessage = '[Different Project] Case Id (' . $originalCase->cs_id . ') Case project (' . $project->name . ') Sale project (' . $saleData['project'] . ')';
             $out['error'] = $errorMessage;
             $out['error_type'] = self::DIFFERENT_PROJECT;
-            Yii::info($errorMessage, 'CasesController::actionCreateCaseBySale:sameProject');
+            Yii::info([
+                'message' => '[Different Project] Case Id (' . $originalCase->cs_id . ') Case project (' . $project->name . ') Sale project (' . $saleData['project'] . ')',
+                'caseId' => $originalCase->cs_id,
+                'caseProjectName' => $project->name,
+                'saleProjectName' => $saleData['project'],
+            ], 'info\CasesController::actionCreateCaseBySale:sameProject');
             return $out;
         }
 
