@@ -456,21 +456,24 @@ return [
                 return 12000;
             },
             'authenticators' => [
+                'google-auth' => [
+                    'class' => common\implementations\twoFactorAuth\OneTimeCodeAuth::class,
+                    'hint' => 'Please enter the six digit code generated your google authenticator'
+                ],
                 'email-auth' => [
                     'class' => common\implementations\twoFactorAuth\EmailAuth::class,
+                    'hint' => 'Please enter the six digit code sent to your email',
                     'codeDuration' => 700,
                     'options' => [
                         'from' => env('COMMON_CONFIG_MAIN_COMPONENTS_EMAIL_DEFAULTFROMEMAIL')
                     ]
-                ],
-                'google-auth' => [
-                    'class' => common\implementations\twoFactorAuth\OneTimeCodeAuth::class
                 ]
             ],
             'storage' => [
                 'class' => common\implementations\twoFactorAuth\AuthStorage::class
             ],
-            'layout' => '@frontend/themes/gentelella_v2/views/layouts/login_2fa.php'
+            'layout' => '@frontend/themes/gentelella_v2/views/layouts/login_2fa.php',
+            'viewFooter' => '@frontend/themes/gentelella_v2/views/layouts/login_2fa_footer.php'
         ],
         'object-task' => [
             'class' => \modules\objectTask\ObjectTaskModule::class,

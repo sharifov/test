@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "43efc0ba283c52fbc562ff37d09b592b",
+    "content-hash": "df54e69bfd86f06427f104313c83ae56",
     "packages": [
         {
             "name": "2amigos/yii2-arrayquery-component",
@@ -4373,11 +4373,11 @@
         },
         {
             "name": "kivork/yii2-two-factor-auth",
-            "version": "1.2.1-stable",
+            "version": "1.3.2-stable",
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:techork/yii2-two-factor-auth.git",
-                "reference": "2e663e82a52d546ae8a128a8a48e0e5536030ebe"
+                "reference": "686961d47064ad7aa336b64d670a42f4ccf0f617"
             },
             "require": {
                 "endroid/qr-code": "4.4.9",
@@ -15861,5 +15861,5 @@
         "ext-pgsql": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.0.0"
 }
