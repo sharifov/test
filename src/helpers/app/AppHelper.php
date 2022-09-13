@@ -33,10 +33,10 @@ class AppHelper
     }
 
     /**
-     * @param \Throwable $throwable
+     * @param Throwable $throwable
      * @return string
      */
-    public static function throwableFormatter(\Throwable $throwable): string
+    public static function throwableFormatter(Throwable $throwable): string
     {
         $str = 'Message: ' . $throwable->getMessage() . ' (code: ' . $throwable->getCode() . '), File: ' . $throwable->getFile() . ': line ' . $throwable->getLine();
         return $str;
@@ -47,7 +47,7 @@ class AppHelper
      * @param bool $trace
      * @return array
      */
-    public static function throwableLog(\Throwable $throwable, bool $trace = false): array
+    public static function throwableLog(Throwable $throwable, bool $trace = false): array
     {
         $data['message'] = $throwable->getMessage();
         $data['code'] = $throwable->getCode();
@@ -61,7 +61,7 @@ class AppHelper
         return $data;
     }
 
-    public static function mergeThrowableWithData(\Throwable $t, array $data, bool $trace = false): array
+    public static function mergeThrowableWithData(Throwable $t, array $data, bool $trace = false): array
     {
         return array_merge(self::throwableLog($t, $trace), $data);
     }
@@ -73,7 +73,7 @@ class AppHelper
      * @param int $typeCodeDelimiter
      */
     public static function throwableLogger(
-        \Throwable $throwable,
+        Throwable $throwable,
         string $category,
         bool $formatted = true,
         int $typeCodeDelimiter = 0
@@ -98,7 +98,7 @@ class AppHelper
     public static function filterByValue(array $array, string $index, $value = null): array
     {
         $newArray = [];
-        if (is_array($array) && $array) {
+        if ($array) {
             foreach (array_keys($array) as $key) {
                 if ($value !== null) {
                     if ($array[$key][$index] === $value) {
@@ -122,7 +122,7 @@ class AppHelper
     {
         $newArray = [];
 
-        if (is_array($array) && $array) {
+        if ($array) {
             foreach (array_keys($array) as $key) {
                 if ($value !== null) {
                     $current = $array[$key];
@@ -149,7 +149,7 @@ class AppHelper
     public static function filterByArray(array $array, string $index, array $arrayVal = []): array
     {
         $newArray = [];
-        if (is_array($array) && $array) {
+        if ($array) {
             foreach (array_keys($array) as $key) {
                 if ($arrayVal) {
                     if (in_array($array[$key][$index], $arrayVal, true)) {
@@ -202,7 +202,7 @@ class AppHelper
     public static function filterByRange(array $array, string $index, float $valMin = null, float $valMax = null): array
     {
         $newArray = [];
-        if (is_array($array) && $array) {
+        if ($array) {
             foreach (array_keys($array) as $key) {
                 if ($valMin !== null && $valMax !== null) {
                     if ($array[$key][$index] >= $valMin && $array[$key][$index] <= $valMax) {
@@ -233,7 +233,7 @@ class AppHelper
     public static function filterBySearchInValue(array $array, string $index, string $value): array
     {
         $newArray = [];
-        if (is_array($array) && $array) {
+        if ($array) {
             foreach (array_keys($array) as $key) {
                 if (strpos($array[$key][$index], $value) !== false) {
                     $newArray[$key] = $array[$key];
@@ -289,7 +289,7 @@ class AppHelper
                     return $i;
                 }
             }
-        } catch (\Throwable $throwable) {
+        } catch (Throwable $throwable) {
             return -1;
         }
 
