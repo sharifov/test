@@ -8,22 +8,23 @@ use modules\taskList\src\entities\userTask\UserTaskQuery;
 use src\auth\Auth;
 use yii\caching\TagDependency;
 use yii\data\Pagination;
+use common\models\Lead;
 
 class UserTaskLeadService
 {
     /**
-     * @param int $leadId
+     * @param Lead $lead
      * @param int|null $activeUserShiftScheduleId
      * @return array
      */
-    public function getSchedulesWithTasksPagination(int $leadId, int $pageNumb = 1, ?int $activeUserShiftScheduleId = null): array
+    public function getSchedulesWithTasksPagination(Lead $lead, int $pageNumb = 1, ?int $activeUserShiftScheduleId = null): array
     {
         $result = [];
         $cache = \Yii::$app->cache;
-        $cacheKeyOfSchedules = UserTasksListHelper::generateUserSchedulesListCacheKey($leadId, Auth::id());
+        $cacheKeyOfSchedules = UserTasksListHelper::generateUserSchedulesListCacheKey($lead->id, $lead->employee_id);
 
-        $userShiftSchedules = $cache->getOrSet($cacheKeyOfSchedules, static function () use ($leadId) {
-            return UserShiftScheduleQuery::getAllThatHaveTasksByLeadIdAndUserIdAndType($leadId, Auth::id())
+        $userShiftSchedules = $cache->getOrSet($cacheKeyOfSchedules, static function () use ($lead) {
+            return UserShiftScheduleQuery::getAllThatHaveTasksByLeadIdAndUserIdAndType($lead->id, $lead->employee_id)
                 ->with('shiftScheduleEventTask')
                 ->all();
         });
@@ -39,18 +40,18 @@ class UserTaskLeadService
             $activeScheduleData = $activeUserShiftScheduleId ? $userShiftSchedulesNew[$activeUserShiftScheduleId] : reset($userShiftSchedulesNew);
 
             $cacheKey = UserTasksListHelper::generateUserTasksListCacheKey(
-                $leadId,
+                $lead->id,
                 Auth::id(),
                 $pageNumb,
                 $activeUserShiftScheduleId
             );
 
             if (!$cache->get($cacheKey)) {
-                $cacheTag = new TagDependency(['tags' => UserTasksListHelper::getUserTasksListCacheTag($leadId, Auth::id())]);
+                $cacheTag = new TagDependency(['tags' => UserTasksListHelper::getUserTasksListCacheTag($lead->id, Auth::id())]);
 
                 $shiftScheduleTasksQuery = UserTaskQuery::getQueryUserIdAndTargetIdAndDateAndTargetObject(
-                    Auth::id(),
-                    $leadId,
+                    $lead->employee_id,
+                    $lead->id,
                     $activeScheduleData['uss_start_utc_dt'],
                     $activeScheduleData['uss_end_utc_dt']
                 );

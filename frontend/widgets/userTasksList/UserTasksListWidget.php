@@ -3,7 +3,6 @@
 namespace frontend\widgets\userTasksList;
 
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
-use src\auth\Auth;
 use yii\base\Widget;
 use yii\helpers\Url;
 use common\models\Lead;
@@ -29,7 +28,7 @@ class UserTasksListWidget extends Widget
     {
         $result = '';
         $userTaskLeadService = new UserTaskLeadService();
-        $userSchedulesWithTasks = $userTaskLeadService->getSchedulesWithTasksPagination($this->lead->id, $this->pageNumber, $this->activeShiftScheduleId);
+        $userSchedulesWithTasks = $userTaskLeadService->getSchedulesWithTasksPagination($this->lead, $this->pageNumber, $this->activeShiftScheduleId);
 
         if (!empty($userSchedulesWithTasks)) {
             $userTimezone = 'UTC';
