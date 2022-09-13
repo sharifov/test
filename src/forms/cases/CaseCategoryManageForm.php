@@ -10,7 +10,6 @@ class CaseCategoryManageForm extends Model
 {
     public const SCENARIO_CREATE = 'create';
     public const SCENARIO_UPDATE = 'update';
-    public const SCENARIO_INDEX = 'index';
 
     public ?string $parentCategoryId = '';
     public ?int $cc_id = null;
@@ -120,7 +119,6 @@ class CaseCategoryManageForm extends Model
         $scenarios = parent::scenarios();
         $scenarios[self::SCENARIO_CREATE] = ['cc_key', 'cc_name', 'cc_dep_id', 'cc_system', 'cc_enabled', 'cc_lft', 'cc_rgt', 'cc_depth', 'cc_tree', 'parentCategoryId', 'cc_allow_to_select'];
         $scenarios[self::SCENARIO_UPDATE] = ['cc_key', 'cc_name', 'cc_dep_id', 'cc_system', 'cc_enabled', 'cc_lft', 'cc_rgt', 'cc_depth', 'cc_tree', 'parentCategoryId', 'cc_allow_to_select'];
-        $scenarios[self::SCENARIO_INDEX] = ['cc_key', 'cc_name', 'cc_dep_id', 'cc_system', 'cc_enabled', 'cc_lft', 'cc_rgt', 'cc_depth', 'cc_tree', 'parentCategoryId', 'cc_allow_to_select'];
         return $scenarios;
     }
 
