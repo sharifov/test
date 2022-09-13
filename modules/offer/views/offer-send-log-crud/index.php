@@ -5,6 +5,7 @@ use modules\offer\src\grid\columns\OfferSendLogTypeColumn;
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
 use src\helpers\email\MaskEmailHelper;
+use src\helpers\phone\MaskPhoneHelper;
 use yii\grid\ActionColumn;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -46,6 +47,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'ofsndl_send_to',
                 'format' => 'ntext',
                 'value' => static function ($model) {
+                    if (!filter_var($model->ofsndl_send_to, FILTER_VALIDATE_EMAIL)) {
+                        return MaskPhoneHelper::masking($model->ofsndl_send_to);
+                    }
                     return MaskEmailHelper::masking($model->ofsndl_send_to);
                 },
                 'options' => ['style' => 'width:280px'],
