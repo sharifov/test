@@ -24,9 +24,15 @@ class UserTaskLeadService
         $cacheKeyOfSchedules = UserTasksListHelper::generateUserSchedulesListCacheKey($lead->id, $lead->employee_id);
 
         $userShiftSchedules = $cache->getOrSet($cacheKeyOfSchedules, static function () use ($lead) {
-            return UserShiftScheduleQuery::getAllThatHaveTasksByLeadIdAndUserIdAndType($lead->id, $lead->employee_id)
-                ->with('shiftScheduleEventTask')
-                ->all();
+            $query = UserShiftScheduleQuery::getAllThatHaveTasksByLeadIdAndUserIdAndType($lead->id, $lead->employee_id)
+                ->with('shiftScheduleEventTask');
+
+            /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
+            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE)) {
+                \Yii::info($query->createCommand()->getRawSql(), 'info\UserTaskLeadServiceWidget:getAllThatHaveTasksByLeadIdAndUserIdAndType:query');
+            }
+
+            return $query->all();
         });
 
         /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
