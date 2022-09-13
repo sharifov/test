@@ -33,6 +33,8 @@ class UserTasksListWidget extends Widget
         /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
         if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE)) {
             $message = [
+                'leadId' => $this->lead->id,
+                'employee_id' => $this->lead->employee_id,
                 'userSchedulesWithTasks' => $userSchedulesWithTasks,
             ];
 
@@ -46,6 +48,8 @@ class UserTasksListWidget extends Widget
             /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
             if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE)) {
                 $message = [
+                    'leadId' => $this->lead->id,
+                    'employee_id' => $this->lead->employee_id,
                     'userTimezone' => $userTimezone,
                     'userSchedulesWithTasks' => $userSchedulesWithTasks,
                 ];

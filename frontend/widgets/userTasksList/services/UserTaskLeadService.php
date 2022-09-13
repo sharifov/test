@@ -32,6 +32,8 @@ class UserTaskLeadService
         /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
         if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE)) {
             $message = [
+                'leadId' => $lead->id,
+                'employee_id' => $lead->employee_id,
                 'cacheKeyOfSchedules' => $cacheKeyOfSchedules,
                 'userShiftSchedules' => $userShiftSchedules,
             ];
@@ -59,6 +61,8 @@ class UserTaskLeadService
             /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
             if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE)) {
                 $message = [
+                    'leadId' => $lead->id,
+                    'employee_id' => $lead->employee_id,
                     'userShiftSchedulesNew' => $userShiftSchedulesNew,
                     'activeUserShiftScheduleId' => $activeUserShiftScheduleId,
                     'activeScheduleData' => $activeScheduleData,
@@ -98,6 +102,8 @@ class UserTaskLeadService
                 /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
                 if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE)) {
                     $message = [
+                        'leadId' => $lead->id,
+                        'employee_id' => $lead->employee_id,
                         'cacheTag' => $cacheTag,
                         'shiftScheduleTasksQuery' => $shiftScheduleTasksQuery,
                         'shiftScheduleTasks' => $shiftScheduleTasks,
