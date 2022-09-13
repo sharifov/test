@@ -1,8 +1,8 @@
 <?php
 
-namespace src\repositories\dbDataSensitive;
+namespace src\model\dbDataSensitiveView\repository;
 
-use common\models\DbDataSensitiveView;
+use src\model\dbDataSensitiveView\entity\DbDataSensitiveView;
 use src\repositories\AbstractBaseRepository;
 
 class DbDataSensitiveViewRepository extends AbstractBaseRepository

@@ -13,6 +13,7 @@ class UserTaskHelper
         UserTask::STATUS_PROCESSING => 'info',
         UserTask::STATUS_COMPLETE => 'success',
         UserTask::STATUS_CANCEL => 'warning',
+        UserTask::STATUS_FAILED => 'danger',
     ];
 
     public const PRIORITY_LIST_LABEL_MAP = [
@@ -57,11 +58,13 @@ class UserTaskHelper
     {
         switch ($status) {
             case UserTask::STATUS_COMPLETE:
-                return '<i class="fa fa-check-square-o" aria-hidden="true"></i>';
+                return '<i class="fa fa-check-square fa-status-complete" aria-hidden="true"></i>';
             case UserTask::STATUS_CANCEL:
-                return '<i class="fa fa-times" aria-hidden="true"></i>';
+                return '<i class="fa fa-exclamation-circle fa-status-cancel" aria-hidden="true"></i>';
+            case UserTask::STATUS_FAILED:
+                return '<i class="fa fa-times-circle" aria-hidden="true"></i>';
             default:
-                return '<i class="fa fa-square-o" aria-hidden="true"></i>';
+                return '<i class="fa fa-square-o fa-status" aria-hidden="true"></i>';
         }
     }
 
@@ -72,6 +75,8 @@ class UserTaskHelper
                 return 'rgba(83, 162, 101, 0.1)';
             case UserTask::STATUS_CANCEL:
                 return 'rgba(255, 192, 82, 0.1)';
+            case UserTask::STATUS_FAILED:
+                return 'rgba(255, 0, 0, 0.1)';
             default:
                 return 'none';
         }

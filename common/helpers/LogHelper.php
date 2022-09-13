@@ -8,6 +8,7 @@
 namespace common\helpers;
 
 use Yii;
+use yii\base\Model;
 use yii\helpers\ArrayHelper;
 
 class LogHelper
@@ -238,5 +239,18 @@ class LogHelper
         $last = substr($source, -$showLen);
 
         return $first . $middle . $last;
+    }
+
+    public static function prepareErrorDataForLogFromModel(Model $model): array
+    {
+        $log = [
+            'errors' => $model->getErrors(),
+        ];
+
+        foreach ($model->getFirstErrors() as $attribute => $error) {
+            $log['data'][$attribute] = $model->{$attribute};
+        }
+
+        return $log;
     }
 }

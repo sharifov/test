@@ -6,7 +6,7 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model common\models\DbDataSensitive */
+/* @var $model src\model\dbDataSensitive\entity\DbDataSensitive */
 
 $this->title = $model->dda_name;
 $this->params['breadcrumbs'][] = ['label' => 'DB Data Sensitive', 'url' => ['index']];
@@ -36,28 +36,28 @@ $this->params['breadcrumbs'][] = $this->title;
             'dda_name',
             [
                 'attribute' => 'da_created_user_id',
-                'value' => static function (\common\models\DbDataSensitive $model) {
+                'value' => static function (\src\model\dbDataSensitive\entity\DbDataSensitive $model) {
                     return $model->createdUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->createdUser->username) : $model->dda_created_user_id;
                 },
                 'format' => 'raw',
             ],
             [
                 'attribute' => 'da_updated_user_id',
-                'value' => static function (\common\models\DbDataSensitive $model) {
+                'value' => static function (\src\model\dbDataSensitive\entity\DbDataSensitive $model) {
                     return $model->updatedUser ? '<i class="fa fa-user"></i> ' . Html::encode($model->updatedUser->username) : $model->dda_updated_user_id;
                 },
                 'format' => 'raw',
             ],
             [
                 'attribute' => 'da_created_dt',
-                'value' => static function (\common\models\DbDataSensitive $model) {
+                'value' => static function (\src\model\dbDataSensitive\entity\DbDataSensitive $model) {
                     return $model->dda_created_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->dda_created_dt)) : '-';
                 },
                 'format' => 'raw'
             ],
             [
                 'attribute' => 'da_updated_dt',
-                'value' => static function (\common\models\DbDataSensitive $model) {
+                'value' => static function (\src\model\dbDataSensitive\entity\DbDataSensitive $model) {
                     return $model->dda_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->dda_updated_dt)) : '-';
                 },
                 'format' => 'raw'

@@ -95,7 +95,7 @@ $subtypeTotalData = [];
                                     'class' => 'bg-info'
                                 ];
                             }
-                            if ($model->isDeadline()) {
+                            if ($model->isFailed()) {
                                 return [
                                     'class' => 'danger'
                                 ];
@@ -124,8 +124,8 @@ $subtypeTotalData = [];
                                 'value' => static function (UserTask $model) {
                                     $result = UserTaskHelper::statusLabel($model->ut_status_id);
 
-                                    if ($model->isDeadline()) {
-                                        $result .= '<p class="text-center mt-2"><i class="fa fa-times-circle text-danger"></i></p>';
+                                    if ($model->isFailed()) {
+                                        $result .= '<span class="task-list__status-ico">' . UserTaskHelper::renderStatus($model->ut_status_id) . '</span>';
                                     }
 
                                     return $result;
@@ -224,15 +224,21 @@ $subtypeTotalData = [];
                             [
                                 'label' => 'Deadline',
                                 'value' => static function (UserTask $model) {
-                                    if ($model->isProcessing()) {
-                                        return $model->isDeadline() ? Html::tag(
-                                            'span',
-                                            'Deadline',
-                                            ['title' => \Yii::$app->formatter->asRelativeTime(strtotime($model->ut_end_dt)),
-                                                'class' => 'badge badge-danger']
-                                        ) :
-                                            UserTaskHelper::getDeadlineTimer($model->ut_start_dt, $model->ut_end_dt);
+                                    if ($model->isFailed()) {
+                                        if ($model->isDeadline()) {
+                                            return Html::tag(
+                                                'span',
+                                                'Deadline',
+                                                ['title' => \Yii::$app->formatter->asRelativeTime(strtotime($model->ut_end_dt)),
+                                                    'class' => 'badge badge-danger']
+                                            );
+                                        }
+                                    } elseif ($model->isProcessing()) {
+                                        if (!$model->isDeadline()) {
+                                            return UserTaskHelper::getDeadlineTimer($model->ut_start_dt, $model->ut_end_dt);
+                                        }
                                     }
+
                                     return '-';
                                 },
                                 'format' => 'raw',
@@ -296,6 +302,17 @@ $ajaxUrl = \yii\helpers\Url::to(['task-list/my-data-ajax']);
 $openModalEventUrl = \yii\helpers\Url::to(['shift-schedule/ajax-event-details']);
 $openModalUserTaskUrl = \yii\helpers\Url::to(['task-list/ajax-user-task-details']);
 // 'https://fullcalendar.io/api/demo-feeds/events.json?overload-day',
+
+$css = <<<CSS
+    .task-list__status-ico {
+      color: red;
+      padding-left: 6px;
+      display: block;
+      text-align: center;
+    }
+CSS;
+
+$this->registerCss($css);
 
 $js = <<<JS
     var shiftScheduleDataUrl = '$ajaxUrl';

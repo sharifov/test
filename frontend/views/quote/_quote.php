@@ -487,8 +487,7 @@ $js = <<<JS
         validatePriceField($(this), key);
     });
     
-    $(document).on('change', '.alt-quote-price', function(event){
-        
+    var changeAltQuotePrice = function(event) {
         $('.alt-quote-price').prop('readonly', true);
         $('.field-error').each(function() {
             $(this).removeClass('field-error');
@@ -521,7 +520,12 @@ $js = <<<JS
                 $('.alt-quote-price').prop('readonly', false);
             }
         });
-    });
+    };
+    
+    $(document).on('change', '.alt-quote-price', changeAltQuotePrice);
+    $('#modal-lg').on('hidden.bs.modal', function (e) {
+        $(document).off('change', '.alt-quote-price', changeAltQuotePrice);
+    })
 
     /***  Cancel card  ***/
     $('#cancel-alt-quote').click(function (e) {
