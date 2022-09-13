@@ -12,7 +12,7 @@ use Yii;
  */
 class m220912_143840_add_abac_policy_access_user_schedule extends AbacMigration
 {
-    private const AP_SUBJECT = '("admin" in r.sub.env.user.roles) || ("shift_manager" in r.sub.env.user.roles) || ("shift_supervisor" in r.sub.env.user.roles)';
+    private const AP_SUBJECT = '("admin" in r.sub.env.user.roles)';
     private const AP_OBJECT = 'shift/shift/act/user_shift_schedule';
     private const AP_ACTION = '(access)';
     private const AP_EFFECT = 1;
