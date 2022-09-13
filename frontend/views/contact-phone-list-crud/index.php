@@ -34,7 +34,12 @@ $this->params['breadcrumbs'][] = $this->title;
         'columns' => [
 
             'cpl_id',
-            'cpl_phone_number',
+            [
+                'attribute' => 'cpl_phone_number',
+                'value' => static function (ContactPhoneList $model) {
+                    return MaskPhoneHelper::masking($model->cpl_phone_number);
+                }
+            ],
             'cpl_uid',
             'cpl_title',
             [

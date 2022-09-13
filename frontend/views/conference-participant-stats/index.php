@@ -30,7 +30,6 @@ $this->params['breadcrumbs'][] = $this->title;
             'cps_id',
             'cps_cf_id',
             'cps_cf_sid',
-            'cps_participant_identity',
             'cps_user_id',
             'cps_duration',
             'cps_talk_time',
