@@ -3,7 +3,7 @@
 use yii\helpers\Html;
 
 /* @var $this yii\web\View */
-/* @var $model common\models\DbDataSensitive */
+/* @var $model src\model\dbDataSensitive\entity\DbDataSensitive */
 
 $this->title = 'Create DB Data Sensitive';
 $this->params['breadcrumbs'][] = ['label' => 'Db Data Sensitive', 'url' => ['index']];

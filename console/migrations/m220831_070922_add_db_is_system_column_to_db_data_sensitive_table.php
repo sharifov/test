@@ -2,7 +2,7 @@
 
 use yii\db\Migration;
 use src\model\dbDataSensitive\dictionary\DbDataSensitiveDictionary;
-use common\models\DbDataSensitive;
+use src\model\dbDataSensitive\entity\DbDataSensitive;
 
 /**
  * Handles adding columns to table `{{%db_data_sensitive}}`.
