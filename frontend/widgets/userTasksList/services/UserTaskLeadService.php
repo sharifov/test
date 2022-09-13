@@ -36,7 +36,7 @@ class UserTaskLeadService
                 'userShiftSchedules' => $userShiftSchedules,
             ];
 
-            \Yii::info($message, 'UserTaskLeadServiceWidget:getSchedulesWithTasksPagination:first');
+            \Yii::info($message, 'info\UserTaskLeadServiceWidget:getSchedulesWithTasksPagination:first');
         }
 
         if (!empty($userShiftSchedules)) {
@@ -65,7 +65,7 @@ class UserTaskLeadService
                     'cacheKey' => $cacheKey,
                 ];
 
-                \Yii::info($message, 'UserTaskLeadServiceWidget:getSchedulesWithTasksPagination:second');
+                \Yii::info($message, 'info\UserTaskLeadServiceWidget:getSchedulesWithTasksPagination:second');
             }
 
             if (!$cache->get($cacheKey)) {
@@ -103,7 +103,7 @@ class UserTaskLeadService
                         'shiftScheduleTasks' => $shiftScheduleTasks,
                     ];
 
-                    \Yii::info($message, 'UserTaskLeadServiceWidget:getSchedulesWithTasksPagination:third');
+                    \Yii::info($message, 'info\UserTaskLeadServiceWidget:getSchedulesWithTasksPagination:third');
                 }
             }
 

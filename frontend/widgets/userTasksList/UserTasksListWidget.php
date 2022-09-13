@@ -36,7 +36,7 @@ class UserTasksListWidget extends Widget
                 'userSchedulesWithTasks' => $userSchedulesWithTasks,
             ];
 
-            \Yii::info($message, 'UserTasksListWidget:run:first');
+            \Yii::info($message, 'info\UserTasksListWidget:run:first');
         }
 
         if (!empty($userSchedulesWithTasks)) {
@@ -50,7 +50,7 @@ class UserTasksListWidget extends Widget
                     'userSchedulesWithTasks' => $userSchedulesWithTasks,
                 ];
 
-                \Yii::info($message, 'UserTasksListWidget:run:second');
+                \Yii::info($message, 'info\UserTasksListWidget:run:second');
             }
 
             $result = $this->render('tasks_list', $userSchedulesWithTasks);
