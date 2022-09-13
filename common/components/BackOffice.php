@@ -164,7 +164,7 @@ class BackOffice
     public static function getSignatureBOForRbac(string $sigUsername, string $endpointUrl = '', array $requestBodyArray = [], ?string $requestBodyJson = ''): string
     {
         $apiKey = Yii::$app->params['backOffice']['apiKey'];
-        $requestBodyString = $requestQueryString = $requestBodyJson = '';
+        $requestBodyString = $requestQueryString '';
         if (count($requestBodyArray)) {
             $requestBodyString = json_encode($requestBodyArray);
         }
