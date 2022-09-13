@@ -20,6 +20,11 @@ class UserTaskLeadService
     public function getSchedulesWithTasksPagination(Lead $lead, int $pageNumb = 1, ?int $activeUserShiftScheduleId = null): array
     {
         $result = [];
+
+        if (empty($lead->employee_id)) {
+            return [];
+        }
+
         $cache = \Yii::$app->cache;
         $cacheKeyOfSchedules = UserTasksListHelper::generateUserSchedulesListCacheKey($lead->id, $lead->employee_id);
 
@@ -33,7 +38,7 @@ class UserTaskLeadService
             }
 
             return $query->all();
-        });
+        }, UserTasksListHelper::CACHE_DURATION);
 
         /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
         if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE)) {
