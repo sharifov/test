@@ -26,6 +26,7 @@ use common\models\UserGroupAssign;
 use common\models\UserProfile;
 use modules\featureFlag\FFlag;
 use modules\fileStorage\src\entity\fileLead\FileLead;
+use modules\lead\src\abac\LeadSearchAbacObject;
 use modules\smartLeadDistribution\src\services\SmartLeadDistributionService;
 use modules\smartLeadDistribution\src\SmartLeadDistribution;
 use src\access\EmployeeGroupAccess;
@@ -452,6 +453,11 @@ class LeadSearch extends Lead
         $dataProvider->setSort($sort);
 
         $this->load($params);
+
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query);
+        }
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
@@ -1033,6 +1039,10 @@ class LeadSearch extends Lead
         $dataProvider->setSort($sort);
 
         $this->load($params);
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query);
+        }
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
@@ -1368,6 +1378,10 @@ class LeadSearch extends Lead
         $query->select(['id', 'uid', 'l_type_create', 'status', 'client_id', 'called_expert', 'project_id', 'source_id', 'trip_type', 'cabin', 'adults', 'children', 'infants', 'employee_id', 'createdDate' => new Expression("DATE(created)"), 'createdTime' => new Expression("TIME(created)"), 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
         $this->load($params);
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query);
+        }
 
         // grid filtering conditions
         $query->andFilterWhere([
@@ -1798,6 +1812,10 @@ class LeadSearch extends Lead
         $dataProvider->setSort($sort);
 
         $this->load($params);
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query);
+        }
 
         if (!$this->validate()) {
             $query->where('0=1');
@@ -1964,6 +1982,10 @@ class LeadSearch extends Lead
         $dataProvider->setSort($sort);
 
         $this->load($params);
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query);
+        }
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
@@ -2097,6 +2119,10 @@ class LeadSearch extends Lead
         //$query->with(['client', 'client.clientEmails', 'client.clientPhones', 'leadFlightSegments']);
         $this->load($params);
         $leadTable = Lead::tableName();
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query, $leadTable);
+        }
 
         //$query->select([$leadTable . '.*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
@@ -2210,6 +2236,10 @@ class LeadSearch extends Lead
         ]);
 
         $this->load($params);
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query, $leadTable);
+        }
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
@@ -2289,6 +2319,10 @@ class LeadSearch extends Lead
         $this->load($params);
 
         $leadTable = Lead::tableName();
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query, $leadTable);
+        }
 
         $query->select([$leadTable . '.*', 'l_client_time' => new Expression("TIME( CONVERT_TZ(NOW(), '+00:00', offset_gmt) )")]);
 
@@ -2340,6 +2374,10 @@ class LeadSearch extends Lead
         $leadTable = Lead::tableName();
 
         $this->load($params);
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query, $leadTable);
+        }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -2426,6 +2464,10 @@ class LeadSearch extends Lead
         $dataProvider->setSort($sort);
 
         $this->load($params);
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query, $leadTable);
+        }
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
@@ -2518,6 +2560,10 @@ class LeadSearch extends Lead
         $leadTable = Lead::tableName();
 
         $this->load($params);
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query, $leadTable);
+        }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -2632,6 +2678,10 @@ class LeadSearch extends Lead
         ]);
 
         $this->load($params);
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query, $leadTable);
+        }
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
@@ -2773,6 +2823,10 @@ class LeadSearch extends Lead
         ]);
 
         $this->load($params);
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query, $leadTable);
+        }
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
@@ -2996,6 +3050,10 @@ class LeadSearch extends Lead
         $leadTable = Lead::tableName();
 
         $this->load($params);
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query, $leadTable);
+        }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -3074,6 +3132,10 @@ class LeadSearch extends Lead
         $leadTable = Lead::tableName();
 
         $this->load($params);
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query, $leadTable);
+        }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -3141,6 +3203,10 @@ class LeadSearch extends Lead
         $query = Lead::find()->andWhere([$leadTable . '.status' => Lead::STATUS_NEW]);
 
         $this->load($params);
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query, $leadTable);
+        }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -3185,6 +3251,10 @@ class LeadSearch extends Lead
         $leadTable = Lead::tableName();
 
         $this->load($params);
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query, $leadTable);
+        }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -3241,6 +3311,10 @@ class LeadSearch extends Lead
         $leadTable = Lead::tableName();
 
         $this->load($params);
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query, $leadTable);
+        }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -3396,6 +3470,10 @@ class LeadSearch extends Lead
         ]);
 
         $this->load($params);
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query, $leadTable);
+        }
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
@@ -3466,6 +3544,10 @@ class LeadSearch extends Lead
         ]);
 
         $this->load($params);
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query, $leadTable);
+        }
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails
@@ -3510,6 +3592,11 @@ class LeadSearch extends Lead
         $query->from('leads AS l');
         $query->where(['IS NOT', 'ce.email', null]);
         $query->andFilterWhere(['l.status' => [Lead::STATUS_PROCESSING, Lead::STATUS_PENDING, Lead::STATUS_FOLLOW_UP, Lead::STATUS_ON_HOLD]]);
+
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query, 'l');
+        }
 
         if ($this->client_email) {
             $query->andFilterWhere(['like', 'ce.email', $this->client_email]);
@@ -3561,6 +3648,11 @@ class LeadSearch extends Lead
         $query->from('leads AS l');
         $query->where(['IS NOT', 'cp.phone', null]);
         $query->andFilterWhere(['l.status' => [Lead::STATUS_PROCESSING, Lead::STATUS_PENDING, Lead::STATUS_FOLLOW_UP, Lead::STATUS_ON_HOLD]]);
+
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query, 'l');
+        }
 
         if ($this->client_phone) {
             $query->andFilterWhere(['like', 'cp.phone', $this->client_phone]);
@@ -3617,6 +3709,11 @@ class LeadSearch extends Lead
         $query->from('leads AS l');
         $query->where(['IS NOT', 'l.request_ip', null]);
         $query->andFilterWhere(['l.status' => [Lead::STATUS_PROCESSING, Lead::STATUS_PENDING, Lead::STATUS_FOLLOW_UP, Lead::STATUS_ON_HOLD]]);
+
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query, 'l');
+        }
 
         if ($this->request_ip) {
             //$query->andFilterWhere(['like', 'l.request_ip', $this->request_ip]);
@@ -4637,6 +4734,11 @@ class LeadSearch extends Lead
 
         $this->load($params);
 
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query, $leadTable);
+        }
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => ['defaultOrder' => ['created' => SORT_DESC]],
@@ -4749,6 +4851,11 @@ class LeadSearch extends Lead
 
         $this->load($params);
 
+        /** @fflag FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES, Exclude test leads from queues */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES)) {
+            $this->excludeIsTest($query, $leadTable);
+        }
+
         if (!$this->validate()) {
             $query->where('0=1');
             return $dataProvider;
@@ -4774,5 +4881,20 @@ class LeadSearch extends Lead
             $leadTable . '.employee_id' => $this->employee_id,
         ]);
         return $dataProvider;
+    }
+
+    private function excludeIsTest(ActiveQuery|Query $query, ?string $tableName = null): void
+    {
+        if (empty($this->l_is_test)) {
+            /** @abac null, LeadSearchAbacObject::QUERY_SHOW_IS_TEST, LeadSearchAbacObject::ACTION_ACCESS, Access to show test leads  */
+            $canSee = Yii::$app->abac->can(null, LeadSearchAbacObject::QUERY_SHOW_IS_TEST, LeadSearchAbacObject::ACTION_ACCESS);
+
+            if ($canSee === false) {
+                $key = (!empty($tableName)) ? "{$tableName}.l_is_test" : 'l_is_test';
+                $query->andWhere([
+                    $key => false,
+                ]);
+            }
+        }
     }
 }

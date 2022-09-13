@@ -11,6 +11,7 @@ use yii\widgets\Pjax;
 /* @var $clientSearchModel ClientSearch */
 /* @var $clientDataProvider yii\data\ActiveDataProvider */
 
+
 Pjax::begin([
     'id' => 'pjax-call-recording-disabled-client',
     'timeout' => 5000,
@@ -20,6 +21,13 @@ echo GridView::widget([
     'dataProvider' => $clientDataProvider,
     'filterModel' => $clientSearchModel,
     'columns' => [
+        [
+            'attribute' => 'first_name',
+            'value' => static function (Client $model) {
+                $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['first_name']);
+                return $data['first_name'];
+            }
+        ],
         'first_name',
         'middle_name',
         'last_name',

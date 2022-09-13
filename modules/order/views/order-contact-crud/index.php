@@ -3,6 +3,8 @@
 use common\components\grid\DateTimeColumn;
 use common\components\i18n\Formatter;
 use modules\order\src\entities\orderContact\OrderContact;
+use src\helpers\email\MaskEmailHelper;
+use src\helpers\phone\MaskPhoneHelper;
 use yii\bootstrap4\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -37,11 +39,30 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
                 'format' => 'raw'
             ],
-            'oc_first_name',
+            [
+                'attribute' => 'oc_first_name',
+                'value' => static function (OrderContact $model) {
+                    $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['oc_first_name']);
+                    return $data['oc_first_name'];
+                },
+                'format' => 'raw'
+            ],
             'oc_last_name',
             'oc_middle_name',
-            'oc_email:email',
-            'oc_phone_number',
+            [
+                'attribute' => 'oc_email',
+                'value' => static function (OrderContact $model) {
+                    return MaskEmailHelper::masking($model->oc_email);
+                },
+                'format' => 'raw'
+            ],
+            [
+                'attribute' => 'oc_phone_number',
+                'value' => static function (OrderContact $model) {
+                    return MaskPhoneHelper::masking($model->oc_phone_number);
+                },
+                'format' => 'raw'
+            ],
             'oc_client_id:client',
             [
                 'class' => DateTimeColumn::class,
