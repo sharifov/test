@@ -20,8 +20,7 @@ class UserTaskController extends Controller
     {
         $this->printInfo('Start....', $this->action->id, Console::BG_GREEN);
 
-        $startDateTime = date('Y-m-d H:i:s', strtotime(date('Y-m-d H:i') . ' -1 month'));
-        $dTStart = (new \DateTimeImmutable($startDateTime))->setTime(0, 0);
+        $dTStart = (new \DateTimeImmutable('now'))->modify('first day of previous month');
         $dTEnd = (new \DateTime(date('Y-m-d H:i')));
 
         $userTasks = UserTask::find()
