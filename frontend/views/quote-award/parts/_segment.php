@@ -42,7 +42,7 @@ $select2Properties = [
        data-inner='<i class="fa fa-plus" aria-hidden="true"></i> Add Segment'
        data-class='btn btn-success'
        href="javascript:void(0)">
-        <i class="fa fa-plus" aria-hidden="true"></i>Add Segment
+        <i class="fa fa-plus" aria-hidden="true"></i> Add Segment
     </a>
     <div style="margin-top: 15px">
         <?php if (count($model->segments)) : ?>
@@ -74,7 +74,7 @@ $select2Properties = [
                                 </a>
                             <?php endif; ?>
                         </td>
-                        <td style="width: 100px"><?= 'Segment ' . ($index + 1) ?></td>
+                        <td style="width: 90px"><?= 'Segment ' . ($index + 1) ?></td>
                         <td> <?= $form->field($segment, '[' . $index . ']origin')->widget(Select2::class, $select2Properties)->label(false) ?></td>
                         <td> <?= $form->field($segment, '[' . $index . ']destination')->widget(Select2::class, $select2Properties)->label(false) ?></td>
                         <td> <?= $form->field($segment, '[' . $index . ']departure')
@@ -104,7 +104,7 @@ $select2Properties = [
                                     ]
                                 )->label(false) ?>
                         </td>
-                        <td><?= $form->field($segment, '[' . $index . ']flight_number')->textInput()->label(false) ?></td>
+                        <td style="width: 100px"><?= $form->field($segment, '[' . $index . ']flight_number')->textInput()->label(false) ?></td>
                         <td style="width:105px"><?= $form->field($segment, '[' . $index . ']trip')->dropDownList(SegmentAwardQuoteItem::getTrips(), ['required' => 'required'])->label(false) ?></td>
                         <td style="width:115px"><?= $form->field($segment, '[' . $index . ']flight')->dropDownList($model->getFlightList(), ['required' => 'required'])->label(false) ?></td>
                     </tr>

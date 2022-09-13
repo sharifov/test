@@ -96,6 +96,6 @@ class QuoteFlightProgram extends \yii\db\ActiveRecord
 
     public static function getList(): array
     {
-        return ArrayHelper::map(self::find()->asArray()->all(), 'gfp_id', 'gfp_name');
+        return ArrayHelper::map(self::find()->orderBy('gfp_id ASC')->asArray()->all(), 'gfp_id', 'gfp_name');
     }
 }

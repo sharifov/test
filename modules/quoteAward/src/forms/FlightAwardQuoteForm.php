@@ -34,43 +34,15 @@ class FlightAwardQuoteForm extends CompositeForm
     {
         $this->attributes = $flight->attributes;
 
-        $isRequiredAwardProgram = $flight->quoteProgram === AwardProgramDictionary::AWARD_MILE;
-
-        $priceList[QuotePrice::PASSENGER_ADULT] = new PriceListAwardQuoteForm(
-            (int)$flight->id,
-            QuotePrice::PASSENGER_ADULT,
-            (int)$this->adults,
-            $isRequiredAwardProgram
-        );
-
-        if (!empty($prices) && array_key_exists($flight->id . '-' . QuotePrice::PASSENGER_ADULT, $prices)) {
-            $priceList[QuotePrice::PASSENGER_ADULT]->setAttributes($prices[$flight->id . '-' . QuotePrice::PASSENGER_ADULT]);
-        }
+        $priceList = [];
+        $this->createPriceQuote($priceList, $prices, QuotePrice::PASSENGER_ADULT, $flight, 'adults');
 
         if (((int)$this->children) > 0) {
-            $priceList[QuotePrice::PASSENGER_CHILD] = new PriceListAwardQuoteForm(
-                (int)$flight->id,
-                QuotePrice::PASSENGER_CHILD,
-                (int)$this->children,
-                $isRequiredAwardProgram
-            );
-
-            if (!empty($prices) && array_key_exists($flight->id . '-' . QuotePrice::PASSENGER_CHILD, $prices)) {
-                $priceList[QuotePrice::PASSENGER_CHILD]->setAttributes($prices[$flight->id . '-' . QuotePrice::PASSENGER_CHILD]);
-            }
+            $this->createPriceQuote($priceList, $prices, QuotePrice::PASSENGER_CHILD, $flight, 'children');
         }
 
         if (((int)$this->infants) > 0) {
-            $priceList[QuotePrice::PASSENGER_INFANT] = new PriceListAwardQuoteForm(
-                (int)$flight->id,
-                QuotePrice::PASSENGER_INFANT,
-                (int)$this->infants,
-                $isRequiredAwardProgram
-            );
-
-            if (!empty($prices) && array_key_exists($flight->id . '-' . QuotePrice::PASSENGER_INFANT, $prices)) {
-                $priceList[QuotePrice::PASSENGER_INFANT]->setAttributes($prices[$flight->id . '-' . QuotePrice::PASSENGER_INFANT]);
-            }
+            $this->createPriceQuote($priceList, $prices, QuotePrice::PASSENGER_INFANT, $flight, 'infants');
         }
 
         $this->prices = $priceList;
@@ -82,12 +54,13 @@ class FlightAwardQuoteForm extends CompositeForm
     public function rules(): array
     {
         return [
-            [['cabin', 'validationCarrier', 'cabin', 'gds', 'quoteProgram'], 'required'],
+            [['cabin', 'validationCarrier', 'gds', 'quoteProgram'], 'required'],
             ['cabin', 'string', 'max' => 1],
-            ['id', 'safe'],
+            ['id', 'integer'],
             ['cabin', 'in', 'range' => array_keys(Flight::getCabinClassList())],
             [['adults', 'children', 'infants'], 'required'],
             [['adults', 'children', 'infants'], 'integer', 'min' => 0, 'max' => 9],
+            ['adults', 'integer', 'min' => 1, 'max' => 9],
 
             ['adults', function () {
                 if (!$this->adults && !$this->children) {
@@ -106,5 +79,21 @@ class FlightAwardQuoteForm extends CompositeForm
     protected function internalForms(): array
     {
         return ['prices'];
+    }
+
+    private function createPriceQuote(array &$priceList, array $prices, string $passenger_type, FlightAwardQuoteItem $flight, string $attribute_name)
+    {
+        $isRequiredAwardProgram = $flight->quoteProgram === AwardProgramDictionary::AWARD_MILE;
+
+        $priceList[$passenger_type] = new PriceListAwardQuoteForm(
+            (int)$flight->id,
+            $passenger_type,
+            (int)$this->{$attribute_name},
+            $isRequiredAwardProgram
+        );
+
+        if (!empty($prices) && array_key_exists($flight->id . '-' . $passenger_type, $prices)) {
+            $priceList[$passenger_type]->setParams($prices[$flight->id . '-' . $passenger_type]);
+        }
     }
 }

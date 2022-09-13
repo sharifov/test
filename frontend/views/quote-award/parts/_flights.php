@@ -7,15 +7,14 @@ use src\helpers\lead\LeadHelper;
 use src\services\parsingDump\lib\ParsingDump;
 use kartik\select2\Select2;
 use common\models\Airline;
+use yii\helpers\Html;
 
 /**
  * @var $model \modules\quoteAward\src\forms\AwardQuoteForm
  */
 
 $form = ActiveForm::begin([
-    'action' => \yii\helpers\Url::to(['quote/save']),
-    'errorCssClass' => '',
-    'successCssClass' => '',
+    'action' => \yii\helpers\Url::to(['quote-award/save']),
     'id' => 'alt-award-quote-info-form'
 ]) ?>
 
@@ -68,8 +67,8 @@ $form = ActiveForm::begin([
                             <td style="width:85px"><?= $form->field($flight, '[' . $index . ']adults')->textInput(['type' => 'number', 'class' => 'form-control js-pax-award'])->label(false) ?></td>
                             <td style="width:85px"><?= $form->field($flight, '[' . $index . ']children')->textInput(['type' => 'number', 'class' => 'form-control js-pax-award'])->label(false) ?></td>
                             <td style="width:85px"><?= $form->field($flight, '[' . $index . ']infants')->textInput(['type' => 'number', 'class' => 'form-control js-pax-award'])->label(false) ?></td>
-                            <td style="width: 120px"><?= $form->field($flight, '[' . $index . ']gds')->dropDownList(ParsingDump::QUOTE_GDS_TYPE_MAP, ['prompt' => '---', 'required' => 'required'])->label(false) ?></td>
-                            <td><?= $form->field($flight, '[' . $index . ']validationCarrier', ['options' => ['tag' => false,]])
+                            <td style="width: 120px"><?= $form->field($flight, '[' . $index . ']gds')->dropDownList(ParsingDump::QUOTE_GDS_TYPE_MAP, ['prompt' => '---'])->label(false) ?></td>
+                            <td><?= $form->field($flight, '[' . $index . ']validationCarrier')
                                     ->widget(Select2::class, [
                                         'data' => Airline::getAirlinesMapping(true),
                                         'options' => ['placeholder' => '---'],
@@ -92,6 +91,9 @@ $form = ActiveForm::begin([
 
         <?= $this->render('_price_list', ['model' => $model, 'form' => $form]) ?>
 
+    </div>
+    <div class="form-group">
+        <?= Html::submitButton('<i class="fa fa-floppy-o" aria-hidden="true"></i> Save Quote', ['class' => 'btn btn-success']) ?>
     </div>
 
 <?php ActiveForm::end() ?>

@@ -40,16 +40,16 @@ class SegmentAwardQuoteForm extends Model
             }],
 
             ['arrival', 'required'],
-            ['arrival', 'date', 'format' => 'php:d-M-Y'],
+            ['arrival', 'date', 'format' => 'php:d-M-Y H:i'],
             ['arrival', 'filter', 'filter' => function ($value) {
                 return date('d-m-Y H:i', strtotime($value));
             }],
 
             ['trip', 'required'],
-            ['arrival', 'in', 'range' => SegmentAwardQuoteItem::getTrips()],
+            ['trip', 'in', 'range' => SegmentAwardQuoteItem::getTrips()],
 
             ['flight', 'required'],
-            ['flight_number', 'required'],
+            ['flight_number', 'string'],
         ];
     }
 }
