@@ -303,6 +303,17 @@ $openModalEventUrl = \yii\helpers\Url::to(['shift-schedule/ajax-event-details'])
 $openModalUserTaskUrl = \yii\helpers\Url::to(['task-list/ajax-user-task-details']);
 // 'https://fullcalendar.io/api/demo-feeds/events.json?overload-day',
 
+$css = <<<CSS
+    .task-list__status-ico {
+      color: red;
+      padding-left: 6px;
+      display: block;
+      text-align: center;
+    }
+CSS;
+
+$this->registerCss($css);
+
 $js = <<<JS
     var shiftScheduleDataUrl = '$ajaxUrl';
     var openModalEventUrl = '$openModalEventUrl';
