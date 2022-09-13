@@ -70,6 +70,7 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_VALIDATE_CHANGE_EXTRA_MARK_UP = 'validateChangeExtraMarkUp';
     public const FF_KEY_UPPERCASE_CONVERT_IN_SET_TRIP_TYPE_METHOD_ENABLE = 'uppercaseConvertInSetTripTypeMethodEnable';
     public const FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES = 'excludeTestLeadFromQueues';
+    public const FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE = 'userNewTaskListOnLeadLogEnable';
 
     public const FF_KEY_LIST = [
         self::FF_KEY_LPP_ENABLE,
@@ -129,6 +130,7 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_VALIDATE_CHANGE_EXTRA_MARK_UP,
         self::FF_KEY_UPPERCASE_CONVERT_IN_SET_TRIP_TYPE_METHOD_ENABLE,
         self::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES,
+        self::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE,
     ];
 
     public const FF_OBJECT_LIST = [

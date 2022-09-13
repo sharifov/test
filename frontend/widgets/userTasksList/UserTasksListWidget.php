@@ -30,9 +30,28 @@ class UserTasksListWidget extends Widget
         $userTaskLeadService = new UserTaskLeadService();
         $userSchedulesWithTasks = $userTaskLeadService->getSchedulesWithTasksPagination($this->lead, $this->pageNumber, $this->activeShiftScheduleId);
 
+        /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE)) {
+            $message = [
+                'userSchedulesWithTasks' => $userSchedulesWithTasks,
+            ];
+
+            \Yii::info($message, 'info\UserTasksListWidget:run:first');
+        }
+
         if (!empty($userSchedulesWithTasks)) {
             $userTimezone = 'UTC';
             $userSchedulesWithTasks = $this->prepareDataForView($userSchedulesWithTasks, $userTimezone);
+
+            /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
+            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE)) {
+                $message = [
+                    'userTimezone' => $userTimezone,
+                    'userSchedulesWithTasks' => $userSchedulesWithTasks,
+                ];
+
+                \Yii::info($message, 'info\UserTasksListWidget:run:second');
+            }
 
             $result = $this->render('tasks_list', $userSchedulesWithTasks);
         }
