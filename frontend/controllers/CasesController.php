@@ -1985,6 +1985,13 @@ class CasesController extends FController
             return $out;
         }
 
+        if (empty($originalCase->cs_order_uid)) {
+            $errorMessage = 'Please add Booking ID to case';
+            $out['error'] = $errorMessage;
+            Yii::info($errorMessage, 'CasesController::actionCreateCaseBySale:MissingCaseBookingId');
+            return $out;
+        }
+
         if (!$this->casesSaleService->allowToCreateCaseWithBookingId($originalCase->cs_order_uid, $project->api_key, $bookingId)) {
             $errorMessage = 'Restriction: you can create new case only for separate bookings';
             $out['error'] = $errorMessage;
