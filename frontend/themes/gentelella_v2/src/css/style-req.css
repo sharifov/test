@@ -6180,3 +6180,366 @@ li.select2-selection__choice:first-of-type {
 li.select2-selection__choice {
   white-space: pre-line;
 }
+
+
+/************* Task List on Lead page ****************/
+.user-task-history-table .user-task-history-table__status-icon > *,
+.lead-user-tasks .lead-user-tasks-title__my-tasks-icon,
+.lead-user-tasks .lead-user-tasks-table__status > *,
+#user-task-list__modal .user-task-history__no-tasks {
+  font-size: 18px;
+}
+
+.lead-user-tasks .lead-user-tasks-table,
+.lead-user-tasks .lead-user-tasks-timeline__title,
+.lead-user-tasks .lead-user-tasks-timeline__subtitle {
+  margin: 0;
+}
+
+.lead-user-tasks .lead-user-tasks-timeline__title {
+  font-size: 14px;
+  font-weight: bolder;
+  color: #474F58;
+}
+
+.lead-user-tasks .lead-user-tasks-title__my-tasks-text,
+.lead-user-tasks .lead-user-tasks-timeline__subtitle {
+  color: #8895A7;
+}
+
+.lead-user-tasks .lead-user-tasks-timeline__schedule .active,
+.lead-user-tasks .lead-user-tasks-timeline__nav-link:hover,
+.lead-user-tasks .lead-user-tasks-timeline__nav-link:focus {
+  background: rgba(83, 162, 101, 0.1);
+}
+
+.lead-user-tasks .lead-user-tasks-timeline__nav-link {
+  padding: 10px 30px;
+}
+
+.lead-user-tasks .lead-user-tasks-timeline__schedule {
+  flex-wrap: nowrap;
+  overflow-y: hidden;
+  position: relative;
+}
+
+.lead-user-tasks .lead-user-tasks-timeline__nav-item {
+  flex: 0 0 auto;
+  border-bottom: 1px solid rgba(83, 162, 101, 0.5);
+}
+
+.lead-user-tasks .lead-user-tasks-timeline__schedule .day-today:before {
+  content: '';
+  width: 100%;
+  height: 4px;
+  background: #53A265;
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+}
+
+.user-task-history-table .user-task-history-table__no-notes,
+.lead-user-tasks .lead-user-tasks-table__row .lead-user-tasks-table__number {
+  font-weight: normal;
+}
+
+.lead-user-tasks .lead-user-tasks-table__row .lead-user-tasks-table__number {
+  padding: 11px 0;
+  text-align: center;
+}
+
+.lead-user-tasks .lead-user-tasks-table__note-link {
+  color: #3A81BB;
+  text-decoration: underline;
+}
+
+.lead-user-tasks-modal .modal-header,
+.lead-user-tasks .lead-user-tasks-table__th,
+.user-task-history-table .user-task-history-table__th {
+  border: 0;
+}
+
+.user-task-history-table .user-task-history-table__task,
+.lead-user-tasks .lead-user-tasks-table__task {
+  font-weight: bold;
+}
+
+.lead-user-tasks .lead-user-tasks-timeline__right {
+  display: flex;
+  align-items: center;
+  justify-content: right;
+}
+
+.lead-user-tasks .lead-user-tasks-timeline__btn {
+  background: #F4F7FA;
+  color: #8895A7;
+  font-size: 14px;
+  margin: 0;
+}
+
+.lead-user-tasks .lead-user-tasks-timeline .lead-user-tasks-timeline__btn.active {
+  background: rgba(83, 162, 101, 0.2);
+  color: #53A265;
+  border-color: rgba(83, 162, 101, 0.2);
+}
+
+.lead-user-tasks  .lead-user-tasks-list__work-started {
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.lead-user-tasks  .lead-user-tasks-list__work-started,
+.lead-user-tasks .lead-user-tasks__no-notes,
+.user-task-history-table .user-task-history-table__no-notes {
+  color: #8895A7;
+}
+
+.user-task-history-table .user-task-history-table__thead,
+.user-task-history-table .user-task-history-table__tbody,
+.user-task-history-table .user-task-history-table__thead,
+.lead-user-tasks .lead-user-tasks-table__thead,
+.lead-user-tasks .lead-user-tasks-table__tbody {
+  border: 1px solid #E6E9ED;
+}
+
+.user-task-history-table .user-task-history-table__thead,
+.lead-user-tasks .lead-user-tasks-table__thead {
+  background: #F4F7FA;
+}
+
+.lead-user-tasks-table,
+.user-task-history-table,
+.user-task-history-table .user-task-history-table__thead,
+.lead-user-tasks .lead-user-tasks-table__thead {
+  color: #474F58;
+}
+
+.lead-user-tasks .lead-user-tasks-title__my-tasks-text {
+  font-size: 15px;
+  margin-left: 6px;
+}
+
+.lead-user-tasks .lead-user-tasks-title__right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.lead-user-tasks .lead-user-tasks-title__my-tasks {
+  display: flex;
+  align-items: center;
+}
+
+.user-task-history-table .user-task-history-table__status-icon .fa-status-complete,
+.lead-user-tasks .lead-user-tasks-table__status .fa-status-complete {
+  color: green;
+}
+
+.lead-user-tasks-list .lead-user-tasks-table__note-link.active {
+  color: #53A265;
+}
+
+.lead-user-tasks .lead-user-tasks-table__status .fa-status-cancel,
+.lead-user-tasks .lead-user-tasks-table__deadline .badge-warning,
+.user-task-history-table .user-task-history-table__deadline .badge-warning,
+.user-task-history-table .user-task-history-table__status-icon .fa-status-cancel,
+.lead-user-tasks .lead-user-tasks-table__cancel .lead-user-tasks-table__deadline,
+.user-task-history-table .user-task-history-table__row-cancel .user-task-history-table__deadline {
+  color: #FFC052;
+}
+
+.lead-user-tasks-table__tbody span,
+.lead-user-tasks .lead-user-tasks__no-notes,
+.lead-user-tasks .lead-user-tasks-table__deadline > * {
+  line-height: 0;
+}
+
+.user-task-history .user-task-history-table__deadline .badge-warning,
+.lead-user-tasks .lead-user-tasks-table__deadline .badge {
+  font-size: 13px;
+}
+
+.user-task-history-table .fa-status-deadline,
+.lead-user-tasks .lead-user-tasks-table__deadline .badge-danger,
+.lead-user-tasks .lead-user-tasks-table__failed .fa-status-deadline,
+.lead-user-tasks .lead-user-tasks-table__failed .lead-user-tasks-table__deadline,
+.user-task-history-table .user-task-history-table__row-failed .user-task-history-table__deadline {
+  color: #E15554;
+}
+
+.lead-user-tasks .lead-user-tasks-table__failed {
+  background: rgba(225, 85, 84, .1);
+}
+
+.user-task-history .user-task-history-table__deadline .badge-warning,
+.lead-user-tasks .lead-user-tasks-table__deadline .badge-danger,
+.lead-user-tasks .lead-user-tasks-table__deadline .badge-warning {
+  background: transparent;
+}
+
+.user-task-history-table .user-task-history-table__status-icon .fa-status,
+.lead-user-tasks .lead-user-tasks-table__status .fa-status {
+  color: #E6E9ED;
+}
+
+.lead-user-tasks .lead-user-tasks-list__pagination {
+  float: right;
+}
+
+.user-task-history-pagination .user-task-history-pagination__paginate {
+  display: flex;
+  justify-content: end;
+}
+
+.user-task-history .user-task-history-pagination .page-link,
+.lead-user-tasks .lead-user-tasks-list__pagination .page-link {
+  background: #fff;
+  color: #8895A7;
+  border: none;
+  font-size: 13px;
+}
+
+.user-task-history .user-task-history-pagination .page-item.prev .page-link,
+.user-task-history .user-task-history-pagination .page-item.next .page-link,
+.lead-user-tasks .lead-user-tasks-list__pagination .page-item.prev .page-link,
+.lead-user-tasks .lead-user-tasks-list__pagination .page-item.next .page-link {
+  border: 1px solid #8895A7;
+  border-radius: 5px;
+  padding: 6px 10px;
+}
+
+.user-task-history .user-task-history-pagination .page-item:hover,
+.user-task-history .user-task-history-pagination .page-item.active .page-link,
+.lead-user-tasks .lead-user-tasks-list__pagination .page-item:hover,
+.lead-user-tasks .lead-user-tasks-list__pagination .page-item.active .page-link {
+  font-weight: bold;
+  color: #474F58;
+}
+
+.user-task-history .user-task-history-pagination .page-item,
+.lead-user-tasks .lead-user-tasks-list__pagination .page-item {
+  margin: 1px;
+}
+
+.user-task-history .user-task-history-pagination .page-link:hover,
+.user-task-history .user-task-history-pagination .page-link:focus,
+.user-task-history .user-task-history-pagination .page-link:active,
+.lead-user-tasks .lead-user-tasks-list__pagination .page-link:hover,
+.lead-user-tasks .lead-user-tasks-list__pagination .page-link:focus,
+.lead-user-tasks .lead-user-tasks-list__pagination .page-link:active {
+  border: none;
+  box-shadow: none;
+  background: none;
+  color: #474F58;
+}
+
+.lead-user-tasks-modal .control-label,
+.lead-user-tasks .lead-user-tasks__tasks .tab-pane.fade {
+  display: none;
+}
+
+.lead-user-tasks .lead-user-tasks__tasks .tab-pane.fade.show {
+  display: block;
+}
+
+.lead-user-tasks-note .lead-user-tasks-note__btns {
+  display: flex;
+  justify-content: center;
+}
+
+.lead-user-tasks-note .lead-user-tasks-note__btns > * {
+  width: 50%;
+}
+
+.lead-user-tasks-modal .modal-body {
+  padding-top: 0;
+  padding-bottom: 5px;
+}
+
+.lead-user-tasks-modal .modal-header span {
+  font-weight: normal;
+  font-size: 38px;
+}
+
+.lead-user-tasks-note .lead-user-tasks-note__textarea {
+  padding: 8px;
+  box-shadow: inset 0 0 3px #e4e9ee;
+}
+
+.lead-user-tasks-table__note-tooltip.tooltip.show {
+  opacity: 1;
+  z-index: 100;
+}
+
+.lead-user-tasks-table__note-tooltip .tooltip-inner {
+  padding: 10px;
+  background: #4D5A6A;
+  text-align: left;
+}
+
+.lead-user-tasks-table__note-tooltip .arrow:before {
+  border-bottom-color: #4D5A6A;
+}
+
+.lead-user-tasks-table .lead-user-tasks-table__note {
+  width: 84px;
+  padding-right: 6px;
+}
+
+.lead-user-tasks .lead-user-tasks-table__deadline .badge,
+.user-task-history-table .user-task-history-table__deadline .badge {
+  padding: 0;
+}
+
+.lead-user-tasks .lead-user-tasks-title__my-tasks-icon {
+  padding-top: 2px;
+}
+
+.lead-user-tasks-table .lead-user-tasks-table__status {
+  padding: 12px 8px;
+}
+
+.user-task-history-table .user-task-history-table__status-icon {
+  width: 38px;
+  padding: 0 0;
+  text-align: center;
+  vertical-align: inherit;
+}
+
+.user-task-history-table .user-task-history-table__thead-number,
+.user-task-history-table .user-task-history-table__number {
+  padding: 11px 0;
+  text-align: center;
+}
+
+.user-task-history-table .user-task-history-table__thead-number {
+  width: 40px;
+}
+
+.user-task-history-table .user-task-history-table__thead-start,
+.user-task-history-table .user-task-history-table__thead-deadline,
+.user-task-history-table .user-task-history-table__thead-completed,
+.user-task-history-table .user-task-history-table__note {
+  width: 15%;
+}
+
+.lead-user-tasks-table .lead-user-tasks-table__task,
+.user-task-history-table .user-task-history-table__task {
+  line-height: 17px;
+}
+
+.lead-user-tasks-table .lead-user-tasks-table__note-head,
+.lead-user-tasks-table .lead-user-tasks-table__deadline-head {
+  width: 92px;
+}
+
+.lead-user-tasks-table .lead-user-tasks-table__start-head,
+.lead-user-tasks-table .lead-user-tasks-table__completed-head {
+  width: 125px;
+}
+
+.lead-user-tasks-table .lead-user-tasks-table__status-head {
+  width: 32px;
+}
