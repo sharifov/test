@@ -6051,3 +6051,8 @@ li.select2-selection__choice:first-of-type {
 li.select2-selection__choice {
   white-space: pre-line;
 }
+
+.task-list__status-ico {
+  color: red;
+  padding-left: 6px;
+}
