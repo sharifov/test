@@ -457,10 +457,12 @@ return [
             },
             'authenticators' => [
                 'google-auth' => [
-                    'class' => common\implementations\twoFactorAuth\OneTimeCodeAuth::class
+                    'class' => common\implementations\twoFactorAuth\OneTimeCodeAuth::class,
+                    'hint' => 'Please enter the six digit code generated your google authenticator'
                 ],
                 'email-auth' => [
                     'class' => common\implementations\twoFactorAuth\EmailAuth::class,
+                    'hint' => 'Please enter the six digit code sent to your email',
                     'codeDuration' => 700,
                     'options' => [
                         'from' => env('COMMON_CONFIG_MAIN_COMPONENTS_EMAIL_DEFAULTFROMEMAIL')
