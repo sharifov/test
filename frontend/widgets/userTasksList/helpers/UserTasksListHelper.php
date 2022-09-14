@@ -186,7 +186,9 @@ class UserTasksListHelper
     {
         $deadline = false;
 
-        if ($endDate && $statusId == UserTask::STATUS_PROCESSING) {
+        if ($statusId == UserTask::STATUS_FAILED) {
+            $deadline = true;
+        } elseif ($endDate && $statusId == UserTask::STATUS_PROCESSING) {
             $date = (new \DateTimeImmutable($endDate))->setTimezone(new \DateTimeZone($timezone))->format('d-M-Y H:i:s');
             $now = (new \DateTimeImmutable('now'))->setTimezone(new \DateTimeZone($timezone))->format('d-M-Y H:i:s');
 
