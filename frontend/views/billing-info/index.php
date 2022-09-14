@@ -35,7 +35,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'bi_first_name',
                 'value' => static function (BillingInfo $model) {
                     return \common\helpers\LogHelper::replaceSource($model->bi_first_name, 2);
-                }
+                },
+                'format' => 'raw'
             ],
             [
                 'attribute' => 'bi_last_name',
