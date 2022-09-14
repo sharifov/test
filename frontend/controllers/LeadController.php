@@ -220,6 +220,8 @@ class LeadController extends FController
                     'create',
                     'business-extra-queue',
                     'get-object-task-list',
+                    'pjax-user-tasks-list',
+                    'ajax-get-user-task',
                 ],
             ],
         ];
