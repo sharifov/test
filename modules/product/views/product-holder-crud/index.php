@@ -34,22 +34,19 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'ph_first_name',
                 'value' => static function (ProductHolder $model) {
-                    $data = \common\helpers\LogHelper::hidePersonalData([$model->ph_first_name], [0]);
-                    return $data[0];
+                    return \common\helpers\LogHelper::replaceSource($model->ph_first_name, 2);
                 }
             ],
             [
                 'attribute' => 'ph_last_name',
                 'value' => static function (ProductHolder $model) {
-                    $data = \common\helpers\LogHelper::hidePersonalData([$model->ph_last_name], [0]);
-                    return $data[0];
+                    return \common\helpers\LogHelper::replaceSource($model->ph_last_name, 2);
                 }
             ],
             [
                 'attribute' => 'ph_middle_name',
                 'value' => static function (ProductHolder $model) {
-                    $data = \common\helpers\LogHelper::hidePersonalData([$model->ph_middle_name], [0]);
-                    return $data[0];
+                    return \common\helpers\LogHelper::replaceSource($model->ph_middle_name, 2);
                 }
             ],
             [
