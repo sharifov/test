@@ -37,8 +37,8 @@ use yii\helpers\VarDumper;
  */
 class CasesController extends BaseController
 {
-    private $createHandler;
-    private $casesSaleService;
+    private Handler $createHandler;
+    private CasesSaleService $casesSaleService;
 
     public function __construct(
         $id,
