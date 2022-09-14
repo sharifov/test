@@ -188,8 +188,9 @@ class UserTasksListHelper
 
         if ($endDate && $statusId == UserTask::STATUS_PROCESSING) {
             $date = (new \DateTimeImmutable($endDate))->setTimezone(new \DateTimeZone($timezone))->format('d-M-Y H:i:s');
+            $now = (new \DateTimeImmutable('now'))->setTimezone(new \DateTimeZone($timezone))->format('d-M-Y H:i:s');
 
-            if (time() > strtotime($date)) {
+            if (strtotime($now) > strtotime($date)) {
                 $deadline = true;
             }
         }
