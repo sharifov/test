@@ -88,9 +88,8 @@ $js = <<<JS
 
         sendNoteRequest(href, (response) => {
             if (response.isSuccess) {
-                console.log('delete');
                 let taskEl = $('.js-add_note_task_list[data-usertaskid="'+response.userTaskId+'"]');
-                taskEl.html('Add note').removeClass('active').attr('data-original-title', '');
+                taskEl.html('Add note').removeClass('active').attr('data-original-title', '').attr('data-new-note', 1);
                 $("#modal-sm").modal("hide");
             }
         });
@@ -103,9 +102,8 @@ $js = <<<JS
         
         sendNoteRequest(href, (response) => {
             if(response.userTaskId) {
-                console.log('submit');
                 let taskEl = $('.js-add_note_task_list[data-usertaskid="'+response.userTaskId+'"]');
-                taskEl.html('View note').addClass('active').attr('data-original-title', response.note);
+                taskEl.html('View note').addClass('active').attr('data-original-title', response.note).attr('data-new-note', 0);
                 $("#modal-sm").modal("hide");
             }
         }, data);
