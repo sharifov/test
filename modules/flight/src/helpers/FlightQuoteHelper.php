@@ -1006,8 +1006,8 @@ class FlightQuoteHelper
                     : new \DateTimeZone("UTC");*/
             }
 
-            $rowExpl = explode($depDate, $rowFl);
-            $cabin = trim(str_replace($flightNumber, '', trim($rowExpl[0])));
+            $rowExplCabin = explode($depDate, $rowFl);
+            $cabin = trim(str_replace($flightNumber, '', trim($rowExplCabin[0])));
             if ($depCity !== null && $arrCity !== null && isset($depDateTimeWithTimezone) && isset($arrDateTimeWithTimezone)) {
                 $flightDuration = intval(($arrDateTimeWithTimezone->getTimestamp() - $depDateTimeWithTimezone->getTimestamp()) / 60);
             } else {
