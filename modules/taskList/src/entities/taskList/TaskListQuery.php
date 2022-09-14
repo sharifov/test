@@ -7,6 +7,7 @@ use modules\objectSegment\src\entities\ObjectSegmentList;
 use modules\objectSegment\src\entities\ObjectSegmentTask;
 use modules\objectSegment\src\entities\ObjectSegmentType;
 use modules\taskList\src\entities\userTask\UserTask;
+use src\helpers\app\DBHelper;
 use src\model\leadData\entity\LeadData;
 
 /**
@@ -55,7 +56,9 @@ class TaskListQuery
         string $targetObject,
         int $targetObjectId,
         string $taskObject,
-        array $utStatusIds
+        array $utStatusIds,
+        \DateTimeImmutable $dTStart,
+        \DateTime $dTEnd
     ): Scopes {
         return TaskList::find()
             ->alias('task_list')
@@ -66,6 +69,12 @@ class TaskListQuery
                     ->andWhere(['ut_target_object' => $targetObject])
                     ->andWhere(['ut_target_object_id' => $targetObjectId])
                     ->andWhere(['IN', 'ut_status_id', $utStatusIds])
+                    ->andWhere(DBHelper::yearMonthRestrictionQuery(
+                        $dTStart,
+                        $dTEnd,
+                        'ut_year',
+                        'ut_month'
+                    ))
                     ->groupBy(['ut_task_list_id'])
             ], 'tl_id = user_task_query.ut_task_list_id')
             ->where(['tl_object' => $taskObject])
