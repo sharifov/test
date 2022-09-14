@@ -88,7 +88,7 @@ class UserTaskLeadService
                     'shiftScheduleTasksPagination' => $shiftScheduleTasksPagination,
                 ];
 
-                if (!empty($cacheDuration)) {
+                if ($cacheDuration > 0) {
                     $cache->set($cacheKey, $result, $cacheDuration, $cacheTag);
                 }
 
@@ -130,7 +130,7 @@ class UserTaskLeadService
 
             $result = $query->all();
 
-            if (!empty($cacheDuration)) {
+            if ($cacheDuration > 0) {
                 $cache->set($cacheKeyOfSchedules, $result, $cacheDuration);
             }
         } else {
