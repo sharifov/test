@@ -44,19 +44,27 @@ $pjaxListId = 'pjax-client-account';
             [
                 'attribute' => 'ca_username',
                 'value' => static function ($model) {
-                    $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['ca_username']);
-                    return $data['ca_username'];
+                    return \common\helpers\LogHelper::replaceSource($model->ca_username, 2);
                 }
             ],
             [
                 'attribute' => 'ca_first_name',
                 'value' => static function ($model) {
-                    $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['ca_first_name']);
-                    return $data['ca_first_name'];
+                    return \common\helpers\LogHelper::replaceSource($model->ca_first_name, 2);
                 }
             ],
-            'ca_middle_name',
-            'ca_last_name',
+            [
+                'attribute' => 'ca_middle_name',
+                'value' => static function ($model) {
+                    return \common\helpers\LogHelper::replaceSource($model->ca_middle_name, 2);
+                }
+            ],
+            [
+                'attribute' => 'ca_last_name',
+                'value' => static function ($model) {
+                    return \common\helpers\LogHelper::replaceSource($model->ca_last_name, 2);
+                }
+            ],
             //'ca_nationality_country_code',
             //'ca_dob',
             //'ca_gender',

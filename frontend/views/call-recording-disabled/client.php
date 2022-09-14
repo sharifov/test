@@ -24,12 +24,21 @@ echo GridView::widget([
         [
             'attribute' => 'first_name',
             'value' => static function (Client $model) {
-                $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['first_name']);
-                return $data['first_name'];
+                return \common\helpers\LogHelper::replaceSource($model->first_name, 2);
             }
         ],
-        'middle_name',
-        'last_name',
+        [
+            'attribute' => 'middle_name',
+            'value' => static function (Client $model) {
+                return \common\helpers\LogHelper::replaceSource($model->middle_name, 2);
+            }
+        ],
+        [
+            'attribute' => 'last_name',
+            'value' => static function (Client $model) {
+                return \common\helpers\LogHelper::replaceSource($model->last_name, 2);
+            }
+        ],
         'company_name',
         [
             'attribute' => 'cl_type_id',
