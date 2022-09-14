@@ -11,7 +11,7 @@ use yii\base\Model;
 use yii\captcha\CaptchaValidator;
 use yii\db\Query;
 use yii\helpers\Url;
-use yii\web\Cookie;
+use yii\helpers\VarDumper;
 use yii\web\IdentityInterface;
 
 /**
@@ -46,15 +46,17 @@ class LoginForm extends Model
 
     /**
      * @param $attribute
+     * @param $params
+     * @param $validator
      * @return bool
      */
-    public function validateCaptchaCode($attribute)
+    public function validateCaptchaCode($attribute, $params, $validator)
     {
         if ((new AntiBruteForceService())->checkCaptchaEnable()) {
             $validator = new CaptchaValidator();
             $validator->captchaAction = Url::to('/site/captcha');
             if (!$validator->validate($this->$attribute)) {
-                $this->addError($attribute, "the `$attribute` is invalid");
+                $this->addError($attribute, "the `{$attribute}` is invalid");
                 return false;
             }
         }
@@ -62,7 +64,8 @@ class LoginForm extends Model
     }
 
     /**
-     * @param string $attribute
+     * @param $attribute
+     * @param $params
      */
     public function checkIsBlocked($attribute): void
     {
@@ -77,8 +80,9 @@ class LoginForm extends Model
      * This method serves as the inline validation for password.
      *
      * @param string $attribute the attribute currently being validated
+     * @param array $params the additional name-value pairs given in the rule
      */
-    public function validatePassword($attribute)
+    public function validatePassword($attribute, $params)
     {
         if (!$this->hasErrors()) {
             $user = $this->getUser();
@@ -177,7 +181,6 @@ class LoginForm extends Model
     {
         $identityCookie = Yii::$app->params['wsIdentityCookie'] ?? [];
 
-        /** @var Cookie $cookie */
         $cookie = Yii::createObject(array_merge($identityCookie, [
             'class' => 'yii\web\Cookie',
             'value' => json_encode([
@@ -187,7 +190,6 @@ class LoginForm extends Model
             ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
             'expire' => $duration ? time() + $duration : 0,
         ]));
-
         Yii::$app->getResponse()->getCookies()->add($cookie);
     }
 
@@ -217,7 +219,7 @@ class LoginForm extends Model
                 );
 
                 if (!$userFailedLogin->save()) {
-                    Yii::error(
+                    \Yii::error(
                         AppHelper::validationLog($userFailedLogin),
                         'LoginForm:afterValidate:saveFailed'
                     );
@@ -254,7 +256,7 @@ class LoginForm extends Model
             ->where(['u.username' => $this->username])
             ->one();
 
-        return $result['up_2fa_secret'] ?? null;
+        return isset($result['up_2fa_secret']) ? $result['up_2fa_secret'] : null;
     }
 
     /**
