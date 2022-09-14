@@ -67,7 +67,7 @@ class UserTasksListHelper
      */
     public static function renderDeadlineStatus($statusId, $startDate, $endDate, $timezone): string
     {
-        if (static::isDeadline($endDate, $statusId, $timezone)) {
+        if ($statusId == UserTask::STATUS_FAILED) {
             return 'Unfulfilled';
         }
 
@@ -167,7 +167,7 @@ class UserTasksListHelper
     {
         $result = '';
 
-        if ($statusId != UserTask::STATUS_CANCEL && !$isDeadline) {
+        if ($statusId != UserTask::STATUS_CANCEL && $statusId != UserTask::STATUS_FAILED) {
             $result = \Yii::$app->formatter->asDateTimeByUserTimezone(
                 strtotime($startDate),
                 $userTimeZone,
