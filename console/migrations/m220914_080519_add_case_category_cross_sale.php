@@ -1,7 +1,7 @@
 <?php
 
 use common\models\Department;
-use src\entities\cases\CaseCategoryDictionary;
+use src\entities\cases\CaseCategoryKeyDictionary;
 use yii\db\Migration;
 
 /**
@@ -12,7 +12,7 @@ class m220914_080519_add_case_category_cross_sale extends Migration
     public function safeUp()
     {
         $this->insert('{{%case_category}}', [
-            'cc_key' => CaseCategoryDictionary::CROSS_SALE,
+            'cc_key' => CaseCategoryKeyDictionary::CROSS_SALE,
             'cc_name' => 'Cross Sale',
             'cc_enabled' => true,
             'cc_system' => true,
@@ -30,7 +30,7 @@ class m220914_080519_add_case_category_cross_sale extends Migration
     public function safeDown()
     {
         $this->delete('{{%case_category}}', ['IN', 'cc_key', [
-            CaseCategoryDictionary::CROSS_SALE,
+            CaseCategoryKeyDictionary::CROSS_SALE,
         ]]);
 
         if (Yii::$app->cache) {
