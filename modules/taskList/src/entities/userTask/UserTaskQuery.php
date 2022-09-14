@@ -7,6 +7,7 @@ use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTask;
 use modules\taskList\src\entities\TargetObject;
 use src\helpers\app\AppHelper;
+use src\helpers\app\DBHelper;
 use Yii;
 
 class UserTaskQuery
@@ -19,6 +20,8 @@ class UserTaskQuery
         array $utStatusIds,
         array $userShiftScheduleStatuses,
         \DateTimeImmutable $dtNow,
+        ?\DateTimeImmutable $dTStart,
+        ?\DateTime $dTEnd,
         ?array $excludeIds = null
     ): UserTaskScopes {
         $dtNowFormatted = $dtNow->format('Y-m-d H:i:s');
@@ -50,6 +53,15 @@ class UserTaskQuery
             ->andWhere(['IN', 'ut_status_id', $utStatusIds])
             ->andWhere(['<=', 'ut_start_dt', $dtNowFormatted])
             ->andWhere(['OR', ['ut_end_dt' => null], ['>=', 'ut_end_dt', $dtNowFormatted]]);
+
+        if ($dTStart && $dTEnd) {
+            $userTasksQuery->andWhere(DBHelper::yearMonthRestrictionQuery(
+                $dTStart,
+                $dTEnd,
+                'ut_year',
+                'ut_month'
+            ));
+        }
 
         if (!empty($excludeIds)) {
             $userTasksQuery->andWhere(['NOT IN', 'ut_id', $excludeIds]);

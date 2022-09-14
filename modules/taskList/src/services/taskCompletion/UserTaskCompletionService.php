@@ -2,10 +2,13 @@
 
 namespace modules\taskList\src\services\taskCompletion;
 
+use modules\featureFlag\FFlag;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\taskList\src\entities\taskList\TaskListQuery;
 use modules\taskList\src\entities\userTask\repository\UserTaskRepository;
 use modules\taskList\src\entities\userTask\UserTaskQuery;
+use modules\taskList\src\services\TargetObjectFactory;
+use modules\taskList\src\services\TargetObjectService;
 use modules\taskList\src\services\taskCompletion\taskCompletionChecker\TaskListCompletionFactory;
 
 class UserTaskCompletionService
@@ -40,12 +43,24 @@ class UserTaskCompletionService
     {
         $this->log('Begin handle', '1');
 
+        /** @fflag FFlag::FF_KEY_USER_TASK_COMPLETION_START_END_DT, Add DT restriction from lead create and now */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_USER_TASK_COMPLETION_START_END_DT)) {
+            $targetObjectModel = (new TargetObjectFactory($this->targetObject, $this->targetObjectId))->create();
+            $dataStart = TargetObjectService::getStatDataByTargetObject($this->targetObject, $targetObjectModel);
+            $dataEnd = new \DateTime('now', new \DateTimeZone('UTC'));
+        } else {
+            $dataStart = null;
+            $dataEnd = null;
+        }
+
         $taskListsQuery = TaskListQuery::getTaskListUserCompletion(
             $this->userId,
             $this->targetObject,
             $this->targetObjectId,
             $this->taskObject,
-            TaskCompletionDictionary::getUserTaskProcessingStatuses()
+            TaskCompletionDictionary::getUserTaskProcessingStatuses(),
+            $dataStart,
+            $dataEnd
         );
         $taskLists = $taskListsQuery->all();
 
@@ -64,6 +79,8 @@ class UserTaskCompletionService
                     TaskCompletionDictionary::getUserTaskProcessingStatuses(),
                     UserShiftSchedule::getProcessingStatuses(),
                     (new \DateTimeImmutable('now', new \DateTimeZone('UTC'))),
+                    $dataStart,
+                    $dataEnd,
                     $this->userTasksProcessed
                 );
 
