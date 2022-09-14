@@ -374,7 +374,7 @@ class ReProtectionQuoteManualCreateService
             'validatingCarrier' => $form->validatingCarrier,
             'fareType' => $form->fareType,
             'key' => md5(serialize($form->toArray())),
-            'trips' => [],
+            'trips' => FlightQuoteHelper::getTripsSegmentsData($form->reservationDump, $form->cabin, (int)$form->tripType),
             'reservationDump' => $form->reservationDump
         ];
     }
