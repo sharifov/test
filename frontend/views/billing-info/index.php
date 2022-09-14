@@ -34,24 +34,24 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'bi_first_name',
                 'value' => static function (BillingInfo $model) {
-                    $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['bi_first_name']);
-                    return $data['bi_first_name'];
+                    $data = \common\helpers\LogHelper::hidePersonalData([$model->bi_first_name], [0]);
+                    return $data[0];
                 },
                 'format' => 'raw'
             ],
             [
                 'attribute' => 'bi_last_name',
                 'value' => static function (BillingInfo $model) {
-                    $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['bi_last_name']);
-                    return $data['bi_last_name'];
+                    $data = \common\helpers\LogHelper::hidePersonalData([$model->bi_last_name], [0]);
+                    return $data[0];
                 },
                 'format' => 'raw'
             ],
             [
                 'attribute' => 'bi_middle_name',
                 'value' => static function (BillingInfo $model) {
-                    $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['bi_middle_name']);
-                    return $data['bi_middle_name'];
+                    $data = \common\helpers\LogHelper::hidePersonalData([$model->bi_middle_name], [0]);
+                    return $data[0];
                 },
                 'format' => 'raw'
             ],
