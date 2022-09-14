@@ -213,8 +213,6 @@ class TaskListController extends FController
             $userTask->ut_description = '';
             (new UserTaskRepository($userTask))->save();
             $result['isSuccess'] = true;
-
-            TagDependency::invalidate(\Yii::$app->cache, UserTasksListHelper::getUserTasksListCacheTag($userTask->ut_target_object_id, Auth::id()));
         } catch (\Throwable $e) {
             Yii::error(AppHelper::throwableLog($e), 'TaskListController:actionAjaxDeleteNote:Throwable');
             $result['message'] = 'Something went wrong';
