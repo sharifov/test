@@ -34,26 +34,20 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'bi_first_name',
                 'value' => static function (BillingInfo $model) {
-                    $data = \common\helpers\LogHelper::hidePersonalData([$model->bi_first_name], [0]);
-                    return $data[0];
-                },
-                'format' => 'raw'
+                    return \common\helpers\LogHelper::replaceSource($model->bi_first_name, 2);
+                }
             ],
             [
                 'attribute' => 'bi_last_name',
                 'value' => static function (BillingInfo $model) {
-                    $data = \common\helpers\LogHelper::hidePersonalData([$model->bi_last_name], [0]);
-                    return $data[0];
-                },
-                'format' => 'raw'
+                    return \common\helpers\LogHelper::replaceSource($model->bi_last_name, 2);
+                }
             ],
             [
                 'attribute' => 'bi_middle_name',
                 'value' => static function (BillingInfo $model) {
-                    $data = \common\helpers\LogHelper::hidePersonalData([$model->bi_middle_name], [0]);
-                    return $data[0];
-                },
-                'format' => 'raw'
+                    return \common\helpers\LogHelper::replaceSource($model->bi_middle_name, 2);
+                }
             ],
             'bi_company_name',
             'bi_cc_id',

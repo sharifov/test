@@ -41,22 +41,19 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'first_name',
                 'value' => static function ($model) {
-                    $data = \common\helpers\LogHelper::hidePersonalData([$model->first_name], [0]);
-                    return $data [0];
+                    return \common\helpers\LogHelper::replaceSource($model->first_name, 2);
                 },
             ],
             [
                 'attribute' => 'middle_name',
                 'value' => static function ($model) {
-                    $data = \common\helpers\LogHelper::hidePersonalData([$model->middle_name], [0]);
-                    return $data [0];
+                    return \common\helpers\LogHelper::replaceSource($model->middle_name, 2);
                 },
             ],
             [
                 'attribute' => 'last_name',
                 'value' => static function ($model) {
-                    $data = \common\helpers\LogHelper::hidePersonalData([$model->last_name], [0]);
-                    return $data [0];
+                    return \common\helpers\LogHelper::replaceSource($model->last_name, 2);
                 },
             ],
             'company_name',
