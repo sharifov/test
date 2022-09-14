@@ -123,7 +123,7 @@ use frontend\widgets\userTasksList\helpers\UserTasksListHelper;
                                     <td class="lead-user-tasks-table__start lead-user-tasks-table__col">
                                         <?= UserTasksListHelper::renderStartDate($userTask['ut_status_id'], $userTask['ut_start_dt'], $isDeadline, $userTimeZone); ?>
                                     </td>
-                                    <td class="lead-user-tasks-table__deadline lead-user-tasks-table__col">
+                                    <td class="lead-user-tasks-table__deadline lead-user-tasks-table__col" style="width: 120px;">
                                         <?= UserTasksListHelper::renderDeadlineStatus($userTask['ut_status_id'], $userTask['ut_start_dt'], $userTask['ut_end_dt'], $userTimeZone); ?>
                                     </td>
                                     <td class="lead-user-tasks-table__completed lead-user-tasks-table__col">
