@@ -128,7 +128,7 @@ class UserTasksListHelper
                 'title' => $description,
                 'data' => [
                     'usertaskid' => $usertaskId,
-                    'new-note' => empty($description),
+                    'new-note' => (int)empty($description),
                     'custom-class' => 'lead-user-tasks-table__note-tooltip',
                 ],
             ]);

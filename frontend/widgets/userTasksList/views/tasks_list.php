@@ -179,8 +179,10 @@ $js = <<<JS
 
     $(document).on('click', '.js-add_note_task_list', function() {
         let modal = $('#modal-sm');
+        var isNewNote = this.getAttribute('data-new-note');
+        
         modal.addClass('lead-user-tasks-modal');
-        modal.find('.modal-title').html($(this).data('new-note') == '1'? 'Add note' : 'Edit note');
+        modal.find('.modal-title').html(isNewNote == '1'? 'Add note' : 'Edit note');
         modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
         
         let userTaskId = $(this).data('usertaskid');
