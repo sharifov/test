@@ -18,10 +18,6 @@ class m220914_080519_add_case_category_cross_sale extends Migration
             'cc_system' => true,
             'cc_dep_id' => Department::DEPARTMENT_CROSS_SELL,
         ]);
-
-        if (Yii::$app->cache) {
-            Yii::$app->cache->flush();
-        }
     }
 
     /**
@@ -32,9 +28,5 @@ class m220914_080519_add_case_category_cross_sale extends Migration
         $this->delete('{{%case_category}}', ['IN', 'cc_key', [
             CaseCategoryKeyDictionary::CROSS_SALE,
         ]]);
-
-        if (Yii::$app->cache) {
-            Yii::$app->cache->flush();
-        }
     }
 }
