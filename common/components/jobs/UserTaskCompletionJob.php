@@ -64,7 +64,7 @@ class UserTaskCompletionJob extends BaseJob implements JobInterface
         }
 
         $timeEnd = microtime(true);
-        $executeSecond = number_format(round($timeEnd - $timeStart, 2), 2);
+        $executeSecond = (int)($timeEnd - $timeStart);
 
         /** @fflag FFlag::FF_KEY_USER_TASK_COMPLETION_DEBUG, Enable debug/log mode */
         if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_USER_TASK_COMPLETION_DEBUG)) {
