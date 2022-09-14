@@ -11,7 +11,6 @@ use yii\base\Model;
 use yii\captcha\CaptchaValidator;
 use yii\db\Query;
 use yii\helpers\Url;
-use yii\helpers\VarDumper;
 use yii\web\IdentityInterface;
 
 /**
@@ -218,11 +217,20 @@ class LoginForm extends Model
                     Yii::$app->session->id
                 );
 
-                if (!$userFailedLogin->save()) {
-                    \Yii::error(
+                if (!$userFailedLogin->validate()) {
+                    Yii::warning(
                         AppHelper::validationLog($userFailedLogin),
-                        'LoginForm:afterValidate:saveFailed'
+                        'LoginForm:afterValidate:validateFailed'
                     );
+                } else {
+                    try {
+                        $userFailedLogin->save(false);
+                    } catch (\Throwable $e) {
+                        Yii::error(
+                            AppHelper::validationLog($userFailedLogin),
+                            'LoginForm:afterValidate:saveFailed'
+                        );
+                    }
                 }
             }
 
