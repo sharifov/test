@@ -7,6 +7,7 @@ use modules\objectSegment\src\entities\ObjectSegmentList;
 use modules\objectSegment\src\entities\ObjectSegmentTask;
 use modules\objectSegment\src\entities\ObjectSegmentType;
 use modules\taskList\src\entities\userTask\UserTask;
+use modules\taskList\src\entities\userTask\UserTaskScopes;
 use src\helpers\app\DBHelper;
 use src\model\leadData\entity\LeadData;
 
@@ -57,27 +58,51 @@ class TaskListQuery
         int $targetObjectId,
         string $taskObject,
         array $utStatusIds,
-        \DateTimeImmutable $dTStart,
-        \DateTime $dTEnd
+        ?\DateTimeImmutable $dTStart,
+        ?\DateTime $dTEnd
     ): Scopes {
         return TaskList::find()
             ->alias('task_list')
             ->innerJoin([
-                'user_task_query' => UserTask::find()
-                    ->select(['ut_task_list_id'])
-                    ->where(['ut_user_id' => $userId])
-                    ->andWhere(['ut_target_object' => $targetObject])
-                    ->andWhere(['ut_target_object_id' => $targetObjectId])
-                    ->andWhere(['IN', 'ut_status_id', $utStatusIds])
-                    ->andWhere(DBHelper::yearMonthRestrictionQuery(
-                        $dTStart,
-                        $dTEnd,
-                        'ut_year',
-                        'ut_month'
-                    ))
-                    ->groupBy(['ut_task_list_id'])
+                'user_task_query' => self::getUserTaskQuery(
+                    $userId,
+                    $targetObject,
+                    $targetObjectId,
+                    $utStatusIds,
+                    $dTStart,
+                    $dTEnd
+                )
             ], 'tl_id = user_task_query.ut_task_list_id')
             ->where(['tl_object' => $taskObject])
             ->distinct();
+    }
+
+    private static function getUserTaskQuery(
+        int $userId,
+        string $targetObject,
+        int $targetObjectId,
+        array $utStatusIds,
+        ?\DateTimeImmutable $dTStart,
+        ?\DateTime $dTEnd
+    ): UserTaskScopes {
+        $query = UserTask::find()
+            ->select(['ut_task_list_id'])
+            ->where(['ut_user_id' => $userId])
+            ->andWhere(['ut_target_object' => $targetObject])
+            ->andWhere(['ut_target_object_id' => $targetObjectId])
+            ->andWhere(['IN', 'ut_status_id', $utStatusIds]);
+
+        if ($dTStart && $dTEnd) {
+            $query->andWhere(DBHelper::yearMonthRestrictionQuery(
+                $dTStart,
+                $dTEnd,
+                'ut_year',
+                'ut_month'
+            ));
+        }
+
+        $query->groupBy(['ut_task_list_id']);
+
+        return $query;
     }
 }

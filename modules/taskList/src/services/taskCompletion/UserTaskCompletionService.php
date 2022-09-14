@@ -2,6 +2,7 @@
 
 namespace modules\taskList\src\services\taskCompletion;
 
+use modules\featureFlag\FFlag;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\taskList\src\entities\taskList\TaskListQuery;
 use modules\taskList\src\entities\userTask\repository\UserTaskRepository;
@@ -42,9 +43,15 @@ class UserTaskCompletionService
     {
         $this->log('Begin handle', '1');
 
-        $targetObjectModel = (new TargetObjectFactory($this->targetObject, $this->targetObjectId))->create();
-        $dataStart = TargetObjectService::getStatDataByTargetObject($this->targetObject, $targetObjectModel);
-        $dataEnd = new \DateTime('now', new \DateTimeZone('UTC'));
+        /** @fflag FFlag::FF_KEY_USER_TASK_COMPLETION_START_END_DT, Add DT restriction from lead create and now */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_USER_TASK_COMPLETION_START_END_DT)) {
+            $targetObjectModel = (new TargetObjectFactory($this->targetObject, $this->targetObjectId))->create();
+            $dataStart = TargetObjectService::getStatDataByTargetObject($this->targetObject, $targetObjectModel);
+            $dataEnd = new \DateTime('now', new \DateTimeZone('UTC'));
+        } else {
+            $dataStart = null;
+            $dataEnd = null;
+        }
 
         $taskListsQuery = TaskListQuery::getTaskListUserCompletion(
             $this->userId,

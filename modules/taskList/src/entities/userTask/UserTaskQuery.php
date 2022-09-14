@@ -20,8 +20,8 @@ class UserTaskQuery
         array $utStatusIds,
         array $userShiftScheduleStatuses,
         \DateTimeImmutable $dtNow,
-        \DateTimeImmutable $dTStart,
-        \DateTime $dTEnd,
+        ?\DateTimeImmutable $dTStart,
+        ?\DateTime $dTEnd,
         ?array $excludeIds = null
     ): UserTaskScopes {
         $dtNowFormatted = $dtNow->format('Y-m-d H:i:s');
@@ -52,13 +52,16 @@ class UserTaskQuery
             ->andWhere(['ut_target_object_id' => $targetObjectId])
             ->andWhere(['IN', 'ut_status_id', $utStatusIds])
             ->andWhere(['<=', 'ut_start_dt', $dtNowFormatted])
-            ->andWhere(['OR', ['ut_end_dt' => null], ['>=', 'ut_end_dt', $dtNowFormatted]])
-            ->andWhere(DBHelper::yearMonthRestrictionQuery(
+            ->andWhere(['OR', ['ut_end_dt' => null], ['>=', 'ut_end_dt', $dtNowFormatted]]);
+
+        if ($dTStart && $dTEnd) {
+            $userTasksQuery->andWhere(DBHelper::yearMonthRestrictionQuery(
                 $dTStart,
                 $dTEnd,
                 'ut_year',
                 'ut_month'
             ));
+        }
 
         if (!empty($excludeIds)) {
             $userTasksQuery->andWhere(['NOT IN', 'ut_id', $excludeIds]);
