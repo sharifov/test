@@ -72,13 +72,11 @@ class UserTasksListHelper
         }
 
         if (!empty($endDate) && $statusId == UserTask::STATUS_PROCESSING) {
-            $startDate = (new \DateTimeImmutable($startDate))->setTimezone(new \DateTimeZone($timezone))->format('d-M-Y H:i:s');
-            $endDate = (new \DateTimeImmutable($endDate))->setTimezone(new \DateTimeZone($timezone))->format('d-M-Y H:i:s');
-
-            $timer = UserTaskHelper::getDeadlineTimer($startDate, $endDate);
-            $timer = ($timer != '-') ? $timer : '';
-
-            return $timer;
+            return \Yii::$app->formatter->asDateTimeByUserTimezone(
+                strtotime($endDate),
+                $timezone,
+                'php:d.m.y [H:i]'
+            );
         } elseif ($statusId == UserTask::STATUS_CANCEL) {
             return 'Canceled';
         }
