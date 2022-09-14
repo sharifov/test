@@ -5,10 +5,9 @@ namespace frontend\widgets\userTasksList\services;
 use frontend\widgets\userTasksList\helpers\UserTasksListHelper;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
 use modules\taskList\src\entities\userTask\UserTaskQuery;
-use src\auth\Auth;
-use yii\caching\TagDependency;
 use yii\data\Pagination;
 use common\models\Lead;
+use modules\featureFlag\FFlag;
 
 class UserTaskLeadService
 {
@@ -20,32 +19,12 @@ class UserTaskLeadService
     public function getSchedulesWithTasksPagination(Lead $lead, int $pageNumb = 1, ?int $activeUserShiftScheduleId = null): array
     {
         $result = [];
-        $cache = \Yii::$app->cache;
-        $cacheKeyOfSchedules = UserTasksListHelper::generateUserSchedulesListCacheKey($lead->id, $lead->employee_id);
 
-        $userShiftSchedules = $cache->getOrSet($cacheKeyOfSchedules, static function () use ($lead) {
-            $query = UserShiftScheduleQuery::getAllThatHaveTasksByLeadIdAndUserIdAndType($lead->id, $lead->employee_id)
-                ->with('shiftScheduleEventTask');
-
-            /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
-            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE)) {
-                \Yii::info($query->createCommand()->getRawSql(), 'info\UserTaskLeadServiceWidget:getAllThatHaveTasksByLeadIdAndUserIdAndType:query');
-            }
-
-            return $query->all();
-        });
-
-        /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE)) {
-            $message = [
-                'leadId' => $lead->id,
-                'employee_id' => $lead->employee_id,
-                'cacheKeyOfSchedules' => $cacheKeyOfSchedules,
-                'userShiftSchedules' => $userShiftSchedules,
-            ];
-
-            \Yii::info($message, 'info\UserTaskLeadServiceWidget:getSchedulesWithTasksPagination:first');
+        if (empty($lead->employee_id)) {
+            return $result;
         }
+
+        $userShiftSchedules = $this->getUserShiftSchedules($lead);
 
         if (!empty($userShiftSchedules)) {
             $userShiftSchedulesNew = [];
@@ -57,69 +36,80 @@ class UserTaskLeadService
             $activeUserShiftScheduleId = $activeUserShiftScheduleId ?: reset($userShiftSchedulesNew)['uss_id'];
             $activeScheduleData = $activeUserShiftScheduleId ? $userShiftSchedulesNew[$activeUserShiftScheduleId] : reset($userShiftSchedulesNew);
 
-            $cacheKey = UserTasksListHelper::generateUserTasksListCacheKey(
-                $lead->id,
-                Auth::id(),
-                $pageNumb,
-                $activeUserShiftScheduleId
-            );
-
             /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
-            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE)) {
+            if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE)) {
                 $message = [
                     'leadId' => $lead->id,
                     'employee_id' => $lead->employee_id,
                     'userShiftSchedulesNew' => $userShiftSchedulesNew,
                     'activeUserShiftScheduleId' => $activeUserShiftScheduleId,
                     'activeScheduleData' => $activeScheduleData,
-                    'cacheKey' => $cacheKey,
                 ];
 
                 \Yii::info($message, 'info\UserTaskLeadServiceWidget:getSchedulesWithTasksPagination:second');
             }
 
-            if (!$cache->get($cacheKey)) {
-                $cacheTag = new TagDependency(['tags' => UserTasksListHelper::getUserTasksListCacheTag($lead->id, Auth::id())]);
+            $shiftScheduleTasksQuery = UserTaskQuery::getQueryUserIdAndTargetIdAndDateAndTargetObject(
+                $lead->employee_id,
+                $lead->id,
+                $activeScheduleData['uss_start_utc_dt'],
+                $activeScheduleData['uss_end_utc_dt']
+            );
+            $shiftScheduleTasksPagination = new Pagination([
+                'route' => 'lead/pjax-user-tasks-list',
+                'pageSize' => UserTasksListHelper::PAGE_SIZE,
+                'totalCount' => (clone $shiftScheduleTasksQuery)->count(),
+            ]);
+            $shiftScheduleTasks = $shiftScheduleTasksQuery
+                ->offset($shiftScheduleTasksPagination->offset)
+                ->limit($shiftScheduleTasksPagination->limit)
+                ->asArray()
+                ->all();
 
-                $shiftScheduleTasksQuery = UserTaskQuery::getQueryUserIdAndTargetIdAndDateAndTargetObject(
-                    $lead->employee_id,
-                    $lead->id,
-                    $activeScheduleData['uss_start_utc_dt'],
-                    $activeScheduleData['uss_end_utc_dt']
-                );
-                $shiftScheduleTasksPagination = new Pagination([
-                    'route' => 'lead/pjax-user-tasks-list',
-                    'pageSize' => UserTasksListHelper::PAGE_SIZE,
-                    'totalCount' => (clone $shiftScheduleTasksQuery)->count(),
-                ]);
-                $shiftScheduleTasks = $shiftScheduleTasksQuery
-                    ->offset($shiftScheduleTasksPagination->offset)
-                    ->limit($shiftScheduleTasksPagination->limit)
-                    ->asArray()
-                    ->all();
+            $result = [
+                'userShiftSchedules' => $userShiftSchedulesNew,
+                'shiftScheduleTasks' => $shiftScheduleTasks,
+                'activeShiftScheduleId' => $activeUserShiftScheduleId,
+                'shiftScheduleTasksPagination' => $shiftScheduleTasksPagination,
+            ];
 
-                $cache->set($cacheKey, [
-                    'userShiftSchedules' => $userShiftSchedulesNew,
+            /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
+            if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE)) {
+                $message = [
+                    'leadId' => $lead->id,
+                    'employee_id' => $lead->employee_id,
+                    'shiftScheduleTasksQuery' => $shiftScheduleTasksQuery,
                     'shiftScheduleTasks' => $shiftScheduleTasks,
-                    'activeShiftScheduleId' => $activeUserShiftScheduleId,
-                    'shiftScheduleTasksPagination' => $shiftScheduleTasksPagination,
-                ], UserTasksListHelper::CACHE_DURATION, $cacheTag);
+                ];
 
-                /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
-                if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE)) {
-                    $message = [
-                        'leadId' => $lead->id,
-                        'employee_id' => $lead->employee_id,
-                        'cacheTag' => $cacheTag,
-                        'shiftScheduleTasksQuery' => $shiftScheduleTasksQuery,
-                        'shiftScheduleTasks' => $shiftScheduleTasks,
-                    ];
-
-                    \Yii::info($message, 'info\UserTaskLeadServiceWidget:getSchedulesWithTasksPagination:third');
-                }
+                \Yii::info($message, 'info\UserTaskLeadServiceWidget:getSchedulesWithTasksPagination:third');
             }
+        }
 
-            $result = $cache->get($cacheKey);
+        return $result;
+    }
+
+    private function getUserShiftSchedules($lead): array
+    {
+        $query = UserShiftScheduleQuery::getAllThatHaveTasksByLeadIdAndUserIdAndType($lead->id, $lead->employee_id)
+            ->with('shiftScheduleEventTask');
+
+        /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE)) {
+            \Yii::info($query->createCommand()->getRawSql(), 'info\UserTaskLeadServiceWidget:getAllThatHaveTasksByLeadIdAndUserIdAndType:query');
+        }
+
+        $result = $query->all();
+
+        /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE)) {
+            $message = [
+                'leadId' => $lead->id,
+                'employee_id' => $lead->employee_id,
+                'userShiftSchedules' => $result,
+            ];
+
+            \Yii::info($message, 'info\UserTaskLeadServiceWidget:getSchedulesWithTasksPagination:first');
         }
 
         return $result;

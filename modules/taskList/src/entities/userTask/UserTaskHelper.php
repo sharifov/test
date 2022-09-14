@@ -62,7 +62,7 @@ class UserTaskHelper
             case UserTask::STATUS_CANCEL:
                 return '<i class="fa fa-exclamation-circle fa-status-cancel" aria-hidden="true"></i>';
             case UserTask::STATUS_FAILED:
-                return '<i class="fa fa-times-circle" aria-hidden="true"></i>';
+                return '<i class="fa fa-times-circle text-danger" aria-hidden="true"></i>';
             default:
                 return '<i class="fa fa-square-o fa-status" aria-hidden="true"></i>';
         }
