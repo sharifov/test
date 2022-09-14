@@ -2,6 +2,7 @@
 
 namespace frontend\widgets\userTasksList\helpers;
 
+use modules\featureFlag\FFlag;
 use src\auth\Auth;
 use modules\taskList\src\entities\userTask\{
     UserTask,
@@ -213,6 +214,22 @@ class UserTasksListHelper
             'from' => $from,
             'totalCount' => $pagination->totalCount,
         ];
+
+        return $result;
+    }
+
+    /**
+     * @return int
+     */
+    public static function getCacheDuration(): int
+    {
+        $result = 0;
+
+        /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_CACHE_DURATION, Cache duration for new user task list (in seconds) */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_USER_NEW_TASK_LIST_CACHE_DURATION)) {
+            /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_CACHE_DURATION, Cache duration for new user task list (in seconds) */
+            $result = \Yii::$app->featureFlag->getValue(FFlag::FF_KEY_USER_NEW_TASK_LIST_CACHE_DURATION);
+        }
 
         return $result;
     }
