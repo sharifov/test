@@ -36,6 +36,20 @@ class FlightStatusService implements BoWebhookService
             return;
         }
 
+        $setting = Yii::$app->params['settings']['case_cross_sale_queue'];
+
+        if (isset($setting['excludeProjects']) && is_array($setting['excludeProjects'])) {
+            if (in_array($form->project_key, $setting['excludeProjects'])) {
+                return;
+            }
+        }
+
+        if (isset($setting['excludeCabin']) && is_array($setting['excludeCabin'])) {
+            if (in_array($form->flight_cabin, $setting['excludeCabin'])) {
+                return;
+            }
+        }
+
         if ($form->isStatusClose() && $form->hasLead() === false) {
             $caseExists = Cases::find()
                 ->where([
