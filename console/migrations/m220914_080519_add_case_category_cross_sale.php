@@ -21,6 +21,7 @@ class m220914_080519_add_case_category_cross_sale extends Migration
             'cc_lft' => 1,
             'cc_rgt' => 2,
             'cc_depth' => 0,
+            'cc_tree' => 0,
         ]);
         /*update cc_tree attribute for a new cross_sale category with it's primary key */
         $caseCategory = (new \yii\db\Query())->from('{{%case_category}}')->where(['cc_key' => CaseCategoryKeyDictionary::CROSS_SALE])->limit(1)->one();
