@@ -49,7 +49,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'value' => static function (ContactPhoneServiceInfo $model) {
                     $resultStr = '-';
-                    if ($decodedData = JsonHelper::decode($model->cpsi_data_json)) {
+                    if ($decodedData = JsonHelper::encode($model->cpsi_data_json)) {
                         $decodedData = \common\helpers\LogHelper::replaceSource($decodedData);
                         $truncatedStr = StringHelper::truncate(
                             Html::encode(VarDumper::dumpAsString($decodedData)),

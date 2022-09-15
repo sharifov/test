@@ -161,7 +161,6 @@ use frontend\extensions\DatePicker;
                         </div>
                     <!--</div>
                     <div class="row">-->
-                        <div class="col-md-1"><?php echo $form->field($model, 'quote_pnr')->label('PNR') ?></div>
                         <div class="col-md-1">
                             <?php echo $form->field($model, 'rating')->dropDownList(array_combine(range(1, 3), range(1, 3)), ['prompt' => '-']) ?>
                         </div>
