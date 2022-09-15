@@ -90,6 +90,22 @@ class CasesQRepository
         return $this->getInboxQuery($user)->cache(self::CACHE_DURATION)->count();
     }
 
+    public function getBaseQuery(Employee $user, array $allowedStatusList = [CasesStatus::STATUS_PENDING]): ActiveQuery
+    {
+        $query = CasesQSearch::find()
+            ->andWhere(['IN', 'cs_status', $allowedStatusList])
+            ->andWhere(['<>', 'cs_is_automate', true]);
+
+
+        if ($user->isAdmin()) {
+            return $query;
+        }
+
+        $query->andWhere($this->createSubQuery($user->id, []));
+
+        return $query;
+    }
+
     /**
      * @param Employee $user
      * @return ActiveQuery

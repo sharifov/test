@@ -177,4 +177,14 @@ class CaseCategory extends ActiveRecord
     {
         return new CasesNestedSetsCategoryQuery(static::class);
     }
+
+    public static function getIdByKey(string $key): ?int
+    {
+        return self::find()->select(['cc_id'])->where(['cc_key' => $key])->limit(1)->scalar();
+    }
+
+    public static function getIdListByCategoryKeys(array $categoryKeys): array
+    {
+        return self::find()->select(['cc_id'])->where(['IN', 'cc_key', $categoryKeys])->column();
+    }
 }
