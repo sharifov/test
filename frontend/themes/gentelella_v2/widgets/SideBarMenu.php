@@ -217,6 +217,13 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'url' => ['/cases-q/pending'], 'icon' => 'list', 'title' => 'Case Pending queue'];
         $menuCases[] = ['label' => 'Inbox <span id="cases-q-inbox" data-type="inbox" class="label-warning label pull-right cases-q-info"></span> ',
             'url' => ['/cases-q/inbox'], 'icon' => 'briefcase text-info', 'title' => 'Case Inbox queue'];
+
+        /** @fflag FFlag::FF_KEY_CROSS_SALE_QUEUE_ENABLE, Cross Sale Queue enable */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CROSS_SALE_QUEUE_ENABLE)) {
+            $menuCases[] = ['label' => 'Cross Sale inbox <span id="cases-q-cross-sale-inbox" data-type="inbox" class="label-warning label pull-right cases-q-info"></span> ',
+                'url' => ['/cases-q/cross-sale-inbox'], 'icon' => 'briefcase text-info', 'title' => 'Cross Sale inbox'];
+        }
+
         $menuCases[] = ['label' => 'Unidentified <span id="cases-q-unidentified" data-type="unidentified" class="label-warning label pull-right cases-q-info"></span> ',
             'url' => ['/cases-q/unidentified'], 'icon' => 'list', 'title' => 'Case Unidentified queue'];
         $menuCases[] = ['label' => 'First Priority <span id="cases-q-first-priority" data-type="first-priority" class="label-warning label pull-right cases-q-info"></span> ',
