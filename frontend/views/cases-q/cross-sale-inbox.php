@@ -25,7 +25,7 @@ use common\models\Language;
  * @var $isAgent bool
  */
 
-$this->title = 'Cross Sale Queue';
+$this->title = 'Cross Sales Queue';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
 
