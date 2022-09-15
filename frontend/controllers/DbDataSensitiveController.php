@@ -2,10 +2,10 @@
 
 namespace frontend\controllers;
 
-use src\model\dbDataSensitive\entity\DbDataSensitive;
-use src\model\dbDataSensitiveView\entity\DbDataSensitiveView;
+use common\models\DbDataSensitive;
+use common\models\DbDataSensitiveView;
 use src\helpers\app\AppHelper;
-use src\model\dbDataSensitive\service\DbDataSensitiveService;
+use src\services\dbDataSensitive\DbDataSensitiveService;
 use yii\filters\VerbFilter;
 use yii\helpers\ArrayHelper;
 use yii\web\NotFoundHttpException;

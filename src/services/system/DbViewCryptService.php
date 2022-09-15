@@ -2,7 +2,7 @@
 
 namespace src\services\system;
 
-use src\model\dbDataSensitiveView\entity\DbDataSensitiveView;
+use common\models\DbDataSensitiveView;
 use src\helpers\setting\SettingHelper;
 use Yii;
 use yii\db\ColumnSchema;

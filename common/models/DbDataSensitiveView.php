@@ -1,11 +1,10 @@
 <?php
 
-namespace src\model\dbDataSensitiveView\entity;
+namespace common\models;
 
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
-use src\model\dbDataSensitive\entity\DbDataSensitive;
 
 /**
  * This is the model class for table "date_sensitive_view".

@@ -2,12 +2,12 @@
 
 namespace common\models\search;
 
-use src\model\dbDataSensitive\entity\DbDataSensitive;
+use common\models\DbDataSensitive;
 use common\models\Employee;
 use yii\data\ActiveDataProvider;
 
 /**
- * DbDataSensitiveSearch represents the model behind the search form of `src\model\dbDataSensitive\entity\DbDataSensitive`.
+ * DbDataSensitiveSearch represents the model behind the search form of `common\models\DbDataSensitive`.
  */
 class DbDataSensitiveSearch extends DbDataSensitive
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace src\model\dbDataSensitive\entity;
+namespace common\models;
 
 use src\behaviors\DbDataSensitiveBehavior;
 use src\behaviors\StringToJsonBehavior;
@@ -9,8 +9,6 @@ use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
 use yii\helpers\Inflector;
-use common\models\Employee;
-use src\model\dbDataSensitiveView\entity\DbDataSensitiveView;
 
 /**
  * This is the model class for table "date_sensitive".

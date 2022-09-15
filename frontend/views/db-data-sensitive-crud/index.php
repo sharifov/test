@@ -2,7 +2,7 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
-use src\model\dbDataSensitive\entity\DbDataSensitive;
+use common\models\DbDataSensitive;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;

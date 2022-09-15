@@ -1,7 +1,7 @@
 <?php
 
-use src\model\dbDataSensitive\entity\DbDataSensitive;
-use src\model\dbDataSensitive\service\DbDataSensitiveService;
+use common\models\DbDataSensitive;
+use src\services\dbDataSensitive\DbDataSensitiveService;
 use yii\db\Migration;
 use yii\db\Query;
 

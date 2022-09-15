@@ -1,12 +1,12 @@
 <?php
 
-namespace src\model\dbDataSensitive\service;
+namespace src\services\dbDataSensitive;
 
-use src\model\dbDataSensitive\entity\DbDataSensitive;
-use src\model\dbDataSensitiveView\entity\DbDataSensitiveView;
+use common\models\DbDataSensitive;
+use common\models\DbDataSensitiveView;
 use frontend\helpers\JsonHelper;
 use src\helpers\app\AppHelper;
-use src\model\dbDataSensitiveView\repository\DbDataSensitiveViewRepository;
+use src\repositories\dbDataSensitive\DbDataSensitiveViewRepository;
 use src\services\system\DbViewCryptService;
 use Yii;
 use yii\db\Connection;
