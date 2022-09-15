@@ -11,8 +11,10 @@ use modules\taskList\src\entities\TargetObject;
 use modules\taskList\src\entities\taskList\TaskList;
 use modules\taskList\src\entities\userTask\behaviors\UserTaskStatusLogDeleteBehavior;
 use modules\taskList\src\events\UserTaskStatusChangedEvent;
+use modules\taskList\src\services\TargetObjectFactory;
 use src\behaviors\dateTime\CreatedYearMonthBehavior;
 use src\entities\EventTrait;
+use yii\base\Model;
 use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 
@@ -348,12 +350,9 @@ class UserTask extends \yii\db\ActiveRecord
             ]);
     }
 
-    public function getLead(): ActiveQuery
+    public function getLead(): Model
     {
-        if ($this->ut_target_object == TargetObject::TARGET_OBJ_LEAD) {
-            return $this->hasOne(Lead::class, ['id' => 'ut_target_object_id']);
-        }
-
-        throw new \DomainException('UserTask is not support Lead target object');
+        return (new TargetObjectFactory(TargetObject::TARGET_OBJ_LEAD, $this->ut_target_object_id))
+            ->create();
     }
 }
