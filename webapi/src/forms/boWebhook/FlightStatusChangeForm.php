@@ -14,6 +14,7 @@ class FlightStatusChangeForm extends Model implements WebhookFromDefinitions
     public $project_key;
     public $source_code;
     public $flight_id;
+    public $flight_cabin;
     public $user_language;
     public $currency_code;
 
@@ -21,7 +22,7 @@ class FlightStatusChangeForm extends Model implements WebhookFromDefinitions
     {
         return [
             [['order_uid', 'status', 'project_key'], 'required'],
-            [['order_uid', 'client_email', 'client_phone', 'project_key', 'source_code', 'user_language', 'currency_code', 'status'], 'string'],
+            [['order_uid', 'client_email', 'client_phone', 'project_key', 'source_code', 'user_language', 'currency_code', 'status', 'flight_cabin'], 'string'],
             [['lead_id', 'flight_id'], 'integer'],
         ];
     }
