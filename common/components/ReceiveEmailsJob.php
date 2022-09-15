@@ -126,10 +126,6 @@ class ReceiveEmailsJob extends BaseObject implements \yii\queue\JobInterface
                                 'error' => $e->getErrors(),
                             ]), 'ReceiveEmailsJob:execute:CreateModelException');
                         } catch (\Throwable $e) {
-                             \Yii::error(
-                                 AppHelper::throwableLog($e, true),
-                                 'ReceiveEmailsJob:execute:receiveEmail'
-                             );
                             \Yii::error(VarDumper::dumpAsString([
                                 'communicationId' => $emailDTO->inboxEmailId,
                                 'error' => $e->getMessage(),
