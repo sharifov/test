@@ -220,7 +220,7 @@ class UserTasksListHelper
         /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_CACHE_DURATION, Cache duration for new user task list (in seconds) */
         if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_USER_NEW_TASK_LIST_CACHE_DURATION)) {
             /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_CACHE_DURATION, Cache duration for new user task list (in seconds) */
-            $duration = \Yii::$app->featureFlag->getValue(FFlag::FF_KEY_USER_NEW_TASK_LIST_CACHE_DURATION);
+            $duration = (int)\Yii::$app->featureFlag->getValue(FFlag::FF_KEY_USER_NEW_TASK_LIST_CACHE_DURATION);
 
             if ($duration > 0) {
                 $result = $duration;
