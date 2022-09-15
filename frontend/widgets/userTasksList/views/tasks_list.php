@@ -169,11 +169,9 @@ use frontend\widgets\userTasksList\helpers\UserTasksListHelper;
 
 <?php
 $js = <<<JS
-    starTimers();
     startTooltips();
     
     $(document).on('pjax:complete', function() {
-        starTimers();
         startTooltips();
     });
 

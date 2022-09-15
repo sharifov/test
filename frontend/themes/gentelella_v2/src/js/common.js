@@ -81,7 +81,7 @@
         });
     };
 
-    window.starTimers = function () {
+    window.starttTimers = function () {
         $(".timer").each(function(index) {
             var sec = $( this ).data('sec');
             var control = $( this ).data('control');
