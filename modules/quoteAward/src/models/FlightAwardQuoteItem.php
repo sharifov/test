@@ -3,7 +3,7 @@
 namespace modules\quoteAward\src\models;
 
 use common\models\Lead;
-use modules\flight\models\Flight;
+use modules\quoteAward\src\entities\QuoteFlightProgramQuery;
 use yii\base\Model;
 
 class FlightAwardQuoteItem extends Model
@@ -18,12 +18,15 @@ class FlightAwardQuoteItem extends Model
     public $recordLocator;
     public $fareType;
     public $quoteProgram;
+    public $awardProgram;
+    public $ppm;
+    public $ppc;
 
     public function rules(): array
     {
         return [
             [['cabin', 'validationCarrier', 'cabin',
-                'gds', 'adults', 'children', 'infants', 'recordLocator', 'fareType', 'quoteProgram', 'id'], 'safe'],
+                'gds', 'adults', 'children', 'infants', 'recordLocator', 'fareType', 'quoteProgram', 'awardProgram', 'ppm', 'id', 'trip_type', 'ppc'], 'safe'],
         ];
     }
 
@@ -37,6 +40,7 @@ class FlightAwardQuoteItem extends Model
             $this->infants = $lead->infants;
         }
         $this->id = $id;
+        $this->ppm = QuoteFlightProgramQuery::getFirstProgramPpm();
 
         parent::__construct($config);
     }

@@ -1,6 +1,7 @@
 <?php
 
 use modules\quoteAward\src\models\SegmentAwardQuoteItem;
+use src\helpers\lead\LeadHelper;
 use src\widgets\DateTimePicker;
 use kartik\select2\Select2;
 use yii\web\JsExpression;
@@ -35,7 +36,7 @@ $select2Properties = [
 ?>
 
 <div>
-    <h5>Trip</h5>
+    <h5 style="font-weight:bold">Trip</h5>
 
     <a class="btn btn-success"
        id="js-add-segment-award"
@@ -46,7 +47,7 @@ $select2Properties = [
     </a>
     <div style="margin-top: 15px">
         <?php if (count($model->segments)) : ?>
-            <table class="table table-neutral" id="price-table">
+            <table class="table table-neutral table-award-segment">
                 <thead>
                 <tr>
                     <th></th>
@@ -55,7 +56,8 @@ $select2Properties = [
                     <th>Destination</th>
                     <th>Departure</th>
                     <th>Arrival</th>
-                    <th>Flight Number</th>
+                    <th>Flight No</th>
+                    <th>Cabin</th>
                     <th>Trip</th>
                     <th>Flight</th>
                 </tr>
@@ -65,46 +67,44 @@ $select2Properties = [
                     <tr id="segment-index-<?= $index ?>">
                         <td style="width:35px">
                             <?php if ($index !== 0) : ?>
-                                <a class="btn btn-danger js-remove-segment-award"
-                                   data-inner='<i class="glyphicon glyphicon-remove " aria-hidden="true"></i>'
+                                <a class="btn btn-default js-remove-segment-award"
+                                   data-inner='<i class="fa fa-trash" aria-hidden="true"></i>'
                                    data-id="<?= $index ?>"
-                                   data-class='btn btn-danger js-remove-segment-award'
+                                   data-class='btn btn-default js-remove-segment-award'
                                    href="javascript:void(0)">
-                                    <i class="glyphicon glyphicon-remove" aria-hidden="true"></i>
+                                    <i class="fa fa-trash" aria-hidden="true"></i>
                                 </a>
                             <?php endif; ?>
                         </td>
                         <td style="width: 90px"><?= 'Segment ' . ($index + 1) ?></td>
                         <td> <?= $form->field($segment, '[' . $index . ']origin')->widget(Select2::class, $select2Properties)->label(false) ?></td>
                         <td> <?= $form->field($segment, '[' . $index . ']destination')->widget(Select2::class, $select2Properties)->label(false) ?></td>
-                        <td> <?= $form->field($segment, '[' . $index . ']departure')
-                                ->widget(
-                                    DateTimePicker::class,
-                                    [
-                                        'clientOptions' => [
-                                            'autoclose' => true,
-                                            'format' => 'yyyy-mm-dd hh:ii',
-                                            'todayBtn' => true
+                        <td style="width: 150px"> <?= $form->field($segment, '[' . $index . ']departure')
+                                ->widget(DateTimePicker::class, [
+                                    'template' => '{input}',
+                                    'clientOptions' => [
+                                        'autoclose' => true,
+                                        'format' => 'yyyy-mm-dd hh:ii',
+                                        'todayBtn' => true
 
-                                        ]
                                     ]
-                                )->label(false) ?>
+                                ])->label(false) ?>
                         </td>
 
-                        <td> <?= $form->field($segment, '[' . $index . ']arrival')
-                                ->widget(
-                                    DateTimePicker::class,
-                                    [
-                                        'clientOptions' => [
-                                            'autoclose' => true,
-                                            'format' => 'yyyy-mm-dd hh:ii',
-                                            'todayBtn' => true
+                        <td style="width: 150px"> <?= $form->field($segment, '[' . $index . ']arrival')
+                                ->widget(DateTimePicker::class, [
+                                    'template' => '{input}',
+                                    'clientOptions' => [
+                                        'autoclose' => true,
+                                        'format' => 'yyyy-mm-dd hh:ii',
+                                        'todayBtn' => true
 
-                                        ]
                                     ]
-                                )->label(false) ?>
+                                ])->label(false) ?>
                         </td>
                         <td style="width: 100px"><?= $form->field($segment, '[' . $index . ']flight_number')->textInput()->label(false) ?></td>
+                        <td style="width: 120px"> <?= $form->field($segment, '[' . $index . ']cabin', [
+                            ])->dropDownList(LeadHelper::cabinList(), ['prompt' => '---'])->label(false) ?></td>
                         <td style="width:105px"><?= $form->field($segment, '[' . $index . ']trip')->dropDownList(SegmentAwardQuoteItem::getTrips(), ['required' => 'required'])->label(false) ?></td>
                         <td style="width:115px"><?= $form->field($segment, '[' . $index . ']flight')->dropDownList($model->getFlightList(), ['required' => 'required'])->label(false) ?></td>
                     </tr>
@@ -115,3 +115,9 @@ $select2Properties = [
         <?php endif; ?>
     </div>
 </div>
+
+<style>
+    .table-award-segment td, .table-award-segment th {
+        padding: 5px;
+    }
+</style>

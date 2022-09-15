@@ -79,7 +79,8 @@ class QuoteFlightProgram extends \yii\db\ActiveRecord
                 'class' => BlameableBehavior::class,
                 'attributes' => [
                     BaseActiveRecord::EVENT_BEFORE_UPDATE => ['gfp_updated_user_id'],
-                ]
+                ],
+                'defaultValue' => null
             ],
         ];
     }

@@ -3,6 +3,7 @@
 namespace modules\quoteAward\src\forms;
 
 use common\components\validators\IataValidator;
+use modules\flight\models\Flight;
 use modules\quoteAward\src\models\SegmentAwardQuoteItem;
 use yii\base\Model;
 
@@ -15,6 +16,7 @@ class SegmentAwardQuoteForm extends Model
     public $trip;
     public $flight;
     public $flight_number;
+    public $cabin;
 
     public function __construct(SegmentAwardQuoteItem $segment, $config = [])
     {
@@ -50,6 +52,16 @@ class SegmentAwardQuoteForm extends Model
 
             ['flight', 'required'],
             ['flight_number', 'string'],
+
+            ['cabin', 'string', 'max' => 1],
+            ['cabin', 'in', 'range' => array_keys(Flight::getCabinClassList())],
+        ];
+    }
+
+    public function attributeLabels()
+    {
+        return [
+            'flight_number' => 'Flight No'
         ];
     }
 }

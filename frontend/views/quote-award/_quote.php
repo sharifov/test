@@ -41,7 +41,7 @@ $paxCntTypes = [
              id="alt-quote-fares-info">
 
             <div class="js-update-ajax">
-                <?= $this->render('parts/_flights', ['model' => $model]) ?>
+                <?= $this->render('parts/_flights', ['model' => $model, 'lead' => $lead]) ?>
             </div>
 
         </div>

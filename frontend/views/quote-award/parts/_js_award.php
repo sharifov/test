@@ -40,20 +40,22 @@ $js = <<<JS
     });
     
      $(document).on('click', '.js-remove-flight-award', function(event){
-        var AwardForm = $('#alt-award-quote-info-form');
-         loadingBtn($(this), true);       
-         let id = $(this).data('id')
-        $.ajax({
-            url: flightUrl,
-            type: 'POST',
-            data: AwardForm.serialize()+'&index='+id,
-             success: function (data) {
+        if (confirm('Are you sure you want to delete this item?')) {
+            var AwardForm = $('#alt-award-quote-info-form');
+            loadingBtn($(this), true);       
+            let id = $(this).data('id')
+            $.ajax({
+              url: flightUrl,
+              type: 'POST',
+              data: AwardForm.serialize()+'&index='+id,
+              success: function (data) {
                 let modal = $('#modal-lg');
                 modal.find('.js-update-ajax').html(data);
-            }
-        }) .fail(function(error) {
+             }
+            }) .fail(function(error) {
             console.log(error);
-        })
+         })
+        }
     });
      
      $(document).on('click', '#js-add-segment-award', function(event){
@@ -149,6 +151,10 @@ $js = <<<JS
            let quotePriceUrl = '{$quotePriceUrl}';
            var AwardForm = $('#alt-award-quote-info-form');
            
+             if ($(this).hasClass('js-check-payment')) {
+            quotePriceUrl = quotePriceUrl + '&refresh=1'
+        }
+           
             $.ajax({
             type: 'post',
             url: quotePriceUrl,
@@ -156,6 +162,8 @@ $js = <<<JS
             success: function (data) {
                 $.each(data, function( index, value ) {
                     $('#'+index).val(value);
+                    $('#'+index).closest('div.form-group').removeClass('has-error');
+                    $('#'+index).closest('div.form-group').find('p').html('');
                 });
                 $('.alt-award-quote-price').prop('readonly', false);
             },
@@ -168,7 +176,7 @@ $js = <<<JS
     
      $(document).on('change', '.js-award-program', function(){
         let ppm = $(this).find(':selected').data('ppm');
-        let ppmInput = $(this).closest('.js-flight-price').find('.js-award-ppm');
+        let ppmInput = $(this).closest('.js-flight-wrap').find('.js-award-ppm');
         ppmInput.val(ppm);
         ppmInput.trigger('change')
         

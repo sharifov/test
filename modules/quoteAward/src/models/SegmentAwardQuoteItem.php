@@ -16,12 +16,16 @@ class SegmentAwardQuoteItem extends Model
     public $trip;
     public $flight;
     public $flight_number;
+    public $cabin;
+
+    public $originName;
+    public $destinationName;
 
     public function rules(): array
     {
         return [
             [['origin', 'destination', 'departure',
-                'arrival', 'trip', 'flight'], 'safe'],
+                'arrival', 'trip', 'flight', 'cabin'], 'safe'],
         ];
     }
 
@@ -29,8 +33,17 @@ class SegmentAwardQuoteItem extends Model
     public function __construct(?Lead $lead = null, $config = [])
     {
         $this->trip = 1;
-        $this->flight = 1;
+        $this->flight = 0;
+
+        if ($lead) {
+            $this->cabin = $lead->cabin;
+        }
         parent::__construct($config);
+    }
+
+    public function setParams($params)
+    {
+        $this->setAttributes($params);
     }
 
     public static function getTrips(): array
