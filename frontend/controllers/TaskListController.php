@@ -179,7 +179,9 @@ class TaskListController extends FController
             $userTask->ut_description = $form->note;
             (new UserTaskRepository($userTask))->save(true);
             \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-            TagDependency::invalidate(\Yii::$app->cache, UserTasksListHelper::getUserTasksListCacheTag((int)$userTask->ut_target_object_id, Auth::id()));
+
+            $lead = $userTask->lead;
+            TagDependency::invalidate(\Yii::$app->cache, UserTasksListHelper::getCacheTagKey($lead->id, $lead->employee_id));
             return ['note' => $form->note, 'truncateNote' => StringHelper::truncate($form->note, 15), 'userTaskId' => $form->userTaskId];
         }
 
@@ -213,6 +215,9 @@ class TaskListController extends FController
             $userTask->ut_description = '';
             (new UserTaskRepository($userTask))->save();
             $result['isSuccess'] = true;
+
+            $lead = $userTask->lead;
+            TagDependency::invalidate(\Yii::$app->cache, UserTasksListHelper::getCacheTagKey($lead->id, $lead->employee_id));
         } catch (\Throwable $e) {
             Yii::error(AppHelper::throwableLog($e), 'TaskListController:actionAjaxDeleteNote:Throwable');
             $result['message'] = 'Something went wrong';

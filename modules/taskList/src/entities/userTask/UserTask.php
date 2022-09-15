@@ -3,6 +3,7 @@
 namespace modules\taskList\src\entities\userTask;
 
 use common\models\Employee;
+use common\models\Lead;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTask;
 use modules\taskList\src\entities\TargetObject;
@@ -36,6 +37,7 @@ use yii\helpers\ArrayHelper;
  * @property Employee $user
  * @property TaskList $taskList
  * @property UserTaskStatusLog $completeTime
+ * @property Lead $lead
  */
 class UserTask extends \yii\db\ActiveRecord
 {
@@ -343,5 +345,10 @@ class UserTask extends \yii\db\ActiveRecord
             ->orderBy([
                 'utsl_created_dt' => SORT_DESC,
             ]);
+    }
+
+    public function getLead(): ActiveQuery
+    {
+        return $this->hasOne(Lead::class, ['id' => 'ut_target_object_id']);
     }
 }
