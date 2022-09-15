@@ -3,18 +3,14 @@
 namespace modules\taskList\src\entities\userTask;
 
 use common\models\Employee;
-use common\models\Lead;
-use common\models\query\LeadQuery;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTask;
 use modules\taskList\src\entities\TargetObject;
 use modules\taskList\src\entities\taskList\TaskList;
 use modules\taskList\src\entities\userTask\behaviors\UserTaskStatusLogDeleteBehavior;
 use modules\taskList\src\events\UserTaskStatusChangedEvent;
-use modules\taskList\src\services\TargetObjectFactory;
 use src\behaviors\dateTime\CreatedYearMonthBehavior;
 use src\entities\EventTrait;
-use yii\base\Model;
 use yii\db\ActiveQuery;
 use yii\helpers\ArrayHelper;
 
@@ -40,7 +36,6 @@ use yii\helpers\ArrayHelper;
  * @property Employee $user
  * @property TaskList $taskList
  * @property UserTaskStatusLog $completeTime
- * @property Lead $lead
  */
 class UserTask extends \yii\db\ActiveRecord
 {
@@ -348,11 +343,5 @@ class UserTask extends \yii\db\ActiveRecord
             ->orderBy([
                 'utsl_created_dt' => SORT_DESC,
             ]);
-    }
-
-    public function getLead(): Model
-    {
-        return (new TargetObjectFactory(TargetObject::TARGET_OBJ_LEAD, $this->ut_target_object_id))
-            ->create();
     }
 }

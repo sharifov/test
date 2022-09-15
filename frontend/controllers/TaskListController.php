@@ -9,10 +9,12 @@ use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
 use modules\shiftSchedule\src\services\UserShiftScheduleService;
 use modules\taskList\abac\dto\TaskListAbacDto;
 use modules\taskList\abac\TaskListAbacObject;
+use modules\taskList\src\entities\TargetObject;
 use modules\taskList\src\entities\userTask\repository\UserTaskRepository;
 use modules\taskList\src\entities\userTask\UserTask;
 use modules\taskList\src\entities\userTask\UserTaskQuery;
 use modules\taskList\src\entities\userTask\UserTaskSearch;
+use modules\taskList\src\services\TargetObjectFactory;
 use modules\user\src\events\UserEvents;
 use modules\user\userActivity\service\UserActivityService;
 use modules\taskList\src\forms\UserTaskNoteForm;
@@ -180,7 +182,8 @@ class TaskListController extends FController
             (new UserTaskRepository($userTask))->save(true);
             \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 
-            $lead = $userTask->lead;
+            $lead = (new TargetObjectFactory(TargetObject::TARGET_OBJ_LEAD, $userTask->ut_target_object_id))
+                ->create();
             TagDependency::invalidate(\Yii::$app->cache, UserTasksListHelper::getCacheTagKey($lead->id, $lead->employee_id));
             return ['note' => $form->note, 'truncateNote' => StringHelper::truncate($form->note, 15), 'userTaskId' => $form->userTaskId];
         }
@@ -216,7 +219,8 @@ class TaskListController extends FController
             (new UserTaskRepository($userTask))->save();
             $result['isSuccess'] = true;
 
-            $lead = $userTask->lead;
+            $lead = (new TargetObjectFactory(TargetObject::TARGET_OBJ_LEAD, $userTask->ut_target_object_id))
+                ->create();
             TagDependency::invalidate(\Yii::$app->cache, UserTasksListHelper::getCacheTagKey($lead->id, $lead->employee_id));
         } catch (\Throwable $e) {
             Yii::error(AppHelper::throwableLog($e), 'TaskListController:actionAjaxDeleteNote:Throwable');
