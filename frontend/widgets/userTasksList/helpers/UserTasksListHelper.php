@@ -60,7 +60,9 @@ class UserTasksListHelper
      */
     public static function renderDeadlineStatus($statusId, $startDate, $endDate, $timezone): string
     {
-        if ($statusId == UserTask::STATUS_FAILED) {
+        $isDeadline = self::isDeadline($endDate, $statusId, $timezone);
+
+        if ($isDeadline || $statusId == UserTask::STATUS_FAILED) {
             return 'Unfulfilled';
         }
 
