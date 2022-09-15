@@ -1,6 +1,7 @@
 <?php
 
 use src\entities\cases\CaseCategory;
+use src\helpers\app\DBHelper;
 use yii\db\Migration;
 
 /**
@@ -13,11 +14,21 @@ class m220830_090122_add_columns_for_nested_sets_in_tbl_case_category extends Mi
      */
     public function safeUp()
     {
-        $this->addColumn('{{%case_category}}', 'cc_lft', $this->integer()->notNull());
-        $this->addColumn('{{%case_category}}', 'cc_rgt', $this->integer()->notNull());
-        $this->addColumn('{{%case_category}}', 'cc_depth', $this->integer()->notNull());
-        $this->addColumn('{{%case_category}}', 'cc_tree', $this->integer()->notNull());
-        $this->addColumn('{{%case_category}}', 'cc_allow_to_select', $this->tinyInteger(1));
+        if (!DBHelper::isColumnExist('case_category', 'cc_lft')) {
+            $this->addColumn('{{%case_category}}', 'cc_lft', $this->integer()->notNull());
+        }
+        if (!DBHelper::isColumnExist('case_category', 'cc_rgt')) {
+            $this->addColumn('{{%case_category}}', 'cc_rgt', $this->integer()->notNull());
+        }
+        if (!DBHelper::isColumnExist('case_category', 'cc_depth')) {
+            $this->addColumn('{{%case_category}}', 'cc_depth', $this->integer()->notNull());
+        }
+        if (!DBHelper::isColumnExist('case_category', 'cc_tree')) {
+            $this->addColumn('{{%case_category}}', 'cc_tree', $this->integer()->notNull());
+        }
+        if (!DBHelper::isColumnExist('case_category', 'cc_allow_to_select')) {
+            $this->addColumn('{{%case_category}}', 'cc_allow_to_select', $this->tinyInteger(1));
+        }
 
         $this->initExistingModels();
     }
@@ -27,11 +38,21 @@ class m220830_090122_add_columns_for_nested_sets_in_tbl_case_category extends Mi
      */
     public function safeDown()
     {
-        $this->dropColumn('{{%case_category}}', 'cc_lft');
-        $this->dropColumn('{{%case_category}}', 'cc_rgt');
-        $this->dropColumn('{{%case_category}}', 'cc_depth');
-        $this->dropColumn('{{%case_category}}', 'cc_tree');
-        $this->dropColumn('{{%case_category}}', 'cc_allow_to_select');
+        if (DBHelper::isColumnExist('case_category', 'cc_lft')) {
+            $this->dropColumn('{{%case_category}}', 'cc_lft');
+        }
+        if (DBHelper::isColumnExist('case_category', 'cc_rgt')) {
+            $this->dropColumn('{{%case_category}}', 'cc_rgt');
+        }
+        if (DBHelper::isColumnExist('case_category', 'cc_depth')) {
+            $this->dropColumn('{{%case_category}}', 'cc_depth');
+        }
+        if (DBHelper::isColumnExist('case_category', 'cc_tree')) {
+            $this->dropColumn('{{%case_category}}', 'cc_tree');
+        }
+        if (DBHelper::isColumnExist('case_category', 'cc_allow_to_select')) {
+            $this->dropColumn('{{%case_category}}', 'cc_allow_to_select');
+        }
     }
 
     /**
