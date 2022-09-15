@@ -8,6 +8,7 @@ use common\models\Notifications;
 use common\models\UserProjectParams;
 use frontend\widgets\notification\NotificationMessage;
 use src\dto\email\EmailDTO;
+use src\exception\CreateModelException;
 use src\helpers\app\AppHelper;
 use src\services\email\EmailMainService;
 use Yii;
@@ -101,10 +102,6 @@ class DownloadEmails
                                 'error' => $e->getErrors(),
                             ]), 'ReceiveEmailsJob:execute:CreateModelException');
                         } catch (\Throwable $e) {
-                            \Yii::error(
-                                AppHelper::throwableLog($e, true),
-                                'DownloadEmail:download:receiveEmail'
-                            );
                             \Yii::error(VarDumper::dumpAsString([
                                 'communicationId' => $emailDTO->inboxEmailId,
                                 'error' => $e->getMessage(),

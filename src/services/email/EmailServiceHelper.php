@@ -284,8 +284,14 @@ class EmailServiceHelper
 
     public function getProjectIdByDepOrUpp($emailTo): ?int
     {
-        return DepartmentEmailProject::find()->byEmail($emailTo)->select(['dep_project_id'])->scalar() ??
-            UserProjectParams::find()->byEmail($emailTo)->select(['upp_project_id'])->scalar() ??
-            null;
+        $depParamProjectId = DepartmentEmailProject::find()->byEmail($emailTo)->select(['dep_project_id'])->scalar();
+        if ($depParamProjectId) {
+            return $depParamProjectId;
+        }
+        $userParamProjectId = UserProjectParams::find()->byEmail($emailTo)->select(['upp_project_id'])->scalar();
+        if ($userParamProjectId) {
+            return $userParamProjectId;
+        }
+        return null;
     }
 }
