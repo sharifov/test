@@ -2017,8 +2017,6 @@ class TestController extends FController
 
     public function actionZ()
     {
-        /* TODO::  */
-
         $job = new UserTaskCompletionJob(
             TargetObject::TARGET_OBJ_LEAD,
             513424,
@@ -2027,11 +2025,6 @@ class TestController extends FController
             Auth::id()
         );
         $x = Yii::$app->queue_job->push($job);
-
-
-        \yii\helpers\VarDumper::dump($x, 20, true); exit();
-        /* FOR DEBUG:: must by remove */
-
 
         echo 'Feature Flag Test<br><br>';
 
