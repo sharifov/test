@@ -4,6 +4,7 @@ namespace modules\taskList\src\entities\userTask;
 
 use common\models\Employee;
 use common\models\Lead;
+use common\models\query\LeadQuery;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTask;
 use modules\taskList\src\entities\TargetObject;
@@ -349,6 +350,10 @@ class UserTask extends \yii\db\ActiveRecord
 
     public function getLead(): ActiveQuery
     {
-        return $this->hasOne(Lead::class, ['id' => 'ut_target_object_id']);
+        if ($this->ut_target_object == TargetObject::TARGET_OBJ_LEAD) {
+            return $this->hasOne(Lead::class, ['id' => 'ut_target_object_id']);
+        }
+
+        throw new \DomainException('UserTask is not support Lead target object');
     }
 }
