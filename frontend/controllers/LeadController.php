@@ -2891,6 +2891,13 @@ class LeadController extends FController
 
     public function actionAjaxGetUserTask(int $leadID): string
     {
+        $lead = $this->findLeadById($leadID);
+
+        /** @abac $abacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS, Access to view lead  */
+        if (!Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access Denied for getting ajax user task.');
+        }
+
         $searchModel = new UserTaskSearch();
         $dataProvider = $searchModel->searchByTargetObjectAndTargetObjectId(
             TargetObject::TARGET_OBJ_LEAD,

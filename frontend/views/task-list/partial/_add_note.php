@@ -95,7 +95,7 @@ $js = <<<JS
         });
     });
     
-    $(document).on('submit', '#add-note-form', function(event) {
+    $(document).one('submit', '#add-note-form', function(event) {
         event.preventDefault();
         let href = $(this).attr('action');
         let data = $(this).serialize();
