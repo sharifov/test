@@ -60,6 +60,7 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_NO_ANSWER_PROTOCOL_ENABLE = 'noAnswerProtocolEnable';
     public const FF_KEY_USER_CONVERSION_EXCLUDE_ALTERNATIVE_LEAD_ENABLE = 'userConversionExcludeAlternativeLeadEnable';
     public const FF_KEY_SWITCH_NEW_SHIFT_ENABLE = 'switchNewShiftEnable';
+    public const FF_KEY_AWARD_ENABLE = 'awardEnable';
     public const FF_KEY_NO_ANSWER_PROTOCOL_CHECK_EMAIL_IN_UNSUBSCRIBE_LIST = 'noAnswerProtocolCheckEmailInUnsubscribeList';
     public const FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE = 'objectTaskStatusLogEnable';
     public const FF_KEY_QUOTE_MIN_PRICE_ENABLE = 'quoteMinPriceEnable';
@@ -70,6 +71,10 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_VALIDATE_CHANGE_EXTRA_MARK_UP = 'validateChangeExtraMarkUp';
     public const FF_KEY_UPPERCASE_CONVERT_IN_SET_TRIP_TYPE_METHOD_ENABLE = 'uppercaseConvertInSetTripTypeMethodEnable';
     public const FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES = 'excludeTestLeadFromQueues';
+    public const FF_KEY_USER_TASK_COMPLETION_START_END_DT = 'userTaskCompletionStatEndDT';
+    public const FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE = 'userNewTaskListOnLeadLogEnable';
+    public const FF_KEY_USER_NEW_TASK_LIST_CACHE_DURATION = 'userNewTaskListCacheDuration';
+    public const FF_KEY_EXCLUDE_API_CREATE_CASE_VALIDATION = 'excludeApiCreateCaseValidation';
     public const FF_KEY_CROSS_SALE_QUEUE_ENABLE = 'crossSaleQueueEnable';
 
     public const FF_KEY_LIST = [
@@ -120,6 +125,7 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_NO_ANSWER_PROTOCOL_ENABLE,
         self::FF_KEY_USER_CONVERSION_EXCLUDE_ALTERNATIVE_LEAD_ENABLE,
         self::FF_KEY_SWITCH_NEW_SHIFT_ENABLE,
+        self::FF_KEY_AWARD_ENABLE,
         self::FF_KEY_NO_ANSWER_PROTOCOL_CHECK_EMAIL_IN_UNSUBSCRIBE_LIST,
         self::FF_KEY_OBJECT_TASK_STATUS_LOG_ENABLE,
         self::FF_KEY_QUOTE_MIN_PRICE_ENABLE,
@@ -130,6 +136,10 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_VALIDATE_CHANGE_EXTRA_MARK_UP,
         self::FF_KEY_UPPERCASE_CONVERT_IN_SET_TRIP_TYPE_METHOD_ENABLE,
         self::FF_KEY_EXCLUDE_TEST_LEAD_FROM_QUEUES,
+        self::FF_KEY_USER_TASK_COMPLETION_START_END_DT,
+        self::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE,
+        self::FF_KEY_USER_NEW_TASK_LIST_CACHE_DURATION,
+        self::FF_KEY_EXCLUDE_API_CREATE_CASE_VALIDATION,
         self::FF_KEY_CROSS_SALE_QUEUE_ENABLE,
     ];
 

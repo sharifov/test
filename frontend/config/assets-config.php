@@ -41,6 +41,7 @@ use frontend\themes\gentelella_v2\assets\SwitcheryAsset;
 use frontend\widgets\clientChat\ClientChatWidgetAsset;
 use frontend\widgets\cronExpression\CronExpressionAssets;
 use frontend\widgets\frontendWidgetList\userflow\assets\UserFlowWidgetAsset;
+use frontend\widgets\nestedSets\NestedSetsAsset;
 use frontend\widgets\newWebPhone\DeviceAsset;
 use frontend\widgets\newWebPhone\NewWebPhoneAsset;
 use frontend\widgets\notification\NotificationSocketAsset;
@@ -191,7 +192,8 @@ return [
         SwitcheryAsset::class,
 
         UserFlowWidgetAsset::class,
-        UserShiftCalendarAsset::class
+        UserShiftCalendarAsset::class,
+        NestedSetsAsset::class,
 
 //        MomentAsset::class
     ],
@@ -820,6 +822,14 @@ return [
             'css' => 'timeline.min.css',
             'depends' => [ UserShiftCalendarAsset::class ],
         ],
+        'NestedSetsAsset' => [
+          'class' => NestedSetsAsset::class,
+          'basePath' => '@webroot/all_shared/build',
+          'baseUrl' => '@web/all_shared/build',
+          'js' => 'select2totree.min.js',
+          'css' => 'select2totree.min.css',
+          'depends' => [ NestedSetsAsset::class ],
+        ],
     ],
 
     'assetManager' => [
@@ -1049,7 +1059,13 @@ return [
             SearchFormAssets::class => false,
             LoaderAssets::class => false,
             FlightResultsAssets::class => false,
-            SearchAssets::class => false
+            SearchAssets::class => false,
+            NestedSetsAsset::class => [
+              'depends' => [
+                JqueryAsset::class,
+                Select2Asset::class,
+              ]
+            ],
         ],
         'hashCallback' => static function ($path) {
             return hash('md4', $path);

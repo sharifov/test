@@ -75,8 +75,8 @@ class AddQuoteManualService
         $reservationService = new ReservationService($gds);
         $productFlightQuote = $productQuote->flightQuote;
         $pastParsedSegments = [];
-        $countTrips = count($productFlightQuote->flightQuoteTrips);
-        if ($countTrips) {
+        $totalFlightTrips = count($productFlightQuote->flightQuoteTrips);
+        if ($totalFlightTrips) {
             foreach ($productFlightQuote->flightQuoteTrips as $tripKey => $trip) {
                 if (count($trip->flightQuoteSegments)) {
                     foreach ($trip->flightQuoteSegments as $key => $segment) {
@@ -97,10 +97,10 @@ class AddQuoteManualService
             }
         }
 
-        return $pastParsedSegments;
+        return [$pastParsedSegments, $totalFlightTrips];
     }
 
-    public static function updateSegmentTripFormsData($form, $totalTrips, $pastSegmentsItinerary): array
+    public static function updateSegmentTripFormsData($form, $pastSegmentsItinerary): array
     {
         $newSegmentTripFormData = $form->getSegmentTripFormsData();
         $updatedSegmentsTrip = $pastSegmentTripFormData = [];
@@ -127,31 +127,29 @@ class AddQuoteManualService
         return array_merge($pastSegmentTripFormData, $updatedSegmentsTrip);
     }
 
-    public static function updateFormAndMergeSegments($form, $itinerary, $pastSegments, $segments): array
+    public static function updateFormAndMergeSegments($form, $itinerary, $pastSegments, $segments, $totalFlightTrips): array
     {
         $pastSegmentsItinerary = [];
-        $totalTrips = count(explode(',', $form->keyTripList));
-        $totalPastTrips = count(ArrayHelper::map($pastSegments, 'segment_trip_key', ''));
-        if ($totalPastTrips === 0 || $totalTrips === $totalPastTrips) {
+        $totalFormTrips = count(explode(',', $form->keyTripList));
+        $totalPastTrips = count($pastSegments);
+
+        if ($totalPastTrips === 0 || $totalFlightTrips === $totalPastTrips) {
             $mergedSegments = $segments;
         } else {
-            $form->keyTripList = implode(',', array_keys(ArrayHelper::map($pastSegments, 'segment_trip_key', '')));
-            foreach ($pastSegments as $key => $pastSegment) {
-                if ($pastSegment['segment_trip_key'] > ($totalPastTrips - $totalTrips)) {
-                    unset($pastSegments[$key]);
-                } else {
-                    $pastSegmentsItinerary[] = (new ItineraryDumpDTO([]))
-                        ->feelByParsedReservationDump($pastSegment);
-                }
+            $totalFormTripsUpdated = (int)$totalFormTrips + (int)$totalPastTrips;
+            $form->keyTripList = implode(',', range(1, $totalFormTripsUpdated));
+
+            foreach ($pastSegments as $pastSegment) {
+                $pastSegmentsItinerary[] = (new ItineraryDumpDTO([]))->feelByParsedReservationDump($pastSegment);
             }
             $form->itinerary = array_merge($pastSegmentsItinerary, $itinerary);
             $mergedSegments = array_merge($pastSegments, $segments);
-            $totalTrips = count(explode(',', $form->keyTripList));
+            $totalFormTrips = count(explode(',', $form->keyTripList));
         }
 
-        $updatedSegmentTripFormData = AddQuoteManualService::updateSegmentTripFormsData($form, $totalTrips, $pastSegmentsItinerary);
+        $updatedSegmentTripFormData = AddQuoteManualService::updateSegmentTripFormsData($form, $pastSegmentsItinerary);
         $form->setSegmentTripFormsData($updatedSegmentTripFormData);
 
-        return [$form, $mergedSegments, $totalTrips];
+        return [$form, $mergedSegments, $totalFormTrips];
     }
 }

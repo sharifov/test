@@ -23,7 +23,6 @@ use yii\helpers\Url;
 use modules\featureFlag\FFlag;
 use frontend\widgets\userTasksList\helpers\UserTasksListHelper;
 
-$calcPagination = UserTasksListHelper::calcPagination($shiftScheduleTasksPagination);
 ?>
 
     <div class="lead-user-tasks x_panel">
@@ -47,13 +46,14 @@ $calcPagination = UserTasksListHelper::calcPagination($shiftScheduleTasksPaginat
             </div>
         </div>
 
-        <?php Pjax::begin([
-            'id' => 'lead-user-tasks__content',
-            'enablePushState' => false,
-        ]); ?>
-
         <!-- Timelines with list of tasks -->
         <?php if (!empty($userShiftSchedulesList)) : ?>
+            <?php $calcPagination = UserTasksListHelper::calcPagination($shiftScheduleTasksPagination); ?>
+            <?php Pjax::begin([
+                'id' => 'lead-user-tasks__content',
+                'enablePushState' => false,
+            ]); ?>
+
             <div class="lead-user-tasks__content x_content">
                 <!-- Timeline -->
                 <div class="lead-user-tasks-timeline mb-3">
@@ -123,7 +123,7 @@ $calcPagination = UserTasksListHelper::calcPagination($shiftScheduleTasksPaginat
                                     <td class="lead-user-tasks-table__start lead-user-tasks-table__col">
                                         <?= UserTasksListHelper::renderStartDate($userTask['ut_status_id'], $userTask['ut_start_dt'], $isDeadline, $userTimeZone); ?>
                                     </td>
-                                    <td class="lead-user-tasks-table__deadline lead-user-tasks-table__col">
+                                    <td class="lead-user-tasks-table__deadline lead-user-tasks-table__col" style="width: 120px;">
                                         <?= UserTasksListHelper::renderDeadlineStatus($userTask['ut_status_id'], $userTask['ut_start_dt'], $userTask['ut_end_dt'], $userTimeZone); ?>
                                     </td>
                                     <td class="lead-user-tasks-table__completed lead-user-tasks-table__col">
@@ -159,25 +159,28 @@ $calcPagination = UserTasksListHelper::calcPagination($shiftScheduleTasksPaginat
                     </div>
                 </div>
             </div>
+            <?php Pjax::end(); ?>
+        <?php else : ?>
+            <div class="lead-user-tasks__not-tasks text-center">
+                Not found user tasks
+            </div>
         <?php endif; ?>
-
-        <?php Pjax::end(); ?>
     </div>
 
 <?php
 $js = <<<JS
-    starTimers();
     startTooltips();
     
     $(document).on('pjax:complete', function() {
-        starTimers();
         startTooltips();
     });
 
     $(document).on('click', '.js-add_note_task_list', function() {
         let modal = $('#modal-sm');
+        var isNewNote = this.getAttribute('data-new-note');
+        
         modal.addClass('lead-user-tasks-modal');
-        modal.find('.modal-title').html($(this).data('new-note') == '1'? 'Add note' : 'Edit note');
+        modal.find('.modal-title').html(isNewNote == '1'? 'Add note' : 'Edit note');
         modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
         
         let userTaskId = $(this).data('usertaskid');

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "43efc0ba283c52fbc562ff37d09b592b",
+    "content-hash": "651f218bd9064acd6b961459fa53b899",
     "packages": [
         {
             "name": "2amigos/yii2-arrayquery-component",
@@ -1365,6 +1365,50 @@
                 "wiki": "https://ckeditor.com/docs/ckeditor4/latest/"
             },
             "time": "2022-07-20T12:00:00+00:00"
+        },
+        {
+            "name": "creocoder/yii2-nested-sets",
+            "version": "0.9.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/creocoder/yii2-nested-sets.git",
+                "reference": "cb8635a459b6246e5a144f096b992dcc30cf9954"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/creocoder/yii2-nested-sets/zipball/cb8635a459b6246e5a144f096b992dcc30cf9954",
+                "reference": "cb8635a459b6246e5a144f096b992dcc30cf9954",
+                "shasum": ""
+            },
+            "require": {
+                "yiisoft/yii2": "*"
+            },
+            "type": "yii2-extension",
+            "autoload": {
+                "psr-4": {
+                    "creocoder\\nestedsets\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Alexander Kochetov",
+                    "email": "creocoder@gmail.com"
+                }
+            ],
+            "description": "The nested sets behavior for the Yii framework",
+            "keywords": [
+                "nested sets",
+                "yii2"
+            ],
+            "support": {
+                "issues": "https://github.com/creocoder/yii2-nested-sets/issues",
+                "source": "https://github.com/creocoder/yii2-nested-sets/tree/master"
+            },
+            "time": "2015-01-27T10:53:51+00:00"
         },
         {
             "name": "dasprid/enum",
@@ -4373,11 +4417,11 @@
         },
         {
             "name": "kivork/yii2-two-factor-auth",
-            "version": "1.2.1-stable",
+            "version": "1.3.2-stable",
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:techork/yii2-two-factor-auth.git",
-                "reference": "2e663e82a52d546ae8a128a8a48e0e5536030ebe"
+                "reference": "686961d47064ad7aa336b64d670a42f4ccf0f617"
             },
             "require": {
                 "endroid/qr-code": "4.4.9",
@@ -15861,5 +15905,5 @@
         "ext-pgsql": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.0.0"
 }

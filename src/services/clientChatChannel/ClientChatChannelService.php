@@ -30,6 +30,7 @@ class ClientChatChannelService
      */
     public function registerChannelInRocketChat(int $channelId, string $username): void
     {
+        \Yii::$app->rchat->updateSystemAuth(false);
         if ($this->username !== $username) {
             $userInfo = \Yii::$app->chatBot->getUserInfo($username);
             if (isset($userInfo['error']['error'])) {
@@ -57,7 +58,6 @@ class ClientChatChannelService
             ],
         ];
 
-        \Yii::$app->rchat->updateSystemAuth(false);
         $newDepartment = \Yii::$app->rchat->createDepartment($newDepartmentData, $this->rocketChatUserInfo['_id'] ?? '', $this->rocketChatUserInfo['username'] ?? '');
         if ($newDepartment['error']) {
             throw new \RuntimeException('[Chat Bot Create Department] ' . $newDepartment['error'] . '; ChannelId: ' . $channelId, ClientChatChannelCodeException::RC_CREATE_DEPARTMENT);
