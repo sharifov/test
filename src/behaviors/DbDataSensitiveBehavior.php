@@ -2,9 +2,9 @@
 
 namespace src\behaviors;
 
-use common\models\DbDataSensitive;
-use common\models\DbDataSensitiveView;
-use src\services\dbDataSensitive\DbDataSensitiveService;
+use src\model\dbDataSensitive\entity\DbDataSensitive;
+use src\model\dbDataSensitiveView\entity\DbDataSensitiveView;
+use src\model\dbDataSensitive\service\DbDataSensitiveService;
 use yii\base\Behavior;
 use yii\base\Event;
 use yii\db\ActiveRecord;
