@@ -53,6 +53,8 @@ class UserTaskCompletionService
             $dataEnd = null;
         }
 
+        $this->log('dataStart.dataEnd', '11', ['dataStart' => $dataStart, 'dataEnd' => $dataEnd]);
+
         $taskListsQuery = TaskListQuery::getTaskListUserCompletion(
             $this->userId,
             $this->targetObject,
@@ -62,6 +64,9 @@ class UserTaskCompletionService
             $dataStart,
             $dataEnd
         );
+
+        $this->log('taskListsQuery', '111', ['sql' => $taskListsQuery->createCommand()->getRawSql()]);
+
         $taskLists = $taskListsQuery->all();
 
         $this->log('Search taskLists result', '2', ['count' => count($taskLists)]);

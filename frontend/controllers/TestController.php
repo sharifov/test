@@ -7,6 +7,7 @@ use common\components\CommunicationService;
 use common\components\ga\GaLead;
 use common\components\ga\GaQuote;
 use common\components\jobs\CallPriceJob;
+use common\components\jobs\UserTaskCompletionJob;
 use common\components\Metrics;
 use common\components\jobs\TelegramSendMessageJob;
 use common\models\Call;
@@ -58,6 +59,8 @@ use modules\rentCar\src\entity\rentCarQuote\RentCarQuote;
 use modules\rentCar\src\services\RentCarQuotePdfService;
 use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftScheduleQuery;
+use modules\taskList\src\entities\TargetObject;
+use modules\taskList\src\entities\TaskObject;
 use modules\user\src\events\UserEvents;
 use modules\user\userActivity\entity\UserActivity;
 use modules\user\userActivity\service\UserActivityService;
@@ -2014,6 +2017,22 @@ class TestController extends FController
 
     public function actionZ()
     {
+        /* TODO::  */
+
+        $job = new UserTaskCompletionJob(
+            TargetObject::TARGET_OBJ_LEAD,
+            513424,
+            TaskObject::OBJ_EMAIL,
+            29158,
+            Auth::id()
+        );
+        $x = Yii::$app->queue_job->push($job);
+
+
+        \yii\helpers\VarDumper::dump($x, 20, true); exit();
+        /* FOR DEBUG:: must by remove */
+
+
         echo 'Feature Flag Test<br><br>';
 
         /** @fflag FFlag::FF_KEY_LPP_ENABLE, Lead Poor Processing Enable/Disable */
