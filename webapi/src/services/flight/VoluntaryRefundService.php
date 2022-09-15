@@ -6,6 +6,7 @@ use common\components\hybrid\HybridWhData;
 use common\components\purifier\Purifier;
 use common\models\Notifications;
 use common\models\Project;
+use modules\flight\src\useCases\services\cases\CaseService;
 use modules\product\src\entities\productQuote\ProductQuoteRepository;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundQuery;
 use modules\product\src\entities\productQuoteRefund\ProductQuoteRefundRepository;
@@ -26,6 +27,7 @@ use yii\base\Model;
  * @property-read CasesRepository $casesRepository
  * @property-read ProductQuoteRepository $productQuoteRepository
  * @property-read CasesCommunicationService $casesCommunicationService
+ * @property CaseService $caseService
  */
 class VoluntaryRefundService implements BoWebhookService
 {
@@ -33,17 +35,27 @@ class VoluntaryRefundService implements BoWebhookService
     private CasesRepository $casesRepository;
     private ProductQuoteRepository $productQuoteRepository;
     private CasesCommunicationService $casesCommunicationService;
+    private CaseService $caseService;
 
+    /**
+     * @param ProductQuoteRefundRepository $productQuoteRefundRepository
+     * @param CasesRepository $casesRepository
+     * @param ProductQuoteRepository $productQuoteRepository
+     * @param CasesCommunicationService $casesCommunicationService
+     * @param CaseService $caseService
+     */
     public function __construct(
         ProductQuoteRefundRepository $productQuoteRefundRepository,
         CasesRepository $casesRepository,
         ProductQuoteRepository $productQuoteRepository,
-        CasesCommunicationService $casesCommunicationService
+        CasesCommunicationService $casesCommunicationService,
+        CaseService $caseService
     ) {
         $this->productQuoteRefundRepository = $productQuoteRefundRepository;
         $this->casesRepository = $casesRepository;
         $this->productQuoteRepository = $productQuoteRepository;
         $this->casesCommunicationService = $casesCommunicationService;
+        $this->caseService = $caseService;
     }
 
     /**
@@ -62,25 +74,33 @@ class VoluntaryRefundService implements BoWebhookService
 
         $productQuoteRefund->detachBehavior('user');
         $productQuote = $productQuoteRefund->productQuote;
-        $case = $productQuoteRefund->case;
+
+        $case = $this->caseService->getCaseByProductQuoteRefund($productQuoteRefund, $productQuote);
+        if (!$case) {
+            \Yii::warning([
+                'message' => 'Case not found by Product Quote Refund (' . $productQuoteRefund->pqr_id . ') or by Product Quote (' . $productQuote->pq_id . ')',
+                'productQuoteId' => $productQuote->pq_id,
+                'productQuoteGid' => $productQuote->pq_gid,
+                'productQuoteRefundId' => $productQuoteRefund->pqr_id,
+                'productQuoteRefundGid' => $productQuoteRefund->pqr_gid,
+            ], 'VoluntaryRefundService:processRequest:NotFoundException');
+            throw new NotFoundException('Case not found by Product Quote Refund (' . $productQuoteRefund->pqr_id . ') or by Product Quote (' . $productQuote->pq_id . ')');
+        }
+
         if ($form->isProcessing()) {
             if (!$productQuoteRefund->isInProcessing() && !$productQuoteRefund->isCompleted()) {
                 $productQuoteRefund->processing();
                 $this->productQuoteRefundRepository->save($productQuoteRefund);
                 $description = 'Refund set to processing ';
-                if ($case) {
-                    $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_WH_UPDATE, $description, [], CaseEventLog::CATEGORY_INFO);
-                }
+                $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_WH_UPDATE, $description, [], CaseEventLog::CATEGORY_INFO);
             }
         } elseif ($form->isRefunded()) {
             $productQuoteRefund->complete();
             $this->productQuoteRefundRepository->save($productQuoteRefund);
 
-            if ($case) {
-                $case->solved(null, 'Refund complete (WH BO)');
-                $this->casesRepository->save($case);
-                $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_WH_UPDATE, 'Refund is completed (WH BO)', [], CaseEventLog::CATEGORY_INFO);
-            }
+            $case->solved(null, 'Refund complete (WH BO)');
+            $this->casesRepository->save($case);
+            $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_WH_UPDATE, 'Refund is completed (WH BO)', [], CaseEventLog::CATEGORY_INFO);
 
             $productQuote->cancelled();
             $this->productQuoteRepository->save($productQuote);
@@ -93,11 +113,9 @@ class VoluntaryRefundService implements BoWebhookService
             $productQuoteRefund->declined();
             $this->productQuoteRefundRepository->save($productQuoteRefund);
 
-            if ($case) {
-                $case->error(null, 'Refund canceled (WH BO)');
-                $this->casesRepository->save($case);
-                $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_WH_UPDATE, 'Refund is canceled (WH BO)', [], CaseEventLog::CATEGORY_INFO);
-            }
+            $case->error(null, 'Refund canceled (WH BO)');
+            $this->casesRepository->save($case);
+            $case->addEventLog(CaseEventLog::VOLUNTARY_REFUND_WH_UPDATE, 'Refund is canceled (WH BO)', [], CaseEventLog::CATEGORY_INFO);
         }
 
         $whData = HybridWhData::getData(HybridWhData::WH_TYPE_VOLUNTARY_REFUND_UPDATE);
@@ -107,7 +125,7 @@ class VoluntaryRefundService implements BoWebhookService
         $whData['refund_order_id'] = $productQuoteRefund->pqr_cid;
         $whData['refund_status'] = ProductQuoteRefundStatus::getClientKeyStatusById($productQuoteRefund->pqr_status_id);
 
-        if ($case && $case->cs_user_id) {
+        if ($case->cs_user_id) {
             Notifications::createAndPublish(
                 $case->cs_user_id,
                 'Refund update',

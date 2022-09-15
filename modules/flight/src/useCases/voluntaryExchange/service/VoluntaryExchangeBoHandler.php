@@ -6,6 +6,7 @@ use common\components\hybrid\HybridWhData;
 use common\components\purifier\Purifier;
 use common\models\Notifications;
 use common\models\Project;
+use modules\flight\src\useCases\services\cases\CaseService;
 use modules\flight\src\useCases\voluntaryExchangeCreate\service\VoluntaryExchangeCreateService;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
@@ -30,6 +31,7 @@ use yii\db\Transaction;
  * @property ProductQuoteChange $productQuoteChange
  * @property Cases $case
  * @property Project $project
+ * @property CaseService $caseService
  */
 class VoluntaryExchangeBoHandler implements BoWebhookService
 {
@@ -41,14 +43,18 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
     private ?ProductQuoteChange $productQuoteChange = null;
     private ?Cases $case = null;
     private ?Project $project = null;
+    private CaseService $caseService;
 
     /**
      * @param VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection
+     * @param CaseService $caseService
      */
     public function __construct(
-        VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection
+        VoluntaryExchangeObjectCollection $voluntaryExchangeObjectCollection,
+        CaseService $caseService
     ) {
         $this->objectCollection = $voluntaryExchangeObjectCollection;
+        $this->caseService = $caseService;
     }
 
     /**
@@ -70,7 +76,18 @@ class VoluntaryExchangeBoHandler implements BoWebhookService
         if (!$this->project = Project::findOne(['project_key' => $this->form->project_key])) {
             throw new \RuntimeException('Project not found by key(' . $this->form->project_key . ')');
         }
-        $this->case = $this->productQuoteChange->pqcCase;
+
+        $this->case = $this->caseService->getCase($this->productQuoteChange, $this->voluntaryQuote);
+        if (!$this->case) {
+            \Yii::warning([
+                'message' => 'Case not found by Product Quote Change (' . $this->productQuoteChange->pqc_id . ') or by Product Quote (' . $this->voluntaryQuote->pq_id . ')',
+                'voluntaryQuoteId' => $this->voluntaryQuote->pq_id,
+                'voluntaryQuoteGid' => $this->voluntaryQuote->pq_gid,
+                'productQuoteChangeId' => $this->productQuoteChange->pqc_id,
+                'productQuoteChangeGid' => $this->productQuoteChange->pqc_gid,
+            ], 'API:BoController:actionWh:BoWebhookHandleJob:VoluntaryExchangeBoHandler:processRequest:RuntimeException');
+            throw new \RuntimeException('Case not found by Product Quote Change (' . $this->productQuoteChange->pqc_id . ') or by Product Quote (' . $this->voluntaryQuote->pq_id . ')');
+        }
 
         switch ($form->status) {
             case FlightVoluntaryExchangeUpdateForm::STATUS_EXCHANGED:

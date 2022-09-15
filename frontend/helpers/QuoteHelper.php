@@ -291,7 +291,7 @@ class QuoteHelper
      * @param array $quotes
      * @return array
      */
-    public static function formatQuoteData(array $quotes): array
+    public static function formatQuoteData(array $quotes, ?string $cid = null): array
     {
         self::getQuotePriceRange($quotes);
 
@@ -384,6 +384,10 @@ class QuoteHelper
             $quotes['results'][$key]['topCriteria'] = self::getQuoteTopCriteria($quote);
             $quotes['results'][$key]['rank'] = self::getQuoteRank($quote);
             $quotes['results'][$key]['autoSort'] = self::getMetaAuto($quote);
+
+            if (!empty($cid)) {
+                $quotes['results'][$key]['cid'] = $cid;
+            }
         }
 
         asort($connectionAirports);

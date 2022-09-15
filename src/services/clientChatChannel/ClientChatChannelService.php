@@ -4,6 +4,7 @@ namespace src\services\clientChatChannel;
 
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
+use yii\httpclient\Exception;
 
 /**
  * Class ClientChatChannelService
@@ -25,6 +26,7 @@ class ClientChatChannelService
      * @param int $channelId
      * @param string $username
      * @return void
+     * @throws Exception
      */
     public function registerChannelInRocketChat(int $channelId, string $username): void
     {
@@ -55,6 +57,7 @@ class ClientChatChannelService
             ],
         ];
 
+        \Yii::$app->rchat->updateSystemAuth(false);
         $newDepartment = \Yii::$app->rchat->createDepartment($newDepartmentData, $this->rocketChatUserInfo['_id'] ?? '', $this->rocketChatUserInfo['username'] ?? '');
         if ($newDepartment['error']) {
             throw new \RuntimeException('[Chat Bot Create Department] ' . $newDepartment['error'] . '; ChannelId: ' . $channelId, ClientChatChannelCodeException::RC_CREATE_DEPARTMENT);

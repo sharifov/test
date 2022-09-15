@@ -79,7 +79,23 @@
 
             $(e).timer({format: '%d %H:%M:%S', seconds: seconds}).timer('start');
         });
-    }
+    };
+
+    window.starTimers = function () {
+        $(".timer").each(function(index) {
+            var sec = $( this ).data('sec');
+            var control = $( this ).data('control');
+            var format = $( this ).data('format');
+
+            $(this).timer({countdown: true, format: format, duration: sec}).timer(control);
+        });
+    };
+
+    window.startTooltips = function () {
+        $('.js-tooltip').tooltip({
+            placement: 'bottom'
+        });
+    };
 
 })(window, $);
 

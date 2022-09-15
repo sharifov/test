@@ -12,8 +12,8 @@ use src\entities\email\EmailBody;
  */
 class EmailDeletedEvent
 {
-    public $emailBody;
-    public $emailId;
+    public EmailBody $emailBody;
+    public int $emailId;
 
     /**
      * @property EmailBody $emailBody

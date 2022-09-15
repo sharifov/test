@@ -2,7 +2,6 @@
 
 namespace src\entities\email;
 
-use Yii;
 use src\helpers\email\MaskEmailHelper;
 use src\model\BaseActiveRecord;
 
@@ -33,12 +32,12 @@ class EmailAddress extends BaseActiveRecord
         return $this->hasMany(EmailContact::class, ['ec_address_id' => 'ea_id']);
     }
 
-    public function getEmail($masking = false)
+    public function getEmail($masking = false): ?string
     {
         return $masking ? MaskEmailHelper::masking($this->ea_email) : $this->ea_email;
     }
 
-    public function getName()
+    public function getName(): ?string
     {
         return $this->ea_name;
     }

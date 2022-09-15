@@ -28,8 +28,10 @@ class LeadTaskListListener
 
             $job = new LeadTaskListJob($event->lead->id, $event->getOldOwnerId());
             \Yii::$app->queue_job->priority(100)->delay(5)->push($job);
-        } catch (\RuntimeException | \DomainException $throwable) {
+        } catch (\DomainException $throwable) {
             \Yii::warning(AppHelper::throwableLog($throwable), 'LeadTaskListListener:handle:Exception');
+        } catch (\RuntimeException $throwable) {
+            return;
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableLog($throwable), 'LeadTaskListListener:handle:Throwable');
         }

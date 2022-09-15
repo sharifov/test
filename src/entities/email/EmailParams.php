@@ -2,7 +2,6 @@
 
 namespace src\entities\email;
 
-use Yii;
 use common\models\Language;
 use common\models\EmailTemplateType;
 use src\model\BaseActiveRecord;

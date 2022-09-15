@@ -172,4 +172,14 @@ class CaseCategory extends ActiveRecord
     {
         return self::find()->select(['cc_key'])->where(['cc_id' => $categoryId])->limit(1)->scalar();
     }
+
+    public static function getIdByKey(string $key): ?int
+    {
+        return self::find()->select(['cc_id'])->where(['cc_key' => $key])->limit(1)->scalar();
+    }
+
+    public static function getIdListByCategoryKeys(array $categoryKeys): array
+    {
+        return self::find()->select(['cc_id'])->where(['IN', 'cc_key', $categoryKeys])->column();
+    }
 }

@@ -3,6 +3,7 @@
 namespace modules\flight\src\useCases\voluntaryExchangeConfirm\form;
 
 use common\components\validators\CheckAndConvertToJsonValidator;
+use modules\flight\src\useCases\services\cases\CaseService;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use modules\product\src\entities\productQuote\ProductQuoteStatus;
@@ -100,7 +101,8 @@ class VoluntaryExchangeConfirmForm extends Model
                 throw new ValidationException('ProductQuoteChange not in processing statuses(' . $processingPQCList . '). Current status(' .
                     ProductQuoteChangeStatus::getName($this->productQuoteChange->pqc_status_id) . ')');
             }
-            if (!$this->case = $this->productQuoteChange->pqcCase ?? null) {
+            $caseService = new CaseService();
+            if (!$this->case = $caseService->getCase($this->productQuoteChange, $this->changeQuote)) {
                 throw new ValidationException('Case not found');
             }
             if (!$this->originQuote = ProductQuoteQuery::getOriginProductQuoteByChangeQuote($this->changeQuote->pq_id)) {

@@ -1,6 +1,7 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
+use src\helpers\phone\MaskPhoneHelper;
 use src\model\contactPhoneData\service\ContactPhoneDataDictionary;
 use src\model\contactPhoneData\entity\ContactPhoneData;
 use yii\grid\ActionColumn;
@@ -44,7 +45,7 @@ $this->params['breadcrumbs'][] = $this->title;
                     if (!$model->cpdCpl) {
                         return Yii::$app->formatter->nullDisplay;
                     }
-                    return $model->cpdCpl->cpl_phone_number;
+                    return MaskPhoneHelper::masking($model->cpdCpl->cpl_phone_number);
                 }
             ],
             [

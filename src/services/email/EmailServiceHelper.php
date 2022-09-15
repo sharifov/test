@@ -10,6 +10,9 @@ use common\models\ClientEmail;
 use common\models\UserProjectParams;
 use common\models\Employee;
 use common\models\DepartmentEmailProject;
+use src\repositories\NotFoundException;
+use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  *
@@ -21,8 +24,8 @@ use common\models\DepartmentEmailProject;
  */
 class EmailServiceHelper
 {
-    private $leadRepository;
-    private $casesRepository;
+    private LeadRepository $leadRepository;
+    private CasesRepository $casesRepository;
 
     public function __construct(LeadRepository $leadRepository, CasesRepository $casesRepository)
     {
@@ -250,23 +253,19 @@ class EmailServiceHelper
 
 
     /**
+     * @param string $email
      * @return array
      */
     public function getUsersIdByEmail(string $email): array
     {
         $users = [];
-        $params = UserProjectParams::find()->byEmail($email, false)->all();
-        if ($params) {
-            foreach ($params as $param) {
-                $users[$param->upp_user_id] = $param->upp_user_id;
-            }
+        if ($params = UserProjectParams::find()->byEmail($email, false)->select(['upp_user_id'])->asArray()->all()) {
+            $users = ArrayHelper::map($params, 'upp_user_id', 'upp_user_id');
         }
 
-        $employees = Employee::find()->where(['email' => $email])->all();
-        if ($employees) {
-            foreach ($employees as $employe) {
-                $users[$employe->id] = $employe->id;
-            }
+        if ($employees = Employee::find()->where(['email' => $email])->select(['id'])->asArray()->all()) {
+            $empUsers = ArrayHelper::map($employees, 'id', 'id');
+            $users = ArrayHelper::merge($users, $empUsers);
         }
 
         return $users;
@@ -285,12 +284,8 @@ class EmailServiceHelper
 
     public function getProjectIdByDepOrUpp($emailTo): ?int
     {
-        if ($dep = DepartmentEmailProject::find()->byEmail($emailTo)->one()) {
-            return $dep->dep_project_id;
-        } else if ($upp = UserProjectParams::find()->byEmail($emailTo)->one()) {
-            return $upp->upp_project_id;
-        }
-
-        return null;
+        return DepartmentEmailProject::find()->byEmail($emailTo)->select(['dep_project_id'])->scalar() ??
+            UserProjectParams::find()->byEmail($emailTo)->select(['upp_project_id'])->scalar() ??
+            null;
     }
 }

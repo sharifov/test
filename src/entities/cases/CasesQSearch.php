@@ -9,6 +9,7 @@ use common\models\Project;
 use src\repositories\cases\CasesQRepository;
 use yii\data\ActiveDataProvider;
 use Yii;
+use yii\db\ActiveQuery;
 use yii\db\Expression;
 use yii\db\Query;
 
@@ -94,7 +95,10 @@ class CasesQSearch extends Cases
         $query = $this->casesQRepository->getPendingQuery($user);
         $query->joinWith(['client']);
 
-        // add conditions that should always apply here
+        /** @fflag FFlag::FF_KEY_CROSS_SALE_QUEUE_ENABLE, Cross Sale Queue enable */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CROSS_SALE_QUEUE_ENABLE)) {
+            $this->excludeFromCategories($query, [CaseCategoryKeyDictionary::CROSS_SALE]);
+        }
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
@@ -144,11 +148,74 @@ class CasesQSearch extends Cases
     }
 
     /**
+     * @param array $params
+     * @param Employee $user
+     * @param integer[] $categoryList
+     * @return ActiveDataProvider
+     */
+    public function searchByCategory(array $params, Employee $user, array $categoryList): ActiveDataProvider
+    {
+        $query = $this->casesQRepository->getBaseQuery($user);
+        $query->andWhere([
+            'IN',
+            'cs_category_id',
+            $categoryList
+        ]);
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort' => [
+                'defaultOrder' => [
+                    'cs_id' => SORT_DESC,
+                ],
+            ],
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            $query->where('0=1');
+
+            return $dataProvider;
+        }
+
+        $query->andFilterWhere([
+            'cs_id' => $this->cs_id,
+            'cs_gid' => $this->cs_gid,
+            'cs_project_id' => $this->cs_project_id,
+            'cs_category_id' => $this->cs_category_id,
+            'cs_dep_id' => $this->cs_dep_id,
+        ]);
+
+        if ($this->cs_created_dt) {
+            $query->andFilterWhere(['DATE(cs_created_dt)' => date('Y-m-d', strtotime($this->cs_created_dt))]);
+        }
+
+        $query->andFilterWhere(['like', 'cs_subject', $this->cs_subject]);
+        $query->andFilterWhere(['like', 'cs_order_uid', $this->cs_order_uid]);
+        $query->andFilterWhere(['like', 'cl_locale', $this->client_locale]);
+
+        return $dataProvider;
+    }
+
+    private function excludeFromCategories(ActiveQuery $query, array $categoryList)
+    {
+        $categoryIdList = CaseCategory::getIdListByCategoryKeys($categoryList);
+        $query->andWhere([
+            'NOT IN',
+            'cs_category_id',
+            $categoryIdList
+        ]);
+    }
+    /**
      * @param $params
      * @param Employee $user
      * @return ActiveDataProvider
      */
-    public function searchInbox($params, Employee $user): ActiveDataProvider
+    public function searchInbox($params, Employee $user, ?string $categoryKey = null): ActiveDataProvider
     {
         $query = $this->casesQRepository->getInboxQuery($user);
 
@@ -211,6 +278,11 @@ class CasesQSearch extends Cases
             ->groupBy('css_cs_id')
         ], 'cases.cs_id = sale_in.css_cs_id');
 
+        /** @fflag FFlag::FF_KEY_CROSS_SALE_QUEUE_ENABLE, Cross Sale Queue enable */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CROSS_SALE_QUEUE_ENABLE)) {
+            $this->excludeFromCategories($query, [CaseCategoryKeyDictionary::CROSS_SALE]);
+        }
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort' => ['defaultOrder' => [
@@ -258,6 +330,17 @@ class CasesQSearch extends Cases
         $dataProvider->setSort($sorting);
 
         $this->load($params);
+
+        /** @fflag FFlag::FF_KEY_CROSS_SALE_QUEUE_ENABLE, Cross Sale Queue enable */
+        if (!empty($categoryKey) && \Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CROSS_SALE_QUEUE_ENABLE)) {
+            $query->andWhere([
+                'cs_category_id' => CaseCategory::find()
+                    ->select(['cc_id'])
+                    ->where([
+                        'cc_key' => $categoryKey
+                    ])
+            ]);
+        }
 
         if (!$this->validate()) {
             // uncomment the following line if you do not want to return any records when validation fails

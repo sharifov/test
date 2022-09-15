@@ -7,6 +7,8 @@ use src\entities\email\EmailLog;
 
 class EmailLogForm extends Model
 {
+    use FormAttributesTrait;
+
     public $id;
     public $statusDoneDt;
     public $readDt;
@@ -23,14 +25,14 @@ class EmailLogForm extends Model
         parent::__construct($config);
     }
 
-    public static function fromArray(array $data)
+    public static function fromArray(array $data): EmailLogForm
     {
         $instance = new static();
         $instance->setAttributes($data);
         return $instance;
     }
 
-    public static function fromModel(EmailLog $log, $config = [])
+    public static function fromModel(EmailLog $log, $config = []): EmailLogForm
     {
         $instance = new static($config);
         $instance->id = $log->el_id;
@@ -47,24 +49,12 @@ class EmailLogForm extends Model
         return $instance;
     }
 
-    public static function replyFromModel(EmailLog $log, $config = [])
+    public static function replyFromModel(EmailLog $log, $config = []): EmailLogForm
     {
-        $instance = new static($config);
-
-        return $instance;
+        return new static($config);
     }
 
-    public function isEmpty()
-    {
-        foreach ($this->attributes() as $attribute) {
-            if (!empty($this->$attribute)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public function attributes()
+    public function attributes(): array
     {
         return [
             'communicationId',
@@ -80,7 +70,7 @@ class EmailLogForm extends Model
         ];
     }
 
-    public function fields()
+    public function fields(): array
     {
         return [
             'el_communication_id' => 'communicationId',
@@ -96,21 +86,8 @@ class EmailLogForm extends Model
         ];
     }
 
-    public function getAttributesForModel($skipEmpty = false)
-    {
-        $result = [];
-        foreach ($this->fields() as $index => $name) {
-            $key = is_int($index) ? $name : $index;
-            if (!$skipEmpty || ($skipEmpty && !empty($this->$name))) {
-                $result[$key] = $this->$name;
-            }
-        }
-        return $result;
-    }
-
     public function rules(): array
     {
-
         return [
             [['communicationId','inboxEmailId', 'isNew'], 'integer'],
             [['errorMessage', 'messageId', 'refMessageId'], 'string'],

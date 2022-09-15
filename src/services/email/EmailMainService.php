@@ -32,6 +32,7 @@ use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\leadUserData\entity\LeadUserData;
 use src\model\leadUserData\entity\LeadUserDataDictionary;
 use src\model\leadUserData\repository\LeadUserDataRepository;
+use yii\base\InvalidConfigException;
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
 use modules\lead\src\services\LeadTaskListService;
@@ -87,6 +88,10 @@ class EmailMainService implements EmailServiceInterface
         ;
     }
 
+    /**
+     * @return static
+     * @throws \yii\base\InvalidConfigException
+     */
     public static function newInstance()
     {
         $emailRepository = Yii::createObject(EmailRepository::class);
@@ -96,24 +101,38 @@ class EmailMainService implements EmailServiceInterface
         return new static($emailRepository, $emailOldRepository, $oldService);
     }
 
-    private function setEmailObjById(int $emailId)
+    /**
+     * @param int $emailId
+     * @return Email|null
+     */
+    private function setEmailObjById(int $emailId): ?Email
     {
         $this->emailObj = $this->emailOldRepository->find($emailId);
         return $this->emailObj;
     }
 
-    private function setEmailObj(Email $email)
+    /**
+     * @param Email $email
+     * @return void
+     */
+    private function setEmailObj(Email $email): void
     {
         $this->emailObj = $email;
-        return $this->emailObj;
     }
 
+    /**
+     * @return Email|null
+     */
     private function getEmailObj(): ?Email
     {
         return $this->emailObj;
     }
 
-    private function setEmailNormObjById(int $emailId)
+    /**
+     * @param int $emailId
+     * @return EmailNorm|null
+     */
+    private function setEmailNormObjById(int $emailId): ?EmailNorm
     {
         try {
             $this->emailNormObj = $this->emailRepository->find($emailId);
@@ -123,23 +142,38 @@ class EmailMainService implements EmailServiceInterface
         return $this->emailNormObj;
     }
 
-    private function setEmailNormObj(EmailNorm $email)
+    /**
+     * @param EmailNorm $email
+     * @return void
+     */
+    private function setEmailNormObj(EmailNorm $email): void
     {
         $this->emailNormObj = $email;
-        return $this->emailNormObj;
     }
 
-    private function getEmailNormObj()
+    /**
+     * @return EmailNorm|null
+     */
+    private function getEmailNormObj(): ?EmailNorm
     {
         return $this->emailNormObj;
     }
 
-    private function getCalledFrom(EmailInterface $email = null): ?int
+    /**
+     * @param Email|EmailNorm|null $email
+     * @return int|null
+     */
+    private function getCalledFrom($email = null): ?int
     {
         return ($email instanceof Email) ? self::FROM_OLD : self::FROM_NORM;
     }
 
-    public function sendMail(EmailInterface $email, array $data = [])
+    /**
+     * @param Email|EmailNorm $email
+     * @param array $data
+     * @return void
+     */
+    public function sendMail($email, array $data = [])
     {
         try {
             $calledFrom = $this->getCalledFrom($email);
@@ -159,13 +193,13 @@ class EmailMainService implements EmailServiceInterface
 
             if ($this->normalizedService !== null && $this->getEmailNormObj() !== null) {
                 $requestData = $this->normalizedService->sendMail($this->getEmailNormObj(), $data);
-                $this->normalizedService->updataAfterSendMail($this->getEmailNormObj(), $requestData);
+                $this->normalizedService->updateAfterSendMail($this->getEmailNormObj(), $requestData);
             } else {
                 $requestData = $this->oldService->sendMail($this->getEmailObj(), $data);
             }
 
             if ($this->getEmailObj()) {
-                $this->oldService->updataAfterSendMail($this->getEmailObj(), $requestData);
+                $this->oldService->updateAfterSendMail($this->getEmailObj(), $requestData);
             }
 
             $email = $this->getEmailNormObj() ?? $this->getEmailObj() ?? $email;
@@ -189,6 +223,12 @@ class EmailMainService implements EmailServiceInterface
         }
     }
 
+    /**
+     * @param int $emailId
+     * @param Lead|null $lead
+     * @param bool $useOwner
+     * @return void
+     */
     public function leadTaskJob(int $emailId, ?Lead $lead, bool $useOwner = false)
     {
         if ($emailId && $lead && (new LeadTaskListService($lead))->isProcessAllowed()) {
@@ -203,6 +243,10 @@ class EmailMainService implements EmailServiceInterface
         }
     }
 
+    /**
+     * @param EmailInterface $email
+     * @return void
+     */
     private function addToABTesting(EmailInterface $email)
     {
         /** @fflag FFlag::FF_KEY_A_B_TESTING_EMAIL_OFFER_TEMPLATES, A/B testing for email offer templates enable/disable */
@@ -220,6 +264,12 @@ class EmailMainService implements EmailServiceInterface
         }
     }
 
+    /**
+     * @param int $emailId
+     * @param string|null $tplType
+     * @param Lead|null $lead
+     * @return void
+     */
     private function leadProcessAfterEmailSending(int $emailId, ?string $tplType, ?Lead $lead)
     {
         if ($emailId && $lead && $tplType && LeadPoorProcessingService::checkEmailTemplate($tplType)) {
@@ -253,6 +303,13 @@ class EmailMainService implements EmailServiceInterface
         }
     }
 
+    /**
+     * @param Email|EmailNorm $email
+     * @param EmailForm $form
+     * @return Email|EmailNorm
+     * @throws Yii\db\Exception
+     * @throws \Throwable
+     */
     public function update($email, EmailForm $form)
     {
         $calledFrom = $this->getCalledFrom($email);
@@ -274,6 +331,13 @@ class EmailMainService implements EmailServiceInterface
         return ($calledFrom == self::FROM_OLD) ? $emailOld : $emailNorm ?? $email;
     }
 
+    /**
+     * @param EmailForm $form
+     * @return Email|EmailNorm
+     * @throws Yii\db\Exception
+     * @throws Yii\db\StaleObjectException
+     * @throws \Throwable
+     */
     public function create(EmailForm $form)
     {
         $email = $this->oldService->create($form);
@@ -290,6 +354,15 @@ class EmailMainService implements EmailServiceInterface
         return $email;
     }
 
+    /**
+     * @param EmailPreviewFromInterface $previewEmailForm
+     * @param Lead $lead
+     * @param array $attachments
+     * @return Email|EmailNorm
+     * @throws Yii\db\Exception
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
     public function createFromLead(EmailPreviewFromInterface $previewEmailForm, Lead $lead, array $attachments = [])
     {
         $email = $this->oldService->createFromLead($previewEmailForm, $lead, $attachments);
@@ -305,6 +378,15 @@ class EmailMainService implements EmailServiceInterface
         return $email;
     }
 
+    /**
+     * @param EmailPreviewFromInterface $previewEmailForm
+     * @param Cases $case
+     * @param array $attachments
+     * @return Email|EmailNorm
+     * @throws Yii\db\Exception
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
     public function createFromCase(EmailPreviewFromInterface $previewEmailForm, Cases $case, array $attachments = [])
     {
         $email = $this->oldService->createFromCase($previewEmailForm, $case, $attachments);
@@ -320,7 +402,13 @@ class EmailMainService implements EmailServiceInterface
         return $email;
     }
 
-
+    /**
+     * @param EmailReviewQueueForm $form
+     * @param Email|EmailNorm $email
+     * @return Email|EmailNorm
+     * @throws Yii\db\Exception
+     * @throws \Throwable
+     */
     public function updateAfterReview(EmailReviewQueueForm $form, $email)
     {
         $calledFrom = $this->getCalledFrom($email);
@@ -342,7 +430,15 @@ class EmailMainService implements EmailServiceInterface
         return ($calledFrom == self::FROM_OLD) ? $emailOld : $emailNorm ?? $email;
     }
 
-    public function createFromDTO(EmailDTO $emailDTO, $autoDetectEmpty = true)
+    /**
+     * @param EmailDTO $emailDTO
+     * @param bool $autoDetectEmpty
+     * @return Email|EmailNorm
+     * @throws Yii\db\Exception
+     * @throws \Throwable
+     * @throws \yii\db\StaleObjectException
+     */
+    public function createFromDTO(EmailDTO $emailDTO, bool $autoDetectEmpty = true)
     {
         $email = $this->oldService->createFromDTO($emailDTO, $autoDetectEmpty);
         $email->refresh();
@@ -358,7 +454,15 @@ class EmailMainService implements EmailServiceInterface
         return $email;
     }
 
-    public function receiveEmail(EmailDTO $emailDTO)
+    /**
+     * @param EmailDTO $emailDTO
+     * @return array
+     * @throws Yii\db\Exception
+     * @throws Yii\db\StaleObjectException
+     * @throws \Throwable
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function receiveEmail(EmailDTO $emailDTO): array
     {
         $notifications = [];
         $email = $this->oldService->createFromDTO($emailDTO, true);
@@ -380,11 +484,10 @@ class EmailMainService implements EmailServiceInterface
             $this->addCreateSaleJob($case, $emailDTO->emailFrom);
 
             if ($userID) {
-                $notifyData = [
+                $notifications[] = [
                     'user' => $userID,
                     'message' => 'New Email Received. Case(' . Purifier::createCaseShortLink($case) . ').'
                 ];
-                array_push($notifications, $notifyData);
             }
         }
 
@@ -396,12 +499,11 @@ class EmailMainService implements EmailServiceInterface
             }
 
             if ($userID) {
-                $notifyData = [
+                $notifications[] = [
                     'user' => $userID,
                     'title' => 'New Email Received',
                     'message' => 'New Email Received. Lead(' . Purifier::createLeadShortLink($lead) . ').'
                 ];
-                array_push($notifications, $notifyData);
             }
             $this->addCreateLeadDataJob($lead);
         }
@@ -428,7 +530,15 @@ class EmailMainService implements EmailServiceInterface
         return $notifications;
     }
 
-    public function getAttachmentsArray($email, array $attachPaths, int $communicationId)
+    /**
+     * @param $email
+     * @param array $attachPaths
+     * @param int $communicationId
+     * @return array
+     * @throws \League\Flysystem\FilesystemException
+     * @throws \yii\base\InvalidConfigException
+     */
+    public function getAttachmentsArray($email, array $attachPaths, int $communicationId): array
     {
         $attachmentsService = new AttachmentsService($email);
         $emailDataAttachments = [];
@@ -449,6 +559,11 @@ class EmailMainService implements EmailServiceInterface
         return $emailDataAttachments;
     }
 
+    /**
+     * @param Cases $case
+     * @param string $emailFrom
+     * @return void
+     */
     public function addCreateSaleJob(Cases $case, string $emailFrom)
     {
         try {
@@ -462,6 +577,10 @@ class EmailMainService implements EmailServiceInterface
         }
     }
 
+    /**
+     * @param Lead $lead
+     * @return void
+     */
     public function addCreateLeadDataJob(Lead $lead)
     {
         try {
@@ -475,6 +594,12 @@ class EmailMainService implements EmailServiceInterface
         }
     }
 
+    /**
+     * @param Email|EmailNorm $email
+     * @param int|null $leadId
+     * @param int|null $caseId
+     * @return void
+     */
     public function linkLeadCase($email, ?int $leadId, ?int $caseId)
     {
         if ($email instanceof Email) {
@@ -494,10 +619,12 @@ class EmailMainService implements EmailServiceInterface
     }
 
     /**
-     *
-     * @param Email|EmailNorm $email
+     * @param $email
+     * @return incoming\Process
+     * @throws \Throwable
+     * @throws \yii\base\InvalidConfigException
      */
-    public function processIncoming($email)
+    public function processIncoming($email): incoming\Process
     {
         $emailIncomingService = Yii::createObject(EmailIncomingService::class);
         return $emailIncomingService->create(
@@ -517,10 +644,10 @@ class EmailMainService implements EmailServiceInterface
      * @throws \RuntimeException
      * @throws \Throwable
      */
-    public function updateEmailStatus(int $communicationId, int $statusId)
+    public function updateEmailStatus(int $communicationId, int $statusId): ?int
     {
         if ($statusId <= 0) {
-            throw \RuntimeException('Email status not valid.');
+            throw new \RuntimeException('Email status not valid.');
         }
         if ($emailOld = $this->emailOldRepository->findByCommunicationId($communicationId)) {
             $this->oldService->changeStatus($emailOld, $statusId);
@@ -534,7 +661,13 @@ class EmailMainService implements EmailServiceInterface
         return $emailOld ? $emailOld->e_id : ($emailNorm ? $emailNorm->e_id : null);
     }
 
-    public function saveInboxId(string $messageId, string $emailTo, int $inboxId)
+    /**
+     * @param string $messageId
+     * @param string $emailTo
+     * @param int $inboxId
+     * @return bool
+     */
+    public function saveInboxId(string $messageId, string $emailTo, int $inboxId): bool
     {
         if ($emailOld = $this->emailOldRepository->findReceived($messageId, $emailTo)->limit(1)->one()) {
             $emailOld->saveInboxId($inboxId);
@@ -549,6 +682,10 @@ class EmailMainService implements EmailServiceInterface
         return $emailOld || $emailNorm;
     }
 
+    /**
+     * @param $email
+     * @return void
+     */
     public function read($email)
     {
         $calledFrom = $this->getCalledFrom($email);
@@ -564,13 +701,12 @@ class EmailMainService implements EmailServiceInterface
     }
 
     /**
-     *
-     * @param EmailInterface $email
+     * @param Email|EmailNorm $email
      * @param int|null $departmentId
-     *
-     * return EmailReviewQueue
+     * @return EmailReviewQueue
+     * @throws InvalidConfigException
      */
-    public function moveToReview($email, ?int $departmentId = null)
+    public function moveToReview($email, ?int $departmentId = null): EmailReviewQueue
     {
         $calledFrom = $this->getCalledFrom($email);
         $emailOld = ($calledFrom == self::FROM_NORM) ? $this->setEmailObjById($email->e_id) : $email;
@@ -594,12 +730,11 @@ class EmailMainService implements EmailServiceInterface
         return $emailReviewQueueManageService->createByEmail($emailToReview, $departmentId);
     }
 
+
     /**
-     *
-     * @param EmailInterface $email
+     * @param Email|EmailNorm $email
      * @param string $message
-     *
-     * return EmailInterface
+     * @return Email|EmailNorm
      */
     public function moveToCancel($email, string $message)
     {
@@ -620,5 +755,29 @@ class EmailMainService implements EmailServiceInterface
         }
 
         return ($calledFrom == self::FROM_OLD) ? $emailOld : $emailNorm ?? $email;
+    }
+
+    /**
+     * @param Email|EmailNorm $email
+     * @return void
+     */
+    public function softDelete($email)
+    {
+        $isDeleted = $email->isDeleted();
+
+        $calledFrom = $this->getCalledFrom($email);
+        $emailOld = ($calledFrom == self::FROM_NORM) ? $this->setEmailObjById($email->e_id) : $email;
+        $emailOld->updateAttributes([
+            'e_is_deleted' => !$isDeleted
+        ]);
+
+        if ($this->normalizedService !== null) {
+            $emailNorm = ($calledFrom == self::FROM_OLD) ? $this->setEmailNormObjById($email->e_id) : $email;
+            if (isset($emailNorm)) {
+                $emailNorm->updateAttributes([
+                    'e_is_deleted' => !$isDeleted
+                ]);
+            }
+        }
     }
 }

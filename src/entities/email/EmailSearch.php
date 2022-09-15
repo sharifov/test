@@ -228,7 +228,7 @@ class EmailSearch extends Email
         }
 
         $prefix = 'searchEmails_u_' . $params['EmailSearch']['user_id'] .
-            '_t_' . $params['email_type_id'].
+            '_t_' . $params['email_type_id'] .
             '_p_' . $params['EmailSearch']['e_project_id'] .
             '_e_' . $params['EmailSearch']['email'];
 

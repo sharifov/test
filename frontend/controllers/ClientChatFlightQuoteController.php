@@ -181,7 +181,7 @@ class ClientChatFlightQuoteController extends FController
                     if ($quotes && !empty($quotes['data']['results']) && empty($quotes['error'])) {
                         Yii::$app->cacheFile->set(
                             $keyCache,
-                            $quotes = QuoteHelper::formatQuoteData($quotes['data']),
+                            $quotes = QuoteHelper::formatQuoteData($quotes['data'], $searchServiceDto->cid),
                             600
                         );
                     }
@@ -196,7 +196,7 @@ class ClientChatFlightQuoteController extends FController
                     if ($quotes && !empty($quotes['data']['results']) && empty($quotes['error'])) {
                         Yii::$app->cacheFile->set(
                             $keyCache,
-                            $quotes = QuoteHelper::formatQuoteData($quotes['data']),
+                            $quotes = QuoteHelper::formatQuoteData($quotes['data'], $searchServiceDto->cid),
                             600
                         );
                     }

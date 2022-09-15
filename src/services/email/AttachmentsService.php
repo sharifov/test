@@ -17,6 +17,7 @@ use modules\fileStorage\src\entity\fileCase\FileCaseRepository;
 use modules\fileStorage\src\services\url\UrlGenerator;
 use modules\fileStorage\src\entity\fileStorage\FileStorage;
 use modules\fileStorage\src\services\CreateByApiDto;
+use yii\base\InvalidConfigException;
 use yii\helpers\ArrayHelper;
 
 /**
@@ -27,13 +28,21 @@ use yii\helpers\ArrayHelper;
  * @property FileClientRepository $fileClientRepository
  * @property FileLeadRepository $fileLeadRepository
  * @property FileCaseRepository $fileCaseRepository
+ * @property UrlGenerator $urlGenerator
+ *
+ * @property int|null $leadId
+ * @property int|null $caseId
+ * @property int|null $clientId
+ * @property array $attachments
+ * @property Email|EmailNorm $email
+ *
  */
 class AttachmentsService
 {
-    public $leadId;
-    public $caseId;
-    public $clientId;
-    public $attachments = [];
+    public ?int $leadId;
+    public ?int $caseId;
+    public ?int $clientId;
+    public array $attachments = [];
 
     private $email;
     private FileSystem $fileSystem;
@@ -44,8 +53,8 @@ class AttachmentsService
     private UrlGenerator $urlGenerator;
 
     /**
-     *
      * @param Email|EmailNorm $email
+     * @throws InvalidConfigException
      */
     public function __construct($email)
     {
@@ -65,6 +74,11 @@ class AttachmentsService
         $this->urlGenerator = Yii::createObject(UrlGenerator::class);
     }
 
+    /**
+     * @param string $path
+     * @return array|null
+     * @throws \League\Flysystem\FilesystemException
+     */
     public function processingFile(string $path): ?array
     {
         if (!$this->fileSystem->fileExists($path)) {
@@ -98,6 +112,10 @@ class AttachmentsService
         ];
     }
 
+    /**
+     * @param string $path
+     * @return FileStorage
+     */
     public function fileStorage(string $path): FileStorage
     {
         $createByApiDto = CreateByApiDto::createWithFile($path, $this->fileSystem);
@@ -107,16 +125,28 @@ class AttachmentsService
         return $fileStorage;
     }
 
+    /**
+     * @param int $fileStorageId
+     * @return void
+     */
     public function fileToClient(int $fileStorageId): void
     {
         $this->fileClientRepository->save(FileClient::create($fileStorageId, $this->clientId));
     }
 
+    /**
+     * @param int $fileStorageId
+     * @return void
+     */
     public function fileToLead(int $fileStorageId): void
     {
         $this->fileLeadRepository->save(FileLead::create($fileStorageId, $this->leadId));
     }
 
+    /**
+     * @param int $fileStorageId
+     * @return void
+     */
     public function fileToCase(int $fileStorageId): void
     {
         $this->fileCaseRepository->save(FileCase::create($fileStorageId, $this->caseId));

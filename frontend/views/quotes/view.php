@@ -56,6 +56,13 @@ $showGdsOfferId = ($user->isAdmin() || $user->isSuperAdmin() || $user->isQa());
                     'record_locator',
                     'check_payment:boolean',
                     'type_id:quoteType',
+                    [
+                        'attribute' => 'quoteSearchCid',
+                        'value' => static function (\common\models\Quote $model) {
+                            return $model->quoteSearchCid->qsc_cid;
+                        },
+                        'visible' => \src\services\quote\QuoteSearchCidService::userIsCanSeeCid($model),
+                    ],
                 ],
             ]) ?>
         </div>

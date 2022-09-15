@@ -2,11 +2,13 @@
 
 namespace frontend\controllers;
 
+use common\helpers\LogHelper;
 use common\models\SaleCreditCard;
 use frontend\helpers\JsonHelper;
 use frontend\models\form\CreditCardForm;
 use modules\cases\src\abac\saleList\SaleListAbacDto;
 use modules\cases\src\abac\saleList\SaleListAbacObject;
+use src\auth\Auth;
 use src\forms\caseSale\CaseSaleSendCcInfoForm;
 use src\helpers\app\AppHelper;
 use src\helpers\cases\CaseSaleHelper;
@@ -332,6 +334,11 @@ class CreditCardController extends FController
                 if ($result['error']) {
                     throw new \RuntimeException('B/O error has occurred: ' . $result['message']);
                 }
+
+                $username = Auth::user()->username ?? null;
+                $bookingId = $dataSale['bookingId'] ?? '';
+                $case->addEventLog(null, 'Sent CC Info for Sale ID: ' . $caseSale->css_sale_id . ', BookId: ' . $bookingId . ', Email: ' . LogHelper::replaceSource($form->email, 2) . ', By username: ' . $username);
+
                 return '<script>$("#modal-sm").modal("hide"); createNotify("Success", "Email sent to customer successfully", "success")</script>';
             }
         } catch (NotFoundException | \RuntimeException $e) {

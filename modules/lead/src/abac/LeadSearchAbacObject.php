@@ -16,14 +16,20 @@ class LeadSearchAbacObject extends AbacBaseModel implements AbacInterface
     /** --------------- ACTIONS --------------------------- */
     public const ACTION_ACCESS = 'access';
 
+
+    /** --------------- QUERIES --------------------------- */
+    public const QUERY_SHOW_IS_TEST = self::NS . 'query/show_is_test';
+
     /** --------------- OBJECT LIST --------------------------- */
     public const OBJECT_LIST = [
         self::ADVANCED_SEARCH => self::ADVANCED_SEARCH,
+        self::QUERY_SHOW_IS_TEST => self::QUERY_SHOW_IS_TEST,
     ];
 
     /** --------------- ACTION LIST --------------------------- */
     public const OBJECT_ACTION_LIST = [
         self::ADVANCED_SEARCH => [self::ACTION_ACCESS],
+        self::QUERY_SHOW_IS_TEST => [self::ACTION_ACCESS],
     ];
 
     /** --------------- ATTRIBUTE LIST --------------------------- */

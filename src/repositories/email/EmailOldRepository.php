@@ -15,7 +15,7 @@ use yii\db\Query;
 
 class EmailOldRepository implements EmailRepositoryInterface
 {
-    private $eventDispatcher;
+    private EventDispatcher $eventDispatcher;
 
     public function __construct(EventDispatcher $eventDispatcher)
     {
@@ -186,6 +186,10 @@ class EmailOldRepository implements EmailRepositoryInterface
         return Email::tableName();
     }
 
+    /**
+     * @param int $communicationId
+     * @return Email
+     */
     public function findByCommunicationId(int $communicationId): Email
     {
         if ($email = Email::find()->byCommunicationId($communicationId)->limit(1)->one()) {
@@ -260,7 +264,7 @@ class EmailOldRepository implements EmailRepositoryInterface
             ->groupBy(['e_case_id', 'e_created_user_id']);
     }
 
-    public function getStatsData(string $startDate, string $endDate, int $type)
+    public function getStatsData(string $startDate, string $endDate, int $type): array
     {
         return Email::find()
             ->select(['e_status_id', 'e_created_dt'])

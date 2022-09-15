@@ -177,7 +177,7 @@ class QuoteController extends FController
                     unset($metricsService);
 
                     if ($quotes && !empty($quotes['data']['results']) && empty($quotes['error'])) {
-                        \Yii::$app->cacheFile->set($keyCache, $quotes = QuoteHelper::formatQuoteData($quotes['data']), 600);
+                        \Yii::$app->cacheFile->set($keyCache, $quotes = QuoteHelper::formatQuoteData($quotes['data'], $dto->cid), 600);
                     } else {
                         throw new \RuntimeException(!empty($quotes['error']) ? JsonHelper::decode($quotes['error'])['Message'] : 'No search results', self::RUNTIME_ERROR_QUOTES_NO_RESULTS);
                     }
@@ -611,7 +611,7 @@ class QuoteController extends FController
                 }
             }
 
-            $preparedQuoteData = QuoteHelper::formatQuoteData(['results' => [$searchQuoteRequest['data']]]);
+            $preparedQuoteData = QuoteHelper::formatQuoteData(['results' => [$searchQuoteRequest['data']]], $cid);
             $addQuoteService = Yii::createObject(AddQuoteService::class);
             $preparedQuoteData['results'][0]['createTypeId'] = Quote::CREATE_TYPE_SMART_SEARCH;
             $quoteUid = $addQuoteService->createByData($preparedQuoteData['results'][0], $lead, $projectProviderId);
@@ -679,7 +679,7 @@ class QuoteController extends FController
                 unset($metricsService);
 
                 if ($quotes && !empty($quotes['data']['results']) && empty($quotes['error'])) {
-                    \Yii::$app->cacheFile->set($keyCache, $quotes = QuoteHelper::formatQuoteData($quotes['data']), 600);
+                    \Yii::$app->cacheFile->set($keyCache, $quotes = QuoteHelper::formatQuoteData($quotes['data'], $dto->cid), 600);
                 } else {
                     throw new \RuntimeException(!empty($quotes['error']) ? JsonHelper::decode($quotes['error'])['Message'] : 'Search result is empty!');
                 }

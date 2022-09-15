@@ -24,6 +24,7 @@ use src\forms\lead\LeadPreferencesForm;
 use src\forms\lead\LeadQuoteExtraMarkUpForm;
 use src\forms\lead\PhoneCreateForm;
 use src\helpers\app\AppHelper;
+use src\helpers\ErrorsToStringHelper;
 use src\model\clientChat\socket\ClientChatSocketCommands;
 use src\model\clientChatLead\entity\ClientChatLead;
 use src\model\quote\abac\dto\QuoteFlightExtraMarkupAbacDto;
@@ -968,6 +969,9 @@ class LeadViewController extends FController
             $message = AppHelper::throwableLog($e);
             $message['quoteId'] = $quoteId ?? null;
             $message['paxCode'] = $paxCode ?? null;
+            if (isset($form)) {
+                $message['form'] = ArrayHelper::toArray($form);
+            }
             Yii::warning($message, 'LeadViewController::actionAjaxEditQuoteExtraMarkUpModalContent:exception');
 
             return $this->renderAjax('_error', ['error' => $e->getMessage()]);
@@ -1029,7 +1033,7 @@ class LeadViewController extends FController
             );
             $form->load(Yii::$app->request->post());
             if (!$form->validate()) {
-                throw new \RuntimeException(implode(', ', $form->getErrorSummary(true)));
+                throw new \RuntimeException(ErrorsToStringHelper::extractFromModel($form));
             }
 
             $clientQuotePriceService = new ClientQuotePriceService($quote);
@@ -1052,6 +1056,10 @@ class LeadViewController extends FController
             $message = AppHelper::throwableLog($e);
             $message['quoteId'] = $quoteId ?? null;
             $message['paxCode'] = $paxCode ?? null;
+            if (isset($form)) {
+                $message['form'] = ArrayHelper::toArray($form);
+            }
+
             \Yii::warning($message, 'LeadViewController::actionAjaxEditQuoteExtraMarkUp:exception');
 
             return ['error' => $e->getMessage()];

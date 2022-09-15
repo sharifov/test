@@ -36,6 +36,7 @@ use frontend\models\LeadPreviewSmsForm;
 use frontend\models\LeadUserRatingForm;
 use frontend\models\ProfitSplitForm;
 use frontend\models\TipsSplitForm;
+use frontend\widgets\userTasksList\forms\UserTasksListForm;
 use modules\email\src\abac\dto\EmailPreviewDto;
 use modules\email\src\abac\EmailAbacObject;
 use modules\featureFlag\FFlag;
@@ -55,6 +56,7 @@ use modules\offer\src\services\OfferSendLogService;
 use modules\order\src\entities\order\search\OrderSearch;
 use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTaskQuery;
 use modules\taskList\src\entities\TargetObject;
+use modules\taskList\src\entities\userTask\UserTaskQuery;
 use modules\taskList\src\entities\userTask\UserTaskSearch;
 use PHPUnit\Framework\Warning;
 use src\auth\Auth;
@@ -67,6 +69,7 @@ use src\forms\lead\ItineraryEditForm;
 use src\forms\lead\LeadCreateForm;
 use src\forms\leadflow\TakeOverReasonForm;
 use src\helpers\app\AppHelper;
+use src\helpers\ErrorsToStringHelper;
 use src\helpers\setting\SettingHelper;
 use src\logger\db\GlobalLogInterface;
 use src\logger\db\LogDTO;
@@ -115,6 +118,7 @@ use src\services\TransactionManager;
 use Yii;
 use yii\caching\DbDependency;
 use yii\data\ActiveDataProvider;
+use yii\data\Pagination;
 use yii\db\Expression;
 use yii\db\Query;
 use yii\helpers\ArrayHelper;
@@ -131,6 +135,7 @@ use yii\web\Response;
 use yii\web\UnauthorizedHttpException;
 use yii\web\UploadedFile;
 use yii\widgets\ActiveForm;
+use frontend\widgets\userTasksList\UserTasksListWidget;
 
 /**
  * Class LeadController
@@ -1006,14 +1011,6 @@ class LeadController extends FController
 //        $tmpl = $isQA ? 'view_qa' : 'view';
         $tmpl = 'view';
 
-        $shiftScheduleEventTasks = [];
-        /** @fflag FFlag::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE, New User Task List in Lead view Enable */
-        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE)) {
-            $shiftScheduleEventTasks = ShiftScheduleEventTaskQuery::getAllByLeadId($lead->id, Auth::id())
-                ->asArray()
-                ->all();
-        }
-
         return $this->render($tmpl, [
             'leadForm' => $leadForm,
             'previewEmailForm' => $previewEmailForm,
@@ -1028,7 +1025,6 @@ class LeadController extends FController
             'itineraryForm' => $itineraryForm,
             'dataProviderNotes' => $dataProviderNotes,
             'modelNote' => $modelNote,
-            'shiftScheduleEventTasks' => $shiftScheduleEventTasks,
 
             'dataProviderOffers' => $dataProviderOffers,
             'dataProviderOrders' => $dataProviderOrders,
@@ -1039,6 +1035,43 @@ class LeadController extends FController
 
             'isCreatedFlightRequest' => $isCreatedFlightRequest,
         ]);
+    }
+
+    public function actionPjaxUserTasksList(string $gid)
+    {
+        $result = '';
+
+        /** @fflag FFlag::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE, New User Task List in Lead view Enable */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE)) {
+            $request = \Yii::$app->request;
+            $userTasksListForm = new UserTasksListForm();
+            $userTasksListForm->load($request->get(), '');
+
+            if (!$userTasksListForm->validate()) {
+                $msg = [
+                    'message' => ErrorsToStringHelper::extractFromModel($userTasksListForm),
+                    'gid' => $userTasksListForm->gid,
+                    'page' => $userTasksListForm->page,
+                    'userShiftScheduleId' => $userTasksListForm->userShiftScheduleId,
+                ];
+                throw new \HttpInvalidParamException(VarDumper::dumpAsString($msg), 'LeadController:actionPjaxUserTasksList');
+            }
+
+            $lead = $this->findLeadByGid($userTasksListForm->gid);
+
+            /** @abac $abacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS, Access to view lead  */
+            if (!Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS)) {
+                throw new ForbiddenHttpException('Access Denied for getting pjax task list.');
+            }
+
+            $result = UserTasksListWidget::widget([
+                'lead' => $lead,
+                'pageNumber' => $userTasksListForm->page,
+                'activeShiftScheduleId' => $userTasksListForm->userShiftScheduleId,
+            ]);
+        }
+
+        return $result;
     }
 
     public function actionGetAirport($term)
@@ -2862,11 +2895,12 @@ class LeadController extends FController
             $leadID,
             $this->request->queryParams
         );
-
+        $dataProvider->query->with(['completeTime', 'taskList']);
 
         return $this->renderAjax('user-task/user-task-list', [
+            'pagination' => $dataProvider->getPagination(),
             'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
+            'historyTasks' => $dataProvider->getModels(),
             'leadID' => $leadID,
         ]);
     }

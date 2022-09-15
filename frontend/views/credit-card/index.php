@@ -1,5 +1,7 @@
 <?php
 
+use common\models\CreditCard;
+use src\helpers\text\MaskStringHelper;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -47,7 +49,13 @@ $this->params['breadcrumbs'][] = $this->title;
 //                },
 //                'filter' => false
 //            ],
-            'cc_holder_name',
+            [
+                'attribute' => 'cc_holder_name',
+                'value' => static function (CreditCard $model) {
+                    $data = \common\helpers\LogHelper::hidePersonalData($model->toArray(), ['cc_holder_name']);
+                    return $data['cc_holder_name'];
+                }
+            ],
             'cc_expiration_month',
             'cc_expiration_year',
             'cc_security_hash',

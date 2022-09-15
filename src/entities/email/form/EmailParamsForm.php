@@ -9,6 +9,8 @@ use common\models\Language;
 
 class EmailParamsForm extends Model
 {
+    use FormAttributesTrait;
+
     public $id;
     public $templateType;
     public $language;
@@ -19,14 +21,14 @@ class EmailParamsForm extends Model
         parent::__construct($config);
     }
 
-    public static function fromArray(array $data)
+    public static function fromArray(array $data): EmailParamsForm
     {
         $instance = new static();
         $instance->setAttributes($data);
         return $instance;
     }
 
-    public static function fromModel(EmailParams $param, $config = [])
+    public static function fromModel(EmailParams $param, $config = []): EmailParamsForm
     {
         $instance = new static($config);
         $instance->templateType = $param->ep_template_type_id;
@@ -37,7 +39,7 @@ class EmailParamsForm extends Model
         return $instance;
     }
 
-    public static function replyFromModel(EmailParams $param, $config = [])
+    public static function replyFromModel(EmailParams $param, $config = []): EmailParamsForm
     {
         $instance = new static($config);
         $instance->templateType = $param->ep_template_type_id;
@@ -47,23 +49,13 @@ class EmailParamsForm extends Model
         return $instance;
     }
 
-    public function isEmpty()
-    {
-        foreach ($this->attributes() as $attribute) {
-            if (!empty($this->$attribute)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public function attributes()
+    public function attributes(): array
     {
         return ['language', 'priority', 'templateType', 'id'];
     }
 
 
-    public function fields()
+    public function fields(): array
     {
         return [
             'ep_language_id' => 'language',
@@ -71,18 +63,6 @@ class EmailParamsForm extends Model
             'ep_template_type_id' => 'templateType',
             'ep_id' => 'id'
         ];
-    }
-
-    public function getAttributesForModel($skipEmpty = false)
-    {
-        $result = [];
-        foreach ($this->fields() as $index => $name) {
-            $key = is_int($index) ? $name : $index;
-            if (!$skipEmpty || ($skipEmpty && !empty($this->$name))) {
-                $result[$key] = $this->$name;
-            }
-        }
-        return $result;
     }
 
     public function rules(): array
