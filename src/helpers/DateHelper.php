@@ -102,4 +102,23 @@ class DateHelper
 
         return $dateTime->modify("+{$minutes} minutes")->format($format);
     }
+
+    /**
+     * Checks if the date is within the range of the other two
+     *
+     * @param string $comparableDate
+     * @param string $startDate
+     * @param string $endDate
+     * @return bool
+     */
+    public static function isDateInTheRangeOtherTwoDates(string $comparableDate, string $startDate, string $endDate): bool
+    {
+        $compD = strtotime($comparableDate);
+        $startD = strtotime($startDate);
+        $endD = strtotime($endDate);
+
+        $result = $compD >= $startD && $compD <= $endD;
+
+        return $result;
+    }
 }

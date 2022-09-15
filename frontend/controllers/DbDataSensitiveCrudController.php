@@ -2,7 +2,7 @@
 
 namespace frontend\controllers;
 
-use common\models\DbDataSensitive;
+use src\model\dbDataSensitive\entity\DbDataSensitive;
 use common\models\search\DbDataSensitiveSearch;
 use yii\filters\VerbFilter;
 use yii\web\ForbiddenHttpException;

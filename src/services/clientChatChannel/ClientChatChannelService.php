@@ -4,6 +4,7 @@ namespace src\services\clientChatChannel;
 
 use yii\helpers\ArrayHelper;
 use yii\helpers\VarDumper;
+use yii\httpclient\Exception;
 
 /**
  * Class ClientChatChannelService
@@ -25,9 +26,11 @@ class ClientChatChannelService
      * @param int $channelId
      * @param string $username
      * @return void
+     * @throws Exception
      */
     public function registerChannelInRocketChat(int $channelId, string $username): void
     {
+        \Yii::$app->rchat->updateSystemAuth(false);
         if ($this->username !== $username) {
             $userInfo = \Yii::$app->chatBot->getUserInfo($username);
             if (isset($userInfo['error']['error'])) {

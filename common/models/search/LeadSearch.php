@@ -365,7 +365,6 @@ class LeadSearch extends Lead
 
 
             'quotes' => 'Quotes',
-            'pnr' => 'PNR',
             'updated' => 'Updated',
             'depart' => 'Depart',
             'segments' => 'Segments',

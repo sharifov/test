@@ -22,6 +22,7 @@ class TaskListAbacObject extends AbacBaseModel implements AbacInterface
     public const ACTION_ACCESS = 'access';
     public const ACTION_ADD_NOTE = 'addNote';
     public const ACTION_READ = 'read';
+    public const ACTION_REMOVE_NOTE = 'removeNote';
 
     public const ATTR_USER_TASK_OWNER = [
         'optgroup' => 'User Task',
@@ -65,7 +66,7 @@ class TaskListAbacObject extends AbacBaseModel implements AbacInterface
         return [
             self::UI_ASSIGN => [self::ACTION_ACCESS],
             self::ACT_MY_TASK_LIST => [self::ACTION_ACCESS],
-            self::OBJ_USER_TASK => [self::ACTION_ADD_NOTE, self::ACTION_READ],
+            self::OBJ_USER_TASK => [self::ACTION_ADD_NOTE, self::ACTION_REMOVE_NOTE, self::ACTION_READ],
         ];
     }
 

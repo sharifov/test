@@ -8,6 +8,7 @@ use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\shiftScheduleTypeLabelAssign\ShiftScheduleTypeLabelAssign;
 use modules\shiftSchedule\src\entities\userShiftSchedule\search\TimelineCalendarFilter;
+use modules\taskList\src\entities\TargetObject;
 use Yii;
 use yii\base\DynamicModel;
 use yii\db\Expression;
@@ -558,5 +559,34 @@ class UserShiftScheduleQuery
         array $shiftScheduleType = [ShiftScheduleType::SUBTYPE_WORK_TIME]
     ): ?array {
         return self::getQueryForNextShiftsByUserId($userId, $startDt, $userTaskEndDt, $status, $shiftScheduleType)->all();
+    }
+
+    /**
+     * Will get all user shift schedules(considering the parameters you passed) that have tasks inside
+     *
+     * @param int $leadId
+     * @param int $userId
+     * @param string $type
+     * @return array
+     */
+    public static function getAllThatHaveTasksByLeadIdAndUserIdAndType(int $leadId, int $userId, string $type = TargetObject::TARGET_OBJ_LEAD): Scopes
+    {
+        return UserShiftSchedule::find()
+            ->innerJoin('shift_schedule_event_task', '
+                user_shift_schedule.uss_user_id = :userId AND 
+                user_shift_schedule.uss_id = shift_schedule_event_task.sset_event_id
+            ', [
+                'userId' => $userId,
+            ])->innerJoin('user_task', '
+                user_task.ut_target_object_id = :leadId AND 
+                user_task.ut_target_object = :type AND
+                user_task.ut_id= shift_schedule_event_task.sset_user_task_id AND
+                user_task.ut_user_id = user_shift_schedule.uss_user_id
+            ', [
+                'leadId' => $leadId,
+                'type' => $type,
+            ])->orderBy([
+                'user_shift_schedule.uss_start_utc_dt' => SORT_ASC,
+            ]);
     }
 }

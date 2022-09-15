@@ -8,6 +8,7 @@ use modules\shiftSchedule\src\entities\shiftScheduleRequest\ShiftScheduleRequest
 use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\events\ShiftScheduleEventChangedEvent;
+use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTask;
 use src\auth\Auth;
 use src\entities\EventTrait;
 use yii\behaviors\BlameableBehavior;
@@ -46,6 +47,7 @@ use yii\db\BaseActiveRecord;
  * @property-read ActiveQuery $createdUser
  * @property-read ActiveQuery $updatedUser
  * @property Employee $user
+ * @property ShiftScheduleEventTask $shiftScheduleEventTask
  */
 class UserShiftSchedule extends \yii\db\ActiveRecord
 {
@@ -401,5 +403,15 @@ class UserShiftSchedule extends \yii\db\ActiveRecord
     public static function getProcessingStatuses(): array
     {
         return [self::STATUS_APPROVED, self::STATUS_DONE];
+    }
+
+    /**
+     * @return ActiveQuery
+     */
+    public function getShiftScheduleEventTask(): ActiveQuery
+    {
+        return $this->hasMany(ShiftScheduleEventTask::class, [
+            'sset_event_id' => 'uss_id',
+        ]);
     }
 }

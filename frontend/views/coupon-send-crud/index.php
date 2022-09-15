@@ -2,6 +2,7 @@
 
 use common\components\grid\DateTimeColumn;
 use common\components\grid\UserSelect2Column;
+use src\helpers\email\MaskEmailHelper;
 use src\model\coupon\entity\couponSend\CouponSend;
 use yii\grid\ActionColumn;
 use yii\bootstrap4\Html;
@@ -48,7 +49,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw',
                 'filter' => CouponSend::TYPE_LIST
             ],
-            'cus_send_to',
+            [
+                'attribute' => 'cus_send_to',
+                'value' => static function ($model) {
+                    return MaskEmailHelper::masking($model->cus_send_to);
+                }
+            ],
             ['class' => DateTimeColumn::class, 'attribute' => 'cus_created_dt'],
 
             ['class' => ActionColumn::class],

@@ -20,7 +20,6 @@
  * @var AbacSmsFromNumberList $smsFromNumberList
  * @var AbacEmailList $emailFromList
  * @var $isCreatedFlightRequest bool
- * @var $shiftScheduleEventTasks array
  */
 
 use common\models\Employee;
@@ -50,6 +49,7 @@ use src\model\sms\useCase\send\fromLead\AbacSmsFromNumberList;
 use yii\bootstrap4\Modal;
 use yii\data\ActiveDataProvider;
 use yii\helpers\Url;
+use frontend\widgets\userTasksList\UserTasksListWidget;
 
 \frontend\themes\gentelella_v2\assets\AssetLeadCommunication::register($this);
 
@@ -189,10 +189,9 @@ $disableMasking = Yii::$app->abac->can($leadAbacDto, LeadAbacObject::LOGIC_CLIEN
                     <?php
                     /** @fflag FFlag::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE, New User Task List in Lead view Enable */
                     if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_NEW_USER_TASK_IN_LEAD_VIEW_ENABLE)) :?>
-                        <?= $this->render('partial/_new_task_list', [
+                        <?= UserTasksListWidget::widget([
                             'lead' => $lead,
-                            'shiftScheduleEventTasks' => $shiftScheduleEventTasks
-                        ]) ?>
+                        ]); ?>
                     <?php else : ?>
                         <?= $this->render('partial/_task_list', [
                             'lead' => $lead

@@ -1,6 +1,7 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
+use common\models\BillingInfo;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use yii\widgets\Pjax;
@@ -30,9 +31,25 @@ $this->params['breadcrumbs'][] = $this->title;
             ['class' => 'yii\grid\SerialColumn'],
 
             'bi_id',
-            'bi_first_name',
-            'bi_last_name',
-            'bi_middle_name',
+            [
+                'attribute' => 'bi_first_name',
+                'value' => static function (BillingInfo $model) {
+                    return \common\helpers\LogHelper::replaceSource($model->bi_first_name, 2);
+                },
+                'format' => 'raw'
+            ],
+            [
+                'attribute' => 'bi_last_name',
+                'value' => static function (BillingInfo $model) {
+                    return \common\helpers\LogHelper::replaceSource($model->bi_last_name, 2);
+                }
+            ],
+            [
+                'attribute' => 'bi_middle_name',
+                'value' => static function (BillingInfo $model) {
+                    return \common\helpers\LogHelper::replaceSource($model->bi_middle_name, 2);
+                }
+            ],
             'bi_company_name',
             'bi_cc_id',
             'bi_hash',

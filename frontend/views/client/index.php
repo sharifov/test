@@ -27,6 +27,7 @@ $this->params['breadcrumbs'][] = $this->title;
     <?php
     $filterProjects = \common\models\Project::getList();
     $filterProjects['-1'] = 'Without project';
+
     ?>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -37,9 +38,24 @@ $this->params['breadcrumbs'][] = $this->title;
             'id',
             'uuid',
             'parent_id',
-            'first_name',
-            'middle_name',
-            'last_name',
+            [
+                'attribute' => 'first_name',
+                'value' => static function ($model) {
+                    return \common\helpers\LogHelper::replaceSource($model->first_name, 2);
+                },
+            ],
+            [
+                'attribute' => 'middle_name',
+                'value' => static function ($model) {
+                    return \common\helpers\LogHelper::replaceSource($model->middle_name, 2);
+                },
+            ],
+            [
+                'attribute' => 'last_name',
+                'value' => static function ($model) {
+                    return \common\helpers\LogHelper::replaceSource($model->last_name, 2);
+                },
+            ],
             'company_name',
             'is_company:boolean',
             'is_public:boolean',
@@ -62,8 +78,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'header' => 'Phones',
                 'attribute' => 'client_phone',
                 'value' => function (Client $model) {
+                    $data = $model->getOnlyPhones();
                     return \frontend\widgets\SliceAndShowMoreWidget::widget([
-                        'data' => $model->getOnlyPhones(),
+                        'data' => \common\helpers\LogHelper::hidePersonalData($data, array_keys($data)),
                         'separator' => ' <i class="fa fa-phone"><code></code></i>'
                     ]);
                 },
@@ -75,8 +92,9 @@ $this->params['breadcrumbs'][] = $this->title;
                 'header' => 'Emails',
                 'attribute' => 'client_email',
                 'value' => function (Client $model) {
+                    $data = $model->getOnlyEmails();
                     return \frontend\widgets\SliceAndShowMoreWidget::widget([
-                        'data' => $model->getOnlyEmails(),
+                        'data' => \common\helpers\LogHelper::hidePersonalData($data, array_keys($data)),
                         'separator' => ' <i class="fa fa-phone"><code></code></i>'
                     ]);
                 },

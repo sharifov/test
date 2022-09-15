@@ -11,6 +11,7 @@ use yii\widgets\Pjax;
 /* @var $clientSearchModel ClientSearch */
 /* @var $clientDataProvider yii\data\ActiveDataProvider */
 
+
 Pjax::begin([
     'id' => 'pjax-call-recording-disabled-client',
     'timeout' => 5000,
@@ -20,9 +21,24 @@ echo GridView::widget([
     'dataProvider' => $clientDataProvider,
     'filterModel' => $clientSearchModel,
     'columns' => [
-        'first_name',
-        'middle_name',
-        'last_name',
+        [
+            'attribute' => 'first_name',
+            'value' => static function (Client $model) {
+                return \common\helpers\LogHelper::replaceSource($model->first_name, 2);
+            }
+        ],
+        [
+            'attribute' => 'middle_name',
+            'value' => static function (Client $model) {
+                return \common\helpers\LogHelper::replaceSource($model->middle_name, 2);
+            }
+        ],
+        [
+            'attribute' => 'last_name',
+            'value' => static function (Client $model) {
+                return \common\helpers\LogHelper::replaceSource($model->last_name, 2);
+            }
+        ],
         'company_name',
         [
             'attribute' => 'cl_type_id',

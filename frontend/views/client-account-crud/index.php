@@ -1,6 +1,7 @@
 <?php
 
 use common\components\grid\DateTimeColumn;
+use src\helpers\text\MaskStringHelper;
 use yii\grid\ActionColumn;
 use common\components\grid\BooleanColumn;
 use yii\bootstrap4\Html;
@@ -40,10 +41,30 @@ $pjaxListId = 'pjax-client-account';
             ],
             'ca_uuid',
             'ca_hid',
-            'ca_username',
-            'ca_first_name',
-            'ca_middle_name',
-            'ca_last_name',
+            [
+                'attribute' => 'ca_username',
+                'value' => static function ($model) {
+                    return \common\helpers\LogHelper::replaceSource($model->ca_username, 2);
+                }
+            ],
+            [
+                'attribute' => 'ca_first_name',
+                'value' => static function ($model) {
+                    return \common\helpers\LogHelper::replaceSource($model->ca_first_name, 2);
+                }
+            ],
+            [
+                'attribute' => 'ca_middle_name',
+                'value' => static function ($model) {
+                    return \common\helpers\LogHelper::replaceSource($model->ca_middle_name, 2);
+                }
+            ],
+            [
+                'attribute' => 'ca_last_name',
+                'value' => static function ($model) {
+                    return \common\helpers\LogHelper::replaceSource($model->ca_last_name, 2);
+                }
+            ],
             //'ca_nationality_country_code',
             //'ca_dob',
             //'ca_gender',

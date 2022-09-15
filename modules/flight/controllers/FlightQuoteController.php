@@ -1081,8 +1081,8 @@ class FlightQuoteController extends FController
                     $segments = $reservationService->parseResult;
                 }
 
-                $pastSegments = AddQuoteManualService::getPastSegmentsByProductQuote($gds, $originProductQuote);
-                [$form, $mergedSegments] = AddQuoteManualService::updateFormAndMergeSegments($form, $itinerary, $pastSegments, $segments);
+                [$pastSegments, $totalFlightTrips] = AddQuoteManualService::getPastSegmentsByProductQuote($gds, $originProductQuote);
+                [$form, $mergedSegments] = AddQuoteManualService::updateFormAndMergeSegments($form, $itinerary, $pastSegments, $segments, $totalFlightTrips);
 
                 $userId = Auth::id();
                 $flightQuote = Yii::createObject(TransactionManager::class)
@@ -1270,8 +1270,8 @@ class FlightQuoteController extends FController
                     $segments = $reservationService->parseResult;
                 }
 
-                $pastSegments = AddQuoteManualService::getPastSegmentsByProductQuote($gds, $originProductQuote);
-                [$form, $mergedSegments] = AddQuoteManualService::updateFormAndMergeSegments($form, $itinerary, $pastSegments, $segments);
+                [$pastSegments, $totalFlightTrips] = AddQuoteManualService::getPastSegmentsByProductQuote($gds, $originProductQuote);
+                [$form, $mergedSegments] = AddQuoteManualService::updateFormAndMergeSegments($form, $itinerary, $pastSegments, $segments, $totalFlightTrips);
 
                 $userId = Auth::id();
                 $flightQuote = Yii::createObject(TransactionManager::class)
