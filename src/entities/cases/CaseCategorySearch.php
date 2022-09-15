@@ -15,6 +15,8 @@ class CaseCategorySearch extends CaseCategory
     public $createTimeStart;
     public $createTimeEnd;
     public $depID;
+    public $parentCategoryId;
+
 
     public const DEFAULT_RANGE = '-29 days';
 
@@ -27,8 +29,10 @@ class CaseCategorySearch extends CaseCategory
             [['cc_id', 'cc_key', 'cc_name'], 'string'],
             [['cc_dep_id', 'cc_system'], 'integer'],
             ['cc_enabled', 'boolean'],
+            ['parentCategoryId', 'string'],
+            ['cc_allow_to_select', 'boolean'],
             [['createTimeRange'], 'match', 'pattern' => '/^.+\s\-\s.+$/'],
-            [['createTimeStart', 'createTimeEnd', 'depID'], 'safe'],
+            [['createTimeStart', 'createTimeEnd', 'depID', 'parentCategoryId'], 'safe'],
         ];
     }
 
@@ -48,6 +52,7 @@ class CaseCategorySearch extends CaseCategory
     {
         return [
             'depID' => 'Department',
+            'parentCategoryId' => 'Parent Category',
         ];
     }
 
@@ -69,8 +74,10 @@ class CaseCategorySearch extends CaseCategory
 
         if (!$this->validate()) {
             $query->where('0=1');
+
             return $dataProvider;
         }
+
 
         // grid filtering conditions
         $query->andFilterWhere([
@@ -78,11 +85,23 @@ class CaseCategorySearch extends CaseCategory
             'cc_dep_id' => $this->cc_dep_id,
             'cc_system' => $this->cc_system,
             'cc_enabled' => $this->cc_enabled,
+            'cc_allow_to_select' => $this->cc_allow_to_select,
         ]);
 
         $query
             ->andFilterWhere(['like', 'cc_key', $this->cc_key])
             ->andFilterWhere(['like', 'cc_name', $this->cc_name]);
+
+        if (isset($this->parentCategoryId) && $this->parentCategoryId !== '') {
+            $parent = CaseCategory::findNestedSets()->andWhere(['cc_id' => $this->parentCategoryId])->one();
+            $condition = [
+                'and',
+                ['>', 'cc_lft', $parent->getAttribute('cc_lft')],
+                ['<', 'cc_rgt', $parent->getAttribute('cc_rgt')],
+                ['=', 'cc_tree', $parent->getAttribute('cc_tree')],
+            ];
+            $query->andFilterWhere($condition);
+        }
 
         return $dataProvider;
     }
@@ -92,12 +111,15 @@ class CaseCategorySearch extends CaseCategory
         $this->load($params);
         $query = CaseCategory::find()->joinWith(['dep', 'cases']);
         $query->select([
-            'cc_id', 'cc_dep_id', 'dep_name', 'cc_name',
+            'cc_id',
+            'cc_dep_id',
+            'dep_name',
+            'cc_name',
             'SUM(IF(cs_status = ' . CasesStatus::STATUS_PENDING . ', 1, 0)) AS pending',
             'SUM(IF(cs_status = ' . CasesStatus::STATUS_PROCESSING . ', 1, 0)) AS processing',
             'SUM(IF(cs_status = ' . CasesStatus::STATUS_FOLLOW_UP . ', 1, 0)) AS followup',
             'SUM(IF(cs_status = ' . CasesStatus::STATUS_SOLVED . ', 1, 0)) AS solved',
-            'SUM(IF(cs_status = ' . CasesStatus::STATUS_TRASH . ', 1, 0)) AS trash'
+            'SUM(IF(cs_status = ' . CasesStatus::STATUS_TRASH . ', 1, 0)) AS trash',
         ]);
         $query->groupBy(['cc_id']);
 
