@@ -18,7 +18,7 @@ class QuoteAwardController extends FController
         if ($lead !== null) {
             return $this->renderAjax('_quote', [
                 'model' => $form,
-                'lead' => $lead
+                'lead' => $lead,
             ]);
         }
         return null;
