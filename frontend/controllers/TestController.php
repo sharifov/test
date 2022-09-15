@@ -2017,15 +2017,6 @@ class TestController extends FController
 
     public function actionZ()
     {
-        $job = new UserTaskCompletionJob(
-            TargetObject::TARGET_OBJ_LEAD,
-            513424,
-            TaskObject::OBJ_EMAIL,
-            29158,
-            Auth::id()
-        );
-        $x = Yii::$app->queue_job->push($job);
-
         echo 'Feature Flag Test<br><br>';
 
         /** @fflag FFlag::FF_KEY_LPP_ENABLE, Lead Poor Processing Enable/Disable */
