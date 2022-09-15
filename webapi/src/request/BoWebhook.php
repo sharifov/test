@@ -6,10 +6,12 @@ use modules\flight\src\useCases\voluntaryExchange\service\VoluntaryExchangeBoHan
 use modules\product\src\services\ProductQuoteService;
 use src\interfaces\BoWebhookService;
 use webapi\src\forms\boWebhook\FlightRefundUpdateForm;
+use webapi\src\forms\boWebhook\FlightStatusChangeForm;
 use webapi\src\forms\boWebhook\FlightVoluntaryExchangeUpdateForm;
 use webapi\src\forms\boWebhook\ReprotectionUpdateForm;
 use webapi\src\forms\boWebhook\VoluntaryRefundUpdateForm;
 use webapi\src\services\flight\FlightManageApiService;
+use webapi\src\services\flight\FlightStatusService;
 use webapi\src\services\flight\VoluntaryRefundService;
 use yii\base\Model;
 
@@ -19,12 +21,14 @@ class BoWebhook
     public const TYPE_FLIGHT_REFUND_UPDATE = 2;
     public const TYPE_VOLUNTARY_REFUND_UPDATE = 3;
     public const TYPE_VOLUNTARY_EXCHANGE_UPDATE = 4;
+    public const TYPE_FLIGHT_REQUEST_STATUS_CHANGE = 5;
 
     public const LIST_NAME = [
         self::TYPE_REPROTECTION_UPDATE => 'reprotection_update',
         self::TYPE_FLIGHT_REFUND_UPDATE => 'flight_refund',
         self::TYPE_VOLUNTARY_REFUND_UPDATE => 'voluntary_flight_refund',
         self::TYPE_VOLUNTARY_EXCHANGE_UPDATE => 'flight_exchange',
+        self::TYPE_FLIGHT_REQUEST_STATUS_CHANGE => 'flight_request_status_change',
     ];
 
     public const FORM_LIST = [
@@ -32,6 +36,7 @@ class BoWebhook
         self::TYPE_FLIGHT_REFUND_UPDATE => FlightRefundUpdateForm::class,
         self::TYPE_VOLUNTARY_REFUND_UPDATE => VoluntaryRefundUpdateForm::class,
         self::TYPE_VOLUNTARY_EXCHANGE_UPDATE => FlightVoluntaryExchangeUpdateForm::class,
+        self::TYPE_FLIGHT_REQUEST_STATUS_CHANGE => FlightStatusChangeForm::class,
     ];
 
     public const SERVICE_LIST = [
@@ -39,6 +44,7 @@ class BoWebhook
         self::TYPE_FLIGHT_REFUND_UPDATE => FlightManageApiService::class,
         self::TYPE_VOLUNTARY_REFUND_UPDATE => VoluntaryRefundService::class,
         self::TYPE_VOLUNTARY_EXCHANGE_UPDATE => VoluntaryExchangeBoHandler::class,
+        self::TYPE_FLIGHT_REQUEST_STATUS_CHANGE => FlightStatusService::class,
     ];
 
     public static function getTypeIdByName(string $name): ?int

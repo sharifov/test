@@ -75,6 +75,7 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE = 'userNewTaskListOnLeadLogEnable';
     public const FF_KEY_USER_NEW_TASK_LIST_CACHE_DURATION = 'userNewTaskListCacheDuration';
     public const FF_KEY_EXCLUDE_API_CREATE_CASE_VALIDATION = 'excludeApiCreateCaseValidation';
+    public const FF_KEY_CROSS_SALE_QUEUE_ENABLE = 'crossSaleQueueEnable';
 
     public const FF_KEY_LIST = [
         self::FF_KEY_LPP_ENABLE,
@@ -139,6 +140,7 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE,
         self::FF_KEY_USER_NEW_TASK_LIST_CACHE_DURATION,
         self::FF_KEY_EXCLUDE_API_CREATE_CASE_VALIDATION,
+        self::FF_KEY_CROSS_SALE_QUEUE_ENABLE,
     ];
 
     public const FF_OBJECT_LIST = [
