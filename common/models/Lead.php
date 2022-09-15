@@ -1958,6 +1958,7 @@ class Lead extends ActiveRecord implements Objectable
             'l_status_dt' => 'Status Dt',
             'l_expiration_dt' => 'Expiration',
             'l_type' => 'Type',
+            'l_is_test' => 'Is Test',
         ];
     }
 

@@ -53,6 +53,8 @@ class UserTaskCompletionService
             $dataEnd = null;
         }
 
+        $this->log('dataStart.dataEnd', '1.1', ['dataStart' => $dataStart, 'dataEnd' => $dataEnd]);
+
         $taskListsQuery = TaskListQuery::getTaskListUserCompletion(
             $this->userId,
             $this->targetObject,
@@ -62,6 +64,7 @@ class UserTaskCompletionService
             $dataStart,
             $dataEnd
         );
+
         $taskLists = $taskListsQuery->all();
 
         $this->log('Search taskLists result', '2', ['count' => count($taskLists)]);
@@ -85,6 +88,7 @@ class UserTaskCompletionService
                 );
 
                 if (!$userTask = $userTaskQuery->limit(1)->one()) {
+                    $this->log('UserTask not found by TaskList', '3.1', ['taskListId' => $taskList->tl_id]);
                     continue;
                 }
 

@@ -156,7 +156,7 @@ $isAgent = Auth::user()->isAgent();
                         'uid',
                         'gid',
                         'l_request_hash',
-
+                        'l_is_test:booleanByLabel',
                         [
                             'attribute' => 'employee_id',
                             'format' => 'raw',
