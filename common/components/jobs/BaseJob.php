@@ -64,7 +64,37 @@ class BaseJob extends BaseObject
         return true;
     }
 
-    public static function runInClass(): string
+    public function execTimeRegister(?array $buckets = null): bool
+    {
+        try {
+            if (!empty($this->timeStart)) {
+                $metrics = \Yii::$container->get(Metrics::class);
+                $seconds = round(microtime(true) - $this->timeStart, 1);
+                $seconds -= $this->delayJob;
+                $buckets = empty($buckets) ? $this->defaultBuckets : $buckets;
+                $metrics->histogramMetric(
+                    'job_execution_time',
+                    $seconds,
+                    ['jobName' => self::runInClass()],
+                    Metrics::NAMESPACE_CONSOLE,
+                    '',
+                    $buckets
+                );
+
+                if ($seconds > 60) {
+                    \Yii::warning(
+                        'Warning: (' . self::runInClass() . ') execution timeout exceeded. Time (' . $seconds . ') sec',
+                        'BaseJob:ExecTimeRegister:TimeoutExceeded'
+                    );
+                }
+            }
+        } catch (\Throwable $throwable) {
+            \Yii::error(AppHelper::throwableLog($throwable), 'BaseJob:ExecTimeRegister:Throwable');
+            return false;
+        }
+    }
+
+        public static function runInClass(): string
     {
         return OutputHelper::getShortClassName(static::class);
     }
