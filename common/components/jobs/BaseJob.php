@@ -18,7 +18,7 @@ use yii\base\BaseObject;
 class BaseJob extends BaseObject
 {
     public float $timeStart;
-    public float $timeExecution;
+    private float $timeExecution;
     public int $delayJob = 0;
 
     private array $defaultBuckets = [1, 3, 5, 7, 10, 15, 30, 60, 300];
