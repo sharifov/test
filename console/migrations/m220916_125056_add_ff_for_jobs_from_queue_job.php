@@ -18,10 +18,10 @@ class m220916_125056_add_ff_for_jobs_from_queue_job extends Migration
                 throw new \RuntimeException('Class (FeatureFlag) not found');
             }
 
-            if (!\kivork\FeatureFlag\Models\FeatureFlag::find()->where(['ff_key' => FFlag::FF_KEY_USER_NEW_TASK_LIST_CACHE_DURATION])->exists()) {
+            if (!\kivork\FeatureFlag\Models\FeatureFlag::find()->where(['ff_key' => FFlag::FF_KEY_LOGGING_EXECUTION_TIME_FOR_JOBS_FROM_QUEUE_JOB])->exists()) {
                 $featureFlagService = new \kivork\FeatureFlag\Services\FeatureFlagService();
                 $featureFlagService::add(
-                    FFlag::FF_KEY_USER_NEW_TASK_LIST_CACHE_DURATION,
+                    FFlag::FF_KEY_LOGGING_EXECUTION_TIME_FOR_JOBS_FROM_QUEUE_JOB,
                     'Logging execution time for jobs of queue_job',
                     \kivork\FeatureFlag\Models\FeatureFlag::TYPE_BOOL,
                     true,
@@ -48,25 +48,10 @@ class m220916_125056_add_ff_for_jobs_from_queue_job extends Migration
                 throw new \RuntimeException('Class (FeatureFlag) not found');
             }
             $featureFlagService = new \kivork\FeatureFlag\Services\FeatureFlagService();
-            $featureFlagService::delete(FFlag::FF_KEY_USER_NEW_TASK_LIST_CACHE_DURATION);
+            $featureFlagService::delete(FFlag::FF_KEY_LOGGING_EXECUTION_TIME_FOR_JOBS_FROM_QUEUE_JOB);
             Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
             \Yii::error(AppHelper::throwableLog($throwable), 'm220916_125056_add_ff_for_jobs_from_queue_job:safeDown:Throwable');
         }
     }
-
-    /*
-    // Use up()/down() to run migration code without a transaction.
-    public function up()
-    {
-
-    }
-
-    public function down()
-    {
-        echo "m220916_125056_add_ff_for_jobs_from_queue_job cannot be reverted.\n";
-
-        return false;
-    }
-    */
 }
