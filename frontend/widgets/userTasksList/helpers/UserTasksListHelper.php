@@ -160,7 +160,7 @@ class UserTasksListHelper
     {
         $result = '';
 
-        if ($statusId != UserTask::STATUS_CANCEL && $statusId != UserTask::STATUS_FAILED) {
+        if (!$isDeadline && $statusId != UserTask::STATUS_CANCEL && $statusId != UserTask::STATUS_FAILED) {
             $result = \Yii::$app->formatter->asDateTimeByUserTimezone(
                 strtotime($startDate),
                 $userTimeZone,
