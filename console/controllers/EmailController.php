@@ -60,13 +60,13 @@ class EmailController extends Controller
         printf("\n --- End %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
     }
 
-    public function actionDownload(bool $debug = false, int $limit = 20)
+    public function actionDownload(bool $debug = false, int $limit = 20, ?int $communicationEmailId = null)
     {
         printf("\n --- Start %s ---\n", $this->ansiFormat(self::class . ' - ' . $this->action->id, Console::FG_YELLOW));
         $time_start = microtime(true);
 
         $download = \Yii::createObject(DownloadEmails::class);
-        $download->download($debug, $limit);
+        $download->download($debug, $limit, $communicationEmailId);
 
         $time_end = microtime(true);
         $time = number_format(round($time_end - $time_start, 2), 2);
