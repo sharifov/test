@@ -3,6 +3,7 @@
 namespace common\components\jobs;
 
 use common\components\Metrics;
+use modules\featureFlag\FFlag;
 use console\helpers\OutputHelper;
 use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
@@ -67,32 +68,33 @@ class BaseJob extends BaseObject
 
     public function execTimeRegister(?array $buckets = null): bool
     {
-
-        try {
-            if (!empty($this->timeExecution)) {
-                $metrics = \Yii::$container->get(Metrics::class);
-                $seconds = round(microtime(true) - $this->timeExecution, 1);
-                $seconds -= $this->delayJob;
-                $buckets = empty($buckets) ? $this->defaultBuckets : $buckets;
-                $metrics->histogramMetric(
-                    'job_execution_time',
-                    $seconds,
-                    ['jobName' => self::runInClass()],
-                    Metrics::NAMESPACE_CONSOLE,
-                    '',
-                    $buckets
-                );
-
-                if ($seconds > 60) {
-                    \Yii::warning(
-                        'Warning: (' . self::runInClass() . ') execution timeout exceeded. Time (' . $seconds . ') sec',
-                        'BaseJob:ExecTimeRegister:TimeoutExceeded'
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_LOGGING_EXECUTION_TIME_FOR_JOBS_FROM_QUEUE_JOB)) {
+            try {
+                if (!empty($this->timeExecution)) {
+                    $metrics = \Yii::$container->get(Metrics::class);
+                    $seconds = round(microtime(true) - $this->timeExecution, 1);
+                    $seconds -= $this->delayJob;
+                    $buckets = empty($buckets) ? $this->defaultBuckets : $buckets;
+                    $metrics->histogramMetric(
+                        'job_execution_time',
+                        $seconds,
+                        ['jobName' => self::runInClass()],
+                        Metrics::NAMESPACE_CONSOLE,
+                        '',
+                        $buckets
                     );
+
+                    if ($seconds > 60) {
+                        \Yii::warning(
+                            'Warning: (' . self::runInClass() . ') execution timeout exceeded. Time (' . $seconds . ') sec',
+                            'BaseJob:ExecTimeRegister:TimeoutExceeded'
+                        );
+                    }
                 }
+            } catch (\Throwable $throwable) {
+                \Yii::error(AppHelper::throwableLog($throwable), 'BaseJob:ExecTimeRegister:Throwable');
+                return false;
             }
-        } catch (\Throwable $throwable) {
-            \Yii::error(AppHelper::throwableLog($throwable), 'BaseJob:ExecTimeRegister:Throwable');
-            return false;
         }
     }
 
