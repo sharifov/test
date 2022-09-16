@@ -17,6 +17,7 @@ use yii\base\BaseObject;
 class BaseJob extends BaseObject
 {
     public float $timeStart;
+    public float $timeExecution;
     public int $delayJob = 0;
 
     private array $defaultBuckets = [1, 3, 5, 7, 10, 15, 30, 60, 300];
@@ -66,10 +67,11 @@ class BaseJob extends BaseObject
 
     public function execTimeRegister(?array $buckets = null): bool
     {
+
         try {
-            if (!empty($this->timeStart)) {
+            if (!empty($this->timeExecution)) {
                 $metrics = \Yii::$container->get(Metrics::class);
-                $seconds = round(microtime(true) - $this->timeStart, 1);
+                $seconds = round(microtime(true) - $this->timeExecution, 1);
                 $seconds -= $this->delayJob;
                 $buckets = empty($buckets) ? $this->defaultBuckets : $buckets;
                 $metrics->histogramMetric(

@@ -75,6 +75,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
     public function execute($queue): void
     {
         $this->waitingTimeRegister();
+        $this->timeExecution = microtime(true);
 
         $reProtectionCreateService = Yii::createObject(ReprotectionCreateService::class);
         $flightQuoteManageService = Yii::createObject(FlightQuoteManageService::class);
