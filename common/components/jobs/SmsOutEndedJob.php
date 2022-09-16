@@ -122,5 +122,7 @@ class SmsOutEndedJob extends BaseJob implements JobInterface
                 }
             }
         }
+
+        $this->execTimeRegister();
     }
 }

@@ -50,6 +50,9 @@ class RocketChatUserUpdateJob extends BaseJob implements JobInterface
         } catch (\Throwable $throwable) {
             AppHelper::throwableLogger($throwable, 'RocketChatUserUpdateJob:execute:Throwable');
         }
+
+        $this->execTimeRegister();
+
         return false;
     }
 

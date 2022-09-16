@@ -28,5 +28,7 @@ class BoRequestJob extends BaseJob implements JobInterface
         } catch (\Throwable $e) {
             \Yii::error(array_merge(['quoteGid' => $this->quoteGid], AppHelper::throwableLog($e, true)), 'BoRequestJob:reprotection:confirm');
         }
+
+        $this->execTimeRegister();
     }
 }

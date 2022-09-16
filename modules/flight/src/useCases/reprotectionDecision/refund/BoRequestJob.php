@@ -32,5 +32,7 @@ class BoRequestJob extends BaseJob implements JobInterface
         } catch (\Throwable $e) {
             \Yii::error(array_merge(['bookingId' => $this->bookingId], AppHelper::throwableLog($e, true)), 'BoRequestJob:reprotection:refund');
         }
+
+        $this->execTimeRegister();
     }
 }

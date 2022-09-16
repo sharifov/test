@@ -42,5 +42,7 @@ class CheckClientExcludeIpJob extends BaseJob implements JobInterface
                 'ip' => $this->ip,
             ], 'CheckClientExcludeIpJob');
         }
+
+        $this->execTimeRegister();
     }
 }

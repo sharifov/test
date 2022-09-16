@@ -22,5 +22,7 @@ class SmsPriceJob extends BaseJob implements JobInterface
         } catch (\Throwable $e) {
             \Yii::info($e->getMessage(), 'info\SmsPriceJob');
         }
+
+        $this->execTimeRegister();
     }
 }

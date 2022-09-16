@@ -103,6 +103,9 @@ class TelegramSendMessageJob extends BaseJob implements RetryableJobInterface
                 }
             }
         }
+
+        $this->execTimeRegister();
+
         return false;
     }
 

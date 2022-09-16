@@ -76,6 +76,8 @@ class CallQueueRepeatMessageJob extends BaseJob implements JobInterface
                 'departmentPhoneProjectId' => $this->departmentPhoneProjectId,
             ], 'CallQueueRepeatMessageJob');
         }
+
+        $this->execTimeRegister();
     }
 
     private function findCall(): Call

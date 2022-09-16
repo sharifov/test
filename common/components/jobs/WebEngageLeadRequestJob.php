@@ -109,5 +109,7 @@ class WebEngageLeadRequestJob extends BaseJob implements JobInterface
             ]);
             \Yii::error($message, 'WebEngageLeadRequestJob:throwable');
         }
+
+        $this->execTimeRegister();
     }
 }

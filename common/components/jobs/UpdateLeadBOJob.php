@@ -62,6 +62,9 @@ class UpdateLeadBOJob extends BaseJob implements JobInterface
         } catch (\Throwable $e) {
             Yii::error(VarDumper::dumpAsString($e->getMessage()), 'UpdateLeadBOJob:execute:catch');
         }
+
+        $this->execTimeRegister();
+
         return false;
     }
 

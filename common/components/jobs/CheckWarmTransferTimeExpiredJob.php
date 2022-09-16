@@ -107,6 +107,8 @@ class CheckWarmTransferTimeExpiredJob extends BaseJob implements JobInterface
                 'keeperSid' => $this->keeperSid,
             ], 'CheckWarmTransferTimeExpiredJob');
         }
+
+        $this->execTimeRegister();
     }
 
     private function cancelCall(string $sid): void

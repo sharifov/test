@@ -70,6 +70,8 @@ class CallQueueLongTimeNotificationJob extends BaseJob implements JobInterface
                 'departmentPhoneProjectId' => $this->departmentPhoneProjectId,
             ], 'CallQueueLongTimeNotificationJob');
         }
+
+        $this->execTimeRegister();
     }
 
     private function sendNotifications(array $users, Call $call): void

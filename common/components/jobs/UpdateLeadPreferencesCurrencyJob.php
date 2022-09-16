@@ -51,5 +51,7 @@ class UpdateLeadPreferencesCurrencyJob extends BaseJob implements JobInterface
                 }
             }
         }
+
+        $this->execTimeRegister();
     }
 }

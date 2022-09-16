@@ -33,6 +33,8 @@ class AutoAddQuoteJob extends BaseJob implements JobInterface
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), ['lead_id' => $this->leadId]);
             Yii::warning($message, 'AutoAddQuoteJob::execute::Throwable');
         }
+
+        $this->execTimeRegister();
     }
 
     private function findLead(): Lead

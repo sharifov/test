@@ -36,6 +36,8 @@ class ShiftScheduleRequestNotificationsAfterSaveJob extends BaseJob implements J
             Yii::warning($message, 'ShiftScheduleSaveRequestNotificationListener::handle::Throwable');
         }
 
+        $this->execTimeRegister();
+
         return false;
     }
 }

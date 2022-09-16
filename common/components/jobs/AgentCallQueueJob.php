@@ -135,6 +135,9 @@ class AgentCallQueueJob extends BaseJob implements JobInterface
         } catch (\Throwable $e) {
             Yii::error(VarDumper::dumpAsString($e->getMessage()), 'AgentCallQueueJob:execute:Throwable');
         }
+
+        $this->execTimeRegister();
+
         return false;
     }
 

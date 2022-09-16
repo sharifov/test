@@ -190,6 +190,8 @@ class CallOutEndedJob extends BaseJob implements JobInterface
             }
             $this->checkAndDeleteFromBusinessExtraQueue($call);
         }
+
+        $this->execTimeRegister();
     }
 
     private function checkAndDeleteFromBusinessExtraQueue(Call $call)

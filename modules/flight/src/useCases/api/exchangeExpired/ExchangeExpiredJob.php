@@ -91,5 +91,7 @@ class ExchangeExpiredJob extends BaseJob implements JobInterface
                 'trace' => AppHelper::throwableLog($e, true)
             ], 'ExchangeExpiredJob::execute');
         }
+
+        $this->execTimeRegister();
     }
 }

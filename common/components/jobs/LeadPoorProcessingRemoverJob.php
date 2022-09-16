@@ -60,5 +60,7 @@ class LeadPoorProcessingRemoverJob extends BaseJob implements JobInterface
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
             \Yii::error($message, 'LeadPoorProcessingRemoverJob:execute:Throwable');
         }
+
+        $this->execTimeRegister();
     }
 }

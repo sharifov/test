@@ -47,5 +47,7 @@ class CheckUserIsOnRedialCallJob extends BaseJob implements JobInterface
         }
 
         UserStatus::isOnCallOff($this->userId);
+
+        $this->execTimeRegister();
     }
 }

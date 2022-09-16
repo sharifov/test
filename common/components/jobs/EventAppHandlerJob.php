@@ -72,5 +72,7 @@ class EventAppHandlerJob extends BaseJob implements JobInterface
 
             \Yii::error($dataError, 'EventAppHandlerJob:execute');
         }
+
+        $this->execTimeRegister();
     }
 }

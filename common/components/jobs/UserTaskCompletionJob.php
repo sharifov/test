@@ -79,6 +79,8 @@ class UserTaskCompletionJob extends BaseJob implements JobInterface
                 \Yii::info($message, 'info\UserTaskCompletionJob:execute:executeSecond');
             }
         }
+
+        $this->execTimeRegister();
     }
 
     private function logData(): array

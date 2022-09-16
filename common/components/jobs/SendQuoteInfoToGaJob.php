@@ -67,6 +67,9 @@ class SendQuoteInfoToGaJob extends BaseJob implements JobInterface
                 'SendQuoteInfoToGaJob:execute:Throwable'
             );
         }
+
+        $this->execTimeRegister();
+
         return false;
     }
 

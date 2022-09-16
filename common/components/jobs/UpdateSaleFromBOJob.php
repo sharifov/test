@@ -71,6 +71,8 @@ class UpdateSaleFromBOJob extends BaseJob implements JobInterface
             AppHelper::throwableLogger($throwable, 'UpdateSaleFromBOJob:execute:Throwable');
         }
 
+        $this->execTimeRegister();
+
         return false;
     }
 

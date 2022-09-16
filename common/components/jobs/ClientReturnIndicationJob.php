@@ -21,6 +21,8 @@ class ClientReturnIndicationJob extends BaseJob implements JobInterface
 
     public function execute($queue)
     {
+        $this->waitingTimeRegister();
+
         try {
             if ($client = ClientsQuery::findById($this->clientId)) {
                 $dto = new ClientSegmentObjectDto($client);
@@ -29,5 +31,7 @@ class ClientReturnIndicationJob extends BaseJob implements JobInterface
         } catch (\Throwable $e) {
             Yii::error(AppHelper::throwableLog($e, true), 'ClientReturnIndicationJob::objectSegment');
         }
+
+        $this->execTimeRegister();
     }
 }

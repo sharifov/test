@@ -56,5 +56,7 @@ class UserTaskAssignJob extends BaseJob implements JobInterface
             $message['clientId'] = $this->clientId;
             \Yii::error($message, 'UserTaskAssignJob:execute:Throwable');
         }
+
+        $this->execTimeRegister();
     }
 }

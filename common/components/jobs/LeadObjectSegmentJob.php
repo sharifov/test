@@ -78,5 +78,7 @@ class LeadObjectSegmentJob extends BaseJob implements JobInterface
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
             \Yii::error($message, 'LeadObjectSegmentJob:execute:Throwable');
         }
+
+        $this->execTimeRegister();
     }
 }

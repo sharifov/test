@@ -62,6 +62,8 @@ class UpdateConferenceParticipantCallIdJob extends BaseJob implements JobInterfa
                 'conferenceSid' => $this->conferenceSid,
             ], 'UpdateConferenceParticipantCallIdJob');
         }
+
+        $this->execTimeRegister();
     }
 
     private function sendSocketData(int $conferenceId): void

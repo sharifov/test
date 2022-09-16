@@ -38,6 +38,8 @@ class UserTaskCanceledJob extends BaseJob implements JobInterface
             $message['leadId'] = $this->leadId;
             \Yii::error($message, 'UserTaskCanceledJob:execute:Throwable');
         }
+
+        $this->execTimeRegister();
     }
 
     private function getLead(): ?Lead

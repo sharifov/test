@@ -75,5 +75,7 @@ class VoluntaryRefundExpiredJob extends BaseJob implements JobInterface
                 'trace' => AppHelper::throwableLog($e, true)
             ], 'VoluntaryRefundExpiredJob::execute');
         }
+
+        $this->execTimeRegister();
     }
 }

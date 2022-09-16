@@ -43,5 +43,7 @@ class LeadBusinessExtraQueueJob extends BaseJob implements JobInterface
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
             \Yii::error($message, 'LeadBusinessExtraQueueJob:execute:Throwable');
         }
+
+        $this->execTimeRegister();
     }
 }

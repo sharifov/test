@@ -53,5 +53,7 @@ class LeadTaskListJob extends BaseJob implements JobInterface
             $message['oldOwnerId'] = $this->oldOwnerId;
             \Yii::error($message, 'LeadTaskListJob:execute:Throwable');
         }
+
+        $this->execTimeRegister();
     }
 }

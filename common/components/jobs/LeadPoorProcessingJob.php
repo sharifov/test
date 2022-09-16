@@ -95,5 +95,7 @@ class LeadPoorProcessingJob extends BaseJob implements JobInterface
                 \Yii::error($message, 'LeadPoorProcessingJob:execute:Throwable');
             }
         }
+
+        $this->execTimeRegister();
     }
 }

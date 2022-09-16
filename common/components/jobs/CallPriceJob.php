@@ -22,5 +22,7 @@ class CallPriceJob extends BaseJob implements JobInterface
         } catch (\Throwable $e) {
             \Yii::info($e->getMessage(), 'info\CallPriceJob');
         }
+
+        $this->execTimeRegister();
     }
 }

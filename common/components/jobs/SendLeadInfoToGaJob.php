@@ -52,6 +52,9 @@ class SendLeadInfoToGaJob extends BaseJob implements JobInterface
         } catch (\Throwable $throwable) {
             AppHelper::throwableLogger($throwable, 'SendLeadInfoToGaJob:execute:Throwable');
         }
+
+        $this->execTimeRegister();
+
         return false;
     }
 

@@ -54,6 +54,9 @@ class CreateSaleFromBOJob extends BaseJob implements JobInterface
         } catch (\Throwable $e) {
             Yii::error(VarDumper::dumpAsString($e->getMessage()), 'CreateSaleFromBOJob:execute:catch');
         }
+
+        $this->execTimeRegister();
+
         return false;
     }
 

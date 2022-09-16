@@ -264,6 +264,9 @@ class CallQueueJob extends BaseJob implements JobInterface
                     if ($call->checkCancelCall()) {
                         $seconds = round(microtime(true) - $timeStart, 1);
                         $metrics->jobHistogram(substr(strrchr(get_class($this), '\\'), 1) . '_seconds', $seconds, ['type' => 'cancel']);
+
+                        $this->execTimeRegister();
+
                         unset($metrics);
                         return true;
                     }
@@ -354,6 +357,9 @@ class CallQueueJob extends BaseJob implements JobInterface
         }
         $seconds = round(microtime(true) - $timeStart, 1);
         $metrics->jobHistogram(substr(strrchr(get_class($this), '\\'), 1) . '_seconds', $seconds, ['type' => 'execute']);
+
+        $this->execTimeRegister();
+
         unset($metrics);
 
         return false;
