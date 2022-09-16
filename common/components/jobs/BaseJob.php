@@ -94,7 +94,7 @@ class BaseJob extends BaseObject
         }
     }
 
-        public static function runInClass(): string
+    public static function runInClass(): string
     {
         return OutputHelper::getShortClassName(static::class);
     }
