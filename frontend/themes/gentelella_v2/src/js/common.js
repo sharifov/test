@@ -97,6 +97,26 @@
         });
     };
 
+    window.reloadTasksListWidget = function (params) {
+        var result = false;
+        var pjaxContainer = $('#lead-user-tasks__content').data('pjax-container');
+
+        if (pjaxContainer && params.gid) {
+            var urlData = '/lead/pjax-user-tasks-list?gid=' + params.gid;
+
+            $.pjax.reload(pjaxContainer, {
+                url: urlData,
+                'push': params.push,
+                'replace': params.replace,
+                'scrollTo': params.scroll,
+                'container': pjaxContainer,
+            });
+
+            result = true;
+        }
+
+        return result;
+    };
 })(window, $);
 
 function soundNotification(fileName = 'button_tiny', volume = 0.3) {

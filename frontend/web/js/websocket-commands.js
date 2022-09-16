@@ -598,6 +598,17 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
                         $(document).trigger('reloadShitScheduleRequest')
                     }
 
+                    if (obj.cmd === 'leadTasksListSaved') {
+                        if (typeof reloadTasksListWidget === 'function') {
+                            reloadTasksListWidget({
+                                gid: obj.data.gid,
+                                push: false,
+                                replace: false,
+                                scroll: false,
+                            });
+                        }
+                    }
+
                     if (obj.cmd === 'updateLeadHeader') {
                         let gid = obj.data.lead.gid;
 
