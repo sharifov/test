@@ -262,6 +262,7 @@ class LeadManageService
             $clientChatLead = ClientChatLead::create($dto->chat->cch_id, $leadId, new \DateTimeImmutable('now'));
 
             $this->clientChatLeadRepository->save($clientChatLead);
+//          TODO: after releasing new experiments don't forget to delete old LeadData CrossSystemXp
             if ($crossSystemXp = $dto->chatVisitorData->getCrossSystemXp()) {
                 $leadData = LeadData::create($leadId, LeadDataKeyDictionary::KEY_CROSS_SYSTEM_XP, $dto->chatVisitorData->getCrossSystemXp());
                 $this->leadDataRepository->save($leadData);
