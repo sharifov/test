@@ -176,6 +176,25 @@ use frontend\widgets\userTasksList\helpers\UserTasksListHelper;
 <?php
 $js = <<<JS
     startTooltips();
+
+    window.refreshTaskList = function () {
+        var result = false;
+        var pjaxContainer = $('#lead-user-tasks__content').data('pjax-container');
+
+        if (pjaxContainer) {
+            $.pjax.reload(pjaxContainer, {
+                url: '{$pjaxUrl}',
+                push: false,
+                replace: false,
+                scrollTo: false,
+                container: pjaxContainer
+            });
+
+            result = true;
+        }
+
+        return result;
+    };
     
     $(document).on('pjax:complete', function() {
         startTooltips();
@@ -194,11 +213,11 @@ $js = <<<JS
            modal.find('.modal-body').html(data);
         }).fail(function (xhr) {
             setTimeout(function () {
-            modal.modal('hide');
-            createNotify('Error', xhr.statusText, 'error');
-        }, 800);
+                modal.modal('hide');
+                createNotify('Error', xhr.statusText, 'error');
+            }, 800);
+        });
     });
-});
 JS;
 
 $this->registerJs($js);

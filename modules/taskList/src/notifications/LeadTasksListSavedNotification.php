@@ -24,16 +24,14 @@ class LeadTasksListSavedNotification
      * @param bool $isSuccessSaved
      * @return bool
      */
-    public function handle(bool $isSuccessSaved = true): bool
+    public function send(bool $isSuccessSaved = true): bool
     {
-        $isSuccess = Notifications::pub(['lead-' . $this->lead->id], 'leadTasksListSaved', [
+        return Notifications::pub(['lead-' . $this->lead->id], 'refreshTaskList', [
             'data' => [
                 'gid' => $this->lead->gid,
                 'leadId' => $this->lead->id,
                 'isSuccessSaved' => $isSuccessSaved,
             ],
         ]);
-
-        return $isSuccess;
     }
 }

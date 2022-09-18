@@ -134,9 +134,8 @@ class LeadTaskListService
                     }
                 }
 
-                if (!empty($countOfSuccessSavedUserTasks)) {
-                    $tasksListNotification = new LeadTasksListSavedNotification($this->lead);
-                    $tasksListNotification->handle();
+                if ($countOfSuccessSavedUserTasks > 0) {
+                    (new LeadTasksListSavedNotification($this->lead))->send();
                 }
                 return;
             }
