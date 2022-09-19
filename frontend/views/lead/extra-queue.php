@@ -18,6 +18,8 @@ use dosamigos\datepicker\DatePicker;
 
 $this->title = 'Extra Queue';
 $this->params['breadcrumbs'][] = $this->title;
+/** @fflag FFlag::FF_KEY_HIDE_TASK_INFO_COLUMN_FROM_LEAD_SECTION_UI, Hide "Task info" column from Lead section on UI */
+$isFFHideTaskInfoColumn = \Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_HIDE_TASK_INFO_COLUMN_FROM_LEAD_SECTION_UI);
 ?>
 
 <h1>
@@ -192,7 +194,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'contentOptions' => [
                 'class' => 'text-left'
             ],
-            'visible' => ! $isAgent,
+            'visible' => !$isAgent && !$isFFHideTaskInfoColumn,
             'options' => [
                 'style' => 'width:140px'
             ]
