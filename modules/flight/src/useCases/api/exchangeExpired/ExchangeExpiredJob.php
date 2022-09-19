@@ -44,7 +44,7 @@ class ExchangeExpiredJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
-        $this->timeExecution = microtime(true);
+        $this->setTimeExecution(microtime(true));
 
         try {
             if (!$flightRequest = FlightRequest::findOne($this->flightRequestId)) {

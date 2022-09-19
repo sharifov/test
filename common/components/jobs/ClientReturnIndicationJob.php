@@ -22,7 +22,7 @@ class ClientReturnIndicationJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
-        $this->timeExecution = microtime(true);
+        $this->setTimeExecution(microtime(true));
 
         try {
             if ($client = ClientsQuery::findById($this->clientId)) {

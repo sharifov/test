@@ -63,7 +63,7 @@ class VoluntaryRefundConfirmJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
-        $this->timeExecution = microtime(true);
+        $this->setTimeExecution(microtime(true));
 
         $this->productQuoteRefundRepository = \Yii::createObject(ProductQuoteRefundRepository::class);
         $this->productQuoteObjectRefundRepository = \Yii::createObject(ProductQuoteObjectRefundRepository::class);

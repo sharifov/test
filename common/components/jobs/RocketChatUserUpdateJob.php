@@ -29,7 +29,7 @@ class RocketChatUserUpdateJob extends BaseJob implements JobInterface
     public function execute($queue): bool
     {
         $this->waitingTimeRegister();
-        $this->timeExecution = microtime(true);
+        $this->setTimeExecution(microtime(true));
         try {
             $rocketChat = \Yii::$app->rchat;
             $result = $rocketChat->updateUser($this->userId, $this->data);

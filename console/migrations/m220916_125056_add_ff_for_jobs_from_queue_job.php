@@ -24,7 +24,7 @@ class m220916_125056_add_ff_for_jobs_from_queue_job extends Migration
                     FFlag::FF_KEY_LOGGING_EXECUTION_TIME_FOR_JOBS_FROM_QUEUE_JOB,
                     'Logging execution time for jobs of queue_job',
                     \kivork\FeatureFlag\Models\FeatureFlag::TYPE_BOOL,
-                    true,
+                    false,
                     \kivork\FeatureFlag\Models\FeatureFlag::ET_DISABLED,
                     [
                         'ff_category' => FFlag::FF_CATEGORY_SYSTEM,

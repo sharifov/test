@@ -38,7 +38,7 @@ class LeadPoorProcessingRemoverJob extends BaseJob implements JobInterface
     public function execute($queue): void
     {
         $this->waitingTimeRegister();
-        $this->timeExecution = microtime(true);
+        $this->setTimeExecution(microtime(true));
         $logData = [
             'leadId' => $this->leadId,
             'ruleKeys' => $this->ruleKeys,
