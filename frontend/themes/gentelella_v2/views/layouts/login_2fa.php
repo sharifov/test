@@ -38,7 +38,13 @@ $this->endBody();
 <?php
 $css = <<<CSS
 #two-factor-col {
-    margin-left: 33.3%!important;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 400px;
+}
+
+#two-factor-container {
+    width: 400px;
 }
 
 #two-factor-header {
