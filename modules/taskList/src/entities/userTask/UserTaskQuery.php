@@ -6,7 +6,6 @@ use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
 use modules\shiftSchedule\src\entities\userShiftSchedule\UserShiftSchedule;
 use modules\taskList\src\entities\shiftScheduleEventTask\ShiftScheduleEventTask;
 use modules\taskList\src\entities\TargetObject;
-use src\helpers\app\AppHelper;
 use src\helpers\app\DBHelper;
 use Yii;
 

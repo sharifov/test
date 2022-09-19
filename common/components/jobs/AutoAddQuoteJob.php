@@ -22,6 +22,7 @@ class AutoAddQuoteJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
+        $this->timeExecution = microtime(true);
         try {
             $lead = $this->findLead();
             $autoQuoteService = \Yii::createObject(AddQuoteService::class);

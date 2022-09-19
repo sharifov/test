@@ -13,6 +13,7 @@ use yii\base\BaseObject;
  * Class BaseJob
  *
  * @property float $timeStart
+ * @property float $timeExecution
  * @property int $delayJob
  */
 class BaseJob extends BaseObject

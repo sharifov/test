@@ -59,6 +59,7 @@ class AgentCallQueueJob extends BaseJob implements JobInterface
     public function execute($queue): bool
     {
         $this->waitingTimeRegister();
+        $this->timeExecution = microtime(true);
         try {
 //            $this->casesCreateService = Yii::createObject(CasesCreateService::class);
 //            $this->clientManageService = Yii::createObject(ClientManageService::class);

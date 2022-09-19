@@ -8,8 +8,11 @@
  * @var $is_manager boolean
  */
 
+use modules\featureFlag\FFlag;
 use modules\lead\src\abac\dto\LeadAbacDto;
 use modules\lead\src\abac\LeadAbacObject;
+use modules\quoteAward\src\dictionary\AwardProgramDictionary;
+use modules\quoteAward\src\forms\AwardQuoteForm;
 use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
@@ -30,7 +33,8 @@ $canAccessPriceResearchLinks = \Yii::$app->abac->can(
     LeadAbacObject::ACT_PRICE_LINK_RESEARCH,
     LeadAbacObject::ACTION_ACCESS
 );
-
+/** @fflag FFlag::FF_KEY_AWARD_ENABLE, Award Enable */
+$enableAward = Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_AWARD_ENABLE);
 if ($canAccessPriceResearchLinks) {
     try {
         $priceResearchLinks = SettingHelper::getPriceResearchLinksNamesArray($lead);
@@ -185,6 +189,12 @@ JS;
                     <?php endif; ?>
                     <?php if (!$lead->client->isExcluded()) : ?>
                         <?= Html::a('<i class="fa fa-plus-circle success"></i> Add Quote', null, ['class' => 'add-clone-alt-quote dropdown-item', 'data-uid' => 0, 'data-url' => Url::to(['quote/create', 'leadId' => $leadForm->getLead()->id, 'qId' => 0])])?>
+                    <?php endif; ?>
+                    <?php
+                    if ($enableAward) : ?>
+                        <?php if (!$lead->client->isExcluded()) : ?>
+                            <?= Html::a('<i class="fa fa-plus-circle success"></i> Add Award Quote', null, ['class' => 'add-clone-alt-quote dropdown-item', 'data-uid' => 0, 'data-url' => Url::to(['quote-award/create', 'leadId' => $leadForm->getLead()->id])]) ?>
+                        <?php endif; ?>
                     <?php endif; ?>
                     <?= Html::a('<i class="fa fa-clone success"></i> Clone Quote', null, [
                         'class' => 'clone-quote-by-uid dropdown-item',
@@ -443,3 +453,7 @@ $js = <<<JS
     $('.popover-class[data-toggle="popover"]').popover({sanitize: false, html: true});
 JS;
 $this->registerJs($js);
+
+if ($enableAward) {
+    $this->render('/quote-award/parts/_js_award', ['lead' => $lead]);
+}

@@ -1,6 +1,8 @@
 <?php
 
 use common\components\grid\BooleanColumn;
+use frontend\widgets\nestedSets\NestedSetsWidget;
+use src\helpers\nestedSets\NestedSetsHelper;
 use yii\helpers\Html;
 use yii\grid\GridView;
 use common\models\Department;
@@ -22,8 +24,10 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::a('Create Case Category', ['create'], ['class' => 'btn btn-success']) ?>
     </p>
 
-    <?php Pjax::begin(['scrollTo' => 0]); ?>
-    <?php // echo $this->render('_search', ['model' => $searchModel]); ?>
+    <?php
+    Pjax::begin(['scrollTo' => 0]); ?>
+    <?php
+    // echo $this->render('_search', ['model' => $searchModel]); ?>
 
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -42,16 +46,40 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'cc_dep_id',
                 'format' => 'raw',
                 'filter' => Department::getList(),
-                'value' => static function (CaseCategory $model) {
+                'value' => static function ($model) {
                     return $model->dep ? $model->dep->dep_name : 'undefined';
-                }
+                },
+            ],
+            [
+                'attribute' => 'parentCategory',
+                'format' => 'raw',
+                'value' => static function ($model) {
+                    $parents = $model->parents()->asArray()->all();
+                    $parentsNamesString = null;
+                    if ($parents) {
+                        $parentsNames = array_column($parents, 'cc_name');
+                        $parentsNamesString = NestedSetsHelper::formatHierarchyString($parentsNames);
+                    }
+
+                    return $parentsNamesString;
+                },
+                'filter' => NestedSetsWidget::widget([
+                    'query' => CaseCategory::findNestedSets(),
+                    'label' => '',
+                    'model' => $searchModel,
+                    'parentCategoryId' => $searchModel->parentCategoryId,
+                ]),
             ],
             ['class' => BooleanColumn::class, 'attribute' => 'cc_system'],
             ['class' => BooleanColumn::class, 'attribute' => 'cc_enabled'],
+            ['class' => BooleanColumn::class, 'attribute' => 'cc_allow_to_select'],
             ['class' => yii\grid\ActionColumn::class],
         ],
-    ]); ?>
+    ]);
+?>
 
-    <?php Pjax::end(); ?>
+    <?php
+    Pjax::end(); ?>
+
 
 </div>

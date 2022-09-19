@@ -19,6 +19,7 @@ class ShiftScheduleRequestNotificationsAfterSaveJob extends BaseJob implements J
     public function execute($queue): bool
     {
         $this->waitingTimeRegister();
+        $this->timeExecution = microtime(true);
 
         Yii::$app->set('formatter', Formatter::class);
 

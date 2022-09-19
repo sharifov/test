@@ -40,6 +40,7 @@ class CallQueueLongTimeNotificationJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
+        $this->timeExecution = microtime(true);
         try {
             $call = $this->findCall();
             if (

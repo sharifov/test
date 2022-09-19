@@ -25,6 +25,7 @@ class LeadCallPrepareCheckerJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
+        $this->timeExecution = microtime(true);
 
         $lead = Lead::findOne($this->leadId);
 

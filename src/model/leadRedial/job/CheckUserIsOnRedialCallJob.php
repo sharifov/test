@@ -31,6 +31,7 @@ class CheckUserIsOnRedialCallJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
+        $this->timeExecution = microtime(true);
 
         $isExistRedialCall = Call::find()
             ->andWhere([

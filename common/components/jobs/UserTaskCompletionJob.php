@@ -42,6 +42,7 @@ class UserTaskCompletionJob extends BaseJob implements JobInterface
     {
         $timeStart = microtime(true);
         $this->waitingTimeRegister();
+        $this->timeExecution = microtime(true);
 
         try {
             $userTaskCompletionService = new UserTaskCompletionService(

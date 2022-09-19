@@ -46,6 +46,7 @@ class CheckWarmTransferTimeExpiredJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
+        $this->timeExecution = microtime(true);
         $access = CallUserAccess::find()->byWarmTransfer()->byCall($this->callId)->byUser($this->toUserId)->one();
         if (!$access) {
             $access = CallUserAccess::find()->accepted()->byCall($this->callId)->byUser($this->toUserId)->one();

@@ -317,7 +317,7 @@ class Email extends BaseActiveRecord implements EmailInterface
 
     public function getEmailsByType(int $type): array
     {
-       switch ($type) {
+        switch ($type) {
             case EmailContactType::CC:
                 return $this->emailsCc;
             case EmailContactType::BCC:

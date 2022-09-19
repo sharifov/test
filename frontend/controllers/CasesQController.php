@@ -3,6 +3,8 @@
 namespace frontend\controllers;
 
 use src\auth\Auth;
+use src\entities\cases\CaseCategory;
+use src\entities\cases\CaseCategoryKeyDictionary;
 use src\entities\cases\CasesQSearch;
 use Yii;
 
@@ -171,6 +173,19 @@ class CasesQController extends FController
         $dataProvider = $searchModel->searchPassDeparture(Yii::$app->request->queryParams, Auth::user());
 
         return $this->render('pass-departure', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+            'isAgent' => Auth::user()->isAgent(),
+        ]);
+    }
+
+    public function actionCrossSaleInbox(): string
+    {
+        $searchModel = new CasesQSearch();
+        $categoryList = CaseCategory::getIdListByCategoryKeys([CaseCategoryKeyDictionary::CROSS_SALE]);
+        $dataProvider = $searchModel->searchByCategory(Yii::$app->request->queryParams, Auth::user(), $categoryList);
+
+        return $this->render('cross-sale-inbox', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'isAgent' => Auth::user()->isAgent(),
