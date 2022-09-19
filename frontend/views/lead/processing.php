@@ -82,7 +82,8 @@ $(document).on('click','.lead-rating-star',function(){
 });
 JS;
 $this->registerJs($js);
-
+/** @fflag FFlag::FF_KEY_SHOW_TASK_INFO_COLUMN_ON_LEAD_SECTION_UI, Show "Task info" column from Lead section on UI */
+$isFFShowTaskInfoColumn = \Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_SHOW_TASK_INFO_COLUMN_ON_LEAD_SECTION_UI);
 ?>
 
 <style>
@@ -363,7 +364,7 @@ $this->registerJs($js);
             'contentOptions' => [
                 'class' => 'text-left'
             ],
-            'visible' => ! $isAgent,
+            'visible' => !$isAgent && $isFFShowTaskInfoColumn,
             'options' => [
                 'style' => 'width:170px'
             ]

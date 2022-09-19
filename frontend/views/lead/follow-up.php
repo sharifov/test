@@ -22,7 +22,8 @@ $this->title = 'Follow Up Queue';
 $lists = new ListsAccess(Yii::$app->user->id);
 
 $this->params['breadcrumbs'][] = $this->title;
-
+/** @fflag FFlag::FF_KEY_SHOW_TASK_INFO_COLUMN_ON_LEAD_SECTION_UI, Show "Task info" column from Lead section on UI */
+$isFFShowTaskInfoColumn = \Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_SHOW_TASK_INFO_COLUMN_ON_LEAD_SECTION_UI);
 ?>
 
 <style>
@@ -274,7 +275,7 @@ $this->params['breadcrumbs'][] = $this->title;
             'contentOptions' => [
                 'class' => 'text-left'
             ],
-            'visible' => ! $isAgent,
+            'visible' => !$isAgent && $isFFShowTaskInfoColumn,
             'options' => [
                 'style' => 'width:140px'
             ]
