@@ -38,6 +38,7 @@ class LeadPoorProcessingRemoverJob extends BaseJob implements JobInterface
     public function execute($queue): void
     {
         $this->waitingTimeRegister();
+        $this->timeExecution = microtime(true);
         $logData = [
             'leadId' => $this->leadId,
             'ruleKeys' => $this->ruleKeys,
@@ -60,5 +61,7 @@ class LeadPoorProcessingRemoverJob extends BaseJob implements JobInterface
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
             \Yii::error($message, 'LeadPoorProcessingRemoverJob:execute:Throwable');
         }
+
+        $this->execTimeRegister();
     }
 }

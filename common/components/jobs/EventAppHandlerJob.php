@@ -49,6 +49,7 @@ class EventAppHandlerJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
+        $this->timeExecution = microtime(true);
         try {
             $obj = $this->object;
             $method = $this->method;
@@ -72,5 +73,7 @@ class EventAppHandlerJob extends BaseJob implements JobInterface
 
             \Yii::error($dataError, 'EventAppHandlerJob:execute');
         }
+
+        $this->execTimeRegister();
     }
 }

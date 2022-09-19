@@ -31,6 +31,7 @@ class CheckUserIsOnRedialCallJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
+        $this->timeExecution = microtime(true);
 
         $isExistRedialCall = Call::find()
             ->andWhere([
@@ -47,5 +48,7 @@ class CheckUserIsOnRedialCallJob extends BaseJob implements JobInterface
         }
 
         UserStatus::isOnCallOff($this->userId);
+
+        $this->execTimeRegister();
     }
 }

@@ -22,11 +22,14 @@ class BoRequestJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
+        $this->timeExecution = microtime(true);
         try {
             $requestBo = \Yii::createObject(BoRequest::class);
             $requestBo->appliedQuote($this->quoteGid, $this->userId, $this->caseId);
         } catch (\Throwable $e) {
             \Yii::error(array_merge(['quoteGid' => $this->quoteGid], AppHelper::throwableLog($e, true)), 'BoRequestJob:reprotection:confirm');
         }
+
+        $this->execTimeRegister();
     }
 }

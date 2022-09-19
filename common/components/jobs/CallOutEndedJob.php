@@ -58,6 +58,7 @@ class CallOutEndedJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
+        $this->timeExecution = microtime(true);
 
         if ($call = Call::findOne($this->callId)) {
             $keyId = ClientDataKeyService::getIdByKeyCache(ClientDataKeyDictionary::APP_CALL_OUT_TOTAL_COUNT);
@@ -190,6 +191,8 @@ class CallOutEndedJob extends BaseJob implements JobInterface
             }
             $this->checkAndDeleteFromBusinessExtraQueue($call);
         }
+
+        $this->execTimeRegister();
     }
 
     private function checkAndDeleteFromBusinessExtraQueue(Call $call)

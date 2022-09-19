@@ -24,6 +24,7 @@ class UserTaskAssignJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
+        $this->timeExecution = microtime(true);
 
         try {
             $leads = Lead::find()
@@ -56,5 +57,7 @@ class UserTaskAssignJob extends BaseJob implements JobInterface
             $message['clientId'] = $this->clientId;
             \Yii::error($message, 'UserTaskAssignJob:execute:Throwable');
         }
+
+        $this->execTimeRegister();
     }
 }

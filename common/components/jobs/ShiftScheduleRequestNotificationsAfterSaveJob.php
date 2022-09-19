@@ -19,6 +19,7 @@ class ShiftScheduleRequestNotificationsAfterSaveJob extends BaseJob implements J
     public function execute($queue): bool
     {
         $this->waitingTimeRegister();
+        $this->timeExecution = microtime(true);
 
         Yii::$app->set('formatter', Formatter::class);
 
@@ -35,6 +36,8 @@ class ShiftScheduleRequestNotificationsAfterSaveJob extends BaseJob implements J
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), ['RequestID' => $this->shiftScheduleRequest->ssr_id]);
             Yii::warning($message, 'ShiftScheduleSaveRequestNotificationListener::handle::Throwable');
         }
+
+        $this->execTimeRegister();
 
         return false;
     }

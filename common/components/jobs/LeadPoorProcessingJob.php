@@ -39,6 +39,7 @@ class LeadPoorProcessingJob extends BaseJob implements JobInterface
     public function execute($queue): void
     {
         $this->waitingTimeRegister();
+        $this->timeExecution = microtime(true);
 
         $idKey = 'job_' . $this->leadId . '_' . implode('_', $this->ruleKeys);
         if (RedisHelper::checkDuplicate($idKey)) {
@@ -95,5 +96,7 @@ class LeadPoorProcessingJob extends BaseJob implements JobInterface
                 \Yii::error($message, 'LeadPoorProcessingJob:execute:Throwable');
             }
         }
+
+        $this->execTimeRegister();
     }
 }

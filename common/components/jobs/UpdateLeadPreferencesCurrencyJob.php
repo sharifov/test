@@ -22,6 +22,7 @@ class UpdateLeadPreferencesCurrencyJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
+        $this->timeExecution = microtime(true);
 
         $leadPreferences = LeadPreferences::getListByCurrencyCodeWhereLeadIsProcessed($this->currencyCode);
 
@@ -51,5 +52,7 @@ class UpdateLeadPreferencesCurrencyJob extends BaseJob implements JobInterface
                 }
             }
         }
+
+        $this->execTimeRegister();
     }
 }

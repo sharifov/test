@@ -42,6 +42,7 @@ class UserTaskCompletionJob extends BaseJob implements JobInterface
     {
         $timeStart = microtime(true);
         $this->waitingTimeRegister();
+        $this->timeExecution = microtime(true);
 
         try {
             $userTaskCompletionService = new UserTaskCompletionService(
@@ -79,6 +80,8 @@ class UserTaskCompletionJob extends BaseJob implements JobInterface
                 \Yii::info($message, 'info\UserTaskCompletionJob:execute:executeSecond');
             }
         }
+
+        $this->execTimeRegister();
     }
 
     private function logData(): array

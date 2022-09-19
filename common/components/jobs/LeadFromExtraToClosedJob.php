@@ -27,21 +27,25 @@ class LeadFromExtraToClosedJob extends BaseJob implements JobInterface
     public function execute($queue): void
     {
         $this->waitingTimeRegister();
-            $logData = [
-                'leadId' => $this->lead->id,
-            ];
-            try {
-                $service = new LeadFromExtraQueueToClosedService();
-                $service->transferLeadFromExtraToClosed($this->lead);
-            } catch (\RuntimeException | \DomainException $throwable) {
-                /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
-                if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG)) {
-                    $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
-                    \Yii::warning($message, 'LeadFromExtraToClosedJob:execute:Exception');
-                }
-            } catch (\Throwable $throwable) {
+        $this->timeExecution = microtime(true);
+
+        $logData = [
+            'leadId' => $this->lead->id,
+        ];
+        try {
+            $service = new LeadFromExtraQueueToClosedService();
+            $service->transferLeadFromExtraToClosed($this->lead);
+        } catch (\RuntimeException | \DomainException $throwable) {
+            /** @fflag FFlag::FF_KEY_DEBUG, Lead Poor Processing info log enable */
+            if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_DEBUG)) {
                 $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
-                \Yii::error($message, 'LeadPoorProcessingJob:execute:Throwable');
+                \Yii::warning($message, 'LeadFromExtraToClosedJob:execute:Exception');
             }
+        } catch (\Throwable $throwable) {
+            $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
+            \Yii::error($message, 'LeadPoorProcessingJob:execute:Throwable');
+        }
+
+        $this->execTimeRegister();
     }
 }

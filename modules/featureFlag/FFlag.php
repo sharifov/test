@@ -77,6 +77,7 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_EXCLUDE_API_CREATE_CASE_VALIDATION = 'excludeApiCreateCaseValidation';
     public const FF_KEY_CROSS_SALE_QUEUE_ENABLE = 'crossSaleQueueEnable';
     public const FF_KEY_AUTO_REFRESH_LEAD_TASK_LIST_ENABLE = 'autoRefreshLeadTaskListEnable';
+    public const FF_KEY_LOGGING_EXECUTION_TIME_FOR_JOBS_FROM_QUEUE_JOB = 'loggingExecutionTimeForJobsFromQueueJob';
 
     public const FF_KEY_LIST = [
         self::FF_KEY_LPP_ENABLE,
@@ -143,6 +144,7 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_EXCLUDE_API_CREATE_CASE_VALIDATION,
         self::FF_KEY_CROSS_SALE_QUEUE_ENABLE,
         self::FF_KEY_AUTO_REFRESH_LEAD_TASK_LIST_ENABLE,
+        self::FF_KEY_LOGGING_EXECUTION_TIME_FOR_JOBS_FROM_QUEUE_JOB,
     ];
 
     public const FF_OBJECT_LIST = [

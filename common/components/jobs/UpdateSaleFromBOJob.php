@@ -33,6 +33,7 @@ class UpdateSaleFromBOJob extends BaseJob implements JobInterface
     public function execute($queue): bool
     {
         $this->waitingTimeRegister();
+        $this->timeExecution = microtime(true);
         try {
             if ($this->checkParams()) {
                 /** @var CasesSaleService $casesSaleService */
@@ -70,6 +71,8 @@ class UpdateSaleFromBOJob extends BaseJob implements JobInterface
         } catch (\Throwable $throwable) {
             AppHelper::throwableLogger($throwable, 'UpdateSaleFromBOJob:execute:Throwable');
         }
+
+        $this->execTimeRegister();
 
         return false;
     }
