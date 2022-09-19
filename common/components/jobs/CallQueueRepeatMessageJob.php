@@ -31,7 +31,7 @@ class CallQueueRepeatMessageJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
-        $this->timeExecution = microtime(true);
+        $this->setTimeExecution(microtime(true));
         try {
             $call = $this->findCall();
             if (

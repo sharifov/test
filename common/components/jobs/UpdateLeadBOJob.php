@@ -33,7 +33,7 @@ class UpdateLeadBOJob extends BaseJob implements JobInterface
     public function execute($queue): bool
     {
         $this->waitingTimeRegister();
-        $this->timeExecution = microtime(true);
+        $this->setTimeExecution(microtime(true));
         try {
             if ($this->lead_id) {
                 $lead = Lead::findOne($this->lead_id);

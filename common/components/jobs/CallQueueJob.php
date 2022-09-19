@@ -73,7 +73,7 @@ class CallQueueJob extends BaseJob implements JobInterface
     public function execute($queue): bool
     {
         $this->waitingTimeRegister();
-        $this->timeExecution = microtime(true);
+        $this->setTimeExecution(microtime(true));
         $metrics = \Yii::$container->get(Metrics::class);
         $timeStart = microtime(true);
 

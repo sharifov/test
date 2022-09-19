@@ -103,4 +103,14 @@ class BaseJob extends BaseObject
     {
         return OutputHelper::getShortClassName(static::class);
     }
+
+    public function getTimeExecution()
+    {
+        return $this->timeExecution;
+    }
+
+    public function setTimeExecution($timeExecution)
+    {
+        $this->timeExecution = $timeExecution;
+    }
 }

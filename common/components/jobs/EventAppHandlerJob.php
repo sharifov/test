@@ -49,7 +49,7 @@ class EventAppHandlerJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
-        $this->timeExecution = microtime(true);
+        $this->setTimeExecution(microtime(true));
         try {
             $obj = $this->object;
             $method = $this->method;

@@ -26,7 +26,7 @@ class CheckClientExcludeIpJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
-        $this->timeExecution = microtime(true);
+        $this->setTimeExecution(microtime(true));
         try {
             $checker = \Yii::createObject(ClientExcludeIpChecker::class);
             $checker->check($this->clientId, $this->ip);

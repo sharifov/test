@@ -30,7 +30,7 @@ class LeadTaskListJob extends BaseJob implements JobInterface
     public function execute($queue): void
     {
         $this->waitingTimeRegister();
-        $this->timeExecution = microtime(true);
+        $this->setTimeExecution(microtime(true));
 
         try {
             if (!$lead = LeadQuery::getLeadById($this->leadId)) {
