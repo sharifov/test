@@ -3,6 +3,9 @@
 /**
  * @var string $message
  * @var array $errors
+ * @var \modules\product\src\entities\productQuote\ProductQuote $productQuote
+ * @var \modules\order\src\entities\order\Order $order
+ * @var \src\entities\cases\Cases $case
  * @var \modules\flight\src\useCases\voluntaryRefund\manualCreate\VoluntaryRefundCreateForm $refundForm
  */
 
@@ -12,6 +15,7 @@ use frontend\helpers\JsonHelper;
 use kartik\form\ActiveForm;
 use modules\flight\src\useCases\voluntaryRefund\manualCreate\AuxiliaryOptionForm;
 use modules\flight\src\useCases\voluntaryRefund\manualCreate\TicketForm;
+use modules\product\src\abac\dto\ProductQuoteAbacDto;
 use modules\product\src\abac\ProductQuoteAbacObject;
 use yii\bootstrap4\Alert;
 use yii\grid\SerialColumn;
@@ -41,8 +45,12 @@ use dosamigos\datepicker\DatePicker;
         '<span style="color:blue;">Check manually</span>';
     ?>
     <?php
-    /** @abac null, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_VIEW_VOL_REFUND_ORIGIN_DATA_FROM_BO, View Origin Data From BO (Voluntary Refund) */
-    $viewOriginDataFromBO = \Yii::$app->abac->can(null, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_VIEW_VOL_REFUND_ORIGIN_DATA_FROM_BO);
+    $productQuoteAbacDto = new ProductQuoteAbacDto($productQuote);
+    $productQuoteAbacDto->mapCaseAttributes($case);
+    $productQuoteAbacDto->mapOrderAttributes($order);
+
+    /** @abac $productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_VIEW_VOL_REFUND_ORIGIN_DATA_FROM_BO, View Origin Data From BO (Voluntary Refund) */
+    $viewOriginDataFromBO = \Yii::$app->abac->can($productQuoteAbacDto, ProductQuoteAbacObject::OBJ_PRODUCT_QUOTE, ProductQuoteAbacObject::ACTION_VIEW_VOL_REFUND_ORIGIN_DATA_FROM_BO);
     ?>
     <?php Pjax::begin([
     'id' => 'voluntary_refund_create_pjax',
