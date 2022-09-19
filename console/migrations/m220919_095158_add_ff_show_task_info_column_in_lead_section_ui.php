@@ -4,9 +4,9 @@ use yii\db\Migration;
 use src\helpers\app\AppHelper;
 
 /**
- * Class m220919_080246_add_ff_hide_task_info_column_from_lead_section_ui
+ * Class m220919_095158_add_ff_show_task_info_column_in_lead_section_ui
  */
-class m220919_080246_add_ff_hide_task_info_column_from_lead_section_ui extends Migration
+class m220919_095158_add_ff_show_task_info_column_in_lead_section_ui extends Migration
 {
     /**
      * {@inheritdoc}
@@ -17,20 +17,20 @@ class m220919_080246_add_ff_hide_task_info_column_from_lead_section_ui extends M
             if (!class_exists('\kivork\FeatureFlag\Models\FeatureFlag')) {
                 throw new \RuntimeException('Class (FeatureFlag) not found');
             }
-            if (\kivork\FeatureFlag\Models\FeatureFlag::find()->where(['ff_key' => \modules\featureFlag\FFlag::FF_KEY_HIDE_TASK_INFO_COLUMN_FROM_LEAD_SECTION_UI])->exists()) {
-                throw new \RuntimeException('FeatureFlag (' . \modules\featureFlag\FFlag::FF_KEY_HIDE_TASK_INFO_COLUMN_FROM_LEAD_SECTION_UI . ') already exit');
+            if (\kivork\FeatureFlag\Models\FeatureFlag::find()->where(['ff_key' => \modules\featureFlag\FFlag::FF_KEY_SHOW_TASK_INFO_COLUMN_ON_LEAD_SECTION_UI])->exists()) {
+                throw new \RuntimeException('FeatureFlag (' . \modules\featureFlag\FFlag::FF_KEY_SHOW_TASK_INFO_COLUMN_ON_LEAD_SECTION_UI . ') already exit');
             }
 
             $featureFlagService = new \kivork\FeatureFlag\Services\FeatureFlagService();
             $featureFlagService::add(
-                \modules\featureFlag\FFlag::FF_KEY_HIDE_TASK_INFO_COLUMN_FROM_LEAD_SECTION_UI,
-                'Hide "Task info" column from Lead section on UI',
+                \modules\featureFlag\FFlag::FF_KEY_SHOW_TASK_INFO_COLUMN_ON_LEAD_SECTION_UI,
+                'Show "Task info" column from Lead section on UI',
                 \kivork\FeatureFlag\Models\FeatureFlag::TYPE_BOOL,
-                false,
-                \kivork\FeatureFlag\Models\FeatureFlag::ET_DISABLED,
+                true,
+                \kivork\FeatureFlag\Models\FeatureFlag::ET_ENABLED,
                 [
                     'ff_category' => \modules\featureFlag\FFlag::FF_CATEGORY_LEAD,
-                    'ff_description' => 'Hide "Task info" column from Lead section on UI',
+                    'ff_description' => 'Show "Task info" column from Lead section on UI',
                 ]
             );
 
@@ -38,7 +38,7 @@ class m220919_080246_add_ff_hide_task_info_column_from_lead_section_ui extends M
         } catch (\Throwable $throwable) {
             \Yii::error(
                 AppHelper::throwableLog($throwable),
-                'm220919_080246_add_ff_hide_task_info_column_from_lead_section_ui:safeUp:Throwable'
+                'm220919_095158_add_ff_show_task_info_column_in_lead_section_ui:safeUp:Throwable'
             );
         }
     }
@@ -54,13 +54,13 @@ class m220919_080246_add_ff_hide_task_info_column_from_lead_section_ui extends M
             }
 
             $featureFlagService = new \kivork\FeatureFlag\Services\FeatureFlagService();
-            $featureFlagService::delete(\modules\featureFlag\FFlag::FF_KEY_HIDE_TASK_INFO_COLUMN_FROM_LEAD_SECTION_UI);
+            $featureFlagService::delete(\modules\featureFlag\FFlag::FF_KEY_SHOW_TASK_INFO_COLUMN_ON_LEAD_SECTION_UI);
 
             \Yii::$app->featureFlag->invalidateCache();
         } catch (\Throwable $throwable) {
             \Yii::error(
                 AppHelper::throwableLog($throwable),
-                'm220919_080246_add_ff_hide_task_info_column_from_lead_section_ui:safeDown:Throwable'
+                'm220919_095158_add_ff_show_task_info_column_in_lead_section_ui:safeDown:Throwable'
             );
         }
     }
