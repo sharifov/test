@@ -27,6 +27,7 @@ use yii\helpers\ArrayHelper;
  * @property int $depId
  * @property int $sourceTypeId
  * @property string|null $orderUid
+ * @property int|null $saleId
  *
  * @property Employee $user
  */
@@ -41,6 +42,7 @@ class CasesCreateByWebForm extends Model
     public $depId;
     public $sourceTypeId;
     public $orderUid;
+    public $saleId;
 
     private $user;
     private $cache_projects;
@@ -103,6 +105,9 @@ class CasesCreateByWebForm extends Model
             ['orderUid', 'default', 'value' => null],
             ['orderUid', 'string', 'min'  => '5', 'max' => 7],
             ['orderUid', 'match', 'pattern' => '/^[a-zA-Z0-9]+$/'],
+
+            ['saleId', 'default', 'value' => null],
+            ['saleId', 'integer'],
         ];
     }
 
@@ -204,6 +209,61 @@ class CasesCreateByWebForm extends Model
             'clientEmail' => 'Email',
             'sourceTypeId' => 'Source type',
             'orderUid' => 'Booking ID',
+            'saleId' => 'Sale ID',
         ];
+    }
+
+    /**
+     * @param int|null $depId
+     * @return CasesCreateByWebForm
+     */
+    public function setDepartmentId(?int $depId): CasesCreateByWebForm
+    {
+        $this->depId = $depId;
+        return $this;
+    }
+
+    /**
+     * @param string|null $email
+     * @return CasesCreateByWebForm
+     */
+    public function setEmail(?string $email): CasesCreateByWebForm
+    {
+        $this->clientEmail = $email;
+        return $this;
+    }
+
+    /**
+     * @param int|null $saleId
+     * @return CasesCreateByWebForm
+     */
+    public function setSaleId(?int $saleId): CasesCreateByWebForm
+    {
+        $this->saleId = $saleId;
+        return $this;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getDepartmentId(): ?int
+    {
+        return $this->depId ?? null;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getEmail(): ?string
+    {
+        return $this->clientEmail ?? null;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getSaleId(): ?int
+    {
+        return $this->saleId ?? null;
     }
 }
