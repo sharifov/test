@@ -5,6 +5,7 @@ namespace common\implementations\twoFactorAuth;
 use common\models\UserConnection;
 use kivork\TwoFactorAuth\Totp;
 use src\model\user\entity\monitor\UserMonitor;
+use yii\helpers\ArrayHelper;
 
 /**
  * Class OneTimeCodeAuth
@@ -59,10 +60,11 @@ class OneTimeCodeAuth extends Totp
     /**
      * @param $user
      * @return string
+     * @throws \Exception
      */
     public function getCompany($user): string
     {
-        return 'KIVORK';
+        return ArrayHelper::getValue(\Yii::$app->params['settings'], 'two_factor_company_name', 'KIVORK');
     }
 
     /**
