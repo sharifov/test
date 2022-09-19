@@ -11,7 +11,7 @@ use yii\filters\VerbFilter;
 /**
  * InfoBlockCrudController implements the CRUD actions for InfoBlock model.
  */
-class InfoBlockCrudController extends Controller
+class InfoBlockCrudController extends FController
 {
     /**
      * @inheritDoc
