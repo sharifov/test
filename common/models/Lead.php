@@ -83,6 +83,7 @@ use src\model\leadPoorProcessingData\entity\LeadPoorProcessingDataDictionary;
 use src\model\leadPoorProcessingLog\entity\LeadPoorProcessingLogStatus;
 use src\model\leadUserConversion\entity\LeadUserConversion;
 use src\model\leadUserRating\entity\LeadUserRating;
+use src\model\project\entity\projectLocale\ProjectLocale;
 use src\repositories\client\ClientPhoneRepository;
 use src\services\lead\calculator\LeadTripTypeCalculator;
 use src\services\lead\calculator\SegmentDTO;
@@ -4148,6 +4149,10 @@ Reason: {reason}',
             }
         }
 
+        $localeParams = [];
+        if ($project && $client = $this->client) {
+            $localeParams = self::getLocaleParams($project->id, $client->cl_marketing_country, $lang);
+        }
 
         $content_data['lead'] = [
             'id'  => $this->id,
@@ -4161,6 +4166,8 @@ Reason: {reason}',
             'phone'     => $projectContactInfo['phone'] ?? '',
             'email'     => $projectContactInfo['email'] ?? '',
         ];
+
+        $content_data['localeParams'] = $localeParams;
 
         $content_data['agent'] = [
             'name'  => array_key_exists('full_name', $agent) ? $agent['full_name'] : $employee->full_name,
@@ -4235,13 +4242,17 @@ Reason: {reason}',
      * @param array $projectContactInfo
      * @return array
      */
-    public function getOfferEmailData(array $offerIds, array $projectContactInfo): array
+    public function getOfferEmailData(array $offerIds, array $projectContactInfo, ?string $lang = null): array
     {
         $project = $this->project;
 
         $upp = null;
+        $localeParams = [];
         if ($project) {
             $upp = UserProjectParams::find()->where(['upp_project_id' => $project->id, 'upp_user_id' => Yii::$app->user->id])->withEmailList()->withPhoneList()->one();
+            if ($client = $this->client) {
+                $localeParams = self::getLocaleParams($project->id, $client->cl_marketing_country, $lang);
+            }
         }
 
         if ($offerIds && is_array($offerIds)) {
@@ -4255,7 +4266,6 @@ Reason: {reason}',
             }
         }
 
-
         $content_data['lead'] = [
             'id'  => $this->id,
             'uid' => $this->uid
@@ -4268,6 +4278,8 @@ Reason: {reason}',
             'phone'     => $projectContactInfo['phone'] ?? '',
             'email'     => $projectContactInfo['email'] ?? '',
         ];
+
+        $content_data['localeParams'] = $localeParams;
 
         $content_data['agent'] = [
             'name'  => Yii::$app->user->identity->full_name,
@@ -5437,5 +5449,51 @@ ORDER BY lt_date DESC LIMIT 1)'), date('Y-m-d')]);
         return array_sum(
             $this->getNumberObjectTasksOrderByStatus()
         );
+    }
+    /**
+     * @param int $projectId
+     * @param string|null $marketingCountry
+     * @param string|null $locale
+     * @return array|mixed|null
+     */
+    public static function getLocaleParams(int $projectId, ?string $marketingCountry, ?string $locale)
+    {
+        if ($locale && $marketingCountry) {
+            if ($params = self::searchParams($projectId, $locale, $marketingCountry)) {
+                return $params;
+            }
+        }
+
+        if ($locale && !$marketingCountry) {
+            if ($defaultMarketCountry = ProjectLocale::getDefaultMarketCountryByProject($projectId)) {
+                if ($params = self::searchParams($projectId, $locale, $defaultMarketCountry)) {
+                    return $params;
+                }
+            }
+        }
+
+        if ($projectLocale = ProjectLocale::getDefaultProjectLocale($projectId)) {
+            return JsonHelper::decode($projectLocale->pl_params);
+        }
+        return [];
+    }
+
+    private static function searchParams(int $projectId, ?string $language, ?string $marketingCountry): ?array
+    {
+        $projectLocale = ProjectLocale::getByProjectLanguageMarket($projectId, $language, $marketingCountry);
+        if ($projectLocale) {
+            return JsonHelper::decode($projectLocale->pl_params);
+        }
+
+        $projectLocaleByLocale = ProjectLocale::getByProjectLanguageMarket($projectId, $language, null);
+        $projectLocaleByMarket = ProjectLocale::getByProjectLanguageMarket($projectId, null, $marketingCountry);
+
+        if ($projectLocaleByLocale && $projectLocaleByMarket) {
+            return ArrayHelper::merge(
+                JsonHelper::decode($projectLocaleByLocale->pl_params),
+                JsonHelper::decode($projectLocaleByMarket->pl_params)
+            );
+        }
+        return null;
     }
 }
