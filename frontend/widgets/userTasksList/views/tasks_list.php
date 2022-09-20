@@ -187,7 +187,8 @@ $js = <<<JS
                 push: false,
                 replace: false,
                 scrollTo: false,
-                container: pjaxContainer
+                container: pjaxContainer,
+                timeout: 0
             });
 
             result = true;
