@@ -14,7 +14,6 @@ class SiteController extends Controller
     {
         return $this->asJson([
             'ServerName' => Yii::$app->request->serverName,
-            'Host' => Yii::$app->params['host'],
             'Date' => date('Y-m-d H:i:s'),
         ]);
     }

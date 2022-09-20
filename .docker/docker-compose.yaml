@@ -172,6 +172,46 @@ services:
         aliases:
           - ${HOST_API}
 
+  leads-php-fpm:
+    container_name: crm-leads-php-fpm
+    image: ${REGISTRY}crm-php-fpm:${PHP_FPM_IMAGE_TAG}
+    environment:
+      - PHP_IDE_CONFIG=${PHP_IDE_CONFIG_API}
+    volumes:
+      - ./../:/var/www/app
+    working_dir: /var/www/app
+    depends_on:
+      - redis
+      - mysql
+      - psql
+      - beanstalkd
+      - centrifugo
+      - queue
+      - clickhouse
+    restart: on-failure
+    networks:
+      - backend
+      - kivork-proxy
+
+  leads-nginx:
+    container_name: crm-leads-nginx
+    image: ${REGISTRY}crm-nginx:${NGINX_IMAGE_TAG}
+    ports:
+      - ${HOST_LEADS_PORT}:443
+    environment:
+      - HOST_LEADS=${HOST_LEADS}
+    volumes:
+      - ./nginx/certs/:/etc/nginx/certs/:ro
+      - ./leads-nginx/templates:/etc/nginx/templates
+      - ./leads-nginx/logs:/var/log/nginx
+      - ./../:/var/www/app
+    depends_on:
+      - leads-php-fpm
+    restart: on-failure
+    networks:
+      - backend
+      - kivork-proxy
+
   ws-nginx:
     container_name: crm-ws-nginx
     image: ${REGISTRY}crm-nginx:${NGINX_IMAGE_TAG}

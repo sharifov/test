@@ -107,6 +107,7 @@ tmpDirs=(
   "$dockerFolder/frontend-nginx/logs"
   "$dockerFolder/ws-nginx/logs"
   "$currentDir/var/fileStorage"
+  "$dockerFolder/leads-nginx/logs"
 )
 
 tmpDatabasesDirs=(
