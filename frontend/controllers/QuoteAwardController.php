@@ -9,6 +9,7 @@ use src\forms\CompositeFormHelper;
 use src\repositories\NotFoundException;
 use Yii;
 use yii\helpers\Html;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
 class QuoteAwardController extends FController
@@ -25,19 +26,20 @@ class QuoteAwardController extends FController
         parent::__construct($id, $module, $config);
     }
 
-    public function actionCreate($uid): ?string
+    public function actionCreate($gid): ?string
     {
-        $lead = Lead::find()->andWhere(['uid' => $uid])->limit(1)->one();
-        $form = new AwardQuoteForm($lead, [], [], []);
-        $form->load(\Yii::$app->request->post());
+        $lead = Lead::find()->andWhere(['gid' => $gid])->limit(1)->one();
 
         if ($lead !== null) {
+            $form = new AwardQuoteForm($lead, [], [], []);
+            $form->load(\Yii::$app->request->post());
+
             return $this->render('create', [
                 'model' => $form,
                 'lead' => $lead,
             ]);
         }
-        throw new NotFoundException('Lead not Found');
+        throw new NotFoundHttpException('Lead not Found');
     }
 
     public function actionUpdate($leadId, $type = null): ?string
