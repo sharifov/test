@@ -262,7 +262,7 @@ class AirSearchService extends Component
     {
         $result = ['data' => [], 'error' => ''];
         $url = $this->searchQuoteByKeyEndpoint . '/' . $cid . '/' . $key;
-        $response = $this->sendRequest($url, [], $method);
+        $response = $this->sendRequest($url, [], $method, ['X-Kiv-Cust-direct' => true]);
 
         if ($response->isOk) {
             $result['data'] = $response->data;
