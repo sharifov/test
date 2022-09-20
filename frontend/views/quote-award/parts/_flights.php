@@ -300,10 +300,10 @@ $form = ActiveForm::begin([
         <?php endif; ?>
     </div>
     <?php
-    $applied = Quote::findOne([
+    $applied = Quote::find()->andWhere([
         'status' => Quote::STATUS_APPLIED,
         'lead_id' => $lead->id
-    ]);
+    ])->limit(1)->one();
     if ($applied === null) : ?>
         <?= Html::submitButton('<i class="fa fa-floppy-o" aria-hidden="true"></i> Save Quote', [
             'id' => 'save-alt-award-quote',

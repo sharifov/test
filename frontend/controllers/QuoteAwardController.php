@@ -20,8 +20,8 @@ class QuoteAwardController extends FController
         QuoteFlightService $quoteFlightService,
         $config = []
     ) {
-        parent::__construct($id, $module, $config);
         $this->quoteFlightService = $quoteFlightService;
+        parent::__construct($id, $module, $config);
     }
 
     public function actionCreate($leadId): ?string
@@ -80,7 +80,7 @@ class QuoteAwardController extends FController
             return $this->renderAjax('parts/_flights', [
                 'model' => $form,
                 'lead' => $lead,
-                'tab' => $tabId
+                'tab' => $tabId,
             ]);
         }
         return null;

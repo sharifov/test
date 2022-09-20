@@ -51,7 +51,7 @@ class QuoteFlight extends \yii\db\ActiveRecord
         return [
             [['qf_quote_id'], 'required'],
             [['qf_quote_id', 'qf_user_id', 'qf_check_payment', 'qf_updated_user_id'], 'integer'],
-            [['qf_created_dt', 'qf_updated_dt'], 'safe'],
+            [['qf_created_dt', 'qf_updated_dt'], 'date', 'format' => 'php:Y-m-d'],
             [['qf_booking_type', 'qf_fare_type'], 'string', 'max' => 20],
             [['qf_record_locator'], 'string', 'max' => 8],
             [['qf_gds', 'qf_cabin'], 'string', 'max' => 1],
