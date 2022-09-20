@@ -172,6 +172,10 @@ class CommunicationService extends Component implements CommunicationServiceInte
         $data['mail']['language_id'] = $language;
         $data['mail']['email_data'] = $email_data;
 
+        if (isset($email_data['client']) && !isset($email_data['client']['email'])) {
+            $data['mail']['email_data']['client']['email'] = $email_to;
+        }
+
         if (isset($email_data['email_from_name']) && $email_data['email_from_name']) {
             $data['mail']['email_from_name'] = $email_data['email_from_name'];
         }
