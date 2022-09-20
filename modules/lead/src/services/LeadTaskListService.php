@@ -134,6 +134,13 @@ class LeadTaskListService
                     }
                 }
 
+                /** @fflag \modules\featureFlag\FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
+                if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE)) {
+                    \Yii::info([
+                        'countOfSuccessSavedUserTasks' => $countOfSuccessSavedUserTasks,
+                    ], 'info\LeadTaskListService:assign');
+                }
+
                 if ($countOfSuccessSavedUserTasks > 0) {
                     (new LeadTasksListSavedNotification($this->lead))->send();
                 }
