@@ -1111,11 +1111,35 @@ class CasesController extends FController
                 $form->projectId = (new ProjectRepository())->getIdByName($params['project']);
             }
             $form->orderUid = $params['orderUid'] ?? null;
+
+            if (!empty($params['department'])) {
+                $form->setDepartmentId((int)$params['department']);
+            }
+            if (!empty($params['email'])) {
+                $form->setEmail($params['email']);
+            }
+            if (!empty($params['saleId'])) {
+                $form->setSaleId((int)$params['saleId']);
+            }
         } elseif ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
                 /** @var Cases $case */
                 $case = $this->casesCreateService->createByWeb($form, $user->id);
                 $this->casesManageService->processing($case->cs_id, Yii::$app->user->id, Yii::$app->user->id);
+
+                if (!empty($form->getSaleId())) {
+                    $saleData = ['saleId' => $form->getSaleId()];
+                    $this->casesSaleService->createSale($case->cs_id, $saleData);
+                } else {
+                    Yii::info([
+                        'message' => 'Case sale not created.',
+                        'caseId' => $case->cs_id,
+                        'projectId' => $case->project->id,
+                        'caseBookingId' => $case->cs_order_uid,
+                        'saleId' => $form->getSaleId(),
+                    ], 'info\CasesController::actionCreate:MissingSaleId');
+                }
+
                 Yii::$app->session->setFlash('success', 'Case created');
                 return $this->redirect(['view', 'gid' => $case->cs_gid]);
             } catch (\Throwable $e) {

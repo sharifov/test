@@ -202,8 +202,8 @@ class SaleSearch extends Model
                 $result = $response->data;
                 if (isset($result['items']) && is_array($result['items'])) {
                     foreach ($result['items'] as $key => $item) {
-                        $caseQuery = Cases::find()->select(['cs_id', 'cs_gid'])->where(['cs_order_uid' => $item['confirmationNumber']]);
-                        $caseSaleQuery = CaseSale::find()->select(['cs_id', 'cs_gid'])->innerJoin(Cases::tableName(), 'cs_id = css_cs_id')->where(['css_sale_book_id' => $item['confirmationNumber']]);
+                        $caseQuery = Cases::find()->select(['cs_id', 'cs_gid', 'cs_dep_id', 'cs_status'])->where(['cs_order_uid' => $item['confirmationNumber']]);
+                        $caseSaleQuery = CaseSale::find()->select(['cs_id', 'cs_gid', 'cs_dep_id', 'cs_status'])->innerJoin(Cases::tableName(), 'cs_id = css_cs_id')->where(['css_sale_book_id' => $item['confirmationNumber']]);
                         $result['items'][$key]['relatedLeads'] = Lead::find()->select(['id', 'gid'])->where(['bo_flight_id' => $item['saleId']])->asArray()->all();
                         $result['items'][$key]['relatedCases'] = $caseQuery->union($caseSaleQuery)->asArray()->all();
                     }
