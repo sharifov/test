@@ -74,6 +74,7 @@ use src\access\CallAccess;
 use src\auth\Auth;
 use src\dispatchers\DeferredEventDispatcher;
 use src\entities\cases\Cases;
+use src\forms\api\VisitorForm;
 use src\repositories\NotFoundException;
 use src\services\cases\CasesCommunicationService;
 use src\helpers\app\AppHelper;
@@ -2017,6 +2018,35 @@ class TestController extends FController
 
     public function actionZ()
     {
+
+
+        try {
+            $visitorForm = new VisitorForm();
+            $data['visitor'] = [
+                'id' => 'ip_value',
+                'ipAddress' => '23.22.53.178',
+                'userAgent' => 'userAgent_value',
+            ];
+            $visitorForm->load($data);
+
+            if (!$visitorForm->validate()) {
+
+            }
+        } catch (\Throwable $throwable) {
+
+
+
+            $message = AppHelper::throwableLog($throwable);
+            $message['customData'] = [];
+            \Yii::error($message, 'TODO:::Throwable');
+        }
+
+        \yii\helpers\VarDumper::dump($visitorForm->toArray(), 20, true); exit();
+        /* FOR DEBUG:: must by remove */
+
+
+
+
         echo 'Feature Flag Test<br><br>';
 
         /** @fflag FFlag::FF_KEY_LPP_ENABLE, Lead Poor Processing Enable/Disable */
