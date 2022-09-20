@@ -32,8 +32,7 @@ $js = <<<JS
             type: 'POST',
             data: AwardForm.serialize()+'&tab='+tabActive,
              success: function (data) {
-                let modal = $('#modal-lg');
-                modal.find('.js-update-ajax').html(data);
+               $('.js-update-ajax').html(data);
                 loadingBtn($('#js-add-flight-award'), false);
             }
         }) .fail(function(error) {
@@ -52,8 +51,7 @@ $js = <<<JS
               type: 'POST',
               data: AwardForm.serialize()+'&index='+id,
               success: function (data) {
-                let modal = $('#modal-lg');
-                modal.find('.js-update-ajax').html(data);
+               $('.js-update-ajax').html(data);
              }
             }) .fail(function(error) {
             console.log(error);
@@ -71,8 +69,7 @@ $js = <<<JS
             type: 'POST',
             data: AwardForm.serialize()+'&tripId='+tripId+'&tab='+tabActive,
              success: function (data) {
-                let modal = $('#modal-lg');
-                modal.find('.js-update-ajax').html(data);
+               $('.js-update-ajax').html(data);
                 loadingBtn($('#js-add-segment-award'), false);
             }
         }) .fail(function(error) {
@@ -99,8 +96,7 @@ $js = <<<JS
             type: 'POST',
             data: formDataAward,
              success: function (data) {
-                let modal = $('#modal-lg');
-                modal.find('.js-update-ajax').html(data);
+               $('.js-update-ajax').html(data);
                 $(this).prop( "disabled", false);
             }
         }) .fail(function(error) {
@@ -121,8 +117,7 @@ $js = <<<JS
             type: 'POST',
             data: AwardForm.serialize()+'&index='+id+'&tab='+tabActive,
              success: function (data) {
-                let modal = $('#modal-lg');
-                modal.find('.js-update-ajax').html(data);
+               $('.js-update-ajax').html(data);
             }
         }) .fail(function(error) {
             console.log(error);
@@ -141,8 +136,7 @@ $js = <<<JS
                 type: 'POST',
                 data: AwardForm.serialize()+'&index='+id+'&tab='+tabActive,
                  success: function (data) {
-                    let modal = $('#modal-lg');
-                    modal.find('.js-update-ajax').html(data);
+                    $('.js-update-ajax').html(data);
                 }
             }) .fail(function(error) {
                 console.log(error);

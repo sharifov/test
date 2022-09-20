@@ -7,6 +7,7 @@
 
 use common\models\Currency;
 use common\models\Lead;
+use modules\featureFlag\FFlag;
 use yii\helpers\Url;
 use common\models\QuotePrice;
 use yii\web\View;
@@ -18,7 +19,13 @@ $paxCntTypes = [
     QuotePrice::PASSENGER_CHILD => $lead->children,
     QuotePrice::PASSENGER_INFANT => $lead->infants
 ];
+/** @fflag FFlag::FF_KEY_AWARD_ENABLE, Award Enable */
+$enableAward = Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_AWARD_ENABLE);
+$this->title = 'Add Quote'
 ?>
+    <div class="">
+        <h1><?= $this->title ?></h1>
+    </div>
     <div class="alternatives__item">
         <?php $currencyLead = $lead->leadPreferences->pref_currency ?? Currency::getDefaultCurrencyCode() ?>
         <?php if ($currencyLead !== Currency::getDefaultCurrencyCode()) : ?>
@@ -52,3 +59,7 @@ function formatRepo( repo ) {
     }
 JS;
 $this->registerJs($js, View::POS_HEAD);
+
+if ($enableAward) {
+    $this->render('/quote-award/parts/_js_award', ['lead' => $lead]);
+}

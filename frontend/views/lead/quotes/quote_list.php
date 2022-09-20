@@ -193,7 +193,7 @@ JS;
                     <?php
                     if ($enableAward) : ?>
                         <?php if (!$lead->client->isExcluded()) : ?>
-                            <?= Html::a('<i class="fa fa-plus-circle success"></i> Add Award Quote', null, ['class' => 'add-clone-alt-quote dropdown-item', 'data-uid' => 0, 'data-url' => Url::to(['quote-award/create', 'leadId' => $leadForm->getLead()->id])]) ?>
+                            <?= Html::a('<i class="fa fa-plus-circle success"></i> Add Award Quote', ['/quote-award/create', 'uid' => $leadForm->getLead()->uid], ['class' => 'dropdown-item ', 'target' => '_blank', 'data-pjax' => 0]) ?>
                         <?php endif; ?>
                     <?php endif; ?>
                     <?= Html::a('<i class="fa fa-clone success"></i> Clone Quote', null, [
@@ -454,6 +454,3 @@ $js = <<<JS
 JS;
 $this->registerJs($js);
 
-if ($enableAward) {
-    $this->render('/quote-award/parts/_js_award', ['lead' => $lead]);
-}
