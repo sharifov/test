@@ -27,21 +27,12 @@ $paxCntTypes = [
                 <strong><?php echo $currencyLead ?></strong>
             </div>
         <?php endif ?>
-        <div style="margin-top: 15px">
-            <a class="btn btn-success"
-               id="js-add-flight-award"
-               data-inner='<i class="fa fa-plus" aria-hidden="true"></i> Add Flight'
-               data-class='btn btn-success'
-               href="javascript:void(0)">
-                <i class="fa fa-plus" aria-hidden="true"></i> Add Flight
-            </a>
-        </div>
 
         <div class="table-wrapper ticket-details-block__table mb-20"
              id="alt-quote-fares-info">
 
             <div class="js-update-ajax">
-                <?= $this->render('parts/_flights', ['model' => $model, 'lead' => $lead]) ?>
+                <?= $this->render('parts/_flights', ['model' => $model, 'lead' => $lead, 'tab' => 0]) ?>
             </div>
 
         </div>

@@ -13,7 +13,7 @@ class PriceListAwardQuoteForm extends Model
 {
     public $flight;
     public $passenger_type;
-    public $passenger_count;
+    public $passenger_count = 1;
     public $selling = 0;
     public $net = 0;
     public $taxes = 0;

@@ -17,6 +17,7 @@ class SegmentAwardQuoteForm extends Model
     public $flight;
     public $flight_number;
     public $cabin;
+    public $operatedBy;
 
     public function __construct(SegmentAwardQuoteItem $segment, $config = [])
     {
@@ -52,6 +53,7 @@ class SegmentAwardQuoteForm extends Model
 
             ['flight', 'required'],
             ['flight_number', 'string'],
+            ['operatedBy', 'required'],
 
             ['cabin', 'string', 'max' => 1],
             ['cabin', 'in', 'range' => array_keys(Flight::getCabinClassList())],
