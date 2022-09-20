@@ -27,6 +27,7 @@ class CheckClientCallJoinToConferenceJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
+        $this->setTimeExecution(microtime(true));
         /** @var Call $call */
         $call = Call::find()->andWhere(['c_id' => $this->callId, 'c_status_id' => Call::STATUS_DELAY])->one();
 
@@ -81,6 +82,8 @@ class CheckClientCallJoinToConferenceJob extends BaseJob implements JobInterface
         if (!$data->queueLongTime->isEmpty()) {
             $this->createCallQueueLongTimeJob($jobId, $call, $data->queueLongTime->departmentPhoneId);
         }
+
+        $this->execTimeRegister();
     }
 
     private function createRepeatMessageJob($jobId, $call, $depPhoneId): void

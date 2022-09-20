@@ -33,6 +33,7 @@ class UpdateLeadBOJob extends BaseJob implements JobInterface
     public function execute($queue): bool
     {
         $this->waitingTimeRegister();
+        $this->setTimeExecution(microtime(true));
         try {
             if ($this->lead_id) {
                 $lead = Lead::findOne($this->lead_id);
@@ -62,6 +63,9 @@ class UpdateLeadBOJob extends BaseJob implements JobInterface
         } catch (\Throwable $e) {
             Yii::error(VarDumper::dumpAsString($e->getMessage()), 'UpdateLeadBOJob:execute:catch');
         }
+
+        $this->execTimeRegister();
+
         return false;
     }
 

@@ -24,6 +24,9 @@ class LeadCallPrepareCheckerJob extends BaseJob implements JobInterface
 
     public function execute($queue)
     {
+        $this->waitingTimeRegister();
+        $this->setTimeExecution(microtime(true));
+
         $lead = Lead::findOne($this->leadId);
 
         if (!$lead) {
@@ -43,5 +46,7 @@ class LeadCallPrepareCheckerJob extends BaseJob implements JobInterface
                 'leadId' => $this->leadId,
             ], 'LeadCallPrepareCheckerJob');
         }
+
+        $this->execTimeRegister();
     }
 }

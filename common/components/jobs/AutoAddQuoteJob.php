@@ -22,6 +22,7 @@ class AutoAddQuoteJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
+        $this->setTimeExecution(microtime(true));
         try {
             $lead = $this->findLead();
             $autoQuoteService = \Yii::createObject(AddQuoteService::class);
@@ -33,6 +34,8 @@ class AutoAddQuoteJob extends BaseJob implements JobInterface
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable, true), ['lead_id' => $this->leadId]);
             Yii::warning($message, 'AutoAddQuoteJob::execute::Throwable');
         }
+
+        $this->execTimeRegister();
     }
 
     private function findLead(): Lead

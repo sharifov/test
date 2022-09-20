@@ -26,6 +26,7 @@ class LeadBusinessExtraQueueRemoverJob extends BaseJob implements JobInterface
     public function execute($queue): void
     {
         $this->waitingTimeRegister();
+        $this->setTimeExecution(microtime(true));
         $logData = [
             'leadId' => $this->leadId,
         ];
@@ -44,5 +45,7 @@ class LeadBusinessExtraQueueRemoverJob extends BaseJob implements JobInterface
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
             \Yii::error($message, 'LeadBusinessExtraQueueRemoverJob:execute:Throwable');
         }
+
+        $this->execTimeRegister();
     }
 }

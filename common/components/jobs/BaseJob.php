@@ -3,6 +3,7 @@
 namespace common\components\jobs;
 
 use common\components\Metrics;
+use modules\featureFlag\FFlag;
 use console\helpers\OutputHelper;
 use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
@@ -12,11 +13,13 @@ use yii\base\BaseObject;
  * Class BaseJob
  *
  * @property float $timeStart
+ * @property float $timeExecution
  * @property int $delayJob
  */
 class BaseJob extends BaseObject
 {
     public float $timeStart;
+    private float $timeExecution;
     public int $delayJob = 0;
 
     private array $defaultBuckets = [1, 3, 5, 7, 10, 15, 30, 60, 300];
@@ -64,8 +67,50 @@ class BaseJob extends BaseObject
         return true;
     }
 
+    public function execTimeRegister(?array $buckets = null): bool
+    {
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_LOGGING_EXECUTION_TIME_FOR_JOBS_FROM_QUEUE_JOB)) {
+            try {
+                if (!empty($this->timeExecution)) {
+                    $metrics = \Yii::$container->get(Metrics::class);
+                    $seconds = round(microtime(true) - $this->timeExecution, 1);
+                    $seconds -= $this->delayJob;
+                    $buckets = empty($buckets) ? $this->defaultBuckets : $buckets;
+                    $metrics->histogramMetric(
+                        'job_execution_time',
+                        $seconds,
+                        ['jobName' => self::runInClass()],
+                        Metrics::NAMESPACE_CONSOLE,
+                        '',
+                        $buckets
+                    );
+
+                    if ($seconds > 60) {
+                        \Yii::warning(
+                            'Warning: (' . self::runInClass() . ') execution timeout exceeded. Time (' . $seconds . ') sec',
+                            'BaseJob:ExecTimeRegister:TimeoutExceeded'
+                        );
+                    }
+                }
+            } catch (\Throwable $throwable) {
+                \Yii::error(AppHelper::throwableLog($throwable), 'BaseJob:ExecTimeRegister:Throwable');
+                return false;
+            }
+        }
+    }
+
     public static function runInClass(): string
     {
         return OutputHelper::getShortClassName(static::class);
+    }
+
+    public function getTimeExecution()
+    {
+        return $this->timeExecution;
+    }
+
+    public function setTimeExecution($timeExecution)
+    {
+        $this->timeExecution = $timeExecution;
     }
 }
