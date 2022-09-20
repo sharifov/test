@@ -38,6 +38,7 @@ class LeadTasksListSavedNotification
         ];
 
         if ($isAutoRefreshLeadTaskListEnabled) {
+            sleep(2);
             $result = Notifications::pub(['lead-' . $this->lead->id], 'refreshTaskList', $notificationData);
         }
 
