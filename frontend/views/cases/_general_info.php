@@ -9,6 +9,7 @@ use yii\widgets\DetailView;
 /* @var $this yii\web\View */
 /* @var $model \src\entities\cases\Cases */
 /* @var $isAdmin boolean */
+/* @var $categoriesHierarchy string */
 ?>
 
 <div class="x_panel">
@@ -113,6 +114,11 @@ use yii\widgets\DetailView;
                                 return $model->cs_updated_dt ? '<i class="fa fa-calendar"></i> ' . Yii::$app->formatter->asDatetime(strtotime($model->cs_updated_dt)) : '-';
                             },
                             'format' => 'raw'
+                        ],
+                        [
+                            'attribute' => 'categoriesHierarchy',
+                            'value' => $categoriesHierarchy,
+                            'label' => 'Category',
                         ],
 
                         //'cs_updated_dt',

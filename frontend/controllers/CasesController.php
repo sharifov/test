@@ -68,6 +68,7 @@ use src\forms\cases\CasesSaleForm;
 use src\guards\cases\CaseManageSaleInfoGuard;
 use src\helpers\app\AppHelper;
 use src\helpers\ErrorsToStringHelper;
+use src\helpers\nestedSets\NestedSetsHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\call\useCase\createCall\fromCase\AbacCallFromNumberList;
 use src\model\callLog\entity\callLog\CallLogType;
@@ -719,6 +720,8 @@ class CasesController extends FController
 
         $dataProviderOrders = (new OrderSearch())->searchByCase($model->cs_id);
 
+        $categoriesHierarchy = NestedSetsHelper::getCategoriesHierarchy($model->getAttribute('cs_category_id'));
+
         return $this->render('view', [
             'model' => $model,
             'previewEmailForm' => $previewEmailForm,
@@ -748,6 +751,10 @@ class CasesController extends FController
             'callFromNumberList' => $callFromNumberList,
             'smsFromNumberList' => $smsFromNumberList,
             'emailFromList' => $emailFromList,
+
+            'categoriesHierarchy' => $categoriesHierarchy,
+
+
         ]);
     }
 
