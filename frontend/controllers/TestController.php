@@ -74,6 +74,8 @@ use src\access\CallAccess;
 use src\auth\Auth;
 use src\dispatchers\DeferredEventDispatcher;
 use src\entities\cases\Cases;
+use src\exception\AdditionalDataInterface;
+use src\exception\ModelException;
 use src\forms\api\VisitorForm;
 use src\repositories\NotFoundException;
 use src\services\cases\CasesCommunicationService;
@@ -2019,25 +2021,25 @@ class TestController extends FController
     public function actionZ()
     {
         try {
-            $visitorForm = new VisitorForm();
+            $testForm = new VisitorForm();
             $data['visitor'] = [
-                'id' => 'ip_value',
+                'id' => str_repeat('x', random_int(30, 60)),
                 'ipAddress' => '23.22.53.178',
                 'userAgent' => 'userAgent_value',
             ];
-            $visitorForm->load($data);
+            $testForm->load($data);
 
-            if (!$visitorForm->validate()) {
-                /* TODO::  */
+            if (!$testForm->validate()) {
+                throw new ModelException($testForm, ['id', 'ipAddressregerg']);
             }
+        } catch (AdditionalDataInterface $throwable) {
+            $message = AppHelper::throwableLog($throwable);
+            $message['customData'] = $throwable->getAdditionalData();
+            \Yii::error($message, 'TODO:::ModelException');
         } catch (\Throwable $throwable) {
             $message = AppHelper::throwableLog($throwable);
-            $message['customData'] = [];
             \Yii::error($message, 'TODO:::Throwable');
         }
-
-//        \yii\helpers\VarDumper::dump($visitorForm->toArray(), 20, true); exit();
-        /* FOR DEBUG:: must by remove */
 
         echo 'Feature Flag Test<br><br>';
 

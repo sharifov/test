@@ -6,20 +6,21 @@ use src\helpers\ErrorsToStringHelper;
 use Throwable;
 use yii\base\Model;
 
-class ModelException extends \DomainException
+class ModelException extends \DomainException implements AdditionalDataInterface
 {
     protected Model $model;
     protected string $defaultMessage;
     protected ?string $customMessage;
     protected ?array $keyModelData;
+    protected array $extraData;
 
     protected array $additionalData = [];
 
     public function __construct(
         Model $model,
         ?array $keyModelData = null,
-        ?string $customMessage = null,
         array $extraData = [],
+        ?string $customMessage = null,
         string $defaultMessage = '',
         int $code = 0,
         Throwable $previous = null
@@ -28,8 +29,9 @@ class ModelException extends \DomainException
         $this->customMessage = $customMessage;
         $this->defaultMessage = $defaultMessage;
         $this->keyModelData = $keyModelData;
+        $this->extraData = $extraData;
 
-        //$this->modelData = $additionalData;
+        $this->generateAdditionalData();
 
         parent::__construct($this->generateMessage(), $code, $previous);
     }
@@ -49,11 +51,10 @@ class ModelException extends \DomainException
     {
         if ($this->keyModelData) {
             foreach ($this->keyModelData as $key) {
-                $this->additionalData[$key] = $this->model->{$key} ?? null;
+                $this->additionalData[$key] = $this->model->{$key} ?? 'Property(' . $key . ') not found';
             }
         }
-
-        // $extraData
+        return $this->additionalData = array_merge($this->additionalData, $this->extraData);
     }
 
     public function getAdditionalData(): array
