@@ -28,27 +28,15 @@ class LeadTasksListSavedNotification
     {
         $result = false;
         /** @fflag FFlag::FF_KEY_AUTO_REFRESH_LEAD_TASK_LIST_ENABLE, Auto refresh lead task list enabled */
-        $isAutoRefreshLeadTaskListEnabled = \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_AUTO_REFRESH_LEAD_TASK_LIST_ENABLE);
-        $notificationData = [
-            'data' => [
-                'gid' => $this->lead->gid,
-                'leadId' => $this->lead->id,
-                'isSavedAction' => true,
-            ],
-        ];
-
-        if ($isAutoRefreshLeadTaskListEnabled) {
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_AUTO_REFRESH_LEAD_TASK_LIST_ENABLE)) {
             sleep(2);
-            $result = Notifications::pub(['lead-' . $this->lead->id], 'refreshTaskList', $notificationData);
-        }
-
-        /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
-        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE)) {
-            \Yii::info([
-                'isSuccessNotification' => $result,
-                'isAutoRefreshLeadTaskListEnabled' => $isAutoRefreshLeadTaskListEnabled,
-                'notificationData' => $notificationData,
-            ], 'info\LeadTasksListSavedNotification:send');
+            $result = Notifications::pub(['lead-' . $this->lead->id], 'refreshTaskList', [
+                'data' => [
+                    'gid' => $this->lead->gid,
+                    'leadId' => $this->lead->id,
+                    'isSavedAction' => true,
+                ],
+            ]);
         }
 
         return $result;
