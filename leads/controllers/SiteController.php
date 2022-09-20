@@ -6,15 +6,14 @@ namespace leads\controllers;
 
 use Yii;
 use yii\web\Controller;
-use yii\web\Response;
 
 class SiteController extends Controller
 {
-    public function actionIndex(): Response
+    public function actionIndex(): array
     {
-        return $this->asJson([
+        return [
             'ServerName' => Yii::$app->request->serverName,
             'Date' => date('Y-m-d H:i:s'),
-        ]);
+        ];
     }
 }
