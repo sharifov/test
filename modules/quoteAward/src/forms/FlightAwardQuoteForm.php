@@ -7,6 +7,7 @@ use common\models\Lead;
 use common\models\QuotePrice;
 use modules\flight\models\Flight;
 use modules\quoteAward\src\dictionary\AwardProgramDictionary;
+use modules\quoteAward\src\dictionary\ProductTypeDictionary;
 use modules\quoteAward\src\entities\QuoteFlightProgram;
 use modules\quoteAward\src\models\FlightAwardQuoteItem;
 use src\forms\CompositeForm;
@@ -26,9 +27,10 @@ class FlightAwardQuoteForm extends CompositeForm
     public $recordLocator;
     public $fareType;
     public $quoteProgram;
-    public $ppc;
+    public $pcc;
     public $awardProgram;
     public $ppm;
+    public $productType;
 
     private $is_required_award_program;
 
@@ -64,10 +66,11 @@ class FlightAwardQuoteForm extends CompositeForm
         return [
             [['cabin', 'validationCarrier', 'gds', 'quoteProgram'], 'required'],
             ['cabin', 'string', 'max' => 1],
-            [['ppc', 'fareType', 'recordLocator'], 'string'],
+            [['pcc', 'fareType', 'recordLocator', 'productType'], 'string'],
             ['id', 'integer'],
             ['ppm', 'number'],
             ['cabin', 'in', 'range' => array_keys(Flight::getCabinClassList())],
+            ['productType', 'in', 'range' => array_keys(ProductTypeDictionary::getList())],
             ['awardProgram', 'in', 'range' => array_keys(QuoteFlightProgram::getList())],
             [['adults', 'children', 'infants'], 'required'],
             [['adults', 'children', 'infants'], 'integer', 'min' => 0, 'max' => 9],
@@ -111,12 +114,33 @@ class FlightAwardQuoteForm extends CompositeForm
     public function attributeLabels()
     {
         return [
-            'ppc' => 'PPC'
+            'pcc' => 'PCC'
         ];
     }
 
     public function isRequiredAwardProgram(): bool
     {
         return $this->is_required_award_program;
+    }
+
+    public function getTotalPrice(): array
+    {
+        $totalPrice = [
+            'selling' => 0,
+            'net' => 0,
+            'fare' => 0,
+            'taxes' => 0,
+            'markUp' => 0,
+        ];
+
+        foreach ($this->prices as $price) {
+            $totalPrice['selling'] += $price->selling * $price->passenger_count;
+            $totalPrice['net'] += $price->net * $price->passenger_count;
+            $totalPrice['fare'] += $price->fare * $price->passenger_count;
+            $totalPrice['taxes'] += $price->taxes * $price->passenger_count;
+            $totalPrice['markUp'] += $price->mark_up * $price->passenger_count;
+        }
+
+        return $totalPrice;
     }
 }

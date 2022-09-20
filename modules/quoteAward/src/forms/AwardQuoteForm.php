@@ -19,10 +19,12 @@ class AwardQuoteForm extends CompositeForm
 {
     public const REQUEST_FLIGHT = 'flight';
     public const REQUEST_SEGMENT = 'segment';
+    public const REQUEST_TRIP = 'trip';
 
     private Lead $lead;
 
     public $trip_type;
+    public $cabin;
     public $checkPayment;
     public $employee_id;
     public $labels;
@@ -35,6 +37,7 @@ class AwardQuoteForm extends CompositeForm
     {
         $this->lead = $lead;
         $this->trip_type = $lead->trip_type;
+        $this->cabin = $lead->cabin ?: Lead::TRIP_TYPE_ONE_WAY;
         $this->employee_id = Auth::id();
         $this->checkPayment = true;
 
@@ -52,11 +55,13 @@ class AwardQuoteForm extends CompositeForm
     public function rules(): array
     {
         return [
-            [['trip_type'], 'required'],
+            [['trip_type', 'cabin'], 'required'],
             [['labels', 'checkPayment'], 'safe'],
             ['checkPayment', 'boolean'],
             [['employee_id'], 'exist', 'skipOnError' => true, 'targetClass' => Employee::class, 'targetAttribute' => ['employee_id' => 'id']],
             ['trip_type', 'in', 'range' => array_keys(Lead::getFlightTypeList())],
+            ['cabin', 'string', 'max' => 1],
+            ['cabin', 'in', 'range' => array_keys(Flight::getCabinClassList())],
         ];
     }
 
@@ -116,10 +121,10 @@ class AwardQuoteForm extends CompositeForm
         return $flights;
     }
 
-    public function addSegment()
+    public function addSegment($tripId)
     {
         $segments = $this->segments;
-        $segments[] = (new SegmentAwardQuoteForm((new SegmentAwardQuoteItem($this->lead))));
+        $segments[] = (new SegmentAwardQuoteForm((new SegmentAwardQuoteItem($this->lead, $tripId))));
         $this->segments = $segments;
     }
 
@@ -129,6 +134,17 @@ class AwardQuoteForm extends CompositeForm
         $segments = $this->segments;
         if (array_key_exists($index, $segments)) {
             unset($segments[$index]);
+        }
+        $this->segments = $segments;
+    }
+
+    public function removeTrip(int $removeIndex)
+    {
+        $segments = $this->segments;
+        foreach ($segments as $key => $segment) {
+            if ($removeIndex === (int)$segment->trip) {
+                unset($segments[$key]);
+            }
         }
         $this->segments = $segments;
     }
@@ -154,5 +170,37 @@ class AwardQuoteForm extends CompositeForm
             'employee_id' => 'Quote Creator',
             'labels' => 'Quote label'
         ];
+    }
+
+    public function groupByTrip(): array
+    {
+        $trips = [];
+        foreach ($this->segments as $key => $segment) {
+            $trips[$segment->trip][$key] = $segment;
+        }
+
+        return $trips;
+    }
+
+    public function getTotalPrice(): array
+    {
+        $totalPrice = [
+            'selling' => 0,
+            'net' => 0,
+            'fare' => 0,
+            'taxes' => 0,
+            'markUp' => 0,
+        ];
+
+        foreach ($this->flights as $flight) {
+            $prices = $flight->getTotalPrice();
+            $totalPrice['selling'] += $prices['selling'];
+            $totalPrice['net'] += $prices['net'];
+            $totalPrice['fare'] += $prices['fare'];
+            $totalPrice['taxes'] += $prices['taxes'];
+            $totalPrice['markUp'] += $prices['markUp'];
+        }
+
+        return $totalPrice;
     }
 }
