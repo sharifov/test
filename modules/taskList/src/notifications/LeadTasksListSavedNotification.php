@@ -38,7 +38,7 @@ class LeadTasksListSavedNotification
         ];
 
         if ($isAutoRefreshLeadTaskListEnabled) {
-            $result = Notifications::publish('refreshTaskList', ['user_id' => $this->lead->employee_id], $notificationData);
+            $result = Notifications::pub(['lead-' . $this->lead->id], 'refreshTaskList', $notificationData);
         }
 
         /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
