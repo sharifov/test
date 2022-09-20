@@ -91,12 +91,13 @@ class BaseJob extends BaseObject
                             'BaseJob:ExecTimeRegister:TimeoutExceeded'
                         );
                     }
+                    return true;
                 }
             } catch (\Throwable $throwable) {
                 \Yii::error(AppHelper::throwableLog($throwable), 'BaseJob:ExecTimeRegister:Throwable');
-                return false;
             }
         }
+        return false;
     }
 
     public static function runInClass(): string
