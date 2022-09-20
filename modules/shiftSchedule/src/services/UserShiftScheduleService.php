@@ -8,6 +8,7 @@ use Cron\CronExpression;
 use Exception;
 use frontend\helpers\TimeConverterHelper;
 use modules\featureFlag\FFlag;
+use modules\shiftSchedule\src\abac\ShiftAbacObject;
 use modules\shiftSchedule\src\entities\shift\Shift;
 use modules\shiftSchedule\src\entities\shiftScheduleRule\ShiftScheduleRule;
 use modules\shiftSchedule\src\entities\shiftScheduleType\ShiftScheduleType;
@@ -438,6 +439,15 @@ class UserShiftScheduleService
     public static function shiftSummaryReportIsEnable(): bool
     {
         /** @fflag FFlag::FF_KET_SHIFT_SUMMARY_REPORT_ENABLE, Enable shift summary report */
-        return Yii::$app->featureFlag->isEnable(FFlag::FF_KET_SHIFT_SUMMARY_REPORT_ENABLE);
+        if (Yii::$app->featureFlag->isEnable(FFlag::FF_KET_SHIFT_SUMMARY_REPORT_ENABLE)) {
+            /** @abac ShiftAbacObject::ACT_SUMMARY_REPORT, ShiftAbacObject::ACTION_ACCESS, Access to shift-schedule/summary-report */
+            return \Yii::$app->abac->can(
+                null,
+                ShiftAbacObject::ACT_SUMMARY_REPORT,
+                ShiftAbacObject::ACTION_ACCESS
+            );
+        }
+
+        return false;
     }
 }

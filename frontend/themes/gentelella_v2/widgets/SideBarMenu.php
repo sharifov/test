@@ -217,6 +217,13 @@ class SideBarMenu extends \yii\bootstrap\Widget
             'url' => ['/cases-q/pending'], 'icon' => 'list', 'title' => 'Case Pending queue'];
         $menuCases[] = ['label' => 'Inbox <span id="cases-q-inbox" data-type="inbox" class="label-warning label pull-right cases-q-info"></span> ',
             'url' => ['/cases-q/inbox'], 'icon' => 'briefcase text-info', 'title' => 'Case Inbox queue'];
+
+        /** @fflag FFlag::FF_KEY_CROSS_SALE_QUEUE_ENABLE, Cross Sale Queue enable */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CROSS_SALE_QUEUE_ENABLE)) {
+            $menuCases[] = ['label' => 'Cross Sales inbox <span id="cases-q-cross-sales-inbox" data-type="inbox" class="label-warning label pull-right cases-q-info"></span> ',
+                'url' => ['/cases-q/cross-sale-inbox'], 'icon' => 'briefcase text-info', 'title' => 'Cross Sales inbox'];
+        }
+
         $menuCases[] = ['label' => 'Unidentified <span id="cases-q-unidentified" data-type="unidentified" class="label-warning label pull-right cases-q-info"></span> ',
             'url' => ['/cases-q/unidentified'], 'icon' => 'list', 'title' => 'Case Unidentified queue'];
         $menuCases[] = ['label' => 'First Priority <span id="cases-q-first-priority" data-type="first-priority" class="label-warning label pull-right cases-q-info"></span> ',
@@ -571,7 +578,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => 'Lead User Ratings', 'url' => ['/lead-user-rating-crud/index']],
                         ['label' => 'Lead Status Reason', 'url' => ['/lead-status-reason-crud/index']],
                         ['label' => 'Lead Status Reason Log', 'url' => ['/lead-status-reason-log-crud/index']],
-                        [
+                        (SmartLeadDistributionService::ffIsEnable()) ? [
                             'label' => 'Smart Lead Distribution',
                             'url' => 'javascript:',
                             'icon' => 'list',
@@ -579,8 +586,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                                 ['label' => 'Lead Rating Parameters', 'url' => ['/smart-lead-distribution/lead-rating-parameter-crud/index']],
                                 ['label' => 'Summary Report', 'url' => ['/smart-lead-distribution/lead-rating-report/index']],
                             ],
-                            'visible' => SmartLeadDistributionService::ffIsEnable()
-                        ]
+                        ] : null,
                     ]
                 ],
                 [
@@ -1281,7 +1287,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
         $menuInfoBlock = [];
         /** @fflag FFlag::FF_KEY_INFO_BLOCK_ENABLE, Info Block Enable */
         if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_INFO_BLOCK_ENABLE)) {
-            $menuInfoBlock = ['label' => 'Info Block', 'url' => ['/info-block-crud/index'], 'icon' => 'list', 'visible' => \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_INFO_BLOCK_ENABLE)];
+            $menuInfoBlock = ['label' => 'Info Block', 'url' => ['/info-block-crud/index'], 'icon' => 'list'];
         }
 
         $menuItems[] = [
@@ -1339,7 +1345,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
                         ['label' => Yii::t('menu', 'Composer Info'), 'url' => ['/tools/composer-info']],
                         ['label' => 'Check phone', 'url' => ['/tools/check-phone'], 'icon' => 'volume-control-phone'],
                         ['label' => 'Import phones', 'url' => ['/tools/import-phone'], 'icon' => 'caret-square-o-up'],
-                        ['label' => 'Lead rating', 'url' => ['/tools/lead-rating'], 'visible' => SmartLeadDistributionService::ffIsEnable()],
+                        (SmartLeadDistributionService::ffIsEnable()) ? ['label' => 'Lead rating', 'url' => ['/tools/lead-rating']] : null,
                     ]
                 ],
 

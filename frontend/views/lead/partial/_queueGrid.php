@@ -26,7 +26,8 @@ $is_manager = false;
 if ($user->isAdmin() || $user->isSupervision()) {
     $is_manager = true;
 }
-
+/** @fflag FFlag::FF_KEY_SHOW_TASK_INFO_COLUMN_ON_LEAD_SECTION_UI, Show "Task info" column from Lead section on UI */
+$isFFShowTaskInfoColumn = \Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_SHOW_TASK_INFO_COLUMN_ON_LEAD_SECTION_UI);
 ?>
 <?php \yii\widgets\Pjax::begin(['timeout' => 10000]); ?>
 <?= GridView::widget([
@@ -354,7 +355,7 @@ if ($user->isAdmin() || $user->isSupervision()) {
             },
             'format' => 'html',
             'contentOptions' => ['class' => 'text-left'],
-            'visible' => $is_manager && in_array($queueType, ['follow-up', 'processing', 'processing-all']),
+            'visible' => $is_manager && in_array($queueType, ['follow-up', 'processing', 'processing-all']) && $isFFShowTaskInfoColumn,
             'options' => ['style' => 'width:140px'],
         ],
 

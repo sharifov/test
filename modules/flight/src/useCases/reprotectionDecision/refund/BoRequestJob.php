@@ -26,11 +26,14 @@ class BoRequestJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
+        $this->setTimeExecution(microtime(true));
         try {
             $requestBo = \Yii::createObject(BoRequest::class);
             $requestBo->refund($this->bookingId, $this->orderRefundId, $this->productQuoteRefundId, $this->userId, $this->caseId);
         } catch (\Throwable $e) {
             \Yii::error(array_merge(['bookingId' => $this->bookingId], AppHelper::throwableLog($e, true)), 'BoRequestJob:reprotection:refund');
         }
+
+        $this->execTimeRegister();
     }
 }

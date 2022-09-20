@@ -184,13 +184,13 @@ class QCallService
             ($phoneNumberRedial = PhoneNumberRedialQuery::getOneMatchingByClientPhone($clientPhone->phone, $qCall->lqcLead->project_id))
         ) {
             $phone = $phoneNumberRedial->phoneList->pl_phone_number;
-            Yii::info([
-                'matchedPhone' => $phone,
-                'pattern' => $phoneNumberRedial->pnr_phone_pattern,
-                'phoneTo' => $clientPhone->phone,
-                'phoneNumberRedialId' => $phoneNumberRedial->pnr_id,
-                'leadId' => $qCall->lqc_lead_id
-            ], 'info\qCallService::updateInterval::phoneNumberRedialReplace');
+//            Yii::info([
+//                'matchedPhone' => $phone,
+//                'pattern' => $phoneNumberRedial->pnr_phone_pattern,
+//                'phoneTo' => $clientPhone->phone,
+//                'phoneNumberRedialId' => $phoneNumberRedial->pnr_id,
+//                'leadId' => $qCall->lqc_lead_id
+//            ], 'info\qCallService::updateInterval::phoneNumberRedialReplace');
         }
 
         if (!$phone) {

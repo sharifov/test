@@ -1438,6 +1438,7 @@ class FlightQuoteController extends FController
                 try {
                     $productQuote = $this->productQuoteRepository->find($form->originProductQuoteId);
                     $order = $this->orderRepository->find($form->orderId);
+                    $case = $this->casesRepository->find($form->caseId);
 
                     $this->voluntaryRefundService->createManual($order, $form->caseId, $productQuote, $form);
 
@@ -1453,7 +1454,10 @@ class FlightQuoteController extends FController
             return $this->renderAjax('partial/_voluntary_refund_create', [
                 'message' => '',
                 'errors' => [],
-                'refundForm' => $form
+                'refundForm' => $form,
+                'productQuote' => $productQuote,
+                'order' => $order,
+                'case' => $case,
             ]);
         }
 
@@ -1544,7 +1548,10 @@ class FlightQuoteController extends FController
             return $this->renderAjax('partial/_voluntary_refund_create', [
                 'message' => $message,
                 'errors' => $errors,
-                'refundForm' => $form
+                'refundForm' => $form,
+                'productQuote' => $productQuote,
+                'order' => $order,
+                'case' => $case,
             ]);
         }
         throw new BadRequestHttpException('Method not allowed');

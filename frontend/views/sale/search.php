@@ -1,5 +1,8 @@
 <?php
 
+use common\models\Department;
+use common\models\Employee;
+use src\entities\cases\CasesStatus;
 use yii\helpers\Html;
 use yii\widgets\Pjax;
 use yii\grid\GridView;
@@ -7,10 +10,13 @@ use yii\grid\GridView;
 /* @var $this yii\web\View */
 /* @var $searchModel common\models\search\SaleSearch */
 /* @var $dataProvider yii\data\ArrayDataProvider */
+/* @var $user common\models\Employee */
 
 $this->title = 'Search Sale';
 $this->params['breadcrumbs'][] = $this->title;
 
+$user = Yii::$app->user->identity;
+$userDepartments = $user->getUserDepartmentList();
 
 ?>
 <style>
@@ -76,12 +82,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'format' => 'raw'
             ],
             [
-                'label' => 'Cases',
+                'label' => 'Cases / Departments / Statuses',
                 'value' => static function ($model) {
                     $data = [];
                     if ($model['relatedCases']) {
                         foreach ($model['relatedCases'] as $case) {
-                            $data[] = '<i class="fa fa-link"></i> ' . Html::a($case['cs_id'], ['/cases/view/' . $case['cs_gid']]);
+                            $departmentName = Department::getName($case['cs_dep_id']);
+                            $statusName = CasesStatus::getName($case['cs_status']);
+                            $data[] = '<i class="fa fa-link"></i> ' . Html::a($case['cs_id'], ['/cases/view/' . $case['cs_gid']]) . ' ' . $departmentName . ' ' . $statusName;
                         }
                     }
 
@@ -189,11 +197,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 'class' => 'yii\grid\ActionColumn',
                 'template' => '{view}',
                 'buttons' => [
-                    'view' => function ($url, $model, $key) {
+                    'view' => function ($url, $model, $key) use ($userDepartments) {
                         return Html::a('<span class="fa fa-search"></span> View sale', ['view', 'h' => base64_encode($model['confirmationNumber'] . '|' . $model['saleId'])], ['title' => 'View', 'data-pjax' => 0, 'class' => 'btn btn-info btn-xs']) .
                         '<br/>' .
-                        Html::a('<span class="fa fa-cube"></span> Create case', ['/cases/create', 'orderUid' => $model['confirmationNumber'], 'project' => $model['project']], ['data-pjax' => 0, 'class' => 'btn btn-success btn-xs'])
-                        ;
+                        Html::a(
+                            '<span class="fa fa-cube"></span> Create case',
+                            ['/cases/create', 'orderUid' => $model['confirmationNumber'], 'project' => $model['project'], 'department' => count($userDepartments) == 1 ? key($userDepartments) : '', 'email' => $model['email'] ?? null, 'saleId' => $model['saleId'] ?? null,],
+                            ['data-pjax' => 0, 'class' => 'btn btn-success btn-xs', 'target' => '_blank',]
+                        );
                     },
                 ]
             ]

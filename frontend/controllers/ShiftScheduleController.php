@@ -75,7 +75,7 @@ class ShiftScheduleController extends FController
                 'rules' => [
                     [
                         'actions' => ['ajax-multiple-delete', 'add-multiple-events', 'ajax-event-details', 'ajax-get-logs',
-                            'ajax-edit-event-form', 'ajax-multiple-update', 'ajax-edit-event', 'add-event', 'delete-event', 'summary-report'],
+                            'ajax-edit-event-form', 'ajax-multiple-update', 'ajax-edit-event', 'add-event', 'delete-event'],
                         'allow' => true,
                         'roles' => ['@']
                     ],
@@ -117,6 +117,16 @@ class ShiftScheduleController extends FController
                             null,
                             ShiftAbacObject::ACT_USER_SHIFT_SCHEDULE,
                             ShiftAbacObject::ACTION_REMOVE_FUTURE_USER_SCHEDULE
+                        ),
+                        'roles' => ['@'],
+                    ],
+                    /** @abac ShiftAbacObject::ACT_SUMMARY_REPORT, ShiftAbacObject::ACTION_ACCESS, Access to shift-schedule/summary-report */
+                    [
+                        'actions' => ['summary-report'],
+                        'allow' => \Yii::$app->abac->can(
+                            null,
+                            ShiftAbacObject::ACT_SUMMARY_REPORT,
+                            ShiftAbacObject::ACTION_ACCESS
                         ),
                         'roles' => ['@'],
                     ],

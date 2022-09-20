@@ -696,8 +696,9 @@ class LeadController extends FController
 
                         // Initiate basic state of `$content_data`
                         $content_data = ($comForm->offerList)
-                            ? $lead->getOfferEmailData($comForm->offerList, $projectContactInfo)
-                            : $lead->getEmailData2($comForm->quoteList, $projectContactInfo, $lang);
+                            ? $lead->getOfferEmailData($comForm->offerList, $projectContactInfo, $language)
+                            : $lead->getEmailData2($comForm->quoteList, $projectContactInfo, $language);
+
                         $content_data['quotes'] = array_map(function ($quoteArray) use ($comForm) {
                             $quoteArray['qc'] = $comForm->c_qc_uid;
                             return $quoteArray;

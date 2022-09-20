@@ -9,6 +9,7 @@ use common\models\UserProjectParams;
 use frontend\widgets\notification\NotificationMessage;
 use src\dto\email\EmailDTO;
 use src\exception\CreateModelException;
+use src\helpers\app\AppHelper;
 use src\services\email\EmailMainService;
 use src\services\email\EmailService;
 use Yii;
