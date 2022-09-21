@@ -167,7 +167,12 @@ class ClientChatRequestController extends ApiBaseController
      * ]
      * },
      * "sources": {
+     * "crossSystemXp": "123465.1"
      * },
+     * "experiments": [
+     * "123461.1",
+     * "123465.3",
+     * ],
      * "page": {
      * "url": "https:\/\/dev-ovago.travel-dev.com\/search\/WAS-FRA%2F2021-03-22%2F2021-03-28",
      * "title": "Air Ticket Booking - Find Cheap Flights and Airfare Deals - Ovago.com",
