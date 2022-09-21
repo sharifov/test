@@ -32,6 +32,7 @@ class TelegramSendMessageJob extends BaseJob implements RetryableJobInterface
     public function execute($queue): bool
     {
         $this->waitingTimeRegister();
+        $this->setTimeExecution(microtime(true));
 
         if (TelegramService::delayForTelegramMessagesIsEnable() === true) {
             $lastMessageToUser = TelegramService::getTimeForLastSentMessageToUser($this->user_id);
@@ -103,6 +104,9 @@ class TelegramSendMessageJob extends BaseJob implements RetryableJobInterface
                 }
             }
         }
+
+        $this->execTimeRegister();
+
         return false;
     }
 

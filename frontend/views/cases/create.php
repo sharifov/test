@@ -69,6 +69,8 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <?= $form->field($model, 'description')->textarea(['rows' => 6]) ?>
 
+                <?= $form->field($model, 'saleId')->hiddenInput()->label(false) ?>
+
 
 
                 <div class="form-group text-center">
@@ -116,6 +118,13 @@ $js = <<<JS
                       callback.apply(context, args);
                     }, ms || 0);
               };
+        }
+        
+        let department = $('#casescreatebywebform-depid');
+        if(department.val() !== '') {
+            setTimeout(function () {
+                department.trigger('change');
+            }, 100);
         }
     });
 JS;

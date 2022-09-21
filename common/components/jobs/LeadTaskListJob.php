@@ -30,6 +30,7 @@ class LeadTaskListJob extends BaseJob implements JobInterface
     public function execute($queue): void
     {
         $this->waitingTimeRegister();
+        $this->setTimeExecution(microtime(true));
 
         try {
             if (!$lead = LeadQuery::getLeadById($this->leadId)) {
@@ -53,5 +54,7 @@ class LeadTaskListJob extends BaseJob implements JobInterface
             $message['oldOwnerId'] = $this->oldOwnerId;
             \Yii::error($message, 'LeadTaskListJob:execute:Throwable');
         }
+
+        $this->execTimeRegister();
     }
 }

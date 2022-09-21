@@ -44,6 +44,7 @@ class ExchangeExpiredJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
+        $this->setTimeExecution(microtime(true));
 
         try {
             if (!$flightRequest = FlightRequest::findOne($this->flightRequestId)) {
@@ -91,5 +92,7 @@ class ExchangeExpiredJob extends BaseJob implements JobInterface
                 'trace' => AppHelper::throwableLog($e, true)
             ], 'ExchangeExpiredJob::execute');
         }
+
+        $this->execTimeRegister();
     }
 }

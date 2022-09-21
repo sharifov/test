@@ -36,6 +36,7 @@ class LeadObjectSegmentJob extends BaseJob implements JobInterface
     public function execute($queue): void
     {
         $this->waitingTimeRegister();
+        $this->setTimeExecution(microtime(true));
 
         $logData = [
             'leadId' => $this->lead->id,
@@ -78,5 +79,7 @@ class LeadObjectSegmentJob extends BaseJob implements JobInterface
             $message = ArrayHelper::merge(AppHelper::throwableLog($throwable), $logData);
             \Yii::error($message, 'LeadObjectSegmentJob:execute:Throwable');
         }
+
+        $this->execTimeRegister();
     }
 }

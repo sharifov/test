@@ -32,7 +32,7 @@ class DownloadEmails
         $this->emailService = $emailService;
     }
 
-    public function download(bool $debug, int $limit): void
+    public function download(bool $debug, int $limit, ?int $communicationEmailId = null): void
     {
         $newMessages = (bool)Yii::$app->redis->get('new_email_message_received');
         if (!$newMessages) {
@@ -44,11 +44,15 @@ class DownloadEmails
         $cycleCount = 1;
         $countTotal = 0;
 
-        // $lastEmailId = EmailRepositoryFactory::getRepository()->getLastInboxId() ?? 1;
-        // TODO EmailRepositoryFactory
-        $lastEmailId = (int) Email::find()->select(['e_inbox_email_id'])->where(['>', 'e_inbox_email_id', 0])->orderBy(['e_inbox_email_id' => SORT_DESC])->scalar();
-        if ($lastEmailId === 0) {
-            $lastEmailId = 1;
+        if ($communicationEmailId) {
+            $lastEmailId = $communicationEmailId;
+        } else {
+            // $lastEmailId = EmailRepositoryFactory::getRepository()->getLastInboxId() ?? 1;
+            // TODO EmailRepositoryFactory
+            $lastEmailId = (int) Email::find()->select(['e_inbox_email_id'])->where(['>', 'e_inbox_email_id', 0])->orderBy(['e_inbox_email_id' => SORT_DESC])->scalar();
+            if ($lastEmailId === 0) {
+                $lastEmailId = 1;
+            }
         }
 
         $filter = [

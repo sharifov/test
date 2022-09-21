@@ -31,6 +31,7 @@ class CallQueueRepeatMessageJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
+        $this->setTimeExecution(microtime(true));
         try {
             $call = $this->findCall();
             if (
@@ -76,6 +77,8 @@ class CallQueueRepeatMessageJob extends BaseJob implements JobInterface
                 'departmentPhoneProjectId' => $this->departmentPhoneProjectId,
             ], 'CallQueueRepeatMessageJob');
         }
+
+        $this->execTimeRegister();
     }
 
     private function findCall(): Call
