@@ -115,81 +115,80 @@ class ClientChatRequestController extends ApiBaseController
      *
      * @apiParamExample {json} Request-Example ROOM_CONNECTED:
      * {
-     * "event": "ROOM_CONNECTED",
-     * "data": {
-     * "rid": "d83ef2d3-30bf-4636-a2c6-7f5b4b0e81a4",
-     * "geo": {
-     * "ip": "92.115.180.30",
-     * "version": "IPv4",
-     * "city": "Chisinau",
-     * "region": "Chi\u0219in\u0103u Municipality",
-     * "region_code": "CU",
-     * "country": "MD",
-     * "country_name": "Republic of Moldova",
-     * "country_code": "MD",
-     * "country_code_iso3": "MDA",
-     * "country_capital": "Chisinau",
-     * "country_tld": ".md",
-     * "continent_code": "EU",
-     * "in_eu": false,
-     * "postal": "MD-2000",
-     * "latitude": 47.0056,
-     * "longitude": 28.8575,
-     * "timezone": "Europe\/Chisinau",
-     * "utc_offset": "+0300",
-     * "country_calling_code": "+373",
-     * "currency": "MDL",
-     * "currency_name": "Leu",
-     * "languages": "ro,ru,gag,tr",
-     * "country_area": 33843,
-     * "country_population": 3545883,
-     * "asn": "AS8926",
-     * "org": "Moldtelecom SA"
-     * },
-     * "visitor": {
-     * "conversations": 0,
-     * "lastAgentMessage": null,
-     * "lastVisitorMessage": null,
-     * "id": "fef46d63-8a30-4eec-89eb-62f1bfc0ffcd",
-     * "username": "Test Usrename",
-     * "name": "Test Name",
-     * "uuid": "54d87707-bb54-46e3-9eca-8f776c7bcacf",
-     * "project": "ovago",
-     * "channel": "1",
-     * "email": "test@techork.com",
-     * "leadIds": [
-     * 234556,
-     * 357346
-     * ],
-     * "caseIds": [
-     * 345464634,
-     * 345634634
-     * ]
-     * },
-     * "sources": {
-     * "crossSystemXp": "123465.1"
-     * },
-     * "experiments": [
-     * "123461.1",
-     * "123465.3",
-     * ],
-     * "page": {
-     * "url": "https:\/\/dev-ovago.travel-dev.com\/search\/WAS-FRA%2F2021-03-22%2F2021-03-28",
-     * "title": "Air Ticket Booking - Find Cheap Flights and Airfare Deals - Ovago.com",
-     * "referrer": "https:\/\/dev-ovago.travel-dev.com\/search\/WAS-FRA%2F2021-03-22%2F2021-03-28"
-     * },
-     * "system": {
-     * "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/85.0.4183.102 Safari\/537.36",
-     * "language": "en-US",
-     * "resolution": "1920x1080"
-     * },
-     * "custom": {
-     * "event": {
-     * "eventName": "UPDATE",
-     * "eventProps": []
-     * }
-     * }
-     * }
+     *     "event": "ROOM_CONNECTED",
+     *     "data": {
+     *         "rid": "d83ef2d3-30bf-4636-a2c6-7f5b4b0e81a4",
+     *         "geo": {
+     *             "ip": "92.115.180.30",
+     *             "version": "IPv4",
+     *             "city": "Chisinau",
+     *             "region": "Chi\u0219in\u0103u Municipality",
+     *             "region_code": "CU",
+     *             "country": "MD",
+     *             "country_name": "Republic of Moldova",
+     *             "country_code": "MD",
+     *             "country_code_iso3": "MDA",
+     *             "country_capital": "Chisinau",
+     *             "country_tld": ".md",
+     *             "continent_code": "EU",
+     *             "in_eu": false,
+     *             "postal": "MD-2000",
+     *             "latitude": 47.0056,
+     *             "longitude": 28.8575,
+     *             "timezone": "Europe\/Chisinau",
+     *             "utc_offset": "+0300",
+     *             "country_calling_code": "+373",
+     *             "currency": "MDL",
+     *             "currency_name": "Leu",
+     *             "languages": "ro,ru,gag,tr",
+     *             "country_area": 33843,
+     *             "country_population": 3545883,
+     *             "asn": "AS8926",
+     *             "org": "Moldtelecom SA"
+     *         },
+     *         "visitor": {
+     *             "conversations": 0,
+     *             "lastAgentMessage": null,
+     *             "lastVisitorMessage": null,
+     *             "id": "fef46d63-8a30-4eec-89eb-62f1bfc0ffcd",
+     *             "username": "Test Usrename",
+     *             "name": "Test Name",
+     *             "uuid": "54d87707-bb54-46e3-9eca-8f776c7bcacf",
+     *             "project": "ovago",
+     *             "channel": "1",
+     *             "email": "test@techork.com",
+     *             "leadIds": [
+     *                 234556,
+     *                 357346
+     *             ],
+     *             "caseIds": [
+     *                 345464634,
+     *                 345634634
+     *             ]
+     *         },
+     *         "sources": {
+     *         },
+     *         "experiments": [
+     *             "123461.1",
+     *             "123465.3"
+     *         ],
+     *         "page": {
+     *             "url": "https:\/\/dev-ovago.travel-dev.com\/search\/WAS-FRA%2F2021-03-22%2F2021-03-28",
+     *             "title": "Air Ticket Booking - Find Cheap Flights and Airfare Deals - Ovago.com",
+     *             "referrer": "https:\/\/dev-ovago.travel-dev.com\/search\/WAS-FRA%2F2021-03-22%2F2021-03-28"
+     *         },
+     *         "system": {
+     *             "user_agent": "Mozilla\/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit\/537.36 (KHTML, like Gecko) Chrome\/85.0.4183.102 Safari\/537.36",
+     *             "language": "en-US",
+     *             "resolution": "1920x1080"
+     *         },
+     *         "custom": {
+     *             "event": {
+     *                 "eventName": "UPDATE",
+     *                 "eventProps": []
+     *             }
+     *         }
+     *     }
      * }
      *
      * @apiSuccessExample Success-Response:
