@@ -128,4 +128,9 @@ return [
         'route' => 'lead/business-inbox',
     ],
 
+    [
+        'pattern' => 'quote-award/create/<gid>',
+        'route' => 'quote-award/create',
+    ],
+
 ];

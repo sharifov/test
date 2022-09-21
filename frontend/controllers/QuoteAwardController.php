@@ -6,8 +6,10 @@ use common\models\Lead;
 use modules\quoteAward\src\forms\AwardQuoteForm;
 use modules\quoteAward\src\services\QuoteFlightService;
 use src\forms\CompositeFormHelper;
+use src\repositories\NotFoundException;
 use Yii;
 use yii\helpers\Html;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
 class QuoteAwardController extends FController
@@ -24,19 +26,20 @@ class QuoteAwardController extends FController
         parent::__construct($id, $module, $config);
     }
 
-    public function actionCreate($leadId): ?string
+    public function actionCreate($gid): ?string
     {
-        $lead = Lead::findOne(['id' => $leadId]);
-        $form = new AwardQuoteForm($lead, [], [], []);
-        $form->load(\Yii::$app->request->post());
+        $lead = Lead::find()->andWhere(['gid' => $gid])->limit(1)->one();
 
         if ($lead !== null) {
-            return $this->renderAjax('_quote', [
+            $form = new AwardQuoteForm($lead, [], [], []);
+            $form->load(\Yii::$app->request->post());
+
+            return $this->render('create', [
                 'model' => $form,
                 'lead' => $lead,
             ]);
         }
-        return null;
+        throw new NotFoundHttpException('Lead not Found');
     }
 
     public function actionUpdate($leadId, $type = null): ?string
