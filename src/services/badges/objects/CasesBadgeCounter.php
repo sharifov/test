@@ -91,6 +91,13 @@ class CasesBadgeCounter implements BadgeCounterInterface
                         $result['auto-processing'] = $count;
                     }
                     break;
+                case 'cross-sale-inbox':
+                    /** @fflag FFlag::FF_KEY_CROSS_SALE_BADGE_ENABLE, Cross Sale badge enable */
+                    if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CROSS_SALE_BADGE_ENABLE) && $count = $this->getCrossSaleInbox()) {
+                        $result['cross-sale-inbox'] = $count;
+                    }
+
+                    break;
             }
         }
         return $result;
@@ -261,5 +268,16 @@ class CasesBadgeCounter implements BadgeCounterInterface
         /** @var Employee $user */
         $user = Yii::$app->user->identity;
         return $this->casesQRepository->getPassDepartureCount($user);
+    }
+
+    private function getCrossSaleInbox(): ?int
+    {
+        if (!Yii::$app->user->can('/cases-q/cross-sale-inbox')) {
+            return null;
+        }
+        /** @var Employee $user */
+        $user = Yii::$app->user->identity;
+
+        return $this->casesQRepository->getCrossSaleInboxCount($user);
     }
 }
