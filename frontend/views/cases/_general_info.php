@@ -42,7 +42,7 @@ use yii\widgets\DetailView;
         <?php if ($model) :?>
         <div class="row">
             <div class="col-md-12">
-                <h4>Category: <span style="color: #0a0a0a"><?=$model->category ? Html::encode($model->category->cc_name) : '' ?></span></h4>
+                <h4>Category: <span style="color: #0a0a0a"><?= Html::encode($categoriesHierarchy) ?></span></h4>
                 <h4>Subject: <span style="color: #0a0a0a; word-break: break-all"><?=$model->cs_subject ? Html::encode($model->cs_subject) : '' ?></span></h4>
                 <?php if ($model->cs_description) : ?>
                 <pre><?= nl2br(trim($model->cs_description)) ?></pre>
@@ -115,12 +115,6 @@ use yii\widgets\DetailView;
                             },
                             'format' => 'raw'
                         ],
-                        [
-                            'attribute' => 'categoriesHierarchy',
-                            'value' => $categoriesHierarchy,
-                            'label' => 'Category',
-                        ],
-
                         //'cs_updated_dt',
                     ],
                 ]) ?>
