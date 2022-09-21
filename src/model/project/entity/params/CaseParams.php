@@ -20,6 +20,7 @@ class CaseParams
     public string $feedbackNameFrom;
     public bool $feedbackBookingIdRequired;
     public bool $allow_auto_case_create;
+    public array $cancel_sale;
 
     public function __construct(array $params)
     {
@@ -29,6 +30,7 @@ class CaseParams
         $this->feedbackNameFrom = $params['feedbackNameFrom'] ?? self::default()['feedbackNameFrom'];
         $this->feedbackBookingIdRequired = (bool)($params['feedbackBookingIdRequired'] ?? self::default()['feedbackBookingIdRequired']);
         $this->allow_auto_case_create = (bool) ($params['allow_auto_case_create'] ?? self::default()['allow_auto_case_create']);
+        $this->cancel_sale = $params['cancel_sale'] ?? self::default()['cancel_sale'];
     }
 
     public function isActiveFeedback(?string $caseOrderUid): bool
@@ -48,6 +50,7 @@ class CaseParams
             'feedbackNameFrom' => '',
             'feedbackBookingIdRequired' => '',
             'allow_auto_case_create' => true,
+            'cancel_sale' => [],
         ];
     }
 }
