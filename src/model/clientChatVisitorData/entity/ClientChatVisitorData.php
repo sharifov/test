@@ -212,4 +212,9 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
     {
         return $this->decodedData['sources']['crossSystemXp'] ?? null;
     }
+
+    public function getExperiments(): array
+    {
+        return $this->decodedData['experiments'] ?? [];
+    }
 }
