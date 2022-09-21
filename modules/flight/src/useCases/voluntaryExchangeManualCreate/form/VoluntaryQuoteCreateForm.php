@@ -160,6 +160,7 @@ class VoluntaryQuoteCreateForm extends ChangeQuoteCreateForm
             }],
             ['expirationDate', NormalizeDateValidator::class],
             ['expirationDate', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+            ['expirationDate', 'checkPastDate'],
         ];
     }
 
@@ -204,6 +205,18 @@ class VoluntaryQuoteCreateForm extends ChangeQuoteCreateForm
         }
         if (!$reservationService->parseStatus || empty($this->itinerary)) {
             $this->addError('reservationDump', 'Incorrect reservation dump');
+        }
+    }
+
+    public function checkPastDate(string $attribute)
+    {
+        if (!empty($this->expirationDate)) {
+            $expirationDate = new \DateTime($this->expirationDate);
+            $now = new \DateTime();
+
+            if ($now->format('Y-m-d') > $expirationDate->format('Y-m-d')) {
+                $this->addError($attribute, 'Expiration Date cannot be in the past');
+            }
         }
     }
 
