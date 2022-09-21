@@ -108,7 +108,7 @@ class FlightStatusService implements BoWebhookService
                     if (isset($saleDetail['itinerary']) && !empty($saleDetail['itinerary'])) {
                         $departureDate = $saleDetail['itinerary'][0]['segments'][0]['departureTime'] ?? '';
 
-                        if (!empty($departureDate) && $departureDate > 0) {
+                        if (!empty($departureDate)) {
                             $hours = DateHelper::getDifferentInHoursByDatesUTC(
                                 date('Y-m-d H:i:s'),
                                 $departureDate
