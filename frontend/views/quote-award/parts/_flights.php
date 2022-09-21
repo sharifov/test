@@ -299,17 +299,20 @@ $form = ActiveForm::begin([
             </div>
         <?php endif; ?>
     </div>
-    <?php
-    $applied = Quote::find()->andWhere([
-        'status' => Quote::STATUS_APPLIED,
-        'lead_id' => $lead->id
-    ])->limit(1)->one();
-    if ($applied === null) : ?>
-        <?= Html::submitButton('<i class="fa fa-floppy-o" aria-hidden="true"></i> Save Quote', [
-            'id' => 'save-alt-award-quote',
-            'class' => 'btn btn-success'
-        ]) ?>
-    <?php endif; ?>
+
+    <div class="d-flex justify-content-center">
+        <?php
+        $applied = Quote::find()->andWhere([
+            'status' => Quote::STATUS_APPLIED,
+            'lead_id' => $lead->id
+        ])->limit(1)->one();
+        if ($applied === null) : ?>
+            <?= Html::submitButton('<i class="fa fa-floppy-o" aria-hidden="true"></i> Save Quote', [
+                'id' => 'save-alt-award-quote',
+                'class' => 'btn btn-success'
+            ]) ?>
+        <?php endif; ?>
+    </div>
 
     <?php ActiveForm::end() ?>
     <style>
@@ -322,6 +325,10 @@ $form = ActiveForm::begin([
             padding: 4px 16px;
             background: rgba(83, 162, 101, 0.2);
             color: #53A265;
+        }
+
+        .quote-award_wrap .table p,  .quote-award_wrap .table .form-group{
+            margin-bottom: 0;
         }
 
     </style>
