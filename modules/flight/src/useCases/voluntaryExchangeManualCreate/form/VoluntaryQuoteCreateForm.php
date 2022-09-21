@@ -214,7 +214,7 @@ class VoluntaryQuoteCreateForm extends ChangeQuoteCreateForm
             $expirationDate = new \DateTime($this->expirationDate);
             $now = new \DateTime();
 
-            if ($now->format('Y-m-d') > $expirationDate->format('Y-m-d')) {
+            if ($now->getTimestamp() > $expirationDate->getTimestamp()) {
                 $this->addError($attribute, 'Expiration Date cannot be in the past');
             }
         }
