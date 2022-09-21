@@ -312,6 +312,16 @@ class Project extends \yii\db\ActiveRecord
         return ArrayHelper::getValue($this->p_params_json, 'object.case.schedule_change', []);
     }
 
+    public function getCancelSaleRejectEmailConfig(): array
+    {
+        return ArrayHelper::getValue($this->p_params_json, 'object.case.cancel_sale.reject', []);
+    }
+
+    public function getCancelSaleVoidEmailConfig(): array
+    {
+        return ArrayHelper::getValue($this->p_params_json, 'object.case.cancel_sale.void', []);
+    }
+
     public static function getListByUserWithProjectKeys(int $user_id = 0): array
     {
         return self::find()->select([
