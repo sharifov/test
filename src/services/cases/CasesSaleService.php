@@ -23,17 +23,22 @@ use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use modules\order\src\services\OrderManageService;
 use src\auth\Auth;
+use src\dto\email\EmailDTO;
 use src\entities\cases\CaseEventLog;
 use src\entities\cases\Cases;
 use src\exception\BoResponseException;
+use src\exception\CreateModelException;
+use src\exception\EmailNotSentException;
 use src\forms\caseSale\CaseSaleCancelForm;
 use src\forms\caseSale\CaseSaleRequestBoForm;
 use src\helpers\app\AppHelper;
 use src\helpers\ErrorsToStringHelper;
 use src\helpers\setting\SettingHelper;
+use src\model\project\entity\params\Params as ProjectParams;
 use src\model\saleTicket\useCase\create\SaleTicketService;
 use src\repositories\cases\CasesRepository;
 use src\repositories\cases\CasesSaleRepository;
+use src\services\email\EmailMainService;
 use Yii;
 use yii\db\Transaction;
 use yii\helpers\ArrayHelper;
@@ -970,11 +975,14 @@ class CasesSaleService
      */
     public function getEmailConfigByBoSaleStatus(array $responseData, Project $project): array
     {
+        $params = ProjectParams::fromJson($project->p_params_json, $project->id);
+        $cancelSaleParams = $params->object->case->cancel_sale;
+
         $emailConfig = [];
         if (!empty($responseData['saleStatus']) && mb_strtolower($responseData['saleStatus']) == 'rejected') {
-            $emailConfig = $project->getCancelSaleRejectEmailConfig();
+            $emailConfig = $cancelSaleParams['reject'] ?? [];
         } elseif (!empty($responseData['saleStatus']) && mb_strtolower($responseData['saleStatus']) == 'void') {
-            $emailConfig = $project->getCancelSaleVoidEmailConfig();
+            $emailConfig = $cancelSaleParams['void'] ?? [];
         }
         return $emailConfig;
     }
@@ -996,7 +1004,74 @@ class CasesSaleService
 
                 if ($employeeId && $ntf = Notifications::create($employeeId, $subject, $message, Notifications::TYPE_INFO)) {
                     $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                    Notifications::publish('getNewNotification', ['user_id' => 1], $dataNotification);
+                    Notifications::publish('getNewNotification', ['user_id' => $employeeId], $dataNotification);
+                }
+            }
+        }
+    }
+
+    /**
+     * @param Cases $case
+     * @param Project $project
+     * @param array $boResponseData
+     * @param array $saleData
+     * @return void
+     */
+    public function sendEmailToClientAboutCloseSale(Cases $case, Project $project, array $boResponseData, array $saleData)
+    {
+        $emailConfig = $this->getEmailConfigByBoSaleStatus($boResponseData, $project);
+        if (count($emailConfig)) {
+            $enabled = $emailConfig['enabled'] ?? null;
+            $emailFrom = $emailConfig['emailFrom'] ?? null;
+            $emailFromName = $emailConfig['emailFromName'] ?? null;
+            $emailTemplateType = $emailConfig['templateTypeKey'] ?? null;
+            $clientEmail = $saleData['email'] ?? null;
+
+            if ($enabled && $emailFrom && $emailFromName && $emailTemplateType && $clientEmail) {
+                $bookingId = $saleData['bookingId'] ?? null;
+                $emailTemplate = $this->getEmailTemplateByKey($emailTemplateType);
+                $emailData = ['email_from_name' => $emailFromName, 'bookingId' => $bookingId];
+
+                $mailPreview = \Yii::$app->comms->mailPreview($case->cs_project_id, $emailTemplate->etp_key, $emailFrom, $clientEmail, $emailData);
+                if (isset($mailPreview['error']) && $mailPreview['error']) {
+                    $errorJson = @json_decode($mailPreview['error'], true);
+                    Yii::error([
+                        'message' => 'Communication Server response: ' . $errorJson['message'] ?? null,
+                        'error' => 'Communication Server response: ' . $errorJson['error'] ?? null,
+                        'caseId' => $case->cs_id,
+                        'emailTemplateKey' => $emailTemplate->etp_key,
+                    ], 'SaleController:cancelSale');
+                } else {
+                    try {
+                        $emailDTO = EmailDTO::fromArray([
+                            'projectId' => $case->cs_project_id,
+                            'caseId' => $case->cs_id,
+                            'depId' => $case->cs_dep_id,
+                            'clientId' => $case->cs_client_id,
+                            'templateTypeId' => $emailTemplate->etp_id,
+                            'emailSubject' => $mailPreview['data']['email_subject'],
+                            'emailFrom' => $emailFrom,
+                            'emailFromName' => $emailFromName,
+                            'emailTo' => $clientEmail,
+                            'bodyHtml' => $mailPreview['data']['email_body_html'],
+                        ]);
+                        $emailService = EmailMainService::newInstance();
+                        $mail = $emailService->createFromDTO($emailDTO, false);
+                        $emailService->sendMail($mail);
+                    } catch (CreateModelException $e) {
+                        Yii::error([
+                            'message' => $e->getMessage(),
+                            'error' => VarDumper::dumpAsString($e->getErrors()),
+                            'caseId' => $case->cs_id,
+                            'emailTemplateKey' => $emailTemplate->etp_key,
+                        ], 'SaleController:cancelSale:send:Email:save');
+                    } catch (EmailNotSentException $e) {
+                        Yii::error([
+                            'message' => $e->getMessage(),
+                            'caseId' => $case->cs_id,
+                            'emailTemplateKey' => $emailTemplate->etp_key,
+                        ], 'SaleController:cancelSale:send:Email');
+                    }
                 }
             }
         }
