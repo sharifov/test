@@ -21,30 +21,36 @@ $paxCntTypes = [
 ];
 /** @fflag FFlag::FF_KEY_AWARD_ENABLE, Award Enable */
 $enableAward = Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_AWARD_ENABLE);
-$this->title = 'Add Quote'
+$this->title = 'Add Quote (Lead #' . $lead->id . ')';
+$this->params['breadcrumbs'][] = ['label' => 'Lead #' . $lead->id, 'url' => ['lead/view', 'gid' => $lead->gid]];
+$this->params['breadcrumbs'][] = $this->title;
 ?>
-    <div class="">
-        <h1><?= $this->title ?></h1>
-    </div>
-    <div class="alternatives__item">
-        <?php $currencyLead = $lead->leadPreferences->pref_currency ?? Currency::getDefaultCurrencyCode() ?>
-        <?php if ($currencyLead !== Currency::getDefaultCurrencyCode()) : ?>
-            <div class="quote_exclamation_currency">
-                <i class="fa fa-exclamation-circle warning"></i> Lead Currency:
-                <strong><?php echo $currencyLead ?></strong>
+    <div class="x_panel">
+        <div class="x-content">
+            <div class="">
+                <h2 class="h2"><?= $this->title ?></h2>
             </div>
-        <?php endif ?>
+            <div class="alternatives__item quote-award_wrap">
+                <?php $currencyLead = $lead->leadPreferences->pref_currency ?? Currency::getDefaultCurrencyCode() ?>
+                <?php if ($currencyLead !== Currency::getDefaultCurrencyCode()) : ?>
+                    <div class="quote_exclamation_currency">
+                        <i class="fa fa-exclamation-circle warning"></i> Lead Currency:
+                        <strong><?php echo $currencyLead ?></strong>
+                    </div>
+                <?php endif ?>
 
-        <div class="table-wrapper ticket-details-block__table mb-20"
-             id="alt-quote-fares-info">
+                <div class="table-wrapper ticket-details-block__table mb-20"
+                     id="alt-quote-fares-info">
 
-            <div class="js-update-ajax">
-                <?= $this->render('parts/_flights', ['model' => $model, 'lead' => $lead, 'tab' => 0]) ?>
+                    <div class="js-update-ajax">
+                        <?= $this->render('parts/_flights', ['model' => $model, 'lead' => $lead, 'tab' => 0]) ?>
+                    </div>
+
+                </div>
             </div>
 
         </div>
     </div>
-
 <?php
 $js = <<<JS
 function formatRepo( repo ) {

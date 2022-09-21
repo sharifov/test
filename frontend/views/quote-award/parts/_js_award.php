@@ -89,12 +89,13 @@ $js = <<<JS
     
      $(document).on('change', '.js-pax-award', function(event){
         var AwardForm = $('#alt-award-quote-info-form');
+         let tabActive =  $('.js-flight-tab.active').data('id');
         var formDataAward = AwardForm.serialize()
           $(this).prop( "disabled", true);
           $.ajax({
             url: updateUrl,
             type: 'POST',
-            data: formDataAward,
+            data: formDataAward+'&tab='+tabActive,
              success: function (data) {
                $('.js-update-ajax').html(data);
                 $(this).prop( "disabled", false);

@@ -57,14 +57,14 @@ $select2Properties = [
                             </div>
                             <div>
                                 <?php if ($tripKey != 1) : ?>
-                                    <a class="js-remove-trip-award"
-                                       data-inner='<i class="fa fa-times" aria-hidden="true"></i>'
+                                    <a class="js-remove-trip-award text-danger"
+                                       data-inner='<i class="fa fa-times" aria-hidden="true"></i> <span style="font-size: 14px">Remove</span>'
                                        data-id="<?= $tripKey ?>"
-                                       data-class='js-remove-trip-award'
+                                       data-class='js-remove-trip-award text-danger'
                                        href="javascript:void(0)"
                                        style="padding: 5px;"
                                     >
-                                        <i class="fa fa-times" aria-hidden="true"></i>
+                                         <i class="fa fa-times" aria-hidden="true"></i> <span style="font-size: 14px">Remove</span>
                                     </a>
                                 <?php endif; ?>
                             </div>
@@ -173,10 +173,10 @@ $select2Properties = [
                 <a class="btn btn-success"
                    id="js-add-segment-award"
                    data-trip="<?= $lastTripId + 1 ?>"
-                   data-inner='Add Trip'
+                   data-inner='<i class="fa fa-plus" aria-hidden="true"></i> Add Trip'
                    data-class='btn btn-success'
                    href="javascript:void(0)">
-                    Add Trip
+                    <i class="fa fa-plus" aria-hidden="true"></i> Add Trip
                 </a>
             </div>
 
