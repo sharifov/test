@@ -2,6 +2,7 @@
 
 namespace frontend\widgets\nestedSets;
 
+use kartik\select2\Select2Asset;
 use RuntimeException;
 use yii\base\Model;
 use yii\base\Widget;
@@ -19,9 +20,11 @@ class NestedSetsWidget extends Widget
     public ?Model $model = null;
     public ActiveQuery $query;
     public ?bool $allowToSelectEnabled = false;
+    public ?bool $disabled = false;
 
     public function init()
     {
+        Select2Asset::register($this->getView());
         NestedSetsAsset::register($this->getView());
         parent::init();
     }
@@ -45,6 +48,7 @@ class NestedSetsWidget extends Widget
             'placeholder' => $this->placeholder,
             'name' => BaseHtml::getInputName($this->model, $this->attribute),
             'label' => $this->label ?? BaseHtml::activeLabel($this->model, $this->attribute, ['class' => 'control-label']),
+            'disabled' => $this->disabled
         ]);
     }
 
