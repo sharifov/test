@@ -14,6 +14,7 @@ class m220922_085534_add_rbac_permission_award extends Migration
         '/quote-award/update',
         '/quote-award/calc-price',
         '/quote-award/save',
+        '/quote-award/import-gds-dump',
     ];
 
     private array $roles = [
