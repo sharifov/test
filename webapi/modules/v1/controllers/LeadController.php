@@ -27,6 +27,8 @@ use modules\product\src\useCases\product\api\create\flight\Handler;
 use modules\webEngage\settings\WebEngageDictionary;
 use modules\webEngage\src\service\webEngageEventData\lead\eventData\LeadCreatedEventData;
 use src\helpers\app\AppHelper;
+use src\helpers\app\HttpStatusCodeHelper;
+use src\helpers\CheckRequestDuplicate;
 use src\helpers\text\HashHelper;
 use src\model\clientData\service\ClientDataService;
 use src\model\leadData\entity\LeadData;
@@ -43,6 +45,11 @@ use src\services\quote\addQuote\AddQuoteService;
 use src\services\TransactionManager;
 use webapi\models\ApiLead;
 use webapi\models\ApiLeadCallExpert;
+use webapi\src\Messages;
+use webapi\src\response\ErrorResponse;
+use webapi\src\response\messages\ErrorsMessage;
+use webapi\src\response\messages\MessageMessage;
+use webapi\src\response\messages\StatusCodeMessage;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
@@ -420,6 +427,15 @@ class LeadController extends ApiBaseController
     public function actionCreate()
     {
         $this->checkPost();
+
+        if (CheckRequestDuplicate::isDuplicate()) {
+            return (new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::TOO_MANY_REQUESTS),
+                new MessageMessage(Messages::TOO_MANY_REQUESTS),
+                new ErrorsMessage('This request with params has already been sent.')
+            ))->toArray();
+        }
+
         $this->startApiLog($this->action->uniqueId);
         $warnings = [];
 
