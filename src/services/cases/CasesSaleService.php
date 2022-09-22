@@ -975,7 +975,7 @@ class CasesSaleService
      */
     public function getEmailConfigByBoSaleStatus(array $responseData, Project $project): array
     {
-        $params = ProjectParams::fromJson($project->p_params_json, $project->id);
+        $params = ProjectParams::fromArray($project->p_params_json);
         $cancelSaleParams = $params->object->case->cancel_sale;
 
         $emailConfig = [];
