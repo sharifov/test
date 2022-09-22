@@ -215,6 +215,6 @@ class ClientChatVisitorData extends \yii\db\ActiveRecord
 
     public function getExperiments(): array
     {
-        return $this->decodedData['experiments'] ?? [];
+        return $this->decodedData['sources']['experiments'] ?? [];
     }
 }
