@@ -1306,13 +1306,14 @@ class Call extends \yii\db\ActiveRecord
 
                 $holdMessage = $changedAttributes['c_status_id'] === self::STATUS_HOLD ? ' Hold' : '';
                 $title = 'Missed' . $holdMessage . ' Call (' . $this->getSourceName() . ')';
-                $message = 'Missed ' . $msgPart . $holdMessage . 'Call (Id: ' . Purifier::createCallShortLink($this) . ')  from ';
+                $message = 'Missed ' . $msgPart . $holdMessage . 'Call (Id: ' . Purifier::createCallShortLink($this);
+                $message .= (($this->c_lead_id && $this->cLead) || ($this->c_case_id && $this->cCase)) ? ') from ' : '';
+
                 if ($this->c_lead_id && $this->cLead) {
                     $message .= $this->cLead->client ? $this->cLead->client->getFullName() : '';
                     $message .= '<br> Lead (Id: ' . Purifier::createLeadShortLink($this->cLead) . ')';
                     $message .= $this->cLead->project ? '<br> ' . $this->cLead->project->name : '';
                 }
-
                 if ($this->c_case_id && $this->cCase) {
                     $message .= $this->cCase->client ? $this->cCase->client->getFullName() : '';
                     $message .= '<br> Case (Id: ' . Purifier::createCaseShortLink($this->cCase) . ')';
