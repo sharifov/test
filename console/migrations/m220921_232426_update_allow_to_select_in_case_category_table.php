@@ -22,8 +22,6 @@ class m220921_232426_update_allow_to_select_in_case_category_table extends Migra
      */
     public function safeDown()
     {
-        echo "m220921_232426_update_allow_to_select_in_case_category_table cannot be reverted.\n";
-
         return false;
     }
 }

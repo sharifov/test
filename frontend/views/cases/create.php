@@ -74,7 +74,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 '
                 ]) ?>
 
-                <?= $form->field($model, 'categoryId', ['enableAjaxValidation' => true])->widget(NestedSetsWidget::class, [
+                <?= $form->field($model, 'categoryId')->widget(NestedSetsWidget::class, [
                     'query' => CaseCategory::findNestedSets()->where(['cc_dep_id' => $model->getDepartmentId()]),
                     'attribute' => 'categoryId',
                     'model' => $model,
@@ -82,9 +82,6 @@ $this->params['breadcrumbs'][] = $this->title;
                     'allowToSelectEnabled' => true,
                     'placeholder' => 'Choose a category'
                 ]); ?>
-
-                <?php
-                    // $form->field($model, 'categoryId')->dropDownList([], ['prompt' => 'Choose a category']) ?>
 
                 <?= $form->field($model, 'sourceTypeId')->dropDownList($model->getSourceTypeList(), ['prompt' => 'Choose a source type']) ?>
 
