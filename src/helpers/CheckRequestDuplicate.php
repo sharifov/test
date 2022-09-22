@@ -7,12 +7,14 @@ use src\helpers\text\HashHelper;
 
 class CheckRequestDuplicate
 {
+    public const TIMEOUT = 2;
+
     /**
      * @return bool
      */
     public static function isDuplicate(): bool
     {
-        return RedisHelper::checkDuplicate(static::getRequestHash(), 2);
+        return RedisHelper::checkDuplicate(static::getRequestHash(), static::TIMEOUT);
     }
 
     /**
