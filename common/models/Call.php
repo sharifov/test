@@ -1349,6 +1349,21 @@ class Call extends \yii\db\ActiveRecord
                     $message .= $this->cCase->project ? '<br> ' . $this->cCase->project->name : '';
                 }
 
+                /** @fflag FFlag::FF_KEY_CALL_DEBUG_LOG_ENABLE, Call debug log enable */
+                if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CALL_DEBUG_LOG_ENABLE)) {
+                    \Yii::info(
+                        [
+                            'point' => 'Call:afterSave:userListNotifications',
+                            'message' => $message,
+                            'callId' => $this->c_id,
+                            'leadId' => $this->c_lead_id,
+                            'caseId' => $this->c_case_id,
+                            'userIds' => $userListNotifications,
+                        ],
+                        'info\Call:MissedCall'
+                    );
+                }
+
                 foreach ($userListNotifications as $userId) {
                     if ($ntf = Notifications::create($userId, $title, $message, Notifications::TYPE_WARNING, true)) {
                         $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
