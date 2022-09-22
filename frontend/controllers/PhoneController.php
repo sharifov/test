@@ -1360,6 +1360,22 @@ class PhoneController extends FController
                 if ($callUserAccess) {
                     $callUserAccess->noAnsweredCall();
                     $callUserAccess->save();
+
+                    /** @fflag FFlag::FF_KEY_CALL_DEBUG_LOG_ENABLE, Call debug log enable */
+                    if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CALL_DEBUG_LOG_ENABLE)) {
+                        \Yii::info(
+                            [
+                                'point' => 'PhoneController:actionAjaxUnholdConferenceCall',
+                                'message' => 'Warm transfer canceled',
+                                'callId' => $call->c_id,
+                                'leadId' => $call->c_lead_id,
+                                'caseId' => $call->c_case_id,
+                                'user_id' => $callUserAccess->cua_user_id,
+                            ],
+                            'info\Call:MissedCall'
+                        );
+                    }
+
                     Notifications::createAndPublish(
                         $callUserAccess->cua_user_id,
                         'Warm transfer canceled',
