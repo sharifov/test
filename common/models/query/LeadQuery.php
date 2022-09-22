@@ -74,6 +74,11 @@ class LeadQuery extends ActiveQuery
         return $this->andWhere(['id' => $id]);
     }
 
+    public function byBookingId(string $bookingId): self
+    {
+        return $this->andWhere(['hybrid_uid' => $bookingId]);
+    }
+
     /**
      * @param null $db
      * @return array|Lead[]
@@ -95,5 +100,14 @@ class LeadQuery extends ActiveQuery
     public static function getLeadById(int $leadId): ?Lead
     {
         return Lead::find()->byId($leadId)->limit(1)->one();
+    }
+
+    /**
+     * @param string $bookingId
+     * @return Lead|null
+     */
+    public static function getLeadByBookingId(string $bookingId): ?Lead
+    {
+        return Lead::find()->byBookingId($bookingId)->limit(1)->one();
     }
 }

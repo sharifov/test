@@ -26,7 +26,7 @@ class SegmentAwardQuoteItem extends Model
     {
         return [
             [['origin', 'destination', 'departure',
-                'arrival', 'trip', 'flight', 'cabin', 'operatedBy'], 'safe'],
+                'arrival', 'trip', 'flight', 'flight_number', 'cabin', 'operatedBy'], 'safe'],
         ];
     }
 
@@ -54,5 +54,24 @@ class SegmentAwardQuoteItem extends Model
             $trips[$i] = 'Trip ' . $i;
         }
         return $trips;
+    }
+
+    public function loadData(array $segment, int $trip)
+    {
+        $this->origin = $segment['departureAirport'] ?? null;
+        $this->destination = $segment['arrivalAirport'] ?? null;
+
+        if (array_key_exists('departureDateTime', $segment) && $segment['departureDateTime'] instanceof \DateTime) {
+            $this->departure = $segment['departureDateTime']->format('Y-m-d H:i');
+        }
+
+        if (array_key_exists('arrivalDateTime', $segment) && $segment['arrivalDateTime'] instanceof \DateTime) {
+            $this->arrival = $segment['arrivalDateTime']->format('Y-m-d H:i');
+        }
+        $this->trip = $trip;
+        $this->flight = 0;
+        $this->flight_number = $segment['flightNumber'] ?? null;
+        $this->cabin = $segment['cabin'] ?? null;
+        $this->operatedBy = $segment['carrier'] ?? null;
     }
 }

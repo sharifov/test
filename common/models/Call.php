@@ -1046,6 +1046,22 @@ class Call extends \yii\db\ActiveRecord
                     foreach ($callUserAccessAny as $callAccess) {
                         $sendWarmTransferMissedNotification = $callAccess->isWarmTransfer();
                         $callAccess->noAnsweredCall();
+
+                        /** @fflag FFlag::FF_KEY_CALL_DEBUG_LOG_ENABLE, Call debug log enable */
+                        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CALL_DEBUG_LOG_ENABLE)) {
+                            \Yii::info(
+                                [
+                                    'point' => 'Call:afterSave:noAnsweredCall',
+                                    'message' => null,
+                                    'callId' => $this->c_id,
+                                    'leadId' => $this->c_lead_id,
+                                    'caseId' => $this->c_case_id,
+                                    'user_id' => $callAccess->cua_user_id,
+                                ],
+                                'info\Call:MissedCall'
+                            );
+                        }
+
                         if ($callAccess->update() === false) {
                             Yii::error(
                                 VarDumper::dumpAsString($callAccess->errors),
@@ -1063,6 +1079,21 @@ class Call extends \yii\db\ActiveRecord
                                     $message .= $this->cCase->client ? $this->cCase->client->getFullName() : '';
                                     $message .= '<br> Case (Id: ' . Purifier::createCaseShortLink($this->cCase) . ')';
                                     $message .= $this->cCase->project ? '<br> ' . $this->cCase->project->name : '';
+                                }
+
+                                /** @fflag FFlag::FF_KEY_CALL_DEBUG_LOG_ENABLE, Call debug log enable */
+                                if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CALL_DEBUG_LOG_ENABLE)) {
+                                    \Yii::info(
+                                        [
+                                            'point' => 'Call:afterSave:sendWarmTransferMissedNotification',
+                                            'message' => $message,
+                                            'callId' => $this->c_id,
+                                            'leadId' => $this->c_lead_id,
+                                            'caseId' => $this->c_case_id,
+                                            'user_id' => $callAccess->cua_user_id,
+                                        ],
+                                        'info\Call:MissedCall'
+                                    );
                                 }
 
                                 if (
@@ -1316,6 +1347,21 @@ class Call extends \yii\db\ActiveRecord
                     $message .= $this->cCase->client ? $this->cCase->client->getFullName() : '';
                     $message .= '<br> Case (Id: ' . Purifier::createCaseShortLink($this->cCase) . ')';
                     $message .= $this->cCase->project ? '<br> ' . $this->cCase->project->name : '';
+                }
+
+                /** @fflag FFlag::FF_KEY_CALL_DEBUG_LOG_ENABLE, Call debug log enable */
+                if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CALL_DEBUG_LOG_ENABLE)) {
+                    \Yii::info(
+                        [
+                            'point' => 'Call:afterSave:userListNotifications',
+                            'message' => $message,
+                            'callId' => $this->c_id,
+                            'leadId' => $this->c_lead_id,
+                            'caseId' => $this->c_case_id,
+                            'userIds' => $userListNotifications,
+                        ],
+                        'info\Call:MissedCall'
+                    );
                 }
 
                 foreach ($userListNotifications as $userId) {
@@ -1647,6 +1693,22 @@ class Call extends \yii\db\ActiveRecord
                 if ($callUserAccessAny) {
                     foreach ($callUserAccessAny as $callAccess) {
                         $callAccess->noAnsweredCall();
+
+                        /** @fflag FFlag::FF_KEY_CALL_DEBUG_LOG_ENABLE, Call debug log enable */
+                        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CALL_DEBUG_LOG_ENABLE)) {
+                            \Yii::info(
+                                [
+                                    'point' => 'Call:applyCallToAgent',
+                                    'message' => null,
+                                    'callId' => $call->c_id,
+                                    'leadId' => $call->c_lead_id,
+                                    'caseId' => $call->c_case_id,
+                                    'user_id' => $callAccess->cua_user_id,
+                                ],
+                                'info\Call:MissedCall'
+                            );
+                        }
+
                         if ($callAccess->update() === false) {
                             Yii::error(VarDumper::dumpAsString($callAccess->errors), 'Call:applyCallToAgent:CallUserAccess:save');
                         }

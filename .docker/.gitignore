@@ -13,3 +13,4 @@ mysql/dump/*
 psql/dump/*
 !psql/dump/.gitkeep
 clickhouse/data
+/leads-nginx/logs
