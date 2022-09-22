@@ -261,7 +261,7 @@ class LoginForm extends Model
             ->select('t.up_2fa_secret')
             ->from(['t' => UserProfile::tableName()])
             ->leftJoin(['u' => Employee::tableName()], 'u.id=t.up_user_id')
-            ->where(['u.username' => $this->username])
+            ->where(['u.username' => $this->_user->username])
             ->one();
 
         return isset($result['up_2fa_secret']) ? $result['up_2fa_secret'] : null;
