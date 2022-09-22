@@ -143,21 +143,6 @@ class CheckWarmTransferTimeExpiredJob extends BaseJob implements JobInterface
             $message .= ', Case (Id: ' . Purifier::createCaseShortLink($call->cCase) . ')';
         }
 
-        /** @fflag FFlag::FF_KEY_CALL_DEBUG_LOG_ENABLE, Call debug log enable */
-        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CALL_DEBUG_LOG_ENABLE)) {
-            \Yii::info(
-                [
-                    'point' => 'CheckWarmTransferTimeExpiredJob:sendNotificationsToTransferedUser',
-                    'message' => $message,
-                    'callId' => $call->c_id,
-                    'leadId' => $call->c_lead_id,
-                    'caseId' => $call->c_case_id,
-                    'user_id' => $this->toUserId,
-                ],
-                'info\Call:MissedCall'
-            );
-        }
-
         Notifications::createAndPublish(
             $this->toUserId,
             'Missed Call',
