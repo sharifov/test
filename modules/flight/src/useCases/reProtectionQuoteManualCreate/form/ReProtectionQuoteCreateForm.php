@@ -91,6 +91,7 @@ class ReProtectionQuoteCreateForm extends ChangeQuoteCreateForm
             [['flightId'], 'exist', 'skipOnError' => true, 'targetClass' => Flight::class, 'targetAttribute' => ['flightId' => 'fl_id']],
             ['expirationDate', NormalizeDateValidator::class],
             ['expirationDate', 'datetime', 'format' => 'php:Y-m-d H:i:s'],
+            ['expirationDate', 'checkPastDate'],
         ];
     }
 
@@ -118,6 +119,18 @@ class ReProtectionQuoteCreateForm extends ChangeQuoteCreateForm
         }
         if (!($reservationService->parseStatus ?? null) || empty($this->itinerary)) {
             $this->addError('reservationDump', 'Incorrect reservation dump');
+        }
+    }
+
+    public function checkPastDate(string $attribute)
+    {
+        if (!empty($this->expirationDate)) {
+            $expirationDate = new \DateTime($this->expirationDate);
+            $now = new \DateTime();
+
+            if ($now->getTimestamp() > $expirationDate->getTimestamp()) {
+                $this->addError($attribute, 'Expiration Date cannot be in the past');
+            }
         }
     }
 
