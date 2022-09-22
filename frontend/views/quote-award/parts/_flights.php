@@ -48,7 +48,7 @@ $form = ActiveForm::begin([
     <?= $this->render('_segment', ['model' => $model, 'form' => $form]) ?>
 
     <div style="margin-top: 15px">
-        <?php if (count($model->flights)) : ?>
+        <?php if (count($model->flights) > 0) : ?>
             <ul class="nav nav-tabs">
                 <?php foreach ($model->flights as $key => $flight) : ?>
                     <li class="<?= ($tab === $key ? 'active' : '') ?> nav-item">
@@ -68,16 +68,18 @@ $form = ActiveForm::begin([
 
                     </li>
                 <?php endforeach; ?>
-                <div class="d-flex align-items-center justify-content-center"
-                     style="margin-left: 15px;">
-                    <a class="btn btn-add-flight"
-                       id="js-add-flight-award"
-                       data-inner='<i class="fa fa-plus" aria-hidden="true"></i> Add Flight'
-                       data-class='btn btn-add-flight'
-                       href="javascript:void(0)">
-                        <i class="fa fa-plus" aria-hidden="true"></i> Add Flight
-                    </a>
-                </div>
+                <?php if (count($model->flights) < 5) : ?>
+                    <div class="d-flex align-items-center justify-content-center"
+                         style="margin-left: 15px;">
+                        <a class="btn btn-add-flight"
+                           id="js-add-flight-award"
+                           data-inner='<i class="fa fa-plus" aria-hidden="true"></i> Add Flight'
+                           data-class='btn btn-add-flight'
+                           href="javascript:void(0)">
+                            <i class="fa fa-plus" aria-hidden="true"></i> Add Flight
+                        </a>
+                    </div>
+                <?php endif; ?>
 
             </ul>
 
@@ -327,7 +329,7 @@ $form = ActiveForm::begin([
             color: #53A265;
         }
 
-        .quote-award_wrap .table p,  .quote-award_wrap .table .form-group{
+        .quote-award_wrap .table p, .quote-award_wrap .table .form-group {
             margin-bottom: 0;
         }
 

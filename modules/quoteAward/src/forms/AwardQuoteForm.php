@@ -178,6 +178,7 @@ class AwardQuoteForm extends CompositeForm
         foreach ($this->segments as $key => $segment) {
             $trips[$segment->trip][$key] = $segment;
         }
+        ksort($trips);
 
         return $trips;
     }
@@ -202,5 +203,26 @@ class AwardQuoteForm extends CompositeForm
         }
 
         return $totalPrice;
+    }
+
+    public function loadGdsSegments(array $trips, int $tripId)
+    {
+        $segments = $this->segments;
+        foreach ($segments as $key => $segment) {
+            if ($tripId === (int)$segment->trip) {
+                unset($segments[$key]);
+            }
+        }
+
+        foreach ($trips as $trip) {
+            if (array_key_exists('segments', $trip)) {
+                foreach ($trip['segments'] as $segment) {
+                    $segmentItem = new SegmentAwardQuoteItem();
+                    $segmentItem->loadData($segment, $tripId);
+                    $segments[] = (new SegmentAwardQuoteForm($segmentItem));
+                }
+            }
+        }
+        $this->segments = $segments;
     }
 }

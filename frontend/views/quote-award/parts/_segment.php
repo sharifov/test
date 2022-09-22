@@ -1,10 +1,9 @@
 <?php
 
 use common\models\Airline;
-use modules\quoteAward\src\models\SegmentAwardQuoteItem;
 use src\helpers\lead\LeadHelper;
-use src\widgets\DateTimePicker;
 use kartik\select2\Select2;
+use src\widgets\DateTimePicker;
 use yii\web\JsExpression;
 
 /**
@@ -64,7 +63,7 @@ $select2Properties = [
                                        href="javascript:void(0)"
                                        style="padding: 5px;"
                                     >
-                                         <i class="fa fa-times" aria-hidden="true"></i> <span style="font-size: 14px">Remove</span>
+                                        <i class="fa fa-times" aria-hidden="true"></i> <span style="font-size: 14px">Remove</span>
                                     </a>
                                 <?php endif; ?>
                             </div>
@@ -92,24 +91,25 @@ $select2Properties = [
                             <?php foreach ($segments as $index => $segment) : ?>
                                 <tr id="segment-index-<?= $index ?>">
                                     <td style="width: 20px" class="text-center"><?= $segmentId ?></td>
-                                    <td> <?= $form->field($segment, '[' . $index . ']operatedBy')->widget(Select2::class, [
+                                    <td style="width: 250px"> <?= $form->field($segment, '[' . $index . ']operatedBy')->widget(Select2::class, [
                                             'data' => Airline::getAirlinesMapping(true),
                                             'options' => ['placeholder' => '---'],
                                             'pluginOptions' => [
                                                 'allowClear' => false
                                             ],
                                         ])->label(false) ?></td>
-                                    <td> <?= $form->field($segment, '[' . $index . ']origin')->widget(Select2::class, $select2Properties)->label(false) ?></td>
-                                    <td> <?= $form->field($segment, '[' . $index . ']destination')->widget(Select2::class, $select2Properties)->label(false) ?></td>
+                                    <td style="width: 250px"> <?= $form->field($segment, '[' . $index . ']origin')->widget(Select2::class, $select2Properties)->label(false) ?></td>
+                                    <td style="width: 250px"> <?= $form->field($segment, '[' . $index . ']destination')->widget(Select2::class, $select2Properties)->label(false) ?></td>
                                     <td style="width: 150px"> <?= $form->field($segment, '[' . $index . ']departure')
                                             ->widget(DateTimePicker::class, [
                                                 'template' => '{input}',
                                                 'clientOptions' => [
                                                     'autoclose' => true,
                                                     'format' => 'yyyy-mm-dd hh:ii',
-                                                    'todayBtn' => true
-
-                                                ]
+                                                    'todayBtn' => true,
+                                                    'startDate' => date('Y-m-d H:i', time()),
+                                                    'minuteStep' => 1
+                                                ],
                                             ])->label(false) ?>
                                     </td>
 
@@ -119,8 +119,9 @@ $select2Properties = [
                                                 'clientOptions' => [
                                                     'autoclose' => true,
                                                     'format' => 'yyyy-mm-dd hh:ii',
-                                                    'todayBtn' => true
-
+                                                    'todayBtn' => true,
+                                                    'startDate' => date('Y-m-d H:i', time()),
+                                                    'minuteStep' => 1
                                                 ]
                                             ])->label(false) ?>
                                     </td>
@@ -147,11 +148,8 @@ $select2Properties = [
                             </tbody>
                         </table>
                         <div class="d-flex" style="margin-left: 5px">
-                            <a class="btn btn-import-gds"
-                               id="1"
+                            <a class="btn btn-import-gds js-dump-gds"
                                data-trip="<?= $tripKey ?>"
-                               data-inner='<i class="fa fa-plus" aria-hidden="true"></i> Import from GDS dump'
-                               data-class='btn btn-import-gds'
                                href="javascript:void(0)">
                                 <i class="fa fa-plus" aria-hidden="true"></i> Import from GDS dump
                             </a>
