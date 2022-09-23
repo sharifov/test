@@ -141,7 +141,7 @@ class ReservationService
         $arrivalCity = Airports::findByIata($segment->fqs_arrival_airport_iata);
         $airline = Airline::find()->where(['iata' => $segment->fqs_operating_airline])->limit(1)->one() ?? null;
 
-        $layoverDuration = $this->getLayoverDuration($pastParsedSegments, $index);
+        $layoverDuration = $this->getLayoverDurationByPastSegment($pastParsedSegments, $index);
         if ($layoverDuration < 0) {
             \Yii::warning('Negative layover duration (' . $layoverDuration . ' sec) for fqs_id: ' . $segment->fqs_id, 'ReservationService:parseSegment:layoverDuration');
             $layoverDuration = 0;
@@ -229,6 +229,47 @@ class ReservationService
         }
         return $result ?? 0;
     }
+
+
+    /**
+     * @param array $data
+     * @param int $index
+     * @return float|int
+     */
+    private function getLayoverDurationByPastSegment(array $data, int $index)
+    {
+        $data = $this->getArrivalAndDeparture($data);
+
+        if (isset($data[$index - 1]) && !FlightQuoteHelper::isNextTrip($data[$index - 1], $data[$index])) {
+            $result = intval(($data[$index]['departureDateTime']->getTimestamp() - $data[$index - 1]['arrivalDateTime']->getTimestamp()) / 60);
+        }
+        return $result ?? 0;
+    }
+
+    /**
+     * @param array $data
+     * @return array
+     */
+    private function getArrivalAndDeparture(array $data): array
+    {
+        $dates = [];
+        foreach ($data as $segment) {
+            $departureTimeZone = null;
+            if ($departureAirport = Airports::findByIata($segment->fqs_departure_airport_iata)) {
+                $departureTimeZone = new \DateTimeZone($departureAirport->timezone);
+            }
+
+            $departureDateTime = DateTime::createFromFormat('Y-m-d H:i:s', $segment->fqs_departure_dt, $departureTimeZone);
+            $arrivalDateTime = DateTime::createFromFormat('Y-m-d H:i:s', $segment->fqs_arrival_dt, $departureTimeZone);
+            $dates[] = [
+                'departureDateTime' => $departureDateTime,
+                'arrivalDateTime' => $arrivalDateTime,
+            ];
+        }
+
+        return $dates;
+    }
+
 
     /**
      * @param string $code
