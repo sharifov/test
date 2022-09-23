@@ -1275,26 +1275,6 @@ class Call extends \yii\db\ActiveRecord
 
         /** @fflag FFlag::FF_KEY_CALL_MISSING_LEAD_OR_CASE, Call Missing Notification if Lead or Case exist */
         if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CALL_MISSING_LEAD_OR_CASE)) {
-            /** @fflag FFlag::FF_KEY_CALL_DEBUG_LOG_ENABLE, Call debug log enable */
-            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CALL_DEBUG_LOG_ENABLE)) {
-                \Yii::info(
-                    [
-                        'point' => 'Call:AfterSave',
-                        'message' => 'AfterSave:MissingNotification',
-                        'callId' => $this->c_id,
-                        'leadId' => $this->c_lead_id,
-                        'caseId' => $this->c_case_id,
-                        'isLeadAdded' => array_key_exists('c_lead_id', $changedAttributes) && $this->c_lead_id,
-                        'isCaseAdded' => array_key_exists('c_case_id', $changedAttributes) && $this->c_case_id,
-                        'isLeadChanged' => $this->isAttributeChanged('c_lead_id'),
-                        'isCaseChanged' => $this->isAttributeChanged('c_case_id'),
-                        'status' => $this->c_status_id,
-                        'callStatus' => $this->c_call_status,
-                    ],
-                    'info\Call:assignToLead'
-                );
-            }
-
             if (
                 $this->c_created_user_id
                 &&
