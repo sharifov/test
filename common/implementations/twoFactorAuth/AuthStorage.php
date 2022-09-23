@@ -21,7 +21,7 @@ class AuthStorage implements StorageBaseInterface
      */
     public function set($key, $value, $duration)
     {
-        return \Yii::$app->redis_2fa->set($key, serialize($value));
+        return \Yii::$app->redis_2fa->setex($key, $duration, serialize($value));
     }
 
     /**
