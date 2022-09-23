@@ -9,7 +9,6 @@ use modules\webEngage\settings\WebEngageDictionary;
 use modules\webEngage\src\service\webEngageEventData\lead\eventData\LeadCreatedEventData;
 use src\helpers\app\AppHelper;
 use src\helpers\app\HttpStatusCodeHelper;
-use src\helpers\CheckRequestDuplicate;
 use src\model\lead\LeadCodeException;
 use src\model\lead\useCases\lead\api\create\LeadCreateMessage;
 use src\model\lead\useCases\lead\api\create\LeadCreateValue;
@@ -324,14 +323,6 @@ class LeadController extends BaseController
      */
     public function actionCreate(): Response
     {
-        if (CheckRequestDuplicate::isDuplicate()) {
-            return new ErrorResponse(
-                new StatusCodeMessage(HttpStatusCodeHelper::TOO_MANY_REQUESTS),
-                new MessageMessage(Messages::TOO_MANY_REQUESTS),
-                new ErrorsMessage('This request with params has already been sent.')
-            );
-        }
-
         $form = new LeadCreateForm();
 
         if (!$form->load(Yii::$app->request->post())) {

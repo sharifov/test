@@ -28,7 +28,6 @@ use modules\webEngage\settings\WebEngageDictionary;
 use modules\webEngage\src\service\webEngageEventData\lead\eventData\LeadCreatedEventData;
 use src\helpers\app\AppHelper;
 use src\helpers\app\HttpStatusCodeHelper;
-use src\helpers\CheckRequestDuplicate;
 use src\helpers\text\HashHelper;
 use src\model\clientData\service\ClientDataService;
 use src\model\leadData\entity\LeadData;
@@ -37,6 +36,7 @@ use src\model\leadData\services\LeadDataService;
 use src\repositories\client\ClientEmailRepository;
 use src\repositories\client\ClientPhoneRepository;
 use src\repositories\lead\LeadRepository;
+use src\services\CheckRequestDuplicateService;
 use src\services\lead\calculator\LeadTripTypeCalculator;
 use src\services\lead\calculator\SegmentDTO;
 use src\services\lead\LeadCreateApiService;
@@ -427,8 +427,9 @@ class LeadController extends ApiBaseController
     public function actionCreate()
     {
         $this->checkPost();
+        $requestDuplicateChecker = new CheckRequestDuplicateService(\Yii::$app->request);
 
-        if (CheckRequestDuplicate::isDuplicate()) {
+        if ($requestDuplicateChecker->isDuplicate()) {
             return (new ErrorResponse(
                 new StatusCodeMessage(HttpStatusCodeHelper::TOO_MANY_REQUESTS),
                 new MessageMessage(Messages::TOO_MANY_REQUESTS),
