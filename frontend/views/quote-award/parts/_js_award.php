@@ -206,28 +206,28 @@ $js = <<<JS
         
     });
      
-      $('#alt-award-quote-info-form').submit(function (e) {
-        e.preventDefault();
-        var AwardForm = $(this);
-        $('#preloader').removeClass('hidden');
-                $.ajax({
-            url: AwardForm.attr("action"),
-            type: AwardForm.attr("method"),
-            data: AwardForm.serialize(),
-            success: function (data) {
-                $('#preloader').addClass('hidden');
-                
-               if (data.save == true) {
-                   window.location.reload();
-                    }else{
-                        alert("dsdsds");
-                    }
-            },
-            error: function (error) {
-                console.log('Error: ' + error);
-            }
-        });
-    });
+       $(document).on('beforeSubmit', '#alt-award-quote-info-form', function (e) {
+         e.preventDefault();
+         var AwardForm = $(this);
+                 $.ajax({
+             url: AwardForm.attr("action"),
+             type: AwardForm.attr("method"),
+             data: AwardForm.serialize(),
+             success: function (data) {
+                 if(data.success == 'true'){
+                 }else {
+                     $.each(data, function(key, val){
+                          AwardForm.yiiActiveForm('updateAttribute', key, [val]) 
+                     })
+                   
+                 }
+             },
+             error: function (error) {
+                 console.log('Error: ' + error);
+             }
+         });
+       return false;
+     });
       
       $(document).on('click','.js-dump-gds', function (e) {
         e.preventDefault();

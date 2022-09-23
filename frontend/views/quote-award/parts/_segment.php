@@ -98,8 +98,26 @@ $select2Properties = [
                                                 'allowClear' => false
                                             ],
                                         ])->label(false) ?></td>
-                                    <td style="width: 250px"> <?= $form->field($segment, '[' . $index . ']origin')->widget(Select2::class, $select2Properties)->label(false) ?></td>
-                                    <td style="width: 250px"> <?= $form->field($segment, '[' . $index . ']destination')->widget(Select2::class, $select2Properties)->label(false) ?></td>
+                                    <td style="width: 250px">
+                                        <?php
+                                        $select2Properties['data'] = [];
+                                        if (isset($segment['origin'])) {
+                                            $select2Properties['data'] = [$segment['origin'] => $segment['originLabel']];
+                                        }
+                                        ?>
+                                        <?= $form->field($segment, '[' . $index . ']origin')
+                                            ->widget(Select2::class, $select2Properties)
+                                            ->label(false) ?></td>
+                                    <td style="width: 250px">
+                                        <?php
+                                        $select2Properties['data'] = [];
+                                        if (isset($segment['destination'])) {
+                                            $select2Properties['data'] = [$segment['destination'] => $segment['destinationLabel']];
+                                        }
+                                        ?>
+
+                                        <?= $form->field($segment, '[' . $index . ']destination')
+                                            ->widget(Select2::class, $select2Properties)->label(false) ?></td>
                                     <td style="width: 150px"> <?= $form->field($segment, '[' . $index . ']departure')
                                             ->widget(DateTimePicker::class, [
                                                 'template' => '{input}',

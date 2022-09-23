@@ -7,6 +7,7 @@ use modules\flight\src\helpers\FlightQuoteHelper;
 use modules\quoteAward\src\forms\AwardQuoteForm;
 use modules\quoteAward\src\forms\ImportGdsDumpForm;
 use modules\quoteAward\src\services\QuoteFlightService;
+use src\forms\CompositeFormHelper;
 use src\helpers\app\AppHelper;
 use src\helpers\ErrorsToStringHelper;
 use src\services\parsingDump\ReservationService;
@@ -193,14 +194,16 @@ class QuoteAwardController extends FController
                 \Yii::$app->request->post('SegmentAwardQuoteForm', []),
                 \Yii::$app->request->post('PriceListAwardQuoteForm', [])
             );
-            if ($form->load(\Yii::$app->request->post()) && $form->validate()) {
+
+            $form->load(\Yii::$app->request->post());
+
+            if ($form->validate()) {
                 $this->quoteFlightService->save($form);
                 return ['success' => true];
+            } else {
+                return CompositeFormHelper::ajaxValidateCompositeForm($form);
             }
-
-            return $form;
         }
-
         return ['success' => false];
     }
 }
