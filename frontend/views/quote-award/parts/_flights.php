@@ -62,8 +62,6 @@ $form = ActiveForm::begin([
                             </span>
                             <?php endif; ?>
                         </a>
-
-
                     </li>
                 <?php endforeach; ?>
                 <?php if (count($model->flights) < 5) : ?>
@@ -331,11 +329,11 @@ $form = ActiveForm::begin([
             margin-bottom: 0;
         }
 
-        .js-flight-tab {
+        #alt-award-quote-info-form .nav-link {
             color: #495057;
         }
 
-        .js-flight-tab.active {
+        #alt-award-quote-info-form .nav-link.active {
             border-bottom: none;
             border-color: #53a265!important;
             color: #53a265!important;
