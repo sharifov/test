@@ -28,9 +28,8 @@ class CheckRequestDuplicateService
      *
      * @return bool
      */
-    public function isDuplicate(string $hash = '', int $timeout = 2): bool
+    public function isDuplicate(string $hash, int $timeout = 2): bool
     {
-        $hash = $hash ?: $this->getRequestHash();
         return RedisHelper::checkDuplicate($hash, $timeout);
     }
 

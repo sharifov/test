@@ -439,7 +439,11 @@ class LeadController extends ApiBaseController
         $this->checkPost();
         $requestDuplicateChecker = new CheckRequestDuplicateService(\Yii::$app->request);
 
-        if ($requestDuplicateChecker->isDuplicate()) {
+        if (
+            $requestDuplicateChecker->isDuplicate(
+                $requestDuplicateChecker->getRequestHash()
+            )
+        ) {
             return (new ErrorResponse(
                 new StatusCodeMessage(HttpStatusCodeHelper::TOO_MANY_REQUESTS),
                 new MessageMessage(Messages::TOO_MANY_REQUESTS),
