@@ -11,6 +11,7 @@ class HttpStatusCodeHelper
     public const UNPROCESSABLE_ENTITY = 422;
     public const INTERNAL_SERVER_ERROR = 500;
     public const GONE = 410;
+    public const TOO_MANY_REQUESTS = 429;
 
     public const LIST = [
         100 => 'Informational: Continue',
