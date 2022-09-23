@@ -1281,8 +1281,9 @@ class Call extends \yii\db\ActiveRecord
                     [
                         'point' => 'Call:AfterSave',
                         'message' => 'AfterSave:MissingNotification',
+                        'callId' => $this->c_id,
                         'leadId' => $this->c_lead_id,
-                        'callId' => $this->c_case_id,
+                        'caseId' => $this->c_case_id,
                         'isLeadAdded' => array_key_exists('c_lead_id', $changedAttributes) && $this->c_lead_id,
                         'isCaseAdded' => array_key_exists('c_case_id', $changedAttributes) && $this->c_case_id,
                         'isLeadChanged' => $this->isAttributeChanged('c_lead_id'),
@@ -1307,11 +1308,8 @@ class Call extends \yii\db\ActiveRecord
                 Notifications::publish(MissedCallMessage::COMMAND, ['user_id' => $this->c_created_user_id], $dataNotification);
             }
 
-            $isLeadAdded = array_key_exists('c_lead_id', $changedAttributes) && $this->c_lead_id;
-            $isCaseAdded = array_key_exists('c_case_id', $changedAttributes) && $this->c_case_id;
-
             if (
-                ($isLeadAdded || $isCaseAdded)
+                ($this->c_lead_id || $this->c_case_id)
                 &&
                 $this->isIn()
                 &&
