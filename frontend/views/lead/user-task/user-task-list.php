@@ -25,7 +25,7 @@ $calcPagination = UserTasksListHelper::calcPagination($pagination);
 ?>
 
 <div class="user-task-history">
-<?php Pjax::begin(['id' => 'pjax-user-task-list', 'timeout' => 5000, 'enablePushState' => false]); ?>
+<?php Pjax::begin(['id' => 'pjax-user-task-list', 'timeout' => 0, 'enablePushState' => false]); ?>
 
     <!-- Form with date -->
     <?php $form = ActiveForm::begin([
@@ -48,7 +48,10 @@ $calcPagination = UserTasksListHelper::calcPagination($pagination);
                             'format' => 'yyyy-mm-dd',
                             'clearBtn' => true,
                             'autoclose' => true,
-                        ]
+                        ],
+                        'clientEvents' => [
+                            'changeDate' => "function () { $('#search-user-task-list-form').submit() }",
+                        ],
                     ])->label(false) ?>
                 </div>
             </div>
