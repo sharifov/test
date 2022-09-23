@@ -1273,17 +1273,31 @@ class Call extends \yii\db\ActiveRecord
             }
         }
 
-        if (($insert || $isChangedStatus) && $this->isIn() && ($this->isStatusNoAnswer() || $this->isStatusBusy())) {
-//                    $callAcceptExist = CallUserAccess::find()->where(['cua_status_id' => CallUserAccess::STATUS_TYPE_ACCEPT, 'cua_call_id' => $this->c_id])->exists();
-//                    if (!$callAcceptExist) {
+        if (
+            $this->c_created_user_id
+            &&
+            ($insert || $isChangedStatus)
+            &&
+            $this->isIn()
+            &&
+            ($this->isStatusNoAnswer() || $this->isStatusBusy())
+        ) {
+            $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? MissedCallMessage::add($this) : [];
+            Notifications::publish(MissedCallMessage::COMMAND, ['user_id' => $this->c_created_user_id], $dataNotification);
+        }
 
+        $isLeadAdded = array_key_exists('c_lead_id', $changedAttributes) && $this->c_lead_id;
+        $isCaseAdded = array_key_exists('c_case_id', $changedAttributes) && $this->c_case_id;
+        if (
+            ($isLeadAdded || $isCaseAdded)
+            &&
+            $this->isIn()
+            &&
+            ($this->isStatusNoAnswer() || $this->isStatusBusy())
+        ) {
             $userListNotifications = [];
-
             if ($this->c_created_user_id) {
                 $userListNotifications[$this->c_created_user_id] = $this->c_created_user_id;
-
-                $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? MissedCallMessage::add($this) : [];
-                Notifications::publish(MissedCallMessage::COMMAND, ['user_id' => $this->c_created_user_id], $dataNotification);
             }
 
             if ($changedAttributes['c_status_id'] !== self::STATUS_HOLD) {
@@ -1297,8 +1311,6 @@ class Call extends \yii\db\ActiveRecord
             }
 
             if ($userListNotifications) {
-                //$from = PhoneFormatter::getPhoneOrNickname($this->c_from);
-                //$to = PhoneFormatter::getPhoneOrNickname($this->c_to);
                 $msgPart = '';
                 if ($this->c_source_type_id != self::SOURCE_DIRECT_CALL) {
                     $msgPart = 'Queued ';
@@ -1325,18 +1337,12 @@ class Call extends \yii\db\ActiveRecord
                         $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
                         Notifications::publish('getNewNotification', ['user_id' => $userId], $dataNotification);
                     }
-                    // Notifications::socket($userId, null, 'getNewNotification', [], true);
-//                    $userListSocketNotification[$userId] = $userId;
                 }
             }
 
             if ($this->c_case_id) {
                 (Yii::createObject(CasesManageService::class))->needAction($this->c_case_id);
             }
-
-
-
-            //}
         }
 
         if (
