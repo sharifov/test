@@ -18,6 +18,8 @@ class SegmentAwardQuoteForm extends Model
     public $flight_number;
     public $cabin;
     public $operatedBy;
+    public $destinationLabel;
+    public $originLabel;
 
     public function __construct(SegmentAwardQuoteItem $segment, $config = [])
     {
@@ -37,19 +39,21 @@ class SegmentAwardQuoteForm extends Model
             }],
 
             ['departure', 'required'],
-            ['departure', 'date', 'format' => 'php:d-M-Y H:i'],
+            ['departure', 'date', 'format' => 'php:Y-m-d H:i'],
             ['departure', 'filter', 'filter' => function ($value) {
-                return date('d-m-Y H:i', strtotime($value));
+                return date('Y-m-d H:i', strtotime($value));
             }],
 
+            ['departure', 'dateValidate'],
+            [['destinationLabel', 'originLabel'], 'safe'],
+
             ['arrival', 'required'],
-            ['arrival', 'date', 'format' => 'php:d-M-Y H:i'],
+            ['arrival', 'date', 'format' => 'php:Y-m-d H:i'],
             ['arrival', 'filter', 'filter' => function ($value) {
-                return date('d-m-Y H:i', strtotime($value));
+                return date('Y-m-d H:i', strtotime($value));
             }],
 
             ['trip', 'required'],
-            ['trip', 'in', 'range' => SegmentAwardQuoteItem::getTrips()],
 
             ['flight', 'required'],
             ['flight_number', 'string'],
@@ -65,5 +69,14 @@ class SegmentAwardQuoteForm extends Model
         return [
             'flight_number' => 'Flight No'
         ];
+    }
+
+    public function dateValidate($attribute, $params)
+    {
+        $departure = strtotime($this->departure);
+        $arrival = strtotime($this->arrival);
+        if ($departure > $arrival) {
+            $this->addError($attribute, 'Departure Date can not be less than Arrival Date');
+        }
     }
 }

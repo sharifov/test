@@ -2,7 +2,10 @@
 
 namespace modules\quoteAward\src\models;
 
+use common\models\Airports;
 use common\models\Lead;
+use src\helpers\app\AppHelper;
+use src\repositories\airport\AirportRepository;
 use yii\base\Model;
 
 class SegmentAwardQuoteItem extends Model
@@ -19,14 +22,14 @@ class SegmentAwardQuoteItem extends Model
     public $cabin;
     public $operatedBy;
 
-    public $originName;
-    public $destinationName;
+    public $originLabel;
+    public $destinationLabel;
 
     public function rules(): array
     {
         return [
             [['origin', 'destination', 'departure',
-                'arrival', 'trip', 'flight', 'flight_number', 'cabin', 'operatedBy'], 'safe'],
+                'arrival', 'trip', 'flight', 'flight_number', 'cabin', 'operatedBy', 'originLabel', 'destinationLabel'], 'safe'],
         ];
     }
 
@@ -45,15 +48,7 @@ class SegmentAwardQuoteItem extends Model
     public function setParams($params)
     {
         $this->setAttributes($params);
-    }
-
-    public static function getTrips(): array
-    {
-        $trips = [];
-        for ($i = 1; $i <= self::TRIP_COUNT; $i++) {
-            $trips[$i] = 'Trip ' . $i;
-        }
-        return $trips;
+        $this->setAirportLabel();
     }
 
     public function loadData(array $segment, int $trip)
@@ -73,5 +68,53 @@ class SegmentAwardQuoteItem extends Model
         $this->flight_number = $segment['flightNumber'] ?? null;
         $this->cabin = $segment['cabin'] ?? null;
         $this->operatedBy = $segment['carrier'] ?? null;
+        $this->setAirportLabel();
+    }
+
+    private function setAirportLabel()
+    {
+        $destAirport = $this->loadAirport($this->destination);
+        $originAirport = $this->loadAirport($this->origin);
+        $this->originLabel = $originAirport ? $this->loadAirportLabel($originAirport) : '';
+        $this->destinationLabel = $destAirport ? $this->loadAirportLabel($destAirport) : '';
+    }
+
+
+    /**
+     * @param string $iata
+     * @return Airports|null
+     */
+    private function loadAirport(string $iata): ?Airports
+    {
+        try {
+            return (new AirportRepository())->findByIata($iata);
+        } catch (\Throwable $throwable) {
+            $logMessage = AppHelper::throwableLog($throwable);
+            $logMessage['airport_iata'] = $iata;
+            \Yii::warning(
+                $logMessage,
+                'SegmentAwardQuoteForm:loadAirport'
+            );
+            return null;
+        }
+    }
+
+    /**
+     * @param Airports $airportModel
+     * @return string
+     */
+    private function loadAirportLabel(Airports $airportModel): string
+    {
+        try {
+            return $airportModel->getSelection();
+        } catch (\Throwable $throwable) {
+            $logMessage = AppHelper::throwableLog($throwable);
+            $logMessage['airport_iata'] = $iata;
+            \Yii::warning(
+                $logMessage,
+                'SegmentAwardQuoteForm:loadAirportLabel'
+            );
+            return '';
+        }
     }
 }

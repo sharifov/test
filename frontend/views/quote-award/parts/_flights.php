@@ -21,7 +21,7 @@ use yii\helpers\Html;
  */
 
 $form = ActiveForm::begin([
-    'action' => \yii\helpers\Url::to(['quote-award/save']),
+    'action' => \yii\helpers\Url::to(['quote-award/save', 'leadId' => $lead->id]),
     'id' => 'alt-award-quote-info-form'
 ]) ?>
 <div style="margin-top: 15px">
