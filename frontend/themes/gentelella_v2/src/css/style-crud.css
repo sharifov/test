@@ -5524,6 +5524,7 @@ input[disabled] + .radio-tab__text {
 */
 .select2-container--krajee .select2-selection--single .select2-selection__arrow {
   border-left-color: #e4e9ee !important;
+  max-height: 28px;
 }
 
 .select2-container--krajee .select2-selection__clear {
@@ -5701,9 +5702,9 @@ input[disabled] + .radio-tab__text {
 
 /****** SELECT KRAJEE PLUGIN ******/
 .select2-container--krajee .select2-selection--single .select2-selection__clear {
-    right: 1.5rem;
-    line-height: 16px;
-    top: 4px;
+  right: 1.5rem;
+  line-height: 18px;
+  vertical-align: middle;
 }
 /****** END SELECT KRAJEE PLUGIN ******/
 
