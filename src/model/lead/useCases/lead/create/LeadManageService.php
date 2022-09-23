@@ -374,6 +374,19 @@ class LeadManageService
 
             $this->updateLeadOnRelationActiveCalls($lead, $call);
 
+            /** @fflag FFlag::FF_KEY_CALL_DEBUG_LOG_ENABLE, Call debug log enable */
+            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CALL_DEBUG_LOG_ENABLE)) {
+                \Yii::info(
+                    [
+                        'point' => 'LeadManageService:createFromPhoneWidget',
+                        'message' => 'assignToLead',
+                        'callId' => $call->c_id,
+                        'leadId' => $lead->id,
+                    ],
+                    'info\Call:assignToLead'
+                );
+            }
+
             return $lead;
         });
     }
@@ -462,6 +475,19 @@ class LeadManageService
             $this->createLeadData($lead->id, $call->c_lead_id, $call->c_id);
 
             $this->updateLeadOnRelationActiveCalls($lead, $call);
+
+            /** @fflag FFlag::FF_KEY_CALL_DEBUG_LOG_ENABLE, Call debug log enable */
+            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CALL_DEBUG_LOG_ENABLE)) {
+                \Yii::info(
+                    [
+                        'point' => 'LeadManageService:createFromPhoneWidgetWithInvalidClient',
+                        'message' => 'assignToLead',
+                        'callId' => $call->c_id,
+                        'leadId' => $lead->id,
+                    ],
+                    'info\Call:assignToLead'
+                );
+            }
 
             return $lead;
         });
