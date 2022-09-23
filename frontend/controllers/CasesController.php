@@ -720,8 +720,7 @@ class CasesController extends FController
         $isAdmin = true;
 
         $dataProviderOrders = (new OrderSearch())->searchByCase($model->cs_id);
-
-        $categoriesHierarchy = NestedSetsHelper::getCategoriesHierarchy($model->getAttribute('cs_category_id'));
+        $categoriesHierarchy = NestedSetsHelper::getCategoriesHierarchy($model->cs_category_id);
 
         return $this->render('view', [
             'model' => $model,
