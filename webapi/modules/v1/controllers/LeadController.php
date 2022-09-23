@@ -408,6 +408,7 @@ class LeadController extends ApiBaseController
      * }
      *
      * @apiError UserNotFound The id of the User was not found.
+     * @apiError TooManyRequests Too many requests
      *
      * @apiErrorExample Error-Response:
      *      HTTP/1.1 422 Unprocessable entity
@@ -418,6 +419,15 @@ class LeadController extends ApiBaseController
      *          "status": 422,
      *          "type": "yii\\web\\UnprocessableEntityHttpException"
      *      }
+     *
+     *      HTTP/1.1 429 Too Many Requests
+     *      {
+     *           "status": 429,
+     *           "message": "Too many requests",
+     *           "errors": [
+     *              "This request with params has already been sent."
+     *          ]
+     *       }
      *
      * @return array
      * @throws BadRequestHttpException
