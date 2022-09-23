@@ -7,7 +7,7 @@ use Throwable;
 /**
  * Class AdditionalDataException
  */
-class AdditionalDataException extends \DomainException
+class AdditionalDataException extends \DomainException implements AdditionalDataInterface
 {
     private array $additionalData;
 

@@ -47,6 +47,7 @@ use modules\order\src\services\OrderManageService;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use src\auth\Auth;
+use src\entities\cases\CaseCategory;
 use src\entities\cases\CaseEventLog;
 use src\entities\cases\CaseEventLogSearch;
 use src\entities\cases\Cases;
@@ -68,6 +69,7 @@ use src\forms\cases\CasesSaleForm;
 use src\guards\cases\CaseManageSaleInfoGuard;
 use src\helpers\app\AppHelper;
 use src\helpers\ErrorsToStringHelper;
+use src\helpers\nestedSets\NestedSetsHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\call\useCase\createCall\fromCase\AbacCallFromNumberList;
 use src\model\callLog\entity\callLog\CallLogType;
@@ -718,6 +720,7 @@ class CasesController extends FController
         $isAdmin = true;
 
         $dataProviderOrders = (new OrderSearch())->searchByCase($model->cs_id);
+        $categoriesHierarchy = NestedSetsHelper::getCategoriesHierarchy($model->cs_category_id);
 
         return $this->render('view', [
             'model' => $model,
@@ -748,6 +751,10 @@ class CasesController extends FController
             'callFromNumberList' => $callFromNumberList,
             'smsFromNumberList' => $smsFromNumberList,
             'emailFromList' => $emailFromList,
+
+            'categoriesHierarchy' => $categoriesHierarchy,
+
+
         ]);
     }
 
@@ -1111,11 +1118,35 @@ class CasesController extends FController
                 $form->projectId = (new ProjectRepository())->getIdByName($params['project']);
             }
             $form->orderUid = $params['orderUid'] ?? null;
+
+            if (!empty($params['department'])) {
+                $form->setDepartmentId((int)$params['department']);
+            }
+            if (!empty($params['email'])) {
+                $form->setEmail($params['email']);
+            }
+            if (!empty($params['saleId'])) {
+                $form->setSaleId((int)$params['saleId']);
+            }
         } elseif ($form->load(Yii::$app->request->post()) && $form->validate()) {
             try {
                 /** @var Cases $case */
                 $case = $this->casesCreateService->createByWeb($form, $user->id);
                 $this->casesManageService->processing($case->cs_id, Yii::$app->user->id, Yii::$app->user->id);
+
+                if (!empty($form->getSaleId())) {
+                    $saleData = ['saleId' => $form->getSaleId()];
+                    $this->casesSaleService->createSale($case->cs_id, $saleData);
+                } else {
+                    Yii::info([
+                        'message' => 'Case sale not created.',
+                        'caseId' => $case->cs_id,
+                        'projectId' => $case->project->id,
+                        'caseBookingId' => $case->cs_order_uid,
+                        'saleId' => $form->getSaleId(),
+                    ], 'info\CasesController::actionCreate:MissingSaleId');
+                }
+
                 Yii::$app->session->setFlash('success', 'Case created');
                 return $this->redirect(['view', 'gid' => $case->cs_gid]);
             } catch (\Throwable $e) {
@@ -1261,6 +1292,22 @@ class CasesController extends FController
             }
         } else {
             $str = '<option>-</option>';
+        }
+        return $str;
+    }
+
+    public function actionGetNestedCategories($id): string
+    {
+        $id = (int)$id;
+        $str = '';
+        if ($categories = $this->caseCategoryRepository->getEnabledByDep($id)) {
+            $str = NestedSetsHelper::jsonData(CaseCategory::findNestedSets()->where([
+                'IN',
+                'cc_id',
+                ArrayHelper::getColumn(ArrayHelper::toArray($categories), 'cc_id')
+            ]));
+        } else {
+            $str = json_encode([]);
         }
         return $str;
     }

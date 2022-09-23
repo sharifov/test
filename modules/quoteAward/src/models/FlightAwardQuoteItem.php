@@ -20,13 +20,14 @@ class FlightAwardQuoteItem extends Model
     public $quoteProgram;
     public $awardProgram;
     public $ppm;
-    public $ppc;
+    public $pcc;
+    public $productType;
 
     public function rules(): array
     {
         return [
             [['cabin', 'validationCarrier', 'cabin',
-                'gds', 'adults', 'children', 'infants', 'recordLocator', 'fareType', 'quoteProgram', 'awardProgram', 'ppm', 'id', 'trip_type', 'ppc'], 'safe'],
+                'gds', 'adults', 'children', 'infants', 'recordLocator', 'fareType', 'quoteProgram', 'awardProgram', 'ppm', 'id', 'trip_type', 'pcc', 'productType'], 'safe'],
         ];
     }
 

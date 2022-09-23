@@ -7,6 +7,7 @@
 /** @var  $attribute string */
 /** @var  $name string */
 /** @var  $label string */
+/** @var  $disabled bool */
 ?>
     <div class='form-group'>
         <?= $label ?>
@@ -16,8 +17,11 @@
 <?php
 $js = <<<JS
 $(document).ready(function(){
-
+   
     const nestedSetsSelect = $("#{$attribute}");
+    if ("$disabled"){
+        nestedSetsSelect.prop("disabled", true);
+    }
     /* add empty option to enable placeholder*/
     nestedSetsSelect.prepend('<option selected=""></option>');
     nestedSetsSelect.select2ToTree({
@@ -59,5 +63,8 @@ $css = <<<CSS
 #{$attribute} + .select2 .select2-selection span.select2-selection__rendered{
     padding-top: 0;
 }
+.select2-container--default .select2-selection--single .select2-selection__placeholder{ 
+    color: #7890a2; 
+ }  
 CSS;
 $this->registerCss($css);

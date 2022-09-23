@@ -2,6 +2,9 @@
 
 use borales\extensions\phoneInput\PhoneInput;
 //use frontend\extensions\PhoneInput;
+use frontend\widgets\nestedSets\NestedSetsWidget;
+use src\entities\cases\CaseCategory;
+use src\forms\cases\CaseCategoryManageForm;
 use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\widgets\ActiveForm;
@@ -39,15 +42,46 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?= $form->field($model, 'depId')->dropDownList($model->getDepartments(), [
                     'prompt' => 'Choose a department',
                     'onchange' => '
-                        $.get( "' . Url::to(['/cases/get-categories']) . '", { id: $(this).val() } )
-                            .done(function( data ) {
-                                $( "#' . Html::getInputId($model, 'categoryId') . '" ).html( data );
+                    const nestedSetsSelect = $("#categoryId");
+                    nestedSetsSelect.select2ToTree({"placeholder" : "Searching..."}).attr("disabled", "disabled");
+                  
+                    $.get( "' . Url::to(['/cases/get-nested-categories']) . '", { id: $(this).val() } )
+                        .done(function( data ) {
+                            data = $.parseJSON(data);
+                            const nestedSetsSelect = $("#categoryId");
+                            nestedSetsSelect.select2("destroy").empty();
+                            nestedSetsSelect.prepend(\'<option selected=""></option>\');
+                            
+                            nestedSetsSelect.select2ToTree({
+                                treeData: {dataArr: data},
+                                  maximumSelectionLength: 3,
+                                allowClear: true,
+                                placeholder: "Choose a category",
+                                templateResult: formatState,
+                                templateSelection: formatState       
+                                                                 
+                            });  
+                            function formatState (state) {
+                                if (!state.disabled) {
+                                  return state.text;
+                                }
+                                return $(\'<span><i class="fa fa-lock"></i> \' + state.text + \'</span>\');
                             }
-                        );
-                    '
+                            nestedSetsSelect.removeAttr("disabled");
+                            nestedSetsSelect.trigger(\'change.select2\');
+                        }
+                    );
+                '
                 ]) ?>
 
-                <?= $form->field($model, 'categoryId')->dropDownList([], ['prompt' => 'Choose a category']) ?>
+                <?= $form->field($model, 'categoryId')->widget(NestedSetsWidget::class, [
+                    'query' => CaseCategory::findNestedSets()->where(['cc_dep_id' => $model->getDepartmentId()]),
+                    'attribute' => 'categoryId',
+                    'model' => $model,
+                    'label' => '',
+                    'allowToSelectEnabled' => true,
+                    'placeholder' => 'Choose a category'
+                ]); ?>
 
                 <?= $form->field($model, 'sourceTypeId')->dropDownList($model->getSourceTypeList(), ['prompt' => 'Choose a source type']) ?>
 
@@ -68,6 +102,8 @@ $this->params['breadcrumbs'][] = $this->title;
                 <?= $form->field($model, 'subject')->textInput(['maxlength' => true]) ?>
 
                 <?= $form->field($model, 'description')->textarea(['rows' => 6]) ?>
+
+                <?= $form->field($model, 'saleId')->hiddenInput()->label(false) ?>
 
 
 
@@ -116,6 +152,13 @@ $js = <<<JS
                       callback.apply(context, args);
                     }, ms || 0);
               };
+        }
+        
+        let department = $('#casescreatebywebform-depid');
+        if(department.val() !== '') {
+            setTimeout(function () {
+                department.trigger('change');
+            }, 100);
         }
     });
 JS;

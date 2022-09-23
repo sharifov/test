@@ -151,7 +151,8 @@ $unsubscribedEmails =  array_column($model->project->emailUnsubscribes, 'eu_emai
         <div class="col-md-4">
             <?= $this->render('_general_info', [
                 'model'      => $model,
-                'isAdmin'       => $isAdmin
+                'isAdmin'       => $isAdmin,
+                'categoriesHierarchy' => $categoriesHierarchy
             ])
 ?>
         </div>

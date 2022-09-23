@@ -943,7 +943,7 @@ class LeadController extends ApiBaseController
      * @apiParam {string{1}=E-ECONOMY,B-BUSINESS,F-FIRST,P-PREMIUM}        lead.cabin                                         Cabin
      * @apiParam {array[]}              lead.emails                                         Array of Emails (string)
      * @apiParam {array[]}              lead.phones                                         Array of Phones (string)
-     * @apiParam {object[]}             lead.experiments                                    Array of new Experiment codes (existed will be deleted)
+     * @apiParam {object[]}             lead.experiments                                    Array of Experiment codes
      * @apiParam {object[]}             lead.flights                                        Array of Flights
      * @apiParam {string{3}}                                lead.flights.origin                 Flight Origin location Airport IATA-code
      * @apiParam {string{3}}                                lead.flights.destination            Flight Destination location Airport IATA-code

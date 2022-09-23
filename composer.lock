@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cd1ae7ad363f273b8df8f5857fca2e1a",
+    "content-hash": "8ea15e58f88913df3cd0b06a42f096bc",
     "packages": [
         {
             "name": "2amigos/yii2-arrayquery-component",
@@ -4365,11 +4365,11 @@
         },
         {
             "name": "kivork/yii2-search-module",
-            "version": "v1.14.0",
+            "version": "v1.15.0",
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:techork/yii2-search-module.git",
-                "reference": "b7ece36b53b27111cc341b09044c5ba2c32df400"
+                "reference": "5fa5f1ffd346b6f268cd4102e5554d678a8d082e"
             },
             "require": {
                 "kovalenkojuls/yii2-widget-combodate": "*",
@@ -4417,11 +4417,11 @@
         },
         {
             "name": "kivork/yii2-two-factor-auth",
-            "version": "1.3.3-stable",
+            "version": "1.3.2-stable",
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:techork/yii2-two-factor-auth.git",
-                "reference": "4867fc1cd5b9962fa22ff1cc0758df7843a6765a"
+                "reference": "686961d47064ad7aa336b64d670a42f4ccf0f617"
             },
             "require": {
                 "endroid/qr-code": "4.4.9",
@@ -15905,5 +15905,5 @@
         "ext-pgsql": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.0.0"
+    "plugin-api-version": "2.3.0"
 }

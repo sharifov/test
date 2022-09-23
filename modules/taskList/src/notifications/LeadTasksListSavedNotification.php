@@ -26,9 +26,11 @@ class LeadTasksListSavedNotification
      */
     public function send(): bool
     {
+        $result = false;
         /** @fflag FFlag::FF_KEY_AUTO_REFRESH_LEAD_TASK_LIST_ENABLE, Auto refresh lead task list enabled */
         if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_AUTO_REFRESH_LEAD_TASK_LIST_ENABLE)) {
-            return Notifications::pub(['lead-' . $this->lead->id], 'refreshTaskList', [
+            sleep(2);
+            $result = Notifications::pub(['lead-' . $this->lead->id], 'refreshTaskList', [
                 'data' => [
                     'gid' => $this->lead->gid,
                     'leadId' => $this->lead->id,
@@ -37,6 +39,6 @@ class LeadTasksListSavedNotification
             ]);
         }
 
-        return false;
+        return $result;
     }
 }

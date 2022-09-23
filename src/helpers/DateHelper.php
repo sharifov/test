@@ -74,6 +74,17 @@ class DateHelper
         return (int)$startDateTime->diff($endDateTime)->format('%a');
     }
 
+    public static function getDifferentInHoursByDatesUTC(string $startDate, string $endDate): int
+    {
+        $startDateTime = self::getDateTimeImmutableUTC($startDate);
+        $endDateTime = self::getDateTimeImmutableUTC($endDate);
+
+        $diff = $startDateTime->diff($endDateTime)->format('%a-%h-%i-%s');
+        $diffParts = explode('-', $diff);
+
+        return ((int)$diffParts[0] * 24) + ((int)$diffParts[1]);
+    }
+
     public static function getDifferentInMinutesByDatesUTC(string $startDate, string $endDate): int
     {
         $startDateTime = self::getDateTimeImmutableUTC($startDate);
