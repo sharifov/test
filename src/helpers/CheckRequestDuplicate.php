@@ -25,11 +25,6 @@ class CheckRequestDuplicate
         $request = \Yii::$app->request;
 
         $requestData = $request->getIsPost() ? $request->post() : $request->get();
-        $requestData = array_filter($requestData, function ($key) {
-            return !in_array($key, [
-                '_csrf-frontend',
-            ]);
-        }, ARRAY_FILTER_USE_KEY);
         $requestData['url'] = $request->url;
         $requestData['user_ip'] = $request->getUserIP();
 
