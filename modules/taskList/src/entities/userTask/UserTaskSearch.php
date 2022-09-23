@@ -433,6 +433,8 @@ class UserTaskSearch extends UserTask
                 new Expression('SUM(CASE WHEN ut_status_id = ' . UserTask::STATUS_COMPLETE . ' THEN 1 ELSE 0 END)'),
             'cancelCnt' =>
                 new Expression('SUM(CASE WHEN ut_status_id = ' . UserTask::STATUS_CANCEL . ' THEN 1 ELSE 0 END)'),
+            'failedCnt' =>
+                new Expression('SUM(CASE WHEN ut_status_id = ' . UserTask::STATUS_FAILED . ' THEN 1 ELSE 0 END)'),
             'leadCnt' =>
                 new Expression('COUNT(DISTINCT(ut_target_object_id))'),
             'allUserTaskCnt' =>
