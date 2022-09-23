@@ -35,7 +35,7 @@ $form = ActiveForm::begin([
             </div>
 
             <div class="col-md-2 d-flex flex-row pr-0">
-                <div class="text-nowrap pt-1 pr-2">Number of flights</div>
+                <div class="text-nowrap pt-1 pr-2">Cabine</div>
                 <?= $form->field($model, 'cabin', [])
                     ->dropDownList(LeadHelper::cabinList(), ['prompt' => 'Select Cabin'])
                     ->label(false) ?>
