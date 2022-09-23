@@ -62,12 +62,14 @@ class VoluntaryRefundConfirmJob extends BaseJob implements JobInterface
      */
     public function execute($queue)
     {
+        $this->waitingTimeRegister();
+        $this->setTimeExecution(microtime(true));
+
         $this->productQuoteRefundRepository = \Yii::createObject(ProductQuoteRefundRepository::class);
         $this->productQuoteObjectRefundRepository = \Yii::createObject(ProductQuoteObjectRefundRepository::class);
         $this->productQuoteOptionRefundRepository = \Yii::createObject(ProductQuoteOptionRefundRepository::class);
         $this->orderRefundRepository = \Yii::createObject(OrderRefundRepository::class);
         $this->caseRepository = \Yii::createObject(CasesRepository::class);
-        $this->waitingTimeRegister();
 
         if (!$flightRequest = FlightRequest::findOne($this->flightRequestId)) {
             throw new \DomainException('FlightRequest not found, ID (' . $this->flightRequestId . ')');
@@ -132,6 +134,8 @@ class VoluntaryRefundConfirmJob extends BaseJob implements JobInterface
             $flightRequest->statusToError();
             $flightRequest->save();
         }
+
+        $this->execTimeRegister();
     }
 
     private function errorHandler(

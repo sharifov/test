@@ -32,11 +32,10 @@ class EmailAuth extends Email
     /**
      * @param $user
      * @return mixed|string
-     * @throws \yii\base\Exception
      */
     public function generateCode($user)
     {
-        return \Yii::$app->security->generateRandomString(8);
+        return (string)rand(100000, 999999);
     }
 
     /**

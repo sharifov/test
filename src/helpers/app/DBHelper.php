@@ -174,9 +174,10 @@ class DBHelper
         string $yearColumn,
         string $monthColumn
     ): string {
-        $preparedYearMonth[(int) $endDt->format('Y')][] = (int) $endDt->format('n');
-        while ($endDt->modify('-1 months') > $startDT) {
-            $preparedYearMonth[(int) $endDt->format('Y')][] = (int) $endDt->format('n');
+        $localEndDt = clone $endDt;
+        $preparedYearMonth[(int) $localEndDt->format('Y')][] = (int) $localEndDt->format('n');
+        while ($localEndDt->modify('-1 months') > $startDT) {
+            $preparedYearMonth[(int) $localEndDt->format('Y')][] = (int) $localEndDt->format('n');
         }
 
         $queryWhereDT = [];

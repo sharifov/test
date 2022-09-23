@@ -34,6 +34,7 @@ class UpdateConferenceParticipantCallIdJob extends BaseJob implements JobInterfa
     public function execute($queue)
     {
         $this->waitingTimeRegister();
+        $this->setTimeExecution(microtime(true));
         try {
             $call = $this->getCall($this->callSid);
             if ($call->c_conference_id !== $this->conferenceId) {
@@ -62,6 +63,8 @@ class UpdateConferenceParticipantCallIdJob extends BaseJob implements JobInterfa
                 'conferenceSid' => $this->conferenceSid,
             ], 'UpdateConferenceParticipantCallIdJob');
         }
+
+        $this->execTimeRegister();
     }
 
     private function sendSocketData(int $conferenceId): void

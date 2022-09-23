@@ -4,7 +4,7 @@ use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
 /* @var $this yii\web\View */
-/* @var $model common\models\DbDataSensitive */
+/* @var $model src\model\dbDataSensitive\entity\DbDataSensitive */
 /* @var $form yii\widgets\ActiveForm */
 
 ?>

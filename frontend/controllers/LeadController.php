@@ -220,6 +220,8 @@ class LeadController extends FController
                     'create',
                     'business-extra-queue',
                     'get-object-task-list',
+                    'pjax-user-tasks-list',
+                    'ajax-get-user-task',
                 ],
             ],
         ];
@@ -694,8 +696,9 @@ class LeadController extends FController
 
                         // Initiate basic state of `$content_data`
                         $content_data = ($comForm->offerList)
-                            ? $lead->getOfferEmailData($comForm->offerList, $projectContactInfo)
-                            : $lead->getEmailData2($comForm->quoteList, $projectContactInfo, $lang);
+                            ? $lead->getOfferEmailData($comForm->offerList, $projectContactInfo, $language)
+                            : $lead->getEmailData2($comForm->quoteList, $projectContactInfo, $language);
+
                         $content_data['quotes'] = array_map(function ($quoteArray) use ($comForm) {
                             $quoteArray['qc'] = $comForm->c_qc_uid;
                             return $quoteArray;
@@ -2889,6 +2892,13 @@ class LeadController extends FController
 
     public function actionAjaxGetUserTask(int $leadID): string
     {
+        $lead = $this->findLeadById($leadID);
+
+        /** @abac $abacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS, Access to view lead  */
+        if (!Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS)) {
+            throw new ForbiddenHttpException('Access Denied for getting ajax user task.');
+        }
+
         $searchModel = new UserTaskSearch();
         $dataProvider = $searchModel->searchByTargetObjectAndTargetObjectId(
             TargetObject::TARGET_OBJ_LEAD,

@@ -220,7 +220,7 @@ class SideBarMenu extends \yii\bootstrap\Widget
 
         /** @fflag FFlag::FF_KEY_CROSS_SALE_QUEUE_ENABLE, Cross Sale Queue enable */
         if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CROSS_SALE_QUEUE_ENABLE)) {
-            $menuCases[] = ['label' => 'Cross Sales inbox <span id="cases-q-cross-sales-inbox" data-type="inbox" class="label-warning label pull-right cases-q-info"></span> ',
+            $menuCases[] = ['label' => 'Cross Sales inbox <span id="cases-q-cross-sale-inbox" data-type="cross-sale-inbox" class="label-warning label pull-right cases-q-info"></span> ',
                 'url' => ['/cases-q/cross-sale-inbox'], 'icon' => 'briefcase text-info', 'title' => 'Cross Sales inbox'];
         }
 

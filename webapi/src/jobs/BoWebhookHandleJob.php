@@ -26,6 +26,9 @@ class BoWebhookHandleJob extends BaseJob implements JobInterface
      */
     public function execute($queue)
     {
+        $this->waitingTimeRegister();
+        $this->setTimeExecution(microtime(true));
+
         try {
             $service = BoWebhook::getServiceByType($this->requestTypeId);
             if (!$service) {
@@ -35,5 +38,7 @@ class BoWebhookHandleJob extends BaseJob implements JobInterface
         } catch (\Throwable $e) {
             \Yii::error(AppHelper::throwableLog($e, true), 'BoWebhookHandleJob::execute');
         }
+
+        $this->execTimeRegister();
     }
 }

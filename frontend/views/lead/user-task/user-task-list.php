@@ -20,7 +20,7 @@ use yii\widgets\{
 use modules\taskList\src\entities\userTask\UserTaskSearch;
 use frontend\widgets\userTasksList\helpers\UserTasksListHelper;
 
-$userTimezone = 'UTC';
+$userTimezone = Auth::user()->timezone ?: 'UTC';
 $calcPagination = UserTasksListHelper::calcPagination($pagination);
 ?>
 
@@ -138,11 +138,9 @@ $calcPagination = UserTasksListHelper::calcPagination($pagination);
 
 <?php
 $js = <<<JS
-    starTimers();
     startTooltips();
     
     $(document).on('pjax:complete', function() {
-        starTimers();
         startTooltips();
     });
 JS;

@@ -75,6 +75,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
     public function execute($queue): void
     {
         $this->waitingTimeRegister();
+        $this->setTimeExecution(microtime(true));
 
         $reProtectionCreateService = Yii::createObject(ReprotectionCreateService::class);
         $flightQuoteManageService = Yii::createObject(FlightQuoteManageService::class);
@@ -107,12 +108,18 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 }
                 $flightRequestService->error('Reason: Change processing already exist. Origin Product Quote(' .
                     $originProductQuote->pq_gid . ')');
+
+                $this->execTimeRegister();
+
                 return;
             }
 
             if ($originProductQuote && $reProtectionCreateService::isScheduleChangeActiveExist($originProductQuote)) {
                 $flightRequestService->error('Reason: Product Quote Schedule Change Active exist. Origin Product Quote(' .
                     $originProductQuote->pq_gid . ')');
+
+                $this->execTimeRegister();
+
                 return;
             }
 
@@ -179,6 +186,9 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     }
                     $flightRequestService->error(VarDumper::dumpAsString($throwable->getMessage()));
                     $reProtectionCreateService::writeLog($throwable);
+
+                    $this->execTimeRegister();
+
                     return;
                 }
 
@@ -216,6 +226,9 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         }
                         $flightRequestService->error(VarDumper::dumpAsString($throwable->getMessage()));
                         $reProtectionCreateService::writeLog($throwable);
+
+                        $this->execTimeRegister();
+
                         return;
                     }
                 }
@@ -281,6 +294,9 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 $caseReProtectionService->caseToManual('Could not create new reProtection quote');
                 $flightRequestService->error(VarDumper::dumpAsString($throwable->getMessage()));
                 $reProtectionCreateService::writeLog($throwable);
+
+                $this->execTimeRegister();
+
                 return;
             }
 
@@ -318,6 +334,9 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                             true
                         );
                     }
+
+                    $this->execTimeRegister();
+
                     return;
                 }
 
@@ -344,6 +363,9 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                         $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Request HybridService is failed');
                         $caseReProtectionService->caseToManual('OTA site is not informed');
                         $flightRequestService->pending('OTA site is not informed');
+
+                        $this->execTimeRegister();
+
                         return;
                     }
 
@@ -372,6 +394,9 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                     } catch (\Throwable $throwable) {
                         $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Quote(' . $reProtectionQuote->pq_gid . ') not set recommended');
                     }
+
+                    $this->execTimeRegister();
+
                     return;
                 }
 
@@ -386,12 +411,18 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                             Notifications::TYPE_INFO,
                             true
                         );
+
+                        $this->execTimeRegister();
+
                         return;
                     }
 
                     if ($case->isPending() || $case->isStatusAutoProcessing() || $case->isFollowUp() || $case->isStatusNew()) {
                         $case->addEventLog(CaseEventLog::RE_PROTECTION_CREATE, 'Manual processing requested');
                         $caseReProtectionService->caseToManual('Manual processing requested');
+
+                        $this->execTimeRegister();
+
                         return;
                     }
                 }
@@ -419,5 +450,7 @@ class ReprotectionCreateJob extends BaseJob implements JobInterface
                 $caseReProtectionService->additionalFillingCase($client->id, $flightRequest->fr_project_id);
             }
         }
+
+        $this->execTimeRegister();
     }
 }

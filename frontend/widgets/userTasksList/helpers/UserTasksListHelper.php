@@ -2,6 +2,7 @@
 
 namespace frontend\widgets\userTasksList\helpers;
 
+use modules\featureFlag\FFlag;
 use src\auth\Auth;
 use modules\taskList\src\entities\userTask\{
     UserTask,
@@ -13,6 +14,7 @@ use yii\helpers\{
     StringHelper,
     Html
 };
+use yii\caching\TagDependency;
 use yii\data\Pagination;
 
 class UserTasksListHelper
@@ -24,36 +26,28 @@ class UserTasksListHelper
      * @param int $leadId
      * @param int $userId
      * @param int $page
-     * @param int $activeUserShiftScheduleId
+     * @param int|null $activeUserShiftScheduleId
      * @param string $prefix
      * @return string
      */
-    public static function generateUserTasksListCacheKey(int $leadId, int $userId, int $page, int $activeUserShiftScheduleId): string
+    public static function getShiftScheduleCacheKey(int $leadId, int $userId, int $page, ?int $activeUserShiftScheduleId): string
     {
-        $cacheKey = md5('usertaskslist_' . $leadId . $userId . $page . $activeUserShiftScheduleId);
+        $cacheKey = md5('shiftschedule_' . $leadId . $userId . $page . $activeUserShiftScheduleId);
         return $cacheKey;
     }
 
     /**
      * @param int $leadId
      * @param int $userId
+     * @param int $page
+     * @param int|null $activeUserShiftScheduleId
+     * @param string $prefix
      * @return string
      */
-    public static function getUserTasksListCacheTag(int $leadId, int $userId): string
+    public static function getSchedulesTasksCacheKey(int $leadId, int $userId, int $page, ?int $activeUserShiftScheduleId): string
     {
-        $tag = md5('usertaskslisttag_' . $leadId . $userId);
-        return $tag;
-    }
-
-    /**
-     * @param int $leadId
-     * @param int $userId
-     * @return string
-     */
-    public static function generateUserSchedulesListCacheKey(int $leadId, int $userId): string
-    {
-        $cacheKey = 'userschedules_' . $leadId . $userId;
-        return md5($cacheKey);
+        $cacheKey = md5('schedulesusertaskslist_' . $leadId . $userId . $page . $activeUserShiftScheduleId);
+        return $cacheKey;
     }
 
     /**
@@ -66,18 +60,18 @@ class UserTasksListHelper
      */
     public static function renderDeadlineStatus($statusId, $startDate, $endDate, $timezone): string
     {
-        if (static::isDeadline($endDate, $statusId, $timezone)) {
+        $isDeadline = self::isDeadline($endDate, $statusId, $timezone);
+
+        if ($isDeadline || $statusId == UserTask::STATUS_FAILED) {
             return 'Unfulfilled';
         }
 
         if (!empty($endDate) && $statusId == UserTask::STATUS_PROCESSING) {
-            $startDate = (new \DateTimeImmutable($startDate))->setTimezone(new \DateTimeZone($timezone))->format('d-M-Y H:i:s');
-            $endDate = (new \DateTimeImmutable($endDate))->setTimezone(new \DateTimeZone($timezone))->format('d-M-Y H:i:s');
-
-            $timer = UserTaskHelper::getDeadlineTimer($startDate, $endDate);
-            $timer = ($timer != '-') ? $timer : '';
-
-            return $timer;
+            return \Yii::$app->formatter->asDateTimeByUserTimezone(
+                strtotime($endDate),
+                $timezone,
+                'php:d.m.y [H:i]'
+            );
         } elseif ($statusId == UserTask::STATUS_CANCEL) {
             return 'Canceled';
         }
@@ -127,9 +121,17 @@ class UserTasksListHelper
                 'title' => $description,
                 'data' => [
                     'usertaskid' => $usertaskId,
-                    'new-note' => empty($description),
+                    'new-note' => (int)empty($description),
                     'custom-class' => 'lead-user-tasks-table__note-tooltip',
                 ],
+            ]);
+        } elseif (!empty($description)) {
+            $result = Html::tag('span', StringHelper::truncate($description, 10), [
+                'class' => 'js-tooltip',
+                'data' => [
+                    'custom-class' => 'lead-user-tasks-table__note-tooltip',
+                    'original-title' => $description,
+                ]
             ]);
         }
 
@@ -148,7 +150,7 @@ class UserTasksListHelper
     public static function getColorByStatusAndDeadline($statucId, $isDeadline)
     {
         if ($isDeadline) {
-            return 'rgba(225, 85, 84, .1)';
+            return 'rgba(255, 0, 0, .1)';
         }
 
         return UserTaskHelper::getColorByStatus($statucId);
@@ -158,7 +160,7 @@ class UserTasksListHelper
     {
         $result = '';
 
-        if ($statusId != UserTask::STATUS_CANCEL && !$isDeadline) {
+        if (!$isDeadline && $statusId != UserTask::STATUS_CANCEL && $statusId != UserTask::STATUS_FAILED) {
             $result = \Yii::$app->formatter->asDateTimeByUserTimezone(
                 strtotime($startDate),
                 $userTimeZone,
@@ -181,8 +183,9 @@ class UserTasksListHelper
 
         if ($endDate && $statusId == UserTask::STATUS_PROCESSING) {
             $date = (new \DateTimeImmutable($endDate))->setTimezone(new \DateTimeZone($timezone))->format('d-M-Y H:i:s');
+            $now = (new \DateTimeImmutable('now'))->setTimezone(new \DateTimeZone($timezone))->format('d-M-Y H:i:s');
 
-            if (time() > strtotime($date)) {
+            if (strtotime($now) > strtotime($date)) {
                 $deadline = true;
             }
         }
@@ -207,5 +210,44 @@ class UserTasksListHelper
         ];
 
         return $result;
+    }
+
+    /**
+     * @return int
+     */
+    public static function getCacheDuration(): int
+    {
+        $result = 0;
+
+        /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_CACHE_DURATION, Cache duration for new user task list (in seconds) */
+        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_USER_NEW_TASK_LIST_CACHE_DURATION)) {
+            /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_CACHE_DURATION, Cache duration for new user task list (in seconds) */
+            $duration = (int)\Yii::$app->featureFlag->getValue(FFlag::FF_KEY_USER_NEW_TASK_LIST_CACHE_DURATION);
+
+            if ($duration > 0) {
+                $result = $duration;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param string $cacheKey
+     * @return TagDependency
+     */
+    public static function getCacheTagDependency(string $cacheKey): TagDependency
+    {
+        return new TagDependency(['tags' => $cacheKey]);
+    }
+
+    /**
+     * @param int $leadId
+     * @param int $employeeId
+     * @return string
+     */
+    public static function getCacheTagKey(int $leadId, int $employeeId): string
+    {
+        return md5('userTaskListWidgetCacheTagKey_' . $leadId . $employeeId);
     }
 }

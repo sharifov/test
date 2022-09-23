@@ -4,13 +4,12 @@ namespace src\entities\cases;
 
 use common\models\Department;
 use common\models\Employee;
-use kartik\daterange\DateRangeBehavior;
+use creocoder\nestedsets\NestedSetsBehavior;
 use src\behaviors\SlugBehavior;
 use yii\behaviors\BlameableBehavior;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
-use yii\helpers\ArrayHelper;
 
 /**
  * Class CaseCategory
@@ -24,10 +23,17 @@ use yii\helpers\ArrayHelper;
  * @property string $cc_updated_dt
  * @property int $cc_updated_user_id
  * @property bool $cc_enabled
- *
+ * @property bool $cc_allow_to_select;
+ * @property int $cc_tree;
+ * @property int $cc_lft;
+ * @property int $cc_rgt;
  * @property Cases[] $cases
  * @property Department $dep
  * @property Employee $updatedUser
+ * @method NestedSetsBehavior makeRoot()
+ * @method NestedSetsBehavior parents($depth = null)
+ * @method NestedSetsBehavior appendTo($node, $runValidation = true, $attributes = null)
+ *
  */
 class CaseCategory extends ActiveRecord
 {
@@ -55,31 +61,13 @@ class CaseCategory extends ActiveRecord
                 'donorColumn' => 'cc_name',
                 'targetColumn' => 'cc_key',
             ],
-        ];
-    }
-
-    /**
-     * @return array
-     */
-    public function rules(): array
-    {
-        return [
-            ['cc_key', 'default', 'value' => null],
-            ['cc_key', 'string', 'max' => 50],
-            ['cc_key', 'filter', 'filter' => 'strtolower', 'skipOnEmpty' => true],
-            ['cc_key', 'match', 'pattern' => '/^[a-z0-9_]+$/', 'message' =>  'Key can only contain alphanumeric characters, underscores.'],
-            ['cc_key', 'unique'],
-
-            ['cc_name', 'required'],
-            ['cc_name', 'string', 'max' => 255],
-            ['cc_name', 'unique'],
-
-            ['cc_dep_id', 'required'],
-            ['cc_dep_id', 'integer'],
-            ['cc_dep_id', 'exist', 'skipOnError' => true, 'targetClass' => Department::class, 'targetAttribute' => ['cc_dep_id' => 'dep_id']],
-
-            [['cc_system', 'cc_enabled'], 'boolean'],
-            ['cc_enabled', 'default', 'value' => true],
+            'tree' => [
+                'class' => NestedSetsBehavior::class,
+                'leftAttribute' => 'cc_lft',
+                'rightAttribute' => 'cc_rgt',
+                'depthAttribute' => 'cc_depth',
+                'treeAttribute' => 'cc_tree',
+            ],
         ];
     }
 
@@ -99,6 +87,11 @@ class CaseCategory extends ActiveRecord
             'cc_updated_dt' => 'Updated Dt',
             'cc_updated_user_id' => 'Updated User ID',
             'cc_enabled' => 'Enabled',
+            'cc_allow_to_select' => 'Allow to select',
+            'cc_lft' => 'Left Key',
+            'cc_rgt' => 'Right Key',
+            'cc_depth' => 'Depth Level',
+            'cc_tree' => 'Tree ID',
         ];
     }
 
@@ -171,6 +164,18 @@ class CaseCategory extends ActiveRecord
     public static function getKey(?int $categoryId)
     {
         return self::find()->select(['cc_key'])->where(['cc_id' => $categoryId])->limit(1)->scalar();
+    }
+
+    public function transactions()
+    {
+        return [
+            self::SCENARIO_DEFAULT => self::OP_ALL,
+        ];
+    }
+
+    public static function findNestedSets()
+    {
+        return new CasesNestedSetsCategoryQuery(static::class);
     }
 
     public static function getIdByKey(string $key): ?int

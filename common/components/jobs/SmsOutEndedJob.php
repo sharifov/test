@@ -61,6 +61,7 @@ class SmsOutEndedJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
+        $this->setTimeExecution(microtime(true));
 
         if ($sms = Sms::find()->where(['s_id' => $this->smsId])->limit(1)->one()) {
             $tplType = $sms->sTemplateType->stp_key ?? null;
@@ -122,5 +123,7 @@ class SmsOutEndedJob extends BaseJob implements JobInterface
                 }
             }
         }
+
+        $this->execTimeRegister();
     }
 }

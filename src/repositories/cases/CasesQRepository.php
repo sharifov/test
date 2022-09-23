@@ -12,6 +12,7 @@ use src\access\EmployeeDepartmentAccess;
 use src\access\EmployeeGroupAccess;
 use src\access\EmployeeProjectAccess;
 use src\auth\Auth;
+use src\entities\cases\CaseCategoryKeyDictionary;
 use src\entities\cases\Cases;
 use src\entities\cases\CasesQSearch;
 use src\entities\cases\CasesStatus;
@@ -104,6 +105,23 @@ class CasesQRepository
         $query->andWhere($this->createSubQuery($user->id, []));
 
         return $query;
+    }
+
+    public function getCrossSaleInboxQuery(Employee $user): ActiveQuery
+    {
+        $query = $this->getBaseQuery($user);
+        $query->leftJoin(
+            '{{%case_category}}',
+            'cc_id = cs_category_id'
+        );
+        $query->andOnCondition('cc_key = "' . CaseCategoryKeyDictionary::CROSS_SALE . '"');
+
+        return $query;
+    }
+
+    public function getCrossSaleInboxCount(Employee $user): int
+    {
+        return $this->getCrossSaleInboxQuery($user)->cache(self::CACHE_DURATION)->count();
     }
 
     /**

@@ -21,6 +21,7 @@ class UserTaskCanceledJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
+        $this->setTimeExecution(microtime(true));
 
         try {
             $lead = $this->getLead();
@@ -38,6 +39,8 @@ class UserTaskCanceledJob extends BaseJob implements JobInterface
             $message['leadId'] = $this->leadId;
             \Yii::error($message, 'UserTaskCanceledJob:execute:Throwable');
         }
+
+        $this->execTimeRegister();
     }
 
     private function getLead(): ?Lead

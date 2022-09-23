@@ -40,7 +40,9 @@ class UserTaskCompletionJob extends BaseJob implements JobInterface
      */
     public function execute($queue): void
     {
+        $timeStart = microtime(true);
         $this->waitingTimeRegister();
+        $this->setTimeExecution(microtime(true));
 
         try {
             $userTaskCompletionService = new UserTaskCompletionService(
@@ -50,6 +52,7 @@ class UserTaskCompletionJob extends BaseJob implements JobInterface
                 $this->taskModelId,
                 $this->userId
             );
+
             $userTaskCompletionService->handle();
         } catch (\RuntimeException | \DomainException $throwable) {
             $message = AppHelper::throwableLog($throwable);
@@ -60,6 +63,25 @@ class UserTaskCompletionJob extends BaseJob implements JobInterface
             $message['logData'] = $this->logData();
             \Yii::error($message, 'UserTaskCompletionJob:execute:Throwable');
         }
+
+        $timeEnd = microtime(true);
+        $executeSecond = (int)($timeEnd - $timeStart);
+
+        /** @fflag FFlag::FF_KEY_USER_TASK_COMPLETION_DEBUG, Enable debug/log mode */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_USER_TASK_COMPLETION_DEBUG)) {
+            $message = [
+                'message' => 'Debug execute time',
+                'executeSecond' => $executeSecond,
+                'logData' => $this->logData(),
+            ];
+            if ($executeSecond > 5) {
+                \Yii::warning($message, 'UserTaskCompletionJob:execute:warning');
+            } else {
+                \Yii::info($message, 'info\UserTaskCompletionJob:execute:executeSecond');
+            }
+        }
+
+        $this->execTimeRegister();
     }
 
     private function logData(): array

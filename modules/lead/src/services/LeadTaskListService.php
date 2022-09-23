@@ -22,6 +22,7 @@ use modules\taskList\src\entities\userTask\repository\UserTaskRepository;
 use modules\taskList\src\entities\userTask\UserTask;
 use modules\taskList\src\entities\userTask\UserTaskQuery;
 use modules\taskList\src\exceptions\TaskListAssignException;
+use modules\taskList\src\notifications\LeadTasksListSavedNotification;
 use modules\taskList\src\services\taskAssign\checker\TaskListAssignCheckerFactory;
 use modules\taskList\src\entities\taskList\TaskListParamService;
 use src\helpers\app\AppHelper;
@@ -53,6 +54,8 @@ class LeadTaskListService
         try {
             $dtNow = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')));
             if ($taskLists = TaskListQuery::getTaskListByLeadId($this->lead->id)) {
+                $countOfSuccessSavedUserTasks = 0;
+
                 foreach ($taskLists as $taskList) {
                     try {
                         $assignChecker = (new TaskListAssignCheckerFactory(
@@ -109,6 +112,7 @@ class LeadTaskListService
                         }
 
                         $assignService->assign();
+                        $countOfSuccessSavedUserTasks++;
                     } catch (TaskListAssignException $exception) {
                         $message = AppHelper::throwableLog($exception);
                         $message['taskListId'] = $taskList->tl_id ?? null;
@@ -128,6 +132,18 @@ class LeadTaskListService
                         $message['leadId'] = $this->lead->id ?? null;
                         \Yii::error($message, 'LeadTaskListService:assignReAssign:Throwable');
                     }
+                }
+
+                /** @fflag \modules\featureFlag\FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE, Log new task list on lead page */
+                if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_USER_NEW_TASK_LIST_ON_LEAD_LOG_ENABLE)) {
+                    \Yii::info([
+                        'leadId' => $this->lead->id,
+                        'countOfSuccessSavedUserTasks' => $countOfSuccessSavedUserTasks,
+                    ], 'info\LeadTaskListService:assign');
+                }
+
+                if ($countOfSuccessSavedUserTasks > 0) {
+                    (new LeadTasksListSavedNotification($this->lead))->send();
                 }
                 return;
             }

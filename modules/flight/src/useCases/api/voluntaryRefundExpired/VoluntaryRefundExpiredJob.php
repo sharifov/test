@@ -37,6 +37,7 @@ class VoluntaryRefundExpiredJob extends BaseJob implements JobInterface
     public function execute($queue)
     {
         $this->waitingTimeRegister();
+        $this->setTimeExecution(microtime(true));
 
         try {
             if (!$flightRequest = FlightRequest::findOne($this->flightRequestId)) {
@@ -75,5 +76,7 @@ class VoluntaryRefundExpiredJob extends BaseJob implements JobInterface
                 'trace' => AppHelper::throwableLog($e, true)
             ], 'VoluntaryRefundExpiredJob::execute');
         }
+
+        $this->execTimeRegister();
     }
 }

@@ -52,6 +52,7 @@ class WebEngageLeadRequestJob extends BaseJob implements JobInterface
     public function execute($queue): void
     {
         $this->waitingTimeRegister();
+        $this->setTimeExecution(microtime(true));
 
         try {
             if (!$lead = Lead::findOne($this->leadId)) {
@@ -109,5 +110,7 @@ class WebEngageLeadRequestJob extends BaseJob implements JobInterface
             ]);
             \Yii::error($message, 'WebEngageLeadRequestJob:throwable');
         }
+
+        $this->execTimeRegister();
     }
 }
