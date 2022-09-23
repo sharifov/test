@@ -3,12 +3,19 @@
 namespace frontend\controllers;
 
 use common\models\Lead;
+use modules\flight\src\helpers\FlightQuoteHelper;
 use modules\quoteAward\src\forms\AwardQuoteForm;
+use modules\quoteAward\src\forms\ImportGdsDumpForm;
 use modules\quoteAward\src\services\QuoteFlightService;
 use src\forms\CompositeFormHelper;
-use src\repositories\NotFoundException;
+use src\helpers\app\AppHelper;
+use src\helpers\ErrorsToStringHelper;
+use src\services\parsingDump\ReservationService;
+use src\services\quote\addQuote\guard\GdsByQuoteGuard;
 use Yii;
 use yii\helpers\Html;
+use yii\helpers\VarDumper;
+use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 
@@ -127,6 +134,55 @@ class QuoteAwardController extends FController
         return $this->asJson($prices);
     }
 
+    public function actionImportGdsDump($leadId)
+    {
+        $lead = Lead::findOne(['id' => $leadId]);
+        $tabId = (int)\Yii::$app->request->post('tab', 0);
+        $data = Yii::$app->request->post();
+        if (Yii::$app->request->isAjax && $lead) {
+            if (Yii::$app->request->isGet) {
+                $form = new ImportGdsDumpForm();
+                $form->tripId = Yii::$app->request->get('tripId', 0);
+                return $this->renderAjax('parts/_import_gds_dump', [
+                    'model' => $form,
+                ]);
+            }
+            $response = [];
+            try {
+                if (Yii::$app->request->isPost) {
+                    $form = new ImportGdsDumpForm();
+                    $form->load($data);
+                    $trips = $this->quoteFlightService->importGdsDump($form);
+
+                    $formAward = new AwardQuoteForm(
+                        $lead,
+                        \Yii::$app->request->post('FlightAwardQuoteForm', []),
+                        \Yii::$app->request->post('SegmentAwardQuoteForm', []),
+                        \Yii::$app->request->post('PriceListAwardQuoteForm', [])
+                    );
+                    $formAward->loadGdsSegments($trips, (int)$form->tripId);
+
+                    $response['flight'] = $this->renderAjax('parts/_flights', [
+                        'model' => $formAward,
+                        'lead' => $lead,
+                        'tab' => $tabId,
+                    ]);
+                    $response['status'] = 'success';
+                }
+            } catch (\RuntimeException | \DomainException $exception) {
+                $response['message'] = VarDumper::dumpAsString($exception->getMessage());
+                Yii::warning(AppHelper::throwableLog($exception), 'QuoteAwardController:actionImportGdsDump:exception');
+            } catch (\Throwable $throwable) {
+                Yii::error(AppHelper::throwableLog($throwable), 'QuoteAwardController:actionImportGdsDump:throwable');
+                $response['message'] = 'Internal Server Error';
+            }
+
+            return $this->asJson($response);
+        }
+
+        throw new BadRequestHttpException();
+    }
+
     public function actionSave($leadId)
     {
         $lead = Lead::findOne(['id' => $leadId]);
@@ -138,14 +194,16 @@ class QuoteAwardController extends FController
                 \Yii::$app->request->post('SegmentAwardQuoteForm', []),
                 \Yii::$app->request->post('PriceListAwardQuoteForm', [])
             );
-            if ($form->load(\Yii::$app->request->post()) && $form->validate()) {
+
+            $form->load(\Yii::$app->request->post());
+
+            if ($form->validate()) {
                 $this->quoteFlightService->save($form);
                 return ['success' => true];
+            } else {
+                return CompositeFormHelper::ajaxValidateCompositeForm($form);
             }
-
-            return $form;
         }
-
         return ['success' => false];
     }
 }

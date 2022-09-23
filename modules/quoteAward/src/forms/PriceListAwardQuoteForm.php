@@ -42,9 +42,11 @@ class PriceListAwardQuoteForm extends Model
     public function rules(): array
     {
         return [
-            [['flight', 'passenger_type', 'selling', 'fare', 'net', 'taxes', 'mark_up', 'passenger_count', 'passenger_count', 'oldParams'], 'required'],
+            [['flight', 'passenger_type', 'selling', 'fare', 'net', 'taxes', 'passenger_count', 'passenger_count', 'oldParams'], 'required'],
             ['net', 'number', 'min' => 1, 'tooSmall' => 'Net price must be greater than 0'],
-            ['miles', 'integer'],
+            ['fare', 'number', 'min' => 1, 'tooSmall' => 'Fare must be greater than 0'],
+            ['taxes', 'number', 'min' => 1, 'tooSmall' => 'Taxes must be greater than 0'],
+            [['miles', 'mark_up'], 'integer'],
             ['passenger_type', 'in', 'range' => [QuotePrice::PASSENGER_ADULT, QuotePrice::PASSENGER_CHILD, QuotePrice::PASSENGER_INFANT]]
         ];
     }

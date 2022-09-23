@@ -142,6 +142,7 @@ class CheckWarmTransferTimeExpiredJob extends BaseJob implements JobInterface
         if ($call->c_case_id && $call->cCase) {
             $message .= ', Case (Id: ' . Purifier::createCaseShortLink($call->cCase) . ')';
         }
+
         Notifications::createAndPublish(
             $this->toUserId,
             'Missed Call',

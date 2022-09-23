@@ -1,19 +1,19 @@
 <?php
 
+use common\models\Airline;
 use common\models\Employee;
 use common\models\Lead;
 use common\models\Quote;
+use kartik\select2\Select2;
+use modules\quoteAward\src\dictionary\AwardProgramDictionary;
 use modules\quoteAward\src\dictionary\ProductTypeDictionary;
 use modules\quoteAward\src\entities\QuoteFlightProgram;
 use modules\quoteAward\src\entities\QuoteFlightProgramQuery;
+use src\helpers\lead\LeadHelper;
 use src\model\flightQuoteLabelList\service\FlightQuoteLabelListDictionary;
 use src\model\flightQuoteLabelList\service\FlightQuoteLabelListService;
-use yii\bootstrap\ActiveForm;
-use modules\quoteAward\src\dictionary\AwardProgramDictionary;
-use src\helpers\lead\LeadHelper;
 use src\services\parsingDump\lib\ParsingDump;
-use kartik\select2\Select2;
-use common\models\Airline;
+use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
 
 /**
@@ -21,34 +21,32 @@ use yii\helpers\Html;
  */
 
 $form = ActiveForm::begin([
-    'action' => \yii\helpers\Url::to(['quote-award/save']),
+    'action' => \yii\helpers\Url::to(['quote-award/save', 'leadId' => $lead->id]),
     'id' => 'alt-award-quote-info-form'
 ]) ?>
 <div style="margin-top: 15px">
     <div>
         <div class="row">
-            <div class="col-md-2">
-                <?= $form->field($model, 'trip_type', [
-                    'options' => [
-                        'tag' => false,
-                    ],
-                ])->dropDownList(Lead::getFlightTypeList())->label(false) ?>
+            <div class="col-md-2 d-flex flex-row pr-0">
+                <div class="text-nowrap pt-1 pr-2">Trip Type</div>
+                <?= $form->field($model, 'trip_type', ['options' => ['tag' => false]])
+                    ->dropDownList(Lead::getFlightTypeList())
+                    ->label(false) ?>
             </div>
 
-            <div class="col-md-2">
-                <?= $form->field($model, 'cabin', [
-                ])->dropDownList(LeadHelper::cabinList(), [
-                    'prompt' => 'Select Cabin'])->label(false) ?>
+            <div class="col-md-2 d-flex flex-row pr-0">
+                <div class="text-nowrap pt-1 pr-2">Cabin</div>
+                <?= $form->field($model, 'cabin', [])
+                    ->dropDownList(LeadHelper::cabinList(), ['prompt' => 'Select Cabin'])
+                    ->label(false) ?>
             </div>
-
         </div>
-
     </div>
 
     <?= $this->render('_segment', ['model' => $model, 'form' => $form]) ?>
 
     <div style="margin-top: 15px">
-        <?php if (count($model->flights)) : ?>
+        <?php if (count($model->flights) > 0) : ?>
             <ul class="nav nav-tabs">
                 <?php foreach ($model->flights as $key => $flight) : ?>
                     <li class="<?= ($tab === $key ? 'active' : '') ?> nav-item">
@@ -60,24 +58,24 @@ $form = ActiveForm::begin([
                                       data-inner='<i class="fa fa-times" aria-hidden="true"></i>'
                                       data-id="<?= $flight->id ?>"
                                       data-class='js-remove-flight-award'>
-                                <i class="fa fa-times" aria-hidden="true"></i>
+                                <i class="fa fa-times text-danger" aria-hidden="true"></i>
                             </span>
                             <?php endif; ?>
                         </a>
-
-
                     </li>
                 <?php endforeach; ?>
-                <div class="d-flex align-items-center justify-content-center"
-                     style="margin-left: 15px;">
-                    <a class="btn btn-add-flight"
-                       id="js-add-flight-award"
-                       data-inner='<i class="fa fa-plus" aria-hidden="true"></i> Add Flight'
-                       data-class='btn btn-add-flight'
-                       href="javascript:void(0)">
-                        <i class="fa fa-plus" aria-hidden="true"></i> Add Flight
-                    </a>
-                </div>
+                <?php if (count($model->flights) < 5) : ?>
+                    <div class="d-flex align-items-center justify-content-center"
+                         style="margin-left: 15px;">
+                        <a class="btn btn-add-flight"
+                           id="js-add-flight-award"
+                           data-inner='<i class="fa fa-plus" aria-hidden="true"></i> Add Flight'
+                           data-class='btn btn-add-flight'
+                           href="javascript:void(0)">
+                            <i class="fa fa-plus" aria-hidden="true"></i> Add Flight
+                        </a>
+                    </div>
+                <?php endif; ?>
 
             </ul>
 
@@ -327,8 +325,17 @@ $form = ActiveForm::begin([
             color: #53A265;
         }
 
-        .quote-award_wrap .table p,  .quote-award_wrap .table .form-group{
+        .quote-award_wrap .table p, .quote-award_wrap .table .form-group {
             margin-bottom: 0;
         }
 
+        #alt-award-quote-info-form .nav-link {
+            color: #495057;
+        }
+
+        #alt-award-quote-info-form .nav-link.active {
+            border-bottom: none;
+            border-color: #53a265!important;
+            color: #53a265!important;
+        }
     </style>

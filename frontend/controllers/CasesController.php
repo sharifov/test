@@ -47,6 +47,7 @@ use modules\order\src\services\OrderManageService;
 use modules\product\src\entities\productQuote\ProductQuote;
 use modules\product\src\entities\productQuote\ProductQuoteQuery;
 use src\auth\Auth;
+use src\entities\cases\CaseCategory;
 use src\entities\cases\CaseEventLog;
 use src\entities\cases\CaseEventLogSearch;
 use src\entities\cases\Cases;
@@ -719,8 +720,7 @@ class CasesController extends FController
         $isAdmin = true;
 
         $dataProviderOrders = (new OrderSearch())->searchByCase($model->cs_id);
-
-        $categoriesHierarchy = NestedSetsHelper::getCategoriesHierarchy($model->getAttribute('cs_category_id'));
+        $categoriesHierarchy = NestedSetsHelper::getCategoriesHierarchy($model->cs_category_id);
 
         return $this->render('view', [
             'model' => $model,
@@ -1292,6 +1292,22 @@ class CasesController extends FController
             }
         } else {
             $str = '<option>-</option>';
+        }
+        return $str;
+    }
+
+    public function actionGetNestedCategories($id): string
+    {
+        $id = (int)$id;
+        $str = '';
+        if ($categories = $this->caseCategoryRepository->getEnabledByDep($id)) {
+            $str = NestedSetsHelper::jsonData(CaseCategory::findNestedSets()->where([
+                'IN',
+                'cc_id',
+                ArrayHelper::getColumn(ArrayHelper::toArray($categories), 'cc_id')
+            ]));
+        } else {
+            $str = json_encode([]);
         }
         return $str;
     }

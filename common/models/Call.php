@@ -1046,6 +1046,7 @@ class Call extends \yii\db\ActiveRecord
                     foreach ($callUserAccessAny as $callAccess) {
                         $sendWarmTransferMissedNotification = $callAccess->isWarmTransfer();
                         $callAccess->noAnsweredCall();
+
                         if ($callAccess->update() === false) {
                             Yii::error(
                                 VarDumper::dumpAsString($callAccess->errors),
@@ -1272,69 +1273,156 @@ class Call extends \yii\db\ActiveRecord
             }
         }
 
-        if (($insert || $isChangedStatus) && $this->isIn() && ($this->isStatusNoAnswer() || $this->isStatusBusy())) {
-//                    $callAcceptExist = CallUserAccess::find()->where(['cua_status_id' => CallUserAccess::STATUS_TYPE_ACCEPT, 'cua_call_id' => $this->c_id])->exists();
-//                    if (!$callAcceptExist) {
+        /** @fflag FFlag::FF_KEY_CALL_MISSING_LEAD_OR_CASE, Call Missing Notification if Lead or Case exist */
+        if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CALL_MISSING_LEAD_OR_CASE)) {
+            /** @fflag FFlag::FF_KEY_CALL_DEBUG_LOG_ENABLE, Call debug log enable */
+            if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_CALL_DEBUG_LOG_ENABLE)) {
+                \Yii::info(
+                    [
+                        'point' => 'Call:AfterSave',
+                        'message' => 'AfterSave:MissingNotification',
+                        'callId' => $this->c_id,
+                        'leadId' => $this->c_lead_id,
+                        'caseId' => $this->c_case_id,
+                        'isLeadAdded' => array_key_exists('c_lead_id', $changedAttributes) && $this->c_lead_id,
+                        'isCaseAdded' => array_key_exists('c_case_id', $changedAttributes) && $this->c_case_id,
+                        'isLeadChanged' => $this->isAttributeChanged('c_lead_id'),
+                        'isCaseChanged' => $this->isAttributeChanged('c_case_id'),
+                        'status' => $this->c_status_id,
+                        'callStatus' => $this->c_call_status,
+                    ],
+                    'info\Call:assignToLead'
+                );
+            }
 
-            $userListNotifications = [];
-
-            if ($this->c_created_user_id) {
-                $userListNotifications[$this->c_created_user_id] = $this->c_created_user_id;
-
+            if (
+                $this->c_created_user_id
+                &&
+                ($insert || $isChangedStatus)
+                &&
+                $this->isIn()
+                &&
+                ($this->isStatusNoAnswer() || $this->isStatusBusy())
+            ) {
                 $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? MissedCallMessage::add($this) : [];
                 Notifications::publish(MissedCallMessage::COMMAND, ['user_id' => $this->c_created_user_id], $dataNotification);
             }
 
-            if ($changedAttributes['c_status_id'] !== self::STATUS_HOLD) {
-                if ($this->c_lead_id && $this->cLead && $this->cLead->employee_id) {
-                    $userListNotifications[$this->cLead->employee_id] = $this->cLead->employee_id;
+            if (
+                ($this->c_lead_id || $this->c_case_id)
+                &&
+                $this->isIn()
+                &&
+                ($this->isStatusNoAnswer() || $this->isStatusBusy())
+            ) {
+                $userListNotifications = [];
+                if ($this->c_created_user_id) {
+                    $userListNotifications[$this->c_created_user_id] = $this->c_created_user_id;
                 }
 
-                if ($this->c_case_id && $this->cCase && $this->cCase->cs_user_id) {
-                    $userListNotifications[$this->cCase->cs_user_id] = $this->cCase->cs_user_id;
-                }
-            }
-
-            if ($userListNotifications) {
-                //$from = PhoneFormatter::getPhoneOrNickname($this->c_from);
-                //$to = PhoneFormatter::getPhoneOrNickname($this->c_to);
-                $msgPart = '';
-                if ($this->c_source_type_id != self::SOURCE_DIRECT_CALL) {
-                    $msgPart = 'Queued ';
-                }
-
-                $holdMessage = $changedAttributes['c_status_id'] === self::STATUS_HOLD ? ' Hold' : '';
-                $title = 'Missed' . $holdMessage . ' Call (' . $this->getSourceName() . ')';
-                $message = 'Missed ' . $msgPart . $holdMessage . 'Call (Id: ' . Purifier::createCallShortLink($this) . ')  from ';
-                if ($this->c_lead_id && $this->cLead) {
-                    $message .= $this->cLead->client ? $this->cLead->client->getFullName() : '';
-                    $message .= '<br> Lead (Id: ' . Purifier::createLeadShortLink($this->cLead) . ')';
-                    $message .= $this->cLead->project ? '<br> ' . $this->cLead->project->name : '';
-                }
-
-                if ($this->c_case_id && $this->cCase) {
-                    $message .= $this->cCase->client ? $this->cCase->client->getFullName() : '';
-                    $message .= '<br> Case (Id: ' . Purifier::createCaseShortLink($this->cCase) . ')';
-                    $message .= $this->cCase->project ? '<br> ' . $this->cCase->project->name : '';
-                }
-
-                foreach ($userListNotifications as $userId) {
-                    if ($ntf = Notifications::create($userId, $title, $message, Notifications::TYPE_WARNING, true)) {
-                        $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
-                        Notifications::publish('getNewNotification', ['user_id' => $userId], $dataNotification);
+                if ($changedAttributes['c_status_id'] !== self::STATUS_HOLD) {
+                    if ($this->c_lead_id && $this->cLead && $this->cLead->employee_id) {
+                        $userListNotifications[$this->cLead->employee_id] = $this->cLead->employee_id;
                     }
-                    // Notifications::socket($userId, null, 'getNewNotification', [], true);
-//                    $userListSocketNotification[$userId] = $userId;
+
+                    if ($this->c_case_id && $this->cCase && $this->cCase->cs_user_id) {
+                        $userListNotifications[$this->cCase->cs_user_id] = $this->cCase->cs_user_id;
+                    }
+                }
+
+                if ($userListNotifications) {
+                    $msgPart = '';
+                    if ($this->c_source_type_id != self::SOURCE_DIRECT_CALL) {
+                        $msgPart = 'Queued ';
+                    }
+
+                    $holdMessage = $changedAttributes['c_status_id'] === self::STATUS_HOLD ? ' Hold' : '';
+                    $title = 'Missed' . $holdMessage . ' Call (' . $this->getSourceName() . ')';
+                    $message = 'Missed ' . $msgPart . $holdMessage . 'Call (Id: ' . Purifier::createCallShortLink($this) . ')';
+                    $message .= (($this->c_lead_id && $this->cLead) || ($this->c_case_id && $this->cCase)) ? ' from ' : '';
+
+                    if ($this->c_lead_id && $this->cLead) {
+                        $message .= $this->cLead->client ? $this->cLead->client->getFullName() : '';
+                        $message .= '<br> Lead (Id: ' . Purifier::createLeadShortLink($this->cLead) . ')';
+                        $message .= $this->cLead->project ? '<br> ' . $this->cLead->project->name : '';
+                    }
+                    if ($this->c_case_id && $this->cCase) {
+                        $message .= $this->cCase->client ? $this->cCase->client->getFullName() : '';
+                        $message .= '<br> Case (Id: ' . Purifier::createCaseShortLink($this->cCase) . ')';
+                        $message .= $this->cCase->project ? '<br> ' . $this->cCase->project->name : '';
+                    }
+
+                    foreach ($userListNotifications as $userId) {
+                        if ($ntf = Notifications::create($userId, $title, $message, Notifications::TYPE_WARNING, true)) {
+                            $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                            Notifications::publish('getNewNotification', ['user_id' => $userId], $dataNotification);
+                        }
+                    }
+                }
+
+                if ($this->c_case_id) {
+                    (Yii::createObject(CasesManageService::class))->needAction($this->c_case_id);
                 }
             }
+        } else {
+            if (($insert || $isChangedStatus) && $this->isIn() && ($this->isStatusNoAnswer() || $this->isStatusBusy())) {
+                $userListNotifications = [];
 
-            if ($this->c_case_id) {
-                (Yii::createObject(CasesManageService::class))->needAction($this->c_case_id);
+                if ($this->c_created_user_id) {
+                    $userListNotifications[$this->c_created_user_id] = $this->c_created_user_id;
+
+                    $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? MissedCallMessage::add($this) : [];
+                    Notifications::publish(MissedCallMessage::COMMAND, ['user_id' => $this->c_created_user_id], $dataNotification);
+                }
+
+                if ($changedAttributes['c_status_id'] !== self::STATUS_HOLD) {
+                    if ($this->c_lead_id && $this->cLead && $this->cLead->employee_id) {
+                        $userListNotifications[$this->cLead->employee_id] = $this->cLead->employee_id;
+                    }
+
+                    if ($this->c_case_id && $this->cCase && $this->cCase->cs_user_id) {
+                        $userListNotifications[$this->cCase->cs_user_id] = $this->cCase->cs_user_id;
+                    }
+                }
+
+                if ($userListNotifications) {
+                    //$from = PhoneFormatter::getPhoneOrNickname($this->c_from);
+                    //$to = PhoneFormatter::getPhoneOrNickname($this->c_to);
+                    $msgPart = '';
+                    if ($this->c_source_type_id != self::SOURCE_DIRECT_CALL) {
+                        $msgPart = 'Queued ';
+                    }
+
+                    $holdMessage = $changedAttributes['c_status_id'] === self::STATUS_HOLD ? ' Hold' : '';
+                    $title = 'Missed' . $holdMessage . ' Call (' . $this->getSourceName() . ')';
+                    $message = 'Missed ' . $msgPart . $holdMessage . 'Call (Id: ' . Purifier::createCallShortLink($this) . ')';
+                    $message .= (($this->c_lead_id && $this->cLead) || ($this->c_case_id && $this->cCase)) ? ' from ' : '';
+
+                    if ($this->c_lead_id && $this->cLead) {
+                        $message .= $this->cLead->client ? $this->cLead->client->getFullName() : '';
+                        $message .= '<br> Lead (Id: ' . Purifier::createLeadShortLink($this->cLead) . ')';
+                        $message .= $this->cLead->project ? '<br> ' . $this->cLead->project->name : '';
+                    }
+                    if ($this->c_case_id && $this->cCase) {
+                        $message .= $this->cCase->client ? $this->cCase->client->getFullName() : '';
+                        $message .= '<br> Case (Id: ' . Purifier::createCaseShortLink($this->cCase) . ')';
+                        $message .= $this->cCase->project ? '<br> ' . $this->cCase->project->name : '';
+                    }
+
+                    foreach ($userListNotifications as $userId) {
+                        if ($ntf = Notifications::create($userId, $title, $message, Notifications::TYPE_WARNING, true)) {
+                            $dataNotification = (Yii::$app->params['settings']['notification_web_socket']) ? NotificationMessage::add($ntf) : [];
+                            Notifications::publish('getNewNotification', ['user_id' => $userId], $dataNotification);
+                        }
+                        // Notifications::socket($userId, null, 'getNewNotification', [], true);
+    //                    $userListSocketNotification[$userId] = $userId;
+                    }
+                }
+
+                if ($this->c_case_id) {
+                    (Yii::createObject(CasesManageService::class))->needAction($this->c_case_id);
+                }
             }
-
-
-
-            //}
         }
 
         if (
@@ -1647,6 +1735,7 @@ class Call extends \yii\db\ActiveRecord
                 if ($callUserAccessAny) {
                     foreach ($callUserAccessAny as $callAccess) {
                         $callAccess->noAnsweredCall();
+
                         if ($callAccess->update() === false) {
                             Yii::error(VarDumper::dumpAsString($callAccess->errors), 'Call:applyCallToAgent:CallUserAccess:save');
                         }

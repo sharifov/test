@@ -78,7 +78,11 @@ use yii\helpers\Html;
                                     'options' => [
                                         'class' => 'form-group',
                                     ],
-                                    'template' => '<div class="input-group"><span class="input-group-addon">$</span>{input}</div>{error}'
+                                    'template' => '<div class="input-group">
+                                        <span class="input-group-prepend">
+                                            <span class="alert-success input-group-text pt-0 pb-0">$</span>
+                                        </span>{input}
+                                    </div>{error}'
                                 ])->textInput(['class' => 'form-control alt-award-quote-price', 'maxlength' => 10]) ?>
                             </td>
 
@@ -87,7 +91,11 @@ use yii\helpers\Html;
                                     'options' => [
                                         'class' => 'form-group',
                                     ],
-                                    'template' => '<div class="input-group"><span class="input-group-addon">$</span>{input}</div>{error}'
+                                    'template' => '<div class="input-group">
+                                        <span class="input-group-prepend">
+                                            <span class="alert-success input-group-text pt-0 pb-0">$</span>
+                                        </span>{input}
+                                    </div>{error}'
                                 ])->textInput([
                                     'class' => 'form-control ',
                                     'readonly' => true,
@@ -99,7 +107,11 @@ use yii\helpers\Html;
                                     'options' => [
                                         'class' => 'form-group',
                                     ],
-                                    'template' => '<div class="input-group"><span class="input-group-addon">$</span>{input}</div>{error}'
+                                    'template' => '<div class="input-group">
+                                        <span class="input-group-prepend">
+                                            <span class="alert-success input-group-text pt-0 pb-0">$</span>
+                                        </span>{input}
+                                    </div>{error}'
                                 ])->textInput([
                                     'class' => 'form-control alt-award-quote-price',
                                     'maxlength' => 10,
@@ -110,7 +122,11 @@ use yii\helpers\Html;
                                     'options' => [
                                         'class' => 'form-group',
                                     ],
-                                    'template' => '<div class="input-group"><span class="input-group-addon">$</span>{input}</div>{error}'
+                                    'template' => '<div class="input-group">
+                                        <span class="input-group-prepend">
+                                            <span class="alert-success input-group-text pt-0 pb-0">$</span>
+                                        </span>{input}
+                                    </div>{error}'
                                 ])->textInput([
                                     'class' => 'form-control alt-award-quote-price',
                                     'maxlength' => 10,
@@ -121,7 +137,11 @@ use yii\helpers\Html;
                                     'options' => [
                                         'class' => 'form-group',
                                     ],
-                                    'template' => '<div class="input-group"><span class="input-group-addon">$</span>{input}</div>{error}'
+                                    'template' => '<div class="input-group">
+                                        <span class="input-group-prepend">
+                                            <span class="alert-success input-group-text pt-0 pb-0">$</span>
+                                        </span>{input}
+                                    </div>{error}'
                                 ])->textInput([
                                     'class' => 'form-control alt-award-quote-price mark-up',
                                     'maxlength' => 10,
