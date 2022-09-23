@@ -1,5 +1,7 @@
 <?php
 
+use frontend\widgets\nestedSets\NestedSetsWidget;
+use src\entities\cases\CaseCategory;
 use src\model\cases\useCases\cases\updateInfo\UpdateInfoForm;
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
@@ -28,18 +30,52 @@ use yii\helpers\Url;
         'prompt' => '-',
         'disabled' => !$model->fieldAccess->canEditDepartment(),
         'onchange' => $model->fieldAccess->canEditCategory() ?
-            '$( "#' . Html::getInputId($model, 'categoryId') . '").prop("disabled", true);
-            $.get( "' . Url::to(['/cases/get-categories']) . '", { id: $(this).val() } )
-                .done(function( data ) {
-                    $( "#' . Html::getInputId($model, 'categoryId') . '" ).html( data );
-                    $( "#' . Html::getInputId($model, 'categoryId') . '").prop("disabled", false);
-                }
-            );
-        ' : '$( "#' . Html::getInputId($model, 'categoryId') . '").prop("disabled", true);'
+            '
+                    const nestedSetsSelect = $("#categoryId");
+                    nestedSetsSelect.select2ToTree({"placeholder" : "Searching..."}).attr("disabled", "disabled");
+                  
+                    $.get( "' . Url::to(['/cases/get-nested-categories']) . '", { id: $(this).val() } )
+                        .done(function( data ) {
+                            data = $.parseJSON(data);
+                            const nestedSetsSelect = $("#categoryId");
+                            nestedSetsSelect.select2("destroy").empty();
+                            nestedSetsSelect.prepend(\'<option selected=""></option>\');
+                            
+                            nestedSetsSelect.select2ToTree({
+                                treeData: {dataArr: data},
+                                  maximumSelectionLength: 3,
+                                allowClear: true,
+                                placeholder: "Choose a category",
+                                templateResult: formatState,
+                                templateSelection: formatState       
+                                                                 
+                            });  
+                            function formatState (state) {
+                                if (!state.disabled) {
+                                  return state.text;
+                                }
+                                return $(\'<span><i class="fa fa-lock"></i> \' + state.text + \'</span>\');
+                            }
+                            nestedSetsSelect.removeAttr("disabled");
+                            nestedSetsSelect.trigger(\'change.select2\');
+                        }
+                    );
+                ' : '$( "#' . Html::getInputId($model, 'categoryId') . '").prop("disabled", true);'
     ]); ?>
 
-    <?= $form->field($model, 'categoryId')->dropDownList($model->getCategoryList(), [
-        'prompt' => '-',
+
+
+
+    <?php
+
+    echo $form->field($model, 'categoryId')->widget(NestedSetsWidget::class, [
+        'query' => CaseCategory::findNestedSets()->where(['cc_dep_id' => $model->depId ?? null ]),
+        'attribute' => 'categoryId',
+        'model' => $model,
+        'label' => '',
+        'allowToSelectEnabled' => true,
+        'placeholder' => 'Choose a category',
+        'parentCategoryId' => $model->categoryId ?? null,
         'disabled' => !$model->fieldAccess->canEditCategory(),
     ]); ?>
 
