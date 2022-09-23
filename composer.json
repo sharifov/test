@@ -114,8 +114,7 @@
 		"kivork/yii2-feature-flag": "2.0.0",
 		"kak/clickhouse": "~1.1",
 		"kivork/yii2-two-factor-auth": "1.3.2",
-		"creocoder/yii2-nested-sets": "^0.9.0",
-		"kartik-v/yii2-widget-typeahead": "^1.0"
+		"creocoder/yii2-nested-sets": "^0.9.0"
 	},
 	"require-dev" : {
 		"yiisoft/yii2-debug" : "~2.1",

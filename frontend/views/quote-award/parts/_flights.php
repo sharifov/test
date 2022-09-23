@@ -1,6 +1,5 @@
 <?php
 
-use common\components\widgets\BaseForm;
 use common\models\Airline;
 use common\models\Employee;
 use common\models\Lead;
@@ -21,9 +20,9 @@ use yii\helpers\Html;
  * @var $model \modules\quoteAward\src\forms\AwardQuoteForm
  */
 
-$form = BaseForm::begin([
+$form = ActiveForm::begin([
     'action' => \yii\helpers\Url::to(['quote-award/save']),
-    'id' => 'alt-award-quote-info-form',
+    'id' => 'alt-award-quote-info-form'
 ]) ?>
 <div style="margin-top: 15px">
     <div>
@@ -315,7 +314,7 @@ $form = BaseForm::begin([
         <?php endif; ?>
     </div>
 
-    <?php BaseForm::end() ?>
+    <?php ActiveForm::end() ?>
     <style>
         .table-award-flight td, .table-award-flight th {
             padding: 5px !important;

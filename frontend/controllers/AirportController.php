@@ -2,12 +2,12 @@
 
 namespace frontend\controllers;
 
-use common\models\Airports;
 use src\helpers\airport\AirportFormatHelper;
 use src\services\airport\AirportSearchService;
 use yii\filters\AjaxFilter;
 use yii\filters\ContentNegotiator;
 use yii\helpers\ArrayHelper;
+use yii\filters\AccessControl;
 use yii\web\Response;
 
 class AirportController extends FController
@@ -39,12 +39,10 @@ class AirportController extends FController
         return ArrayHelper::merge(parent::behaviors(), $behaviors);
     }
 
-    public function actionGetList($term, $raw = false): array
+    public function actionGetList($term = null): array
     {
         $airports = $this->service->search($term);
-
-        return $raw
-            ? $airports['results']
-            : AirportFormatHelper::formatRows($airports, $term);
+        $airports = AirportFormatHelper::formatRows($airports, $term);
+        return $airports;
     }
 }

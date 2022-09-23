@@ -1,68 +1,44 @@
 <?php
 
-use common\components\widgets\BaseForm;
 use common\models\Airline;
-use kartik\select2\Select2;
-use kartik\typeahead\Typeahead;
-use modules\quoteAward\src\forms\AwardQuoteForm;
 use src\helpers\lead\LeadHelper;
+use kartik\select2\Select2;
 use src\widgets\DateTimePicker;
-use yii\base\Model;
-use yii\helpers\Url;
 use yii\web\JsExpression;
 
 /**
- * @var $form BaseForm
- * @var $model AwardQuoteForm
+ * @var $form yii\bootstrap\ActiveForm
+ * @var $model \modules\quoteAward\src\forms\AwardQuoteForm
  */
 
-$typeheadProperties = function (string $name) {
-    return [
-        'name' => '',
-        'options' => [
-            'autocomplete' => 'off',
-            'placeholder' => 'Filter as you type ...'
+$select2Properties = [
+    'options' => [
+        'placeholder' => 'Select location ...',
+        'multiple' => false,
+    ],
+    'pluginOptions' => [
+        'width' => '100%',
+        'allowClear' => true,
+        'minimumInputLength' => 1,
+        'language' => [
+            'errorLoading' => new JsExpression("function () { return 'Waiting for results...'; }"),
         ],
-        'pluginOptions' => ['highlight' => true],
-        'pluginEvents' => [
-            'typeahead:select' => new JsExpression("(ev, data) => {
-                const input = document.getElementsByName('$name')[0];
-                input.dataset.selection = data.selection;
-                input.value = data.id;
-            }"),
-            'typeahead:change' => new JsExpression("(ev) => {
-                const input = document.getElementsByName('$name')[0];
-                if (!ev.target.value) {
-                    input.dataset.selection = '';
-                    input.value = '';
-                } else {
-                    ev.target.value = input.dataset.selection ?? '';
-                }
-            }")
+        'ajax' => [
+            'url' => ['/airport/get-list'],
+            'dataType' => 'json',
+            'data' => new JsExpression('function(params) { return {term:params.term}; }'),
         ],
-        'dataset' => [
-            [
-                'remote' => [
-                    'url' => Url::to(['airport/get-list']) . '?term=%term&raw=1',
-                    'wildcard' => '%term'
-                ],
-                'templates' => [
-                    'suggestion' => new JsExpression(
-                        "Handlebars.compile('<p class=\"text-wrap\">{{text}}</p>')"
-                    )
-                ],
-                'name' => 'id',
-                'display' => 'selection',
-                'limit' => 10
-            ]
-        ]
-    ];
-};
-
+        'escapeMarkup' => new JsExpression('function (markup) { return markup; }'),
+        'templateResult' => new JsExpression('formatRepo'),
+        'templateSelection' => new JsExpression('function (data) { return data.selection || data.text;}'),
+    ]
+];
 ?>
 
 <div>
     <!--    <h5 style="font-weight:bold">Trip</h5>-->
+    <!---->
+
     <div style="margin-top: 5px">
         <?php $trips = $model->groupByTrip();
         if (count($model->segments)) : ?>
@@ -122,14 +98,8 @@ $typeheadProperties = function (string $name) {
                                                 'allowClear' => false
                                             ],
                                         ])->label(false) ?></td>
-                                    <td style="width: 250px">
-                                        <?= $form->field($segment, '[' . $index . ']origin')->simpleHidden() ?>
-                                        <?= Typeahead::widget($typeheadProperties($segment->formName() . '[' . $index . '][origin]')) ?>
-                                    </td>
-                                    <td style="width: 250px">
-                                        <?= $form->field($segment, '[' . $index . ']destination')->simpleHidden() ?>
-                                        <?= Typeahead::widget($typeheadProperties($segment->formName() . '[' . $index . '][destination]')) ?>
-                                    </td>
+                                    <td style="width: 250px"> <?= $form->field($segment, '[' . $index . ']origin')->widget(Select2::class, $select2Properties)->label(false) ?></td>
+                                    <td style="width: 250px"> <?= $form->field($segment, '[' . $index . ']destination')->widget(Select2::class, $select2Properties)->label(false) ?></td>
                                     <td style="width: 150px"> <?= $form->field($segment, '[' . $index . ']departure')
                                             ->widget(DateTimePicker::class, [
                                                 'template' => '{input}',
@@ -215,18 +185,6 @@ $typeheadProperties = function (string $name) {
 <style>
     .table-award-segment td, .table-award-segment th {
         padding: 5px !important;
-    }
-
-    .card .ard-body {
-        overflow-x: visible;
-    }
-
-    .card .ard-body .twitter-typeahead .tt-suggestion {
-        font-size: 13px;
-    }
-
-    .card .ard-body .twitter-typeahead .tt-highlight {
-        color: #e15554;
     }
 
     .table-award-segment th {
