@@ -44,10 +44,10 @@ class TargetObjectNotificationFactory
                     return new LeadTasksListSavedNotification($targetObjectEntity);
                 }
 
-                throw new \RuntimeException('TargetObjectNotification (' . TargetObject::TARGET_OBJ_LEAD . ') not found');
+                throw new \RuntimeException('TargetObjectNotification (' . TargetObject::TARGET_OBJ_LEAD . ') with type "' . $type . '" not found');
             break;
         }
 
-        throw new \RuntimeException('TargetObjectNotification (' . $this->targetObject . ') unprocessed');
+        throw new \RuntimeException('TargetObjectNotification (' . $this->targetObject . ') with type "' . $type . '" unprocessed');
     }
 }
