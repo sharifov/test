@@ -10,6 +10,8 @@ use modules\taskList\src\entities\userTask\UserTaskQuery;
 use modules\taskList\src\services\TargetObjectFactory;
 use modules\taskList\src\services\TargetObjectService;
 use modules\taskList\src\services\taskCompletion\taskCompletionChecker\TaskListCompletionFactory;
+use modules\taskList\src\services\TargetObjectNotificationFactory;
+use modules\taskList\src\entities\TargetObjectNotificationTypes;
 
 class UserTaskCompletionService
 {
@@ -72,6 +74,8 @@ class UserTaskCompletionService
         $taskModel = (new TaskObjectModelFinder($this->taskObject, $this->taskModelId))->findModel();
 
         if ($taskLists) {
+            $isExistsAtLeastOneDoneTask = false;
+
             foreach ($taskLists as $taskList) {
                 $this->log('TaskList begin processing', '3', ['taskListId' => $taskList->tl_id]);
                 $userTaskQuery = UserTaskQuery::getUserTaskCompletion(
@@ -115,6 +119,13 @@ class UserTaskCompletionService
                 $this->log('UserTask set to completed', '6', ['userTaskId' => $userTask->ut_id]);
 
                 $this->userTasksProcessed[] = $userTask->ut_id;
+                $isExistsAtLeastOneDoneTask = true;
+            }
+
+            if ($isExistsAtLeastOneDoneTask) {
+                (new TargetObjectNotificationFactory($this->targetObject, $this->targetObjectId))
+                    ->create(TargetObjectNotificationTypes::COMPLETE_TYPE)
+                    ->send();
             }
         }
         return $this;

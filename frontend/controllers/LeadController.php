@@ -37,6 +37,7 @@ use frontend\models\LeadUserRatingForm;
 use frontend\models\ProfitSplitForm;
 use frontend\models\TipsSplitForm;
 use frontend\widgets\userTasksList\forms\UserTasksListForm;
+use frontend\widgets\userTasksList\helpers\UserTasksListHelper;
 use modules\email\src\abac\dto\EmailPreviewDto;
 use modules\email\src\abac\EmailAbacObject;
 use modules\featureFlag\FFlag;
@@ -47,6 +48,7 @@ use modules\lead\src\abac\LeadAbacObject;
 use modules\lead\src\abac\LeadExpertCallObject;
 use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\lead\src\abac\services\AbacLeadExpertCallService;
+use modules\lead\src\notifications\Task\LeadTasksListCompleteNotification;
 use modules\objectTask\src\entities\ObjectTaskSearch;
 use modules\objectTask\src\services\ObjectTaskService;
 use modules\offer\src\entities\offer\search\OfferSearch;
@@ -117,6 +119,7 @@ use src\services\lead\LeadManageService;
 use src\services\TransactionManager;
 use Yii;
 use yii\caching\DbDependency;
+use yii\caching\TagDependency;
 use yii\data\ActiveDataProvider;
 use yii\data\Pagination;
 use yii\db\Expression;
@@ -1040,7 +1043,7 @@ class LeadController extends FController
         ]);
     }
 
-    public function actionPjaxUserTasksList(string $gid)
+    public function actionPjaxUserTasksList(string $gid, string $notificationActionType = '')
     {
         $result = '';
 
@@ -1065,6 +1068,13 @@ class LeadController extends FController
             /** @abac $abacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS, Access to view lead  */
             if (!Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS)) {
                 throw new ForbiddenHttpException('Access Denied for getting pjax task list.');
+            }
+
+            if ($notificationActionType == LeadTasksListCompleteNotification::NOTIFY_TYPE) {
+                /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_CACHE_DURATION, Cache duration for new user task list (in seconds) */
+                if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_USER_NEW_TASK_LIST_CACHE_DURATION)) {
+                    TagDependency::invalidate(\Yii::$app->cache, UserTasksListHelper::getCacheTagKey($lead->id, $lead->employee_id));
+                }
             }
 
             $result = UserTasksListWidget::widget([

@@ -1,16 +1,18 @@
 <?php
 
-namespace modules\taskList\src\notifications;
+namespace modules\lead\src\notifications\Task;
 
 use common\models\Lead;
 use common\models\Notifications;
 use modules\featureFlag\FFlag;
+use modules\taskList\src\entities\TaskListNotificationInterface;
 
 /**
  * @property Lead $lead
  */
-class LeadTasksListSavedNotification
+abstract class AbstractLeadTaskListListNotification implements TaskListNotificationInterface
 {
+    /** @var Lead  */
     protected Lead $lead;
 
     /**
@@ -27,18 +29,27 @@ class LeadTasksListSavedNotification
     public function send(): bool
     {
         $result = false;
-        /** @fflag FFlag::FF_KEY_AUTO_REFRESH_LEAD_TASK_LIST_ENABLE, Auto refresh lead task list enabled */
-        if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_AUTO_REFRESH_LEAD_TASK_LIST_ENABLE)) {
+
+        if ($this->isEnabledAutoRefreshFF()) {
             sleep(2);
             $result = Notifications::pub(['lead-' . $this->lead->id], 'refreshTaskList', [
                 'data' => [
                     'gid' => $this->lead->gid,
                     'leadId' => $this->lead->id,
-                    'isSavedAction' => true,
+                    'notificationActionType' => static::NOTIFY_TYPE,
                 ],
             ]);
         }
 
         return $result;
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isEnabledAutoRefreshFF(): bool
+    {
+        /** @fflag FFlag::FF_KEY_AUTO_REFRESH_LEAD_TASK_LIST_ENABLE, Auto refresh lead task list enabled */
+        return \Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_AUTO_REFRESH_LEAD_TASK_LIST_ENABLE);
     }
 }
