@@ -123,9 +123,18 @@ class UserTaskCompletionService
             }
 
             if ($isExistsAtLeastOneDoneTask) {
-                (new TargetObjectNotificationFactory($this->targetObject, $this->targetObjectId))
-                    ->create(TargetObjectNotificationTypes::COMPLETE_TYPE)
-                    ->send();
+                try {
+                    (new TargetObjectNotificationFactory($this->targetObject, $this->targetObjectId))
+                        ->create(TargetObjectNotificationTypes::COMPLETE_TYPE)
+                        ->send();
+                } catch (\Throwable $e) {
+                    \Yii::error([
+                        'message' => $e->getMessage(),
+                        'targetObject' => $this->targetObject,
+                        'targetObjectId' => $this->targetObjectId,
+                        'type' => TargetObjectNotificationTypes::COMPLETE_TYPE,
+                    ], 'UserTaskCompletionService:handle:Throwable');
+                }
             }
         }
         return $this;
