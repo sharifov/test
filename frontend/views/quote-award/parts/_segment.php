@@ -207,12 +207,12 @@ $select2Properties = [
         padding: 5px !important;
     }
 
-    .table-award-segment .fix-select2-krajee .select2-container--krajee .select2-selection--single .select2-selection__arrow {
+    .table-award-segment .select2-container--krajee .select2-selection--single .select2-selection__arrow {
         border-left-color: #e4e9ee !important;
         max-height: 28px;
     }
 
-    .table-award-segment .fix-select2-krajee .select2-container--krajee .select2-selection--single .select2-selection__clear {
+    .table-award-segment .select2-container--krajee .select2-selection--single .select2-selection__clear {
         right: 1.5rem;
         line-height: 23px;
         vertical-align: middle;
