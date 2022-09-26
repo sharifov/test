@@ -59,11 +59,11 @@ class m220923_113905_add_default_tasks_for_business_object_segment extends Migra
             try {
                 ObjectSegmentTask::deleteOrAddTasks($recipientSegment->osl_id, $tasksIds);
             } catch (\Throwable $e) {
-                \Yii::error([
-                    'message' => $e->getMessage(),
-                    'tasksIds' => $tasksIds,
-                    'osl_id' => $recipientSegment->osl_id,
-                ], 'm220921_175617_add_default_tasks_for_business_object_segment:safeUp:Throwable:2');
+                $errors = AppHelper::throwableLog($e);
+                $errors['tasksIds'] = $tasksIds;
+                $errors['osl_id'] = $recipientSegment->osl_id;
+
+                \Yii::error($errors, 'm220921_175617_add_default_tasks_for_business_object_segment:safeUp:Throwable:2');
             }
         }
 
