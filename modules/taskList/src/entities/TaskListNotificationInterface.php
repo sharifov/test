@@ -4,10 +4,13 @@ namespace modules\taskList\src\entities;
 
 interface TaskListNotificationInterface
 {
-    public const NOTIFY_TYPE = '';
+    /**
+     * @return self
+     */
+    public function send(): self;
 
     /**
-     * @return bool
+     * @return string
      */
-    public function send(): bool;
+    public static function getType(): string;
 }

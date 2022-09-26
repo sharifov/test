@@ -1,11 +1,11 @@
 <?php
 
-namespace modules\lead\src\notifications\Task;
+namespace modules\taskList\src\notifications\Task;
 
 /**
  * {@inheritdoc}
  */
 class LeadTasksListSavedNotification extends AbstractLeadTaskListListNotification
 {
-    public const NOTIFY_TYPE = 'saved';
+    protected const NOTIFY_TYPE = 'saved';
 }

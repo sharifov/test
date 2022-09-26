@@ -3,9 +3,8 @@
 namespace modules\taskList\src\services;
 
 use modules\taskList\src\entities\TargetObject;
-use modules\lead\src\notifications\Task\LeadTasksListCompleteNotification;
-use modules\lead\src\notifications\Task\LeadTasksListSavedNotification;
-use modules\lead\src\notifications\Task\AbstractLeadTaskListListNotification;
+use modules\taskList\src\notifications\Task\LeadTasksListCompleteNotification;
+use modules\taskList\src\notifications\Task\LeadTasksListSavedNotification;
 use modules\taskList\src\entities\TaskListNotificationInterface;
 
 /**
@@ -38,9 +37,9 @@ class TargetObjectNotificationFactory
 
         switch ($this->targetObject) {
             case TargetObject::TARGET_OBJ_LEAD:
-                if ($type == LeadTasksListCompleteNotification::NOTIFY_TYPE) {
+                if ($type === LeadTasksListCompleteNotification::getType()) {
                     return new LeadTasksListCompleteNotification($targetObjectEntity);
-                } elseif ($type == LeadTasksListSavedNotification::NOTIFY_TYPE) {
+                } elseif ($type === LeadTasksListSavedNotification::getType()) {
                     return new LeadTasksListSavedNotification($targetObjectEntity);
                 }
 

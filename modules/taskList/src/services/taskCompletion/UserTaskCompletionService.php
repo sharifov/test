@@ -12,6 +12,7 @@ use modules\taskList\src\services\TargetObjectService;
 use modules\taskList\src\services\taskCompletion\taskCompletionChecker\TaskListCompletionFactory;
 use modules\taskList\src\services\TargetObjectNotificationFactory;
 use modules\taskList\src\entities\TargetObjectNotificationTypes;
+use src\helpers\app\AppHelper;
 
 class UserTaskCompletionService
 {
@@ -128,12 +129,12 @@ class UserTaskCompletionService
                         ->create(TargetObjectNotificationTypes::COMPLETE_TYPE)
                         ->send();
                 } catch (\Throwable $e) {
-                    \Yii::error([
-                        'message' => $e->getMessage(),
-                        'targetObject' => $this->targetObject,
-                        'targetObjectId' => $this->targetObjectId,
-                        'type' => TargetObjectNotificationTypes::COMPLETE_TYPE,
-                    ], 'UserTaskCompletionService:handle:Throwable');
+                    $errorData = AppHelper::throwableLog($e);
+                    $errorData['targetObject'] = $this->targetObject;
+                    $errorData['targetObjectId'] = $this->targetObjectId;
+                    $errorData['type'] = TargetObjectNotificationTypes::COMPLETE_TYPE;
+
+                    \Yii::error($errorData, 'UserTaskCompletionService:handle:Throwable');
                 }
             }
         }

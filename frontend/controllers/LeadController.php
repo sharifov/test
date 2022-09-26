@@ -48,7 +48,6 @@ use modules\lead\src\abac\LeadAbacObject;
 use modules\lead\src\abac\LeadExpertCallObject;
 use modules\lead\src\abac\queue\LeadBusinessExtraQueueAbacObject;
 use modules\lead\src\abac\services\AbacLeadExpertCallService;
-use modules\lead\src\notifications\Task\LeadTasksListCompleteNotification;
 use modules\objectTask\src\entities\ObjectTaskSearch;
 use modules\objectTask\src\services\ObjectTaskService;
 use modules\offer\src\entities\offer\search\OfferSearch;
@@ -1043,7 +1042,7 @@ class LeadController extends FController
         ]);
     }
 
-    public function actionPjaxUserTasksList(string $gid, string $notificationActionType = '')
+    public function actionPjaxUserTasksList(string $gid)
     {
         $result = '';
 
@@ -1068,13 +1067,6 @@ class LeadController extends FController
             /** @abac $abacDto, LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS, Access to view lead  */
             if (!Yii::$app->abac->can(new LeadAbacDto($lead, Auth::id()), LeadAbacObject::OBJ_LEAD, LeadAbacObject::ACTION_ACCESS)) {
                 throw new ForbiddenHttpException('Access Denied for getting pjax task list.');
-            }
-
-            if ($notificationActionType == LeadTasksListCompleteNotification::NOTIFY_TYPE) {
-                /** @fflag FFlag::FF_KEY_USER_NEW_TASK_LIST_CACHE_DURATION, Cache duration for new user task list (in seconds) */
-                if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_USER_NEW_TASK_LIST_CACHE_DURATION)) {
-                    TagDependency::invalidate(\Yii::$app->cache, UserTasksListHelper::getCacheTagKey($lead->id, $lead->employee_id));
-                }
             }
 
             $result = UserTasksListWidget::widget([

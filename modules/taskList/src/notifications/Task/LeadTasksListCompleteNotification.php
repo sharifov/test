@@ -1,11 +1,11 @@
 <?php
 
-namespace modules\lead\src\notifications\Task;
+namespace modules\taskList\src\notifications\Task;
 
 /**
  * {@inheritdoc}
  */
 class LeadTasksListCompleteNotification extends AbstractLeadTaskListListNotification
 {
-    public const NOTIFY_TYPE = 'complete';
+    protected const NOTIFY_TYPE = 'complete';
 }
