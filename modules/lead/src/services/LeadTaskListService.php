@@ -22,7 +22,7 @@ use modules\taskList\src\entities\userTask\repository\UserTaskRepository;
 use modules\taskList\src\entities\userTask\UserTask;
 use modules\taskList\src\entities\userTask\UserTaskQuery;
 use modules\taskList\src\exceptions\TaskListAssignException;
-use modules\taskList\src\notifications\LeadTasksListSavedNotification;
+use modules\taskList\src\notifications\Task\LeadTasksListSavedNotification;
 use modules\taskList\src\services\taskAssign\checker\TaskListAssignCheckerFactory;
 use modules\taskList\src\entities\taskList\TaskListParamService;
 use src\helpers\app\AppHelper;
