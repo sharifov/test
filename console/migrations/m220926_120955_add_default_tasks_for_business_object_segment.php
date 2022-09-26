@@ -19,55 +19,52 @@ class m220926_120955_add_default_tasks_for_business_object_segment extends Migra
      */
     public function safeUp()
     {
-        $tasksIds = [];
-        $tasks = $this->getTasksList();
-        $recipientSegment = ObjectSegmentListQuery::getByKey(ObjectSegmentListContract::OBJECT_SEGMENT_LIST_KEY_LEAD_TYPE_BUSINESS);
+        try {
+            $tasksIds = [];
+            $tasks = $this->getTasksList();
+            $recipientSegment = ObjectSegmentListQuery::getByKey(ObjectSegmentListContract::OBJECT_SEGMENT_LIST_KEY_LEAD_TYPE_BUSINESS);
 
-        if (empty($recipientSegment)) {
-            \Yii::error(
-                'Couldn`t find object segment by key - ' . ObjectSegmentListContract::OBJECT_SEGMENT_LIST_KEY_LEAD_TYPE_BUSINESS,
-                'm220926_120955_add_default_tasks_for_business_object_segment:safeUp'
-            );
+            if (empty($recipientSegment)) {
+                throw new \Exception('Couldn`t find object segment by key - ' . ObjectSegmentListContract::OBJECT_SEGMENT_LIST_KEY_LEAD_TYPE_BUSINESS);
+            }
 
-            return null;
-        }
+            // Save tasks
+            if (!empty($tasks)) {
+                foreach ($tasks as $taskData) {
+                    try {
+                        $taskListEntity = new TaskList();
+                        $taskListEntity->load($taskData, '');
 
-        // Save tasks
-        if (!empty($tasks)) {
-            foreach ($tasks as $taskData) {
-                try {
-                    $taskListEntity = new TaskList();
-                    $taskListEntity->load($taskData, '');
+                        if (!$taskListEntity->validate()) {
+                            throw new \Exception(ErrorsToStringHelper::extractFromModel($taskListEntity, ' '));
+                        }
 
-                    if (!$taskListEntity->validate()) {
-                        throw new \Exception(ErrorsToStringHelper::extractFromModel($taskListEntity, ' '));
+                        (new TaskListRepository($taskListEntity))->save();
+                        $tasksIds[] = $taskListEntity->tl_id;
+                    } catch (\Throwable $e) {
+                        $errors = AppHelper::throwableLog($e);
+                        $errors['taskListEntity'] = $taskListEntity;
+
+                        \Yii::error($errors, 'm220926_120955_add_default_tasks_for_business_object_segment:safeUp:Throwable');
                     }
-
-                    (new TaskListRepository($taskListEntity))->save();
-                    $tasksIds[] = $taskListEntity->tl_id;
-                } catch (\Throwable $e) {
-                    $errors = AppHelper::throwableLog($e);
-                    $errors['taskListEntity'] = $taskListEntity;
-
-                    \Yii::error($errors, 'm220926_120955_add_default_tasks_for_business_object_segment:safeUp:Throwable');
                 }
             }
-        }
 
-        // Save object segment tasks
-        if (!empty($tasksIds)) {
-            try {
-                ObjectSegmentTask::deleteOrAddTasks($recipientSegment->osl_id, $tasksIds);
-            } catch (\Throwable $e) {
-                $errors = AppHelper::throwableLog($e);
-                $errors['tasksIds'] = $tasksIds;
-                $errors['osl_id'] = $recipientSegment->osl_id;
+            // Save object segment tasks
+            if (!empty($tasksIds)) {
+                try {
+                    ObjectSegmentTask::deleteOrAddTasks($recipientSegment->osl_id, $tasksIds);
+                } catch (\Throwable $e) {
+                    $errors = AppHelper::throwableLog($e);
+                    $errors['tasksIds'] = $tasksIds;
+                    $errors['osl_id'] = $recipientSegment->osl_id;
 
-                \Yii::error($errors, 'm220926_120955_add_default_tasks_for_business_object_segment:safeUp:Throwable:2');
+                    \Yii::error($errors, 'm220926_120955_add_default_tasks_for_business_object_segment:safeUp:Throwable:2');
+                }
             }
+        } catch (\Throwable $e) {
+            \Yii::error(AppHelper::throwableLog($e), 'm220926_120955_add_default_tasks_for_business_object_segment:safeUp:Throwable');
         }
-
-        return true;
     }
 
     /**
