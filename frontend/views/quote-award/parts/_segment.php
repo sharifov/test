@@ -92,7 +92,7 @@ $select2Properties = [
                             <?php foreach ($segments as $index => $segment) : ?>
                                 <tr id="segment-index-<?= $index ?>">
                                     <td style="width: 20px" class="text-center"><?= $segmentId ?></td>
-                                    <td style="width: 250px" class="fix-select2-krajee"> <?= $form->field($segment, '[' . $index . ']operatedBy')->widget(Select2::class, [
+                                    <td style="width: 250px"> <?= $form->field($segment, '[' . $index . ']operatedBy')->widget(Select2::class, [
                                             'theme' => Select2::THEME_KRAJEE,
                                             'data' => Airline::getAirlinesMapping(true),
                                             'options' => ['placeholder' => '---'],
@@ -100,7 +100,7 @@ $select2Properties = [
                                                 'allowClear' => false
                                             ],
                                         ])->label(false) ?></td>
-                                    <td style="width: 250px" class="fix-select2-krajee">
+                                    <td style="width: 250px">
                                         <?php
                                         $select2Properties['data'] = [];
                                         if (isset($segment['origin'])) {
@@ -110,7 +110,7 @@ $select2Properties = [
                                         <?= $form->field($segment, '[' . $index . ']origin')
                                             ->widget(Select2::class, $select2Properties)
                                             ->label(false) ?></td>
-                                    <td style="width: 250px" class="fix-select2-krajee">
+                                    <td style="width: 250px">
                                         <?php
                                         $select2Properties['data'] = [];
                                         if (isset($segment['destination'])) {
