@@ -6,6 +6,8 @@ use modules\objectSegment\src\entities\ObjectSegmentTask;
 use modules\taskList\src\entities\taskList\TaskList;
 use src\helpers\ErrorsToStringHelper;
 use yii\db\Migration;
+use modules\objectSegment\src\contracts\ObjectSegmentListContract;
+use src\helpers\app\AppHelper;
 
 /**
  * Class m220923_113905_add_default_tasks_for_business_object_segment
@@ -19,14 +21,15 @@ class m220923_113905_add_default_tasks_for_business_object_segment extends Migra
     {
         $tasksIds = [];
         $tasks = $this->getTasksList();
-        $recipientSegment = ObjectSegmentListQuery::getByKey('lead_business_type');
+        $recipientSegment = ObjectSegmentListQuery::getByKey(ObjectSegmentListContract::OBJECT_SEGMENT_LIST_KEY_LEAD_TYPE_BUSINESS);
 
         if (empty($recipientSegment)) {
             \Yii::error(
-                'Couldn`t find object segment by key - lead_business_type',
-                'm220921_175617_add_default_tasks_for_business_object_segment:safeUp'
+                'Couldn`t find object segment by key - ' . ObjectSegmentListContract::OBJECT_SEGMENT_LIST_KEY_LEAD_TYPE_BUSINESS,
+                'm220923_113905_add_default_tasks_for_business_object_segment:safeUp'
             );
-            return false;
+
+            return null;
         }
 
         // Save tasks
@@ -43,10 +46,10 @@ class m220923_113905_add_default_tasks_for_business_object_segment extends Migra
                     (new TaskListRepository($taskListEntity))->save();
                     $tasksIds[] = $taskListEntity->tl_id;
                 } catch (\Throwable $e) {
-                    \Yii::error([
-                        'message' => $e->getMessage(),
-                        'task' => $taskListEntity,
-                    ], 'm220921_175617_add_default_tasks_for_business_object_segment:safeUp:Throwable');
+                    $errors = AppHelper::throwableLog($e);
+                    $errors['taskListEntity'] = $taskListEntity;
+
+                    \Yii::error($errors, 'm220923_113905_add_default_tasks_for_business_object_segment:safeUp:Throwable');
                 }
             }
         }
@@ -65,6 +68,28 @@ class m220923_113905_add_default_tasks_for_business_object_segment extends Migra
         }
 
         return true;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function safeDown()
+    {
+        ObjectSegmentTask::deleteAll([
+            'in', 'tl_title', [
+                'Business Default Task: One Shift. EMAIL',
+                'Business Default Task: One Shift. SMS',
+                'Business Default Task: One Shift. CALL',
+
+                'Business Default Task: Two Shift. EMAIL',
+                'Business Default Task: Two Shift. SMS',
+                'Business Default Task: Two Shift. CALL',
+
+                'Business Default Task: Three Shift. EMAIL',
+                'Business Default Task: Three Shift. SMS',
+                'Business Default Task: Three Shift. CALL',
+            ]
+        ]);
     }
 
     /**
@@ -325,14 +350,5 @@ class m220923_113905_add_default_tasks_for_business_object_segment extends Migra
                 'tl_sort_order' => 0,
             ],
         ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function safeDown()
-    {
-        echo "m220923_113905_add_default_tasks_for_business_object_segment cannot be reverted.\n";
-        return false;
     }
 }
