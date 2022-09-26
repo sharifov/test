@@ -120,7 +120,7 @@ class CaseCategoryController extends FController
      */
     public function actionDelete($id): Response
     {
-        $this->findModel($id)->delete();
+        $this->findModel($id)->deleteWithChildren();
 
         return $this->redirect(['index']);
     }
