@@ -10,9 +10,9 @@ use modules\objectSegment\src\contracts\ObjectSegmentListContract;
 use src\helpers\app\AppHelper;
 
 /**
- * Class m220923_113905_add_default_tasks_for_business_object_segment
+ * Class m220926_120955_add_default_tasks_for_business_object_segment
  */
-class m220923_113905_add_default_tasks_for_business_object_segment extends Migration
+class m220926_120955_add_default_tasks_for_business_object_segment extends Migration
 {
     /**
      * {@inheritdoc}
@@ -26,7 +26,7 @@ class m220923_113905_add_default_tasks_for_business_object_segment extends Migra
         if (empty($recipientSegment)) {
             \Yii::error(
                 'Couldn`t find object segment by key - ' . ObjectSegmentListContract::OBJECT_SEGMENT_LIST_KEY_LEAD_TYPE_BUSINESS,
-                'm220923_113905_add_default_tasks_for_business_object_segment:safeUp'
+                'm220926_120955_add_default_tasks_for_business_object_segment:safeUp'
             );
 
             return null;
@@ -49,7 +49,7 @@ class m220923_113905_add_default_tasks_for_business_object_segment extends Migra
                     $errors = AppHelper::throwableLog($e);
                     $errors['taskListEntity'] = $taskListEntity;
 
-                    \Yii::error($errors, 'm220923_113905_add_default_tasks_for_business_object_segment:safeUp:Throwable');
+                    \Yii::error($errors, 'm220926_120955_add_default_tasks_for_business_object_segment:safeUp:Throwable');
                 }
             }
         }
@@ -63,7 +63,7 @@ class m220923_113905_add_default_tasks_for_business_object_segment extends Migra
                 $errors['tasksIds'] = $tasksIds;
                 $errors['osl_id'] = $recipientSegment->osl_id;
 
-                \Yii::error($errors, 'm220921_175617_add_default_tasks_for_business_object_segment:safeUp:Throwable:2');
+                \Yii::error($errors, 'm220926_120955_add_default_tasks_for_business_object_segment:safeUp:Throwable:2');
             }
         }
 
