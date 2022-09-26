@@ -12,6 +12,7 @@ use yii\web\JsExpression;
  */
 
 $select2Properties = [
+    'theme' => Select2::THEME_KRAJEE,
     'options' => [
         'placeholder' => 'Select location ...',
         'multiple' => false,
@@ -92,6 +93,7 @@ $select2Properties = [
                                 <tr id="segment-index-<?= $index ?>">
                                     <td style="width: 20px" class="text-center"><?= $segmentId ?></td>
                                     <td style="width: 250px"> <?= $form->field($segment, '[' . $index . ']operatedBy')->widget(Select2::class, [
+                                            'theme' => Select2::THEME_KRAJEE,
                                             'data' => Airline::getAirlinesMapping(true),
                                             'options' => ['placeholder' => '---'],
                                             'pluginOptions' => [
@@ -203,6 +205,17 @@ $select2Properties = [
 <style>
     .table-award-segment td, .table-award-segment th {
         padding: 5px !important;
+    }
+
+    .table-award-segment .select2-container--krajee .select2-selection--single .select2-selection__arrow {
+        border-left-color: #e4e9ee !important;
+        max-height: 28px;
+    }
+
+    .table-award-segment .select2-container--krajee .select2-selection--single .select2-selection__clear {
+        right: 1.5rem;
+        line-height: 23px;
+        vertical-align: middle;
     }
 
     .table-award-segment th {
