@@ -21,7 +21,9 @@ class ClientEmailAssignTaskListListener
 
                 if (!$existsClientEmailValid && $event->getClientEmail()->type !== ClientEmail::EMAIL_INVALID) {
                     $job = new UserTaskAssignJob($event->getClientEmail()->client_id);
-                    \Yii::$app->queue_job->push($job);
+                    \Yii::$app->queue_job
+                        ->delay(1)
+                        ->push($job);
                 }
             }
         } catch (\Throwable $e) {
