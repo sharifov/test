@@ -1262,13 +1262,24 @@ class ProductQuote extends \yii\db\ActiveRecord implements Serializable
         return $this->productQuoteOptions ? count($this->productQuoteOptions) : 0;
     }
 
+    /**
+     * @param ProductQuote $originalProductQuote
+     * @param array $saleData
+     * @return void
+     */
     public static function updateProductQuoteStatusByBOSaleStatus(ProductQuote $originalProductQuote, array $saleData): void
     {
         if (!empty($originalProductQuote) && isset($saleData['saleStatus']) && is_string($saleData['saleStatus'])) {
+            $productQuoteRepository = \Yii::createObject(ProductQuoteRepository::class);
             $saleStatusBoMap = ProductQuoteStatus::STATUS_BO_MAP[strtolower($saleData['saleStatus'])] ?? null;
-            if (!empty($saleStatusBoMap) && $originalProductQuote->pq_status_id !== $saleStatusBoMap) {
-                $productQuoteRepository = \Yii::createObject(ProductQuoteRepository::class);
+            $currentProductQuoteStatusId = $originalProductQuote->pq_status_id;
+            $changeListRelations = $originalProductQuote->productQuoteChangeRelations;
+
+            if (!empty($saleStatusBoMap) && $currentProductQuoteStatusId !== $saleStatusBoMap && $currentProductQuoteStatusId !== ProductQuoteStatus::BOOKED) {
                 $originalProductQuote->setStatusWithEvent($saleStatusBoMap);
+                $productQuoteRepository->save($originalProductQuote);
+            } elseif ($currentProductQuoteStatusId == ProductQuoteStatus::SOLD && $changeListRelations) {
+                $originalProductQuote->setStatusWithEvent(ProductQuoteStatus::BOOKED);
                 $productQuoteRepository->save($originalProductQuote);
             }
         }
