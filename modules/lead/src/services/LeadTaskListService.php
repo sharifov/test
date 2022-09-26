@@ -54,7 +54,7 @@ class LeadTaskListService
         try {
             $dtNow = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')));
             if ($taskLists = TaskListQuery::getTaskListByLeadId($this->lead->id)) {
-                $countOfSuccessSavedUserTasks = 0;
+                $idsOfSuccessAddedUserTasks = [];
 
                 foreach ($taskLists as $taskList) {
                     try {
@@ -111,8 +111,11 @@ class LeadTaskListService
                             );
                         }
 
-                        $assignService->assign();
-                        $countOfSuccessSavedUserTasks++;
+                        $userTaskId = $assignService->assign();
+
+                        if (!empty($userTaskId)) {
+                            $idsOfSuccessAddedUserTasks[] = $userTaskId;
+                        }
                     } catch (TaskListAssignException $exception) {
                         $message = AppHelper::throwableLog($exception);
                         $message['taskListId'] = $taskList->tl_id ?? null;
@@ -134,7 +137,7 @@ class LeadTaskListService
                     }
                 }
 
-                if ($countOfSuccessSavedUserTasks > 0) {
+                if (!empty($idsOfSuccessAddedUserTasks)) {
                     (new LeadTasksListSavedNotification($this->lead))->send();
                 }
                 return;

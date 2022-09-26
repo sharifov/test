@@ -26,7 +26,12 @@ class LeadTaskFirstAssignService extends LeadTaskAssignService
         $this->userShiftSchedules = $userShiftSchedules;
     }
 
-    public function assign(): void
+    /**
+     * @return false|int
+     * @throws \Throwable
+     * @throws \yii\db\Exception
+     */
+    public function assign()
     {
         $existNewUserTaskComplete = UserTaskQuery::getQueryUserTaskByUserTaskListAndStatuses(
             $this->lead->employee_id,
@@ -42,7 +47,7 @@ class LeadTaskFirstAssignService extends LeadTaskAssignService
                 'info\UserTaskAssign:LeadTaskReAssignService:assign:info'
             );
 
-            return;
+            return false;
         }
 
         $taskListEndDt = null;
@@ -68,5 +73,7 @@ class LeadTaskFirstAssignService extends LeadTaskAssignService
         (new UserTaskRepository($userTask))->save();
 
         $this->createShiftScheduleEventTask($this->userShiftSchedules, $userTask, $this->dtStartWithDelay, $this->taskList->tl_duration_min);
+
+        return $userTask->ut_id;
     }
 }

@@ -31,7 +31,12 @@ class LeadTaskReAssignService extends LeadTaskAssignService
         $this->oldOwnerId = $oldOwnerId;
     }
 
-    public function assign(): void
+    /**
+     * @return false|int
+     * @throws \Throwable
+     * @throws \yii\db\Exception
+     */
+    public function assign()
     {
         $oldUserTask = UserTaskQuery::getQueryUserTaskByTargetObjectAndTaskList(
             $this->taskList->tl_id,
@@ -42,13 +47,12 @@ class LeadTaskReAssignService extends LeadTaskAssignService
             ->limit(1)->one();
 
         if (!$oldUserTask || $oldUserTask->isCanceled()) {
-            (new LeadTaskFirstAssignService(
+            return (new LeadTaskFirstAssignService(
                 $this->lead,
                 $this->taskList,
                 $this->dtStart,
                 $this->userShiftSchedules
             ))->assign();
-            return;
         }
 
         if ($oldUserTask->isComplete()) {
@@ -56,7 +60,7 @@ class LeadTaskReAssignService extends LeadTaskAssignService
                 'Exist OldUserTask Complete (Lead ID: ' . $this->lead->id . ', EmployeeID: ' . $this->oldOwnerId . '), TaskLIst ID (' . $this->taskList->tl_id . ')',
                 'info\UserTaskAssign:LeadTaskReAssignService:assign:info'
             );
-            return;
+            return false;
         }
 
         $userTask = $oldUserTask
@@ -79,5 +83,7 @@ class LeadTaskReAssignService extends LeadTaskAssignService
         ]);
 
         $this->createShiftScheduleEventTask($this->userShiftSchedules, $userTask, $this->dtStartWithDelay, $this->taskList->tl_duration_min);
+
+        return $userTask->ut_id;
     }
 }
