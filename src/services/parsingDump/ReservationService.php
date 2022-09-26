@@ -224,8 +224,12 @@ class ReservationService
      */
     private function getLayoverDuration(array $data, int $index)
     {
-        if (isset($data[$index - 1]) && !FlightQuoteHelper::isNextTrip($data[$index - 1], $data[$index])) {
-            $result = intval(($data[$index]['departureDateTime']->getTimestamp() - $data[$index - 1]['arrivalDateTime']->getTimestamp()) / 60);
+        $dataItem = $data[$index] ?? [];
+        $dataPrevItem = $data[$index - 1] ?? [];
+        if ($dataPrevItem && !FlightQuoteHelper::isNextTrip($dataPrevItem, $dataItem)) {
+            $departTs = empty($dataItem['departureDateTime']) ? 0 : $dataItem['departureDateTime']->getTimestamp();
+            $arrivTs = empty($dataPrevItem['arrivalDateTime']) ? 0 : $dataPrevItem['arrivalDateTime']->getTimestamp();
+            $result = (int) (($departTs - $arrivTs) / 60);
         }
         return $result ?? 0;
     }
@@ -239,9 +243,12 @@ class ReservationService
     private function getLayoverDurationByPastSegment(array $data, int $index)
     {
         $data = $this->getArrivalAndDeparture($data);
-
-        if (isset($data[$index - 1]) && !FlightQuoteHelper::isNextTrip($data[$index - 1], $data[$index])) {
-            $result = intval(($data[$index]['departureDateTime']->getTimestamp() - $data[$index - 1]['arrivalDateTime']->getTimestamp()) / 60);
+        $dataItem = $data[$index] ?? [];
+        $dataPrevItem = $data[$index - 1] ?? [];
+        if ($dataPrevItem && !FlightQuoteHelper::isNextTrip($dataPrevItem, $dataItem)) {
+            $departTs = empty($dataItem['departureDateTime']) ? 0 : $dataItem['departureDateTime']->getTimestamp();
+            $arrivTs = empty($dataPrevItem['arrivalDateTime']) ? 0 : $dataPrevItem['arrivalDateTime']->getTimestamp();
+            $result = (int) (($departTs - $arrivTs) / 60);
         }
         return $result ?? 0;
     }
