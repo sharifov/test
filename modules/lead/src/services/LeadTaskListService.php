@@ -55,7 +55,7 @@ class LeadTaskListService
         try {
             $dtNow = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')));
 
-            if ($this->isDuplicateAssignTask() && $taskLists = TaskListQuery::getTaskListByLeadId($this->lead->id)) {
+            if ($this->isDuplicateAssignTasks() && $taskLists = TaskListQuery::getTaskListByLeadId($this->lead->id)) {
                 $idsOfSuccessAddedUserTasks = [];
 
                 foreach ($taskLists as $taskList) {
@@ -311,7 +311,7 @@ class LeadTaskListService
     /**
      * @return bool
      */
-    private function isDuplicateAssignTask(): bool
+    private function isDuplicateAssignTasks(): bool
     {
         $key = 'LeadTaskListService_handle_' . $this->lead->id;
         return RedisHelper::checkDuplicate($key, 2);
