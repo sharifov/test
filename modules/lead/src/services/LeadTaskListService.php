@@ -4,6 +4,7 @@ namespace modules\lead\src\services;
 
 use common\models\Lead;
 use common\models\LeadTask;
+use frontend\helpers\RedisHelper;
 use modules\featureFlag\FFlag;
 use modules\lead\src\abac\taskLIst\LeadTaskListAbacDto;
 use modules\lead\src\abac\taskLIst\LeadTaskListAbacObject;
@@ -53,7 +54,8 @@ class LeadTaskListService
     {
         try {
             $dtNow = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')));
-            if ($taskLists = TaskListQuery::getTaskListByLeadId($this->lead->id)) {
+
+            if ($this->isDuplicateAssignTask() && $taskLists = TaskListQuery::getTaskListByLeadId($this->lead->id)) {
                 $idsOfSuccessAddedUserTasks = [];
 
                 foreach ($taskLists as $taskList) {
@@ -304,5 +306,14 @@ class LeadTaskListService
             }
         }
         return $dtStart;
+    }
+
+    /**
+     * @return bool
+     */
+    private function isDuplicateAssignTask(): bool
+    {
+        $key = 'LeadTaskListService_handle_' . $this->lead->id;
+        return RedisHelper::checkDuplicate($key, 2);
     }
 }
