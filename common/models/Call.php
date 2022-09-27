@@ -1300,7 +1300,9 @@ class Call extends \yii\db\ActiveRecord
                     $userListNotifications[$this->c_created_user_id] = $this->c_created_user_id;
                 }
 
-                if ($changedAttributes['c_status_id'] !== self::STATUS_HOLD) {
+                $isStatusHold = ($statusId = $changedAttributes['c_status_id'] ?? null) && ($statusId === self::STATUS_HOLD);
+
+                if (!$isStatusHold) {
                     if ($this->c_lead_id && $this->cLead && $this->cLead->employee_id) {
                         $userListNotifications[$this->cLead->employee_id] = $this->cLead->employee_id;
                     }
@@ -1316,7 +1318,7 @@ class Call extends \yii\db\ActiveRecord
                         $msgPart = 'Queued ';
                     }
 
-                    $holdMessage = $changedAttributes['c_status_id'] === self::STATUS_HOLD ? ' Hold' : '';
+                    $holdMessage = $isStatusHold ? ' Hold' : '';
                     $title = 'Missed' . $holdMessage . ' Call (' . $this->getSourceName() . ')';
                     $message = 'Missed ' . $msgPart . $holdMessage . 'Call (Id: ' . Purifier::createCallShortLink($this) . ')';
                     $message .= (($this->c_lead_id && $this->cLead) || ($this->c_case_id && $this->cCase)) ? ' from ' : '';
