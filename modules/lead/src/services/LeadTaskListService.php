@@ -55,7 +55,7 @@ class LeadTaskListService
         try {
             $dtNow = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')));
 
-            if ($this->isDuplicateAssignTasks() && $taskLists = TaskListQuery::getTaskListByLeadId($this->lead->id)) {
+            if (!$this->isDuplicateAssignTasks() && $taskLists = TaskListQuery::getTaskListByLeadId($this->lead->id)) {
                 $idsOfSuccessAddedUserTasks = [];
 
                 foreach ($taskLists as $taskList) {
