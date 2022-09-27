@@ -24,11 +24,17 @@ use yii\db\ActiveRecord;
  */
 class LeadOrder extends \yii\db\ActiveRecord
 {
-    public static function create(int $leadId, int $orderId): self
+    public static function create(int $leadId, int $orderId, ?int $createdUserId = null): self
     {
         $leadOrder = new self();
         $leadOrder->lo_lead_id = $leadId;
         $leadOrder->lo_order_id = $orderId;
+
+        if ($createdUserId !== null) {
+            $leadOrder->detachBehavior('user');
+            $leadOrder->lo_created_user_id = $createdUserId;
+        }
+
         return $leadOrder;
     }
 
@@ -46,7 +52,8 @@ class LeadOrder extends \yii\db\ActiveRecord
                 'class' => BlameableBehavior::class,
                 'attributes' => [
                     ActiveRecord::EVENT_BEFORE_INSERT => ['lo_created_user_id'],
-                ]
+                ],
+                'defaultValue' => null,
             ],
         ];
     }
