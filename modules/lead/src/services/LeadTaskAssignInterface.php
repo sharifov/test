@@ -7,9 +7,9 @@ use modules\taskList\src\entities\userTask\UserTask;
 interface LeadTaskAssignInterface
 {
     /**
-     * @return false|int
+     * @return int|null
      */
-    public function assign();
+    public function assign(): ?int;
 
     public function createShiftScheduleEventTask(array $userShiftSchedules, UserTask $userTask, \DateTimeImmutable $dtNowWithDelay, ?int $duration);
 }

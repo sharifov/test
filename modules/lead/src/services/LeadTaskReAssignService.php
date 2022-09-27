@@ -32,11 +32,11 @@ class LeadTaskReAssignService extends LeadTaskAssignService
     }
 
     /**
-     * @return false|int
+     * @return int|null
      * @throws \Throwable
      * @throws \yii\db\Exception
      */
-    public function assign()
+    public function assign(): ?int
     {
         $oldUserTask = UserTaskQuery::getQueryUserTaskByTargetObjectAndTaskList(
             $this->taskList->tl_id,
@@ -60,7 +60,7 @@ class LeadTaskReAssignService extends LeadTaskAssignService
                 'Exist OldUserTask Complete (Lead ID: ' . $this->lead->id . ', EmployeeID: ' . $this->oldOwnerId . '), TaskLIst ID (' . $this->taskList->tl_id . ')',
                 'info\UserTaskAssign:LeadTaskReAssignService:assign:info'
             );
-            return false;
+            return null;
         }
 
         $userTask = $oldUserTask

@@ -27,11 +27,11 @@ class LeadTaskFirstAssignService extends LeadTaskAssignService
     }
 
     /**
-     * @return false|int
+     * @return int|null
      * @throws \Throwable
      * @throws \yii\db\Exception
      */
-    public function assign()
+    public function assign(): ?int
     {
         $existNewUserTaskComplete = UserTaskQuery::getQueryUserTaskByUserTaskListAndStatuses(
             $this->lead->employee_id,
@@ -47,7 +47,7 @@ class LeadTaskFirstAssignService extends LeadTaskAssignService
                 'info\UserTaskAssign:LeadTaskReAssignService:assign:info'
             );
 
-            return false;
+            return null;
         }
 
         $taskListEndDt = null;
