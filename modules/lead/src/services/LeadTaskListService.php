@@ -26,6 +26,7 @@ use modules\taskList\src\exceptions\TaskListAssignException;
 use modules\taskList\src\notifications\Task\LeadTasksListSavedNotification;
 use modules\taskList\src\services\taskAssign\checker\TaskListAssignCheckerFactory;
 use modules\taskList\src\entities\taskList\TaskListParamService;
+use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use src\helpers\DateHelper;
 use src\helpers\ErrorsToStringHelper;
@@ -306,6 +307,12 @@ class LeadTaskListService
             }
         }
         return $dtStart;
+    }
+
+    public static function isDuplicateByUserId()
+    {
+        $key = 'LeadTaskListService_handleByUserId_' . Auth::id();
+        return RedisHelper::checkDuplicate($key, 2);
     }
 
     /**
