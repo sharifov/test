@@ -4,6 +4,7 @@ namespace modules\lead\src\services;
 
 use common\models\Lead;
 use common\models\LeadTask;
+use frontend\helpers\RedisHelper;
 use modules\featureFlag\FFlag;
 use modules\lead\src\abac\taskLIst\LeadTaskListAbacDto;
 use modules\lead\src\abac\taskLIst\LeadTaskListAbacObject;
@@ -25,6 +26,7 @@ use modules\taskList\src\exceptions\TaskListAssignException;
 use modules\taskList\src\notifications\Task\LeadTasksListSavedNotification;
 use modules\taskList\src\services\taskAssign\checker\TaskListAssignCheckerFactory;
 use modules\taskList\src\entities\taskList\TaskListParamService;
+use src\auth\Auth;
 use src\helpers\app\AppHelper;
 use src\helpers\DateHelper;
 use src\helpers\ErrorsToStringHelper;
@@ -53,8 +55,9 @@ class LeadTaskListService
     {
         try {
             $dtNow = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')));
-            if ($taskLists = TaskListQuery::getTaskListByLeadId($this->lead->id)) {
-                $countOfSuccessSavedUserTasks = 0;
+
+            if (!$this->isDuplicateAssignTasks() && $taskLists = TaskListQuery::getTaskListByLeadId($this->lead->id)) {
+                $idsOfSuccessAddedUserTasks = [];
 
                 foreach ($taskLists as $taskList) {
                     try {
@@ -111,8 +114,11 @@ class LeadTaskListService
                             );
                         }
 
-                        $assignService->assign();
-                        $countOfSuccessSavedUserTasks++;
+                        $userTaskId = $assignService->assign();
+
+                        if (!empty($userTaskId)) {
+                            $idsOfSuccessAddedUserTasks[] = $userTaskId;
+                        }
                     } catch (TaskListAssignException $exception) {
                         $message = AppHelper::throwableLog($exception);
                         $message['taskListId'] = $taskList->tl_id ?? null;
@@ -134,7 +140,7 @@ class LeadTaskListService
                     }
                 }
 
-                if ($countOfSuccessSavedUserTasks > 0) {
+                if (!empty($idsOfSuccessAddedUserTasks)) {
                     (new LeadTasksListSavedNotification($this->lead))->send();
                 }
                 return;
@@ -301,5 +307,20 @@ class LeadTaskListService
             }
         }
         return $dtStart;
+    }
+
+    public static function isDuplicateByUserId()
+    {
+        $key = 'LeadTaskListService_handleByUserId_' . Auth::id();
+        return RedisHelper::checkDuplicate($key, 2);
+    }
+
+    /**
+     * @return bool
+     */
+    private function isDuplicateAssignTasks(): bool
+    {
+        $key = 'LeadTaskListService_handle_' . $this->lead->id;
+        return RedisHelper::checkDuplicate($key, 2);
     }
 }
