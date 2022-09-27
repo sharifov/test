@@ -35,6 +35,7 @@ use modules\product\src\entities\productQuoteOption\ProductQuoteOption;
 use modules\product\src\entities\productQuoteOption\ProductQuoteOptionRepository;
 use src\dispatchers\DeferredEventDispatcher;
 use src\dispatchers\EventDispatcher;
+use src\model\leadOrder\services\LeadOrderService;
 use src\repositories\billingInfo\BillingInfoRepository;
 use src\repositories\creditCard\CreditCardRepository;
 use src\repositories\lead\LeadRepository;
@@ -293,6 +294,13 @@ class OrderApiManageService
             if ($lead) {
                 $lead->booked($newOrder->or_owner_user_id);
                 $this->leadRepository->save($lead);
+
+                $leadOrderService = \Yii::createObject(LeadOrderService::class);
+                $leadOrderService->create(
+                    $lead->id,
+                    $orderId,
+                    $newOrder->or_owner_user_id
+                );
             }
 
             foreach ($form->paxes as $paxForm) {
