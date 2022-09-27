@@ -295,12 +295,15 @@ class OrderApiManageService
                 $lead->booked($newOrder->or_owner_user_id);
                 $this->leadRepository->save($lead);
 
-                $leadOrderService = \Yii::createObject(LeadOrderService::class);
-                $leadOrderService->create(
-                    $lead->id,
-                    $orderId,
-                    $newOrder->or_owner_user_id
-                );
+                /** @fflag FFlag::FF_KEY_ATTACH_LEAD_TO_HOTEL_ORDER, Attach lead to hotel order */
+                if (\Yii::$app->featureFlag->isEnable(\modules\featureFlag\FFlag::FF_KEY_ATTACH_LEAD_TO_HOTEL_ORDER)) {
+                    $leadOrderService = \Yii::createObject(LeadOrderService::class);
+                    $leadOrderService->create(
+                        $lead->id,
+                        $orderId,
+                        $newOrder->or_owner_user_id
+                    );
+                }
             }
 
             foreach ($form->paxes as $paxForm) {

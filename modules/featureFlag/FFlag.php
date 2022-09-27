@@ -83,6 +83,7 @@ class FFlag implements FeatureFlagObjectModelInterface
     public const FF_KEY_SHOW_TASK_INFO_COLUMN_ON_LEAD_SECTION_UI = 'showTaskInfoColumnOnLeadSectionUi';
     public const FF_KEY_CROSS_SALE_NEW_PARAMETERS_ENABLE = 'crossSaleNewParametersEnable';
     public const FF_KEY_CROSS_SALE_BADGE_ENABLE = 'crossSaleBadgeEnable';
+    public const FF_KEY_ATTACH_LEAD_TO_HOTEL_ORDER = 'attachLeadToHotelOrder';
 
     public const FF_KEY_LIST = [
         self::FF_KEY_LPP_ENABLE,
@@ -155,6 +156,7 @@ class FFlag implements FeatureFlagObjectModelInterface
         self::FF_KEY_SHOW_TASK_INFO_COLUMN_ON_LEAD_SECTION_UI,
         self::FF_KEY_CROSS_SALE_NEW_PARAMETERS_ENABLE,
         self::FF_KEY_CROSS_SALE_BADGE_ENABLE,
+        self::FF_KEY_ATTACH_LEAD_TO_HOTEL_ORDER,
     ];
 
     public const FF_OBJECT_LIST = [
