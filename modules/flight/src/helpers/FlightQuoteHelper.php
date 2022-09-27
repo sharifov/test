@@ -1079,6 +1079,9 @@ class FlightQuoteHelper
                 $trips[$key]['duration'] = ($arrivalTime->getTimestamp() - $departureTime->getTimestamp()) / 60;
             }
 
+            $departureTime->setTimezone(new \DateTimeZone('UTC'));
+            $arrivalTime->setTimezone(new \DateTimeZone('UTC'));
+
 //          $keySegment = [];
             foreach ($trip['segments'] as $segmentKey => $segment) {
                 $trips[$key]['segments'][$segmentKey] = ArrayHelper::toArray((new ItineraryDumpDTO([]))->feelByParsedreservationDump($segment));
