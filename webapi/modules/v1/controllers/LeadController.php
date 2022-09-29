@@ -27,6 +27,7 @@ use modules\product\src\useCases\product\api\create\flight\Handler;
 use modules\webEngage\settings\WebEngageDictionary;
 use modules\webEngage\src\service\webEngageEventData\lead\eventData\LeadCreatedEventData;
 use src\helpers\app\AppHelper;
+use src\helpers\app\HttpStatusCodeHelper;
 use src\helpers\text\HashHelper;
 use src\model\clientData\service\ClientDataService;
 use src\model\leadData\entity\LeadData;
@@ -35,6 +36,7 @@ use src\model\leadData\services\LeadDataService;
 use src\repositories\client\ClientEmailRepository;
 use src\repositories\client\ClientPhoneRepository;
 use src\repositories\lead\LeadRepository;
+use src\services\CheckRequestDuplicateService;
 use src\services\lead\calculator\LeadTripTypeCalculator;
 use src\services\lead\calculator\SegmentDTO;
 use src\services\lead\LeadCreateApiService;
@@ -43,6 +45,11 @@ use src\services\quote\addQuote\AddQuoteService;
 use src\services\TransactionManager;
 use webapi\models\ApiLead;
 use webapi\models\ApiLeadCallExpert;
+use webapi\src\Messages;
+use webapi\src\response\ErrorResponse;
+use webapi\src\response\messages\ErrorsMessage;
+use webapi\src\response\messages\MessageMessage;
+use webapi\src\response\messages\StatusCodeMessage;
 use Yii;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
@@ -401,6 +408,7 @@ class LeadController extends ApiBaseController
      * }
      *
      * @apiError UserNotFound The id of the User was not found.
+     * @apiError TooManyRequests Too many requests
      *
      * @apiErrorExample Error-Response:
      *      HTTP/1.1 422 Unprocessable entity
@@ -412,6 +420,15 @@ class LeadController extends ApiBaseController
      *          "type": "yii\\web\\UnprocessableEntityHttpException"
      *      }
      *
+     *      HTTP/1.1 429 Too Many Requests
+     *      {
+     *           "status": 429,
+     *           "message": "Too many requests",
+     *           "errors": [
+     *              "This request with params has already been sent."
+     *          ]
+     *       }
+     *
      * @return array
      * @throws BadRequestHttpException
      * @throws UnprocessableEntityHttpException
@@ -420,6 +437,20 @@ class LeadController extends ApiBaseController
     public function actionCreate()
     {
         $this->checkPost();
+        $requestDuplicateChecker = new CheckRequestDuplicateService(\Yii::$app->request);
+
+        if (
+            $requestDuplicateChecker->isDuplicate(
+                $requestDuplicateChecker->getRequestHash()
+            )
+        ) {
+            return (new ErrorResponse(
+                new StatusCodeMessage(HttpStatusCodeHelper::TOO_MANY_REQUESTS),
+                new MessageMessage(Messages::TOO_MANY_REQUESTS),
+                new ErrorsMessage('This request with params has already been sent.')
+            ))->toArray();
+        }
+
         $this->startApiLog($this->action->uniqueId);
         $warnings = [];
 
@@ -943,7 +974,7 @@ class LeadController extends ApiBaseController
      * @apiParam {string{1}=E-ECONOMY,B-BUSINESS,F-FIRST,P-PREMIUM}        lead.cabin                                         Cabin
      * @apiParam {array[]}              lead.emails                                         Array of Emails (string)
      * @apiParam {array[]}              lead.phones                                         Array of Phones (string)
-     * @apiParam {object[]}             lead.experiments                                    Array of new Experiment codes (existed will be deleted)
+     * @apiParam {object[]}             lead.experiments                                    Array of Experiment codes
      * @apiParam {object[]}             lead.flights                                        Array of Flights
      * @apiParam {string{3}}                                lead.flights.origin                 Flight Origin location Airport IATA-code
      * @apiParam {string{3}}                                lead.flights.destination            Flight Destination location Airport IATA-code

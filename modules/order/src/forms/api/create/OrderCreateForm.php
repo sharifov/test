@@ -82,8 +82,26 @@ class OrderCreateForm extends CompositeRecursiveForm
     public function rules(): array
     {
         return [
-            [['offerGid', 'sourceCid'], 'required'],
-            [['sourceId'], 'string', 'max' => 10],
+            [['offerGid'], 'required'],
+            [['offerGid'], 'string'],
+            ['offerGid', function () {
+                $offer = Offer::find()
+                    ->where([
+                        'of_gid' => $this->offerGid,
+                    ])
+                    ->limit(1)
+                    ->one();
+
+                if ($offer !== null) {
+                    if (empty($this->sourceCid) && $offer->ofLead !== null && $offer->ofLead->source_id) {
+                        $this->sourceCid = $offer->ofLead->source->cid;
+                    }
+                } else {
+                    $this->addError('offerGid', 'Offer not found');
+                }
+            }],
+
+            ['sourceCid', 'required'],
             ['sourceCid', function () {
                 if ($source = Sources::find()->select(['id', 'project_id'])->where(['cid' => $this->sourceCid])->asArray()->limit(1)->one()) {
                     $this->sourceId = $source['id'];
@@ -92,8 +110,8 @@ class OrderCreateForm extends CompositeRecursiveForm
                     $this->addError('sourceCid', 'Source not found');
                 }
             }],
-            [['offerGid'], 'string'],
-            ['offerGid', 'exist', 'targetClass' => Offer::class, 'targetAttribute' => 'of_gid'],
+
+            [['sourceId'], 'string', 'max' => 10],
 
             ['languageId', 'safe'],
 

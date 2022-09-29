@@ -103,4 +103,31 @@ class CompositeFormHelper
         }
         return $errors;
     }
+
+    public static function ajaxValidateCompositeForm(Model $model): array
+    {
+        $result = [];
+        foreach ($model->getErrors() as $attribute => $errors) {
+            if ($internalForm = strstr($attribute, '.', true)) {
+                $tmpInternalFormAttribute = strstr($attribute, '.');
+                $internalFormAttributes = substr($tmpInternalFormAttribute, 1, strlen($tmpInternalFormAttribute));
+                $internalFormAttribute = '';
+                foreach (explode('.', $internalFormAttributes) as $key => $attr) {
+                    if ($key == 0) {
+                        $internalFormAttribute .= $attr;
+                    } else {
+                        $internalFormAttribute .= '[' . $attr . ']';
+                    }
+                }
+                try {
+                    $result[Html::getInputId($model->{$internalForm}[0], $internalFormAttribute)] = $errors;
+                } catch (\Throwable $e) {
+                    $result[Html::getInputId($model, $attribute)] = $errors;
+                }
+            } else {
+                $result[Html::getInputId($model, $attribute)] = $errors;
+            }
+        }
+        return $result;
+    }
 }

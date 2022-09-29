@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8ea15e58f88913df3cd0b06a42f096bc",
+    "content-hash": "660b2d91bf3d001aec9fe3b6171d8b5d",
     "packages": [
         {
             "name": "2amigos/yii2-arrayquery-component",
@@ -4365,11 +4365,11 @@
         },
         {
             "name": "kivork/yii2-search-module",
-            "version": "v1.15.0",
+            "version": "v1.16.0",
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:techork/yii2-search-module.git",
-                "reference": "5fa5f1ffd346b6f268cd4102e5554d678a8d082e"
+                "reference": "d91815b08372e3e5574994b07ede9f19ee64ecfe"
             },
             "require": {
                 "kovalenkojuls/yii2-widget-combodate": "*",
@@ -4417,11 +4417,11 @@
         },
         {
             "name": "kivork/yii2-two-factor-auth",
-            "version": "1.3.2-stable",
+            "version": "1.3.4-stable",
             "source": {
                 "type": "git",
                 "url": "git@bitbucket.org:techork/yii2-two-factor-auth.git",
-                "reference": "686961d47064ad7aa336b64d670a42f4ccf0f617"
+                "reference": "aaf4a1c044191c742a3bc1abb1f4de0539b89301"
             },
             "require": {
                 "endroid/qr-code": "4.4.9",
@@ -9078,16 +9078,16 @@
         },
         {
             "name": "yiisoft/yii2",
-            "version": "2.0.45",
+            "version": "2.0.46",
             "source": {
                 "type": "git",
                 "url": "https://github.com/yiisoft/yii2-framework.git",
-                "reference": "e2223d4085e5612aa616635f8fcaf478607f62e8"
+                "reference": "d73259c3bc886648a6875109f9f09cddeff03708"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/yiisoft/yii2-framework/zipball/e2223d4085e5612aa616635f8fcaf478607f62e8",
-                "reference": "e2223d4085e5612aa616635f8fcaf478607f62e8",
+                "url": "https://api.github.com/repos/yiisoft/yii2-framework/zipball/d73259c3bc886648a6875109f9f09cddeff03708",
+                "reference": "d73259c3bc886648a6875109f9f09cddeff03708",
                 "shasum": ""
             },
             "require": {
@@ -9196,7 +9196,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-02-11T13:12:40+00:00"
+            "time": "2022-08-18T22:18:45+00:00"
         },
         {
             "name": "yiisoft/yii2-authclient",

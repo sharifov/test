@@ -1360,6 +1360,7 @@ class PhoneController extends FController
                 if ($callUserAccess) {
                     $callUserAccess->noAnsweredCall();
                     $callUserAccess->save();
+
                     Notifications::createAndPublish(
                         $callUserAccess->cua_user_id,
                         'Warm transfer canceled',

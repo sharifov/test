@@ -74,7 +74,6 @@ class BaseJob extends BaseObject
                 if (!empty($this->timeExecution)) {
                     $metrics = \Yii::$container->get(Metrics::class);
                     $seconds = round(microtime(true) - $this->timeExecution, 1);
-                    $seconds -= $this->delayJob;
                     $buckets = empty($buckets) ? $this->defaultBuckets : $buckets;
                     $metrics->histogramMetric(
                         'job_execution_time',

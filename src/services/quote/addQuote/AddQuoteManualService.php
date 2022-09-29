@@ -75,11 +75,14 @@ class AddQuoteManualService
         $reservationService = new ReservationService($gds);
         $productFlightQuote = $productQuote->flightQuote;
         $pastParsedSegments = [];
+        $pastSegments = [];
         $totalFlightTrips = count($productFlightQuote->flightQuoteTrips);
+        $totalFlightSegments = 0;
         if ($totalFlightTrips) {
             foreach ($productFlightQuote->flightQuoteTrips as $tripKey => $trip) {
                 if (count($trip->flightQuoteSegments)) {
                     foreach ($trip->flightQuoteSegments as $key => $segment) {
+                        $totalFlightSegments++;
                         $departureTimeZone = null;
                         if ($departureAirport = Airports::findByIata($segment->fqs_departure_airport_iata)) {
                             $departureTimeZone = new \DateTimeZone($departureAirport->timezone);
@@ -88,16 +91,21 @@ class AddQuoteManualService
                         $now = new DateTime('now', $departureTimeZone);
 
                         if ($now->getTimestamp() >= $departureDateTime->getTimestamp()) {
-                            $segment = $reservationService->parseSegment($pastParsedSegments, $key + 1, $segment);
-                            $segment['segment_trip_key'] = $tripKey + 1;
-                            $pastParsedSegments[] = $segment;
+                            $pastSegments[] = $segment;
                         }
                     }
                 }
             }
+
+            if (count($pastSegments)) {
+                foreach ($pastSegments as $key => $segment) {
+                    $parsedSegment = $reservationService->parseSegment($pastSegments, $key, $segment);
+                    $pastParsedSegments[] = $parsedSegment;
+                }
+            }
         }
 
-        return [$pastParsedSegments, $totalFlightTrips];
+        return [$pastParsedSegments, $totalFlightSegments];
     }
 
     public static function updateSegmentTripFormsData($form, $pastSegmentsItinerary): array
@@ -127,16 +135,16 @@ class AddQuoteManualService
         return array_merge($pastSegmentTripFormData, $updatedSegmentsTrip);
     }
 
-    public static function updateFormAndMergeSegments($form, $itinerary, $pastSegments, $segments, $totalFlightTrips): array
+    public static function updateFormAndMergeSegments($form, $itinerary, $pastSegments, $segments, $totalFlightSegments): array
     {
         $pastSegmentsItinerary = [];
         $totalFormTrips = count(explode(',', $form->keyTripList));
-        $totalPastTrips = count($pastSegments);
+        $totalPastSegments = count($pastSegments);
 
-        if ($totalPastTrips === 0 || $totalFlightTrips === $totalPastTrips) {
+        if ($totalPastSegments === 0 || $totalFlightSegments === $totalPastSegments) {
             $mergedSegments = $segments;
         } else {
-            $totalFormTripsUpdated = (int)$totalFormTrips + (int)$totalPastTrips;
+            $totalFormTripsUpdated = (int)$totalFormTrips + (int)$totalPastSegments;
             $form->keyTripList = implode(',', range(1, $totalFormTripsUpdated));
 
             foreach ($pastSegments as $pastSegment) {

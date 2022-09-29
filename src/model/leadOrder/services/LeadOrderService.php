@@ -19,9 +19,9 @@ class LeadOrderService
         $this->repository = $repository;
     }
 
-    public function create(int $leadId, int $orderId): void
+    public function create(int $leadId, int $orderId, ?int $createdUserId = null): void
     {
-        $leadOrder = LeadOrder::create($leadId, $orderId);
+        $leadOrder = LeadOrder::create($leadId, $orderId, $createdUserId);
         $this->repository->save($leadOrder);
     }
 }

@@ -6,6 +6,7 @@ use common\components\jobs\UserTaskAssignJob;
 use common\models\ClientPhone;
 use common\models\query\ClientPhoneQuery;
 use modules\featureFlag\FFlag;
+use modules\lead\src\services\LeadTaskListService;
 use src\events\client\ClientPhoneEventInterface;
 use Yii;
 
@@ -15,7 +16,7 @@ class ClientPhoneAssignTaskListListener
     {
         try {
             /** @fflag FFlag::FF_KEY_LEAD_TASK_ASSIGN, Lead to task List assign checker */
-            if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_LEAD_TASK_ASSIGN)) {
+            if (Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_LEAD_TASK_ASSIGN) && !LeadTaskListService::isDuplicateByUserId()) {
                 $existsClientPhoneValid = ClientPhoneQuery::getQueryClientPhoneByClientId($event->getClientPhone()->client_id)
                     ->andWhere(['<>', 'id', $event->getClientPhone()->id])->exists();
 

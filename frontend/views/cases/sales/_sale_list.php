@@ -147,7 +147,6 @@ $userCanCheckFareRules = Yii::$app->abac->can(null, SaleListAbacObject::UI_BLOCK
 
                     $label .= '<td>' . Html::button('<i class="fa fa-minus-circle"></i> Cancel', [
                         'class' => 'cancel-sale btn btn-warning',
-                        'disabled' => $saleStatus !== 'pending' && $saleStatus !== 'processing',
                         'data-case-id' => $item->css_cs_id,
                         'data-case-sale-id' => $item->css_sale_id,
                         'title' => 'Cancel Sale',
@@ -262,7 +261,7 @@ JS;
 $this->registerJs($jsCode, \yii\web\View::POS_READY);
 $urlRefresh = Url::to(['/cases/ajax-refresh-sale-info']);
 $urlSalePrepareResendTickets = Url::to(['/sale/prepare-resend-tickets']);
-$urlSalePrepareCancelSale = Url::to(['/sale/prepare-cancel-sale']);
+$urlCancelSale = Url::to(['/sale/cancel-sale']);
 $urlViewFareRules = Url::to(['/sale/view-fare-rules']);
 
 $js = <<<JS
@@ -407,22 +406,14 @@ $(document).on('click', '.cancel-sale', function (e) {
     e.preventDefault();
     
     let btn = $(this);
-    let caseId = btn.data('case-id');
-    let caseSaleId = btn.data('case-sale-id');
-    let url = "$urlSalePrepareCancelSale?caseId=" + caseId + '&caseSaleId=' + caseSaleId;
+    let url = "$urlCancelSale?caseId=" + btn.data('case-id') + '&caseSaleId=' + btn.data('case-sale-id');
     let modal = $('#modal-sm');
-    let btnClass = btn.find('i').attr('class');
     
-    btn.addClass('disabled').find('i').attr('class', 'fas fa-spinner fa-spin');
-    modal.find('.modal-body').html('');
+    modal.modal('show').find('.modal-body').html('<div style="text-align:center;font-size: 40px;"><i class="fa fa-spin fa-spinner"></i> Loading ...</div>');
     modal.find('.modal-title').html('Cancel Sale');
     
-    modal.find('.modal-body').load(url, function( response, status, xhr ) {
-        modal.modal({
-          backdrop: 'static',
-          show: true
-        });
-        btn.removeClass('disabled').find('i').attr('class', btnClass);
+    $.get(url, function(data) {
+        modal.find('.modal-body').html(data);
     });
 });
 

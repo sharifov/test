@@ -177,7 +177,7 @@ use frontend\widgets\userTasksList\helpers\UserTasksListHelper;
 $js = <<<JS
     startTooltips();
 
-    window.refreshTaskList = function () {
+    window.refreshTaskList = function (data) {
         var result = false;
         var pjaxContainer = $('#lead-user-tasks__content').data('pjax-container');
 
@@ -188,7 +188,8 @@ $js = <<<JS
                 replace: false,
                 scrollTo: false,
                 container: pjaxContainer,
-                timeout: 0
+                timeout: 0,
+                data: data
             });
 
             result = true;

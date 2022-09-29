@@ -35,8 +35,7 @@ class QuoteHelper
         if (($penalties && self::checkPenaltiesInfo($penalties)) || $fee) {
             $out .= "<div class='tooltip_quote_info_box'>";
             $out .= '<p>Penalties: </p>';
-
-            if ($penalties) {
+            if ($penalties && $penalties['list']) {
                 foreach ($penalties['list'] as $item) {
                     $out .= "<ul class='list-unstyled'>";
                     if (isset($item['permitted']) && $item['permitted']) {

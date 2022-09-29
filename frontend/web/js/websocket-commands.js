@@ -600,7 +600,8 @@ function wsInitConnect(wsUrl, reconnectInterval, userId, onlineObj, ccNotificati
 
                     if (obj.cmd === 'refreshTaskList') {
                         if (typeof refreshTaskList === 'function') {
-                            refreshTaskList();
+                            let data = obj.data ?? {};
+                            refreshTaskList(data);
                         }
                     }
 

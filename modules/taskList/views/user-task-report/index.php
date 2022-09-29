@@ -21,11 +21,13 @@ $this->params['breadcrumbs'][] = $this->title;
     $processingCnt = $result['processingCnt'] ?? 0;
     $completeCnt = $result['completeCnt'] ?? 0;
     $cancelCnt = $result['cancelCnt'] ?? 0;
+    $failedCnt = $result['failedCnt'] ?? 0;
     $leadCnt = $result['leadCnt'] ?? 0;
 
     $processingPercent = NumberHelper::getPercent($processingCnt, $allUserTaskCnt);
     $completePercent = NumberHelper::getPercent($completeCnt, $allUserTaskCnt);
     $cancelPercent = NumberHelper::getPercent($cancelCnt, $allUserTaskCnt);
+    $failedPercent = NumberHelper::getPercent($failedCnt, $allUserTaskCnt);
 ?>
 
 <div class="user-task-index">
@@ -114,6 +116,22 @@ $this->params['breadcrumbs'][] = $this->title;
                         </div>
                         <div class="w_right w_20">
                             <span><?php echo $cancelCnt ?></span>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="widget_summary">
+                        <div class="w_left w_25">
+                            <span>Failed</span>
+                        </div>
+                        <div class="w_center w_55">
+                            <div class="progress">
+                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="<?php echo $failedPercent ?>"
+                                     aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $failedPercent ?>%;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w_right w_20">
+                            <span><?php echo $failedCnt ?></span>
                         </div>
                         <div class="clearfix"></div>
                     </div>

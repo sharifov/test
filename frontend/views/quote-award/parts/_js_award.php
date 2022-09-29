@@ -12,6 +12,7 @@ $segmentUrl = Url::to(['quote-award/update', 'leadId' => $lead->id, 'type' => Aw
 $tripUrl = Url::to(['quote-award/update', 'leadId' => $lead->id, 'type' => AwardQuoteForm::REQUEST_TRIP]);
 $updateUrl = Url::to(['quote-award/update', 'leadId' => $lead->id]);
 $quotePriceUrl = Url::to(['quote-award/calc-price', 'leadId' => $lead->id]);
+$importDumpUrl = Url::to(['quote-award/import-gds-dump', 'leadId' => $lead->id]);
 
 $js = <<<JS
 
@@ -21,6 +22,7 @@ $js = <<<JS
     var tripUrl = '{$tripUrl}';
     var awardType = '{$awardType}';
     var updateUrl = '{$updateUrl}';
+    var importDumpUrl = '{$importDumpUrl}';
    
    
     $(document).on('click', '#js-add-flight-award', function(event){
@@ -32,8 +34,7 @@ $js = <<<JS
             type: 'POST',
             data: AwardForm.serialize()+'&tab='+tabActive,
              success: function (data) {
-                let modal = $('#modal-lg');
-                modal.find('.js-update-ajax').html(data);
+               $('.js-update-ajax').html(data);
                 loadingBtn($('#js-add-flight-award'), false);
             }
         }) .fail(function(error) {
@@ -52,8 +53,7 @@ $js = <<<JS
               type: 'POST',
               data: AwardForm.serialize()+'&index='+id,
               success: function (data) {
-                let modal = $('#modal-lg');
-                modal.find('.js-update-ajax').html(data);
+               $('.js-update-ajax').html(data);
              }
             }) .fail(function(error) {
             console.log(error);
@@ -71,8 +71,7 @@ $js = <<<JS
             type: 'POST',
             data: AwardForm.serialize()+'&tripId='+tripId+'&tab='+tabActive,
              success: function (data) {
-                let modal = $('#modal-lg');
-                modal.find('.js-update-ajax').html(data);
+               $('.js-update-ajax').html(data);
                 loadingBtn($('#js-add-segment-award'), false);
             }
         }) .fail(function(error) {
@@ -92,15 +91,15 @@ $js = <<<JS
     
      $(document).on('change', '.js-pax-award', function(event){
         var AwardForm = $('#alt-award-quote-info-form');
+         let tabActive =  $('.js-flight-tab.active').data('id');
         var formDataAward = AwardForm.serialize()
           $(this).prop( "disabled", true);
           $.ajax({
             url: updateUrl,
             type: 'POST',
-            data: formDataAward,
+            data: formDataAward+'&tab='+tabActive,
              success: function (data) {
-                let modal = $('#modal-lg');
-                modal.find('.js-update-ajax').html(data);
+               $('.js-update-ajax').html(data);
                 $(this).prop( "disabled", false);
             }
         }) .fail(function(error) {
@@ -121,8 +120,7 @@ $js = <<<JS
             type: 'POST',
             data: AwardForm.serialize()+'&index='+id+'&tab='+tabActive,
              success: function (data) {
-                let modal = $('#modal-lg');
-                modal.find('.js-update-ajax').html(data);
+               $('.js-update-ajax').html(data);
             }
         }) .fail(function(error) {
             console.log(error);
@@ -141,8 +139,7 @@ $js = <<<JS
                 type: 'POST',
                 data: AwardForm.serialize()+'&index='+id+'&tab='+tabActive,
                  success: function (data) {
-                    let modal = $('#modal-lg');
-                    modal.find('.js-update-ajax').html(data);
+                    $('.js-update-ajax').html(data);
                 }
             }) .fail(function(error) {
                 console.log(error);
@@ -209,27 +206,80 @@ $js = <<<JS
         
     });
      
-      $('#alt-award-quote-info-form').submit(function (e) {
+       $(document).on('beforeSubmit', '#alt-award-quote-info-form', function (e) {
+         e.preventDefault();
+         var AwardForm = $(this);
+                 $.ajax({
+             url: AwardForm.attr("action"),
+             type: AwardForm.attr("method"),
+             data: AwardForm.serialize(),
+             success: function (data) {
+                 if(data.success == 'true'){
+                 }else {
+                     $.each(data, function(key, val){
+                          AwardForm.yiiActiveForm('updateAttribute', key, [val]) 
+                     })
+                   
+                 }
+             },
+             error: function (error) {
+                 console.log('Error: ' + error);
+             }
+         });
+       return false;
+     });
+      
+      $(document).on('click','.js-dump-gds', function (e) {
         e.preventDefault();
-        var AwardForm = $(this);
-        $('#preloader').removeClass('hidden');
-                $.ajax({
-            url: AwardForm.attr("action"),
-            type: AwardForm.attr("method"),
-            data: AwardForm.serialize(),
-            success: function (data) {
-                $('#preloader').addClass('hidden');
-                
-               if (data.save == true) {
-                   window.location.reload();
-                    }else{
-                        alert("dsdsds");
-                    }
-            },
-            error: function (error) {
-                console.log('Error: ' + error);
-            }
+        let modal = $('#modal-df');
+        let tripId = $(this).data('trip');
+        modal.find('.modal-title').html('GDS dump');
+        modal.find('.modal-body').html('');
+        modal.find('.modal-body').load(importDumpUrl+'&tripId='+tripId, function( response, status, xhr ) {
+            modal.modal({
+              // backdrop: 'static',
+              show: true
+            });
         });
     });
+      
+      
+      $(document).on('submit', '#award-import-gds', function (event) {
+          event.preventDefault();
+          let form = $(this);
+          var AwardForm = $('#alt-award-quote-info-form');
+          loadingBtn($('#btn-award-import-gds'), true);
+          let tabActive =  $('.js-flight-tab.active').data('id');
+            $.ajax({
+            url: importDumpUrl,
+            type: form.attr("method"),
+            data: form.serialize()+'&'+AwardForm.serialize()+'&tab='+tabActive,
+            success: function (dataResponse) {
+                loadingBtn($('#btn-award-import-gds'), false);
+                if (dataResponse.status === 'success') {
+                     let modal = $('#modal-df');
+                     modal.modal('hide');
+                       $('#preloader').removeClass('d-none');
+                     $('.js-update-ajax').html(dataResponse.flight);
+                      $('#preloader').addClass('d-none');
+                } else {
+                    if (dataResponse.message.length) {
+                        createNotifyByObject({
+                            title: "Error",
+                            type: "error",
+                            text: dataResponse.message,
+                            hide: true
+                        }); 
+                    }    
+                    $('#save_dump_btn').hide(500);
+                }
+            },
+            error: function (error) {
+                loadingBtn($('#btn-award-import-gds'), false);
+                console.log(error);
+            }
+            });
+            setTimeout(loadingBtn, 4000, $('#btn-award-import-gds'), false);
+            });
 JS;
 $this->registerJs($js);

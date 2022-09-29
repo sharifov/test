@@ -7,6 +7,7 @@ use common\models\Employee;
 use common\models\LoginForm;
 use common\models\Notifications;
 use common\models\UserConnection;
+use modules\featureFlag\FFlag;
 use src\helpers\app\AppHelper;
 use src\helpers\setting\SettingHelper;
 use src\model\userAuthClient\entity\UserAuthClient;
@@ -32,6 +33,8 @@ class GoogleHandler implements ClientHandler
     }
 
     /**
+     * This method calling when user auth in system
+     *
      * @param AuthAction $authAction
      * @param ClientInterface $client
      * @return void
@@ -49,6 +52,14 @@ class GoogleHandler implements ClientHandler
 
         $countAuthClients = count($authClients);
 
+        /**
+         * NOTICE!
+         * The condition `$countAuthClients > 1` never be true, because `uac_source` & `uac_source_id` pair is unique
+         * for `user_auth_client` table. Key: `UNQ-user_auth_client`
+         * This restriction has been added in `console/migrations/archive/2022/m220106_114232_add_unique_index_for_user_auth_client.php`.
+         *
+         * I think this condition should be deleted.
+         */
         if ($countAuthClients > 1) {
             $this->redirectToStepTwo($authAction, $source, $sourceId);
         } elseif ($countAuthClients === 1 && $authClients[0]) {
@@ -58,13 +69,7 @@ class GoogleHandler implements ClientHandler
 
             $user = Employee::findOne(['email' => $email]);
             if ($user) {
-                $authClient = UserAuthClient::create(
-                    $user->id,
-                    $sourceId,
-                    $email,
-                    \Yii::$app->request->remoteIP,
-                    \Yii::$app->request->userAgent
-                );
+                $authClient = UserAuthClient::create($user->id, $sourceId, $email, \Yii::$app->request->remoteIP, \Yii::$app->request->userAgent);
                 $authClient->setGoogleSource();
                 try {
                     $this->repository->save($authClient);
@@ -80,6 +85,14 @@ class GoogleHandler implements ClientHandler
         }
     }
 
+    /**
+     * Method calling when user
+     *
+     * @param int $userId
+     * @param AuthAction $authAction
+     * @param ClientInterface $client
+     * @throws \Exception
+     */
     public function handleAssign(int $userId, AuthAction $authAction, ClientInterface $client): void
     {
         $userAttributes = $client->getUserAttributes();
@@ -92,13 +105,7 @@ class GoogleHandler implements ClientHandler
         ])->one();
         $email = ArrayHelper::getValue($client->getUserAttributes(), 'email');
         if (!$authClients) {
-            $authClient = UserAuthClient::create(
-                $userId,
-                $sourceId,
-                $email,
-                \Yii::$app->request->remoteIP,
-                \Yii::$app->request->userAgent
-            );
+            $authClient = UserAuthClient::create($userId, $sourceId, $email, \Yii::$app->request->remoteIP, \Yii::$app->request->userAgent);
             $authClient->setGoogleSource();
             try {
                 $this->repository->save($authClient);
@@ -114,6 +121,11 @@ class GoogleHandler implements ClientHandler
         $this->setRedirectUrl('/site/profile');
     }
 
+    /**
+     * @param AuthAction $authAction
+     * @param int $source
+     * @param string $sourceId
+     */
     protected function redirectToStepTwo(AuthAction $authAction, int $source, string $sourceId): void
     {
         $session = \Yii::$app->session;
@@ -122,13 +134,23 @@ class GoogleHandler implements ClientHandler
         $this->setRedirectUrl('/site/auth-step-two');
     }
 
+    /**
+     * @param Employee $user
+     * @throws \yii\base\InvalidConfigException
+     */
     protected function login(Employee $user): void
     {
         $form = new LoginForm();
         $form->setUser($user);
         $form->setUserChecked(true);
         if (SettingHelper::isTwoFactorAuthEnabled() && $user->userProfile && $user->userProfile->is2faEnable()) {
-            $this->redirectToTwoFactorAuth($user, $form);
+            if (\Yii::$app->featureFlag->isEnable(FFlag::FF_KEY_TWO_FACTOR_AUTH_MODULE)) {
+                $module = \Yii::$app->getModule('two-factor-auth');
+                $url = $module->startAuthProcess($form, false);
+                $this->setRedirectUrl($url);
+            } else {
+                $this->redirectToTwoFactorAuth($user, $form);
+            }
         } elseif ($form->login()) {
             if (UserConnection::isIdleMonitorEnabled()) {
                 UserMonitor::addEvent($user->id, UserMonitor::TYPE_LOGIN);
@@ -137,16 +159,10 @@ class GoogleHandler implements ClientHandler
         }
     }
 
-    protected function setRedirectUrl(string $url): void
-    {
-        $this->redirectUrl = $url;
-    }
-
-    public function getRedirectUrl(): string
-    {
-        return $this->redirectUrl;
-    }
-
+    /**
+     * @param Employee $user
+     * @param LoginForm $model
+     */
     protected function redirectToTwoFactorAuth(Employee $user, LoginForm $model): void
     {
         $twoFactorAuthSecretKey = empty($user->userProfile->up_2fa_secret) ?
@@ -159,5 +175,15 @@ class GoogleHandler implements ClientHandler
         $session->set('two_factor_key', $twoFactorAuthSecretKey);
         $session->set('two_factor_remember_me', $model->rememberMe);
         $this->setRedirectUrl('/site/step-two');
+    }
+
+    protected function setRedirectUrl(string $url): void
+    {
+        $this->redirectUrl = $url;
+    }
+
+    public function getRedirectUrl(): string
+    {
+        return $this->redirectUrl;
     }
 }
