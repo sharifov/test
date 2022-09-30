@@ -22,6 +22,7 @@ use modules\order\src\entities\order\OrderRepository;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleForm;
 use modules\order\src\services\createFromSale\OrderCreateFromSaleService;
 use modules\order\src\services\OrderManageService;
+use src\services\cases\CasesCommunicationService;
 use src\auth\Auth;
 use src\dto\email\EmailDTO;
 use src\entities\cases\CaseEventLog;
@@ -55,6 +56,7 @@ use yii\web\BadRequestHttpException;
  * @property OrderCreateFromSaleService $orderCreateFromSaleService
  * @property OrderRepository $orderRepository
  * @property FlightFromSaleService $flightFromSaleService
+ * @property CasesCommunicationService $casesCommunicationService
  */
 class CasesSaleService
 {
@@ -100,6 +102,7 @@ class CasesSaleService
     private OrderCreateFromSaleService $orderCreateFromSaleService;
     private OrderRepository $orderRepository;
     private FlightFromSaleService $flightFromSaleService;
+    private CasesCommunicationService $casesCommunicationService;
 
     public function __construct(
         CasesSaleRepository $casesSaleRepository,
@@ -107,7 +110,8 @@ class CasesSaleService
         OrderCreateFromSaleService $orderCreateFromSaleService,
         OrderRepository $orderRepository,
         FlightFromSaleService $flightFromSaleService,
-        CasesRepository $casesRepository
+        CasesRepository $casesRepository,
+        CasesCommunicationService $casesCommunicationService
     ) {
         $this->casesSaleRepository = $casesSaleRepository;
         $this->saleTicketService = $saleTicketService;
@@ -115,6 +119,7 @@ class CasesSaleService
         $this->orderRepository = $orderRepository;
         $this->flightFromSaleService = $flightFromSaleService;
         $this->casesRepository = $casesRepository;
+        $this->casesCommunicationService = $casesCommunicationService;
     }
 
     /**
@@ -1030,7 +1035,11 @@ class CasesSaleService
             if ($enabled && $emailFrom && $emailFromName && $emailTemplateType && $clientEmail) {
                 $bookingId = $saleData['bookingId'] ?? null;
                 $emailTemplate = $this->getEmailTemplateByKey($emailTemplateType);
-                $emailData = ['email_from_name' => $emailFromName, 'bookingId' => $bookingId];
+                /** @var Employee $userModel */
+                $userModel = Yii::$app->user->identity;
+                $emailData = $this->casesCommunicationService->getEmailData($case, $userModel);
+                $emailData['email_from_name'] = $emailFromName;
+                $emailData['bookingId'] = $bookingId;
 
                 $mailPreview = \Yii::$app->comms->mailPreview($case->cs_project_id, $emailTemplate->etp_key, $emailFrom, $clientEmail, $emailData);
                 if (isset($mailPreview['error']) && $mailPreview['error']) {
